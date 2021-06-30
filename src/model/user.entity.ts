@@ -6,6 +6,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { EventProgress } from './event-progress.entity';
 import { PrevChallenge } from './prev-challenge.entity';
 
 /**
@@ -29,7 +30,7 @@ export enum UserRole {
 }
 
 /**
- * Entity descibing a user in the database
+ * Entity describing a user in the database
  */
 @Entity()
 export class User {
@@ -50,15 +51,14 @@ export class User {
   @Column()
   username: string;
 
-  /** Score calculated upon completion of each challenge, could be more than length of prevChallenges */
+  /** Score calculated upon completion of each challenge */
   @Column()
   score: number;
 
   @Column()
   email: string;
 
-  /** Challenges completed by the groups this players is/was part of */
-  @ManyToMany(() => PrevChallenge)
-  @JoinTable()
-  prevChallenges: PrevChallenge[];
+  /** Event trackers for each event the player participated in */
+  @OneToMany(() => EventProgress, (ev) => ev.player)
+  participatingEvents: EventProgress[];
 }
