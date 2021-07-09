@@ -9,9 +9,11 @@ import {
 } from 'typeorm';
 
 import { Challenge } from './challenge.entity';
-import { EventBase } from './event-base.entity';
 import { User } from './user.entity';
 
+/**
+ * Entity describing a completed challenge
+ */
 @Entity()
 export class PrevChallenge {
   @PrimaryGeneratedColumn()

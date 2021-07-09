@@ -1,0 +1,15 @@
+{
+  "type": "postgres",
+  "host": "localhost",
+  "port": 5432,
+  "username": "postgres",
+  "password": "test",
+  "database": "postgres",
+  "schema": "test",
+  "entities": ["src/model/*.ts"],
+  "migrations": ["src/migration/*.ts"],
+  "cli": {
+    "entitiesDir": "src/model",
+    "migrationsDir": "src/migration"
+  }
+}

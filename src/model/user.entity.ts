@@ -1,13 +1,15 @@
 import {
   Column,
   Entity,
-  JoinTable,
-  ManyToMany,
+  JoinColumn,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+
 import { EventProgress } from './event-progress.entity';
-import { PrevChallenge } from './prev-challenge.entity';
+import { GroupMember } from './group-member.entity';
+import { SessionLogEntry } from './session-log-entry.entity';
 
 /**
  * Enum describing the type of OAuth token
@@ -51,14 +53,23 @@ export class User {
   @Column()
   username: string;
 
-  /** Score calculated upon completion of each challenge */
+  @Column()
+  email: string;
+
+  /** Score calculated upon completion of each challenge added up */
   @Column()
   score: number;
 
-  @Column()
-  email: string;
+  /** A user's membership in a group */
+  @OneToOne(() => GroupMember)
+  @JoinColumn()
+  groupMember: GroupMember;
 
   /** Event trackers for each event the player participated in */
   @OneToMany(() => EventProgress, (ev) => ev.player)
   participatingEvents: EventProgress[];
+
+  /** Actions recorded relating to this user */
+  @OneToMany(() => SessionLogEntry, (entry) => entry.user)
+  logEntries: SessionLogEntry[];
 }
