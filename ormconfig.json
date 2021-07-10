@@ -5,11 +5,11 @@
   "username": "postgres",
   "password": "test",
   "database": "postgres",
-  "schema": "test",
-  "entities": ["src/model/*.ts"],
-  "migrations": ["src/migration/*.ts"],
+  "schema": "public", 
+  "entities": ["dist/model/*{.ts,.js}"],
+  "migrations": ["dist/migration/*{.ts,.js}"],
   "cli": {
-    "entitiesDir": "src/model",
-    "migrationsDir": "src/migration"
+    "entitiesDir": "dist/model",
+    "migrationsDir": "dist/migration"
   }
 }
