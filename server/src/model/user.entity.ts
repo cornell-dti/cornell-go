@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  Index,
   JoinColumn,
   OneToMany,
   OneToOne,
@@ -12,13 +13,15 @@ import { GroupMember } from './group-member.entity';
 import { SessionLogEntry } from './session-log-entry.entity';
 
 /**
- * Enum describing the type of OAuth token
+ * Enum describing the type of authentication token
  */
-export enum OAuthType {
+export enum AuthType {
   /** Uses Sign in with Google token */
   GOOGLE = 'google',
   /** Uses Sign in with Apple ID token */
   APPLE = 'apple',
+  /** Uses ID from device to authenticate */
+  DEVICE = 'device',
 }
 
 /**
@@ -37,39 +40,40 @@ export enum UserRole {
 @Entity()
 export class User {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
-  /** Token produced by an OAuth 2 service identifying this user */
+  /** Token produced by an authentication service identifying this user */
   @Column()
-  oauthToken: string;
+  authToken!: string;
 
-  /** The OAuth 2 service used for authentication  */
+  /** The Auth service used for authentication  */
   @Column({
     type: 'enum',
-    enum: OAuthType,
+    enum: AuthType,
   })
-  oauthType: OAuthType;
+  authType!: AuthType;
 
   @Column()
-  username: string;
+  username!: string;
 
   @Column()
-  email: string;
+  email!: string;
 
   /** Score calculated upon completion of each challenge added up */
+  @Index()
   @Column()
-  score: number;
+  score!: number;
 
   /** A user's membership in a group */
   @OneToOne(() => GroupMember)
   @JoinColumn()
-  groupMember: GroupMember;
+  groupMember!: GroupMember;
 
   /** Event trackers for each event the player participated in */
   @OneToMany(() => EventProgress, (ev) => ev.player)
-  participatingEvents: EventProgress[];
+  participatingEvents!: EventProgress[];
 
   /** Actions recorded relating to this user */
   @OneToMany(() => SessionLogEntry, (entry) => entry.user)
-  logEntries: SessionLogEntry[];
+  logEntries!: SessionLogEntry[];
 }

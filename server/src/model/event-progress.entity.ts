@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  Index,
   ManyToMany,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -16,24 +17,29 @@ import { User } from './user.entity';
 @Entity()
 export class EventProgress {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
+
+  /** Score calculated for this event alone */
+  @Index()
+  @Column()
+  eventScore!: number;
 
   /** True if a player is ranked, false if they have beem disabled for this event  */
   @Column()
-  isPlayerRanked: boolean;
+  isPlayerRanked!: boolean;
 
   /** Timestamp after which a user can earn points for a challenge (allows for anticheat measures preventing car travel or spamming REST apis) */
   @Column({ type: 'timestamp with time zone' })
-  cooldownMinimum: Date;
+  cooldownMinimum!: Date;
 
   @ManyToOne(() => User)
-  player: User;
+  player!: User;
 
   /** Event being tracked */
   @ManyToOne(() => EventBase)
-  event: EventBase;
+  event!: EventBase;
 
   /** Completed challenges */
   @ManyToMany(() => PrevChallenge)
-  completed: PrevChallenge[];
+  completed!: PrevChallenge[];
 }

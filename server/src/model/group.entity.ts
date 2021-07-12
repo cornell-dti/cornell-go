@@ -5,13 +5,13 @@ import { GroupMember } from './group-member.entity';
 @Entity()
 export class Group {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   /** Current event of the group */
   @ManyToOne(() => EventBase)
-  currentEvent: EventBase;
+  currentEvent!: EventBase;
 
   /** Members of the group, with the host at index 0 */
   @OneToMany(() => GroupMember, (mem) => mem.group)
-  members: GroupMember[];
+  members!: GroupMember[];
 }

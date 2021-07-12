@@ -14,16 +14,16 @@ import { User } from './user.entity';
 @Entity()
 export class GroupMember {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column()
-  isHost: boolean;
+  isHost!: boolean;
 
   /** Group this member is part of */
   @ManyToOne(() => Group)
-  group: Group;
+  group!: Group;
 
   /** User this membership describes */
   @OneToOne(() => User)
-  user: User;
+  user!: User;
 }

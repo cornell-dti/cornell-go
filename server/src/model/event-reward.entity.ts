@@ -8,25 +8,25 @@ import { User } from './user.entity';
 @Entity()
 export class EventReward {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   /** Event this rewards was assigned to */
   @ManyToOne(() => EventBase)
-  containingEvent: EventBase;
+  containingEvent!: EventBase;
 
   /** User who earned this reward */
-  @ManyToOne(() => User)
-  claimingUser: User;
+  @ManyToOne(() => User, { nullable: true })
+  claimingUser!: User | null;
 
   /** Short description of reward displayed to users e.g "50% off at XYZ store" */
   @Column()
-  rewardDescription: string;
+  rewardDescription!: string;
 
   /** Information about how to redeem the reward */
   @Column()
-  rewardRedeemInfo: string;
+  rewardRedeemInfo!: string;
 
   /** True if the information is a link */
   @Column()
-  isInfoLink: boolean;
+  isInfoLink!: boolean;
 }
