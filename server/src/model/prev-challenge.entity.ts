@@ -17,18 +17,18 @@ import { User } from './user.entity';
 @Entity()
 export class PrevChallenge {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   /** Timestamp of when the player found the place */
   @CreateDateColumn()
-  foundTimestamp: Date;
+  foundTimestamp!: Date;
 
   /** Members in the group during completion */
   @ManyToMany(() => User)
   @JoinTable()
-  completionPlayers: User[];
+  completionPlayers!: User[];
 
   /** The completed challenge */
   @ManyToOne(() => Challenge)
-  challenge: Challenge;
+  challenge!: Challenge;
 }

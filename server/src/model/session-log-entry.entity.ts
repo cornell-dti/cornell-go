@@ -49,23 +49,23 @@ export enum SessionLogEntryType {
 @Entity()
 export class SessionLogEntry {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column({
     type: 'enum',
     enum: SessionLogEntryType,
   })
-  entryType: SessionLogEntryType;
+  entryType!: SessionLogEntryType;
 
   /** Time when this entry was created */
   @CreateDateColumn()
-  entryTimestamp: Date;
+  entryTimestamp!: Date;
 
   /** UUID associated with this entry type */
-  @Column()
-  associatedUUID: string;
+  @Column({ nullable: true })
+  associatedUUID?: string;
 
   /** User associated with this entry */
   @ManyToOne(() => User)
-  user: User;
+  user!: User;
 }

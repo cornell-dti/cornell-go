@@ -7,16 +7,16 @@ import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
 @Entity()
 export class Challenge {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @Column()
-  name: string;
+  name!: string;
 
   @Column()
-  description: string;
+  description!: string;
 
   @Column()
-  imageUrl: string;
+  imageUrl!: string;
 
   @Index({ spatial: true })
   @Column({
@@ -24,13 +24,13 @@ export class Challenge {
     spatialFeatureType: 'Point',
     srid: 4326,
   })
-  location: Point;
+  location!: Point;
 
   /** Radius within which the challenge is awarded */
   @Column()
-  awardingRadius: number;
+  awardingRadius!: number;
 
   /** Radius within the player is considered close, greater than `awardingRadius` */
   @Column()
-  closeRadius: number;
+  closeRadius!: number;
 }

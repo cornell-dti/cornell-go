@@ -24,25 +24,25 @@ export enum EventRewardType {
 @Entity()
 export class EventBase {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   /** Minimum number of members to complete this event */
   @Column()
-  minMembers: number;
+  minMembers!: number;
 
   /** If the event allows saving uncompleted challenges for later */
   @Column()
-  skippingEnabled: boolean;
+  skippingEnabled!: boolean;
 
   /** If true, then the last challenge is considered a star challenge */
   @Column()
-  hasStarChallenge: boolean;
+  hasStarChallenge!: boolean;
 
   @Column()
-  name: string;
+  name!: string;
 
   @Column()
-  description: string;
+  description!: string;
 
   /** Describes how event is rewarded */
   @Column({
@@ -50,21 +50,21 @@ export class EventBase {
     enum: EventRewardType,
     default: EventRewardType.NO_REWARDS,
   })
-  rewardType: EventRewardType;
+  rewardType!: EventRewardType;
 
   /** Describes end time for limited time events and begin time for others */
   @Column()
-  time: Date;
+  time!: Date;
 
   /** Describes the top N people to be rewarded */
   @Column()
-  topCount: number;
+  topCount!: number;
 
   /** Describes the rewards */
   @OneToMany(() => EventReward, (rew) => rew.containingEvent)
-  rewards: EventReward[];
+  rewards!: EventReward[];
 
   /** Ordered list of challenges */
   @ManyToMany(() => Challenge)
-  challenges: Challenge[];
+  challenges!: Challenge[];
 }
