@@ -25,16 +25,6 @@ export enum AuthType {
 }
 
 /**
- * Enum describing a user account's role
- */
-export enum UserRole {
-  /** Has no special privileges */
-  PLAYER = 'player',
-  /** Has privileges to modify player, group, event, and challenge data directly */
-  ADMIN = 'admin',
-}
-
-/**
  * Entity describing a user in the database
  */
 @Entity()
