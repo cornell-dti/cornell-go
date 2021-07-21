@@ -4,8 +4,10 @@ import {
   Index,
   ManyToMany,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Challenge } from './challenge.entity';
 
 import { EventBase } from './event-base.entity';
 import { PrevChallenge } from './prev-challenge.entity';
@@ -24,7 +26,7 @@ export class EventProgress {
   @Column()
   eventScore!: number;
 
-  /** True if a player is ranked, false if they have beem disabled for this event  */
+  /** True if a player is ranked, false if they have been disabled for this event  */
   @Column()
   isPlayerRanked!: boolean;
 
@@ -33,11 +35,15 @@ export class EventProgress {
   cooldownMinimum!: Date;
 
   @ManyToOne(() => User)
-  player!: User;
+  user!: User;
 
   /** Event being tracked */
   @ManyToOne(() => EventBase)
   event!: EventBase;
+
+  /** Currently selected challenge */
+  @ManyToOne(() => Challenge)
+  currentChallenge!: Challenge;
 
   /** Completed challenges */
   @ManyToMany(() => PrevChallenge)

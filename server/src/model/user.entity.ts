@@ -33,10 +33,12 @@ export class User {
   id!: string;
 
   /** Token produced by an authentication service identifying this user */
-  @Column()
+  @Index()
+  @Column({ unique: true })
   authToken!: string;
 
-  /** The Auth service used for authentication  */
+  /** The service used for authentication */
+  @Index()
   @Column({
     type: 'enum',
     enum: AuthType,
@@ -55,15 +57,15 @@ export class User {
   score!: number;
 
   /** A user's membership in a group */
-  @OneToOne(() => GroupMember)
+  @OneToOne(() => GroupMember, { nullable: true })
   @JoinColumn()
-  groupMember!: GroupMember;
+  groupMember!: GroupMember | null;
 
   /** Event trackers for each event the player participated in */
-  @OneToMany(() => EventProgress, (ev) => ev.player)
+  @OneToMany(() => EventProgress, ev => ev.user)
   participatingEvents!: EventProgress[];
 
   /** Actions recorded relating to this user */
-  @OneToMany(() => SessionLogEntry, (entry) => entry.user)
+  @OneToMany(() => SessionLogEntry, entry => entry.user)
   logEntries!: SessionLogEntry[];
 }

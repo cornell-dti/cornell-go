@@ -30,7 +30,7 @@ export class Challenge {
   @Column()
   awardingRadius!: number;
 
-  /** Radius within the player is considered close, greater than `awardingRadius` */
+  /** Radius within which the player is considered close, greater than `awardingRadius` */
   @Column()
   closeRadius!: number;
 }
