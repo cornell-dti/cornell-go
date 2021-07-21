@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class Admin {
@@ -14,6 +14,7 @@ export class Admin {
   accessGranted!: boolean;
 
   /** OAuth ID identifying the admin, currently only Google signin */
+  @Index()
   @Column()
   oauthId!: string;
 }

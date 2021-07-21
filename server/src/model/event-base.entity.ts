@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  Index,
   ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -34,6 +35,11 @@ export class EventBase {
   @Column()
   skippingEnabled!: boolean;
 
+  /** True if the event is considered the default option */
+  @Column()
+  @Index()
+  isDefault!: boolean;
+
   /** If true, then the last challenge is considered a star challenge */
   @Column()
   hasStarChallenge!: boolean;
@@ -61,7 +67,7 @@ export class EventBase {
   topCount!: number;
 
   /** Describes the rewards */
-  @OneToMany(() => EventReward, (rew) => rew.containingEvent)
+  @OneToMany(() => EventReward, rew => rew.containingEvent)
   rewards!: EventReward[];
 
   /** Ordered list of challenges */

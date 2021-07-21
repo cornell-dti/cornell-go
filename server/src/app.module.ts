@@ -4,7 +4,6 @@ import { GroupsModule } from './groups/groups.module';
 import { ChallengesModule } from './challenges/challenges.module';
 import { UsersModule } from './users/users.module';
 import { AdminModule } from './admin/admin.module';
-import { LeadersModule } from './leaders/leaders.module';
 import { AuthModule } from './auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
@@ -30,7 +29,6 @@ import { ConfigModule } from '@nestjs/config';
     ChallengesModule,
     UsersModule,
     AdminModule,
-    LeadersModule,
     AuthModule,
   ],
   controllers: [],
