@@ -12,6 +12,6 @@ export class Group {
   currentEvent!: EventBase;
 
   /** Members of the group, with the host at index 0 */
-  @OneToMany(() => GroupMember, (mem) => mem.group)
+  @OneToMany(() => GroupMember, mem => mem.group)
   members!: GroupMember[];
 }
