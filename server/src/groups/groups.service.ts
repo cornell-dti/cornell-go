@@ -17,20 +17,18 @@ export class GroupsService {
 
   /** Creates a group from an event */
   async createFromEvent(event: EventBase, host: User) {
-    let group: Group = {
-      id: '',
+    let group: Group = Object.assign(new Group(), {
       currentEvent: event,
       members: [],
-    };
+    });
 
     await this.groupsRepository.save(group);
 
-    let groupMember: GroupMember = {
-      id: -1,
+    let groupMember: GroupMember = Object.assign(new GroupMember(), {
       isHost: true,
       user: host,
       group,
-    };
+    });
 
     group.members = [groupMember];
     host.groupMember = groupMember;

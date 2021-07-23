@@ -45,7 +45,7 @@ export class EventsService {
       .setParameter('player', JSON.stringify(player))
       .getOneOrFail();
 
-    let progress: EventProgress = {
+    let progress: EventProgress = Object.assign(new EventProgress(), {
       id: -1,
       eventScore: 0,
       isPlayerRanked: true,
@@ -54,7 +54,7 @@ export class EventsService {
       currentChallenge: closestChallenge,
       completed: [],
       user,
-    };
+    });
 
     await this.eventProgressRepository.save(progress);
 
