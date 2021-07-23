@@ -17,7 +17,7 @@ import { ConfigModule } from '@nestjs/config';
       username: process.env.CORNELLGODB_USER,
       password: process.env.CORNELLGODB_PASS,
       database: process.env.CORNELLGODB_DBNAME,
-      schema: 'public',
+      schema: process.env.CORNELLGODB_SCHEMA,
       logNotifications: true,
       cache: true,
       entities: ['dist/model/*.entity{.ts,.js}'],

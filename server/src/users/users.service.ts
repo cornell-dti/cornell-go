@@ -28,8 +28,7 @@ export class UsersService {
     authType: AuthType,
     authToken: string,
   ) {
-    let user: User = {
-      id: '',
+    let user: User = Object.assign(new User(), {
       score: 0,
       participatingEvents: [],
       logEntries: [],
@@ -38,7 +37,7 @@ export class UsersService {
       email,
       authToken,
       authType,
-    };
+    });
 
     let eventTracker = await this.eventsService.createDefaultEventTracker(
       user,

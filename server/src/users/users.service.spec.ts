@@ -1,7 +1,7 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { EventsModule } from '../events/events.module';
-import { GroupsModule } from '../groups/groups.module';
+import { Test } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { EventsService } from '../events/events.service';
+import { GroupsService } from '../groups/groups.service';
 import { User } from '../model/user.entity';
 import { UsersService } from './users.service';
 
@@ -9,9 +9,22 @@ describe('UsersService', () => {
   let service: UsersService;
 
   beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      imports: [EventsModule, GroupsModule],
-      providers: [UsersService],
+    const module = await Test.createTestingModule({
+      providers: [
+        UsersService,
+        {
+          useValue: null,
+          provide: getRepositoryToken(User),
+        },
+        {
+          useValue: null,
+          provide: EventsService,
+        },
+        {
+          useValue: null,
+          provide: GroupsService,
+        },
+      ],
     }).compile();
 
     service = module.get<UsersService>(UsersService);

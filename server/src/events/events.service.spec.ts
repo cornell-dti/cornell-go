@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
 import { EventBase } from '../model/event-base.entity';
 import { EventProgress } from '../model/event-progress.entity';
 import { EventReward } from '../model/event-reward.entity';
@@ -10,8 +10,21 @@ describe('EventsService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [TypeOrmModule.forFeature(undefined, 'test')],
-      providers: [EventsService],
+      providers: [
+        EventsService,
+        {
+          useValue: null,
+          provide: getRepositoryToken(EventBase),
+        },
+        {
+          useValue: null,
+          provide: getRepositoryToken(EventReward),
+        },
+        {
+          useValue: null,
+          provide: getRepositoryToken(EventProgress),
+        },
+      ],
     }).compile();
 
     service = module.get<EventsService>(EventsService);
