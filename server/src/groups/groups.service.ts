@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { EventBase } from '../model/event-base.entity';
 import { Group } from '../model/group.entity';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { User } from '../model/user.entity';
 import { GroupMember } from '../model/group-member.entity';
 
@@ -13,18 +13,20 @@ export class GroupsService {
     private groupsRepository: Repository<Group>,
     @InjectRepository(GroupMember)
     private groupMembersRepository: Repository<GroupMember>,
+    @InjectEntityManager()
+    private entityManager: EntityManager,
   ) {}
 
   /** Creates a group from an event */
   async createFromEvent(event: EventBase, host: User) {
-    let group: Group = Object.assign(new Group(), {
+    let group: Group = this.groupsRepository.create({
       currentEvent: event,
       members: [],
     });
 
-    await this.groupsRepository.save(group);
+    await this.entityManager.save(group);
 
-    let groupMember: GroupMember = Object.assign(new GroupMember(), {
+    let groupMember: GroupMember = this.groupMembersRepository.create({
       isHost: true,
       user: host,
       group,
@@ -32,8 +34,9 @@ export class GroupsService {
 
     group.members = [groupMember];
     host.groupMember = groupMember;
+    groupMember.user = host;
 
-    await this.groupMembersRepository.save(groupMember);
+    await this.entityManager.save([groupMember, group, host]);
     return group;
   }
 }
