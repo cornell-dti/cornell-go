@@ -1,0 +1,30 @@
+------------------------------------------------------------------
+
+App Callbacks
+=============
+
+updateUserData({ username: string, score: number })
+
+=============
+
+User Gateway
+=============
+
+requestUserData({ access_token: string }) // To refresh user data on the front end
+setUsername({ access_token: string, name: string }) // To set the user's username
+
+
+=============
+
+Group Gateway
+=============
+
+C
+
+=============
+
+Event Gateway
+=============
+
+
+=============

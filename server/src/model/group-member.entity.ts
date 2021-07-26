@@ -20,10 +20,10 @@ export class GroupMember {
   isHost!: boolean;
 
   /** Group this member is part of */
-  @ManyToOne(() => Group, { cascade: ['update'] })
+  @ManyToOne(() => Group)
   group!: Group;
 
   /** User this membership describes */
-  @OneToOne(() => User, { cascade: ['update'] })
+  @OneToOne(() => User)
   user!: User;
 }

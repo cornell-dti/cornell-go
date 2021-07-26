@@ -45,8 +45,7 @@ export class EventsService {
       .setParameter('player', JSON.stringify(player))
       .getOneOrFail();
 
-    let progress: EventProgress = Object.assign(new EventProgress(), {
-      id: -1,
+    let progress: EventProgress = this.eventProgressRepository.create({
       eventScore: 0,
       isPlayerRanked: true,
       cooldownMinimum: new Date(),

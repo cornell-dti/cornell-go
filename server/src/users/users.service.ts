@@ -28,7 +28,7 @@ export class UsersService {
     authType: AuthType,
     authToken: string,
   ) {
-    let user: User = Object.assign(new User(), {
+    let user: User = this.usersRepository.create({
       score: 0,
       participatingEvents: [],
       logEntries: [],
