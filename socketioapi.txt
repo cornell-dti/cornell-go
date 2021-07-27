@@ -14,6 +14,7 @@ requestUserData({ access_token: string }) // To refresh user data on the front e
 setUsername({ access_token: string, name: string }) // To set the user's username
 
 
+
 =============
 
 Group Gateway
