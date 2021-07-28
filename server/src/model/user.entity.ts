@@ -22,6 +22,8 @@ export enum AuthType {
   APPLE = 'apple',
   /** Uses ID from device to authenticate */
   DEVICE = 'device',
+  /** Cannot login through regular means */
+  NONE = 'none',
 }
 
 /**
@@ -42,6 +44,7 @@ export class User {
   @Column({
     type: 'enum',
     enum: AuthType,
+    default: AuthType.NONE,
   })
   authType!: AuthType;
 
