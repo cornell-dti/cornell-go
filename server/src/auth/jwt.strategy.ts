@@ -6,7 +6,7 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor() {
     super({
-      jwtFromRequest: ExtractJwt.fromBodyField('access_token'),
+      jwtFromRequest: ExtractJwt.fromBodyField('accessToken'),
       ignoreExpiration: false,
       secretOrKey: process.env.JWT_ACCESS_SECRET!,
     });
