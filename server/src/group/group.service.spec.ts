@@ -4,28 +4,28 @@ import { EventBase, EventRewardType } from '../model/event-base.entity';
 import { GroupMember } from '../model/group-member.entity';
 import { Group } from '../model/group.entity';
 import { AuthType, User } from '../model/user.entity';
-import { GroupsService } from './groups.service';
+import { GroupService } from './group.service';
 
-describe('GroupsService', () => {
-  let service: GroupsService;
+describe('GroupService', () => {
+  let service: GroupService;
   let user: User;
   let event: EventBase;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        GroupsService,
+        GroupService,
         { useValue: null, provide: getRepositoryToken(Group) },
         { useValue: null, provide: getRepositoryToken(GroupMember) },
       ],
     }).compile();
 
-    service = module.get<GroupsService>(GroupsService);
+    service = module.get<GroupService>(GroupService);
 
     user = {
       id: '',
       score: 0,
-      participatingEvents: [],
+      participatingEvent: [],
       logEntries: [],
       groupMember: null,
       username: 'Username',

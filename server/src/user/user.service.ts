@@ -2,16 +2,16 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuthType, User } from '../model/user.entity';
 import { Repository } from 'typeorm';
-import { EventsService } from '../events/events.service';
+import { EventService } from '../event/event.service';
 import { GroupMember } from '../model/group-member.entity';
-import { GroupsService } from '../groups/groups.service';
+import { GroupService } from '../group/group.service';
 
 @Injectable()
-export class UsersService {
+export class UserService {
   constructor(
     @InjectRepository(User) private usersRepository: Repository<User>,
-    private eventsService: EventsService,
-    private groupsService: GroupsService,
+    private eventsService: EventService,
+    private groupsService: GroupService,
   ) {}
 
   /** Find a user by their authentication token */
@@ -30,7 +30,7 @@ export class UsersService {
   ) {
     let user: User = this.usersRepository.create({
       score: 0,
-      participatingEvents: [],
+      participatingEvent: [],
       logEntries: [],
       groupMember: null,
       username,

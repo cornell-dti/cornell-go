@@ -2,11 +2,12 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { GroupMember } from '../model/group-member.entity';
 import { Group } from '../model/group.entity';
-import { GroupsService } from './groups.service';
+import { GroupService } from './group.service';
+import { GroupGateway } from './group.gateway';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Group, GroupMember])],
-  providers: [GroupsService],
-  exports: [GroupsService],
+  providers: [GroupService, GroupGateway],
+  exports: [GroupService],
 })
-export class GroupsModule {}
+export class GroupModule {}

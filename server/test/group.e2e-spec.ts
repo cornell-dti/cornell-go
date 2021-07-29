@@ -6,7 +6,7 @@ import { Connection, createConnection, EntityManager } from 'typeorm';
 import { AuthType, User } from '../src/model/user.entity';
 import { getEntityManagerToken } from '@nestjs/typeorm';
 import { EventBase, EventRewardType } from '../src/model/event-base.entity';
-import { GroupsService } from '../src/groups/groups.service';
+import { GroupService } from '../src/group/group.service';
 import { Challenge } from '../src/model/challenge.entity';
 import { EventProgress } from '../src/model/event-progress.entity';
 import { EventReward } from '../src/model/event-reward.entity';
@@ -43,7 +43,7 @@ describe('Group integration tests', () => {
   let entityManager: EntityManager;
   let user: User;
   let event: EventBase;
-  let groupService: GroupsService;
+  let groupService: GroupService;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -81,11 +81,11 @@ describe('Group integration tests', () => {
     await app.init();
 
     entityManager = moduleFixture.get<EntityManager>(getEntityManagerToken());
-    groupService = moduleFixture.get<GroupsService>(GroupsService);
+    groupService = moduleFixture.get<GroupService>(GroupService);
 
     user = entityManager.create(User, {
       score: 0,
-      participatingEvents: [],
+      participatingEvent: [],
       logEntries: [],
       groupMember: null,
       username: 'Username',

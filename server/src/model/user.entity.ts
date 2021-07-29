@@ -66,7 +66,7 @@ export class User {
 
   /** Event trackers for each event the player participated in */
   @OneToMany(() => EventProgress, ev => ev.user)
-  participatingEvents!: EventProgress[];
+  participatingEvent!: EventProgress[];
 
   /** Actions recorded relating to this user */
   @OneToMany(() => SessionLogEntry, entry => entry.user)

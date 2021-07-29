@@ -9,7 +9,7 @@ import { User } from '../model/user.entity';
 import { EventBase } from '../model/event-base.entity';
 
 @Injectable()
-export class EventsService {
+export class EventService {
   constructor(
     @InjectRepository(EventBase)
     private eventsRepository: Repository<EventBase>,
