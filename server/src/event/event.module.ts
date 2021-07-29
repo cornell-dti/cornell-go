@@ -3,11 +3,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { EventBase } from '../model/event-base.entity';
 import { EventProgress } from '../model/event-progress.entity';
 import { EventReward } from '../model/event-reward.entity';
-import { EventsService } from './events.service';
+import { EventService } from './event.service';
+import { EventGateway } from './event.gateway';
 
 @Module({
   imports: [TypeOrmModule.forFeature([EventBase, EventProgress, EventReward])],
-  providers: [EventsService],
-  exports: [EventsService],
+  providers: [EventService, EventGateway],
+  exports: [EventService],
 })
-export class EventsModule {}
+export class EventModule {}

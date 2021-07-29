@@ -3,15 +3,15 @@ import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
 import { EventBase } from '../model/event-base.entity';
 import { EventProgress } from '../model/event-progress.entity';
 import { EventReward } from '../model/event-reward.entity';
-import { EventsService } from './events.service';
+import { EventService } from './event.service';
 
-describe('EventsService', () => {
-  let service: EventsService;
+describe('EventService', () => {
+  let service: EventService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        EventsService,
+        EventService,
         {
           useValue: null,
           provide: getRepositoryToken(EventBase),
@@ -27,7 +27,7 @@ describe('EventsService', () => {
       ],
     }).compile();
 
-    service = module.get<EventsService>(EventsService);
+    service = module.get<EventService>(EventService);
   });
 
   it('should be defined', () => {

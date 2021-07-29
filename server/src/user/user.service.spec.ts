@@ -1,33 +1,33 @@
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { EventsService } from '../events/events.service';
-import { GroupsService } from '../groups/groups.service';
+import { EventService } from '../event/event.service';
+import { GroupService } from '../group/group.service';
 import { User } from '../model/user.entity';
-import { UsersService } from './users.service';
+import { UserService } from './user.service';
 
-describe('UsersService', () => {
-  let service: UsersService;
+describe('UserService', () => {
+  let service: UserService;
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
       providers: [
-        UsersService,
+        UserService,
         {
           useValue: null,
           provide: getRepositoryToken(User),
         },
         {
           useValue: null,
-          provide: EventsService,
+          provide: EventService,
         },
         {
           useValue: null,
-          provide: GroupsService,
+          provide: GroupService,
         },
       ],
     }).compile();
 
-    service = module.get<UsersService>(UsersService);
+    service = module.get<UserService>(UserService);
   });
 
   it('should be defined', () => {

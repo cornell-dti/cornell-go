@@ -7,7 +7,7 @@ import { User } from '../model/user.entity';
 import { GroupMember } from '../model/group-member.entity';
 
 @Injectable()
-export class GroupsService {
+export class GroupService {
   constructor(
     @InjectRepository(Group)
     private groupsRepository: Repository<Group>,
