@@ -7,8 +7,8 @@ import { User } from './user.entity';
  */
 @Entity()
 export class EventReward {
-  @PrimaryGeneratedColumn()
-  id!: number;
+  @PrimaryGeneratedColumn('uuid')
+  id!: string;
 
   /** Event this rewards was assigned to */
   @ManyToOne(() => EventBase)
@@ -26,7 +26,7 @@ export class EventReward {
   @Column()
   rewardRedeemInfo!: string;
 
-  /** True if the information is a link */
+  /** True if the reward is already redeemed */
   @Column()
-  isInfoLink!: boolean;
+  isRedeemed!: boolean;
 }

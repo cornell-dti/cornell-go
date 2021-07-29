@@ -9,6 +9,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { RewardGateway } from './reward/reward.gateway';
 import { RewardModule } from './reward/reward.module';
+import { ClientModule } from './client/client.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { RewardModule } from './reward/reward.module';
     AdminModule,
     AuthModule,
     RewardModule,
+    ClientModule,
   ],
   controllers: [],
   providers: [],
