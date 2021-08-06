@@ -1,6 +1,7 @@
 /** DTO for user in updateLeaderData */
 export interface UpdateLeaderDataUserDto {
   userId: string;
+  username: string;
   score: number;
 }
 

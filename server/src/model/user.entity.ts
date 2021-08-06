@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 
 import { EventProgress } from './event-progress.entity';
+import { EventReward } from './event-reward.entity';
 import { GroupMember } from './group-member.entity';
 import { SessionLogEntry } from './session-log-entry.entity';
 
@@ -59,6 +60,9 @@ export class User {
   @Column()
   score!: number;
 
+  @OneToMany(() => EventReward, ev => ev.claimingUser)
+  rewards!: EventReward[];
+
   /** A user's membership in a group */
   @OneToOne(() => GroupMember, { nullable: true })
   @JoinColumn()
@@ -66,7 +70,7 @@ export class User {
 
   /** Event trackers for each event the player participated in */
   @OneToMany(() => EventProgress, ev => ev.user)
-  participatingEvent!: EventProgress[];
+  participatingEvents!: EventProgress[];
 
   /** Actions recorded relating to this user */
   @OneToMany(() => SessionLogEntry, entry => entry.user)

@@ -1,11 +1,13 @@
 ------------------------------------------------------------------
 
+All gateways must return a true or false based on success
+
 =============
 App Callbacks
 =============
 
 // The user's data 
-updateUserData({ id: string, username: string, score: number, groupId: string, rewardIds: string[], trackedEventIds: string[] })
+updateUserData({ id: string, username: string, score: number, groupId: string, rewardIds: string[], trackedEventIds: string[], authType: "device" | "apple" | "google", ignoreIdLists: boolean })
 // Data relating to a redeemable award for the current user
 updateRewardData({ rewards: { eventId: string, description: string, redeemInfo: string, isRedeemed: boolean }[] })
 // Data relating to a user's progress on various events
@@ -15,9 +17,9 @@ updateGroupData({ curEventId: string, members: { id: string, name: string, point
 // Data relating to any completed or uncompleted challenges. "name" and "completionDate" will be === "" for incomplete challenges. 
 updateChallengeData({ challenges: { id: string, name: string, description: string, imageUrl: string, lat: number, long: number, awardingRadius: number, closeRadius: number, completionDate: string } })
 // Data relating to events in the database
-updateEventData({ events: { id: string, skippingEnabled: boolean, hasStarChallenge: boolean, name: string, description: string, rewardType: "limited_time_event" | "win_on_completion" | "race_to_win" | "no_rewards", time: string, topCount: number, rewards: { id: string, description: string }[], challengeIds: string[] })
+updateEventData({ events: { id: string, skippingEnabled: boolean, hasStarChallenge: boolean, name: string, description: string, rewardType: "limited_time_event" | "win_on_completion" | "race_to_win" | "no_rewards", time: string, topCount: number, minMembers: number, rewards: { id: string, description: string }[], challengeIds: string[] })
 // Data relating to user positions on a leaderboard. For "eventId" === "", list will be global.
-updateLeaderData({ eventId: string, offset: number, users: { userId: string, score: number }[] })
+updateLeaderData({ eventId: string, offset: number, users: { userId: string, username: string, score: number }[] })
 // Called when a user receives a reward
 userRewarded({ rewardId: string, rewardDescription: string })
 // Called when previously received data should be considered invalid
@@ -37,6 +39,8 @@ setAuthToDevice({ accessToken: string, deviceId: string })
 setAuthToOAuth({ accessToken: string, provider: "apple" | "google", authId: string })
 // Deletes an account's authentication method
 closeAccount({ accessToken: string })
+// To request data for global leaders
+requestGlobalLeaderData({ accessToken: string, offset: number, count: number })
 
 =============
 Group Gateway
@@ -59,10 +63,8 @@ Event Gateway
 requestEventData({ accessToken: string, eventIds: string[] })
 // To request data for leaders of a specific event
 requestEventLeaderData({ accessToken: string, offset: number, count: number, eventId: string })
-// To request data for global leaders
-requestGlobalLeaderData({ accessToken: string, offset: number, count: number })
 // To request data for all events in a database
-requestAllEventData({ accessToken: string, offset: number, count: number, rewardTypes: string[], closestToEnding: boolean, shortestFirst: boolean, skippableOnly: boolean })
+requestAllEventData({ accessToken: string, offset: number, count: number, rewardTypes: string[], closestToEnding: boolean, shortestFirst: boolean, skippableOnly: boolean, minMembers: number })
 
 =============
 Reward Gateway
@@ -81,3 +83,5 @@ requestChallengeData({ accessToken: string, challengeIds: string[] })
 requestEventTrackerData({ accessToken: string, trackedEventIds: string[] })
 // To select a further challenge for a skippable event or to backtrack in an event
 setCurrentChallenge({ accessToken: string, challengeId: string })
+// Called when user completes a challenge
+completedChallenge({ accessToken: string })

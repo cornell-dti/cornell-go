@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { EventService } from '../event/event.service';
 import { GroupMember } from '../model/group-member.entity';
 import { GroupService } from '../group/group.service';
+import { AuthService } from '../auth/auth.service';
 
 @Injectable()
 export class UserService {
@@ -19,6 +20,38 @@ export class UserService {
     return await this.usersRepository.findOne({ authType, authToken });
   }
 
+  /** Loads first-level relations and GroupMember.group */
+  async loadBasic(user: User) {
+    return await this.usersRepository.findOneOrFail(user.id, {
+      relations: [
+        'participatingEvents',
+        'participatingEvents.event',
+        'participatingEvents.currentChallenge',
+        'rewards',
+        'groupMember',
+        'groupMember.group',
+      ],
+    });
+  }
+
+  /** Loads the group of the user */
+  async loadGroup(user: User, withMemberData: boolean) {
+    let withGroup = await this.usersRepository.findOneOrFail(user.id, {
+      relations: [
+        ...(withMemberData
+          ? [
+              'groupMember.group',
+              'groupMember.group.members',
+              'groupMember.group.members.user',
+              'currentEvent',
+            ]
+          : ['currentEvent']),
+      ],
+    });
+
+    return withGroup.groupMember!.group;
+  }
+
   /** Registers a user using a certain authentication scheme */
   async register(
     email: string,
@@ -30,7 +63,8 @@ export class UserService {
   ) {
     let user: User = this.usersRepository.create({
       score: 0,
-      participatingEvent: [],
+      participatingEvents: [],
+      rewards: [],
       logEntries: [],
       groupMember: null,
       username,
@@ -45,9 +79,17 @@ export class UserService {
       long,
     );
 
-    let group = await this.groupsService.createFromEvent(
-      eventTracker.event,
-      user,
-    );
+    await this.groupsService.createFromEvent(eventTracker.event, user);
+
+    return user;
+  }
+
+  /** Get the top N users by score */
+  async getTopPlayers(firstIndex: number, count: number) {
+    return await this.usersRepository.find({
+      order: { score: 'DESC' },
+      skip: firstIndex,
+      take: count,
+    });
   }
 }

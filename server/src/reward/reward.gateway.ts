@@ -1,9 +1,42 @@
-import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
+import {
+  MessageBody,
+  SubscribeMessage,
+  WebSocketGateway,
+} from '@nestjs/websockets';
+import { CallingUser } from '../auth/calling-user.decorator';
+import { ClientService } from '../client/client.service';
+import { UpdateRewardDataDto } from '../client/update-reward-data.dto';
+import { User } from '../model/user.entity';
+import { RequestRewardDataDto } from './request-reward-data.dto';
+import { RewardService } from './reward.service';
 
 @WebSocketGateway()
 export class RewardGateway {
-  @SubscribeMessage('message')
-  handleMessage(client: any, payload: any): string {
-    return 'Hello world!';
+  constructor(
+    private clientService: ClientService,
+    private rewardService: RewardService,
+  ) {}
+
+  @SubscribeMessage('requestRewardData')
+  async requestRewardData(
+    @CallingUser() user: User,
+    @MessageBody() data: RequestRewardDataDto,
+  ) {
+    const rewardData = await this.rewardService.getRewardsForUser(
+      user,
+      data.rewardIds,
+    );
+
+    const updateData: UpdateRewardDataDto = {
+      rewards: rewardData.map(rw => ({
+        eventId: rw.containingEvent.id,
+        description: rw.rewardDescription,
+        redeemInfo: rw.rewardRedeemInfo,
+        isRedeemed: rw.isRedeemed,
+      })),
+    };
+
+    this.clientService.emitUpdateRewardData(user, updateData);
+    return true;
   }
 }

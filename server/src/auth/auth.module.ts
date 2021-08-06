@@ -3,7 +3,6 @@ import { GoogleController } from './google/google.controller';
 import { AppleController } from './apple/apple.controller';
 import { DeviceLoginController } from './device-login/device-login.controller';
 import { AuthService } from './auth.service';
-import { JwtStrategy } from './jwt.strategy';
 import { UserModule } from '../user/user.module';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
@@ -24,6 +23,6 @@ import { RefreshAccessController } from './refresh-access/refresh-access.control
     DeviceLoginController,
     RefreshAccessController,
   ],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService],
 })
 export class AuthModule {}
