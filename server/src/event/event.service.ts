@@ -19,6 +19,13 @@ export class EventService {
     private eventRewardsRepository: Repository<EventReward>,
   ) {}
 
+  /** Get events by ids */
+  async getEventsByIds(ids: string[], loadRewards: boolean) {
+    return await this.eventsRepository.findByIds(ids, {
+      relations: loadRewards ? [] : ['rewards'],
+    });
+  }
+
   /** Creates an event tracker with the closest challenge as the current one */
   async createDefaultEventTracker(user: User, lat: number, long: number) {
     let player: Point = {

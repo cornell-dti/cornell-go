@@ -11,4 +11,5 @@ export interface UpdateGroupDataMemberDto {
 export interface UpdateGroupDataDto {
   curEventId: string;
   members: UpdateGroupDataMemberDto[];
+  update: boolean;
 }

@@ -8,8 +8,6 @@ import { GroupService } from './group.service';
 
 describe('GroupService', () => {
   let service: GroupService;
-  let user: User;
-  let event: EventBase;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -21,33 +19,6 @@ describe('GroupService', () => {
     }).compile();
 
     service = module.get<GroupService>(GroupService);
-
-    user = {
-      id: '',
-      score: 0,
-      participatingEvent: [],
-      logEntries: [],
-      groupMember: null,
-      username: 'Username',
-      email: 'Email',
-      authToken: 'Token',
-      authType: AuthType.DEVICE,
-    };
-
-    event = {
-      id: '',
-      minMembers: 0,
-      skippingEnabled: false,
-      isDefault: true,
-      hasStarChallenge: false,
-      name: 'myEvent',
-      description: 'desc',
-      rewardType: EventRewardType.NO_REWARDS,
-      time: new Date(),
-      topCount: 0,
-      rewards: [],
-      challenges: [],
-    };
   });
 
   it('should be defined', () => {

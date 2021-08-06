@@ -22,6 +22,7 @@ export interface UpdateEventDataEventDto {
   time: string;
   topCount: number;
   rewards: UpdateEventDataRewardDto[];
+  minMembers: number;
   challengeIds: string[];
 }
 
