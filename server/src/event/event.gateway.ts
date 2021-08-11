@@ -14,6 +14,7 @@ import { EventService } from './event.service';
 import { RequestAllEventDataDto } from './request-all-event-data.dto';
 import { RequestEventDataDto } from './request-event-data.dto';
 import { RequestEventLeaderDataDto } from './request-event-leader-data.dto';
+import { EventRewardType } from '../model/event-base.entity';
 
 @WebSocketGateway()
 export class EventGateway {
@@ -56,11 +57,47 @@ export class EventGateway {
   async requestAllEventData(
     @CallingUser() user: User,
     @MessageBody() data: RequestAllEventDataDto,
-  ) {}
+  ) {
+    const results = await this.eventService.searchEvents(
+      data.offset,
+      Math.min(data.count, 32), // Maxed out at 32 events
+      data.rewardTypes as EventRewardType[],
+      data.skippableOnly ? true : undefined,
+      {
+        time: data.closestToEnding ? 'ASC' : undefined,
+        challengeCount: data.shortestFirst ? 'ASC' : undefined,
+      },
+    );
+
+    await this.requestEventData(user, {
+      accessToken: data.accessToken,
+      eventIds: results,
+    });
+
+    return true;
+  }
 
   @SubscribeMessage('requestEventLeaderData')
   async requestEventLeaderData(
     @CallingUser() user: User,
     @MessageBody() data: RequestEventLeaderDataDto,
-  ) {}
+  ) {
+    const progresses = await this.eventService.getTopProgressForEvent(
+      data.eventId,
+      data.offset,
+      data.count,
+    );
+
+    await this.clientService.emitUpdateLeaderData(user, {
+      eventId: data.eventId,
+      offset: data.offset,
+      users: progresses.map(evTracker => ({
+        username: evTracker.user.username,
+        userId: evTracker.user.id,
+        score: evTracker.eventScore,
+      })),
+    });
+
+    return true;
+  }
 }
