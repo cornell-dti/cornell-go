@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Point } from 'geojson';
 import { Challenge } from '../model/challenge.entity';
 import { EventProgress } from '../model/event-progress.entity';
 import { EventReward } from '../model/event-reward.entity';
 import { User } from '../model/user.entity';
-import { EventBase } from '../model/event-base.entity';
+import { EventBase, EventRewardType } from '../model/event-base.entity';
 
 @Injectable()
 export class EventService {
@@ -15,8 +15,6 @@ export class EventService {
     private eventsRepository: Repository<EventBase>,
     @InjectRepository(EventProgress)
     private eventProgressRepository: Repository<EventProgress>,
-    @InjectRepository(EventReward)
-    private eventRewardsRepository: Repository<EventReward>,
   ) {}
 
   /** Get events by ids */
@@ -24,6 +22,45 @@ export class EventService {
     return await this.eventsRepository.findByIds(ids, {
       relations: loadRewards ? [] : ['rewards'],
     });
+  }
+
+  /** Get top players for event */
+  async getTopProgressForEvent(eventId: string, offset: number, count: number) {
+    return await this.eventProgressRepository.find({
+      order: {
+        eventScore: 'DESC',
+      },
+      relations: ['user'],
+      select: ['user'],
+      skip: offset,
+      take: count,
+    });
+  }
+
+  /** Searches events based on certain criteria */
+  async searchEvents(
+    offset: number,
+    count: number,
+    rewardTypes: EventRewardType[] | undefined = undefined,
+    skippable: boolean | undefined = undefined,
+    sortBy: {
+      time?: 'ASC' | 'DESC';
+      challengeCount?: 'ASC' | 'DESC';
+    } = {},
+  ) {
+    const events = await this.eventsRepository.find({
+      where: {
+        indexable: true,
+        rewardType: rewardTypes && In(rewardTypes),
+        skippingEnabled: skippable,
+      },
+      select: ['id'],
+      order: sortBy,
+      skip: offset,
+      take: count,
+    });
+
+    return events.map(ev => ev.id);
   }
 
   /** Creates an event tracker with the closest challenge as the current one */

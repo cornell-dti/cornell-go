@@ -58,6 +58,9 @@ export class EventBase {
   })
   rewardType!: EventRewardType;
 
+  /** True if the event is indexable by a search */
+  indexable!: boolean;
+
   /** Describes end time for limited time events and begin time for others */
   @Column()
   time!: Date;
@@ -73,4 +76,8 @@ export class EventBase {
   /** Ordered list of challenges */
   @ManyToMany(() => Challenge)
   challenges!: Challenge[];
+
+  /** Amount of entities in the "challenges" field (update whenever that changes) */
+  @Column()
+  challengeCount!: number;
 }

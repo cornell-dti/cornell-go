@@ -64,7 +64,7 @@ requestEventData({ accessToken: string, eventIds: string[] })
 // To request data for leaders of a specific event
 requestEventLeaderData({ accessToken: string, offset: number, count: number, eventId: string })
 // To request data for all events in a database
-requestAllEventData({ accessToken: string, offset: number, count: number, rewardTypes: string[], closestToEnding: boolean, shortestFirst: boolean, skippableOnly: boolean, minMembers: number })
+requestAllEventData({ accessToken: string, offset: number, count: number, rewardTypes: string[], closestToEnding: boolean, shortestFirst: boolean, skippableOnly: boolean })
 
 =============
 Reward Gateway
