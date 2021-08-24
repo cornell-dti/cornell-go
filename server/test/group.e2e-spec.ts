@@ -8,7 +8,7 @@ import { getEntityManagerToken } from '@nestjs/typeorm';
 import { EventBase, EventRewardType } from '../src/model/event-base.entity';
 import { GroupService } from '../src/group/group.service';
 import { Challenge } from '../src/model/challenge.entity';
-import { EventProgress } from '../src/model/event-progress.entity';
+import { EventTracker } from '../src/model/event-tracker.entity';
 import { EventReward } from '../src/model/event-reward.entity';
 import { GroupMember } from '../src/model/group-member.entity';
 import { PrevChallenge } from '../src/model/prev-challenge.entity';
@@ -63,7 +63,7 @@ describe('Group integration tests', () => {
             Admin,
             Challenge,
             EventBase,
-            EventProgress,
+            EventTracker,
             EventReward,
             GroupMember,
             Group,

@@ -17,7 +17,7 @@ import { User } from './user.entity';
  * Entity describing a player's progress on an event
  */
 @Entity()
-export class EventProgress {
+export class EventTracker {
   @PrimaryGeneratedColumn()
   id!: number;
 

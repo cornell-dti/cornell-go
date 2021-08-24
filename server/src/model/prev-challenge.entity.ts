@@ -5,6 +5,7 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -27,6 +28,10 @@ export class PrevChallenge {
   @ManyToMany(() => User)
   @JoinTable()
   completionPlayers!: User[];
+
+  /** Player owning this completion */
+  @OneToOne(() => User)
+  owner!: User;
 
   /** The completed challenge */
   @ManyToOne(() => Challenge)

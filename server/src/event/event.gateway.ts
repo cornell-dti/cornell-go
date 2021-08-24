@@ -15,6 +15,7 @@ import { RequestAllEventDataDto } from './request-all-event-data.dto';
 import { RequestEventDataDto } from './request-event-data.dto';
 import { RequestEventLeaderDataDto } from './request-event-leader-data.dto';
 import { EventRewardType } from '../model/event-base.entity';
+import { RequestEventTrackerDataDto } from '../challenge/request-event-tracker-data.dto';
 
 @WebSocketGateway()
 export class EventGateway {
@@ -82,10 +83,11 @@ export class EventGateway {
     @CallingUser() user: User,
     @MessageBody() data: RequestEventLeaderDataDto,
   ) {
-    const progresses = await this.eventService.getTopProgressForEvent(
+    const progresses = await this.eventService.getTopTrackerForEvent(
       data.eventId,
       data.offset,
       data.count,
+      true,
     );
 
     await this.clientService.emitUpdateLeaderData(user, {
@@ -95,6 +97,29 @@ export class EventGateway {
         username: evTracker.user.username,
         userId: evTracker.user.id,
         score: evTracker.eventScore,
+      })),
+    });
+
+    return true;
+  }
+
+  @SubscribeMessage('requestEventTrackerData')
+  async requestEventTrackerData(
+    @CallingUser() user: User,
+    @MessageBody() data: RequestEventTrackerDataDto,
+  ) {
+    const trackers = await this.eventService.getEventTrackersByEventId(
+      user,
+      data.trackedEventIds,
+    );
+
+    this.clientService.emitUpdateEventTrackerData(user, {
+      eventTrackers: trackers.map(tracker => ({
+        eventId: tracker.event.id,
+        isRanked: tracker.isPlayerRanked,
+        cooldownMinimum: tracker.cooldownMinimum.toUTCString(),
+        curChallengeId: tracker.currentChallenge.id,
+        prevChallengeIds: tracker.completed.map(pc => pc.challenge.id),
       })),
     });
 

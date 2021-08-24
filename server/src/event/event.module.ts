@@ -1,13 +1,17 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { EventBase } from '../model/event-base.entity';
-import { EventProgress } from '../model/event-progress.entity';
+import { EventTracker } from '../model/event-tracker.entity';
 import { EventReward } from '../model/event-reward.entity';
 import { EventService } from './event.service';
 import { EventGateway } from './event.gateway';
+import { UserModule } from '../user/user.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([EventBase, EventProgress, EventReward])],
+  imports: [
+    TypeOrmModule.forFeature([EventBase, EventTracker, EventReward]),
+    UserModule,
+  ],
   providers: [EventService, EventGateway],
   exports: [EventService],
 })

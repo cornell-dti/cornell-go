@@ -20,7 +20,7 @@ export class UserService {
     return await this.usersRepository.findOne({ authType, authToken });
   }
 
-  /** Loads first-level relations and GroupMember.group */
+  /** Loads first-level relations and GroupMember.group/.currentEvent */
   async loadBasic(user: User) {
     return await this.usersRepository.findOneOrFail(user.id, {
       relations: [
@@ -30,6 +30,7 @@ export class UserService {
         'rewards',
         'groupMember',
         'groupMember.group',
+        'groupMember.group.currentEvent',
       ],
     });
   }

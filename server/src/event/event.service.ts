@@ -3,18 +3,20 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { Point } from 'geojson';
 import { Challenge } from '../model/challenge.entity';
-import { EventProgress } from '../model/event-progress.entity';
+import { EventTracker } from '../model/event-tracker.entity';
 import { EventReward } from '../model/event-reward.entity';
 import { User } from '../model/user.entity';
 import { EventBase, EventRewardType } from '../model/event-base.entity';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class EventService {
   constructor(
+    private userService: UserService,
     @InjectRepository(EventBase)
     private eventsRepository: Repository<EventBase>,
-    @InjectRepository(EventProgress)
-    private eventProgressRepository: Repository<EventProgress>,
+    @InjectRepository(EventTracker)
+    private eventTrackerRepository: Repository<EventTracker>,
   ) {}
 
   /** Get events by ids */
@@ -25,13 +27,19 @@ export class EventService {
   }
 
   /** Get top players for event */
-  async getTopProgressForEvent(eventId: string, offset: number, count: number) {
-    return await this.eventProgressRepository.find({
+  async getTopTrackerForEvent(
+    eventId: string,
+    offset: number,
+    count: number,
+    onlyUser: boolean,
+  ) {
+    return await this.eventTrackerRepository.find({
       order: {
         eventScore: 'DESC',
       },
-      relations: ['user'],
-      select: ['user'],
+      relations: ['user', 'event'],
+      select: onlyUser ? undefined : ['user'],
+      where: { eventId },
       skip: offset,
       take: count,
     });
@@ -63,6 +71,18 @@ export class EventService {
     return events.map(ev => ev.id);
   }
 
+  /** Verifies that a challenge is in an event */
+  async isChallengeInEvent(challengeId: string, eventId: string) {
+    const resultCount = await this.eventsRepository
+      .createQueryBuilder()
+      .where({ id: eventId })
+      .relation(Challenge, 'challenges')
+      .select()
+      .where({ id: challengeId })
+      .getCount();
+    return resultCount > 0;
+  }
+
   /** Creates an event tracker with the closest challenge as the current one */
   async createDefaultEventTracker(user: User, lat: number, long: number) {
     let player: Point = {
@@ -89,7 +109,7 @@ export class EventService {
       .setParameter('player', JSON.stringify(player))
       .getOneOrFail();
 
-    let progress: EventProgress = this.eventProgressRepository.create({
+    let progress: EventTracker = this.eventTrackerRepository.create({
       eventScore: 0,
       isPlayerRanked: true,
       cooldownMinimum: new Date(),
@@ -99,8 +119,31 @@ export class EventService {
       user,
     });
 
-    await this.eventProgressRepository.save(progress);
+    await this.eventTrackerRepository.save(progress);
 
     return progress;
+  }
+
+  /** Get a player's event trackers by event id */
+  async getEventTrackersByEventId(user: User, eventIds: string[]) {
+    return await this.eventTrackerRepository.find({
+      where: {
+        eventId: In(eventIds),
+      },
+      relations: [
+        'event',
+        'currentChallenge',
+        'completed',
+        'completed.challenge',
+      ],
+    });
+  }
+
+  /** Gets a player's event tracker based on group */
+  async getCurrentEventTrackerForUser(user: User) {
+    const basicUser = await this.userService.loadBasic(user);
+    const evId = basicUser.groupMember?.group.currentEvent?.id;
+
+    this.eventTrackerRepository.createQueryBuilder().where();
   }
 }
