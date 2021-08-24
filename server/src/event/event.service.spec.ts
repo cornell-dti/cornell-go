@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
 import { EventBase } from '../model/event-base.entity';
-import { EventProgress } from '../model/event-progress.entity';
+import { EventTracker } from '../model/event-tracker.entity';
 import { EventReward } from '../model/event-reward.entity';
 import { EventService } from './event.service';
 
@@ -22,7 +22,7 @@ describe('EventService', () => {
         },
         {
           useValue: null,
-          provide: getRepositoryToken(EventProgress),
+          provide: getRepositoryToken(EventTracker),
         },
       ],
     }).compile();

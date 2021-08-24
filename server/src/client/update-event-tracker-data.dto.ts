@@ -3,7 +3,7 @@ export interface UpdateEventTrackerDataEventTrackerDto {
   eventId: string;
   isRanked: boolean;
   cooldownMinimum: string;
-  curChallengeId: boolean;
+  curChallengeId: string;
   prevChallengeIds: string[];
 }
 

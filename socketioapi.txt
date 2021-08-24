@@ -65,6 +65,8 @@ requestEventData({ accessToken: string, eventIds: string[] })
 requestEventLeaderData({ accessToken: string, offset: number, count: number, eventId: string })
 // To request data for all events in a database
 requestAllEventData({ accessToken: string, offset: number, count: number, rewardTypes: string[], closestToEnding: boolean, shortestFirst: boolean, skippableOnly: boolean })
+// To request data for specific event trackers
+requestEventTrackerData({ accessToken: string, trackedEventIds: string[] })
 
 =============
 Reward Gateway
@@ -79,8 +81,6 @@ Challenge Gateway
 
 // To request data for specific challenges
 requestChallengeData({ accessToken: string, challengeIds: string[] })
-// To request data for specific event trackers
-requestEventTrackerData({ accessToken: string, trackedEventIds: string[] })
 // To select a further challenge for a skippable event or to backtrack in an event
 setCurrentChallenge({ accessToken: string, challengeId: string })
 // Called when user completes a challenge

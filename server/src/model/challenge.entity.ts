@@ -1,5 +1,12 @@
 import { Point } from 'geojson';
-import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { PrevChallenge } from './prev-challenge.entity';
 
 /**
  * Entity describing a challenge associated with a place
@@ -33,4 +40,8 @@ export class Challenge {
   /** Radius within which the player is considered close, greater than `awardingRadius` */
   @Column()
   closeRadius!: number;
+
+  /** Completions linked to this challenge */
+  @OneToMany(() => PrevChallenge, pc => pc.challenge)
+  completions!: PrevChallenge[];
 }

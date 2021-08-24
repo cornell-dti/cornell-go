@@ -8,7 +8,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-import { EventProgress } from './event-progress.entity';
+import { EventTracker } from './event-tracker.entity';
 import { EventReward } from './event-reward.entity';
 import { GroupMember } from './group-member.entity';
 import { SessionLogEntry } from './session-log-entry.entity';
@@ -69,8 +69,8 @@ export class User {
   groupMember!: GroupMember | null;
 
   /** Event trackers for each event the player participated in */
-  @OneToMany(() => EventProgress, ev => ev.user)
-  participatingEvents!: EventProgress[];
+  @OneToMany(() => EventTracker, ev => ev.user)
+  participatingEvents!: EventTracker[];
 
   /** Actions recorded relating to this user */
   @OneToMany(() => SessionLogEntry, entry => entry.user)

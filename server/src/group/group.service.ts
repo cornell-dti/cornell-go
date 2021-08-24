@@ -5,10 +5,13 @@ import { Group } from '../model/group.entity';
 import { EntityManager, Repository } from 'typeorm';
 import { User } from '../model/user.entity';
 import { GroupMember } from '../model/group-member.entity';
+import { EventTracker } from '../model/event-tracker.entity';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class GroupService {
   constructor(
+    private userService: UserService,
     @InjectRepository(Group)
     private groupsRepository: Repository<Group>,
     @InjectRepository(GroupMember)
