@@ -3,9 +3,11 @@ import {
   Column,
   Entity,
   Index,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { EventBase } from './event-base.entity';
 import { PrevChallenge } from './prev-challenge.entity';
 
 /**
@@ -15,6 +17,11 @@ import { PrevChallenge } from './prev-challenge.entity';
 export class Challenge {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
+
+  /** Index of the challenge relative to others in the linked event, -1 if last */
+  @Index()
+  @Column()
+  eventIndex!: number;
 
   @Column()
   name!: string;
@@ -32,6 +39,10 @@ export class Challenge {
     srid: 4326,
   })
   location!: Point;
+
+  /** Event linked to this challenge */
+  @ManyToOne(() => EventBase)
+  linkedEvent!: EventBase;
 
   /** Radius within which the challenge is awarded */
   @Column()
