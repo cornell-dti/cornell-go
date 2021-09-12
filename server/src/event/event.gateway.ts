@@ -14,8 +14,11 @@ import { EventService } from './event.service';
 import { RequestAllEventDataDto } from './request-all-event-data.dto';
 import { RequestEventDataDto } from './request-event-data.dto';
 import { RequestEventLeaderDataDto } from './request-event-leader-data.dto';
-import { EventRewardType } from '../model/event-base.entity';
+import { EventBase, EventRewardType } from '../model/event-base.entity';
 import { RequestEventTrackerDataDto } from '../challenge/request-event-tracker-data.dto';
+import { EventTracker } from 'src/model/event-tracker.entity';
+import { Challenge } from 'src/model/challenge.entity';
+import { EventReward } from 'src/model/event-reward.entity';
 
 @WebSocketGateway()
 export class EventGateway {
@@ -31,7 +34,7 @@ export class EventGateway {
   ) {
     const ids = await this.eventService.getEventsByIds(data.eventIds, true);
     const updateEventData: UpdateEventDataDto = {
-      events: ids.map(ev => ({
+      events: ids.map((ev: EventBase) => ({
         id: ev.id,
         skippingEnabled: ev.skippingEnabled,
         hasStarChallenge: ev.hasStarChallenge,
@@ -41,8 +44,8 @@ export class EventGateway {
         time: ev.time.toUTCString(),
         minMembers: ev.minMembers,
         topCount: ev.topCount,
-        challengeIds: ev.challenges.map(ch => ch.id),
-        rewards: ev.rewards.map(rw => ({
+        challengeIds: ev.challenges.map((ch: Challenge) => ch.id),
+        rewards: ev.rewards.map((rw: EventReward) => ({
           id: rw.id,
           description: rw.rewardDescription,
         })),
@@ -93,7 +96,7 @@ export class EventGateway {
     await this.clientService.emitUpdateLeaderData(user, {
       eventId: data.eventId,
       offset: data.offset,
-      users: progresses.map(evTracker => ({
+      users: progresses.map((evTracker: EventTracker) => ({
         username: evTracker.user.username,
         userId: evTracker.user.id,
         score: evTracker.eventScore,
@@ -114,7 +117,7 @@ export class EventGateway {
     );
 
     this.clientService.emitUpdateEventTrackerData(user, {
-      eventTrackers: trackers.map(tracker => ({
+      eventTrackers: trackers.map((tracker: EventTracker) => ({
         eventId: tracker.event.id,
         isRanked: tracker.isPlayerRanked,
         cooldownMinimum: tracker.cooldownMinimum.toUTCString(),

@@ -40,7 +40,7 @@ export class EventBase {
   @Index()
   isDefault!: boolean;
 
-  /** If true, then the last challenge is considered a star challenge */
+  /** If true, then the challenge with index -1 is considered a star challenge */
   @Column()
   hasStarChallenge!: boolean;
 
@@ -74,7 +74,7 @@ export class EventBase {
   rewards!: EventReward[];
 
   /** Ordered list of challenges */
-  @ManyToMany(() => Challenge)
+  @OneToMany(() => Challenge, ch => ch.linkedEvent)
   challenges!: Challenge[];
 
   /** Amount of entities in the "challenges" field (update whenever that changes) */

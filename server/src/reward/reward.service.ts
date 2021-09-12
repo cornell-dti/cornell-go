@@ -10,8 +10,10 @@ export class RewardService {
   /** Get rewards that are in ids and owned by the user */
   async getRewardsForUser(user: User, ids: string[]) {
     return await this.rewardRepository.findByIds(ids, {
-      where: { claimingUser: { id: user.id } },
+      where: { claimingUser: user },
       loadRelationIds: true,
     });
   }
+
+  /** */
 }

@@ -126,24 +126,33 @@ export class EventService {
 
   /** Get a player's event trackers by event id */
   async getEventTrackersByEventId(user: User, eventIds: string[]) {
-    return await this.eventTrackerRepository.find({
-      where: {
-        eventId: In(eventIds),
-      },
-      relations: [
-        'event',
-        'currentChallenge',
-        'completed',
-        'completed.challenge',
-      ],
-    });
+    return await this.eventTrackerRepository
+      .createQueryBuilder('tracker')
+      .where('tracker.userId = :userId', { userId: user.id })
+      .innerJoinAndSelect('tracker.event', 'event', 'event.id IN (:...evIds)')
+      .leftJoinAndSelect('tracker.currentChallenge', 'currentChallenge')
+      .leftJoinAndSelect('tracker.completed', 'completed')
+      .leftJoinAndSelect('completed.challenge', 'challenge')
+      .setParameter('evIds', eventIds)
+      .getMany();
   }
 
   /** Gets a player's event tracker based on group */
   async getCurrentEventTrackerForUser(user: User) {
-    const basicUser = await this.userService.loadBasic(user);
-    const evId = basicUser.groupMember?.group.currentEvent?.id;
+    return await this.eventTrackerRepository
+      .createQueryBuilder('tracker')
+      .innerJoinAndSelect('tracker.user', 'user', 'user.id = :userId')
+      .leftJoinAndSelect('tracker.event', 'trackerEvent')
+      .leftJoinAndSelect('user.groupMember', 'groupMember')
+      .leftJoinAndSelect('groupMember.group', 'group')
+      .leftJoinAndSelect('group.currentEvent', 'event')
+      .where('event.id = trackerEvent.id')
+      .setParameter('userId', user.id)
+      .getOneOrFail();
+  }
 
-    this.eventTrackerRepository.createQueryBuilder().where();
+  /** Saves an event tracker */
+  async saveTracker(tracker: EventTracker) {
+    await this.eventTrackerRepository.save(tracker);
   }
 }
