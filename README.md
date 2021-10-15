@@ -8,4 +8,8 @@ This repository contains the Flutter mobile app, the React administration app, a
 ### FA21
 
 - **Nikita Kasumov** - TPM/PM
+
 - **Boao Dong** - Backend Developer
+
+- **Eric Huang** - Administrative Frontend
+
