@@ -1,4 +1,4 @@
-name: Check server build CI
+name: Check admin code-style CI
 
 on: pull_request
 
