@@ -1,6 +1,7 @@
 #!/bin/bash
 
-sudo apt install -y nodejs
+apt update
+apt install -y nodejs npm
 cd admin
 npm install
 npm run checkformat
