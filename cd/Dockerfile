@@ -1,3 +1,5 @@
 FROM ubuntu
-RUN ["cd/setup.sh"]
-ENTRYPOINT [ "cd/deploy.sh" ]
+WORKDIR /app
+COPY . .
+RUN ["./cd/setup.sh"]
+ENTRYPOINT [ "./cd/deploy.sh" ]
