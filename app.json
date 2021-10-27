@@ -1,0 +1,13 @@
+{
+  "name": "CornellGO",
+  "description": "Deployment of CornellGO, an interactive scavenger hunt",
+  "stack": "container",
+  "addons": [
+    {
+      "plan": "heroku-postgresql",
+      "options": {
+        "version": "9.5"
+      }
+    }
+  ]
+}
