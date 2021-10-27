@@ -11,4 +11,4 @@ jobs:
       - name: Build the image
         run: docker build . --file ci/admin-build/Dockerfile -t app
       - name: Run the image
-        run: docker run -dp app
+        run: docker run app
