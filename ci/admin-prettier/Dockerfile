@@ -1,4 +1,4 @@
-FROM ubuntu
+FROM node
 WORKDIR /app
 COPY . .
 
