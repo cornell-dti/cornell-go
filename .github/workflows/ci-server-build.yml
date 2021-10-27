@@ -9,4 +9,5 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Build the image
-        run: docker build . --file ci/server-build/Dockerfile
+        run: docker build . --file ci/server-build/Dockerfile -t app
+        run: docker run -dp app
