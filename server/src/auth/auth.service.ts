@@ -24,6 +24,10 @@ export class AuthService {
     return token;
   }
 
+  async validateUser(username: string, password: string) {
+    return true;
+  }
+
   /** Sets a user's authentication type based on token */
   async setAuthType(user: User, authType: AuthType, token: string) {
     let idToken: string | undefined = '';
