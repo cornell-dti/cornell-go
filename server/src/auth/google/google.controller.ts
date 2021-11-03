@@ -1,5 +1,6 @@
-import { Controller, Post, Request } from '@nestjs/common';
+import { Controller, Post, Req } from '@nestjs/common';
 import { AuthService } from '../auth.service';
+import { Request } from 'express';
 
 @Controller('google')
 export class GoogleController {
@@ -7,8 +8,7 @@ export class GoogleController {
 
   // login
   @Post('/auth/login')
-  async login(@Request() req) {
+  async login(@Req() req: Request) {
     return this.authService.loginGoogle(req.token);
   }
-
 }
