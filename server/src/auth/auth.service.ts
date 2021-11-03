@@ -5,14 +5,14 @@ import { User, AuthType } from '../model/user.entity';
 import { JwtService } from '@nestjs/jwt';
 import { OAuth2Client } from 'google-auth-library';
 import { AuthConstants } from './constant';
-import { UserService } from '../user/user.service'
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
     private readonly jwtService: JwtService,
-    private readonly UserService: UserService
+    private readonly UserService: UserService,
   ) {}
 
   /** Get identifier from an apple token */
@@ -22,58 +22,64 @@ export class AuthService {
 
   /** Get identifier from a google token */
   getIdFromGoogleToken(token: string): string | undefined {
-
-    return undefined
+    return undefined;
   }
 
-  
-  async verifyGoogle(token_id : string): Promise<any> {
+  async verifyGoogle(token_id: string): Promise<any> {
     try {
       const client = new OAuth2Client(AuthConstants.client_id);
       const ticket: any = await client.verifyIdToken({
         idToken: token_id,
-        audience: AuthConstants.client_id, 
+        audience: AuthConstants.client_id,
       });
       const payload = ticket.getPayload();
       //const userid = payload['sub'];
-      return payload
-    }
-    catch(error) {
+      return payload;
+    } catch (error) {
       if (error) {
-        return "error"
+        return 'error';
       }
     }
-    return "error"
+    return 'error';
   }
 
-
-  async loginGoogle(ID_token : string) {
+  async loginGoogle(ID_token: string) {
     const payload = await this.verifyGoogle(ID_token);
     const authType: AuthType = AuthType.GOOGLE;
     const authToken: string = payload['sub'];
-    const exist_user: User | undefined = await this.userRepository.findOne({ authType, authToken });
+    const exist_user: User | undefined = await this.userRepository.findOne({
+      authType,
+      authToken,
+    });
     if (exist_user) {
-      const payload : object = { username: exist_user.username, sub: exist_user.id };
+      const payload: object = {
+        username: exist_user.username,
+        sub: exist_user.id,
+      };
       return {
         access_token: this.jwtService.sign(payload),
-      }
+      };
     }
-// this would go wrong if the user does not let google share its information
-//https://developers.google.com/identity/sign-in/web/backend-auth#create-an-account-or-session
+    // this would go wrong if the user does not let google share its information
+    //https://developers.google.com/identity/sign-in/web/backend-auth#create-an-account-or-session
     else {
-      const email: string = payload['email']
-      const username : string = payload['name']
-      const lat : number  =  0
-      const long : number = 0
-      const user = await this.UserService.register(email, username, lat, long, authType, authToken)
-      const payload_token : object = { username: user.username, sub: user.id };
+      const email: string = payload['email'];
+      const username: string = payload['name'];
+      const lat: number = 0;
+      const long: number = 0;
+      const user = await this.UserService.register(
+        email,
+        username,
+        lat,
+        long,
+        authType,
+        authToken,
+      );
+      const payload_token: object = { username: user.username, sub: user.id };
       return {
         access_token: this.jwtService.sign(payload_token),
-      }
+      };
     }
-
-    
-
   }
   /** Get identifier from a device token */
   getIdFromDeviceToken(token: string): string | undefined {
