@@ -3,6 +3,10 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
+import HomeIcon from '@mui/icons-material/Home';
+import PlaceIcon from '@mui/icons-material/Place';
+import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
+import PeopleIcon from '@mui/icons-material/People';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -17,8 +21,8 @@ function TabPanel(props: TabPanelProps) {
     <div
       role="tabpanel"
       hidden={value !== index}
-      id={`vertical-tabpanel-${index}`}
-      aria-labelledby={`vertical-tab-${index}`}
+      id={`sidebar-tabpanel-${index}`}
+      aria-labelledby={`sidebar-tab-${index}`}
       {...other}
     >
       {value === index && (
@@ -32,8 +36,8 @@ function TabPanel(props: TabPanelProps) {
 
 function a11yProps(index: number) {
   return {
-    id: `vertical-tab-${index}`,
-    'aria-controls': `vertical-tabpanel-${index}`,
+    id: `sidebar-tab-${index}`,
+    'aria-controls': `sidebar-tabpanel-${index}`,
   };
 }
 
@@ -46,20 +50,19 @@ export default function Sidebar() {
 
   return (
     <Box
-      sx={{ flexGrow: 1, bgcolor: 'background.paper', display: 'flex', height: 224 }}
+      sx={{ flexGrow: 1, bgcolor: 'background.paper', display: 'flex'}}
     >
       <Tabs
         orientation="vertical"
         variant="scrollable"
         value={value}
         onChange={handleChange}
-        aria-label="Vertical tabs example"
         sx={{ borderRight: 1, borderColor: 'divider' }}
       >
-        <Tab label="Home" {...a11yProps(0)} />
-        <Tab label="Places" {...a11yProps(1)} />
-        <Tab label="Admin Approval" {...a11yProps(2)} />
-        <Tab label="Users" {...a11yProps(3)} />
+        <Tab icon={<HomeIcon/>} label="Home" {...a11yProps(0)} />
+        <Tab icon={<PlaceIcon/>} label="Places" {...a11yProps(1)} />
+        <Tab icon={<VerifiedUserIcon/>} label="Admin Approval" {...a11yProps(2)} />
+        <Tab icon={<PeopleIcon/>} label="Users" {...a11yProps(3)} />
 
       </Tabs>
 
