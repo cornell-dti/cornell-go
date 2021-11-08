@@ -3,6 +3,7 @@ import { User } from '../model/user.entity';
 
 export const CallingUser = createParamDecorator(
   (data: unknown, ctx: ExecutionContext) => {
-    return ctx.switchToWs().getData<{ _authenticatedUserEntity: User }>();
+    return ctx.switchToWs().getData<{ _authenticatedUserEntity: User }>()
+      ._authenticatedUserEntity;
   },
 );
