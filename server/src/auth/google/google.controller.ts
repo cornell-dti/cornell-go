@@ -1,14 +1,20 @@
-import { Controller, Post, Req } from '@nestjs/common';
+import { Controller, Post, Body } from '@nestjs/common';
+import { AuthType } from 'src/model/user.entity';
 import { AuthService } from '../auth.service';
-import { Request } from 'express';
+import { TokenDto } from '../constant';
 
 @Controller('google')
 export class GoogleController {
   constructor(private readonly authService: AuthService) {}
 
   // login
-  @Post('/auth/login')
-  async login(@Req() req: Request) {
-    return this.authService.loginGoogle(req.token);
+  @Post()
+  async login(@Body() req: TokenDto) {
+    const success: string = await this.authService.login(
+      req.token,
+      AuthType.GOOGLE,
+    );
+    // success is a string, either"login success" or "verify error"
+    return success;
   }
 }

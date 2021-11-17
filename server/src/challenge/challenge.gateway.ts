@@ -118,12 +118,12 @@ export class ChallengeGateway {
     @MessageBody() data: CompletedChallengeDto,
   ) {
     /**
-     * TODO: 
+     * TODO:
      * Create PrevChallenge and associate with user
      * Progress the user to the next challenge (if possible)
      * Reward player upon completion of last challenge (if conditions met)
      * If conditions involve other players, check for reward for all players
-     * 
+     *
      */
   }
 }
