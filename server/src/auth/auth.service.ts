@@ -11,7 +11,7 @@ import {
 } from 'google-auth-library';
 import { AuthConstants } from './constant';
 import { UserService } from '../user/user.service';
-
+import appleSignin from 'apple-signin-auth';
 @Injectable()
 export class AuthService {
   constructor(
@@ -21,8 +21,29 @@ export class AuthService {
   ) {}
 
   /** Get identifier from an apple token */
-  getIdFromAppleToken(token: string): string | undefined {
-    return undefined;
+  async getIdFromAppleToken(token: string): Promise<string | undefined> {
+    const verifiedToken = await this.verifyApple(token);
+    if (!verifiedToken) {
+      return undefined;
+    }
+    return verifiedToken;
+  }
+
+  async verifyApple(token_id: string): Promise<string | undefined> {
+    try {
+      const { sub: userAppleId } = await appleSignin.verifyIdToken(
+        token_id, // We need to pass the token that we wish to decode.
+        {
+          audience: AuthConstants.client_id, // client id - The same one we used  on the frontend, this is the secret key used for encoding and decoding the token.
+          ignoreExpiration: true, // Token will not expire unless you manually do so.
+        },
+      );
+      return userAppleId;
+    } catch (err) {
+      // if any error pops up during the verifying stage, the process terminate
+      // and return the error to the front end
+      return undefined;
+    }
   }
 
   /** Get identifier from a google token */
@@ -55,13 +76,14 @@ export class AuthService {
   }
 
   async login(id_token: string, authenType: AuthType): Promise<string> {
+    // if verify success, idToken is a string. If anything is wrong, it is undefined
     let idToken: string | undefined;
     switch (authenType) {
       case AuthType.GOOGLE:
         idToken = await this.getIdFromGoogleToken(id_token);
         break;
       case AuthType.APPLE:
-        //idToken = this.getIdFromAppleToken(id_token);
+        idToken = await this.getIdFromAppleToken(id_token);
         break;
       case AuthType.DEVICE:
         //idToken = this.getIdFromDeviceToken(id_token);
@@ -124,7 +146,7 @@ export class AuthService {
 
     switch (authType) {
       case AuthType.APPLE:
-        idToken = this.getIdFromAppleToken(token);
+        idToken = await this.getIdFromAppleToken(token);
         break;
       case AuthType.DEVICE:
         idToken = this.getIdFromDeviceToken(token);
