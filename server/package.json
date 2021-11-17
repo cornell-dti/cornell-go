@@ -32,6 +32,7 @@
     "@nestjs/typeorm": "^8.0.1",
     "@nestjs/websockets": "^8.0.5",
     "@types/geojson": "^7946.0.8",
+    "apple-signin-auth": "^1.5.1",
     "dotenv": "^10.0.0",
     "google-auth-library": "^7.10.1",
     "passport": "^0.4.1",
