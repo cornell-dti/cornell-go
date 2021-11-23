@@ -6,13 +6,10 @@ import Sidebar from './Sidebar';
 
 export function App() {
   return (
-    <div>
+    <div style={{ minHeight: '100vh', display: "flex", flexDirection: "column" }}>
       <AppBar position="static">
         <Toolbar>
-          <Typography
-            component="h1"
-            variant="h4"
-            color="inherit">
+          <Typography component="h1" variant="h4" color="inherit">
             CornellGO!Manager
           </Typography>
         </Toolbar>

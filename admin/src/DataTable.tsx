@@ -1,11 +1,14 @@
+import {
+  DataGrid,
+  GridColDef,
+  GridRowModel,
+  GridRenderCellParams,
+} from '@mui/x-data-grid';
 
-import { DataGrid, GridColDef, GridRowModel, GridRenderCellParams } from '@mui/x-data-grid';
-
-type Clickable = { text: string, clickFunc: () => void };
-type Editable = { text: string, editFunc: (s:string) => void }
+type Clickable = { text: string; clickFunc: () => void };
+type Editable = { text: string; editFunc: (s: string) => void };
 
 type Cell = string | Clickable | Editable;
-
 
 function isEditable(cell: Cell): cell is Editable {
   return (cell as Editable).editFunc !== undefined;
@@ -18,9 +21,8 @@ function isClickable(cell: Cell): cell is Clickable {
 interface DataTableProps {
   children?: React.ReactNode;
   columns: string[];
-  rows: Cell[][]
+  rows: Cell[][];
 }
-
 
 const sampleColumns: GridColDef[] = [
   { field: 'id', headerName: 'ID', width: 70 },
@@ -32,7 +34,6 @@ const sampleColumns: GridColDef[] = [
     type: 'number',
     width: 90,
   },
-
 ];
 
 const sampleRows = [
@@ -48,35 +49,33 @@ const sampleRows = [
 ];
 
 export default function DataTable(props: DataTableProps) {
-  const {rows, columns} = props;
-  let gridRows = rows.map(
-    (row, i) => (row.reduce((current, item, index) => {
-    Object.defineProperty(current, columns[index], {
-      value: (typeof item === 'string')? item : item.text,
-      configurable: true
-    })
-    Object.defineProperty(current, 'id', {
-      value: i,
-      configurable: true
-    })
-    return current as GridRowModel;
-  },{})));
-  let gridColumns: GridColDef[] = columns.map(
-    (value, index) => (
-      {field: value,
-         headerName: value,
-          type: 'string'
-        }
-          ));
+  const { rows, columns } = props;
+  let gridRows = rows.map((row, i) =>
+    row.reduce((current, item, index) => {
+      Object.defineProperty(current, columns[index], {
+        value: typeof item === 'string' ? item : item.text,
+        configurable: true,
+      });
+      Object.defineProperty(current, 'id', {
+        value: i,
+        configurable: true,
+      });
+      return current as GridRowModel;
+    }, {}),
+  );
+  let gridColumns: GridColDef[] = columns.map((value, index) => ({
+    field: value,
+    headerName: value,
+    type: 'string',
+  }));
   return (
-  
-  <DataGrid
-    rows={gridRows}
-    columns={gridColumns}
-    pageSize={5}
-    rowsPerPageOptions={[5]}
-    checkboxSelection
-    disableSelectionOnClick
-  />
+    <DataGrid
+      rows={gridRows}
+      columns={gridColumns}
+      pageSize={5}
+      rowsPerPageOptions={[5]}
+      checkboxSelection
+      disableSelectionOnClick
+    />
   );
 }
