@@ -7,6 +7,7 @@ import HomeIcon from '@mui/icons-material/Home';
 import PlaceIcon from '@mui/icons-material/Place';
 import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
 import PeopleIcon from '@mui/icons-material/People';
+import DataTable from './DataTable';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -24,9 +25,10 @@ function TabPanel(props: TabPanelProps) {
       id={`sidebar-tabpanel-${index}`}
       aria-labelledby={`sidebar-tab-${index}`}
       {...other}
+      style={{display: 'inline-flex'}}
     >
       {value === index && (
-        <Box sx={{ p: 3 }}>
+        <Box sx={{ p: 3}}>
           <Typography>{children}</Typography>
         </Box>
       )}
@@ -39,6 +41,17 @@ function a11yProps(index: number) {
     id: `sidebar-tab-${index}`,
     'aria-controls': `sidebar-tabpanel-${index}`,
   };
+}
+
+const sample = {
+  columns: ['1','2','3','4','buttons'],
+
+  rows: [
+    ["Joe James", "Test Corp", "Yonkers", "NY",{text:"bruh", clickFunc: () => console.log("bruh")}],
+    ["John Walsh", "Test Corp", "Hartford", "CT",{text:"bruh", clickFunc: () => console.log("bruh")}],
+    ["Bob Herm", "Test Corp", "Tampa", "FL",{text:"bruh", clickFunc: () => console.log("bruh")}],
+    ["James Houston", "Test Corp", "Dallas", "TX",{text:"bruh", clickFunc: () => console.log("bruh")}],
+   ]
 }
 
 export default function Sidebar() {
@@ -75,8 +88,10 @@ export default function Sidebar() {
       <TabPanel value={value} index={2}>
         Item Three
       </TabPanel>
-      <TabPanel value={value} index={3}>
-        Item Four
+      <TabPanel value={value} index={3} >
+        <div style={{ minWidth: '100%', height: 400}}>
+          <DataTable columns={sample.columns} rows={sample.rows}/>
+        </div>
       </TabPanel>
     </Box>
   );
