@@ -10,16 +10,36 @@ import { JoinGroupDto } from './join-group.dto';
 import { LeaveGroupDto } from './leave-group.dto';
 import { RequestGroupDataDto } from './request-group-data.dto';
 import { SetCurrentEventDto } from './set-current-event.dto';
-
+import {
+  UpdateGroupDataDto,
+  UpdateGroupDataMemberDto,
+} from '../client/update-group-data.dto';
+import { GroupService } from './group.service';
+import { GroupMember } from '../model/group-member.entity';
 @WebSocketGateway()
 export class GroupGateway {
-  constructor(private clientService: ClientService) {}
+  constructor(
+    private clientService: ClientService,
+    private groupService: GroupService,
+  ) {}
 
   @SubscribeMessage('requestGroupData')
   async requestGroupData(
     @CallingUser() user: User,
     @MessageBody() data: RequestGroupDataDto,
-  ) {}
+  ) {
+    const authToken: string = data.accessToken;
+    await this.groupService.requestGroupData(authToken);
+    //TODO: 1. search user repository(implemented in service)
+    // TODO:2. construct updateGroupData
+    // const updateGroupData: UpdateGroupDataDto = {
+    //   curEventId: "id",
+    //   members: UpdateGroupDataMemberDto[],
+    //   update: true,
+    // };
+    // TODO: 3.call clientService
+    //this.clientService.emitUpdateGroupData(user, updateGroupData);
+  }
 
   @SubscribeMessage('joinGroup')
   async joinGroup(
