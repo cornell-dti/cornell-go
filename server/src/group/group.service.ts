@@ -42,4 +42,9 @@ export class GroupService {
     await this.entityManager.save([groupMember, group, host]);
     return group;
   }
+
+  /** */
+  async requestGroupData(authToken: string) {
+    return;
+  }
 }
