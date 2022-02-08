@@ -5,7 +5,7 @@ CornellGO! is an interactive scavenger hunt aimed at sparking interest in explor
 This repository contains the Flutter mobile app, the React administration app, and the Nest.js backend. Visit each subfolder for a description of each project's installation.
 ## Contributors
 
-### FA21
+### SP22
 
 - **Nikita Kasumov** - TPM/PM
 
@@ -13,3 +13,4 @@ This repository contains the Flutter mobile app, the React administration app, a
 
 - **Eric Huang** - Administrative Frontend
 
+- **Cathryn Li**
