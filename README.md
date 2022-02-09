@@ -13,3 +13,7 @@ This repository contains the Flutter mobile app, the React administration app, a
 
 - **Eric Huang** - Administrative Frontend
 
+### SP22 
+- **Nikita Kasumov** - TPM/PM 
+- **Eric Huang** - Developer 
+- **Youssef Attia** - Developer
