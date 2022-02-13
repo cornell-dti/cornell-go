@@ -11,16 +11,24 @@ import { RewardGateway } from './reward/reward.gateway';
 import { RewardModule } from './reward/reward.module';
 import { ClientModule } from './client/client.module';
 
+import * as PgParser from 'pg-connection-string';
+
+const connectionOptions = process.env.DATABASE_URL
+  ? PgParser.parse(process.env.DATABASE_URL)
+  : null;
+
 @Module({
   imports: [
     ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: process.env.CORNELLGODB_HOST,
-      username: process.env.CORNELLGODB_USER,
-      password: process.env.CORNELLGODB_PASS,
-      database: process.env.CORNELLGODB_DBNAME,
+      host: connectionOptions?.host ?? process.env.CORNELLGODB_HOST,
+      port: connectionOptions?.port ?? 5432,
+      username: connectionOptions?.user ?? process.env.CORNELLGODB_USER,
+      password: connectionOptions?.password ?? process.env.CORNELLGODB_PASS,
+      database: connectionOptions?.database ?? process.env.CORNELLGODB_DBNAME,
       schema: process.env.CORNELLGODB_SCHEMA,
+      synchronize: process.env.DEVELOPMENT === 'true',
       logNotifications: true,
       cache: true,
       entities: ['dist/model/*.entity{.ts,.js}'],
