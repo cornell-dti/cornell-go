@@ -23,7 +23,7 @@ const connectionOptions = process.env.DATABASE_URL
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: connectionOptions?.host ?? process.env.CORNELLGODB_HOST,
-      port: connectionOptions?.port ?? 5432,
+      port: +(connectionOptions?.port ?? 5432),
       username: connectionOptions?.user ?? process.env.CORNELLGODB_USER,
       password: connectionOptions?.password ?? process.env.CORNELLGODB_PASS,
       database: connectionOptions?.database ?? process.env.CORNELLGODB_DBNAME,
