@@ -63,16 +63,15 @@ Open the main.dart file, then click the Play button
 
 ## Contributors
 
+
+### SP22 
+- **Nikita Kasumov** - TPM/PM 
+- **Eric Huang** - Developer 
+- **Youssef Attia** - Developer
+- **Cathryn Li** - Developer
+
 ### FA21
 
 - **Nikita Kasumov** - TPM/PM
-
 - **Boao Dong** - Backend Developer
-
 - **Eric Huang** - Administrative Frontend
-
-### SP22
-
-- **Nikita Kasumov** - TPM/PM
-- **Eric Huang** - Developer
-- **Youssef Attia** - Developer
