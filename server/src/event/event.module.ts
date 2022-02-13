@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { EventBase } from '../model/event-base.entity';
 import { EventTracker } from '../model/event-tracker.entity';
@@ -10,7 +10,7 @@ import { UserModule } from '../user/user.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([EventBase, EventTracker, EventReward]),
-    UserModule,
+    forwardRef(() => UserModule),
   ],
   providers: [EventService, EventGateway],
   exports: [EventService],
