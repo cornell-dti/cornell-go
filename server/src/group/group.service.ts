@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { EventBase } from '../model/event-base.entity';
 import { Group } from '../model/group.entity';
@@ -11,6 +11,7 @@ import { UserService } from '../user/user.service';
 @Injectable()
 export class GroupService {
   constructor(
+    @Inject(forwardRef(() => UserService))
     private userService: UserService,
     @InjectRepository(Group)
     private groupsRepository: Repository<Group>,

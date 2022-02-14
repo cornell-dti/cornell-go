@@ -20,12 +20,14 @@ import { SetUsernameDto } from './set-username.dto';
 import { RequestEventLeaderDataDto } from '../event/request-event-leader-data.dto';
 import { RequestGlobalLeaderDataDto } from './request-global-leader-data.dto';
 import { UserService } from './user.service';
+import { forwardRef, Inject } from '@nestjs/common';
 
 @WebSocketGateway()
 export class UserGateway {
   constructor(
     private clientService: ClientService,
     private userService: UserService,
+    @Inject(forwardRef(() => AuthService))
     private authService: AuthService,
   ) {}
 
