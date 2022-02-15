@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { EventBase } from '../model/event-base.entity';
 import { EventTracker } from '../model/event-tracker.entity';
@@ -11,6 +11,7 @@ import { ClientModule } from 'src/client/client.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([EventBase, EventTracker, EventReward]),
+    forwardRef(() => UserModule),
     UserModule,
     ClientModule,
   ],
