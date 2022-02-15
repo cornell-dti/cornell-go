@@ -1,6 +1,6 @@
-# game
+# Cornell Go.
 
-A new Flutter project.
+Flutter Application for Cornell Go.
 
 ## Getting Started
 

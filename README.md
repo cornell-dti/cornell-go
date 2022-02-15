@@ -69,9 +69,9 @@ Open the main.dart file, then click the Play button
 - **Eric Huang** - Developer 
 - **Youssef Attia** - Developer
 - **Cathryn Li** - Developer
+- **Nirbhay S Narang (nick) ** - Developer
 
 ### FA21
-
 - **Nikita Kasumov** - TPM/PM
 - **Boao Dong** - Backend Developer
 - **Eric Huang** - Administrative Frontend
