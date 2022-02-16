@@ -17,7 +17,7 @@ import { User } from './user.entity';
  * Entity describing a completed challenge
  */
 @Entity()
-@Unique(['owner', 'challenge'])
+// UNCOMMENT ASAP @Unique(['owner', 'challenge'])
 export class PrevChallenge {
   @PrimaryGeneratedColumn()
   id!: number;
