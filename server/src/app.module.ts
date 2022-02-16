@@ -10,22 +10,31 @@ import { ConfigModule } from '@nestjs/config';
 import { RewardGateway } from './reward/reward.gateway';
 import { RewardModule } from './reward/reward.module';
 import { ClientModule } from './client/client.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: process.env.CORNELLGODB_HOST,
-      username: process.env.CORNELLGODB_USER,
-      password: process.env.CORNELLGODB_PASS,
-      database: process.env.CORNELLGODB_DBNAME,
+      url: process.env.DATABASE_URL,
       schema: process.env.CORNELLGODB_SCHEMA,
+      synchronize: process.env.DEVELOPMENT === 'true',
       logNotifications: true,
       cache: true,
       entities: ['dist/model/*.entity{.ts,.js}'],
       migrations: ['dist/migration/*{.ts,.js}'],
       migrationsRun: true,
+      ssl: !process.env.NO_SSL,
+      extra: !process.env.NO_SSL && {
+        ssl: {
+          rejectUnauthorized: false,
+        },
+      },
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', '..', 'admin', 'build'),
     }),
     EventModule,
     GroupModule,

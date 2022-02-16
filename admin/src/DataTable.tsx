@@ -4,6 +4,7 @@ import {
   GridRowModel,
   GridRenderCellParams,
 } from '@mui/x-data-grid';
+import Button from '@mui/material/Button';
 
 type Clickable = { text: string; clickFunc: () => void };
 type Editable = { text: string; editFunc: (s: string) => void };
@@ -63,16 +64,38 @@ export default function DataTable(props: DataTableProps) {
       return current as GridRowModel;
     }, {}),
   );
-  let gridColumns: GridColDef[] = columns.map((value, index) => ({
+  let gridColumns: GridColDef[] = columns.map((value, index) => {
+    let cell = rows[0][index];
+    return {
     field: value,
     headerName: value,
     type: 'string',
-  }));
+    editable: typeof cell != 'string' && 'editFunc' in cell? true : false,
+    renderCell: () => {
+      if(typeof cell === 'string'){
+        return (
+          <div>{cell}</div>
+        )
+      }
+      else if('clickFunc' in cell){
+        return (
+          <Button onClick={cell.clickFunc}>{cell.text}</Button>
+        )
+      }
+      else {
+        return (
+          <div>{cell.text}</div>
+        )
+      }
+    }
+  }});
   return (
     <DataGrid
       rows={gridRows}
       columns={gridColumns}
       pageSize={5}
+      // edit function can go here instead, could be a better way
+      // onCellEditCommit={}
       rowsPerPageOptions={[5]}
       checkboxSelection
       disableSelectionOnClick
