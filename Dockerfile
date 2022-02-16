@@ -1,9 +1,21 @@
-FROM node
-WORKDIR /app
-COPY . .
+FROM node:14.18.1
 
-RUN ["chmod", "+x", "./cd/setup.sh"]
-RUN ["chmod", "+x", "./cd/deploy.sh"]
+EXPOSE 80
 
-RUN ["./cd/setup.sh"]
-ENTRYPOINT [ "./cd/deploy.sh" ]
+RUN npm install -g prettier @nestjs/cli jest rimraf
+
+WORKDIR /app/admin
+COPY admin/package.json .
+RUN npm install
+
+WORKDIR /app/server
+COPY server/package.json .
+RUN npm install
+
+WORKDIR /app/admin
+COPY admin .
+RUN npm run build
+
+WORKDIR /app/server
+COPY server .
+ENTRYPOINT ["npm", "run", "start"]
