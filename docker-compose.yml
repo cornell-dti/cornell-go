@@ -17,6 +17,10 @@ services:
     networks:
       - reference
   server:
+    ports:
+      - "80:80"
     build: .
+    networks:
+      - reference
 networks:
   reference:

@@ -1,7 +1,8 @@
 FROM node:14.18.1
-WORKDIR /app
-COPY . .
 
-RUN ["chmod", "+x", "ci/server-prettier/run.sh"]
+WORKDIR /app/server
+COPY server .
 
-ENTRYPOINT [ "ci/server-prettier/run.sh" ]
+RUN npm install -g prettier @nestjs/cli jest rimraf
+RUN npm install
+RUN npm run checkformat
