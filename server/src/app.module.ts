@@ -25,6 +25,11 @@ import { ClientModule } from './client/client.module';
       migrations: ['dist/migration/*{.ts,.js}'],
       migrationsRun: true,
       ssl: !process.env.NO_SSL,
+      "extra": {
+        "ssl": {
+          "rejectUnauthorized": false
+        }
+      }
     }),
     EventModule,
     GroupModule,
