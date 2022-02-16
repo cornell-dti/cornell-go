@@ -17,6 +17,12 @@ services:
     networks:
       - reference
   server:
+    ports:
+      - "80:80"
+    environment:
+      - NO_SSL=true
     build: .
+    networks:
+      - reference
 networks:
   reference:

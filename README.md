@@ -4,24 +4,28 @@ CornellGO! is an interactive scavenger hunt aimed at sparking interest in explor
 
 This repository contains the Flutter mobile app, the React administration app, and the Nest.js backend. Visit each subfolder for a description of each project's installation.
 
-### Full project startup
+### Full project setup
 
 ```
-cd ./server
+cd server
 npm install
 cd ../admin
 npm install
 cd ../game
 flutter pub get
 ```
+### Update container with new changes
+```
+docker compose build
+```
 
-### Run project in container (make sure to run the npm installs before to prevent a very long startup)
+### Run project in container
 
 ```
 docker compose up
 ```
 
-### Restart the container
+### Start the container in the background (for flutter/react frontend)
 
 ```
 docker compose restart
@@ -41,21 +45,14 @@ docker compose down
 rm -rf ./postgres-data
 ```
 
-### Start the server based on .env in the `server` folder
-
-```
-cd server
-npm run start
-```
-
-### Start the frontend without a backend running
+### Start the frontend
 
 ```
 cd admin
 npm start
 ```
 
-### Start the flutter app without a backend running
+### Start the flutter app
 
 ```
 Open the main.dart file, then click the Play button
@@ -63,15 +60,16 @@ Open the main.dart file, then click the Play button
 
 ## Contributors
 
+### SP22
 
-### SP22 
-- **Nikita Kasumov** - TPM/PM 
-- **Eric Huang** - Developer 
+- **Nikita Kasumov** - TPM/PM
+- **Eric Huang** - Developer
 - **Youssef Attia** - Developer
 - **Cathryn Li** - Developer
-- **Nirbhay S Narang (nick) ** - Developer
+- **Nirbhay S Narang (nick)** - Developer
 
 ### FA21
+
 - **Nikita Kasumov** - TPM/PM
 - **Boao Dong** - Backend Developer
 - **Eric Huang** - Administrative Frontend
