@@ -1,7 +1,8 @@
 FROM node:14.18.1
-WORKDIR /app
-COPY . .
 
-RUN ["chmod", "+x", "ci/admin-build/run.sh"]
+WORKDIR /app/admin
+COPY admin .
 
-ENTRYPOINT [ "ci/admin-build/run.sh" ]
+RUN npm install -g prettier @nestjs/cli jest rimraf
+RUN npm install
+RUN npm run build

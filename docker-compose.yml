@@ -1,0 +1,28 @@
+version: "3.3"
+services:
+  postgres:
+    image: postgis/postgis
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: test
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - type: bind
+        source: ./postgres-data
+        target: /var/lib/postgresql/data
+    networks:
+      - reference
+  server:
+    ports:
+      - "80:80"
+    environment:
+      - NO_SSL=true
+    build: .
+    networks:
+      - reference
+networks:
+  reference:
