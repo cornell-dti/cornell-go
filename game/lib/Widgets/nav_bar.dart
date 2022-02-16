@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class NavBar extends StatelessWidget {
@@ -44,7 +43,7 @@ class NavBar extends StatelessWidget {
             ),
             ListTile(
               leading: Icon(
-                CupertinoIcons.group,
+                Icons.group_rounded,
                 color: Color(0xFFB31B1B),
               ),
               title: Text('Leaderboard', style: listTextStyle),
@@ -52,15 +51,15 @@ class NavBar extends StatelessWidget {
             ),
             ListTile(
               leading: Icon(
-                CupertinoIcons.arrow_2_circlepath_circle,
+                Icons.location_history_rounded,
                 color: Color(0xFFB31B1B),
               ),
-              title: Text('Visisted places', style: listTextStyle),
+              title: Text('Visited places', style: listTextStyle),
               onTap: () => null,
             ),
             ListTile(
               leading: Icon(
-                CupertinoIcons.lightbulb,
+                Icons.lightbulb_outline_rounded,
                 color: Color(0xFFB31B1B),
               ),
               title: Text('Suggest Location', style: listTextStyle),
@@ -68,14 +67,14 @@ class NavBar extends StatelessWidget {
             ),
             ListTile(
               leading: Icon(
-                CupertinoIcons.text_bubble,
+                Icons.chat_bubble_rounded,
                 color: Color(0xFFB31B1B),
               ),
               title: Text('Give feedback', style: listTextStyle),
               onTap: () => null,
             ),
             ListTile(
-              leading: Icon(CupertinoIcons.settings, color: Color(0xFFB31B1B)),
+              leading: Icon(Icons.settings_rounded, color: Color(0xFFB31B1B)),
               title: Text('Settings', style: listTextStyle),
               onTap: () => null,
             )

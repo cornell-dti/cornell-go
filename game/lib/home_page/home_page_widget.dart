@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:velocity_x/velocity_x.dart';
-import 'package:cupertino_icons/cupertino_icons.dart';
 import 'package:game/Widgets/nav_bar.dart';
 import 'package:game/Widgets/nav_btn.dart';
 
@@ -34,6 +33,8 @@ class _HomePageWidgetState extends State<HomePageWidget> {
       topRight: Radius.circular(24.0),
     );
     return Scaffold(
+        floatingActionButton: navBtn(scaffoldKey),
+        floatingActionButtonLocation: FloatingActionButtonLocation.startTop,
         drawer: NavBar(),
         key: scaffoldKey,
         backgroundColor: const Color(0xFFFFFF),
@@ -46,7 +47,6 @@ class _HomePageWidgetState extends State<HomePageWidget> {
               ),
             ),
           ),
-          navBtn(scaffoldKey),
           SlidingUpPanel(
               minHeight: 200,
               padding: const EdgeInsets.all(8),
@@ -81,7 +81,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
               child: HStack([
                 Padding(
                     padding: EdgeInsets.all(3),
-                    child: Icon(CupertinoIcons.bolt_circle, color: Carnelian)),
+                    child: Icon(Icons.bolt_rounded, color: Carnelian)),
                 Padding(
                   padding: EdgeInsets.all(3),
                   child: Text("3 Points",
@@ -94,7 +94,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                 Padding(
                     padding: EdgeInsets.all(3),
                     child:
-                        Icon(CupertinoIcons.location_circle, color: Carnelian)),
+                        Icon(Icons.follow_the_signs_rounded, color: Carnelian)),
                 Padding(
                   padding: EdgeInsets.all(3),
                   child: Text("20 mins",
@@ -106,8 +106,8 @@ class _HomePageWidgetState extends State<HomePageWidget> {
               child: HStack([
                 Padding(
                     padding: EdgeInsets.all(3),
-                    child:
-                        Icon(CupertinoIcons.group, color: Color(0xFFB31B1B))),
+                    child: Icon(Icons.group_add_rounded,
+                        color: Color(0xFFB31B1B))),
                 Padding(
                   padding: EdgeInsets.all(3),
                   child: Text("4/8 ready",
@@ -219,9 +219,8 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                 width: MediaQuery.of(context).size.width / 5,
                 child: Row(
                   children: [
-                    Icon(CupertinoIcons.check_mark_circled_solid,
-                        color: Colors.grey),
-                    Icon(CupertinoIcons.camera_circle_fill, color: Carnelian)
+                    Icon(Icons.check_box_rounded, color: Colors.grey),
+                    Icon(Icons.camera_front_rounded, color: Carnelian)
                   ],
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 ),
