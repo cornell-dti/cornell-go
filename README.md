@@ -12,4 +12,4 @@ This repository contains the Flutter mobile app, the React administration app, a
 - **Eric Huang** - Developer 
 - **Youssef Attia** - Developer
 - **Cathryn Li** - Developer
-- **Nirbhay S Narang (nick) ** - Developer
+- **Nirbhay S Narang** - Developer
