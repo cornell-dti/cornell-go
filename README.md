@@ -25,7 +25,7 @@ docker compose build
 docker compose up
 ```
 
-### Start the container in the background
+### Start the container in the background (for flutter/react frontend)
 
 ```
 docker compose restart
@@ -45,14 +45,14 @@ docker compose down
 rm -rf ./postgres-data
 ```
 
-### Start the frontend without a backend running
+### Start the frontend
 
 ```
 cd admin
 npm start
 ```
 
-### Start the flutter app without a backend running
+### Start the flutter app
 
 ```
 Open the main.dart file, then click the Play button
@@ -66,7 +66,7 @@ Open the main.dart file, then click the Play button
 - **Eric Huang** - Developer
 - **Youssef Attia** - Developer
 - **Cathryn Li** - Developer
-- **Nirbhay S Narang (nick) ** - Developer
+- **Nirbhay S Narang (nick)** - Developer
 
 ### FA21
 
