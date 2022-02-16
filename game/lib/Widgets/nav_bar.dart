@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:game/feedback/feedback.dart';
+import 'package:game/leaderboard/leaderboard_widget.dart';
+import 'package:game/settings/settings.dart';
+import 'package:game/suggestions/suggestions.dart';
+import 'package:game/visited_places/visited_places_widget.dart';
 
 class NavBar extends StatelessWidget {
   @override
@@ -47,23 +52,40 @@ class NavBar extends StatelessWidget {
                 color: Color(0xFFB31B1B),
               ),
               title: Text('Leaderboard', style: listTextStyle),
-              onTap: () => null,
+              onTap: () => {
+                Navigator.pop(context),
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => LeaderboardWidget()))
+              },
             ),
             ListTile(
-              leading: Icon(
-                Icons.location_history_rounded,
-                color: Color(0xFFB31B1B),
-              ),
-              title: Text('Visited places', style: listTextStyle),
-              onTap: () => null,
-            ),
+                leading: Icon(
+                  Icons.location_history_rounded,
+                  color: Color(0xFFB31B1B),
+                ),
+                title: Text('Visited places', style: listTextStyle),
+                onTap: () => {
+                      Navigator.pop(context),
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => VisitedPlacesWidget()))
+                    }),
             ListTile(
               leading: Icon(
                 Icons.lightbulb_outline_rounded,
                 color: Color(0xFFB31B1B),
               ),
               title: Text('Suggest Location', style: listTextStyle),
-              onTap: () => null,
+              onTap: () => {
+                Navigator.pop(context),
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => SuggestionsWidget()))
+              },
             ),
             ListTile(
               leading: Icon(
@@ -71,12 +93,20 @@ class NavBar extends StatelessWidget {
                 color: Color(0xFFB31B1B),
               ),
               title: Text('Give feedback', style: listTextStyle),
-              onTap: () => null,
+              onTap: () => {
+                Navigator.pop(context),
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => FeedbackWidget()))
+              },
             ),
             ListTile(
               leading: Icon(Icons.settings_rounded, color: Color(0xFFB31B1B)),
               title: Text('Settings', style: listTextStyle),
-              onTap: () => null,
+              onTap: () => {
+                Navigator.pop(context),
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => SettingsWidget()))
+              },
             )
           ],
         ),

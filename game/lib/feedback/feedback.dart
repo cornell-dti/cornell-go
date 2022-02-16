@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:game/Widgets/back_btn.dart';
 
-class LeaderboardWidget extends StatefulWidget {
-  LeaderboardWidget({Key? key}) : super(key: key);
+class FeedbackWidget extends StatefulWidget {
+  FeedbackWidget({Key? key}) : super(key: key);
 
   @override
   _LeaderboardWidgetState createState() => _LeaderboardWidgetState();
 }
 
-class _LeaderboardWidgetState extends State<LeaderboardWidget> {
+class _LeaderboardWidgetState extends State<FeedbackWidget> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
