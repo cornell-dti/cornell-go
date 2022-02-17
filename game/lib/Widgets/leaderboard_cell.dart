@@ -9,7 +9,7 @@ Widget leaderBoardCell(context, name, position, points, isUser) {
   var nameStyle = TextStyle(
       fontWeight: (isUser) ? FontWeight.w900 : FontWeight.w800,
       fontSize: 22,
-      color: (isUser) ? Carnelian : Colors.white);
+      color: Colors.white);
   var pointStyle = TextStyle(
       fontWeight: FontWeight.normal,
       fontSize: 18,

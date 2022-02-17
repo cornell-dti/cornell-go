@@ -34,7 +34,6 @@ class _HomePageWidgetState extends State<HomePageWidget> {
     );
     return Scaffold(
         floatingActionButton: navBtn(scaffoldKey),
-        floatingActionButtonLocation: FloatingActionButtonLocation.startTop,
         drawer: NavBar(),
         key: scaffoldKey,
         backgroundColor: const Color(0xFFFFFF),
@@ -81,7 +80,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
               child: HStack([
                 Padding(
                     padding: EdgeInsets.all(3),
-                    child: Icon(Icons.bolt_rounded, color: Carnelian)),
+                    child: Icon(Icons.bolt, color: Carnelian)),
                 Padding(
                   padding: EdgeInsets.all(3),
                   child: Text("3 Points",
@@ -220,7 +219,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                 child: Row(
                   children: [
                     Icon(Icons.check_box_rounded, color: Colors.grey),
-                    Icon(Icons.camera_front_rounded, color: Carnelian)
+                    Icon(Icons.camera_alt_rounded, color: Carnelian)
                   ],
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 ),
