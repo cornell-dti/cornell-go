@@ -10,23 +10,15 @@ import { ConfigModule } from '@nestjs/config';
 import { RewardGateway } from './reward/reward.gateway';
 import { RewardModule } from './reward/reward.module';
 import { ClientModule } from './client/client.module';
-
-import * as PgParser from 'pg-connection-string';
-
-const connectionOptions = process.env.DATABASE_URL
-  ? PgParser.parse(process.env.DATABASE_URL)
-  : null;
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: connectionOptions?.host ?? process.env.CORNELLGODB_HOST,
-      port: +(connectionOptions?.port ?? 5432),
-      username: connectionOptions?.user ?? process.env.CORNELLGODB_USER,
-      password: connectionOptions?.password ?? process.env.CORNELLGODB_PASS,
-      database: connectionOptions?.database ?? process.env.CORNELLGODB_DBNAME,
+      url: process.env.DATABASE_URL,
       schema: process.env.CORNELLGODB_SCHEMA,
       synchronize: process.env.DEVELOPMENT === 'true',
       logNotifications: true,
@@ -34,6 +26,15 @@ const connectionOptions = process.env.DATABASE_URL
       entities: ['dist/model/*.entity{.ts,.js}'],
       migrations: ['dist/migration/*{.ts,.js}'],
       migrationsRun: true,
+      ssl: !process.env.NO_SSL,
+      extra: !process.env.NO_SSL && {
+        ssl: {
+          rejectUnauthorized: false,
+        },
+      },
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', '..', 'admin', 'build'),
     }),
     EventModule,
     GroupModule,
