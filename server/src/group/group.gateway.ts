@@ -28,8 +28,6 @@ export class GroupGateway {
     @CallingUser() user: User,
     @MessageBody() data: RequestGroupDataDto,
   ) {
-    const authToken: string = data.accessToken;
-    await this.groupService.requestGroupData(authToken);
     //TODO: 1. search user repository(implemented in service)
     // TODO:2. construct updateGroupData
     // const updateGroupData: UpdateGroupDataDto = {

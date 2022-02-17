@@ -1,4 +1,2 @@
 /** DTO for requestGroupData */
-export interface RequestGroupDataDto {
-  accessToken: string;
-}
+export interface RequestGroupDataDto {}

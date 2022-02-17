@@ -55,6 +55,17 @@ export class User {
   @Column()
   email!: string;
 
+  @Column()
+  hashedRefreshToken!: string;
+
+  /** True if the user has rights over other admins */
+  @Column()
+  superuser!: boolean;
+
+  /** True if admin has approval to use admin tools */
+  @Column()
+  adminGranted!: boolean;
+
   /** Score calculated upon completion of each challenge added up */
   @Index()
   @Column()

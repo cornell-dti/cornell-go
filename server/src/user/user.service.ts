@@ -73,6 +73,9 @@ export class UserService {
       email,
       authToken,
       authType,
+      hashedRefreshToken: '',
+      superuser: false,
+      adminGranted: false,
     });
 
     let eventTracker = await this.eventsService.createDefaultEventTracker(
@@ -93,5 +96,9 @@ export class UserService {
       skip: firstIndex,
       take: count,
     });
+  }
+
+  async byId(id: string) {
+    return await this.usersRepository.findOne({ id });
   }
 }

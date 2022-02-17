@@ -19,7 +19,6 @@ import { RequestEventTrackerDataDto } from '../challenge/request-event-tracker-d
 import { EventTracker } from 'src/model/event-tracker.entity';
 import { Challenge } from 'src/model/challenge.entity';
 import { EventReward } from 'src/model/event-reward.entity';
-
 @WebSocketGateway()
 export class EventGateway {
   constructor(
@@ -74,7 +73,6 @@ export class EventGateway {
     );
 
     await this.requestEventData(user, {
-      accessToken: data.accessToken,
       eventIds: results,
     });
 

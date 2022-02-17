@@ -4,9 +4,10 @@ CornellGO! is an interactive scavenger hunt aimed at sparking interest in explor
 
 This repository contains the Flutter mobile app, the React administration app, and the Nest.js backend. Visit each subfolder for a description of each project's installation.
 
-### Full project startup
+### Full project setup
 
 ```
+mkdir postgres-data
 cd ./server
 npm install
 cd ../admin
@@ -15,13 +16,14 @@ cd ../game
 flutter pub get
 ```
 
-### Run project in container (make sure to run the npm installs before to prevent a very long startup)
+### Run project in container
 
 ```
+docker compose build
 docker compose up
 ```
 
-### Restart the container
+### Start the container in the background
 
 ```
 docker compose restart
@@ -30,8 +32,9 @@ docker compose restart
 ### Stop the container
 
 ```
-Mac OS: Command + C
-Other: Control + C
+Press Control + C
+*OR* (if done in the background)
+docker compose stop
 ```
 
 ### Delete container artifacts
@@ -69,7 +72,7 @@ Open the main.dart file, then click the Play button
 - **Eric Huang** - Developer 
 - **Youssef Attia** - Developer
 - **Cathryn Li** - Developer
-- **Nirbhay S Narang (nick) ** - Developer
+- **Nirbhay S Narang** - Developer
 
 ### FA21
 - **Nikita Kasumov** - TPM/PM
