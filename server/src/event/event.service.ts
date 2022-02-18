@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { Point } from 'geojson';
@@ -8,6 +8,7 @@ import { EventReward } from '../model/event-reward.entity';
 import { User } from '../model/user.entity';
 import { EventBase, EventRewardType } from '../model/event-base.entity';
 import { UserService } from '../user/user.service';
+import { ChallengeService } from 'src/challenge/challenge.service';
 
 @Injectable()
 export class EventService {

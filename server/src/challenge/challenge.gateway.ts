@@ -1,3 +1,4 @@
+import { forwardRef, Inject } from '@nestjs/common';
 import {
   MessageBody,
   SubscribeMessage,
@@ -20,6 +21,7 @@ export class ChallengeGateway {
     private clientService: ClientService,
     private challengeService: ChallengeService,
     private userService: UserService,
+    @Inject(forwardRef(() => EventService))
     private eventService: EventService,
   ) {}
 

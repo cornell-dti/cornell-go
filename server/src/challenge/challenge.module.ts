@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ClientModule } from 'src/client/client.module';
 import { EventModule } from 'src/event/event.module';
@@ -12,10 +12,10 @@ import { ChallengeService } from './challenge.service';
 @Module({
   imports: [
     TypeOrmModule.forFeature([Challenge, PrevChallenge]),
+    forwardRef(() => EventModule),
     UserModule,
     RewardModule,
     ClientModule,
-    EventModule,
   ],
   providers: [ChallengeGateway, ChallengeService],
 })
