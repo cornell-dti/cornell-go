@@ -20,9 +20,11 @@ import { SetUsernameDto } from './set-username.dto';
 import { RequestEventLeaderDataDto } from '../event/request-event-leader-data.dto';
 import { RequestGlobalLeaderDataDto } from './request-global-leader-data.dto';
 import { UserService } from './user.service';
-import { forwardRef, Inject } from '@nestjs/common';
+import { forwardRef, Inject, UseGuards } from '@nestjs/common';
+import { UserGuard } from 'src/auth/jwt-auth.guard';
 
 @WebSocketGateway()
+@UseGuards(UserGuard)
 export class UserGateway {
   constructor(
     private clientService: ClientService,

@@ -1,9 +1,10 @@
-import { forwardRef, Inject } from '@nestjs/common';
+import { forwardRef, Inject, UseGuards } from '@nestjs/common';
 import {
   MessageBody,
   SubscribeMessage,
   WebSocketGateway,
 } from '@nestjs/websockets';
+import { UserGuard } from 'src/auth/jwt-auth.guard';
 import { UpdateGroupDataDto } from 'src/client/update-group-data.dto';
 import { CallingUser } from '../auth/calling-user.decorator';
 import { ClientService } from '../client/client.service';
@@ -16,6 +17,7 @@ import { RequestChallengeDataDto } from './request-challenge-data.dto';
 import { SetCurrentChallengeDto } from './set-current-challenge.dto';
 
 @WebSocketGateway()
+@UseGuards(UserGuard)
 export class ChallengeGateway {
   constructor(
     private clientService: ClientService,

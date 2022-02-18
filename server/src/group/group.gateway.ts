@@ -16,7 +16,10 @@ import {
 } from '../client/update-group-data.dto';
 import { GroupService } from './group.service';
 import { GroupMember } from '../model/group-member.entity';
+import { UserGuard } from 'src/auth/jwt-auth.guard';
+import { UseGuards } from '@nestjs/common';
 @WebSocketGateway()
+@UseGuards(UserGuard)
 export class GroupGateway {
   constructor(
     private clientService: ClientService,

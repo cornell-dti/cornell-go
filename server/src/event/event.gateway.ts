@@ -19,7 +19,10 @@ import { RequestEventTrackerDataDto } from '../challenge/request-event-tracker-d
 import { EventTracker } from 'src/model/event-tracker.entity';
 import { Challenge } from 'src/model/challenge.entity';
 import { EventReward } from 'src/model/event-reward.entity';
+import { UserGuard } from 'src/auth/jwt-auth.guard';
+import { UseGuards } from '@nestjs/common';
 @WebSocketGateway()
+@UseGuards(UserGuard)
 export class EventGateway {
   constructor(
     private clientService: ClientService,
