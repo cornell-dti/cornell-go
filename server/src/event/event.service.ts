@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { Point } from 'geojson';
@@ -8,6 +8,7 @@ import { EventReward } from '../model/event-reward.entity';
 import { User } from '../model/user.entity';
 import { EventBase, EventRewardType } from '../model/event-base.entity';
 import { UserService } from '../user/user.service';
+import { ChallengeService } from 'src/challenge/challenge.service';
 
 @Injectable()
 export class EventService {
@@ -17,7 +18,16 @@ export class EventService {
     private eventsRepository: Repository<EventBase>,
     @InjectRepository(EventTracker)
     private eventTrackerRepository: Repository<EventTracker>,
-  ) {}
+    @Inject(forwardRef(() => ChallengeService))
+    private challengeService: ChallengeService,
+  ) {
+    eventsRepository
+      .findOneOrFail({ isDefault: true })
+      .then(() => {})
+      .catch(() => {
+        this.makeDefaultEvent();
+      });
+  }
 
   /** Get events by ids */
   async getEventsByIds(ids: string[], loadRewards: boolean) {
@@ -154,5 +164,30 @@ export class EventService {
   /** Saves an event tracker */
   async saveTracker(tracker: EventTracker) {
     await this.eventTrackerRepository.save(tracker);
+  }
+
+  async makeDefaultEvent() {
+    const ev = this.eventsRepository.create({
+      name: 'Default Event',
+      description: 'Default Event',
+      minMembers: 1,
+      skippingEnabled: true,
+      isDefault: true,
+      hasStarChallenge: false,
+      rewardType: EventRewardType.NO_REWARDS,
+      indexable: false,
+      time: new Date(),
+      topCount: 1,
+      rewards: [],
+      challenges: [],
+      challengeCount: 0,
+    });
+
+    const chal = await this.challengeService.createNew(ev);
+    ev.challenges = [chal];
+
+    await this.eventsRepository.save(ev);
+
+    return ev;
   }
 }

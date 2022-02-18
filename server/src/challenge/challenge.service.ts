@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { EventService } from 'src/event/event.service';
 import { UserService } from 'src/user/user.service';
@@ -13,6 +13,7 @@ import { User } from '../model/user.entity';
 export class ChallengeService {
   constructor(
     private userService: UserService,
+    @Inject(forwardRef(() => EventService))
     private eventService: EventService,
     @InjectRepository(Challenge)
     private challengeRepository: Repository<Challenge>,
@@ -21,6 +22,24 @@ export class ChallengeService {
     @InjectEntityManager()
     private entityManager: EntityManager,
   ) {}
+
+  async createNew(event: EventBase) {
+    const chal = this.challengeRepository.create({
+      eventIndex: 0,
+      name: 'New challenge',
+      description: 'New challenge',
+      imageUrl: '',
+      location: { type: 'Point', coordinates: [0, 0] },
+      awardingRadius: 0,
+      closeRadius: 0,
+      completions: [],
+      linkedEvent: event,
+    });
+
+    await this.challengeRepository.save(chal);
+
+    return chal;
+  }
 
   /** Get challenges with prev challenges for a given user */
   async getChallengesByIdsWithPrevChallenge(
