@@ -7,7 +7,7 @@ import { UserService } from '../user/user.service';
 import appleSignin from 'apple-signin-auth';
 import { JwtPayload } from './jwt-payload';
 import { LoginTicket, OAuth2Client } from 'google-auth-library';
-import crypto from 'crypto';
+import { pbkdf2, randomBytes } from 'crypto';
 
 interface IntermediatePayload {
   id: string;
@@ -23,6 +23,16 @@ export class AuthService {
     private readonly userService: UserService,
   ) {}
   googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+  refreshOptions = {
+    expiresIn: process.env.JWT_REFRESH_EXPIRATION,
+    secret: process.env.JWT_REFRESH_SECRET,
+  };
+
+  accessOptions = {
+    expiresIn: process.env.JWT_ACCESS_EXPIRATION,
+    secret: process.env.JWT_ACCESS_SECRET,
+  };
 
   async payloadFromApple(idToken: string): Promise<IntermediatePayload | null> {
     try {
@@ -97,24 +107,21 @@ export class AuthService {
       );
     }
 
-    const accessToken = await this.jwtService.signAsync({
-      userId: user.id,
-    } as JwtPayload);
+    const accessToken = await this.jwtService.signAsync(
+      {
+        userId: user.id,
+      } as JwtPayload,
+      this.accessOptions,
+    );
 
     const refreshToken = await this.jwtService.signAsync(
       {
         userId: user.id,
       } as JwtPayload,
-      {
-        expiresIn: process.env.JWT_REFRESH_EXPIRATION,
-        secret: process.env.JWT_REFRESH_SECRET,
-      },
+      this.refreshOptions,
     );
 
-    user.hashedRefreshToken = crypto
-      .createHash('sha512')
-      .update(refreshToken)
-      .digest('hex');
+    user.hashedRefreshToken = await this.hashSalt(refreshToken);
 
     await this.userRepository.save(user);
 
@@ -125,23 +132,23 @@ export class AuthService {
     try {
       const payload: JwtPayload = await this.jwtService.verifyAsync(
         refreshToken,
-        {
-          secret: process.env.JWT_REFRESH_SECRET,
-        },
+        this.refreshOptions,
       );
-
-      const hashedRefreshToken = crypto
-        .createHash('sha512')
-        .update(refreshToken)
-        .digest('hex');
 
       const user = await this.userService.byId(payload.userId);
 
-      if (hashedRefreshToken !== user?.hashedRefreshToken) return null;
+      if (
+        !user ||
+        !(await this.verifyHashSalt(refreshToken, user.hashedRefreshToken))
+      )
+        return null;
 
-      const accessToken = await this.jwtService.signAsync({
-        userId: user.id,
-      } as JwtPayload);
+      const accessToken = await this.jwtService.signAsync(
+        {
+          userId: user.id,
+        } as JwtPayload,
+        this.accessOptions,
+      );
 
       return accessToken;
     } catch {
@@ -161,10 +168,44 @@ export class AuthService {
     try {
       const decodedPayload = await this.jwtService.verifyAsync<JwtPayload>(
         token,
+        this.accessOptions,
       );
       return (await this.userService.byId(decodedPayload.userId)) ?? null;
     } catch {
       return null;
     }
+  }
+
+  private async pdfk2Async(
+    input: string,
+    salt: string,
+    iterations: number,
+    length: number,
+    digest: string,
+  ) {
+    return new Promise<Buffer>((resolve, reject) =>
+      pbkdf2(input, salt, iterations, length, digest, (err, key) => {
+        if (err) reject(err);
+        else resolve(key);
+      }),
+    );
+  }
+
+  private async hashSalt(input: string): Promise<string> {
+    const salt = randomBytes(128).toString('hex');
+    const iterations = 10000;
+    const hash = await this.pdfk2Async(input, salt, iterations, 64, 'sha512');
+    return salt + hash.toString('hex');
+  }
+
+  private async verifyHashSalt(
+    input: string,
+    hashSalt: string,
+  ): Promise<boolean> {
+    const salt = hashSalt.substring(0, 256);
+    const iterations = 10000;
+    const hash = await this.pdfk2Async(input, salt, iterations, 64, 'sha512');
+
+    return salt + hash.toString('hex') === hashSalt;
   }
 }

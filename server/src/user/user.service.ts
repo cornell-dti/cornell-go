@@ -78,11 +78,16 @@ export class UserService {
       adminGranted: false,
     });
 
+    await this.usersRepository.save(user);
+
     let eventTracker = await this.eventsService.createDefaultEventTracker(
       user,
       lat,
       long,
     );
+
+    user.participatingEvents = [eventTracker];
+    await this.usersRepository.save(user);
 
     await this.groupsService.createFromEvent(eventTracker.event, user);
 

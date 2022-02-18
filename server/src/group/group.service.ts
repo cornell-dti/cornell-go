@@ -26,6 +26,7 @@ export class GroupService {
     let group: Group = this.groupsRepository.create({
       currentEvent: event,
       members: [],
+      friendlyId: 'ABCDEF',
     });
 
     await this.entityManager.save(group);

@@ -7,10 +7,11 @@ import { EventService } from './event.service';
 import { EventGateway } from './event.gateway';
 import { UserModule } from '../user/user.module';
 import { ClientModule } from 'src/client/client.module';
+import { Challenge } from 'src/model/challenge.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([EventBase, EventTracker, EventReward]),
+    TypeOrmModule.forFeature([EventBase, EventTracker, EventReward, Challenge]),
     forwardRef(() => UserModule),
     UserModule,
     ClientModule,

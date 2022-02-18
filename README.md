@@ -15,7 +15,9 @@ npm install
 cd ../game
 flutter pub get
 ```
+
 ### Update container with new changes
+
 ```
 docker compose build
 ```
@@ -46,6 +48,7 @@ docker compose stop
 ```
 docker compose down
 rm -rf ./postgres-data
+mkdir postgres-data
 ```
 
 ### Start the frontend

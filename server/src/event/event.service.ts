@@ -17,7 +17,14 @@ export class EventService {
     private eventsRepository: Repository<EventBase>,
     @InjectRepository(EventTracker)
     private eventTrackerRepository: Repository<EventTracker>,
-  ) {}
+    @InjectRepository(Challenge)
+    private challengeRepository: Repository<Challenge>,
+  ) {
+    eventsRepository
+      .findOneOrFail({ isDefault: true })
+      .then(() => {})
+      .catch(() => this.makeDefaultEvent());
+  }
 
   /** Get events by ids */
   async getEventsByIds(ids: string[], loadRewards: boolean) {
@@ -94,18 +101,18 @@ export class EventService {
       isDefault: true,
     });
 
-    let closestChallenge = await this.eventsRepository
-      .createQueryBuilder()
-      .relation(Challenge, 'challenges')
-      .of(defaultEvent)
-      .select()
+    let closestChallengeEvent = await this.eventsRepository
+      .createQueryBuilder('event')
+      .where('event.id = :defaultId')
+      .leftJoinAndSelect('event.challenges', 'challenge')
       .where(
-        'not ST_DWITHIN(location, ST_SetSRID(ST_GeomFromGeoJSON(:player), ST_SRID(location)), closeRadius, false)',
+        'not ST_DWITHIN(challenge.location, ST_SetSRID(ST_GeomFromGeoJSON(:player), ST_SRID(challenge.location)), challenge.closeRadius, false)',
       )
       .orderBy(
-        'ST_Distance(location, ST_SetSRID(ST_GeomFromGeoJSON(:player), ST_SRID(location)))',
+        'ST_Distance(challenge.location, ST_SetSRID(ST_GeomFromGeoJSON(:player), ST_SRID(challenge.location)))',
         'ASC',
       )
+      .setParameter('defaultId', defaultEvent.id)
       .setParameter('player', JSON.stringify(player))
       .getOneOrFail();
 
@@ -114,7 +121,7 @@ export class EventService {
       isPlayerRanked: true,
       cooldownMinimum: new Date(),
       event: defaultEvent,
-      currentChallenge: closestChallenge,
+      currentChallenge: closestChallengeEvent.challenges[0],
       completed: [],
       user,
     });
@@ -154,5 +161,50 @@ export class EventService {
   /** Saves an event tracker */
   async saveTracker(tracker: EventTracker) {
     await this.eventTrackerRepository.save(tracker);
+  }
+
+  async createNew(event: EventBase) {
+    const chal = this.challengeRepository.create({
+      eventIndex: 0,
+      name: 'New challenge',
+      description: 'New challenge',
+      imageUrl: '',
+      location: { type: 'Point', coordinates: [0, 0] },
+      awardingRadius: 0,
+      closeRadius: 0,
+      completions: [],
+      linkedEvent: event,
+    });
+
+    await this.challengeRepository.save(chal);
+
+    return chal;
+  }
+
+  async makeDefaultEvent() {
+    const ev = this.eventsRepository.create({
+      name: 'Default Event',
+      description: 'Default Event',
+      minMembers: 1,
+      skippingEnabled: true,
+      isDefault: true,
+      hasStarChallenge: false,
+      rewardType: EventRewardType.NO_REWARDS,
+      indexable: false,
+      time: new Date(),
+      topCount: 1,
+      rewards: [],
+      challenges: [],
+      challengeCount: 0,
+    });
+
+    await this.eventsRepository.save(ev);
+
+    const chal = await this.createNew(ev);
+    ev.challenges = [chal];
+
+    await this.eventsRepository.save(ev);
+
+    return ev;
   }
 }
