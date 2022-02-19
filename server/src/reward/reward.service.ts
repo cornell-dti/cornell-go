@@ -15,6 +15,4 @@ export class RewardService {
   async getRewardsForUser(user: User, ids: string[]): Promise<EventReward[]> {
     return await this.rewardRepository.find({ id: ids, claimingUser: user });
   }
-
-  /** */
 }

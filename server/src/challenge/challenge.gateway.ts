@@ -82,7 +82,7 @@ export class ChallengeGateway {
 
     // Is user switching to or from the star challenge
     const isStarChallengeAffected =
-      challenge.eventIndex === -1 || curChallenge.eventIndex === 9999;
+      challenge.eventIndex === 9999 || curChallenge.eventIndex === 9999;
 
     // Is user skipping while it's allowed
     const isSkippingWhileAllowed =
@@ -122,6 +122,32 @@ export class ChallengeGateway {
     @CallingUser() user: User,
     @MessageBody() data: CompletedChallengeDto,
   ) {
+    const newTracker = await this.challengeService.completeChallenge(
+      user,
+      data.challengeId,
+    );
+
+    const groupMember = await user.groupMember?.load();
+    const group = await groupMember?.group.load();
+
+    const updateData: UpdateGroupDataDto = {
+      curEventId: group?.currentEvent.id ?? '',
+      members: [
+        {
+          id: user.id,
+          name: user.username,
+          points: user.score,
+          host: groupMember?.isHost ?? false,
+          curChallengeId: newTracker.currentChallenge.id,
+        },
+      ],
+      update: true,
+    };
+
+    for (const mem of group?.members ?? []) {
+      const member = await mem.user.load();
+      this.clientService.emitUpdateGroupData(member, updateData);
+    }
     /**
      * TODO:
      * Create PrevChallenge and associate with user

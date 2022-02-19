@@ -19,8 +19,8 @@ export enum EventRewardType {
   WIN_ON_COMPLETION = 'win_on_completion',
   /** N people who complete event first will be rewarded based on their time to completion, will be advertised as upcoming */
   RACE_TO_WIN = 'race_to_win',
-  /** Perpetual event with no rewards */
-  NO_REWARDS = 'no_rewards',
+  /** Perpetual event with an infinite or null reward */
+  PERPETUAL = 'no_rewards',
 }
 
 @Entity()
@@ -28,9 +28,9 @@ export class EventBase {
   @PrimaryKey()
   id = v4();
 
-  /** Minimum number of members to complete this event */
+  /** Required amount of members to successfully complete this event */
   @Property()
-  minMembers!: number;
+  requiredMembers!: number;
 
   /** If the event allows saving uncompleted challenges for later */
   @Property()
@@ -41,7 +41,7 @@ export class EventBase {
   @Index()
   isDefault!: boolean;
 
-  /** If true, then the challenge with index -1 is considered a star challenge */
+  /** If true, then the challenge with index 9999 is considered a star challenge */
   @Property()
   hasStarChallenge!: boolean;
 

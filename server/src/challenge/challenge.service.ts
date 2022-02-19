@@ -93,7 +93,7 @@ export class ChallengeService {
       });
     } catch {
       return await this.challengeRepository.findOneOrFail({
-        eventIndex: -1,
+        eventIndex: 9999,
         linkedEvent: chal.linkedEvent,
       });
     }
@@ -108,6 +108,8 @@ export class ChallengeService {
       user,
     );
 
+    const curChallenge = await eventTracker.currentChallenge.load();
+
     // Ensure that the correct challenge is marked complete
     if (challengeId !== eventTracker.currentChallenge.id) return eventTracker;
 
@@ -120,9 +122,11 @@ export class ChallengeService {
 
     await this.prevChallengeRepository.persistAndFlush(prevChal);
 
-    eventTracker.currentChallenge.set(
-      await this.nextChallenge(await eventTracker.currentChallenge.load()),
+    const nextChallenge = await this.nextChallenge(
+      await eventTracker.currentChallenge.load(),
     );
+
+    eventTracker.currentChallenge.set(nextChallenge);
 
     await this.eventService.saveTracker(eventTracker);
 
