@@ -1,4 +1,11 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Entity,
+  IdentifiedReference,
+  ManyToOne,
+  PrimaryKey,
+  Property,
+} from '@mikro-orm/core';
+import { v4 } from 'uuid';
 import { EventBase } from './event-base.entity';
 import { User } from './user.entity';
 
@@ -7,26 +14,26 @@ import { User } from './user.entity';
  */
 @Entity()
 export class EventReward {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
+  @PrimaryKey()
+  id = v4();
 
   /** Event this rewards was assigned to */
-  @ManyToOne(() => EventBase)
-  containingEvent!: EventBase;
+  @ManyToOne()
+  containingEvent!: IdentifiedReference<EventBase>;
 
   /** User who earned this reward */
-  @ManyToOne(() => User, { nullable: true })
-  claimingUser!: User | null;
+  @ManyToOne()
+  claimingUser?: IdentifiedReference<User>;
 
   /** Short description of reward displayed to users e.g "50% off at XYZ store" */
-  @Column()
+  @Property()
   rewardDescription!: string;
 
   /** Information about how to redeem the reward */
-  @Column()
+  @Property()
   rewardRedeemInfo!: string;
 
   /** True if the reward is already redeemed */
-  @Column()
+  @Property()
   isRedeemed!: boolean;
 }
