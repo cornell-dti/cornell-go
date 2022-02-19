@@ -1,11 +1,10 @@
-import { Injectable } from '@nestjs/common';
-import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
+import { InjectRepository } from '@mikro-orm/nestjs';
+import { EntityRepository } from '@mikro-orm/postgresql';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { EventService } from 'src/event/event.service';
 import { UserService } from 'src/user/user.service';
-import { EntityManager, Repository } from 'typeorm';
 import { Challenge } from '../model/challenge.entity';
 import { EventBase } from '../model/event-base.entity';
-import { EventTracker } from '../model/event-tracker.entity';
 import { PrevChallenge } from '../model/prev-challenge.entity';
 import { User } from '../model/user.entity';
 
@@ -13,14 +12,32 @@ import { User } from '../model/user.entity';
 export class ChallengeService {
   constructor(
     private userService: UserService,
+    @Inject(forwardRef(() => EventService))
     private eventService: EventService,
     @InjectRepository(Challenge)
-    private challengeRepository: Repository<Challenge>,
+    private challengeRepository: EntityRepository<Challenge>,
     @InjectRepository(PrevChallenge)
-    private prevChallengeRepository: Repository<PrevChallenge>,
-    @InjectEntityManager()
-    private entityManager: EntityManager,
+    private prevChallengeRepository: EntityRepository<PrevChallenge>,
   ) {}
+
+  async createNew(event: EventBase) {
+    const chal = this.challengeRepository.create({
+      eventIndex: 0,
+      name: 'New challenge',
+      description: 'New challenge',
+      imageUrl: '',
+      latitude: 0,
+      longitude: 0,
+      awardingRadius: 0,
+      closeRadius: 0,
+      completions: [],
+      linkedEvent: event,
+    });
+
+    await this.challengeRepository.persistAndFlush(chal);
+
+    return chal;
+  }
 
   /** Get challenges with prev challenges for a given user */
   async getChallengesByIdsWithPrevChallenge(
@@ -29,14 +46,10 @@ export class ChallengeService {
   ): Promise<Challenge[]> {
     return await this.challengeRepository
       .createQueryBuilder()
-      .whereInIds(ids)
-      .leftJoinAndSelect(
-        'completions',
-        'prevChallenge',
-        'prevChallenge.ownerId = :userId',
-        { userId: user.id },
-      )
-      .getMany();
+      .select('*')
+      .join('completions', 'prevChallenge')
+      .where({ id: { $in: ids } })
+      .andWhere({ 'prevChallenge.ownerId': user.id });
   }
 
   /** Get a challenge by its id */
@@ -46,24 +59,21 @@ export class ChallengeService {
 
   /** Is challenge completed by user */
   async isChallengeCompletedByUser(user: User, challenge: Challenge) {
-    return (
-      (await this.prevChallengeRepository.count({
-        where: {
-          owner: user,
-          challenge,
-        },
-      })) > 0
-    );
+    const num = await this.prevChallengeRepository.count({
+      owner: user,
+      challenge,
+    });
+    return num > 0;
   }
 
   /** Save a challenge entity */
   async saveChallenge(chal: Challenge) {
-    await this.challengeRepository.save(chal);
+    await this.challengeRepository.persistAndFlush(chal);
   }
 
   /** Save a prev challenge entity */
   async savePrevChallenge(prevChal: PrevChallenge) {
-    await this.prevChallengeRepository.save(prevChal);
+    await this.prevChallengeRepository.persistAndFlush(prevChal);
   }
 
   /** Find first challenge */
@@ -83,7 +93,7 @@ export class ChallengeService {
       });
     } catch {
       return await this.challengeRepository.findOneOrFail({
-        eventIndex: -1,
+        eventIndex: 9999,
         linkedEvent: chal.linkedEvent,
       });
     }
@@ -91,11 +101,14 @@ export class ChallengeService {
 
   /** Progress user through challenges, ensuring challengeId is current */
   async completeChallenge(user: User, challengeId: string) {
-    const group = await this.userService.loadGroup(user, true);
+    const group = await (await user.groupMember?.load())?.group.load();
+    const groupMembers = await group?.members.loadItems();
 
     const eventTracker = await this.eventService.getCurrentEventTrackerForUser(
       user,
     );
+
+    const curChallenge = await eventTracker.currentChallenge.load();
 
     // Ensure that the correct challenge is marked complete
     if (challengeId !== eventTracker.currentChallenge.id) return eventTracker;
@@ -103,14 +116,17 @@ export class ChallengeService {
     const prevChal = this.prevChallengeRepository.create({
       owner: user,
       challenge: eventTracker.currentChallenge,
-      completionPlayers: group.members.map(mem => mem.user),
+      completionPlayers: groupMembers?.map(mem => mem.user),
+      foundTimestamp: new Date(),
     });
 
-    await this.prevChallengeRepository.save(prevChal);
+    await this.prevChallengeRepository.persistAndFlush(prevChal);
 
-    eventTracker.currentChallenge = await this.nextChallenge(
-      eventTracker.currentChallenge,
+    const nextChallenge = await this.nextChallenge(
+      await eventTracker.currentChallenge.load(),
     );
+
+    eventTracker.currentChallenge.set(nextChallenge);
 
     await this.eventService.saveTracker(eventTracker);
 

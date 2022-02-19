@@ -1,15 +1,13 @@
 import {
-  Column,
-  CreateDateColumn,
+  Collection,
   Entity,
-  JoinTable,
+  IdentifiedReference,
   ManyToMany,
   ManyToOne,
   OneToOne,
-  PrimaryGeneratedColumn,
-  Unique,
-} from 'typeorm';
-
+  PrimaryKey,
+  Property,
+} from '@mikro-orm/core';
 import { Challenge } from './challenge.entity';
 import { User } from './user.entity';
 
@@ -19,23 +17,22 @@ import { User } from './user.entity';
 @Entity()
 // UNCOMMENT ASAP @Unique(['owner', 'challenge'])
 export class PrevChallenge {
-  @PrimaryGeneratedColumn()
+  @PrimaryKey()
   id!: number;
 
   /** Timestamp of when the player found the place */
-  @CreateDateColumn()
-  foundTimestamp!: Date;
+  @Property()
+  foundTimestamp = new Date();
 
   /** Members in the group during completion */
-  @ManyToMany(() => User)
-  @JoinTable()
-  completionPlayers!: User[];
+  @ManyToMany()
+  completionPlayers = new Collection<User>(this);
 
   /** Player owning this completion */
-  @OneToOne(() => User)
-  owner!: User;
+  @OneToOne()
+  owner!: IdentifiedReference<User>;
 
   /** The completed challenge */
-  @ManyToOne(() => Challenge)
-  challenge!: Challenge;
+  @ManyToOne()
+  challenge!: IdentifiedReference<Challenge>;
 }

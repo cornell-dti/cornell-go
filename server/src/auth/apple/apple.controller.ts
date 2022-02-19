@@ -1,23 +1,24 @@
 import { Controller, Post, Body } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
 import { AuthType } from 'src/model/user.entity';
 import { AuthService } from '../auth.service';
-import { TokenDto } from '../constant';
+import { LoginDto } from '../login.dto';
 
 @Controller('apple')
 export class AppleController {
   constructor(private readonly authService: AuthService) {}
 
+  // login
   @Post()
-  async login(@Body() req: TokenDto) {
-    const success: string = await this.authService.login(
-      req.token,
+  async login(
+    @Body() req: LoginDto,
+  ): Promise<{ accessToken: string; refreshToken: string } | null> {
+    const tokens = await this.authService.login(
+      req.idToken,
       AuthType.APPLE,
+      req.lat,
+      req.long,
     );
-    // success is a string, either"login success" or "verify error"
-    return success;
+
+    return tokens && { accessToken: tokens[0], refreshToken: tokens[1] };
   }
 }
-
-/**Useful sources:
- * https://dev.to/heyitsarpit/how-to-add-signin-with-apple-on-your-website-43m9 */

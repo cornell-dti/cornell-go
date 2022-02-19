@@ -1,58 +1,60 @@
-import { Point } from 'geojson';
 import {
-  Column,
+  Collection,
   Entity,
   Index,
   ManyToOne,
   OneToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+  PrimaryKey,
+  Property,
+} from '@mikro-orm/core';
+import { Point } from 'geojson';
+
 import { EventBase } from './event-base.entity';
 import { PrevChallenge } from './prev-challenge.entity';
+
+import { v4 } from 'uuid';
 
 /**
  * Entity describing a challenge associated with a place
  */
 @Entity()
 export class Challenge {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
+  @PrimaryKey()
+  id = v4();
 
-  /** Index of the challenge relative to others in the linked event, -1 if last */
+  /** Index of the challenge relative to others in the linked event, 9999 if last */
   @Index()
-  @Column()
+  @Property()
   eventIndex!: number;
 
-  @Column()
+  @Property({ length: 2048 })
   name!: string;
 
-  @Column()
+  @Property({ length: 2048 })
   description!: string;
 
-  @Column()
+  @Property({ length: 2048 })
   imageUrl!: string;
 
-  @Index({ spatial: true })
-  @Column({
-    type: 'geography',
-    spatialFeatureType: 'Point',
-    srid: 4326,
-  })
-  location!: Point;
+  @Property()
+  latitude!: number;
+
+  @Property()
+  longitude!: number;
 
   /** Event linked to this challenge */
-  @ManyToOne(() => EventBase)
+  @ManyToOne()
   linkedEvent!: EventBase;
 
   /** Radius within which the challenge is awarded */
-  @Column()
+  @Property()
   awardingRadius!: number;
 
   /** Radius within which the player is considered close, greater than `awardingRadius` */
-  @Column()
+  @Property()
   closeRadius!: number;
 
   /** Completions linked to this challenge */
   @OneToMany(() => PrevChallenge, pc => pc.challenge)
-  completions!: PrevChallenge[];
+  completions = new Collection<PrevChallenge>(this);
 }
