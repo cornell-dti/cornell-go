@@ -1,17 +1,20 @@
-import {
-  Column,
-  Entity,
-  Index,
-  JoinColumn,
-  OneToMany,
-  OneToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
-
 import { EventTracker } from './event-tracker.entity';
 import { EventReward } from './event-reward.entity';
 import { GroupMember } from './group-member.entity';
 import { SessionLogEntry } from './session-log-entry.entity';
+import {
+  Collection,
+  Entity,
+  Enum,
+  IdentifiedReference,
+  Index,
+  OneToMany,
+  OneToOne,
+  PrimaryKey,
+  Property,
+  Unique,
+} from '@mikro-orm/core';
+import { v4 } from 'uuid';
 
 /**
  * Enum describing the type of authentication token
@@ -32,58 +35,53 @@ export enum AuthType {
  */
 @Entity()
 export class User {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
+  @PrimaryKey()
+  id = v4();
 
   /** Token produced by an authentication service identifying this user */
-  @Index()
-  @Column({ unique: true })
+  @Unique()
+  @Property()
   authToken!: string;
 
   /** The service used for authentication */
   @Index()
-  @Column({
-    type: 'enum',
-    enum: AuthType,
-    default: AuthType.NONE,
-  })
+  @Enum(() => AuthType)
   authType!: AuthType;
 
-  @Column()
+  @Property()
   username!: string;
 
-  @Column()
+  @Property()
   email!: string;
 
-  @Column()
+  @Property()
   hashedRefreshToken!: string;
 
   /** True if the user has rights over other admins */
-  @Column()
+  @Property()
   superuser!: boolean;
 
   /** True if admin has approval to use admin tools */
-  @Column()
+  @Property()
   adminGranted!: boolean;
 
   /** Score calculated upon completion of each challenge added up */
   @Index()
-  @Column()
+  @Property()
   score!: number;
 
   @OneToMany(() => EventReward, ev => ev.claimingUser)
-  rewards!: EventReward[];
+  rewards = new Collection<EventReward>(this);
 
   /** A user's membership in a group */
-  @OneToOne(() => GroupMember, { nullable: true })
-  @JoinColumn()
-  groupMember!: GroupMember | null;
+  @OneToOne()
+  groupMember?: IdentifiedReference<GroupMember>;
 
   /** Event trackers for each event the player participated in */
   @OneToMany(() => EventTracker, ev => ev.user)
-  participatingEvents!: EventTracker[];
+  participatingEvents = new Collection<EventTracker>(this);
 
   /** Actions recorded relating to this user */
   @OneToMany(() => SessionLogEntry, entry => entry.user)
-  logEntries!: SessionLogEntry[];
+  logEntries = new Collection<SessionLogEntry>(this);
 }

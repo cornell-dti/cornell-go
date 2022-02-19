@@ -1,6 +1,4 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { User, AuthType } from '../model/user.entity';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
@@ -8,6 +6,9 @@ import appleSignin from 'apple-signin-auth';
 import { JwtPayload } from './jwt-payload';
 import { LoginTicket, OAuth2Client } from 'google-auth-library';
 import { pbkdf2, randomBytes } from 'crypto';
+import { InjectRepository } from '@mikro-orm/nestjs';
+import { EntityRepository } from '@mikro-orm/postgresql';
+import { MikroORM } from '@mikro-orm/core';
 
 interface IntermediatePayload {
   id: string;
@@ -17,7 +18,7 @@ interface IntermediatePayload {
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(User) private userRepository: Repository<User>,
+    @InjectRepository(User) private userRepository: EntityRepository<User>,
     private readonly jwtService: JwtService,
     @Inject(forwardRef(() => UserService))
     private readonly userService: UserService,
@@ -123,7 +124,7 @@ export class AuthService {
 
     user.hashedRefreshToken = await this.hashSalt(refreshToken);
 
-    await this.userRepository.save(user);
+    await this.userRepository.persistAndFlush(user);
 
     return [accessToken, refreshToken];
   }
@@ -161,7 +162,7 @@ export class AuthService {
     user.authType = authType;
     user.authToken = token;
 
-    this.userRepository.save(user);
+    await this.userRepository.persistAndFlush(user);
   }
 
   async userByToken(token: string): Promise<User | null> {

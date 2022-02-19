@@ -1,6 +1,4 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
 import { Point } from 'geojson';
 import { Challenge } from '../model/challenge.entity';
 import { EventTracker } from '../model/event-tracker.entity';
@@ -9,17 +7,19 @@ import { User } from '../model/user.entity';
 import { EventBase, EventRewardType } from '../model/event-base.entity';
 import { UserService } from '../user/user.service';
 import { ChallengeService } from 'src/challenge/challenge.service';
+import { InjectRepository } from '@mikro-orm/nestjs';
+import { EntityRepository } from '@mikro-orm/postgresql';
 
 @Injectable()
 export class EventService {
   constructor(
     private userService: UserService,
     @InjectRepository(EventBase)
-    private eventsRepository: Repository<EventBase>,
+    private eventsRepository: EntityRepository<EventBase>,
     @InjectRepository(EventTracker)
-    private eventTrackerRepository: Repository<EventTracker>,
+    private eventTrackerRepository: EntityRepository<EventTracker>,
     @InjectRepository(Challenge)
-    private challengeRepository: Repository<Challenge>,
+    private challengeRepository: EntityRepository<Challenge>,
   ) {
     eventsRepository
       .findOneOrFail({ isDefault: true })
@@ -28,29 +28,22 @@ export class EventService {
   }
 
   /** Get events by ids */
-  async getEventsByIds(ids: string[], loadRewards: boolean) {
-    return await this.eventsRepository.findByIds(ids, {
-      relations: loadRewards ? [] : ['rewards'],
-    });
+  async getEventsByIds(ids: string[]): Promise<EventBase[]> {
+    return await this.eventsRepository.find({ id: { $in: ids } });
   }
 
   /** Get top players for event */
-  async getTopTrackerForEvent(
+  async getTopTrackersForEvent(
     eventId: string,
     offset: number,
     count: number,
-    onlyUser: boolean,
-  ) {
-    return await this.eventTrackerRepository.find({
-      order: {
-        eventScore: 'DESC',
+  ): Promise<EventTracker[]> {
+    return await this.eventTrackerRepository.find(
+      {
+        id: eventId,
       },
-      relations: ['user', 'event'],
-      select: onlyUser ? undefined : ['user'],
-      where: { eventId },
-      skip: offset,
-      take: count,
-    });
+      { offset, limit: count, orderBy: { eventScore: 'desc' } },
+    );
   }
 
   /** Searches events based on certain criteria */
@@ -64,17 +57,18 @@ export class EventService {
       challengeCount?: 'ASC' | 'DESC';
     } = {},
   ) {
-    const events = await this.eventsRepository.find({
-      where: {
+    const events = await this.eventsRepository.find(
+      {
         indexable: true,
-        rewardType: rewardTypes && In(rewardTypes),
+        rewardType: rewardTypes && { $in: rewardTypes },
         skippingEnabled: skippable,
       },
-      select: ['id'],
-      order: sortBy,
-      skip: offset,
-      take: count,
-    });
+      {
+        orderBy: sortBy,
+        offset,
+        limit: count,
+      },
+    );
 
     return events.map(ev => ev.id);
   }
@@ -83,85 +77,70 @@ export class EventService {
   async isChallengeInEvent(challengeId: string, eventId: string) {
     const resultCount = await this.eventsRepository
       .createQueryBuilder()
-      .where({ id: eventId })
-      .relation(Challenge, 'challenges')
-      .select()
-      .where({ id: challengeId })
+      .join('challenges', 'challenge')
+      .where({ id: eventId, 'challenge.id': challengeId })
       .getCount();
+
     return resultCount > 0;
   }
 
   /** Creates an event tracker with the closest challenge as the current one */
   async createDefaultEventTracker(user: User, lat: number, long: number) {
-    let player: Point = {
-      type: 'Point',
-      coordinates: [long, lat],
-    };
+    const defaultEvent = await this.eventsRepository
+      .createQueryBuilder('ev')
+      .select([
+        'ev.*',
+        `chal.latitude - ${+lat} as dx`,
+        `chal.longitude - ${+long} as dy`,
+        'dx * dx + dy * dy as distSq',
+      ])
+      .where({ isDefault: true })
+      .joinAndSelect('ev.challenges', 'chal')
+      .andWhere('distSq > 0.000000128205 * ev.closeRadius * ev.closeRadius')
+      .orderBy({ distSq: 'asc' })
+      .getSingleResult();
 
-    let defaultEvent = await this.eventsRepository.findOneOrFail({
-      isDefault: true,
-    });
+    const closestChallenge = defaultEvent?.challenges[0];
 
-    let closestChallengeEvent = await this.eventsRepository
-      .createQueryBuilder('event')
-      .where('event.id = :defaultId')
-      .leftJoinAndSelect('event.challenges', 'challenge')
-      .where(
-        'not ST_DWITHIN(challenge.location, ST_SetSRID(ST_GeomFromGeoJSON(:player), ST_SRID(challenge.location)), challenge.closeRadius, false)',
-      )
-      .orderBy(
-        'ST_Distance(challenge.location, ST_SetSRID(ST_GeomFromGeoJSON(:player), ST_SRID(challenge.location)))',
-        'ASC',
-      )
-      .setParameter('defaultId', defaultEvent.id)
-      .setParameter('player', JSON.stringify(player))
-      .getOneOrFail();
+    if (!closestChallenge) throw 'Cannot find closest challenge!';
 
     let progress: EventTracker = this.eventTrackerRepository.create({
       eventScore: 0,
       isPlayerRanked: true,
       cooldownMinimum: new Date(),
       event: defaultEvent,
-      currentChallenge: closestChallengeEvent.challenges[0],
+      currentChallenge: closestChallenge,
       completed: [],
       user,
     });
 
-    await this.eventTrackerRepository.save(progress);
+    await this.eventTrackerRepository.persistAndFlush(progress);
 
     return progress;
   }
 
   /** Get a player's event trackers by event id */
   async getEventTrackersByEventId(user: User, eventIds: string[]) {
-    return await this.eventTrackerRepository
-      .createQueryBuilder('tracker')
-      .where('tracker.userId = :userId', { userId: user.id })
-      .innerJoinAndSelect('tracker.event', 'event', 'event.id IN (:...evIds)')
-      .leftJoinAndSelect('tracker.currentChallenge', 'currentChallenge')
-      .leftJoinAndSelect('tracker.completed', 'completed')
-      .leftJoinAndSelect('completed.challenge', 'challenge')
-      .setParameter('evIds', eventIds)
-      .getMany();
+    return await this.eventTrackerRepository.find({
+      user,
+      event: { id: eventIds },
+    });
   }
 
   /** Gets a player's event tracker based on group */
   async getCurrentEventTrackerForUser(user: User) {
-    return await this.eventTrackerRepository
-      .createQueryBuilder('tracker')
-      .innerJoinAndSelect('tracker.user', 'user', 'user.id = :userId')
-      .leftJoinAndSelect('tracker.event', 'trackerEvent')
-      .leftJoinAndSelect('user.groupMember', 'groupMember')
-      .leftJoinAndSelect('groupMember.group', 'group')
-      .leftJoinAndSelect('group.currentEvent', 'event')
-      .where('event.id = trackerEvent.id')
-      .setParameter('userId', user.id)
-      .getOneOrFail();
+    const member = await user.groupMember?.load();
+    const group = await member?.group.load();
+
+    return await this.eventTrackerRepository.findOneOrFail({
+      user,
+      event: group?.currentEvent,
+    });
   }
 
   /** Saves an event tracker */
   async saveTracker(tracker: EventTracker) {
-    await this.eventTrackerRepository.save(tracker);
+    await this.eventTrackerRepository.persistAndFlush(tracker);
   }
 
   async createNew(event: EventBase) {
@@ -170,14 +149,15 @@ export class EventService {
       name: 'New challenge',
       description: 'New challenge',
       imageUrl: '',
-      location: { type: 'Point', coordinates: [0, 0] },
+      latitude: 0,
+      longitude: 0,
       awardingRadius: 0,
       closeRadius: 0,
       completions: [],
       linkedEvent: event,
     });
 
-    await this.challengeRepository.save(chal);
+    await this.challengeRepository.persistAndFlush(chal);
 
     return chal;
   }
@@ -199,12 +179,10 @@ export class EventService {
       challengeCount: 0,
     });
 
-    await this.eventsRepository.save(ev);
-
     const chal = await this.createNew(ev);
-    ev.challenges = [chal];
+    ev.challenges.set([chal]);
 
-    await this.eventsRepository.save(ev);
+    await this.eventsRepository.persistAndFlush(ev);
 
     return ev;
   }

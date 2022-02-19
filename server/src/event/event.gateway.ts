@@ -34,24 +34,31 @@ export class EventGateway {
     @CallingUser() user: User,
     @MessageBody() data: RequestEventDataDto,
   ) {
-    const ids = await this.eventService.getEventsByIds(data.eventIds, true);
+    const ids = await this.eventService.getEventsByIds(data.eventIds);
+
     const updateEventData: UpdateEventDataDto = {
-      events: ids.map((ev: EventBase) => ({
-        id: ev.id,
-        skippingEnabled: ev.skippingEnabled,
-        hasStarChallenge: ev.hasStarChallenge,
-        name: ev.name,
-        description: ev.description,
-        rewardType: ev.rewardType as RewardTypeDto,
-        time: ev.time.toUTCString(),
-        minMembers: ev.minMembers,
-        topCount: ev.topCount,
-        challengeIds: ev.challenges.map((ch: Challenge) => ch.id),
-        rewards: ev.rewards.map((rw: EventReward) => ({
-          id: rw.id,
-          description: rw.rewardDescription,
+      events: await Promise.all(
+        ids.map(async (ev: EventBase) => ({
+          id: ev.id,
+          skippingEnabled: ev.skippingEnabled,
+          hasStarChallenge: ev.hasStarChallenge,
+          name: ev.name,
+          description: ev.description,
+          rewardType: ev.rewardType as RewardTypeDto,
+          time: ev.time.toUTCString(),
+          minMembers: ev.minMembers,
+          topCount: ev.topCount,
+          challengeIds: (
+            await ev.challenges.loadItems()
+          ).map((ch: Challenge) => ch.id),
+          rewards: (
+            await ev.rewards.loadItems()
+          ).map((rw: EventReward) => ({
+            id: rw.id,
+            description: rw.rewardDescription,
+          })),
         })),
-      })),
+      ),
     };
 
     this.clientService.emitUpdateEventData(user, updateEventData);
@@ -87,21 +94,22 @@ export class EventGateway {
     @CallingUser() user: User,
     @MessageBody() data: RequestEventLeaderDataDto,
   ) {
-    const progresses = await this.eventService.getTopTrackerForEvent(
+    const progresses = await this.eventService.getTopTrackersForEvent(
       data.eventId,
       data.offset,
       data.count,
-      true,
     );
 
     await this.clientService.emitUpdateLeaderData(user, {
       eventId: data.eventId,
       offset: data.offset,
-      users: progresses.map((evTracker: EventTracker) => ({
-        username: evTracker.user.username,
-        userId: evTracker.user.id,
-        score: evTracker.eventScore,
-      })),
+      users: await Promise.all(
+        progresses.map(async (evTracker: EventTracker) => ({
+          username: (await evTracker.user.load()).username,
+          userId: evTracker.user.id,
+          score: evTracker.eventScore,
+        })),
+      ),
     });
 
     return true;
@@ -118,13 +126,17 @@ export class EventGateway {
     );
 
     this.clientService.emitUpdateEventTrackerData(user, {
-      eventTrackers: trackers.map((tracker: EventTracker) => ({
-        eventId: tracker.event.id,
-        isRanked: tracker.isPlayerRanked,
-        cooldownMinimum: tracker.cooldownMinimum.toUTCString(),
-        curChallengeId: tracker.currentChallenge.id,
-        prevChallengeIds: tracker.completed.map(pc => pc.challenge.id),
-      })),
+      eventTrackers: await Promise.all(
+        trackers.map(async (tracker: EventTracker) => ({
+          eventId: tracker.event.id,
+          isRanked: tracker.isPlayerRanked,
+          cooldownMinimum: tracker.cooldownMinimum.toUTCString(),
+          curChallengeId: tracker.currentChallenge.id,
+          prevChallengeIds: (
+            await tracker.completed.loadItems()
+          ).map(pc => pc.challenge.id),
+        })),
+      ),
     });
 
     return true;

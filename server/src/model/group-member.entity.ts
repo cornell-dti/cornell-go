@@ -1,10 +1,11 @@
 import {
-  Column,
   Entity,
+  IdentifiedReference,
   ManyToOne,
   OneToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+  PrimaryKey,
+  Property,
+} from '@mikro-orm/core';
 import { Group } from './group.entity';
 import { User } from './user.entity';
 
@@ -13,17 +14,17 @@ import { User } from './user.entity';
  */
 @Entity()
 export class GroupMember {
-  @PrimaryGeneratedColumn()
+  @PrimaryKey()
   id!: number;
 
-  @Column()
+  @Property()
   isHost!: boolean;
 
   /** Group this member is part of */
-  @ManyToOne(() => Group)
-  group!: Group;
+  @ManyToOne()
+  group!: IdentifiedReference<Group>;
 
   /** User this membership describes */
-  @OneToOne(() => User)
-  user!: User;
+  @OneToOne(() => User, user => user.groupMember)
+  user!: IdentifiedReference<User>;
 }

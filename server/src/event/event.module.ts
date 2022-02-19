@@ -1,5 +1,4 @@
 import { forwardRef, Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { EventBase } from '../model/event-base.entity';
 import { EventTracker } from '../model/event-tracker.entity';
 import { EventReward } from '../model/event-reward.entity';
@@ -8,10 +7,16 @@ import { EventGateway } from './event.gateway';
 import { UserModule } from '../user/user.module';
 import { ClientModule } from 'src/client/client.module';
 import { Challenge } from 'src/model/challenge.entity';
+import { MikroOrmModule } from '@mikro-orm/nestjs';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([EventBase, EventTracker, EventReward, Challenge]),
+    MikroOrmModule.forFeature([
+      EventBase,
+      EventTracker,
+      EventReward,
+      Challenge,
+    ]),
     forwardRef(() => UserModule),
     UserModule,
     ClientModule,

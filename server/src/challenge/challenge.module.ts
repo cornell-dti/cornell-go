@@ -1,5 +1,5 @@
+import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { forwardRef, Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { ClientModule } from 'src/client/client.module';
 import { EventModule } from 'src/event/event.module';
 import { RewardModule } from 'src/reward/reward.module';
@@ -11,7 +11,7 @@ import { ChallengeService } from './challenge.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Challenge, PrevChallenge]),
+    MikroOrmModule.forFeature([Challenge, PrevChallenge]),
     forwardRef(() => EventModule),
     UserModule,
     RewardModule,

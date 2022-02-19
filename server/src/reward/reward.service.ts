@@ -1,6 +1,6 @@
+import { InjectRepository } from '@mikro-orm/nestjs';
+import { EntityRepository } from '@mikro-orm/postgresql';
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { EventReward } from '../model/event-reward.entity';
 import { User } from '../model/user.entity';
 
@@ -8,15 +8,12 @@ import { User } from '../model/user.entity';
 export class RewardService {
   constructor(
     @InjectRepository(EventReward)
-    private rewardRepository: Repository<EventReward>,
+    private rewardRepository: EntityRepository<EventReward>,
   ) {}
 
   /** Get rewards that are in ids and owned by the user */
-  async getRewardsForUser(user: User, ids: string[]) {
-    return await this.rewardRepository.findByIds(ids, {
-      where: { claimingUser: user },
-      loadRelationIds: true,
-    });
+  async getRewardsForUser(user: User, ids: string[]): Promise<EventReward[]> {
+    return await this.rewardRepository.find({ id: ids, claimingUser: user });
   }
 
   /** */
