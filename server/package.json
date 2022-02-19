@@ -25,6 +25,7 @@
   "dependencies": {
     "@mikro-orm/cli": "^5.0.2",
     "@mikro-orm/core": "^5.0.2",
+    "@mikro-orm/migrations": "^5.0.2",
     "@mikro-orm/nestjs": "^4.3.1",
     "@mikro-orm/postgresql": "^5.0.2",
     "@mikro-orm/reflection": "^5.0.2",

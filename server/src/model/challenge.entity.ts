@@ -19,7 +19,7 @@ import { v4 } from 'uuid';
  */
 @Entity()
 export class Challenge {
-  @PrimaryKey('uuid')
+  @PrimaryKey()
   id = v4();
 
   /** Index of the challenge relative to others in the linked event, 9999 if last */
@@ -27,13 +27,13 @@ export class Challenge {
   @Property()
   eventIndex!: number;
 
-  @Property()
+  @Property({ length: 2048 })
   name!: string;
 
-  @Property()
+  @Property({ length: 2048 })
   description!: string;
 
-  @Property()
+  @Property({ length: 2048 })
   imageUrl!: string;
 
   @Property()

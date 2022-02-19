@@ -88,16 +88,16 @@ export class EventService {
   async createDefaultEventTracker(user: User, lat: number, long: number) {
     const defaultEvent = await this.eventsRepository
       .createQueryBuilder('ev')
-      .select([
-        'ev.*',
-        `chal.latitude - ${+lat} as dx`,
-        `chal.longitude - ${+long} as dy`,
-        'dx * dx + dy * dy as distSq',
-      ])
+      .select(['ev.*'])
       .where({ isDefault: true })
       .joinAndSelect('ev.challenges', 'chal')
-      .andWhere('distSq > 0.000000128205 * ev.closeRadius * ev.closeRadius')
-      .orderBy({ distSq: 'asc' })
+      .andWhere(
+        `((chal.latitude - ${+lat})^2 + (chal.longitude - ${+long})^2) > 0.000000128205 * chal.close_radius * chal.close_radius`,
+      )
+      .orderBy({
+        [`((chal.latitude - ${+lat})^2 + (chal.longitude - ${+long})^2)`]:
+          'asc',
+      })
       .getSingleResult();
 
     const closestChallenge = defaultEvent?.challenges[0];

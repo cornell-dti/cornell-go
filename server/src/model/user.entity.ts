@@ -40,7 +40,7 @@ export class User {
 
   /** Token produced by an authentication service identifying this user */
   @Unique()
-  @Property()
+  @Property({ length: 2048 })
   authToken!: string;
 
   /** The service used for authentication */
@@ -48,13 +48,13 @@ export class User {
   @Enum(() => AuthType)
   authType!: AuthType;
 
-  @Property()
+  @Property({ length: 2048 })
   username!: string;
 
-  @Property()
+  @Property({ length: 2048 })
   email!: string;
 
-  @Property()
+  @Property({ length: 2048 })
   hashedRefreshToken!: string;
 
   /** True if the user has rights over other admins */

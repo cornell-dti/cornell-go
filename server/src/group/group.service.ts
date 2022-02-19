@@ -7,6 +7,7 @@ import { EventTracker } from '../model/event-tracker.entity';
 import { UserService } from '../user/user.service';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityRepository } from '@mikro-orm/postgresql';
+import { v4 } from 'uuid';
 
 @Injectable()
 export class GroupService {
@@ -22,6 +23,7 @@ export class GroupService {
   /** Creates a group from an event */
   async createFromEvent(event: EventBase, host: User) {
     let group: Group = this.groupsRepository.create({
+      id: v4(),
       currentEvent: event,
       members: [],
       friendlyId: 'ABCDEF',

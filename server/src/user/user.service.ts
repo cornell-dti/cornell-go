@@ -4,6 +4,7 @@ import { EventService } from '../event/event.service';
 import { GroupService } from '../group/group.service';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityRepository } from '@mikro-orm/postgresql';
+import { v4 } from 'uuid';
 
 @Injectable()
 export class UserService {
@@ -29,6 +30,7 @@ export class UserService {
     authToken: string,
   ) {
     let user: User = this.usersRepository.create({
+      id: v4(),
       score: 0,
       participatingEvents: [],
       rewards: [],

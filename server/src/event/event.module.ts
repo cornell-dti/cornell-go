@@ -8,6 +8,7 @@ import { UserModule } from '../user/user.module';
 import { ClientModule } from 'src/client/client.module';
 import { Challenge } from 'src/model/challenge.entity';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
     forwardRef(() => UserModule),
     UserModule,
     ClientModule,
+    AuthModule,
   ],
   providers: [EventService, EventGateway],
   exports: [EventService],

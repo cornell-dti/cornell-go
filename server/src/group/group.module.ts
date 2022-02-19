@@ -6,12 +6,14 @@ import { GroupGateway } from './group.gateway';
 import { UserModule } from '../user/user.module';
 import { ClientModule } from 'src/client/client.module';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   imports: [
     MikroOrmModule.forFeature([Group, GroupMember]),
     forwardRef(() => UserModule),
     ClientModule,
+    AuthModule,
   ],
   providers: [GroupService, GroupGateway],
   exports: [GroupService],

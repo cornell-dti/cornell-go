@@ -8,6 +8,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { RefreshAccessController } from './refresh-access/refresh-access.controller';
 import { User } from 'src/model/user.entity';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
+import { UserGuard } from './jwt-auth.guard';
 
 @Module({
   imports: [

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, OnModuleInit } from '@nestjs/common';
 import { EventModule } from './event/event.module';
 import { GroupModule } from './group/group.module';
 import { ChallengeModule } from './challenge/challenge.module';
@@ -15,6 +15,8 @@ import { join } from 'path';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { AsyncLocalStorage } from 'async_hooks';
+import { InitService } from './init.service';
+import { TsMorphMetadataProvider } from '@mikro-orm/reflection';
 
 const storage = new AsyncLocalStorage<EntityManager>();
 
@@ -23,8 +25,9 @@ const storage = new AsyncLocalStorage<EntityManager>();
     ConfigModule.forRoot(),
     MikroOrmModule.forRoot({
       type: 'postgresql',
-      entities: ['dist/model/*.entity{.ts,.js}'],
-      entitiesTs: ['src/model/*.entity{.ts,.js}'],
+      autoLoadEntities: true,
+      allowGlobalContext: true,
+      metadataProvider: TsMorphMetadataProvider,
       name: 'CornellGO PostgreSQL DB',
       clientUrl: process.env.DATABASE_URL,
       forceUtcTimezone: true,
@@ -58,6 +61,6 @@ const storage = new AsyncLocalStorage<EntityManager>();
     ClientModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [InitService],
 })
 export class AppModule {}

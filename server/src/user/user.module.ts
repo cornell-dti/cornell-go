@@ -7,10 +7,11 @@ import { UserGateway } from './user.gateway';
 import { ClientModule } from 'src/client/client.module';
 import { AuthModule } from 'src/auth/auth.module';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
+import { SessionLogEntry } from 'src/model/session-log-entry.entity';
 
 @Module({
   imports: [
-    MikroOrmModule.forFeature([User]),
+    MikroOrmModule.forFeature([User, SessionLogEntry]),
     forwardRef(() => EventModule),
     forwardRef(() => AuthModule),
     GroupModule,
