@@ -166,11 +166,11 @@ export class EventService {
     const ev = this.eventsRepository.create({
       name: 'Default Event',
       description: 'Default Event',
-      minMembers: 1,
+      requiredMembers: 1,
       skippingEnabled: true,
       isDefault: true,
       hasStarChallenge: false,
-      rewardType: EventRewardType.NO_REWARDS,
+      rewardType: EventRewardType.PERPETUAL,
       indexable: false,
       time: new Date(),
       topCount: 1,

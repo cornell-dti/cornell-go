@@ -46,7 +46,7 @@ export class EventGateway {
           description: ev.description,
           rewardType: ev.rewardType as RewardTypeDto,
           time: ev.time.toUTCString(),
-          minMembers: ev.minMembers,
+          requiredMembers: ev.requiredMembers,
           topCount: ev.topCount,
           challengeIds: (
             await ev.challenges.loadItems()

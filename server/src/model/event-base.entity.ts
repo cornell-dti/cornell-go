@@ -28,7 +28,7 @@ export class EventBase {
   @PrimaryKey()
   id = v4();
 
-  /** Required amount of members to successfully complete this event */
+  /** Required amount of members to successfully complete this event, -1 for any amount */
   @Property()
   requiredMembers!: number;
 
