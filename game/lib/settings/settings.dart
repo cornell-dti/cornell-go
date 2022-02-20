@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:game/Widgets/back_btn.dart';
 
-class VisitedPlacesWidget extends StatefulWidget {
-  VisitedPlacesWidget({Key? key}) : super(key: key);
+class SettingsWidget extends StatefulWidget {
+  SettingsWidget({Key? key}) : super(key: key);
 
   @override
   _VisitedPlacesWidgetState createState() => _VisitedPlacesWidgetState();
 }
 
-class _VisitedPlacesWidgetState extends State<VisitedPlacesWidget> {
+class _VisitedPlacesWidgetState extends State<SettingsWidget> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
@@ -20,8 +20,7 @@ class _VisitedPlacesWidgetState extends State<VisitedPlacesWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
         key: scaffoldKey,
-        floatingActionButton:
-            backBtn(scaffoldKey, context, "Previouly visited"),
+        floatingActionButton: backBtn(scaffoldKey, context, "Settings"),
         backgroundColor: Color(0xFFDBE2E7),
         body: Center(child: Text("TODO")));
   }

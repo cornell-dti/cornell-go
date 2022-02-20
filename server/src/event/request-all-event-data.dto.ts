@@ -1,6 +1,5 @@
 /** DTO for requestAllEventData */
 export interface RequestAllEventDataDto {
-  accessToken: string;
   offset: number;
   count: number;
   rewardTypes: string[];
