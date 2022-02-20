@@ -2,7 +2,7 @@ import 'package:simple_animations/simple_animations.dart';
 import 'package:flutter/material.dart';
 
 Widget backBtn(scaffoldKey, context, text) {
-  var toFit = MediaQuery.of(context).size.width - 40;
+  var toFit = MediaQuery.of(context).size.width - 35;
   Color Carnelian = Color(0xFFB31B1B);
   return Align(
     alignment: Alignment.topLeft,
@@ -14,7 +14,7 @@ Widget backBtn(scaffoldKey, context, text) {
         children: [
           PlayAnimation<double>(
             tween: Tween(begin: 0, end: toFit),
-            duration: const Duration(milliseconds: 500),
+            duration: const Duration(milliseconds: 400),
             builder: (context, child, value) {
               return Positioned(
                 left: 10,
@@ -27,7 +27,7 @@ Widget backBtn(scaffoldKey, context, text) {
                       color: Carnelian),
                   child: Padding(
                     padding: const EdgeInsets.only(
-                        top: 12.0, bottom: 12.0, right: 12.0, left: 28.0),
+                        top: 12.0, bottom: 12.0, right: 12.0, left: 12.0),
                     child: Text(
                       text,
                       style: TextStyle(
