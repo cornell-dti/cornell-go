@@ -72,7 +72,7 @@ Open the main.dart file, then click the Play button
 - **Eric Huang** - Developer
 - **Youssef Attia** - Developer
 - **Cathryn Li** - Developer
-- **Nirbhay S Narang (nick)** - Developer
+- **Nirbhay S Narang** - Developer
 
 ### FA21
 
