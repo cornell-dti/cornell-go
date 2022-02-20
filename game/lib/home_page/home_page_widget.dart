@@ -33,7 +33,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
       topRight: Radius.circular(24.0),
     );
     return Scaffold(
-        floatingActionButton: navBtn(scaffoldKey),
+        floatingActionButton: navBtn(scaffoldKey, context),
         drawer: NavBar(),
         key: scaffoldKey,
         backgroundColor: const Color(0xFFFFFF),

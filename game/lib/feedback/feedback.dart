@@ -15,8 +15,7 @@ class _LeaderboardWidgetState extends State<FeedbackWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
         key: scaffoldKey,
-        floatingActionButton: backBtn(scaffoldKey, context),
-        floatingActionButtonLocation: FloatingActionButtonLocation.startTop,
+        floatingActionButton: backBtn(scaffoldKey, context, "Feedback"),
         backgroundColor: Color(0xFFDBE2E7),
         body: Center(child: Text("TODO")));
   }

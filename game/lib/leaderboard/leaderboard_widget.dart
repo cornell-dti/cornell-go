@@ -16,7 +16,7 @@ class _LeaderboardWidgetState extends State<LeaderboardWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: scaffoldKey,
-      floatingActionButton: backBtn(scaffoldKey, context),
+      floatingActionButton: backBtn(scaffoldKey, context, "Leaderboard"),
       backgroundColor: Colors.black,
       body: Padding(
         padding: const EdgeInsets.only(top: 150),

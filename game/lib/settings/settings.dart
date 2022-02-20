@@ -20,7 +20,7 @@ class _VisitedPlacesWidgetState extends State<SettingsWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
         key: scaffoldKey,
-        floatingActionButton: backBtn(scaffoldKey, context),
+        floatingActionButton: backBtn(scaffoldKey, context, "Settings"),
         backgroundColor: Color(0xFFDBE2E7),
         body: Center(child: Text("TODO")));
   }
