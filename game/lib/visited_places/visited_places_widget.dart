@@ -19,10 +19,31 @@ class _VisitedPlacesWidgetState extends State<VisitedPlacesWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        key: scaffoldKey,
-        floatingActionButton:
-            backBtn(scaffoldKey, context, "Previouly visited"),
-        backgroundColor: Color(0xFFDBE2E7),
-        body: Center(child: Text("TODO")));
+      key: scaffoldKey,
+      floatingActionButton: backBtn(scaffoldKey, context, "Previouly visited"),
+      backgroundColor: Colors.white,
+      body: Padding(
+        padding: const EdgeInsets.only(top: 150),
+        child: Container(
+          child: Padding(
+            padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+            child: Column(
+              children: [
+                Container(
+                  child: Text("Search Bar")
+                  ),
+                Container(
+                  child: ListView(
+                    shrinkWrap: true,
+                    scrollDirection: Axis.vertical,
+                    children: [Text("Sage Chapel")])
+                ),
+              ],
+                ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
