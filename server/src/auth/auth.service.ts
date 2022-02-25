@@ -89,11 +89,17 @@ export class AuthService {
         idToken = await this.payloadFromApple(token);
         break;
       case AuthType.DEVICE:
-        idToken = { id: token, email: '' };
+        idToken =
+          process.env.DEVELOPMENT === 'true'
+            ? {
+                id: token,
+                email: 'dev@cornell.edu',
+              }
+            : null;
         break;
     }
 
-    if (!idToken) return null;
+    if (!idToken || !idToken.email.endsWith('@cornell.edu')) return null;
 
     let user = await this.userService.byAuth(authType, idToken.id);
 
