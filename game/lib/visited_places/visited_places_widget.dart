@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:game/Widgets/back_btn.dart';
+import 'package:game/widgets/back_btn.dart';
 
 class VisitedPlacesWidget extends StatefulWidget {
   VisitedPlacesWidget({Key? key}) : super(key: key);
