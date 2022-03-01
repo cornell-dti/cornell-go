@@ -1,6 +1,7 @@
-FROM fischerscode/flutter-sudo
+FROM cirrusci/flutter
 
 WORKDIR /app/game
 COPY game .
 
-RUN sudo flutter build web
+RUN ls
+RUN flutter build web
