@@ -99,7 +99,7 @@ export class UserGateway {
     // Update data for the group
     const updateData: UpdateGroupDataDto = {
       curEventId: group?.currentEvent.id ?? '',
-      update: true,
+      removeListedMembers: false,
       members: [
         {
           id: user.id,
@@ -130,7 +130,8 @@ export class UserGateway {
     @CallingUser() user: User,
     @MessageBody() data: SetAuthToDeviceDto,
   ) {
-    return this.authService.setAuthType(user, AuthType.DEVICE, data.deviceId);
+    await this.authService.setAuthType(user, AuthType.DEVICE, data.deviceId);
+    return true;
   }
 
   @SubscribeMessage('setAuthToOAuth')
@@ -138,11 +139,12 @@ export class UserGateway {
     @CallingUser() user: User,
     @MessageBody() data: SetAuthToOAuthDto,
   ) {
-    return this.authService.setAuthType(
+    await this.authService.setAuthType(
       user,
       this.providerToAuthType(data.provider),
       data.authId,
     );
+    return true;
   }
 
   @SubscribeMessage('closeAccount')
@@ -150,7 +152,8 @@ export class UserGateway {
     @CallingUser() user: User,
     @MessageBody() data: CloseAccountDto,
   ) {
-    return this.authService.setAuthType(user, AuthType.NONE, '');
+    await this.authService.setAuthType(user, AuthType.NONE, '');
+    return true;
   }
 
   @SubscribeMessage('requestGlobalLeaderData')
@@ -172,7 +175,6 @@ export class UserGateway {
         score: usr.score,
       })),
     });
-
     return true;
   }
 }
