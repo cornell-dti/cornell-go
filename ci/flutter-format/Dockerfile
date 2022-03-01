@@ -1,4 +1,4 @@
-FROM cirrusci/flutter
+FROM fischerscode/flutter
 
 WORKDIR /app/game
 COPY game .
