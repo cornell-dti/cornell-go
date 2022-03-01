@@ -1,4 +1,4 @@
-FROM fischerscode/flutter
+FROM fischerscode/flutter-sudo
 
 WORKDIR /app/game
 COPY game .
