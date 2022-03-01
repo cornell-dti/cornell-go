@@ -39,9 +39,13 @@ class ApiClient {
         _refreshUrl = Uri.parse(apiUrl + "/refresh-access"),
         _clientApi = GameClientApi();
 
-  Future<bool> _createSocket() async {
-    if (_socket != null) return true;
+  Future<bool> _createSocket(bool refreshing) async {
+    if (_socket != null && !refreshing) return true;
     if (_accessToken == null) return false;
+
+    if (refreshing && _socket != null) {
+      _socket?.disconnect();
+    }
 
     final socket = IO.io(
         _apiUrl,
@@ -51,11 +55,23 @@ class ApiClient {
     if (socket.connected) {
       _socket = socket;
       _clientApi.connectSocket(socket);
-      _serverApi = GameServerApi(socket, _refreshAccess);
+      if (refreshing) {
+        _serverApi?.replaceSocket(socket);
+      } else {
+        _serverApi = GameServerApi(socket, _accessRefresher);
+      }
       socket.onDisconnect((data) => _serverApi = null);
       return true;
     }
 
+    return false;
+  }
+
+  Future<bool> _accessRefresher() async {
+    final refreshResult = await _refreshAccess();
+    if (refreshResult) {
+      return _createSocket(true);
+    }
     return false;
   }
 
@@ -107,7 +123,7 @@ class ApiClient {
 
         await _saveToken();
 
-        return await _createSocket();
+        return await _createSocket(false);
       }
     }
     return false;
@@ -125,7 +141,7 @@ class ApiClient {
 
       await _saveToken();
 
-      return await _createSocket();
+      return await _createSocket(false);
     }
     return false;
   }
@@ -134,5 +150,7 @@ class ApiClient {
     await _googleSignIn.signOut();
     _refreshToken = null;
     _accessToken = null;
+    _socket?.disconnect();
+    _socket = null;
   }
 }
