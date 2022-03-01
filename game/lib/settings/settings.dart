@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:game/widgets/back_btn.dart';
+import 'package:game/widget/back_btn.dart';
 
 class SettingsWidget extends StatefulWidget {
   SettingsWidget({Key? key}) : super(key: key);
