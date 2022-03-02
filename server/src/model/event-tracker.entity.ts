@@ -1,12 +1,14 @@
 import {
-  Column,
+  Collection,
   Entity,
+  IdentifiedReference,
   Index,
   ManyToMany,
   ManyToOne,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+  PrimaryKey,
+  Property,
+} from '@mikro-orm/core';
+import { v4 } from 'uuid';
 import { Challenge } from './challenge.entity';
 
 import { EventBase } from './event-base.entity';
@@ -18,34 +20,34 @@ import { User } from './user.entity';
  */
 @Entity()
 export class EventTracker {
-  @PrimaryGeneratedColumn()
-  id!: number;
+  @PrimaryKey()
+  id = v4();
 
   /** Score calculated for this event alone */
   @Index()
-  @Column()
+  @Property()
   eventScore!: number;
 
   /** True if a player is ranked, false if they have been disabled for this event  */
-  @Column()
+  @Property()
   isPlayerRanked!: boolean;
 
   /** Timestamp after which a user can earn points for a challenge (allows for anticheat measures preventing car travel or spamming REST apis) */
-  @Column({ type: 'timestamp with time zone' })
+  @Property()
   cooldownMinimum!: Date;
 
-  @ManyToOne(() => User)
-  user!: User;
+  @ManyToOne()
+  user!: IdentifiedReference<User>;
 
   /** Event being tracked */
-  @ManyToOne(() => EventBase)
-  event!: EventBase;
+  @ManyToOne()
+  event!: IdentifiedReference<EventBase>;
 
   /** Currently selected challenge */
-  @ManyToOne(() => Challenge)
-  currentChallenge!: Challenge;
+  @ManyToOne()
+  currentChallenge!: IdentifiedReference<Challenge>;
 
   /** Completed challenges */
   @ManyToMany(() => PrevChallenge)
-  completed!: PrevChallenge[];
+  completed = new Collection<PrevChallenge>(this);
 }
