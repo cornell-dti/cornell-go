@@ -1,29 +1,31 @@
 import {
-  Column,
+  Collection,
   Entity,
-  Index,
+  IdentifiedReference,
   ManyToOne,
   OneToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+  PrimaryKey,
+  Property,
+  Unique,
+} from '@mikro-orm/core';
 import { EventBase } from './event-base.entity';
 import { GroupMember } from './group-member.entity';
 
 @Entity()
 export class Group {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryKey()
   id!: string;
 
   /** Current event of the group */
-  @ManyToOne(() => EventBase)
-  currentEvent!: EventBase;
+  @ManyToOne()
+  currentEvent!: IdentifiedReference<EventBase>;
 
   /** Friendly id of the group */
-  @Column({ unique: true })
-  @Index()
+  @Property()
+  @Unique()
   friendlyId!: string;
 
   /** Members of the group, with the host at index 0 */
   @OneToMany(() => GroupMember, mem => mem.group)
-  members!: GroupMember[];
+  members = new Collection<GroupMember>(this);
 }
