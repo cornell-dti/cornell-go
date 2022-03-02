@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "757523123677",
+    "project_id": "cornell-go",
+    "storage_bucket": "cornell-go.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:757523123677:android:7c0e70e35a2d54a8507a34",
+        "android_client_info": {
+          "package_name": "com.cornellgo.game"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "757523123677-2nv6haiqnvklhb134cgg5qe8bia4du4q.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBBGoQlbjlNCBfxiob-mkm1TCougaHqcu4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "757523123677-2nv6haiqnvklhb134cgg5qe8bia4du4q.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

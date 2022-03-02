@@ -1,4 +1,4 @@
-name: Check server code-style CI
+name: Check flutter build CI
 
 on: pull_request
 
@@ -9,4 +9,4 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Build the image
-        run: docker build . --file ci/server-prettier/Dockerfile -t app
+        run: docker build . --file ci/flutter-build/Dockerfile -t app
