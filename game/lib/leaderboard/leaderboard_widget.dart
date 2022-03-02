@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:game/Widgets/back_btn.dart';
-import 'package:game/Widgets/leaderboard_cell.dart';
+import 'package:game/widget/back_btn.dart';
+import 'package:game/widget/leaderboard_cell.dart';
 
 class LeaderboardWidget extends StatefulWidget {
   LeaderboardWidget({Key? key}) : super(key: key);

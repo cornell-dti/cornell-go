@@ -106,7 +106,7 @@ export class ChallengeGateway {
           curChallengeId: data.challengeId,
         },
       ],
-      update: true,
+      removeListedMembers: false,
     };
 
     for (const mem of group?.members ?? []) {
@@ -141,13 +141,15 @@ export class ChallengeGateway {
           curChallengeId: newTracker.currentChallenge.id,
         },
       ],
-      update: true,
+      removeListedMembers: false,
     };
 
     for (const mem of group?.members ?? []) {
       const member = await mem.user.load();
       this.clientService.emitUpdateGroupData(member, updateData);
     }
+
+    return true;
     /**
      * TODO:
      * Create PrevChallenge and associate with user

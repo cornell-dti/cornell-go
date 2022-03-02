@@ -1,16 +1,12 @@
-import 'dart:ffi';
-import 'dart:ui';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:velocity_x/velocity_x.dart';
-import 'package:game/Widgets/nav_bar.dart';
-import 'package:game/Widgets/nav_btn.dart';
+import 'package:game/widget/nav_bar.dart';
+import 'package:game/widget/nav_btn.dart';
 
 class HomePageWidget extends StatefulWidget {
   HomePageWidget({Key? key}) : super(key: key);
-  var scaffoldKey = GlobalKey<ScaffoldState>();
+  final scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   _HomePageWidgetState createState() => _HomePageWidgetState();
