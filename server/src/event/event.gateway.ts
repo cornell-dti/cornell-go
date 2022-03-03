@@ -37,6 +37,7 @@ export class EventGateway {
     const ids = await this.eventService.getEventsByIds(data.eventIds);
 
     const updateEventData: UpdateEventDataDto = {
+      isSearch: false,
       events: await Promise.all(
         ids.map(async (ev: EventBase) => ({
           id: ev.id,
@@ -83,6 +84,7 @@ export class EventGateway {
     );
 
     await this.requestEventData(user, {
+      isSearch: true,
       eventIds: results,
     });
 

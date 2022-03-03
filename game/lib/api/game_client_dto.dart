@@ -140,10 +140,12 @@ class UpdateEventDataEventDto {
 
 class UpdateEventDataDto {
   UpdateEventDataDto.fromJson(Map<String, dynamic> fields) {
+    isSearch = fields["isSearch"];
     events = fields["events"]
         .map((dynamic event) => UpdateEventDataEventDto.fromJson(event));
   }
   List<UpdateEventDataEventDto> events = [];
+  bool isSearch = false;
 }
 
 class UpdateLeaderDataUserDto {
