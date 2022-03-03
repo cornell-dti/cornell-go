@@ -22,6 +22,13 @@ class EventModel extends ChangeNotifier {
     });
 
     client.clientApi.updateLeaderDataStream.listen((event) {
+      if (event.users.length == 0) {
+        _topPlayerLength[event.eventId] =
+            _topPlayers[event.eventId]?.length ?? 0;
+        notifyListeners();
+        return;
+      }
+
       final players = _topPlayers[event.eventId];
       for (int i = event.offset; i < event.users.length; i++) {
         if (i > _topPlayers.length) {
