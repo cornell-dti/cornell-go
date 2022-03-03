@@ -18,7 +18,7 @@ export class GroupService {
     private groupsRepository: EntityRepository<Group>,
     @InjectRepository(GroupMember)
     private groupMembersRepository: EntityRepository<GroupMember>,
-  ) {}
+  ) { }
 
   /** Creates a group from an event */
   async createFromEvent(event: EventBase, host: User) {
@@ -43,5 +43,11 @@ export class GroupService {
 
     await this.groupsRepository.persistAndFlush(group);
     return group;
+  }
+
+  /** Get group of the user */
+  async getGroupForUser(user: User): Promise<Group> {
+    const groupMember = await user.groupMember!.load();
+    return groupMember!.group.load();
   }
 }
