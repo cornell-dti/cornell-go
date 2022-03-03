@@ -48,4 +48,9 @@ export class GroupService {
   async requestGroupData(authToken: string) {
     return;
   }
+  async saveGroup(group: Group) { 
+    await this.groupRepository.persistAndFlush(group); 
+  }
+
+
 }

@@ -123,6 +123,24 @@ export class EventService {
 
     return progress;
   }
+  async createEventTracker(user: User, event: EventBase) {
+    
+    let closestChallenge = event.challenges[0];
+
+    let progress: EventTracker = this.eventTrackerRepository.create({
+      eventScore: 0,
+      isPlayerRanked: true,
+      cooldownMinimum: new Date(),
+      event: event,
+      currentChallenge: closestChallenge,
+      completed: [],
+      user,
+    });
+
+    await this.eventTrackerRepository.save(progress);
+
+    return progress;
+  }
 
   /** Get a player's event trackers by event id */
   async getEventTrackersByEventId(user: User, eventIds: string[]) {

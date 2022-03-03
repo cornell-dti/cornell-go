@@ -1,3 +1,4 @@
+import { EventService } from 'src/event/event.service';
 import {
   MessageBody,
   SubscribeMessage,
@@ -21,6 +22,7 @@ export class GroupGateway {
   constructor(
     private clientService: ClientService,
     private groupService: GroupService,
+    private eventService: EventService,
   ) {}
 
   @SubscribeMessage('requestGroupData')
@@ -57,5 +59,23 @@ export class GroupGateway {
   async setCurrentEvent(
     @CallingUser() user: User,
     @MessageBody() data: SetCurrentEventDto,
-  ) {}
+  ) {
+    let userGroup = await user.groupMember!.group;
+    let newEvent = await this.eventService.getEventsByIds([data.eventId], false);
+    userGroup.members.forEach(async member=> {
+      //if the user already has the event, keep their tracker
+      try {
+        let memberEvent = await this.eventService.getCurrentEventTrackerForUser(member.user)
+        if (memberEvent.event.id != data.eventId)
+          this.eventService.createEventTracker(member.user, newEvent[0]);
+        //else add a new tracker to the current event
+      } catch {
+        this.eventService.createEventTracker(member.user, newEvent[0]);
+      }
+    });
+    userGroup.currentEvent.set(newEvent); 
+    await this.groupService.saveGroup(userGroup);
+    let updateGroupData: UpdateGroupDataDto = {curEventId:data.eventId, members:[], update:false};
+    this.clientService.emitUpdateGroupData(user, updateGroupData);
+  }
 }
