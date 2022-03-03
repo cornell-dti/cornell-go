@@ -32,12 +32,12 @@ export class EventGateway {
   @SubscribeMessage('requestEventData')
   async requestEventData(
     @CallingUser() user: User,
-    @MessageBody() data: RequestEventDataDto,
+    @MessageBody() data: RequestEventDataDto & { isSearch?: boolean },
   ) {
     const ids = await this.eventService.getEventsByIds(data.eventIds);
 
     const updateEventData: UpdateEventDataDto = {
-      isSearch: false,
+      isSearch: !!data.isSearch,
       events: await Promise.all(
         ids.map(async (ev: EventBase) => ({
           id: ev.id,
