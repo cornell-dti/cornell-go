@@ -25,8 +25,8 @@ export class GroupGateway {
   constructor(
     private clientService: ClientService,
     private groupService: GroupService,
-    private eventService: EventService
-  ) { }
+    private eventService: EventService,
+  ) {}
 
   @SubscribeMessage('requestGroupData')
   async requestGroupData(
@@ -36,19 +36,23 @@ export class GroupGateway {
     const groupData = await this.groupService.getGroupForUser(user);
 
     const updateGroupData: UpdateGroupDataDto = {
-      curEventId: "id",
-      members: await Promise.all((await groupData.members.loadItems()).map(
-        async (member) => {
+      curEventId: groupData.currentEvent.id,
+      members: await Promise.all(
+        (
+          await groupData.members.loadItems()
+        ).map(async member => {
           const usr = await member.user.load();
           return {
             id: usr.id,
             name: usr.username,
             points: usr.score,
             host: member.isHost,
-            curChallengeId: (await
-              this.eventService.getCurrentEventTrackerForUser(usr)).event.id
+            curChallengeId: (
+              await this.eventService.getCurrentEventTrackerForUser(usr)
+            ).event.id,
           };
-        })),
+        }),
+      ),
       removeListedMembers: false,
     };
 
@@ -60,17 +64,17 @@ export class GroupGateway {
   async joinGroup(
     @CallingUser() user: User,
     @MessageBody() data: JoinGroupDto,
-  ) { }
+  ) {}
 
   @SubscribeMessage('leaveGroup')
   async leaveGroup(
     @CallingUser() user: User,
     @MessageBody() data: LeaveGroupDto,
-  ) { }
+  ) {}
 
   @SubscribeMessage('setCurrentEvent')
   async setCurrentEvent(
     @CallingUser() user: User,
     @MessageBody() data: SetCurrentEventDto,
-  ) { }
+  ) {}
 }

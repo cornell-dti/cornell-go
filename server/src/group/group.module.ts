@@ -20,4 +20,4 @@ import { AuthModule } from 'src/auth/auth.module';
   providers: [GroupService, GroupGateway],
   exports: [GroupService],
 })
-export class GroupModule { }
+export class GroupModule {}
