@@ -1,169 +1,218 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { User, AuthType } from '../model/user.entity';
 import { JwtService } from '@nestjs/jwt';
-import {
-  auth,
-  LoginTicket,
-  OAuth2Client,
-  TokenPayload,
-} from 'google-auth-library';
-import { AuthConstants } from './constant';
 import { UserService } from '../user/user.service';
 import appleSignin from 'apple-signin-auth';
+import { JwtPayload } from './jwt-payload';
+import { LoginTicket, OAuth2Client } from 'google-auth-library';
+import { pbkdf2, randomBytes } from 'crypto';
+import { InjectRepository } from '@mikro-orm/nestjs';
+import { EntityRepository } from '@mikro-orm/postgresql';
+import { MikroORM } from '@mikro-orm/core';
+
+interface IntermediatePayload {
+  id: string;
+  email: string;
+}
+
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(User) private userRepository: Repository<User>,
+    @InjectRepository(User) private userRepository: EntityRepository<User>,
     private readonly jwtService: JwtService,
     @Inject(forwardRef(() => UserService))
-    private readonly UserService: UserService,
+    private readonly userService: UserService,
   ) {}
+  googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-  /** Get identifier from an apple token */
-  async getIdFromAppleToken(token: string): Promise<string | undefined> {
-    const verifiedToken = await this.verifyApple(token);
-    if (!verifiedToken) {
-      return undefined;
-    }
-    return verifiedToken;
-  }
+  refreshOptions = {
+    expiresIn: process.env.JWT_REFRESH_EXPIRATION,
+    secret: process.env.JWT_REFRESH_SECRET,
+  };
 
-  async verifyApple(token_id: string): Promise<string | undefined> {
+  accessOptions = {
+    expiresIn: process.env.JWT_ACCESS_EXPIRATION,
+    secret: process.env.JWT_ACCESS_SECRET,
+  };
+
+  async payloadFromApple(idToken: string): Promise<IntermediatePayload | null> {
     try {
-      const { sub: userAppleId } = await appleSignin.verifyIdToken(
-        token_id, // We need to pass the token that we wish to decode.
+      const payload = await appleSignin.verifyIdToken(
+        idToken, // We need to pass the token that we wish to decode.
         {
-          audience: AuthConstants.client_id, // client id - The same one we used  on the frontend, this is the secret key used for encoding and decoding the token.
+          audience: process.env.APPLE_CLIENT_ID, // client id - The same one we used  on the frontend, this is the secret key used for encoding and decoding the token.
           ignoreExpiration: true, // Token will not expire unless you manually do so.
         },
       );
-      return userAppleId;
+      return { id: payload.sub, email: payload.email };
     } catch (err) {
       // if any error pops up during the verifying stage, the process terminate
       // and return the error to the front end
-      return undefined;
+      return null;
     }
   }
 
-  /** Get identifier from a google token */
-  async getIdFromGoogleToken(token: string): Promise<string | undefined> {
-    const verifiedToken = await this.verifyGoogle(token);
-    if (!verifiedToken) {
-      return undefined;
-    }
-    return verifiedToken;
-  }
-
-  async verifyGoogle(token_id: string): Promise<string | undefined> {
+  async payloadFromGoogle(
+    idToken: string,
+  ): Promise<IntermediatePayload | null> {
     try {
-      const client = new OAuth2Client(AuthConstants.client_id);
-      const ticket: LoginTicket = await client.verifyIdToken({
-        idToken: token_id,
-        audience: AuthConstants.client_id,
+      const ticket: LoginTicket = await this.googleClient.verifyIdToken({
+        idToken,
       });
       const payload = ticket.getPayload();
+
       if (!payload) {
-        return undefined;
+        return null;
       }
-      const authToken: string = payload['sub'];
-      return authToken;
+
+      return { id: payload.sub, email: payload.email ?? '' };
     } catch (error) {
       // if any error pops up during the verifying stage, the process terminate
       // and return the error to the front end
-      return undefined;
+      return null;
     }
   }
 
-  async login(id_token: string, authenType: AuthType): Promise<string> {
+  async login(
+    token: string,
+    authType: AuthType,
+    lat: number,
+    long: number,
+  ): Promise<[string, string] | null> {
     // if verify success, idToken is a string. If anything is wrong, it is undefined
-    let idToken: string | undefined;
-    switch (authenType) {
+    let idToken: IntermediatePayload | null = null;
+    switch (authType) {
       case AuthType.GOOGLE:
-        idToken = await this.getIdFromGoogleToken(id_token);
+        idToken = await this.payloadFromGoogle(token);
         break;
       case AuthType.APPLE:
-        idToken = await this.getIdFromAppleToken(id_token);
+        idToken = await this.payloadFromApple(token);
         break;
       case AuthType.DEVICE:
-        //idToken = this.getIdFromDeviceToken(id_token);
+        idToken =
+          process.env.DEVELOPMENT === 'true'
+            ? {
+                id: token,
+                email: 'dev@cornell.edu',
+              }
+            : null;
         break;
     }
-    if (!idToken) {
-      return 'verify error';
+
+    if (!idToken || !idToken.email.endsWith('@cornell.edu')) return null;
+
+    let user = await this.userService.byAuth(authType, idToken.id);
+
+    if (!user) {
+      user = await this.userService.register(
+        idToken.email,
+        idToken.email?.split('@')[0],
+        lat,
+        long,
+        authType,
+        idToken.id,
+      );
     }
-    this.registerUser(authenType, idToken);
-    return 'login success';
+
+    const accessToken = await this.jwtService.signAsync(
+      {
+        userId: user.id,
+      } as JwtPayload,
+      this.accessOptions,
+    );
+
+    const refreshToken = await this.jwtService.signAsync(
+      {
+        userId: user.id,
+      } as JwtPayload,
+      this.refreshOptions,
+    );
+
+    user.hashedRefreshToken = await this.hashSalt(refreshToken);
+
+    await this.userRepository.persistAndFlush(user);
+
+    return [accessToken, refreshToken];
   }
 
-  async registerUser(authType: AuthType, authToken: string) {
-    const exist_user: User | undefined = await this.userRepository.findOne({
-      authType,
-      authToken,
-    });
-    if (exist_user) {
-      const payload: object = {
-        username: exist_user.username,
-        sub: exist_user.id,
-      };
-      //TODO:
-      // return {
-      //   access_token: this.jwtService.sign(payload),
-      // };
-    }
-    // this would go wrong if the user does not let google share its information
-    //https://developers.google.com/identity/sign-in/web/backend-auth#create-an-account-or-session
-    else {
-      // if we do not have this user in our database, we register
-      // const email: string = payload['email'];
-      // const username: string = payload['name'];
-      // const lat: number = 0;
-      // const long: number = 0;
-      // const user = await this.UserService.register(
-      //   email,
-      //   username,
-      //   lat,
-      //   long,
-      //   authType,
-      //   authToken,
-      // );
-      // const payload_token: object = { username: user.username, sub: user.id };
-      // return {
-      //   access_token: this.jwtService.sign(payload_token),
-      // };
-    }
-    return '';
-  }
+  async refreshAccessToken(refreshToken: string): Promise<string | null> {
+    try {
+      const payload: JwtPayload = await this.jwtService.verifyAsync(
+        refreshToken,
+        this.refreshOptions,
+      );
 
-  /** Get identifier from a device token */
-  getIdFromDeviceToken(token: string): string | undefined {
-    return token;
+      const user = await this.userService.byId(payload.userId);
+
+      if (
+        !user ||
+        !(await this.verifyHashSalt(refreshToken, user.hashedRefreshToken))
+      )
+        return null;
+
+      const accessToken = await this.jwtService.signAsync(
+        {
+          userId: user.id,
+        } as JwtPayload,
+        this.accessOptions,
+      );
+
+      return accessToken;
+    } catch {
+      return null;
+    }
   }
 
   /** Sets a user's authentication type based on token */
   async setAuthType(user: User, authType: AuthType, token: string) {
-    let idToken: string | undefined = '';
-
-    switch (authType) {
-      case AuthType.APPLE:
-        idToken = await this.getIdFromAppleToken(token);
-        break;
-      case AuthType.DEVICE:
-        idToken = this.getIdFromDeviceToken(token);
-        break;
-      case AuthType.GOOGLE:
-        idToken = await this.getIdFromGoogleToken(token);
-        break;
-    }
-
-    if (!idToken) return false;
-
     user.authType = authType;
-    user.authToken = idToken;
+    user.authToken = token;
 
-    this.userRepository.save(user);
+    await this.userRepository.persistAndFlush(user);
+  }
 
-    return true;
+  async userByToken(token: string): Promise<User | null> {
+    try {
+      const decodedPayload = await this.jwtService.verifyAsync<JwtPayload>(
+        token,
+        this.accessOptions,
+      );
+      return (await this.userService.byId(decodedPayload.userId)) ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  private async pdfk2Async(
+    input: string,
+    salt: string,
+    iterations: number,
+    length: number,
+    digest: string,
+  ) {
+    return new Promise<Buffer>((resolve, reject) =>
+      pbkdf2(input, salt, iterations, length, digest, (err, key) => {
+        if (err) reject(err);
+        else resolve(key);
+      }),
+    );
+  }
+
+  private async hashSalt(input: string): Promise<string> {
+    const salt = randomBytes(128).toString('hex');
+    const iterations = 10000;
+    const hash = await this.pdfk2Async(input, salt, iterations, 64, 'sha512');
+    return salt + hash.toString('hex');
+  }
+
+  private async verifyHashSalt(
+    input: string,
+    hashSalt: string,
+  ): Promise<boolean> {
+    const salt = hashSalt.substring(0, 256);
+    const iterations = 10000;
+    const hash = await this.pdfk2Async(input, salt, iterations, 64, 'sha512');
+
+    return salt + hash.toString('hex') === hashSalt;
   }
 }

@@ -1,6 +1,5 @@
-import '../home_page/home_page_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:game/widget/back_btn.dart';
 
 class VisitedPlacesWidget extends StatefulWidget {
   VisitedPlacesWidget({Key? key}) : super(key: key);
@@ -19,6 +18,11 @@ class _VisitedPlacesWidgetState extends State<VisitedPlacesWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(key: scaffoldKey, body: Text("removed flutter flow."));
+    return Scaffold(
+        key: scaffoldKey,
+        floatingActionButton:
+            backBtn(scaffoldKey, context, "Previouly visited"),
+        backgroundColor: Color(0xFFDBE2E7),
+        body: Center(child: Text("TODO")));
   }
 }

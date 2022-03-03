@@ -1,10 +1,11 @@
 import {
-  Column,
-  CreateDateColumn,
   Entity,
+  Enum,
+  IdentifiedReference,
   ManyToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+  PrimaryKey,
+  Property,
+} from '@mikro-orm/core';
 import { User } from './user.entity';
 
 /**
@@ -48,24 +49,20 @@ export enum SessionLogEntryType {
  */
 @Entity()
 export class SessionLogEntry {
-  @PrimaryGeneratedColumn()
+  @PrimaryKey()
   id!: number;
 
-  @Column({
-    type: 'enum',
-    enum: SessionLogEntryType,
-  })
+  @Enum(() => SessionLogEntryType)
   entryType!: SessionLogEntryType;
 
   /** Time when this entry was created */
-  @CreateDateColumn()
-  entryTimestamp!: Date;
+  entryTimestamp = new Date();
 
   /** UUID associated with this entry type */
-  @Column({ nullable: true })
+  @Property()
   associatedUUID?: string;
 
   /** User associated with this entry */
-  @ManyToOne(() => User)
-  user!: User;
+  @ManyToOne()
+  user!: IdentifiedReference<User>;
 }

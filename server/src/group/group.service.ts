@@ -1,12 +1,13 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { EventBase } from '../model/event-base.entity';
 import { Group } from '../model/group.entity';
-import { EntityManager, Repository } from 'typeorm';
 import { User } from '../model/user.entity';
 import { GroupMember } from '../model/group-member.entity';
 import { EventTracker } from '../model/event-tracker.entity';
 import { UserService } from '../user/user.service';
+import { InjectRepository } from '@mikro-orm/nestjs';
+import { EntityRepository } from '@mikro-orm/postgresql';
+import { v4 } from 'uuid';
 
 @Injectable()
 export class GroupService {
@@ -14,21 +15,21 @@ export class GroupService {
     @Inject(forwardRef(() => UserService))
     private userService: UserService,
     @InjectRepository(Group)
-    private groupsRepository: Repository<Group>,
+    private groupsRepository: EntityRepository<Group>,
     @InjectRepository(GroupMember)
-    private groupMembersRepository: Repository<GroupMember>,
-    @InjectEntityManager()
-    private entityManager: EntityManager,
+    private groupMembersRepository: EntityRepository<GroupMember>,
   ) {}
 
   /** Creates a group from an event */
   async createFromEvent(event: EventBase, host: User) {
     let group: Group = this.groupsRepository.create({
+      id: v4(),
       currentEvent: event,
       members: [],
+      friendlyId: 'ABCDEF',
     });
 
-    await this.entityManager.save(group);
+    await this.groupsRepository.persistAndFlush(group);
 
     let groupMember: GroupMember = this.groupMembersRepository.create({
       isHost: true,
@@ -36,21 +37,15 @@ export class GroupService {
       group,
     });
 
-    group.members = [groupMember];
-    host.groupMember = groupMember;
-    groupMember.user = host;
+    group.members.set([groupMember]);
+    host.groupMember?.set(groupMember);
+    groupMember.user.set(host);
 
-    await this.entityManager.save([groupMember, group, host]);
+    await this.groupsRepository.persistAndFlush(group);
     return group;
   }
-
-  /** */
-  async requestGroupData(authToken: string) {
-    return;
-  }
+  
   async saveGroup(group: Group) { 
     await this.groupRepository.persistAndFlush(group); 
   }
-
-
 }
