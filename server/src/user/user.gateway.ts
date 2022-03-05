@@ -57,12 +57,13 @@ export class UserGateway {
     const groupMember = await user.groupMember?.load();
     const rewards = await user.rewards.loadItems();
     const participatingEvents = await user.participatingEvents.loadItems();
+    const group = await groupMember?.group.load();
 
     this.clientService.emitUpdateUserData(user, {
       id: user.id,
       username: user.username,
       score: user.score,
-      groupId: groupMember?.group.id ?? '',
+      groupId: group?.friendlyId ?? 'undefined',
       authType: user.authType as UpdateUserDataAuthTypeDto,
       rewardIds: rewards.map(rw => rw.id),
       trackedEventIds: participatingEvents.map(ev => ev.event.id),

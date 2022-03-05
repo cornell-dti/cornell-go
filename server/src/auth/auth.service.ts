@@ -178,7 +178,8 @@ export class AuthService {
         this.accessOptions,
       );
       return (await this.userService.byId(decodedPayload.userId)) ?? null;
-    } catch {
+    } catch (e) {
+      console.log(e);
       return null;
     }
   }
