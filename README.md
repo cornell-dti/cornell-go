@@ -74,6 +74,7 @@ Open the main.dart file, then click the Play button
 - **Cathryn Li** - Developer
 - **Nirbhay S Narang** - Developer
 - **Chris Gu** - Developer
+- **Brian La** - Developer
 
 ### FA21
 
