@@ -69,7 +69,7 @@ export class UserGateway {
       ignoreIdLists: false,
     });
 
-    return true;
+    return false;
   }
 
   @SubscribeMessage('setUsername')
@@ -122,7 +122,7 @@ export class UserGateway {
       );
     }
 
-    return true;
+    return false;
   }
 
   @SubscribeMessage('setAuthToDevice')
@@ -131,7 +131,7 @@ export class UserGateway {
     @MessageBody() data: SetAuthToDeviceDto,
   ) {
     await this.authService.setAuthType(user, AuthType.DEVICE, data.deviceId);
-    return true;
+    return false;
   }
 
   @SubscribeMessage('setAuthToOAuth')
@@ -144,7 +144,7 @@ export class UserGateway {
       this.providerToAuthType(data.provider),
       data.authId,
     );
-    return true;
+    return false;
   }
 
   @SubscribeMessage('closeAccount')
@@ -153,7 +153,7 @@ export class UserGateway {
     @MessageBody() data: CloseAccountDto,
   ) {
     await this.authService.setAuthType(user, AuthType.NONE, '');
-    return true;
+    return false;
   }
 
   @SubscribeMessage('requestGlobalLeaderData')
@@ -175,6 +175,6 @@ export class UserGateway {
         score: usr.score,
       })),
     });
-    return true;
+    return false;
   }
 }

@@ -32,6 +32,7 @@ class ApiClient extends ChangeNotifier {
   GameClientApi get clientApi => _clientApi;
   GameServerApi? get serverApi => _serverApi;
   bool connectionFailed = false;
+  bool authenticated = false;
 
   ApiClient(FlutterSecureStorage storage, String apiUrl)
       : _storage = storage,
@@ -79,9 +80,13 @@ class ApiClient extends ChangeNotifier {
   Future<bool> _accessRefresher() async {
     final refreshResult = await _refreshAccess();
     if (refreshResult) {
+      authenticated = true;
       _createSocket(true);
     } else {
+      authenticated = false;
       _socket?.disconnect();
+      _socket = null;
+      notifyListeners();
     }
     return refreshResult;
   }
@@ -112,8 +117,15 @@ class ApiClient extends ChangeNotifier {
 
     if (token != null) {
       _refreshToken = token;
-      return await _refreshAccess();
+
+      final access = await _refreshAccess();
+      authenticated = access;
+      notifyListeners();
+      return access;
     }
+
+    authenticated = false;
+    notifyListeners();
     return false;
   }
 
@@ -138,6 +150,8 @@ class ApiClient extends ChangeNotifier {
         return true;
       }
     }
+    authenticated = false;
+    notifyListeners();
     return false;
   }
 
@@ -165,5 +179,7 @@ class ApiClient extends ChangeNotifier {
     _accessToken = null;
     _socket?.disconnect();
     _socket = null;
+    authenticated = false;
+    notifyListeners();
   }
 }

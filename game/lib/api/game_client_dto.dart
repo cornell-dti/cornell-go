@@ -99,7 +99,6 @@ class UpdateEventDataEventDto {
   UpdateEventDataEventDto.fromJson(Map<String, dynamic> fields) {
     id = fields["id"];
     skippingEnabled = fields["skippingEnabled"];
-    hasStarChallenge = fields["hasStarChallenge"];
     name = fields["name"];
     description = fields["description"];
     switch (fields["rewardType"]) {
@@ -126,7 +125,6 @@ class UpdateEventDataEventDto {
 
   String id = "";
   bool skippingEnabled = false;
-  bool hasStarChallenge = false;
   String name = "";
   String description = "";
   UpdateEventDataEventRewardTypeDto rewardType =
