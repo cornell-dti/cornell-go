@@ -59,11 +59,11 @@ export class AuthService {
   ): Promise<IntermediatePayload | null> {
     try {
       let ticket: LoginTicket | null = null;
-      if (aud == 'android') {
+      if (aud === 'android') {
         ticket = await this.googleAndroidClient.verifyIdToken({
           idToken,
         });
-      } else if (aud == 'ios') {
+      } else if (aud === 'ios') {
         ticket = await this.googleIosClient.verifyIdToken({
           idToken,
         });
