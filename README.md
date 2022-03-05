@@ -78,6 +78,7 @@ flutter run --dart-define=API_URL=https://example.com
 - **Cathryn Li** - Developer
 - **Nirbhay S Narang** - Developer
 - **Chris Gu** - Developer
+- **Brian La** - Developer
 
 ### FA21
 
