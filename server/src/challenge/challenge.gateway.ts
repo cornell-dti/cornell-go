@@ -148,8 +148,6 @@ export class ChallengeGateway {
       const member = await mem.user.load();
       this.clientService.emitUpdateGroupData(member, updateData);
     }
-
-    return false;
     /**
      * TODO:
      * Create PrevChallenge and associate with user

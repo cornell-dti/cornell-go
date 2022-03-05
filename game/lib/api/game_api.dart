@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:game/api/game_client_api.dart';
@@ -135,8 +136,12 @@ class ApiClient extends ChangeNotifier {
       final auth = await account.authentication;
       final idToken = auth.idToken;
       final pos = await GeoPoint.current();
-      final loginResponse = await http.post(_googleLoginUrl,
-          body: {'idToken': idToken, 'lat': pos.lat, 'long': pos.long});
+      final loginResponse = await http.post(_googleLoginUrl, body: {
+        'idToken': idToken,
+        'lat': pos.lat,
+        'long': pos.long,
+        'aud': Platform.isIOS ? "ios" : "android"
+      });
 
       if (loginResponse.statusCode == 200 && loginResponse.body != "null") {
         final responseBody = jsonDecode(loginResponse.body);
