@@ -9,6 +9,7 @@ import 'package:game/model/group_model.dart';
 import 'package:game/model/reward_model.dart';
 import 'package:game/model/tracker_model.dart';
 import 'package:game/model/user_model.dart';
+import 'package:game/widget/game_widget.dart';
 import 'package:provider/provider.dart';
 import 'dart:io' show Platform;
 
@@ -43,6 +44,6 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(create: (_) => EventModel(client)),
           ChangeNotifierProvider(create: (_) => TrackerModel(client)),
           ChangeNotifierProvider(create: (_) => ChallengeModel(client))
-        ], child: HomePageWidget()));
+        ], child: GameWidget(child: HomePageWidget())));
   }
 }
