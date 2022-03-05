@@ -15,7 +15,6 @@ import 'dart:io' show Platform;
 final storage = FlutterSecureStorage();
 final LOOPBACK = (Platform.isAndroid ? "10.0.2.2" : "127.0.0.1");
 final API_URL = String.fromEnvironment('API_URL', defaultValue: LOOPBACK);
-final client = ApiClient(storage, API_URL);
 
 void main() {
   runApp(MyApp());
@@ -34,15 +33,20 @@ class MyApp extends StatelessWidget {
       ],
       supportedLocales: const [Locale('en', '')],
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: MultiProvider(providers: [
-        ChangeNotifierProvider(create: (_) => UserModel(client)),
-        ChangeNotifierProvider(create: (_) => RewardModel(client)),
-        ChangeNotifierProvider(create: (_) => GroupModel(client)),
-        ChangeNotifierProvider(create: (_) => EventModel(client)),
-        ChangeNotifierProvider(create: (_) => TrackerModel(client)),
-        ChangeNotifierProvider(create: (_) => ChallengeModel(client)),
-        Provider(create: (_) => client)
-      ], child: HomePageWidget()),
+      home: ChangeNotifierProvider(
+        create: (_) => ApiClient(storage, API_URL),
+        child: Consumer<ApiClient>(
+            builder: (_, client, home) => MultiProvider(providers: [
+                  ChangeNotifierProvider(create: (_) => UserModel(client)),
+                  ChangeNotifierProvider(create: (_) => RewardModel(client)),
+                  ChangeNotifierProvider(create: (_) => GroupModel(client)),
+                  ChangeNotifierProvider(create: (_) => EventModel(client)),
+                  ChangeNotifierProvider(create: (_) => TrackerModel(client)),
+                  ChangeNotifierProvider(create: (_) => ChallengeModel(client)),
+                  Provider(create: (_) => client)
+                ], child: home),
+            child: HomePageWidget()),
+      ),
     );
   }
 }
