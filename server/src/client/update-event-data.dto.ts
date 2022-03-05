@@ -29,4 +29,5 @@ export interface UpdateEventDataEventDto {
 /** DTO for updateEventData */
 export interface UpdateEventDataDto {
   events: UpdateEventDataEventDto[];
+  isSearch: boolean;
 }
