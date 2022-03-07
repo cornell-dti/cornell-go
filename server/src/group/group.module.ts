@@ -5,6 +5,7 @@ import { GroupService } from './group.service';
 import { GroupGateway } from './group.gateway';
 import { UserModule } from '../user/user.module';
 import { ClientModule } from 'src/client/client.module';
+import { EventModule } from '../event/event.module';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { AuthModule } from 'src/auth/auth.module';
 
@@ -14,6 +15,7 @@ import { AuthModule } from 'src/auth/auth.module';
     forwardRef(() => UserModule),
     ClientModule,
     AuthModule,
+    EventModule,
   ],
   providers: [GroupService, GroupGateway],
   exports: [GroupService],

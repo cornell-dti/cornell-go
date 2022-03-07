@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:game/api/game_client_api.dart';
 import 'package:game/api/game_server_api.dart';
 import 'package:game/api/geopoint.dart';
@@ -8,7 +9,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:http/http.dart' as http;
 
-class ApiClient {
+class ApiClient extends ChangeNotifier {
   final FlutterSecureStorage _storage;
 
   final _googleSignIn = GoogleSignIn(
@@ -30,6 +31,7 @@ class ApiClient {
 
   GameClientApi get clientApi => _clientApi;
   GameServerApi? get serverApi => _serverApi;
+  bool connectionFailed = false;
 
   ApiClient(FlutterSecureStorage storage, String apiUrl)
       : _storage = storage,
@@ -39,9 +41,8 @@ class ApiClient {
         _refreshUrl = Uri.parse(apiUrl + "/refresh-access"),
         _clientApi = GameClientApi();
 
-  Future<bool> _createSocket(bool refreshing) async {
-    if (_socket != null && !refreshing) return true;
-    if (_accessToken == null) return false;
+  void _createSocket(bool refreshing) async {
+    if (_socket != null && !refreshing || _accessToken == null) return;
 
     if (refreshing && _socket != null) {
       _socket?.disconnect();
@@ -50,9 +51,15 @@ class ApiClient {
     final socket = IO.io(
         _apiUrl,
         IO.OptionBuilder()
-            .setTransports(['websocket']).setAuth({'token': _accessToken}));
+            .setTransports(['websocket'])
+            .disableAutoConnect()
+            .setAuth({'token': _accessToken}));
 
-    if (socket.connected) {
+    socket.onDisconnect((data) {
+      _serverApi = null;
+      notifyListeners();
+    });
+    socket.onConnect((data) {
       _socket = socket;
       _clientApi.connectSocket(socket);
       if (refreshing) {
@@ -60,19 +67,23 @@ class ApiClient {
       } else {
         _serverApi = GameServerApi(socket, _accessRefresher);
       }
-      socket.onDisconnect((data) => _serverApi = null);
-      return true;
-    }
-
-    return false;
+      notifyListeners();
+    });
+    socket.onConnectError((data) {
+      connectionFailed = true;
+      notifyListeners();
+    });
+    socket.connect();
   }
 
   Future<bool> _accessRefresher() async {
     final refreshResult = await _refreshAccess();
     if (refreshResult) {
-      return _createSocket(true);
+      _createSocket(true);
+    } else {
+      _socket?.disconnect();
     }
-    return false;
+    return refreshResult;
   }
 
   Future<bool> _refreshAccess() async {
@@ -123,7 +134,8 @@ class ApiClient {
 
         await _saveToken();
 
-        return await _createSocket(false);
+        _createSocket(false);
+        return true;
       }
     }
     return false;
@@ -140,8 +152,9 @@ class ApiClient {
       this._refreshToken = responseBody["refreshToken"];
 
       await _saveToken();
+      _createSocket(false);
 
-      return await _createSocket(false);
+      return true;
     }
     return false;
   }

@@ -48,4 +48,10 @@ export class GroupService {
   async saveGroup(group: Group) { 
     await this.groupRepository.persistAndFlush(group); 
   }
+
+  /** Get group of the user */
+  async getGroupForUser(user: User): Promise<Group> {
+    const groupMember = await user.groupMember!.load();
+    return groupMember!.group.load();
+  }
 }
