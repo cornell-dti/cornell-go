@@ -1,4 +1,9 @@
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 /*
@@ -9,11 +14,12 @@ import { AuthService } from './auth.service';
 
 @Injectable()
 export class UserGuard implements CanActivate {
-  constructor(private authService: AuthService) {}
+  constructor(@Inject(AuthService) private authService: AuthService) {}
 
   async canActivate(context: ExecutionContext) {
     const client = context.switchToWs().getClient<Socket>();
-    const token = client.handshake.auth['token'];
+    const token =
+      client.handshake.auth['token'] ?? client.handshake.query['token'];
 
     const user = await this.authService.userByToken(token);
     if (user) {

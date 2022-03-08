@@ -40,6 +40,6 @@ export class RewardGateway {
     };
 
     this.clientService.emitUpdateRewardData(user, updateData);
-    return true;
+    return false;
   }
 }
