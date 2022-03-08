@@ -57,7 +57,7 @@ export class GroupGateway {
     };
 
     this.clientService.emitUpdateGroupData(user, updateGroupData);
-    return true;
+    return false;
   }
 
   @SubscribeMessage('joinGroup')
