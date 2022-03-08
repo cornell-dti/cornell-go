@@ -40,7 +40,7 @@ const storage = new AsyncLocalStorage<EntityManager>();
       driverOptions: {
         connection: {
           ssl: !process.env.NO_SSL,
-          rejectUnauthorized: !process.env.NO_SSL,
+          rejectUnauthorized: false,
         },
       },
       migrations: {
