@@ -45,6 +45,10 @@ const storage = new AsyncLocalStorage<EntityManager>();
       migrations: {
         path: 'dist/migrations',
         pathTs: 'src/migrations',
+        disableForeignKeys: false,
+      },
+      schemaGenerator: {
+        disableForeignKeys: false,
       },
     }),
     ServeStaticModule.forRoot({
