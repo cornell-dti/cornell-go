@@ -17,6 +17,7 @@ export class GoogleController {
       AuthType.GOOGLE,
       req.lat,
       req.long,
+      req.aud,
     );
 
     return tokens && { accessToken: tokens[0], refreshToken: tokens[1] };

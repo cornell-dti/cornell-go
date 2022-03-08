@@ -52,7 +52,7 @@ export class ChallengeGateway {
       })),
     });
 
-    return true;
+    return false;
   }
 
   @SubscribeMessage('setCurrentChallenge')
@@ -114,7 +114,7 @@ export class ChallengeGateway {
       this.clientService.emitUpdateGroupData(member, updateData);
     }
 
-    return true;
+    return false;
   }
 
   @SubscribeMessage('completedChallenge')
@@ -148,8 +148,6 @@ export class ChallengeGateway {
       const member = await mem.user.load();
       this.clientService.emitUpdateGroupData(member, updateData);
     }
-
-    return true;
     /**
      * TODO:
      * Create PrevChallenge and associate with user
