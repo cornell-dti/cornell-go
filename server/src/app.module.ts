@@ -39,8 +39,7 @@ const storage = new AsyncLocalStorage<EntityManager>();
       context: () => storage.getStore(), // use our AsyncLocalStorage instance
       driverOptions: {
         connection: {
-          ssl: !process.env.NO_SSL,
-          rejectUnauthorized: false,
+          ssl: !process.env.NO_SSL && { rejectUnauthorized: false },
         },
       },
       migrations: {
