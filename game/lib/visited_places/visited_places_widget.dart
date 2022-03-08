@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:game/Widgets/back_btn.dart';
+
+import 'package:game/widget/back_btn.dart';
 import 'package:game/Widgets/visited_places_cell.dart';
 
 class VisitedPlacesWidget extends StatefulWidget {
