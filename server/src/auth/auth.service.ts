@@ -23,7 +23,8 @@ export class AuthService {
     @Inject(forwardRef(() => UserService))
     private readonly userService: UserService,
   ) {}
-  googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+  googleIosClient = new OAuth2Client(process.env.GOOGLE_IOS_CLIENT_ID);
+  googleAndroidClient = new OAuth2Client(process.env.GOOGLE_ANDROID_CLIENT_ID);
 
   refreshOptions = {
     expiresIn: process.env.JWT_REFRESH_EXPIRATION,
@@ -54,12 +55,20 @@ export class AuthService {
 
   async payloadFromGoogle(
     idToken: string,
+    aud: 'android' | 'ios',
   ): Promise<IntermediatePayload | null> {
     try {
-      const ticket: LoginTicket = await this.googleClient.verifyIdToken({
-        idToken,
-      });
-      const payload = ticket.getPayload();
+      let ticket: LoginTicket | null = null;
+      if (aud === 'android') {
+        ticket = await this.googleAndroidClient.verifyIdToken({
+          idToken,
+        });
+      } else if (aud === 'ios') {
+        ticket = await this.googleIosClient.verifyIdToken({
+          idToken,
+        });
+      }
+      const payload = ticket?.getPayload();
 
       if (!payload) {
         return null;
@@ -78,22 +87,30 @@ export class AuthService {
     authType: AuthType,
     lat: number,
     long: number,
+    aud?: 'ios' | 'android',
   ): Promise<[string, string] | null> {
     // if verify success, idToken is a string. If anything is wrong, it is undefined
     let idToken: IntermediatePayload | null = null;
     switch (authType) {
       case AuthType.GOOGLE:
-        idToken = await this.payloadFromGoogle(token);
+        if (!aud) return null;
+        idToken = await this.payloadFromGoogle(token, aud);
         break;
       case AuthType.APPLE:
         idToken = await this.payloadFromApple(token);
         break;
       case AuthType.DEVICE:
-        idToken = { id: token, email: '' };
+        idToken =
+          process.env.DEVELOPMENT === 'true'
+            ? {
+                id: token,
+                email: 'dev@cornell.edu',
+              }
+            : null;
         break;
     }
 
-    if (!idToken) return null;
+    if (!idToken || !idToken.email.endsWith('@cornell.edu')) return null;
 
     let user = await this.userService.byAuth(authType, idToken.id);
 
@@ -172,7 +189,8 @@ export class AuthService {
         this.accessOptions,
       );
       return (await this.userService.byId(decodedPayload.userId)) ?? null;
-    } catch {
+    } catch (e) {
+      console.log(e);
       return null;
     }
   }

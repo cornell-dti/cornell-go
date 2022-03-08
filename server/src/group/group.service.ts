@@ -8,6 +8,7 @@ import { UserService } from '../user/user.service';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityRepository } from '@mikro-orm/postgresql';
 import { v4 } from 'uuid';
+import { Reference } from '@mikro-orm/core';
 
 @Injectable()
 export class GroupService {
@@ -26,8 +27,10 @@ export class GroupService {
       id: v4(),
       currentEvent: event,
       members: [],
-      friendlyId: 'ABCDEF',
+      friendlyId: '',
     });
+
+    group.friendlyId = group.id.substring(9, 13);
 
     await this.groupsRepository.persistAndFlush(group);
 
@@ -38,10 +41,16 @@ export class GroupService {
     });
 
     group.members.set([groupMember]);
-    host.groupMember?.set(groupMember);
+    host.groupMember = Reference.create(groupMember);
     groupMember.user.set(host);
 
     await this.groupsRepository.persistAndFlush(group);
     return group;
+  }
+
+  /** Get group of the user */
+  async getGroupForUser(user: User): Promise<Group> {
+    const groupMember = await user.groupMember!.load();
+    return groupMember!.group.load();
   }
 }

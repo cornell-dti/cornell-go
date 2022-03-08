@@ -52,7 +52,7 @@ export class ChallengeGateway {
       })),
     });
 
-    return true;
+    return false;
   }
 
   @SubscribeMessage('setCurrentChallenge')
@@ -106,7 +106,7 @@ export class ChallengeGateway {
           curChallengeId: data.challengeId,
         },
       ],
-      update: true,
+      removeListedMembers: false,
     };
 
     for (const mem of group?.members ?? []) {
@@ -114,7 +114,7 @@ export class ChallengeGateway {
       this.clientService.emitUpdateGroupData(member, updateData);
     }
 
-    return true;
+    return false;
   }
 
   @SubscribeMessage('completedChallenge')
@@ -141,7 +141,7 @@ export class ChallengeGateway {
           curChallengeId: newTracker.currentChallenge.id,
         },
       ],
-      update: true,
+      removeListedMembers: false,
     };
 
     for (const mem of group?.members ?? []) {

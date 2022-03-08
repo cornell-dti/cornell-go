@@ -57,19 +57,20 @@ export class UserGateway {
     const groupMember = await user.groupMember?.load();
     const rewards = await user.rewards.loadItems();
     const participatingEvents = await user.participatingEvents.loadItems();
+    const group = await groupMember?.group.load();
 
     this.clientService.emitUpdateUserData(user, {
       id: user.id,
       username: user.username,
       score: user.score,
-      groupId: groupMember?.group.id ?? '',
+      groupId: group?.friendlyId ?? 'undefined',
       authType: user.authType as UpdateUserDataAuthTypeDto,
       rewardIds: rewards.map(rw => rw.id),
       trackedEventIds: participatingEvents.map(ev => ev.event.id),
       ignoreIdLists: false,
     });
 
-    return true;
+    return false;
   }
 
   @SubscribeMessage('setUsername')
@@ -99,7 +100,7 @@ export class UserGateway {
     // Update data for the group
     const updateData: UpdateGroupDataDto = {
       curEventId: group?.currentEvent.id ?? '',
-      update: true,
+      removeListedMembers: false,
       members: [
         {
           id: user.id,
@@ -122,7 +123,7 @@ export class UserGateway {
       );
     }
 
-    return true;
+    return false;
   }
 
   @SubscribeMessage('setAuthToDevice')
@@ -130,7 +131,8 @@ export class UserGateway {
     @CallingUser() user: User,
     @MessageBody() data: SetAuthToDeviceDto,
   ) {
-    return this.authService.setAuthType(user, AuthType.DEVICE, data.deviceId);
+    await this.authService.setAuthType(user, AuthType.DEVICE, data.deviceId);
+    return false;
   }
 
   @SubscribeMessage('setAuthToOAuth')
@@ -138,11 +140,12 @@ export class UserGateway {
     @CallingUser() user: User,
     @MessageBody() data: SetAuthToOAuthDto,
   ) {
-    return this.authService.setAuthType(
+    await this.authService.setAuthType(
       user,
       this.providerToAuthType(data.provider),
       data.authId,
     );
+    return false;
   }
 
   @SubscribeMessage('closeAccount')
@@ -150,7 +153,8 @@ export class UserGateway {
     @CallingUser() user: User,
     @MessageBody() data: CloseAccountDto,
   ) {
-    return this.authService.setAuthType(user, AuthType.NONE, '');
+    await this.authService.setAuthType(user, AuthType.NONE, '');
+    return false;
   }
 
   @SubscribeMessage('requestGlobalLeaderData')
@@ -172,7 +176,6 @@ export class UserGateway {
         score: usr.score,
       })),
     });
-
-    return true;
+    return false;
   }
 }

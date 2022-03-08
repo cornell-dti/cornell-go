@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:game/Widgets/back_btn.dart';
-import 'package:game/Widgets/leaderboard_cell.dart';
+import 'package:game/widget/back_btn.dart';
+import 'package:game/widget/leaderboard_cell.dart';
+import 'package:game/widget/leaderboard_user_cell.dart';
 
 class LeaderboardWidget extends StatefulWidget {
   LeaderboardWidget({Key? key}) : super(key: key);
@@ -27,6 +28,7 @@ class _LeaderboardWidgetState extends State<LeaderboardWidget> {
               shrinkWrap: true,
               scrollDirection: Axis.vertical,
               children: [
+                leaderBoardUserCell(context, "User", "1", "6", "23"),
                 leaderBoardCell(context, "User", "1", "23", true),
                 leaderBoardCell(context, "User 2", "2", "20", false),
                 leaderBoardCell(context, "User 3", "3", "19", false),
