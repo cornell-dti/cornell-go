@@ -62,6 +62,10 @@ npm start
 
 ```
 Open the main.dart file, then click the Play button
+*OR* to run with a custom server url
+
+cd game
+flutter run --dart-define=API_URL=https://example.com
 ```
 
 ## Contributors
@@ -73,6 +77,8 @@ Open the main.dart file, then click the Play button
 - **Youssef Attia** - Developer
 - **Cathryn Li** - Developer
 - **Nirbhay S Narang** - Developer
+- **Chris Gu** - Developer
+- **Brian La** - Developer
 
 ### FA21
 
