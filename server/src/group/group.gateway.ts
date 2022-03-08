@@ -26,7 +26,7 @@ export class GroupGateway {
     private clientService: ClientService,
     private groupService: GroupService,
     private eventService: EventService,
-  ) {}
+  ) { }
 
   @SubscribeMessage('requestGroupData')
   async requestGroupData(
@@ -64,17 +64,23 @@ export class GroupGateway {
   async joinGroup(
     @CallingUser() user: User,
     @MessageBody() data: JoinGroupDto,
-  ) {}
+  ) {
+    this.groupService.joinGroup(user, data.groupId);
+    this.requestGroupData(user, {})
+  }
 
   @SubscribeMessage('leaveGroup')
   async leaveGroup(
     @CallingUser() user: User,
     @MessageBody() data: LeaveGroupDto,
-  ) {}
+  ) {
+    this.groupService.leaveGroup(user);
+    this.requestGroupData(user, {})
+  }
 
   @SubscribeMessage('setCurrentEvent')
   async setCurrentEvent(
     @CallingUser() user: User,
     @MessageBody() data: SetCurrentEventDto,
-  ) {}
+  ) { }
 }
