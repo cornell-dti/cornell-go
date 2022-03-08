@@ -57,19 +57,20 @@ export class UserGateway {
     const groupMember = await user.groupMember?.load();
     const rewards = await user.rewards.loadItems();
     const participatingEvents = await user.participatingEvents.loadItems();
+    const group = await groupMember?.group.load();
 
     this.clientService.emitUpdateUserData(user, {
       id: user.id,
       username: user.username,
       score: user.score,
-      groupId: groupMember?.group.id ?? '',
+      groupId: group?.friendlyId ?? 'undefined',
       authType: user.authType as UpdateUserDataAuthTypeDto,
       rewardIds: rewards.map(rw => rw.id),
       trackedEventIds: participatingEvents.map(ev => ev.event.id),
       ignoreIdLists: false,
     });
 
-    return true;
+    return false;
   }
 
   @SubscribeMessage('setUsername')
@@ -122,7 +123,7 @@ export class UserGateway {
       );
     }
 
-    return true;
+    return false;
   }
 
   @SubscribeMessage('setAuthToDevice')
@@ -131,7 +132,7 @@ export class UserGateway {
     @MessageBody() data: SetAuthToDeviceDto,
   ) {
     await this.authService.setAuthType(user, AuthType.DEVICE, data.deviceId);
-    return true;
+    return false;
   }
 
   @SubscribeMessage('setAuthToOAuth')
@@ -144,7 +145,7 @@ export class UserGateway {
       this.providerToAuthType(data.provider),
       data.authId,
     );
-    return true;
+    return false;
   }
 
   @SubscribeMessage('closeAccount')
@@ -153,7 +154,7 @@ export class UserGateway {
     @MessageBody() data: CloseAccountDto,
   ) {
     await this.authService.setAuthType(user, AuthType.NONE, '');
-    return true;
+    return false;
   }
 
   @SubscribeMessage('requestGlobalLeaderData')
@@ -175,6 +176,6 @@ export class UserGateway {
         score: usr.score,
       })),
     });
-    return true;
+    return false;
   }
 }

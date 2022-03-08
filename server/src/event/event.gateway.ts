@@ -42,7 +42,6 @@ export class EventGateway {
         ids.map(async (ev: EventBase) => ({
           id: ev.id,
           skippingEnabled: ev.skippingEnabled,
-          hasStarChallenge: ev.hasStarChallenge,
           name: ev.name,
           description: ev.description,
           rewardType: ev.rewardType as RewardTypeDto,
@@ -64,7 +63,7 @@ export class EventGateway {
 
     this.clientService.emitUpdateEventData(user, updateEventData);
 
-    return true;
+    return false;
   }
 
   @SubscribeMessage('requestAllEventData')
@@ -88,7 +87,7 @@ export class EventGateway {
       eventIds: results,
     });
 
-    return true;
+    return false;
   }
 
   @SubscribeMessage('requestEventLeaderData')
@@ -114,7 +113,7 @@ export class EventGateway {
       ),
     });
 
-    return true;
+    return false;
   }
 
   @SubscribeMessage('requestEventTrackerData')
@@ -141,6 +140,6 @@ export class EventGateway {
       ),
     });
 
-    return true;
+    return false;
   }
 }

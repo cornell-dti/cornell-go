@@ -15,7 +15,6 @@ export interface UpdateEventDataRewardDto {
 export interface UpdateEventDataEventDto {
   id: string;
   skippingEnabled: boolean;
-  hasStarChallenge: boolean;
   name: string;
   description: string;
   rewardType: RewardTypeDto;
