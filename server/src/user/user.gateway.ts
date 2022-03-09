@@ -20,9 +20,11 @@ import { SetUsernameDto } from './set-username.dto';
 import { RequestEventLeaderDataDto } from '../event/request-event-leader-data.dto';
 import { RequestGlobalLeaderDataDto } from './request-global-leader-data.dto';
 import { UserService } from './user.service';
-import { forwardRef, Inject } from '@nestjs/common';
+import { forwardRef, Inject, UseGuards } from '@nestjs/common';
+import { UserGuard } from 'src/auth/jwt-auth.guard';
 
 @WebSocketGateway()
+@UseGuards(UserGuard)
 export class UserGateway {
   constructor(
     private clientService: ClientService,
@@ -52,19 +54,23 @@ export class UserGateway {
     @CallingUser() user: User,
     @MessageBody() data: RequestUserDataDto,
   ) {
-    const basicUser = await this.userService.loadBasic(user);
-    this.clientService.emitUpdateUserData(basicUser, {
+    const groupMember = await user.groupMember?.load();
+    const rewards = await user.rewards.loadItems();
+    const participatingEvents = await user.participatingEvents.loadItems();
+    const group = await groupMember?.group.load();
+
+    this.clientService.emitUpdateUserData(user, {
       id: user.id,
       username: user.username,
       score: user.score,
-      groupId: user.groupMember?.group.id ?? '',
+      groupId: group?.friendlyId ?? 'undefined',
       authType: user.authType as UpdateUserDataAuthTypeDto,
-      rewardIds: user.rewards.map(rw => rw.id),
-      trackedEventIds: user.participatingEvents.map(ev => ev.event.id),
+      rewardIds: rewards.map(rw => rw.id),
+      trackedEventIds: participatingEvents.map(ev => ev.event.id),
       ignoreIdLists: false,
     });
 
-    return true;
+    return false;
   }
 
   @SubscribeMessage('setUsername')
@@ -72,17 +78,19 @@ export class UserGateway {
     @CallingUser() user: User,
     @MessageBody() data: SetUsernameDto,
   ) {
-    const group = await this.userService.loadGroup(user, true);
-    const groupMembers = group.members;
-    const basicUser = await this.userService.loadBasic(user);
-    basicUser.username = data.newUsername;
+    const groupMember = await user.groupMember?.load();
+    const group = await groupMember?.group.load();
+    const groupMembers = group?.members;
+    const participatingEvents = await user.participatingEvents.loadItems();
+
+    user.username = data.newUsername;
 
     // Update user that name has changed
-    this.clientService.emitUpdateUserData(basicUser, {
+    this.clientService.emitUpdateUserData(user, {
       id: user.id,
       username: user.username,
       score: user.score,
-      groupId: user.groupMember?.group.id ?? '',
+      groupId: group?.id ?? '',
       authType: user.authType as UpdateUserDataAuthTypeDto,
       rewardIds: [],
       trackedEventIds: [],
@@ -91,28 +99,31 @@ export class UserGateway {
 
     // Update data for the group
     const updateData: UpdateGroupDataDto = {
-      curEventId: group.currentEvent.id,
-      update: true,
+      curEventId: group?.currentEvent.id ?? '',
+      removeListedMembers: false,
       members: [
         {
-          id: basicUser.id,
-          name: basicUser.username,
-          points: basicUser.score,
-          host: basicUser.groupMember?.isHost ?? false,
+          id: user.id,
+          name: user.username,
+          points: user.score,
+          host: groupMember?.isHost ?? false,
           curChallengeId:
-            basicUser.participatingEvents.find(
-              ev => ev.event.id === group.currentEvent.id,
+            participatingEvents.find(
+              ev => ev.event.id === group?.currentEvent.id,
             )?.currentChallenge.id ?? '',
         },
       ],
     };
 
     // Update groupmates about username change
-    for (const member of groupMembers) {
-      this.clientService.emitUpdateGroupData(member.user, updateData);
+    for (const member of groupMembers ?? []) {
+      this.clientService.emitUpdateGroupData(
+        await member?.user.load(),
+        updateData,
+      );
     }
 
-    return true;
+    return false;
   }
 
   @SubscribeMessage('setAuthToDevice')
@@ -120,7 +131,8 @@ export class UserGateway {
     @CallingUser() user: User,
     @MessageBody() data: SetAuthToDeviceDto,
   ) {
-    return this.authService.setAuthType(user, AuthType.DEVICE, data.deviceId);
+    await this.authService.setAuthType(user, AuthType.DEVICE, data.deviceId);
+    return false;
   }
 
   @SubscribeMessage('setAuthToOAuth')
@@ -128,11 +140,12 @@ export class UserGateway {
     @CallingUser() user: User,
     @MessageBody() data: SetAuthToOAuthDto,
   ) {
-    return this.authService.setAuthType(
+    await this.authService.setAuthType(
       user,
       this.providerToAuthType(data.provider),
       data.authId,
     );
+    return false;
   }
 
   @SubscribeMessage('closeAccount')
@@ -140,7 +153,8 @@ export class UserGateway {
     @CallingUser() user: User,
     @MessageBody() data: CloseAccountDto,
   ) {
-    return this.authService.setAuthType(user, AuthType.NONE, '');
+    await this.authService.setAuthType(user, AuthType.NONE, '');
+    return false;
   }
 
   @SubscribeMessage('requestGlobalLeaderData')
@@ -162,7 +176,6 @@ export class UserGateway {
         score: usr.score,
       })),
     });
-
-    return true;
+    return false;
   }
 }

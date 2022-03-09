@@ -1,8 +1,10 @@
+import { UseGuards } from '@nestjs/common';
 import {
   MessageBody,
   SubscribeMessage,
   WebSocketGateway,
 } from '@nestjs/websockets';
+import { UserGuard } from 'src/auth/jwt-auth.guard';
 import { CallingUser } from '../auth/calling-user.decorator';
 import { ClientService } from '../client/client.service';
 import { UpdateRewardDataDto } from '../client/update-reward-data.dto';
@@ -11,6 +13,7 @@ import { RequestRewardDataDto } from './request-reward-data.dto';
 import { RewardService } from './reward.service';
 
 @WebSocketGateway()
+@UseGuards(UserGuard)
 export class RewardGateway {
   constructor(
     private clientService: ClientService,
@@ -37,6 +40,6 @@ export class RewardGateway {
     };
 
     this.clientService.emitUpdateRewardData(user, updateData);
-    return true;
+    return false;
   }
 }

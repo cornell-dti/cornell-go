@@ -15,18 +15,18 @@ export interface UpdateEventDataRewardDto {
 export interface UpdateEventDataEventDto {
   id: string;
   skippingEnabled: boolean;
-  hasStarChallenge: boolean;
   name: string;
   description: string;
   rewardType: RewardTypeDto;
   time: string;
   topCount: number;
   rewards: UpdateEventDataRewardDto[];
-  minMembers: number;
+  requiredMembers: number;
   challengeIds: string[];
 }
 
 /** DTO for updateEventData */
 export interface UpdateEventDataDto {
   events: UpdateEventDataEventDto[];
+  isSearch: boolean;
 }
