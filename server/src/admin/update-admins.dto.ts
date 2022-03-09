@@ -1,6 +1,6 @@
 export interface UpdateAdminsAdminUpdateDto {
-  email: string;
-  status: 'approve' | 'deny';
+  id: string;
+  granted: boolean;
 }
 
 export interface UpdateAdminsDto {

@@ -10,7 +10,16 @@ import { JwtService } from '@nestjs/jwt';
     Custom imports for AuthService, jwt secret, etc...
 */
 import { Socket } from 'socket.io';
+import { Handshake } from 'socket.io/dist/socket';
 import { AuthService } from './auth.service';
+
+function tokenOfHandshake(handshake: Handshake) {
+  return (
+    (handshake.auth['token'] as string | undefined) ??
+    (process.env.DEVELOPMENT !== 'false' &&
+      (handshake.query['token'] as string))
+  );
+}
 
 @Injectable()
 export class UserGuard implements CanActivate {
@@ -18,8 +27,9 @@ export class UserGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext) {
     const client = context.switchToWs().getClient<Socket>();
-    const token =
-      client.handshake.auth['token'] ?? client.handshake.query['token'];
+    const token = tokenOfHandshake(client.handshake);
+
+    if (!token) return false;
 
     const user = await this.authService.userByToken(token);
     if (user) {
@@ -38,7 +48,9 @@ export class AdminGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext) {
     const client = context.switchToWs().getClient<Socket>();
-    const token = client.handshake.auth['token'];
+    const token = tokenOfHandshake(client.handshake);
+
+    if (!token) return false;
 
     const user = await this.authService.userByToken(token);
     if (user && user.adminGranted) {

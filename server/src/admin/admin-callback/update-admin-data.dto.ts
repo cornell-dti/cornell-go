@@ -1,6 +1,7 @@
 export interface UpdateAdminDataAdminDto {
+  id: string;
   email: string;
-  approved: boolean;
+  requesting: boolean;
   superuser: boolean;
 }
 
