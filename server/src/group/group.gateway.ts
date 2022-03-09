@@ -40,7 +40,7 @@ export class GroupGateway {
       members: await Promise.all(
         (
           await groupData.members.loadItems()
-        ).map(async (member:GroupMember) => {
+        ).map(async (member: GroupMember) => {
           const usr = await member.user.load();
           return {
             id: usr.id,
@@ -77,12 +77,10 @@ export class GroupGateway {
     @CallingUser() user: User,
     @MessageBody() data: SetCurrentEventDto,
   ) {
-    const userMember = await user.groupMember!.load()
+    const userMember = await user.groupMember!.load();
     const userGroup = await userMember.group.load();
-    let newEvent = await this.eventService.getEventsByIds(
-      [data.eventId],
-    );
-    userGroup.members.forEach(async (member: GroupMember)  => {
+    let newEvent = await this.eventService.getEventsByIds([data.eventId]);
+    userGroup.members.forEach(async (member: GroupMember) => {
       //if the user already has the event, keep their tracker
       try {
         let memberEvent = await this.eventService.getCurrentEventTrackerForUser(

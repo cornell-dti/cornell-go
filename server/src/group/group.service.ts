@@ -47,9 +47,9 @@ export class GroupService {
     await this.groupsRepository.persistAndFlush(group);
     return group;
   }
-  
-  async saveGroup(group: Group) { 
-    await this.groupsRepository.persistAndFlush(group); 
+
+  async saveGroup(group: Group) {
+    await this.groupsRepository.persistAndFlush(group);
   }
 
   /** Get group of the user */
