@@ -100,7 +100,7 @@ export class GroupGateway {
     let updateGroupData: UpdateGroupDataDto = {
       curEventId: data.eventId,
       members: [],
-      update: false,
+      removeListedMembers: false,
     };
     this.clientService.emitUpdateGroupData(user, updateGroupData);
   }
