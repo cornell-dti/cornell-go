@@ -131,7 +131,7 @@ export class EventService {
       user,
     });
 
-    await this.eventTrackerRepository.save(progress);
+    await this.eventTrackerRepository.persistAndFlush(progress);
 
     return progress;
   }

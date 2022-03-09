@@ -79,18 +79,19 @@ export class GroupGateway {
   ) {
     const userMember = await user.groupMember!.load();
     const userGroup = await userMember.group.load();
-    let newEvent = await this.eventService.getEventsByIds([data.eventId]);
-    userGroup.members.forEach(async (member: GroupMember) => {
+    let newEvent = (await this.eventService.getEventsByIds([data.eventId]))[0];
+    ( await userGroup.members.loadItems()).forEach(async (member: GroupMember) => {
       //if the user already has the event, keep their tracker
+      let currentUser = await member.user.load();
       try {
         let memberEvent = await this.eventService.getCurrentEventTrackerForUser(
-          member.user,
+          currentUser
         );
         if (memberEvent.event.id != data.eventId)
-          this.eventService.createEventTracker(member.user, newEvent[0]);
+          this.eventService.createEventTracker(currentUser, newEvent);
         //else add a new tracker to the current event
       } catch {
-        this.eventService.createEventTracker(member.user, newEvent[0]);
+        this.eventService.createEventTracker(currentUser, newEvent);
       }
     });
     userGroup.currentEvent.set(newEvent);
