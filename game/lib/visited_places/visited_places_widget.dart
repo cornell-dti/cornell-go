@@ -23,7 +23,7 @@ class _VisitedPlacesWidgetState extends State<VisitedPlacesWidget> {
     return Scaffold(
       key: scaffoldKey,
       floatingActionButton: backBtn(scaffoldKey, context, "Previouly visited"),
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.black,
       body: Padding(
         padding: const EdgeInsets.only(top: 150),
         child: Container(
@@ -32,16 +32,29 @@ class _VisitedPlacesWidgetState extends State<VisitedPlacesWidget> {
             child: Column(
               children: [
                 Container(
-                    child: Row(
-                  children: [
-                    Icon(Icons.search, size: 24),
-                    Expanded(
-                        child: TextField(
-                            decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      hintText: 'search...',
-                    )))
-                  ],
+                    child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.search,
+                        size: 25,
+                        color: Colors.white,
+                      ),
+                      Expanded(
+                          child: TextField(
+                              cursorColor: Colors.white,
+                              decoration: InputDecoration(
+                                  enabledBorder: UnderlineInputBorder(
+                                      borderSide:
+                                          BorderSide(color: Colors.white)),
+                                  border: UnderlineInputBorder(),
+                                  hintText: 'search...',
+                                  hintStyle: TextStyle(
+                                      fontSize: 20, color: Colors.white),
+                                  fillColor: Colors.white)))
+                    ],
+                  ),
                 )),
                 Expanded(
                     child: ListView(
