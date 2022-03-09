@@ -17,7 +17,6 @@ import {
 } from '../client/update-group-data.dto';
 import { GroupService } from './group.service';
 import { GroupMember } from '../model/group-member.entity';
-import { EventService } from '../event/event.service';
 import { UserGuard } from 'src/auth/jwt-auth.guard';
 import { UseGuards } from '@nestjs/common';
 @WebSocketGateway()
@@ -41,7 +40,7 @@ export class GroupGateway {
       members: await Promise.all(
         (
           await groupData.members.loadItems()
-        ).map(async member => {
+        ).map(async (member:GroupMember) => {
           const usr = await member.user.load();
           return {
             id: usr.id,
@@ -82,9 +81,8 @@ export class GroupGateway {
     const userGroup = await userMember.group.load();
     let newEvent = await this.eventService.getEventsByIds(
       [data.eventId],
-
     );
-    userGroup.members.forEach(async member => {
+    userGroup.members.forEach(async (member: GroupMember)  => {
       //if the user already has the event, keep their tracker
       try {
         let memberEvent = await this.eventService.getCurrentEventTrackerForUser(
