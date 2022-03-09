@@ -11,4 +11,5 @@ export interface ChallengeDto {
 
 export interface UpdateChallengesDto {
   challenges: ChallengeDto[];
+  deletedIds: string[];
 }

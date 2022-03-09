@@ -19,4 +19,5 @@ export interface EventDto {
 
 export interface UpdateEventsDto {
   events: EventDto[];
+  deletedIds: string[];
 }

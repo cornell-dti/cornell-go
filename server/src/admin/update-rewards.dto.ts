@@ -6,4 +6,5 @@ export interface RewardDto {
 
 export interface UpdateRewardsDto {
   rewards: RewardDto[];
+  deletedIds: string[];
 }
