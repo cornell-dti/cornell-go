@@ -41,10 +41,6 @@ export class EventBase {
   @Index()
   isDefault!: boolean;
 
-  /** If true, then the challenge with index 9999 is considered a star challenge */
-  @Property()
-  hasStarChallenge!: boolean;
-
   @Property()
   name!: string;
 

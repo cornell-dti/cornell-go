@@ -7,60 +7,47 @@ class GameServerApi {
   final Future<bool> Function() _refreshAccess;
   Socket _socket;
 
+  String _refreshEv = "";
+  dynamic _refreshDat = "";
+
   GameServerApi(Socket socket, Future<bool> Function() refresh)
       : _refreshAccess = refresh,
         _socket = socket;
 
   void replaceSocket(Socket socket) {
     _socket = socket;
-  }
-
-  Future<bool> _emitAck(String ev, Map<String, dynamic> data) async {
-    final invoker = Completer<bool>();
-    _socket.emitWithAck(ev, data, ack: (ack) {
-      if (ack is bool) {
-        invoker.complete(ack);
-      } else {
-        invoker.complete(false);
+    _socket.onError((data) async {
+      if (await _refreshAccess()) {
+        _socket.emit(_refreshEv, _refreshDat);
       }
     });
-
-    return invoker.future;
   }
 
-  Future<bool> _invokeWithRefresh(String ev, Map<String, dynamic> data) async {
-    final success = await _emitAck(ev, data);
-    if (!success) {
-      final hasRefreshed = await _refreshAccess();
-
-      if (hasRefreshed) {
-        return await _emitAck(ev, data);
-      }
-      return false;
-    }
-    return true;
+  void _invokeWithRefresh(String ev, Map<String, dynamic> data) {
+    _refreshEv = ev;
+    _refreshDat = data;
+    _socket.emit(ev, data);
   }
 
-  Future<bool> requestRewardData(List<String> rewardIds) =>
+  void requestRewardData(List<String> rewardIds) =>
       _invokeWithRefresh("requestRewardData", {'rewardIds': rewardIds});
 
-  Future<bool> requestGlobalLeaderData(int offset, int count) =>
-      _invokeWithRefresh(
-          "requestRewardData", {'offset': offset, 'count': count});
+  void requestGlobalLeaderData(int offset, int count) => _invokeWithRefresh(
+      "requestRewardData", {'offset': offset, 'count': count});
 
-  Future<bool> closeAccount() => _invokeWithRefresh("closeAccount", {});
-  Future<bool> setUsername(String newUsername) =>
+  void closeAccount() => _invokeWithRefresh("closeAccount", {});
+  void setUsername(String newUsername) =>
       _invokeWithRefresh("setUsername", {'newUsername': newUsername});
-  Future<bool> requestUserData() => _invokeWithRefresh("requestUserData", {});
-  Future<bool> requestGroupData() => _invokeWithRefresh("requestGroupData", {});
-  Future<bool> joinGroup(String groupId) =>
+  void requestUserData() => _invokeWithRefresh("requestUserData", {});
+  void requestGroupData() => _invokeWithRefresh("requestGroupData", {});
+  void joinGroup(String groupId) =>
       _invokeWithRefresh("joinGroup", {'groupId': groupId});
-  Future<bool> leaveGroup() => _invokeWithRefresh("leaveGroup", {});
-  Future<bool> setCurrentEvent(String eventId) =>
+  void leaveGroup() => _invokeWithRefresh("leaveGroup", {});
+  void setCurrentEvent(String eventId) =>
       _invokeWithRefresh("setCurrentEvent", {"eventId": eventId});
-  Future<bool> requestEventData(List<String> eventIds) =>
+  void requestEventData(List<String> eventIds) =>
       _invokeWithRefresh("requestEventData", {"eventIds": eventIds});
-  Future<bool> requestAllEventData(
+  void requestAllEventData(
           int offset,
           int count,
           List<UpdateEventDataEventRewardTypeDto> rewardTypes,
@@ -93,21 +80,20 @@ class GameServerApi {
         })
       });
 
-  Future<bool> requestEventLeaderData(int offset, int count, String eventId) =>
+  void requestEventLeaderData(int offset, int count, String eventId) =>
       _invokeWithRefresh("requestEventLeaderData",
           {"offset": offset, "count": count, "eventId": eventId});
 
-  Future<bool> requestEventTrackerData(List<String> trackedEventIds) =>
+  void requestEventTrackerData(List<String> trackedEventIds) =>
       _invokeWithRefresh(
           "requestEventLeaderData", {"trackedEventIds": trackedEventIds});
 
-  Future<bool> requestChallengeData(List<String> challengeIds) =>
-      _invokeWithRefresh(
-          "requestChallengeData", {"challengeIds": challengeIds});
+  void requestChallengeData(List<String> challengeIds) => _invokeWithRefresh(
+      "requestChallengeData", {"challengeIds": challengeIds});
 
-  Future<bool> setCurrentChallenge(String challengeId) =>
+  void setCurrentChallenge(String challengeId) =>
       _invokeWithRefresh("setCurrentChallenge", {"challengeId": challengeId});
 
-  Future<bool> completedChallenge(String challengeId) =>
+  void completedChallenge(String challengeId) =>
       _invokeWithRefresh("completedChallenge", {"challengeId": challengeId});
 }

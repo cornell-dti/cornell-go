@@ -169,7 +169,6 @@ export class EventService {
       requiredMembers: 1,
       skippingEnabled: true,
       isDefault: true,
-      hasStarChallenge: false,
       rewardType: EventRewardType.PERPETUAL,
       indexable: false,
       time: new Date(),

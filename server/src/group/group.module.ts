@@ -15,7 +15,7 @@ import { AuthModule } from 'src/auth/auth.module';
     forwardRef(() => UserModule),
     ClientModule,
     AuthModule,
-    EventModule,
+    forwardRef(() => EventModule),
   ],
   providers: [GroupService, GroupGateway],
   exports: [GroupService],
