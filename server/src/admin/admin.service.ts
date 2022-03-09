@@ -18,6 +18,14 @@ export class AdminService {
     private challengeRepository: EntityRepository<Challenge>,
   ) {}
 
+  async requestAdminAccess(adminId: string) {
+    const admin = await this.userRepository.findOne({ id: adminId });
+    if (admin) {
+      admin.adminRequested = true;
+      await this.userRepository.persistAndFlush(admin);
+    }
+  }
+
   async setAdminStatus(adminId: string, granted: boolean) {
     const admin = await this.userRepository.findOne({ id: adminId });
     if (admin) {
