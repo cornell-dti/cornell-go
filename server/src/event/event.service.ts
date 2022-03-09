@@ -124,7 +124,6 @@ export class EventService {
     return progress;
   }
   async createEventTracker(user: User, event: EventBase) {
-    
     let closestChallenge = event.challenges[0];
 
     let progress: EventTracker = this.eventTrackerRepository.create({

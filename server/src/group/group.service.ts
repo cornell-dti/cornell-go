@@ -28,7 +28,7 @@ export class GroupService {
       members: [],
     });
 
-    await this.entityManager.save(group);
+    await this.entityManager.persistAndFlush(group);
 
     let groupMember: GroupMember = this.groupMembersRepository.create({
       isHost: true,
@@ -40,7 +40,7 @@ export class GroupService {
     host.groupMember = groupMember;
     groupMember.user = host;
 
-    await this.entityManager.save([groupMember, group, host]);
+    await this.entityManager.persistAndFlush([groupMember, group, host]);
     return group;
   }
 
@@ -48,9 +48,7 @@ export class GroupService {
   async requestGroupData(authToken: string) {
     return;
   }
-  async saveGroup(group: Group) { 
-    await this.groupRepository.persistAndFlush(group); 
+  async saveGroup(group: Group) {
+    await this.groupRepository.persistAndFlush(group);
   }
-
-
 }
