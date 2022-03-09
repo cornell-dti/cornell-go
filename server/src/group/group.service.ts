@@ -47,13 +47,14 @@ export class GroupService {
     await this.groupsRepository.persistAndFlush(group);
     return group;
   }
+  
+  async saveGroup(group: Group) { 
+    await this.groupsRepository.persistAndFlush(group); 
+  }
 
   /** Get group of the user */
   async getGroupForUser(user: User): Promise<Group> {
     const groupMember = await user.groupMember!.load();
     return groupMember!.group.load();
-  }
-  async saveGroup(group: Group) {
-    await this.groupRepository.persistAndFlush(group);
   }
 }
