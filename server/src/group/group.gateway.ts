@@ -27,7 +27,7 @@ export class GroupGateway {
     private clientService: ClientService,
     private groupService: GroupService,
     private eventService: EventService,
-  ) { }
+  ) {}
 
   @SubscribeMessage('requestGroupData')
   async requestGroupData(
@@ -99,5 +99,5 @@ export class GroupGateway {
   async setCurrentEvent(
     @CallingUser() user: User,
     @MessageBody() data: SetCurrentEventDto,
-  ) { }
+  ) {}
 }
