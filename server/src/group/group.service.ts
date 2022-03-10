@@ -20,7 +20,7 @@ export class GroupService {
     private groupsRepository: EntityRepository<Group>,
     @InjectRepository(GroupMember)
     private groupMembersRepository: EntityRepository<GroupMember>,
-  ) { }
+  ) {}
 
   /** Creates a group from an event */
   async createFromEvent(event: EventBase, host: User) {
@@ -97,7 +97,7 @@ export class GroupService {
   async leaveGroup(user: User): Promise<Group | null> {
     const userOldGroup = await this.getGroupForUser(user);
     const updatedOldGroup = await this.removeUserFromGroup(user);
-    await this.createFromEvent(await userOldGroup.currentEvent.load(), user)
+    await this.createFromEvent(await userOldGroup.currentEvent.load(), user);
     return updatedOldGroup;
   }
 }
