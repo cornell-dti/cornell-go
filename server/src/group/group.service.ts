@@ -20,7 +20,7 @@ export class GroupService {
     private groupsRepository: EntityRepository<Group>,
     @InjectRepository(GroupMember)
     private groupMembersRepository: EntityRepository<GroupMember>,
-  ) {}
+  ) { }
 
   /** Creates a group from an event */
   async createFromEvent(event: EventBase, host: User) {
@@ -52,30 +52,32 @@ export class GroupService {
   /** Get group of the user */
   async getGroupForUser(user: User): Promise<Group> {
     const groupMember = await user.groupMember!.load();
-    return groupMember!.group.load();
+    return await groupMember!.group.load();
   }
 
-  /** Get group from the id.
+  /** Get group from by the friendlyId.
    * Throws a NotFoundError if the id does not correspond to a group. */
-  async getGroupFromID(id: string): Promise<Group> {
-    const group = await this.groupsRepository.findOne({ friendlyId: id });
-    if (group == null) throw NotFoundError;
-    return group;
+  async getGroupFromFriendlyId(id: string): Promise<Group> {
+    return await this.groupsRepository.findOneOrFail({ friendlyId: id });
   }
 
   /** Helper function that removes a user from their current group.
    * If the user is the only member, deletes the group. */
-  async removeUserFromGroup(user: User) {
+  async removeUserFromGroup(user: User): Promise<Group | null> {
     const oldGroup = await this.getGroupForUser(user);
     oldGroup.members.remove(await user.groupMember!.load());
-    if (oldGroup.members.length == 0)
+    if (oldGroup.members.length == 0) {
       this.groupsRepository.removeAndFlush(oldGroup);
+      return null;
+    }
+    return oldGroup;
   }
 
-  /** Adds user to an existing group, given by the group's id. */
-  async joinGroup(user: User, joinId: string) {
-    this.removeUserFromGroup(user);
-    const group = await this.getGroupFromID(joinId);
+  /** Adds user to an existing group, given by the group's id.
+   * Returns the old group if it still exists, or null. */
+  async joinGroup(user: User, joinId: string): Promise<Group | null> {
+    const oldGroup = await this.removeUserFromGroup(user);
+    const group = await this.getGroupFromFriendlyId(joinId);
     let groupMember: GroupMember = this.groupMembersRepository.create({
       isHost: false,
       user: user,
@@ -87,14 +89,15 @@ export class GroupService {
     groupMember.user.set(user);
 
     await this.groupsRepository.persistAndFlush(group);
+    return oldGroup;
   }
 
-  /** Moves the user out of their current group into a new group */
-  async leaveGroup(user: User) {
-    const oldGroup = await this.getGroupForUser(user);
-    const newGroupId = (
-      await this.createFromEvent(await oldGroup.currentEvent.load(), user)
-    ).friendlyId;
-    this.joinGroup(user, newGroupId);
+  /** Moves the user out of their current group into a new group.
+   * Returns the old group if it still exists, or null. */
+  async leaveGroup(user: User): Promise<Group | null> {
+    const userOldGroup = await this.getGroupForUser(user);
+    const updatedOldGroup = await this.removeUserFromGroup(user);
+    await this.createFromEvent(await userOldGroup.currentEvent.load(), user)
+    return updatedOldGroup;
   }
 }
