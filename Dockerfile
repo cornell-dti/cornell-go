@@ -18,4 +18,5 @@ RUN npm run build
 
 WORKDIR /app/server
 COPY server .
-ENTRYPOINT ["npm", "run", "start"]
+RUN npm run build
+ENTRYPOINT ["npm", "run", "start:prod"]
