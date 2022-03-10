@@ -43,6 +43,7 @@ export class UserService {
       hashedRefreshToken: '',
       superuser: false,
       adminGranted: false,
+      adminRequested: false,
     });
 
     const eventTracker = await this.eventsService.createDefaultEventTracker(
