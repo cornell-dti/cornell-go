@@ -74,8 +74,4 @@ export class EventBase {
     orderBy: { eventIndex: 'asc' },
   })
   challenges = new Collection<Challenge>(this);
-
-  /** Amount of entities in the "challenges" field (update whenever that changes) */
-  @Property()
-  challengeCount!: number;
 }
