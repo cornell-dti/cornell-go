@@ -138,11 +138,11 @@ class ApiClient extends ChangeNotifier {
       final pos = await GeoPoint.current();
       final loginResponse = await http.post(_googleLoginUrl, body: {
         'idToken': idToken,
-        'lat': pos.lat,
-        'long': pos.long,
+        'lat': pos.lat.toString(),
+        'long': pos.long.toString(),
         'aud': Platform.isIOS ? "ios" : "android"
       });
-
+      print(loginResponse.body);
       if (loginResponse.statusCode == 200 && loginResponse.body != "null") {
         final responseBody = jsonDecode(loginResponse.body);
 
@@ -155,6 +155,7 @@ class ApiClient extends ChangeNotifier {
         return true;
       }
     }
+
     authenticated = false;
     notifyListeners();
     return false;
