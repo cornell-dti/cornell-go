@@ -76,7 +76,6 @@ export class AuthService {
 
       return { id: payload.sub, email: payload.email ?? '' };
     } catch (error) {
-      
       // if any error pops up during the verifying stage, the process terminate
       // and return the error to the front end
       return null;
