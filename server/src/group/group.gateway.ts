@@ -89,7 +89,7 @@ export class GroupGateway {
         user,
         [data.eventId],
       );
-      if (evTrackers.length == 0)
+      if (evTrackers.length === 0)
         this.eventService.createEventTracker(currentUser, newEvent);
     });
     userGroup.currentEvent.set(newEvent);
