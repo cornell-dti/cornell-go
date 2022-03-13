@@ -19,6 +19,7 @@ import { GroupService } from './group.service';
 import { GroupMember } from '../model/group-member.entity';
 import { UserGuard } from 'src/auth/jwt-auth.guard';
 import { UseGuards } from '@nestjs/common';
+import { group } from 'console';
 @WebSocketGateway()
 @UseGuards(UserGuard)
 export class GroupGateway {
@@ -80,21 +81,17 @@ export class GroupGateway {
     const userMember = await user.groupMember!.load();
     const userGroup = await userMember.group.load();
     let newEvent = (await this.eventService.getEventsByIds([data.eventId]))[0];
-    (await userGroup.members.loadItems()).forEach(
-      async (member: GroupMember) => {
-        //if the user already has the event, keep their tracker
-        let currentUser = await member.user.load();
-        try {
-          let memberEvent =
-            await this.eventService.getCurrentEventTrackerForUser(currentUser);
-          if (memberEvent.event.id != data.eventId)
-            this.eventService.createEventTracker(currentUser, newEvent);
-          //else add a new tracker to the current event
-        } catch {
-          this.eventService.createEventTracker(currentUser, newEvent);
-        }
-      },
-    );
+    let groupMembers = await userGroup.members.loadItems();
+    groupMembers.forEach(async (member: GroupMember) => {
+      //if the user already has the event, keep their tracker
+      let currentUser = await member.user.load();
+      const evTrackers = await this.eventService.getEventTrackersByEventId(
+        user,
+        [data.eventId],
+      );
+      if (evTrackers.length == 0)
+        this.eventService.createEventTracker(currentUser, newEvent);
+    });
     userGroup.currentEvent.set(newEvent);
     await this.groupService.saveGroup(userGroup);
     let updateGroupData: UpdateGroupDataDto = {
@@ -102,6 +99,11 @@ export class GroupGateway {
       members: [],
       removeListedMembers: false,
     };
-    this.clientService.emitUpdateGroupData(user, updateGroupData);
+    groupMembers.forEach(async (member: GroupMember) => {
+      this.clientService.emitUpdateGroupData(
+        await member.user.load(),
+        updateGroupData,
+      );
+    });
   }
 }
