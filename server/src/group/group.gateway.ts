@@ -19,7 +19,8 @@ import { GroupService } from './group.service';
 import { GroupMember } from '../model/group-member.entity';
 import { UserGuard } from 'src/auth/jwt-auth.guard';
 import { UseGuards } from '@nestjs/common';
-import { group } from 'console';
+import { Group } from 'src/model/group.entity';
+
 @WebSocketGateway()
 @UseGuards(UserGuard)
 export class GroupGateway {
@@ -61,17 +62,39 @@ export class GroupGateway {
     return false;
   }
 
+  /** Helper function that notifies the user, all old group members,
+   * and all new members that the user has moved groups. */
+  async notifyAll(user: User, oldGroup: Group | null) {
+    this.requestGroupData(user, {});
+    if (oldGroup != null) {
+      const oldMembers = oldGroup!.members;
+      for (const member of oldMembers) {
+        this.requestGroupData(await member.user.load(), {});
+      }
+    }
+    const newMembers = (await this.groupService.getGroupForUser(user)).members;
+    for (const member of newMembers) {
+      this.requestGroupData(await member.user.load(), {});
+    }
+  }
+
   @SubscribeMessage('joinGroup')
   async joinGroup(
     @CallingUser() user: User,
     @MessageBody() data: JoinGroupDto,
-  ) {}
+  ) {
+    const oldGroup = await this.groupService.joinGroup(user, data.groupId);
+    this.notifyAll(user, oldGroup);
+  }
 
   @SubscribeMessage('leaveGroup')
   async leaveGroup(
     @CallingUser() user: User,
     @MessageBody() data: LeaveGroupDto,
-  ) {}
+  ) {
+    const oldGroup = await this.groupService.leaveGroup(user);
+    this.notifyAll(user, oldGroup);
+  }
 
   @SubscribeMessage('setCurrentEvent')
   async setCurrentEvent(
