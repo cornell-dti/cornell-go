@@ -192,7 +192,6 @@ export class EventService {
       topCount: 1,
       rewards: [],
       challenges: [],
-      challengeCount: 0,
     });
 
     const chal = await this.createNew(ev);
