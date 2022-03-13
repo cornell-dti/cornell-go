@@ -95,7 +95,10 @@ export class AuthService {
     let idToken: IntermediatePayload | null = null;
     switch (authType) {
       case AuthType.GOOGLE:
-        if (!aud) return null;
+        if (!aud) {
+          console.log('Google aud is missing');
+          return null;
+        }
         idToken = await this.payloadFromGoogle(token, aud);
         break;
       case AuthType.APPLE:
@@ -112,7 +115,14 @@ export class AuthService {
         break;
     }
 
-    if (!idToken || !idToken.email.endsWith('@cornell.edu')) return null;
+    if (!idToken || !idToken.email.endsWith('@cornell.edu')) {
+      if (!idToken) {
+        console.log('Id token was null!');
+      } else {
+        console.log('Non cornell account was used!');
+      }
+      return null;
+    }
 
     let user = await this.userService.byAuth(authType, idToken.id);
 
