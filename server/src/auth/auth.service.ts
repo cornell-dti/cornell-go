@@ -71,11 +71,13 @@ export class AuthService {
       const payload = ticket?.getPayload();
 
       if (!payload) {
+        console.log('Failed to verify with google');
         return null;
       }
 
       return { id: payload.sub, email: payload.email ?? '' };
     } catch (error) {
+      console.log(error);
       // if any error pops up during the verifying stage, the process terminate
       // and return the error to the front end
       return null;
