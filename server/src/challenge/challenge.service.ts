@@ -4,7 +4,8 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { EventService } from 'src/event/event.service';
 import { UserService } from 'src/user/user.service';
 import { Challenge } from '../model/challenge.entity';
-import { EventBase } from '../model/event-base.entity';
+import { EventReward } from '../model/event-reward.entity';
+import { EventBase,EventRewardType } from '../model/event-base.entity';
 import { PrevChallenge } from '../model/prev-challenge.entity';
 import { User } from '../model/user.entity';
 
@@ -18,6 +19,8 @@ export class ChallengeService {
     private challengeRepository: EntityRepository<Challenge>,
     @InjectRepository(PrevChallenge)
     private prevChallengeRepository: EntityRepository<PrevChallenge>,
+    @InjectRepository(PrevChallenge)
+    private rewardRepository: EntityRepository<EventReward>
   ) {}
 
   async createNew(event: EventBase) {
@@ -131,5 +134,21 @@ export class ChallengeService {
     await this.eventService.saveTracker(eventTracker);
 
     return eventTracker;
+  }
+
+  /** Check if the current event can return rewards */
+  async checkForReward(user: User, eventBase: EventBase) {
+    const rewardType = eventBase.rewardType
+
+    const userRewards = await user.rewards.loadItems();
+
+    //If User has completed the event/done all the challenges then:
+
+    if(rewardType === EventRewardType.LIMITED_TIME_EVENT && eventBase.time > new Date()){
+      return user.rewards
+    }
+
+    const unclaimedReward = await this.rewardRepository.findOne({ claimingUser: null, event: eventBase });
+    return userRewards + [unclaimedReward]
   }
 }
