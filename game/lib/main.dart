@@ -47,7 +47,9 @@ class MyApp extends StatelessWidget {
               ChangeNotifierProvider(create: (_) => TrackerModel(client)),
               ChangeNotifierProvider(create: (_) => ChallengeModel(client))
             ],
-            child: GameWidget(
-                child: LoginWidget(storage: storage, API_URL: API_URL))));
+            builder: (context, child) {
+              return GameWidget(
+                  child: LoginWidget(storage: storage, API_URL: API_URL));
+            }));
   }
 }
