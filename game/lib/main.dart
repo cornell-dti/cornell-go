@@ -44,6 +44,9 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(create: (_) => EventModel(client)),
           ChangeNotifierProvider(create: (_) => TrackerModel(client)),
           ChangeNotifierProvider(create: (_) => ChallengeModel(client))
-        ], child: GameWidget(child: HomePageWidget())));
+        ], 
+        builder: (context, child) {
+          return GameWidget(child: HomePageWidget());
+        }));
   }
 }
