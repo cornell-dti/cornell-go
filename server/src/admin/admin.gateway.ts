@@ -1,3 +1,4 @@
+import { UpdateEventDataDto } from './../../dist/client/update-event-data.dto.d';
 import { UseGuards } from '@nestjs/common';
 import {
   MessageBody,
@@ -54,9 +55,7 @@ export class AdminGateway {
           ).map((ch: Challenge) => ch.id),
           rewardIds: (
             await ev.rewards.loadItems()
-          ).map((rw: EventReward) => ({
-            id: rw.id,
-          })),
+          ).map((rw: EventReward) => (rw.id)),
         })),
       ),
     })
@@ -66,7 +65,25 @@ export class AdminGateway {
   async requestChallenges(
     @CallingUser() user: User,
     data: RequestChallengesDto,
-  ) {}
+  ) {
+    const challenges = await this.adminService.getAllChallengeData();
+
+    this.adminCallbackService.emitUpdateChallengeData({
+      deletedIds:[],
+      challenges: await Promise.all(
+        challenges.map(async (ch:Challenge) => ({
+          id: ch.id,
+          name: ch.name,
+          description: ch.description,
+          imageUrl: ch.imageUrl,
+          latitude: ch.latitude,
+          longitude: ch.longitude,
+          awardingRadius: ch.awardingRadius,
+          closeRadius: ch.closeRadius,
+        }))
+      ),
+    });
+  }
 
   @SubscribeMessage('requestRewards')
   async requestRewards(@CallingUser() user: User, data: RequestRewardsDto) {}
@@ -86,7 +103,12 @@ export class AdminGateway {
   }
 
   @SubscribeMessage('updateEvents')
-  async updateEvents(@CallingUser() user: User, data: UpdateEventsDto) {}
+  async updateEvents(@CallingUser() user: User, data: UpdateEventsDto) {
+    const eventUpdates: UpdateEventsDto[] = [];
+    for (const eventData of data.events) {
+      const event = await this.adminService.updateEvent();
+    }
+  }
 
   @SubscribeMessage('updateChallenges')
   async updateChallenges(

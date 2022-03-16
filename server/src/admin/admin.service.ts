@@ -45,4 +45,12 @@ export class AdminService {
   async getAllEventData() {
     return await this.eventRepository.find({});
   }
+
+  async getAllChallengeData() {
+    return await this.challengeRepository.find({});
+  }
+
+  async updateEvent() {
+
+  }
 }
