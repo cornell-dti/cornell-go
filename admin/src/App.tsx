@@ -22,24 +22,73 @@ import {
 
 import { Home } from "./components/Home";
 
-import {
-  MemoryRouter,
-  Route,
-  Routes,
-  useLocation,
-  useNavigate,
-} from "react-router-dom";
+import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { Rewards } from "./components/Rewards";
 import { Admins } from "./components/Admins";
 import { Challenges } from "./components/Challenges";
 import { Events } from "./components/Events";
+import { ReactNode } from "react";
 
-const drawerWidth = 250;
+const routes = [
+  { path: "/", element: <Home />, icon: <HomeSharp />, name: "Home" },
+  {
+    path: "/admins",
+    element: <Admins />,
+    icon: <VerifiedUser />,
+    name: "Admin Approval",
+  },
+  { path: "/events", element: <Events />, icon: <Event />, name: "Events" },
+  {
+    path: "/challenges",
+    element: <Challenges />,
+    icon: <Place />,
+    name: "Challenges",
+  },
+  {
+    path: "/rewards",
+    element: <Rewards />,
+    icon: <EmojiEvents />,
+    name: "Rewards",
+  },
+];
 
-export default function App() {
+function NavButton(props: { path: string; text: string; icon: ReactNode }) {
   const navigate = useNavigate();
   const location = useLocation();
+  return (
+    <ListItemButton
+      onClick={() => navigate(props.path)}
+      selected={location.pathname === props.path}
+    >
+      <ListItemIcon>{props.icon}</ListItemIcon>
+      <ListItemText primary={props.text} />
+    </ListItemButton>
+  );
+}
 
+function NavDrawer(props: { children: ReactNode }) {
+  const drawerWidth = 250;
+  return (
+    <Drawer
+      variant="permanent"
+      sx={{
+        width: drawerWidth,
+        flexShrink: 0,
+        [`& .MuiDrawer-paper`]: {
+          width: drawerWidth,
+          boxSizing: "border-box",
+        },
+      }}
+    >
+      <Toolbar />
+      <Box sx={{ overflow: "auto" }}>
+        <List>{props.children}</List>
+      </Box>
+    </Drawer>
+  );
+}
+
+export default function App() {
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
@@ -53,76 +102,17 @@ export default function App() {
           </Typography>
         </Toolbar>
       </AppBar>
-      <Drawer
-        variant="permanent"
-        sx={{
-          width: drawerWidth,
-          flexShrink: 0,
-          [`& .MuiDrawer-paper`]: {
-            width: drawerWidth,
-            boxSizing: "border-box",
-          },
-        }}
-      >
-        <Toolbar />
-        <Box sx={{ overflow: "auto" }}>
-          <List>
-            <ListItemButton
-              onClick={() => navigate("/")}
-              selected={location.pathname === "/"}
-            >
-              <ListItemIcon>
-                <HomeSharp />
-              </ListItemIcon>
-              <ListItemText primary={"Home"} />
-            </ListItemButton>
-            <ListItemButton
-              onClick={() => navigate("/admins")}
-              selected={location.pathname === "/admins"}
-            >
-              <ListItemIcon>
-                <VerifiedUser />
-              </ListItemIcon>
-              <ListItemText primary={"Admin Approval"} />
-            </ListItemButton>
-            <ListItemButton
-              onClick={() => navigate("/events")}
-              selected={location.pathname === "/events"}
-            >
-              <ListItemIcon>
-                <Event />
-              </ListItemIcon>
-              <ListItemText primary={"Events"} />
-            </ListItemButton>
-            <ListItemButton
-              onClick={() => navigate("/challenges")}
-              selected={location.pathname === "/challenges"}
-            >
-              <ListItemIcon>
-                <Place />
-              </ListItemIcon>
-              <ListItemText primary={"Challenges"} />
-            </ListItemButton>
-            <ListItemButton
-              onClick={() => navigate("/rewards")}
-              selected={location.pathname === "/rewards"}
-            >
-              <ListItemIcon>
-                <EmojiEvents />
-              </ListItemIcon>
-              <ListItemText primary={"Rewards"} />
-            </ListItemButton>
-          </List>
-        </Box>
-      </Drawer>
+      <NavDrawer>
+        {routes.map((route) => (
+          <NavButton path={route.path} text={route.name} icon={route.icon} />
+        ))}
+      </NavDrawer>
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <Toolbar />
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/admins" element={<Admins />} />
-          <Route path="/events" element={<Events />} />
-          <Route path="/challenges" element={<Challenges />} />
-          <Route path="/rewards" element={<Rewards />} />
+          {routes.map((route) => (
+            <Route path={route.path} element={route.element} />
+          ))}
         </Routes>
       </Box>
     </Box>
