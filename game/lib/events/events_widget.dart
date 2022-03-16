@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:game/widget/back_btn.dart';
 import 'package:game/widget/visited_places_cell.dart';
 
-class VisitedPlacesWidget extends StatefulWidget {
-  VisitedPlacesWidget({Key? key}) : super(key: key);
+class EventsWidget extends StatefulWidget {
+  EventsWidget({Key? key}) : super(key: key);
 
   @override
-  _VisitedPlacesWidgetState createState() => _VisitedPlacesWidgetState();
+  _EventsWidgetState createState() => _EventsWidgetState();
 }
 
-class _VisitedPlacesWidgetState extends State<VisitedPlacesWidget> {
+class _EventsWidgetState extends State<EventsWidget> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
