@@ -64,6 +64,7 @@ class _LoginWidgetState extends State<LoginWidget> {
                     onPressed: () async {
                       final client = ApiClient(widget.storage, widget.API_URL);
                       final isAuth = await client.connectGoogle();
+                      print(isAuth);
                     },
                   ),
                 )

@@ -2,12 +2,16 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key></key>
+	<string></string>
+	<key>CFBundle</key>
+	<string></string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
-	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<string>com.cornellgo.game</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -27,7 +31,7 @@
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>This app needs access to location when open.</string>
+	<string> CornellGO! servers need access to your location. </string>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
@@ -43,14 +47,12 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
-	<key>NSLocationWhenInUseUsageDescription</key>
-    <string> CornellGO! servers need access to your location. </string>
 	<key> NSLocationAlwaysAndWhenInUseUsageDescription </key>
 	<string> CornellGO! servers need access to your location. </string>
-    <key>NSLocationUsageDescription</key>
-    <string> CornellGO! servers need access to your location. </string>
-    <key>NSLocationAlwaysUsageDescription</key>
-   	<string> CornellGO! servers need access to your location. </string>
+	<key>NSLocationUsageDescription</key>
+	<string> CornellGO! servers need access to your location. </string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string> CornellGO! servers need access to your location. </string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
