@@ -22,7 +22,7 @@ import {
 
 import { Home } from "./components/Home";
 
-import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
+import { Route, Routes, useLocation, useNavigate, useRoutes } from "react-router-dom";
 import { Rewards } from "./components/Rewards";
 import { Admins } from "./components/Admins";
 import { Challenges } from "./components/Challenges";
@@ -55,6 +55,7 @@ const routes = [
 function NavButton(props: { path: string; text: string; icon: ReactNode }) {
   const navigate = useNavigate();
   const location = useLocation();
+  
   return (
     <ListItemButton
       onClick={() => navigate(props.path)}
