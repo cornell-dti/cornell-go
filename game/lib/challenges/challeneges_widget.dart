@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 
 import 'package:game/widget/back_btn.dart';
-import 'package:game/widget/visited_places_cell.dart';
+import 'package:game/widget/challenge_cell.dart';
 
-class VisitedPlacesWidget extends StatefulWidget {
-  VisitedPlacesWidget({Key? key}) : super(key: key);
+class ChallegesWidget extends StatefulWidget {
+  ChallegesWidget({Key? key}) : super(key: key);
 
   @override
-  _VisitedPlacesWidgetState createState() => _VisitedPlacesWidgetState();
+  _ChallegesWidgetState createState() => _ChallegesWidgetState();
 }
 
-class _VisitedPlacesWidgetState extends State<VisitedPlacesWidget> {
+class _ChallegesWidgetState extends State<ChallegesWidget> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
@@ -61,14 +61,14 @@ class _VisitedPlacesWidgetState extends State<VisitedPlacesWidget> {
                         shrinkWrap: true,
                         scrollDirection: Axis.vertical,
                         children: [
-                      visitedPlacesCell(context, "Sage Chapel", "4/19/2021", 5,
-                          "assets/images/38582.jpg"),
-                      visitedPlacesCell(context, "Sage Chapel", "4/19/2021", 5,
-                          "assets/images/38582.jpg"),
-                      visitedPlacesCell(context, "Sage Chapel", "4/19/2021", 5,
-                          "assets/images/38582.jpg"),
-                      visitedPlacesCell(context, "Sage Chapel", "4/19/2021", 5,
-                          "assets/images/38582.jpg"),
+                      challengeCell(context, "Sage Chapel", "4/19/2021", 5,
+                          "assets/images/38582.jpg", false, false, false),
+                      challengeCell(context, "Sage Chapel", "4/19/2021", 5,
+                          "assets/images/38582.jpg", true, true, false),
+                      challengeCell(context, "Sage Chapel", "4/19/2021", 5,
+                          "assets/images/38582.jpg", false, true, false),
+                      challengeCell(context, "Sage Chapel", "4/19/2021", 5,
+                          "assets/images/38582.jpg", false, true, true),
                     ]))
               ],
             ),
