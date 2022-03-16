@@ -1,139 +1,130 @@
 import {
   AppBar,
-  Toolbar,
-  Typography,
+  Box,
   CssBaseline,
-  TextField,
-  Grid,
   Drawer,
-  makeStyles,
   List,
   ListItem,
-  ListItemText,
+  ListItemButton,
   ListItemIcon,
-  Paper,
-  Container,
-  Button,
-} from "@material-ui/core";
+  ListItemText,
+  Toolbar,
+  Typography,
+} from "@mui/material";
 
 import {
-  Group,
-  Home,
-  LocationOn,
-  PeopleRounded,
-  Person,
-  Search,
+  EmojiEvents,
+  Event,
+  HomeSharp,
+  Place,
   VerifiedUser,
-} from "@material-ui/icons";
+} from "@mui/icons-material";
 
-import Places from "./components/Places";
-import { MemoryRouter, Route, Routes, useNavigate } from "react-router-dom";
-import AdminApproval from "./components/AdminApproval";
+import { Home } from "./components/Home";
 
-const drawerWidth = 240;
+import {
+  MemoryRouter,
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
+import { Rewards } from "./components/Rewards";
+import { Admins } from "./components/Admins";
+import { Challenges } from "./components/Challenges";
+import { Events } from "./components/Events";
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    display: "flex",
-  },
-  appBar: {
-    zIndex: theme.zIndex.drawer + 1,
-  },
-  drawer: {
-    width: drawerWidth,
-    flexShrink: 0,
-  },
-  drawerPaper: {
-    width: drawerWidth,
-  },
-  drawerContainer: {
-    overflow: "auto",
-  },
-  content: {
-    flexGrow: 1,
-    padding: theme.spacing(3),
-  },
-}));
-
-type NavigationDrawerProps = {
-  drawerClass: string;
-  drawerPaper: string;
-};
-
-function NavigationDrawer({ drawerClass, drawerPaper }: NavigationDrawerProps) {
-  const navigate = useNavigate();
-  return (
-    <Drawer
-      variant="permanent"
-      className={drawerClass}
-      classes={{ paper: drawerPaper }}
-    >
-      <Toolbar />
-      <List>
-        <ListItem button onClick={() => navigate("/")}>
-          <ListItemIcon>
-            <Home />
-          </ListItemIcon>
-          <ListItemText primary="Home" />
-        </ListItem>
-        <ListItem button onClick={() => navigate("/places")}>
-          <ListItemIcon>
-            <LocationOn />
-          </ListItemIcon>
-          <ListItemText primary="Places" />
-        </ListItem>
-        <ListItem button onClick={() => navigate("/admins")}>
-          <ListItemIcon>
-            <VerifiedUser />
-          </ListItemIcon>
-          <ListItemText primary="Admin Approval" />
-        </ListItem>
-        <ListItem button onClick={() => navigate("/users")}>
-          <ListItemIcon>
-            <PeopleRounded />
-          </ListItemIcon>
-          <ListItemText primary="Users" />
-        </ListItem>
-      </List>
-    </Drawer>
-  );
-}
+const drawerWidth = 250;
 
 export default function App() {
-  const classes = useStyles();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   return (
-    <MemoryRouter>
-      <AppBar position="fixed" className={classes.appBar}>
-        <CssBaseline />
+    <Box sx={{ display: "flex" }}>
+      <CssBaseline />
+      <AppBar
+        position="fixed"
+        sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
+      >
         <Toolbar>
-          <Typography variant="subtitle1" color="inherit">
+          <Typography variant="h6" noWrap component="div">
             CornellGO! Manager
           </Typography>
         </Toolbar>
       </AppBar>
-
-      <NavigationDrawer
-        drawerClass={classes.drawer}
-        drawerPaper={classes.drawerPaper}
-      />
-
-      <div style={{ marginLeft: 240, marginTop: 84 }}>
+      <Drawer
+        variant="permanent"
+        sx={{
+          width: drawerWidth,
+          flexShrink: 0,
+          [`& .MuiDrawer-paper`]: {
+            width: drawerWidth,
+            boxSizing: "border-box",
+          },
+        }}
+      >
+        <Toolbar />
+        <Box sx={{ overflow: "auto" }}>
+          <List>
+            <ListItemButton
+              onClick={() => navigate("/")}
+              selected={location.pathname === "/"}
+            >
+              <ListItemIcon>
+                <HomeSharp />
+              </ListItemIcon>
+              <ListItemText primary={"Home"} />
+            </ListItemButton>
+            <ListItemButton
+              onClick={() => navigate("/admins")}
+              selected={location.pathname === "/admins"}
+            >
+              <ListItemIcon>
+                <VerifiedUser />
+              </ListItemIcon>
+              <ListItemText primary={"Admin Approval"} />
+            </ListItemButton>
+            <ListItemButton
+              onClick={() => navigate("/events")}
+              selected={location.pathname === "/events"}
+            >
+              <ListItemIcon>
+                <Event />
+              </ListItemIcon>
+              <ListItemText primary={"Events"} />
+            </ListItemButton>
+            <ListItemButton
+              onClick={() => navigate("/challenges")}
+              selected={location.pathname === "/challenges"}
+            >
+              <ListItemIcon>
+                <Place />
+              </ListItemIcon>
+              <ListItemText primary={"Challenges"} />
+            </ListItemButton>
+            <ListItemButton
+              onClick={() => navigate("/rewards")}
+              selected={location.pathname === "/rewards"}
+            >
+              <ListItemIcon>
+                <EmojiEvents />
+              </ListItemIcon>
+              <ListItemText primary={"Rewards"} />
+            </ListItemButton>
+          </List>
+        </Box>
+      </Drawer>
+      <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+        <Toolbar />
         <Routes>
-          <Route path="/">
-            <div>Home</div>
-          </Route>
-          <Route path="/places">
-            <Places />
-          </Route>
-          <Route path="/admins">
-            <AdminApproval />
-          </Route>
-          <Route path="/users">
-            <div>Users</div>
-          </Route>
+          <Route path="/" element={<Home />} />
+          <Route path="/admins" element={<Admins />} />
+          <Route path="/events" element={<Events />} />
+          <Route path="/challenges" element={<Challenges />} />
+          <Route path="/rewards" element={<Rewards />} />
         </Routes>
-      </div>
-    </MemoryRouter>
+      </Box>
+    </Box>
   );
 }
