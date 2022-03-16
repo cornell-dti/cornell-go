@@ -136,14 +136,19 @@ class ApiClient extends ChangeNotifier {
       final auth = await account.authentication;
       final idToken = auth.idToken;
       final pos = await GeoPoint.current();
-      final loginResponse = await http.post(_googleLoginUrl, body: {
-        'idToken': idToken,
-        'lat': pos.lat.toString(),
-        'long': pos.long.toString(),
-        'aud': Platform.isIOS ? "ios" : "android"
-      });
-      print(loginResponse.body);
-      if (loginResponse.statusCode == 200 && loginResponse.body != "null") {
+      print(_googleLoginUrl);
+      print(account);
+      final loginResponse = await http.post(_googleLoginUrl,
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(<String, String>{
+            "idToken": idToken!,
+            "lat": pos.lat.toString(),
+            "long": pos.long.toString(),
+            "aud": Platform.isIOS ? "ios" : "android"
+          }));
+      if (loginResponse.statusCode == 200 && loginResponse.body != "") {
         final responseBody = jsonDecode(loginResponse.body);
 
         this._accessToken = responseBody["accessToken"];
