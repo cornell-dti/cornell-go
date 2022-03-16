@@ -6,6 +6,7 @@ import 'package:game/widget/back_btn.dart';
 import 'package:game/widget/leaderboard_cell.dart';
 import 'package:game/widget/leaderboard_user_cell.dart';
 import 'package:provider/provider.dart';
+import 'dart:math';
 
 class LeaderboardWidget extends StatefulWidget {
   LeaderboardWidget({Key? key}) : super(key: key);
@@ -38,9 +39,9 @@ class _LeaderboardWidgetState extends State<LeaderboardWidget> {
                       shrinkWrap: true,
                       scrollDirection: Axis.vertical,
                       children: [
-                        for (int i = 0; i < list.length; i++)
+                        for (int i = 0; i < min(6,list.length); i++)
                           leaderBoardUserCell(context, list.elementAt(i).username, i, list.elementAt(i).score, list.elementAt(i).userId),
-                        leaderBoardCell(context, "User", list.length, "--", false),
+                        for (int i = min(6, list.length); i < 6; i++) leaderBoardCell(context, "User", list.length, "--", false),
                       ],
                     );
                   },
