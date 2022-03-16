@@ -104,14 +104,19 @@ export default function App() {
       </AppBar>
       <NavDrawer>
         {routes.map((route) => (
-          <NavButton path={route.path} text={route.name} icon={route.icon} />
+          <NavButton
+            path={route.path}
+            text={route.name}
+            icon={route.icon}
+            key={route.path}
+          />
         ))}
       </NavDrawer>
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <Toolbar />
         <Routes>
           {routes.map((route) => (
-            <Route path={route.path} element={route.element} />
+            <Route path={route.path} element={route.element} key={route.path} />
           ))}
         </Routes>
       </Box>
