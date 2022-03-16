@@ -7,6 +7,7 @@ import {
 import { CallingUser } from 'src/auth/calling-user.decorator';
 import { AdminGuard } from 'src/auth/jwt-auth.guard';
 import { User } from 'src/model/user.entity';
+import { EventBase } from 'src/model/event-base.entity';
 import { AdminCallbackService } from './admin-callback/admin-callback.service';
 import { UpdateAdminDataAdminDto } from './admin-callback/update-admin-data.dto';
 import { AdminService } from './admin.service';
@@ -18,6 +19,9 @@ import { UpdateAdminsDto } from './update-admins.dto';
 import { UpdateChallengesDto } from './update-challenges.dto';
 import { UpdateEventsDto } from './update-events.dto';
 import { UpdateRewardsDto } from './update-rewards.dto';
+import { RewardTypeDto } from 'src/client/update-event-data.dto';
+import { Challenge } from 'src/model/challenge.entity';
+import { EventReward } from 'src/model/event-reward.entity';
 
 @WebSocketGateway()
 @UseGuards(AdminGuard)
@@ -28,7 +32,35 @@ export class AdminGateway {
   ) {}
 
   @SubscribeMessage('requestEvents')
-  async requestEvents(@CallingUser() user: User, data: RequestEventsDto) {}
+  async requestEvents(@CallingUser() user: User, data: RequestEventsDto) {
+    const events = await this.adminService.getAllEventData();
+
+    this.adminCallbackService.emitUpdateEventData({
+      deletedIds:[],
+      events: await Promise.all(
+        events.map(async (ev: EventBase) => ({
+          id: ev.id,
+          skippingEnabled: ev.skippingEnabled,
+          isDefault:ev.isDefault,
+          name: ev.name,
+          description: ev.description,
+          rewardType: ev.rewardType as RewardTypeDto,
+          time: ev.time.toUTCString(),
+          requiredMembers: ev.requiredMembers,
+          topCount: ev.topCount,
+          indexable: ev.indexable,
+          challengeIds: (
+            await ev.challenges.loadItems()
+          ).map((ch: Challenge) => ch.id),
+          rewardIds: (
+            await ev.rewards.loadItems()
+          ).map((rw: EventReward) => ({
+            id: rw.id,
+          })),
+        })),
+      ),
+    })
+  }
 
   @SubscribeMessage('requestChallenges')
   async requestChallenges(

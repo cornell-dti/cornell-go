@@ -41,4 +41,8 @@ export class AdminService {
       adminRequested: true,
     });
   }
+
+  async getAllEventData() {
+    return await this.eventRepository.find({});
+  }
 }
