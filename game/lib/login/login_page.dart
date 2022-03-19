@@ -3,7 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:game/api/game_api.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:game/home_page/home_page_widget.dart';
 
 class LoginWidget extends StatefulWidget {
   final FlutterSecureStorage storage;
@@ -21,8 +21,22 @@ class _LoginWidgetState extends State<LoginWidget> {
   @override
   void initState() {
     super.initState();
-    print(widget.API_URL);
-    print(widget.storage);
+    WidgetsBinding.instance?.addPostFrameCallback((_) {
+      //to auto log in a user if already logged in.
+      checkLoggedIn();
+    });
+  }
+
+  Future<void> checkLoggedIn() async {
+    if (await ApiClient(widget.storage, widget.API_URL).tryRelog()) {
+      _toHomePage(context);
+    }
+  }
+
+  void _toHomePage(context) {
+    Navigator.pop(context);
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => HomePageWidget()));
   }
 
   @override
@@ -64,7 +78,13 @@ class _LoginWidgetState extends State<LoginWidget> {
                     onPressed: () async {
                       final client = ApiClient(widget.storage, widget.API_URL);
                       final isAuth = await client.connectGoogle();
-                      print(isAuth);
+                      if (!isAuth) {
+                        _showDialog(
+                            "An error occurred while signing you in. Please check your connection and try again.");
+                      } else {
+                        //navigate to home page
+                        _toHomePage(context);
+                      }
                     },
                   ),
                 )
