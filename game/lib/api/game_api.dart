@@ -53,9 +53,10 @@ class ApiClient extends ChangeNotifier {
     final socket = IO.io(
         _apiUrl,
         IO.OptionBuilder()
-            .setTransports(['websocket'])
+            .setTransports(["websocket"])
             .disableAutoConnect()
-            .setAuth({'token': _accessToken}));
+            .setAuth({'token': _accessToken})
+            .build());
 
     socket.onDisconnect((data) {
       _serverApi = null;
@@ -97,7 +98,7 @@ class ApiClient extends ChangeNotifier {
       final refreshResponse =
           await http.post(_refreshUrl, body: {'refreshToken': _refreshToken});
 
-      if (refreshResponse.statusCode == 200 && refreshResponse.body != "null") {
+      if (refreshResponse.statusCode == 201 && refreshResponse.body != "null") {
         final responseBody = jsonDecode(refreshResponse.body);
         _accessToken = responseBody["accessToken"];
 
@@ -122,6 +123,7 @@ class ApiClient extends ChangeNotifier {
       final access = await _refreshAccess();
       authenticated = access;
       notifyListeners();
+      print(access);
       return access;
     }
 
@@ -136,8 +138,7 @@ class ApiClient extends ChangeNotifier {
       final auth = await account.authentication;
       final idToken = auth.idToken;
       final pos = await GeoPoint.current();
-      print(_googleLoginUrl);
-      print(account);
+
       final loginResponse = await http.post(_googleLoginUrl,
           headers: <String, String>{
             'Content-Type': 'application/json; charset=UTF-8',
@@ -148,7 +149,7 @@ class ApiClient extends ChangeNotifier {
             "long": pos.long.toString(),
             "aud": Platform.isIOS ? "ios" : "android"
           }));
-      if (loginResponse.statusCode == 200 && loginResponse.body != "") {
+      if (loginResponse.statusCode == 201 && loginResponse.body != "") {
         final responseBody = jsonDecode(loginResponse.body);
 
         this._accessToken = responseBody["accessToken"];
@@ -160,7 +161,6 @@ class ApiClient extends ChangeNotifier {
         return true;
       }
     }
-
     authenticated = false;
     notifyListeners();
     return false;
