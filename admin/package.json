@@ -3,11 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@emotion/react": "^11.5.0",
-    "@mui/icons-material": "^5.0.5",
-    "@mui/material": "^5.5.1",
-    "@mui/styled-engine-sc": "^5.4.2",
-    "@mui/x-data-grid": "^4.0.2",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
@@ -16,8 +11,6 @@
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
     "icons": "^1.0.0",
-    "mui": "^0.0.1",
-    "mui-datatables": "^4.0.0",
     "prettier": "^2.4.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
@@ -55,9 +48,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "devDependencies": {
-    "@types/mui-datatables": "^3.7.7",
-    "@types/string-similarity": "^4.0.0"
   }
 }

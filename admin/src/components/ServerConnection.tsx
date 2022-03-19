@@ -7,3 +7,7 @@ export const ServerConnectionContext = createContext<null | {
 export function ServerConnectionProvider() {
 
 }
+
+export function AuthenticationGuard() {
+  return <></>;
+}
