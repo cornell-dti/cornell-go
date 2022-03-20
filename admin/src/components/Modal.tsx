@@ -9,7 +9,7 @@ const ModalBackground = styled.div<{ opacity: number }>`
   top: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: rgba(0, 0, 0, 0.6);
   z-index: 999;
   transition: opacity 0.125s;
 
@@ -29,10 +29,11 @@ const ModalLayout = styled.div`
   background-color: white;
   padding: 12px 18px 12px 18px;
   font-family: "Roboto";
+  box-shadow: 0 0 8px 0.5px gray;
 `;
 
 const ModalTitle = styled.div`
-  font-weight: bold;
+  font-weight: 500;
   font-size: 22px;
   margin-bottom: 12px;
   user-select: none;
