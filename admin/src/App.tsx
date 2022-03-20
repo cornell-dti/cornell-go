@@ -4,6 +4,7 @@ import { Admins } from "./components/Admins";
 import { Challenges } from "./components/Challenges";
 import { Events } from "./components/Events";
 
+import styled from "styled-components";
 import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import {
   AppBar,
@@ -12,29 +13,55 @@ import {
   Sidebar,
   SidebarButton,
 } from "./components/Layout";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faHome,
+  faLocationDot,
+  faPersonWalking,
+  faTrophy,
+  faUserShield,
+} from "@fortawesome/free-solid-svg-icons";
 
 const routes = [
-  { path: "/", element: <Home />, icon: <></>, name: "Home" },
+  {
+    path: "/",
+    element: <Home />,
+    icon: <FontAwesomeIcon icon={faHome} />,
+    name: "Home",
+  },
   {
     path: "/admins",
     element: <Admins />,
-    icon: <></>,
+    icon: <FontAwesomeIcon icon={faUserShield} />,
     name: "Admin Approval",
   },
-  { path: "/events", element: <Events />, icon: <></>, name: "Events" },
+  {
+    path: "/events",
+    element: <Events />,
+    icon: <FontAwesomeIcon icon={faPersonWalking} />,
+    name: "Events",
+  },
   {
     path: "/challenges",
     element: <Challenges />,
-    icon: <></>,
+    icon: <FontAwesomeIcon icon={faLocationDot} />,
     name: "Challenges",
   },
   {
     path: "/rewards",
     element: <Rewards />,
-    icon: <></>,
+    icon: <FontAwesomeIcon icon={faTrophy} />,
     name: "Rewards",
   },
 ];
+
+const SidebarIcon = styled.span`
+  display: inline-block;
+  width: 32px;
+  font-size: 20px;
+  text-align: center;
+  margin-right: 12px;
+`;
 
 export default function App() {
   const curRoute = useLocation();
@@ -49,6 +76,7 @@ export default function App() {
             onClick={() => navigate(route.path)}
             key={route.path}
           >
+            <SidebarIcon>{route.icon}</SidebarIcon>
             {route.name}
           </SidebarButton>
         ))}

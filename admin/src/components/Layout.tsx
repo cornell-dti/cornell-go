@@ -22,7 +22,7 @@ const AppBarBase = styled.div`
   user-select: none;
 `;
 
-const AppBarButton = styled.span`
+const AppBarButton = styled.div`
   display: inline-block;
   width: 32px;
   margin-right: 30px;
@@ -46,7 +46,7 @@ export function AppBar(props: { children: ReactNode }) {
 
 const SidebarBase = styled.div<{ shown: boolean }>`
   position: absolute;
-  top: 60px;
+  padding-top: 60px;
   z-index: 98;
   width: 240px;
   height: 100%;
@@ -56,7 +56,8 @@ const SidebarBase = styled.div<{ shown: boolean }>`
   background-color: white;
 
   @media (max-width: 768px) {
-    left: -240px;
+    left: -100%;
+    width: 100%;
 
     ${(props) =>
       props.shown &&
