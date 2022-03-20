@@ -79,9 +79,12 @@ export const Container = styled.div`
 
   @media (min-width: 768px) {
     left: 240px;
+    width: calc(100% - 240px);
+  }
+  @media (max-width: 768px) {
+    width: 100%;
   }
   top: 60px;
-  width: calc(100% - 240px);
   height: calc(100% - 60px);
   padding: 15px 15px 0 15px;
   overflow-y: auto;

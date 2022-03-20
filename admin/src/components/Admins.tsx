@@ -4,14 +4,11 @@ import { HButton } from "./HButton";
 const AdminApprovalEntryBox = styled.div`
   border-radius: 4px;
   width: 100%;
-  height: 48px;
   box-shadow: 0 0 2px black;
-  padding-left: 12px;
+  padding: 10px 10px 10px 12px;
   margin-bottom: 12px;
   line-height: 30px;
   font-size: 18px;
-  padding-top: 10px;
-  padding-right: 10px;
 `;
 
 function AdminApprovalEntry(props: { email: string }) {
