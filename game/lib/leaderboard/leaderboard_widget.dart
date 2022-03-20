@@ -29,22 +29,22 @@ class _LeaderboardWidgetState extends State<LeaderboardWidget> {
         child: Container(
           child: Padding(
             padding: const EdgeInsets.only(left: 8.0, right: 8.0),
-            child: Consumer<GroupModel>(
-              builder: (context, myGroupModel, child) {
-                return Consumer<EventModel>(
-                  builder: (context, myEventModel, child) {
-                    if (myGroupModel.curEventId == null) return ListView();
-                    final List<UpdateLeaderDataUserDto> list = myEventModel.getTopPlayersForEvent(myGroupModel.curEventId!, 6);
-                    return ListView(
-                      shrinkWrap: true,
-                      scrollDirection: Axis.vertical,
-                      children: [
-                        for (int i = 0; i < min(6,list.length); i++)
-                          leaderBoardUserCell(context, list.elementAt(i).username, i, list.elementAt(i).score, list.elementAt(i).userId),
-                        for (int i = min(6, list.length); i < 6; i++) leaderBoardCell(context, "User", list.length, "--", false),
-                      ],
-                    );
-                  },
+            child: Consumer2<GroupModel, EventModel>(
+              builder: (context, myGroupModel, myEventModel, child) {
+                if (myGroupModel.curEventId == null) return ListView();
+                final List<UpdateLeaderDataUserDto> list = myEventModel
+                    .getTopPlayersForEvent(myGroupModel.curEventId!, 6);
+                return ListView(
+                  shrinkWrap: true,
+                  scrollDirection: Axis.vertical,
+                  children: [
+                    for (int i = 0; i < min(6, list.length); i++)
+                      leaderBoardUserCell(context, list.elementAt(i).username,
+                          i, list.elementAt(i).score, list.elementAt(i).userId),
+                    for (int i = min(6, list.length); i < 6; i++)
+                      leaderBoardCell(
+                          context, "User", list.length, "--", false),
+                  ],
                 );
               },
             ),
