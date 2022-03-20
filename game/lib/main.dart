@@ -27,16 +27,8 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-        title: 'CornellGO!',
-        localizationsDelegates: [
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        supportedLocales: const [Locale('en', '')],
-        theme: ThemeData(primarySwatch: Colors.blue),
-        home: MultiProvider(providers: [
+    return MultiProvider(
+        providers: [
           ChangeNotifierProvider(create: (_) => client),
           ChangeNotifierProvider(create: (_) => UserModel(client)),
           ChangeNotifierProvider(create: (_) => RewardModel(client)),
@@ -44,9 +36,16 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(create: (_) => EventModel(client)),
           ChangeNotifierProvider(create: (_) => TrackerModel(client)),
           ChangeNotifierProvider(create: (_) => ChallengeModel(client))
-        ], 
-        builder: (context, child) {
-          return HomePageWidget();
-        }));
+        ],
+        child: MaterialApp(
+            title: 'CornellGO!',
+            localizationsDelegates: [
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: const [Locale('en', '')],
+            theme: ThemeData(primarySwatch: Colors.blue),
+            home: HomePageWidget()));
   }
 }
