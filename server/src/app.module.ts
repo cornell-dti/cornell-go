@@ -39,13 +39,16 @@ const storage = new AsyncLocalStorage<EntityManager>();
       context: () => storage.getStore(), // use our AsyncLocalStorage instance
       driverOptions: {
         connection: {
-          ssl: !process.env.NO_SSL,
-          rejectUnauthorized: !process.env.NO_SSL,
+          ssl: !process.env.NO_SSL && { rejectUnauthorized: false },
         },
       },
       migrations: {
         path: 'dist/migrations',
         pathTs: 'src/migrations',
+        disableForeignKeys: false,
+      },
+      schemaGenerator: {
+        disableForeignKeys: false,
       },
     }),
     ServeStaticModule.forRoot({

@@ -8,7 +8,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { RefreshAccessController } from './refresh-access/refresh-access.controller';
 import { User } from 'src/model/user.entity';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
-import { UserGuard } from './jwt-auth.guard';
+import { AdminGuard, UserGuard } from './jwt-auth.guard';
 
 @Module({
   imports: [
@@ -25,7 +25,7 @@ import { UserGuard } from './jwt-auth.guard';
     DeviceLoginController,
     RefreshAccessController,
   ],
-  providers: [AuthService],
+  providers: [AuthService, UserGuard, AdminGuard],
   exports: [AuthService],
 })
 export class AuthModule {}
