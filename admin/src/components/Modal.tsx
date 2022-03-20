@@ -1,6 +1,7 @@
 import { ReactNode, useLayoutEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import styled, { css } from "styled-components";
+import { HButton } from "./HButton";
 
 const ModalBackground = styled.div<{ opacity: number }>`
   position: fixed;
@@ -50,33 +51,12 @@ const ModalButtonPanel = styled.div`
   height: 30px;
 `;
 
-const ModalButton = styled.div`
-  float: right;
-  height: 30px;
-  user-select: none;
-  line-height: 30px;
-  transition: background-color 0.15s;
-  color: #6200ee;
-  padding: 0 10px 0 10px;
-  border-radius: 4px;
-  font-weight: 500;
-  text-align: center;
-
-  :hover {
-    background-color: rgb(245, 245, 255);
-  }
-
-  :active {
-    background-color: rgb(220, 220, 255);
-  }
-`;
-
 export function Modal(props: {
   title: string;
   children: ReactNode;
   buttons: string[];
   isOpen: boolean;
-  onButtonClick: (name: string) => void;
+  onButtonClick: (index: number) => void;
 }) {
   const [open, setOpen] = useState(false);
   const [opacity, setOpacity] = useState(0);
@@ -102,10 +82,14 @@ export function Modal(props: {
           <ModalTitle>{props.title}</ModalTitle>
           <ModalBody>{props.children}</ModalBody>
           <ModalButtonPanel>
-            {props.buttons.map((btn) => (
-              <ModalButton onClick={() => props.onButtonClick(btn)}>
+            {props.buttons.map((btn, i) => (
+              <HButton
+                onClick={() => props.onButtonClick(i)}
+                key={btn}
+                float="right"
+              >
                 {btn}
-              </ModalButton>
+              </HButton>
             ))}
           </ModalButtonPanel>
         </ModalLayout>

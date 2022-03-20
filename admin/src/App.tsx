@@ -11,7 +11,6 @@ import {
   Sidebar,
   SidebarButton,
 } from "./components/Layout";
-import { Modal } from "./components/Modal";
 
 import {
   faHome,
@@ -24,7 +23,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { useState } from "react";
 
 const routes = [
   {
@@ -71,10 +69,9 @@ export default function App() {
   const curRoute = useLocation();
   const navigate = useNavigate();
 
-  const [modelOpen, setModelOpen] = useState(false);
   return (
     <AppLayout>
-      <AppBar>CornellGO Manager</AppBar>
+      <AppBar>CornellGO! Manager</AppBar>
       <Sidebar>
         {routes.map((route) => (
           <SidebarButton
@@ -88,9 +85,6 @@ export default function App() {
             {route.name}
           </SidebarButton>
         ))}
-        <SidebarButton active={false} onClick={() => setModelOpen(true)}>
-          Open Modal
-        </SidebarButton>
       </Sidebar>
       <Container>
         <Routes>
@@ -98,16 +92,6 @@ export default function App() {
             <Route path={route.path} element={route.element} key={route.path} />
           ))}
         </Routes>
-        <Modal
-          title="Modal Title"
-          buttons={["OK"]}
-          isOpen={modelOpen}
-          onButtonClick={(name) => {
-            setModelOpen(false);
-          }}
-        >
-          H
-        </Modal>
       </Container>
     </AppLayout>
   );
