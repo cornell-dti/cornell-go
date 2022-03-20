@@ -4,8 +4,6 @@ import { Admins } from "./components/Admins";
 import { Challenges } from "./components/Challenges";
 import { Events } from "./components/Events";
 
-import styled from "styled-components";
-import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import {
   AppBar,
   AppLayout,
@@ -13,7 +11,8 @@ import {
   Sidebar,
   SidebarButton,
 } from "./components/Layout";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Modal } from "./components/Modal";
+
 import {
   faHome,
   faLocationDot,
@@ -21,36 +20,41 @@ import {
   faTrophy,
   faUserShield,
 } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
+import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
+import styled from "styled-components";
+import { useState } from "react";
 
 const routes = [
   {
     path: "/",
     element: <Home />,
-    icon: <FontAwesomeIcon icon={faHome} />,
+    icon: faHome,
     name: "Home",
   },
   {
     path: "/admins",
     element: <Admins />,
-    icon: <FontAwesomeIcon icon={faUserShield} />,
+    icon: faUserShield,
     name: "Admin Approval",
   },
   {
     path: "/events",
     element: <Events />,
-    icon: <FontAwesomeIcon icon={faPersonWalking} />,
+    icon: faPersonWalking,
     name: "Events",
   },
   {
     path: "/challenges",
     element: <Challenges />,
-    icon: <FontAwesomeIcon icon={faLocationDot} />,
+    icon: faLocationDot,
     name: "Challenges",
   },
   {
     path: "/rewards",
     element: <Rewards />,
-    icon: <FontAwesomeIcon icon={faTrophy} />,
+    icon: faTrophy,
     name: "Rewards",
   },
 ];
@@ -66,9 +70,10 @@ const SidebarIcon = styled.span`
 export default function App() {
   const curRoute = useLocation();
   const navigate = useNavigate();
+
   return (
     <AppLayout>
-      <AppBar>CornellGO Manager</AppBar>
+      <AppBar>CornellGO! Manager</AppBar>
       <Sidebar>
         {routes.map((route) => (
           <SidebarButton
@@ -76,7 +81,9 @@ export default function App() {
             onClick={() => navigate(route.path)}
             key={route.path}
           >
-            <SidebarIcon>{route.icon}</SidebarIcon>
+            <SidebarIcon>
+              <FontAwesomeIcon icon={route.icon} />
+            </SidebarIcon>
             {route.name}
           </SidebarButton>
         ))}
