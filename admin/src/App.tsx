@@ -5,8 +5,13 @@ import { Challenges } from "./components/Challenges";
 import { Events } from "./components/Events";
 
 import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
-import { ReactNode } from "react";
-import { styled } from "@mui/material";
+import {
+  AppBar,
+  AppLayout,
+  Container,
+  Sidebar,
+  SidebarButton,
+} from "./components/Layout";
 
 const routes = [
   { path: "/", element: <Home />, icon: <></>, name: "Home" },
@@ -32,11 +37,29 @@ const routes = [
 ];
 
 export default function App() {
+  const curRoute = useLocation();
+  const navigate = useNavigate();
   return (
-    <Routes>
-      {routes.map((route) => (
-        <Route path={route.path} element={route.element} key={route.path} />
-      ))}
-    </Routes>
+    <AppLayout>
+      <AppBar>CornellGO Manager</AppBar>
+      <Sidebar>
+        {routes.map((route) => (
+          <SidebarButton
+            active={curRoute.pathname === route.path}
+            onClick={() => navigate(route.path)}
+            key={route.path}
+          >
+            {route.name}
+          </SidebarButton>
+        ))}
+      </Sidebar>
+      <Container>
+        <Routes>
+          {routes.map((route) => (
+            <Route path={route.path} element={route.element} key={route.path} />
+          ))}
+        </Routes>
+      </Container>
+    </AppLayout>
   );
 }
