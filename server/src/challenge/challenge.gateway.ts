@@ -6,7 +6,7 @@ import {
 } from '@nestjs/websockets';
 import { UserGuard } from 'src/auth/jwt-auth.guard';
 import { UpdateGroupDataDto } from 'src/client/update-group-data.dto';
-import { UpdateUserDataDto } from 'src/client/update-user-data.dto';
+import { UpdateUserDataAuthTypeDto, UpdateUserDataDto } from 'src/client/update-user-data.dto';
 import { CallingUser } from '../auth/calling-user.decorator';
 import { ClientService } from '../client/client.service';
 import { EventService } from '../event/event.service';
@@ -150,7 +150,7 @@ export class ChallengeGateway {
       this.clientService.emitUpdateGroupData(member, updateData);
     }
     
-    const userRewards = await this.challengeService.checkForReward(user, newTracker.event)
+    const userRewards = await this.challengeService.checkForReward(user, newTracker.event, newTracker)
     const participatingEvents = await user.participatingEvents.loadItems();
 
     const updatedUser: UpdateUserDataDto = {
