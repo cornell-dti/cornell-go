@@ -1,10 +1,14 @@
 import 'dart:async';
 
+import 'package:game/api/game_client_dto.dart';
 import 'package:socket_io_client/socket_io_client.dart';
 
 class GameServerApi {
   final Future<bool> Function() _refreshAccess;
   Socket _socket;
+
+  String _refreshEv = "";
+  dynamic _refreshDat = "";
 
   GameServerApi(Socket socket, Future<bool> Function() refresh)
       : _refreshAccess = refresh,
@@ -12,36 +16,84 @@ class GameServerApi {
 
   void replaceSocket(Socket socket) {
     _socket = socket;
-  }
-
-  Future<bool> _emitAck(String ev, Map<String, dynamic> data) async {
-    final invoker = Completer<bool>();
-    _socket.emitWithAck(ev, data, ack: (ack) {
-      if (ack is bool) {
-        invoker.complete(ack);
-      } else {
-        invoker.complete(false);
+    _socket.onError((data) async {
+      if (await _refreshAccess()) {
+        _socket.emit(_refreshEv, _refreshDat);
       }
     });
-
-    return invoker.future;
   }
 
-  Future<bool> _invokeWithRefresh(String ev, Map<String, dynamic> data) async {
-    final success = await _emitAck(ev, data);
-    if (!success) {
-      final hasRefreshed = await _refreshAccess();
-
-      if (hasRefreshed) {
-        return await _emitAck(ev, data);
-      }
-      return false;
-    }
-    return true;
+  void _invokeWithRefresh(String ev, Map<String, dynamic> data) {
+    _refreshEv = ev;
+    _refreshDat = data;
+    _socket.emit(ev, data);
   }
 
-  Future<bool> requestRewardData(List<String> rewardIds) =>
+  void requestRewardData(List<String> rewardIds) =>
       _invokeWithRefresh("requestRewardData", {'rewardIds': rewardIds});
 
-  // TODO: write the rest of the API!
+  void requestGlobalLeaderData(int offset, int count) => _invokeWithRefresh(
+      "requestRewardData", {'offset': offset, 'count': count});
+
+  void closeAccount() => _invokeWithRefresh("closeAccount", {});
+  void setUsername(String newUsername) =>
+      _invokeWithRefresh("setUsername", {'newUsername': newUsername});
+  void requestUserData() => _invokeWithRefresh("requestUserData", {});
+  void requestGroupData() => _invokeWithRefresh("requestGroupData", {});
+  void joinGroup(String groupId) =>
+      _invokeWithRefresh("joinGroup", {'groupId': groupId});
+  void leaveGroup() => _invokeWithRefresh("leaveGroup", {});
+  void setCurrentEvent(String eventId) =>
+      _invokeWithRefresh("setCurrentEvent", {"eventId": eventId});
+  void requestEventData(List<String> eventIds) =>
+      _invokeWithRefresh("requestEventData", {"eventIds": eventIds});
+  void requestAllEventData(
+          int offset,
+          int count,
+          List<UpdateEventDataEventRewardTypeDto> rewardTypes,
+          bool closestToEnding,
+          bool shortestFirst,
+          bool skippableOnly) =>
+      _invokeWithRefresh("requestEventData", {
+        "offset": offset,
+        "count": count,
+        "closestToEnding": closestToEnding,
+        "shortestFirst": shortestFirst,
+        "skippableOnly": skippableOnly,
+        "rewardTypes": rewardTypes.map((e) {
+          var result = "";
+          switch (e) {
+            case UpdateEventDataEventRewardTypeDto.NO_REWARDS:
+              result = "no_rewards";
+              break;
+            case UpdateEventDataEventRewardTypeDto.LIMITED_TIME_EVENT:
+              result = "limited_time_event";
+              break;
+            case UpdateEventDataEventRewardTypeDto.RACE_TO_WIN:
+              result = "race_to_win";
+              break;
+            case UpdateEventDataEventRewardTypeDto.WIN_ON_COMPLETION:
+              result = "win_on_completion";
+              break;
+          }
+          return result;
+        })
+      });
+
+  void requestEventLeaderData(int offset, int count, String eventId) =>
+      _invokeWithRefresh("requestEventLeaderData",
+          {"offset": offset, "count": count, "eventId": eventId});
+
+  void requestEventTrackerData(List<String> trackedEventIds) =>
+      _invokeWithRefresh(
+          "requestEventLeaderData", {"trackedEventIds": trackedEventIds});
+
+  void requestChallengeData(List<String> challengeIds) => _invokeWithRefresh(
+      "requestChallengeData", {"challengeIds": challengeIds});
+
+  void setCurrentChallenge(String challengeId) =>
+      _invokeWithRefresh("setCurrentChallenge", {"challengeId": challengeId});
+
+  void completedChallenge(String challengeId) =>
+      _invokeWithRefresh("completedChallenge", {"challengeId": challengeId});
 }

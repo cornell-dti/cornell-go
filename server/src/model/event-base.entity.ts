@@ -41,10 +41,6 @@ export class EventBase {
   @Index()
   isDefault!: boolean;
 
-  /** If true, then the challenge with index 9999 is considered a star challenge */
-  @Property()
-  hasStarChallenge!: boolean;
-
   @Property()
   name!: string;
 
@@ -78,8 +74,4 @@ export class EventBase {
     orderBy: { eventIndex: 'asc' },
   })
   challenges = new Collection<Challenge>(this);
-
-  /** Amount of entities in the "challenges" field (update whenever that changes) */
-  @Property()
-  challengeCount!: number;
 }

@@ -53,7 +53,7 @@ export class ChallengeGateway {
       })),
     });
 
-    return true;
+    return false;
   }
 
   @SubscribeMessage('setCurrentChallenge')
@@ -115,7 +115,7 @@ export class ChallengeGateway {
       this.clientService.emitUpdateGroupData(member, updateData);
     }
 
-    return true;
+    return false;
   }
 
   @SubscribeMessage('completedChallenge')
