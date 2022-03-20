@@ -2,12 +2,14 @@ import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityRepository } from '@mikro-orm/postgresql';
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { EventService } from 'src/event/event.service';
+import { ClientService } from 'src/client/client.service';
 import { UserService } from 'src/user/user.service';
 import { Challenge } from '../model/challenge.entity';
 import { EventReward } from '../model/event-reward.entity';
 import { EventBase,EventRewardType } from '../model/event-base.entity';
 import { PrevChallenge } from '../model/prev-challenge.entity';
 import { User } from '../model/user.entity';
+import { EventTracker } from 'src/model/event-tracker.entity';
 
 @Injectable()
 export class ChallengeService {
@@ -15,6 +17,8 @@ export class ChallengeService {
     private userService: UserService,
     @Inject(forwardRef(() => EventService))
     private eventService: EventService,
+    @Inject(forwardRef(() => EventService))
+    private clientService: ClientService,
     @InjectRepository(Challenge)
     private challengeRepository: EntityRepository<Challenge>,
     @InjectRepository(PrevChallenge)
@@ -137,18 +141,33 @@ export class ChallengeService {
   }
 
   /** Check if the current event can return rewards */
-  async checkForReward(user: User, eventBase: EventBase) {
-    const rewardType = eventBase.rewardType
-
+  async checkForReward(user: User, eventBase: EventBase, eventTracker: EventTracker) {
     const userRewards = await user.rewards.loadItems();
 
-    //If User has completed the event/done all the challenges then:
+    //If User has not completed the event/done all the challenges then:
+    if(eventTracker.completed.count() !== eventBase.challengeCount){
+      return userRewards
+    }
 
+    const rewardType = eventBase.rewardType
     if(rewardType === EventRewardType.LIMITED_TIME_EVENT && eventBase.time > new Date()){
-      return user.rewards
+      return userRewards
+    }
+    
+    if(rewardType === EventRewardType.PERPETUAL){
+      const newReward = await this.rewardRepository.findOne({event: eventBase});
+      newReward.claimingUser = user
+      newReward.isRedeemed = false
+
+      await this.rewardRepository.persistAndFlush(newReward);
+      this.clientService.emitUpdateRewardData(user, newReward)
+      return userRewards + [newReward]
     }
 
     const unclaimedReward = await this.rewardRepository.findOne({ claimingUser: null, event: eventBase });
+    unclaimedReward.claimingUser = user
+    this.clientService.emitUpdateRewardData(user, unclaimedReward)
+
     return userRewards + [unclaimedReward]
   }
 }
