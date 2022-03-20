@@ -23,10 +23,10 @@ const ModalLayout = styled.div`
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 700px;
+  width: min(700px, calc(100% - 20px));
   border-radius: 5px;
   background-color: white;
-  padding: 12px 18px 18px 18px;
+  padding: 12px 18px 12px 18px;
   font-family: "Roboto";
 `;
 
@@ -38,10 +38,12 @@ const ModalTitle = styled.div`
 `;
 
 const ModalBody = styled.div`
-  min-height: 150px;
+  min-height: 80px;
+  max-height: calc(100vh - 200px);
   width: 100%;
   color: gray;
   font-size: 18px;
+  overflow-y: auto;
 `;
 
 const ModalButtonPanel = styled.div`
