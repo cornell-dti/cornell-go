@@ -120,7 +120,7 @@ class UpdateEventDataEventDto {
   String name = "";
   String description = "";
   UpdateEventDataEventRewardTypeDto rewardType =
-      UpdateEventDataEventRewardTypeDto.NO_REWARDS;
+      UpdateEventDataEventRewardTypeDto.PERPETUAL;
   DateTime? time = null;
   int topCount = 0;
   List<UpdateEventDataRewardDto> rewards = [];
