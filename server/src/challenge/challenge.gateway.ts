@@ -11,6 +11,7 @@ import {
   UpdateUserDataAuthTypeDto,
   UpdateUserDataDto,
 } from 'src/client/update-user-data.dto';
+import { EventReward } from 'src/model/event-reward.entity';
 import { CallingUser } from '../auth/calling-user.decorator';
 import { ClientService } from '../client/client.service';
 import { EventService } from '../event/event.service';
@@ -153,7 +154,7 @@ export class ChallengeGateway {
       const member = await mem.user.load();
       this.clientService.emitUpdateGroupData(member, updateData);
     }
-    const event = newTracker.event.load();
+    const event = await newTracker.event.load();
     const newReward = await this.challengeService.checkForReward(
       user,
       event,
@@ -174,10 +175,17 @@ export class ChallengeGateway {
         authType: user.authType as UpdateUserDataAuthTypeDto,
       };
       this.clientService.emitUpdateUserData(user, updatedUser);
-      const rewards: UpdateRewardDataDto = {
-        rewards: userRewards.concat(newReward),
+
+      const rewards = userRewards.concat(newReward).map(reward => ({
+        eventId: reward.containingEvent.id,
+        description: reward.rewardDescription,
+        redeemInfo: reward.rewardRedeemInfo,
+        isRedeemed: reward.isRedeemed,
+      }));
+      const updatedRewards: UpdateRewardDataDto = {
+        rewards: rewards,
       };
-      this.clientService.emitUpdateRewardData(user, rewards);
+      this.clientService.emitUpdateRewardData(user, updatedRewards);
     }
 
     return true;
