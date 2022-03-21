@@ -8,7 +8,6 @@ import { EventBase,EventRewardType } from '../model/event-base.entity';
 import { PrevChallenge } from '../model/prev-challenge.entity';
 import { User } from '../model/user.entity';
 import { EventTracker } from 'src/model/event-tracker.entity';
-import {UpdateRewardDataDto} from 'src/client/update-reward-data.dto'
 import { v4 } from 'uuid';
 
 @Injectable()
@@ -153,8 +152,8 @@ export class ChallengeService {
     if(rewardType === EventRewardType.PERPETUAL){
       const newReward = await this.rewardRepository.findOne({event: eventBase});
       if(newReward !== null){
-        newReward.claimingUser = user
-        newReward.isRedeemed = false
+        newReward.claimingUser.set(user)
+        newReward.isRedeemed.set(false)
         const reward = this.rewardRepository.create({ ...newReward, id: v4() })
         await this.rewardRepository.persistAndFlush(reward);
         return newReward

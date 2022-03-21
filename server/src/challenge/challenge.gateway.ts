@@ -6,6 +6,7 @@ import {
 } from '@nestjs/websockets';
 import { UserGuard } from 'src/auth/jwt-auth.guard';
 import { UpdateGroupDataDto } from 'src/client/update-group-data.dto';
+import { UpdateRewardDataDto } from 'src/client/update-reward-data.dto';
 import { UpdateUserDataAuthTypeDto, UpdateUserDataDto } from 'src/client/update-user-data.dto';
 import { CallingUser } from '../auth/calling-user.decorator';
 import { ClientService } from '../client/client.service';
@@ -149,8 +150,8 @@ export class ChallengeGateway {
       const member = await mem.user.load();
       this.clientService.emitUpdateGroupData(member, updateData);
     }
-    
-    const newReward = await this.challengeService.checkForReward(user, newTracker.event, newTracker)
+    const event = newTracker.event.load()
+    const newReward = await this.challengeService.checkForReward(user, event, newTracker)
     
     if(newReward !== null){
       const participatingEvents = await user.participatingEvents.loadItems();
@@ -159,14 +160,17 @@ export class ChallengeGateway {
         id: user.id,
         username: user.username,
         score: user.score,
-        groupId: group?.id,
+        groupId: group?.id ?? '',
         rewardIds: userRewards.concat(newReward).map(reward => reward.id),//Add reward to user.rewards,
         trackedEventIds: participatingEvents.map(ev => ev.id),
         ignoreIdLists: false,
         authType: user.authType as UpdateUserDataAuthTypeDto,
       }
       this.clientService.emitUpdateUserData(user, updatedUser)
-      this.clientService.emitUpdateRewardData(user, userRewards.concat(newReward))
+      const rewards: UpdateRewardDataDto = {
+        rewards: userRewards.concat(newReward)
+      }
+      this.clientService.emitUpdateRewardData(user, rewards)
     }
     
 
