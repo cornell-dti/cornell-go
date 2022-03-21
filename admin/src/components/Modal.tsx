@@ -9,9 +9,9 @@ const ModalBackground = styled.div<{ opacity: number }>`
   top: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.6);
+  background-color: rgba(0, 0, 0, 0.5);
   z-index: 999;
-  transition: opacity 0.125s;
+  transition: opacity 0.15s;
 
   ${(props) =>
     css`
@@ -29,7 +29,7 @@ const ModalLayout = styled.div`
   background-color: white;
   padding: 12px 18px 12px 18px;
   font-family: "Roboto";
-  box-shadow: 0 0 8px 0.5px gray;
+  box-shadow: 0 0 32px 0.1px rgb(80, 80, 80);
 `;
 
 const ModalTitle = styled.div`
@@ -72,7 +72,7 @@ export function Modal(props: {
       setOpacity(0);
       setTimeout(() => {
         setOpen(false);
-      }, 125);
+      }, 150);
     }
   }, [props.isOpen, setOpen, setOpacity]);
 

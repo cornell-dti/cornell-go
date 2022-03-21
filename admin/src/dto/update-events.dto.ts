@@ -5,7 +5,7 @@ export interface EventDto {
   isDefault: boolean;
   name: string;
   description: string;
-  rewardType: 'limited_time_event' | 'perpetual';
+  rewardType: "limited_time_event" | "perpetual";
   indexable: boolean;
   time: string;
   rewardIds: string[];

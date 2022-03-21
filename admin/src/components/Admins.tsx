@@ -45,7 +45,7 @@ export function Admins() {
     <>
       <Modal
         title="Approval Confirmation"
-        buttons={["Approve", "Cancel"]}
+        buttons={["CANCEL", "APPROVE"]}
         isOpen={approveModal}
         onButtonClick={(idx) => {
           setApproveModal(false);
@@ -55,7 +55,7 @@ export function Admins() {
       </Modal>
       <Modal
         title="Denial Confirmation"
-        buttons={["Deny", "Cancel"]}
+        buttons={["CANCEL", "DENY"]}
         isOpen={denyModal}
         onButtonClick={(idx) => {
           setDenyModal(false);

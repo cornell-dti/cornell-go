@@ -1,3 +1,9 @@
+import { SearchBar } from "./SearchBar";
+
 export function Rewards() {
-  return <>Rewards</>;
+  return (
+    <>
+      <SearchBar />
+    </>
+  );
 }

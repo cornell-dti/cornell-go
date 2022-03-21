@@ -1,9 +1,5 @@
 /** DTO for reward type */
-export type RewardTypeDto =
-  | 'limited_time_event'
-  | 'win_on_completion'
-  | 'race_to_win'
-  | 'no_rewards';
+export type RewardTypeDto = 'limited_time_event' | 'perpetual';
 
 /** DTO for reward in updateEventData */
 export interface UpdateEventDataRewardDto {
