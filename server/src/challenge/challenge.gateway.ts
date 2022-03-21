@@ -150,20 +150,24 @@ export class ChallengeGateway {
       this.clientService.emitUpdateGroupData(member, updateData);
     }
     
-    const userRewards = await this.challengeService.checkForReward(user, newTracker.event, newTracker)
-    const participatingEvents = await user.participatingEvents.loadItems();
-
-    const updatedUser: UpdateUserDataDto = {
-      id: user.id,
-      username: user.username,
-      score: user.score,
-      groupId: group?.id,
-      rewardIds: userRewards.map(reward => reward.id),//Add reward to user.rewards,
-      trackedEventIds: participatingEvents.map(ev => ev.id),
-      ignoreIdLists: false,
-      authType: user.authType as UpdateUserDataAuthTypeDto,
+    const newReward = await this.challengeService.checkForReward(user, newTracker.event, newTracker)
+    
+    if(newReward !== null){
+      const participatingEvents = await user.participatingEvents.loadItems();
+      const userRewards = await user.rewards.loadItems();
+      const updatedUser: UpdateUserDataDto = {
+        id: user.id,
+        username: user.username,
+        score: user.score,
+        groupId: group?.id,
+        rewardIds: userRewards.concat(newReward).map(reward => reward.id),//Add reward to user.rewards,
+        trackedEventIds: participatingEvents.map(ev => ev.id),
+        ignoreIdLists: false,
+        authType: user.authType as UpdateUserDataAuthTypeDto,
+      }
+      this.clientService.emitUpdateUserData(user, updatedUser)
+      this.clientService.emitUpdateRewardData(user, userRewards.concat(newReward))
     }
-    this.clientService.emitUpdateUserData(user, updatedUser)
     
 
     return true;
