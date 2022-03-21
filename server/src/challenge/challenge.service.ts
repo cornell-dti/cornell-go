@@ -4,7 +4,7 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { EventService } from 'src/event/event.service';
 import { Challenge } from '../model/challenge.entity';
 import { EventReward } from '../model/event-reward.entity';
-import { EventBase,EventRewardType } from '../model/event-base.entity';
+import { EventBase, EventRewardType } from '../model/event-base.entity';
 import { PrevChallenge } from '../model/prev-challenge.entity';
 import { User } from '../model/user.entity';
 import { EventTracker } from 'src/model/event-tracker.entity';
@@ -20,7 +20,7 @@ export class ChallengeService {
     @InjectRepository(PrevChallenge)
     private prevChallengeRepository: EntityRepository<PrevChallenge>,
     @InjectRepository(EventReward)
-    private rewardRepository: EntityRepository<EventReward>
+    private rewardRepository: EntityRepository<EventReward>,
   ) {}
 
   async createNew(event: EventBase) {
@@ -137,35 +137,46 @@ export class ChallengeService {
   }
 
   /** Check if the current event can return rewards */
-  async checkForReward(user: User, eventBase: EventBase, eventTracker: EventTracker) {
-
+  async checkForReward(
+    user: User,
+    eventBase: EventBase,
+    eventTracker: EventTracker,
+  ) {
     //If User has not completed the event/done all the challenges then:
-    if(eventTracker.completed.count() !== eventBase.challengeCount){
-      return null
+    if (eventTracker.completed.count() !== eventBase.challengeCount) {
+      return null;
     }
 
-    const rewardType = eventBase.rewardType
-    if(rewardType === EventRewardType.LIMITED_TIME_EVENT && eventBase.time > new Date()){
-      return null
+    const rewardType = eventBase.rewardType;
+    if (
+      rewardType === EventRewardType.LIMITED_TIME_EVENT &&
+      eventBase.time > new Date()
+    ) {
+      return null;
     }
-    
-    if(rewardType === EventRewardType.PERPETUAL){
-      const newReward = await this.rewardRepository.findOne({event: eventBase});
-      if(newReward !== null){
-        newReward.claimingUser.set(user)
-        newReward.isRedeemed.set(false)
-        const reward = this.rewardRepository.create({ ...newReward, id: v4() })
+
+    if (rewardType === EventRewardType.PERPETUAL) {
+      const newReward = await this.rewardRepository.findOne({
+        event: eventBase,
+      });
+      if (newReward !== null) {
+        newReward.claimingUser.set(user);
+        newReward.isRedeemed.set(false);
+        const reward = this.rewardRepository.create({ ...newReward, id: v4() });
         await this.rewardRepository.persistAndFlush(reward);
-        return newReward
+        return newReward;
       }
-      return null      
+      return null;
     }
 
-    const unclaimedReward = await this.rewardRepository.findOne({ claimingUser: null, event: eventBase });
-    if(unclaimedReward !== null){
-      unclaimedReward.claimingUser = user
-      return unclaimedReward
+    const unclaimedReward = await this.rewardRepository.findOne({
+      claimingUser: null,
+      event: eventBase,
+    });
+    if (unclaimedReward !== null) {
+      unclaimedReward.claimingUser = user;
+      return unclaimedReward;
     }
-    return null
+    return null;
   }
 }
