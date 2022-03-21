@@ -157,11 +157,11 @@ export class ChallengeService {
 
     if (rewardType === EventRewardType.PERPETUAL) {
       const newReward = await this.rewardRepository.findOne({
-        event: eventBase,
+        containingEvent: eventBase,
       });
       if (newReward !== null) {
-        newReward.claimingUser.set(user);
-        newReward.isRedeemed.set(false);
+        newReward?.claimingUser?.set(user);
+        newReward.isRedeemed = false
         const reward = this.rewardRepository.create({ ...newReward, id: v4() });
         await this.rewardRepository.persistAndFlush(reward);
         return newReward;
@@ -171,10 +171,10 @@ export class ChallengeService {
 
     const unclaimedReward = await this.rewardRepository.findOne({
       claimingUser: null,
-      event: eventBase,
+      containingEvent: eventBase,
     });
     if (unclaimedReward !== null) {
-      unclaimedReward.claimingUser = user;
+      unclaimedReward.claimingUser.set(user);
       return unclaimedReward;
     }
     return null;
