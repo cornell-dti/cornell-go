@@ -143,7 +143,7 @@ export class ChallengeService {
     eventTracker: EventTracker,
   ) {
     //If User has not completed the event/done all the challenges then:
-    if (eventTracker.completed.count() !== eventBase.challengeCount) {
+    if (eventTracker.completed.count() !== eventBase.challenges.count()) {
       return null;
     }
 
@@ -161,7 +161,7 @@ export class ChallengeService {
       });
       if (newReward !== null) {
         newReward?.claimingUser?.set(user);
-        newReward.isRedeemed = false
+        newReward.isRedeemed = false;
         const reward = this.rewardRepository.create({ ...newReward, id: v4() });
         await this.rewardRepository.persistAndFlush(reward);
         return newReward;
@@ -174,7 +174,7 @@ export class ChallengeService {
       containingEvent: eventBase,
     });
     if (unclaimedReward !== null) {
-      unclaimedReward.claimingUser.set(user);
+      unclaimedReward.claimingUser?.set(user);
       return unclaimedReward;
     }
     return null;
