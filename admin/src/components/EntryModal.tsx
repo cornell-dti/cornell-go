@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Modal } from "./Modal";
 import styled from "styled-components";
+import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 
 export type OptionEntryForm = {
   name: string;
@@ -130,8 +131,72 @@ function NumberEntryFormBox(props: { form: NumberEntryForm }) {
   );
 }
 
+const MapBox = styled.div`
+  width: 100%;
+  height: 300px;
+  margin-bottom: 32px;
+  overflow: hidden;
+`;
+
+function DraggableMarker(props: {
+  center: [number, number];
+  onLocationChange: (lat: number, long: number) => void;
+}) {
+  const [position, setPosition] = useState(props.center);
+  const markerRef = useRef<any>(null);
+  const eventHandlers = useMemo(
+    () => ({
+      dragend() {
+        const marker = markerRef.current;
+        if (marker != null) {
+          const loc: [number, number] = marker.getLatLng();
+          props.onLocationChange(loc[0], loc[1]);
+          setPosition(marker.getLatLng());
+        }
+      },
+    }),
+    []
+  );
+
+  return (
+    <Marker
+      draggable={true}
+      eventHandlers={eventHandlers}
+      position={position}
+      ref={markerRef}
+    >
+      <Popup minWidth={90}>
+        <span>Drag the pin to move the location</span>
+      </Popup>
+    </Marker>
+  );
+}
+
 function MapEntryFormBox(props: { form: MapEntryForm }) {
-  return <EntryBox></EntryBox>;
+  return (
+    <MapBox>
+      <MapContainer
+        center={[props.form.latitude, props.form.longitude]}
+        zoom={20}
+        style={{
+          width: "100%",
+          height: 300,
+        }}
+      >
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        <DraggableMarker
+          center={[props.form.latitude, props.form.longitude]}
+          onLocationChange={(lat, long) => {
+            props.form.latitude = lat;
+            props.form.longitude = long;
+          }}
+        />
+      </MapContainer>
+    </MapBox>
+  );
 }
 
 export function EntryModal(props: {
