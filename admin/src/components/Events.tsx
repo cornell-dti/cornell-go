@@ -1,5 +1,7 @@
+import { useState } from "react";
 import styled from "styled-components";
 import { EventDto } from "../dto/update-events.dto";
+import { EntryModal, EntryForm } from "./EntryModal";
 import { HButton } from "./HButton";
 import {
   ListCardBody,
@@ -29,7 +31,7 @@ function EventCard(props: { event: EventDto }) {
         <ListCardTitle>{props.event.name}</ListCardTitle>
         <ListCardDescription>{props.event.description}</ListCardDescription>
         <ListCardBody>
-          Available Until/Since: <b>{props.event.time}</b> <br />
+          Available Until: <b>{props.event.time}</b> <br />
           Required Players: <b>{requiredText}</b> <br />
           Rewarding Method: <b>{rewardingMethod}</b> <br />
           Challenge Count: <b>{props.event.challengeIds.length}</b> <br />
@@ -66,9 +68,35 @@ export function Events() {
     challengeIds: [],
   };
 
+  const [isCreateModalOpen, setCreateModalOpen] = useState(false);
+
   return (
     <>
-      <SearchBar />
+      <EntryModal
+        title="Create Event"
+        isOpen={isCreateModalOpen}
+        onEntry={() => {}}
+        onCancel={() => {
+          setCreateModalOpen(false);
+        }}
+        form={
+          [
+            { name: "Name", characterLimit: 256, value: "" },
+            { name: "Description", characterLimit: 2048, value: "" },
+            { name: "Required Members", value: -1, min: -1, max: 99 },
+            { name: "Skipping", options: ["Disabled", "Enabled"], value: 0 },
+            { name: "Default", options: ["No", "Yes"], value: 0 },
+            {
+              name: "Rewarding Method",
+              options: ["Perpetual", "Limited Time"],
+              value: 0,
+            },
+            { name: "Visible", options: ["No", "Yes"], value: 0 },
+            { name: "Available Until", date: new Date() },
+          ] as EntryForm[]
+        }
+      />
+      <SearchBar onCreate={() => setCreateModalOpen(true)} />
       <EventCard event={myEvent} />
     </>
   );

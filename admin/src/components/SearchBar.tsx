@@ -48,7 +48,7 @@ const SearchBarButtons = styled.div`
 
 export function SearchBar(props: {
   onSearch?: (query: string) => void;
-  onNew?: () => void;
+  onCreate?: () => void;
   selected?: string;
 }) {
   const searchRef = useRef<number>(-1);
@@ -56,7 +56,7 @@ export function SearchBar(props: {
   return (
     <SearchBarBox>
       <SearchBarButtons>
-        <HButton>Create</HButton>
+        <HButton onClick={props.onCreate}>Create</HButton>
       </SearchBarButtons>
       <SearchBarText>{props.selected ?? "No Selection"}</SearchBarText>
       <SearchTextBox
