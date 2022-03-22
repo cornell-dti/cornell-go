@@ -12,6 +12,7 @@ const ModalBackground = styled.div<{ opacity: number }>`
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 999;
   transition: opacity 0.15s;
+  overflow-y: auto;
 
   ${(props) =>
     css`
@@ -41,7 +42,6 @@ const ModalTitle = styled.div`
 
 const ModalBody = styled.div`
   min-height: 80px;
-  max-height: calc(100vh - 200px);
   width: 100%;
   color: gray;
   font-size: 18px;

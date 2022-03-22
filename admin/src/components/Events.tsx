@@ -1,41 +1,14 @@
 import styled from "styled-components";
 import { EventDto } from "../dto/update-events.dto";
 import { HButton } from "./HButton";
+import {
+  ListCardBody,
+  ListCardBox,
+  ListCardButtons,
+  ListCardDescription,
+  ListCardTitle,
+} from "./ListCard";
 import { SearchBar } from "./SearchBar";
-
-const EventCardBox = styled.div`
-  position: relative;
-  left: 50%;
-  transform: translateX(-50%);
-  border-radius: 4px;
-  width: min(calc(100% - 40px), 600px);
-  box-shadow: 0 0 2px black;
-  padding: 10px 10px 10px 12px;
-  margin-bottom: 16px;
-`;
-
-const EventCardTitle = styled.div`
-  font-weight: 500;
-  font-size: 22px;
-  margin-bottom: 12px;
-`;
-
-const EventCardBody = styled.div`
-  width: 100%;
-  color: black;
-  font-size: 16px;
-`;
-
-const EventCardDescription = styled.div`
-  height: 128px;
-  width: 100%;
-  color: gray;
-  font-size: 18px;
-`;
-
-const EventCardButtons = styled.div`
-  padding-top: 32px;
-`;
 
 function EventCard(props: { event: EventDto }) {
   const requiredText =
@@ -52,10 +25,10 @@ function EventCard(props: { event: EventDto }) {
 
   return (
     <>
-      <EventCardBox>
-        <EventCardTitle>{props.event.name}</EventCardTitle>
-        <EventCardDescription>{props.event.description}</EventCardDescription>
-        <EventCardBody>
+      <ListCardBox>
+        <ListCardTitle>{props.event.name}</ListCardTitle>
+        <ListCardDescription>{props.event.description}</ListCardDescription>
+        <ListCardBody>
           Available Until/Since: <b>{props.event.time}</b> <br />
           Required Players: <b>{requiredText}</b> <br />
           Rewarding Method: <b>{rewardingMethod}</b> <br />
@@ -67,13 +40,13 @@ function EventCard(props: { event: EventDto }) {
           <br />
           Default: <b>{affirmOfBool(props.event.isDefault)}</b> <br />
           Visible: <b>{affirmOfBool(props.event.indexable)}</b>
-        </EventCardBody>
-        <EventCardButtons>
+        </ListCardBody>
+        <ListCardButtons>
           <HButton>SELECT</HButton>
           <HButton float="right">DELETE</HButton>
           <HButton float="right">EDIT</HButton>
-        </EventCardButtons>
-      </EventCardBox>
+        </ListCardButtons>
+      </ListCardBox>
     </>
   );
 }

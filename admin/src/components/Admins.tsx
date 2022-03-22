@@ -4,9 +4,9 @@ import { HButton } from "./HButton";
 import { Modal } from "./Modal";
 
 const AdminApprovalEntryBox = styled.div`
-  border-radius: 4px;
+  border-radius: 6px;
   width: 100%;
-  box-shadow: 0 0 2px black;
+  box-shadow: 0 0 2px 0.1px black;
   padding: 10px 10px 10px 12px;
   margin-bottom: 12px;
   line-height: 30px;

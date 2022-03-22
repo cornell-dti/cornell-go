@@ -1,12 +1,18 @@
+import { useRef } from "react";
 import styled from "styled-components";
+import { HButton } from "./HButton";
 
 const SearchBarBox = styled.div`
+  display: flex;
+  flex-direction: row;
   position: sticky;
+  justify-content: space-between;
   top: 0;
-  border-radius: 4px;
+  border-radius: 6px;
   width: 100%;
   height: 48px;
   box-shadow: 0 0 2px black;
+  padding: 6px;
   margin-bottom: 12px;
   line-height: 30px;
   font-size: 18px;
@@ -16,24 +22,55 @@ const SearchBarBox = styled.div`
 `;
 
 const SearchTextBox = styled.input`
+  flex-shrink: 0;
+  margin-left: 12px;
   width: calc(50% - 12px);
-  margin: 6px;
   font-size: 18px;
+  justify-self: flex-end;
 `;
 
 const SearchBarText = styled.div`
-  display: inline-block;
-  width: calc(50% - 12px);
+  flex: 1;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow-x: clip;
   font-weight: bold;
-  text-align: center;
   font-size: 16px;
+  align-self: center;
+  margin: 6px;
 `;
 
-export function SearchBar() {
+const SearchBarButtons = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-self: center;
+`;
+
+export function SearchBar(props: {
+  onSearch?: (query: string) => void;
+  onNew?: () => void;
+  selected?: string;
+}) {
+  const searchRef = useRef<number>(-1);
+
   return (
     <SearchBarBox>
-      <SearchTextBox placeholder="Search..."></SearchTextBox>
-      <SearchBarText>No Event Selected</SearchBarText>
+      <SearchBarButtons>
+        <HButton>Create</HButton>
+      </SearchBarButtons>
+      <SearchBarText>{props.selected ?? "No Selection"}</SearchBarText>
+      <SearchTextBox
+        placeholder="Search..."
+        onChange={(e) => {
+          clearTimeout(searchRef.current);
+          const val = e.target.value;
+          searchRef.current = window.setTimeout(() => {
+            if (props.onSearch) {
+              props.onSearch(val);
+            }
+          }, 500);
+        }}
+      />
     </SearchBarBox>
   );
 }
