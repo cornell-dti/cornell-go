@@ -63,17 +63,11 @@ class GameServerApi {
         "rewardTypes": rewardTypes.map((e) {
           var result = "";
           switch (e) {
-            case UpdateEventDataEventRewardTypeDto.NO_REWARDS:
-              result = "no_rewards";
+            case UpdateEventDataEventRewardTypeDto.PERPETUAL:
+              result = "perpetual";
               break;
             case UpdateEventDataEventRewardTypeDto.LIMITED_TIME_EVENT:
               result = "limited_time_event";
-              break;
-            case UpdateEventDataEventRewardTypeDto.RACE_TO_WIN:
-              result = "race_to_win";
-              break;
-            case UpdateEventDataEventRewardTypeDto.WIN_ON_COMPLETION:
-              result = "win_on_completion";
               break;
           }
           return result;

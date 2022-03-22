@@ -189,7 +189,6 @@ export class EventService {
       rewardType: EventRewardType.PERPETUAL,
       indexable: false,
       time: new Date(),
-      topCount: 1,
       rewards: [],
       challenges: [],
     });
