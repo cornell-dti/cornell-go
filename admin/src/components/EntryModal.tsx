@@ -42,6 +42,8 @@ export type EntryForm =
 
 const EntryBox = styled.div`
   margin-bottom: 12px;
+  display: flex;
+  flex-direction: row;
 `;
 
 const EntryTextBox = styled.input`
@@ -50,7 +52,7 @@ const EntryTextBox = styled.input`
   border-width: 1px;
   height: 28px;
   border-radius: 2px;
-  width: calc(100% - 192px);
+  flex-grow: 1;
 `;
 
 const EntrySelect = styled.select`
@@ -92,7 +94,10 @@ function FreeEntryFormBox(props: { form: FreeEntryForm }) {
 function DateEntryFormBox(props: { form: DateEntryForm }) {
   const [val, setVal] = useState("");
 
-  useEffect(() => setVal(props.form.date.toISOString()), [props.form]);
+  useEffect(
+    () => setVal(props.form.date.toISOString().slice(0, -1)),
+    [props.form]
+  );
 
   return (
     <EntryBox>

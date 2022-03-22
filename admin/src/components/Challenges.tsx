@@ -76,8 +76,8 @@ export function Challenges() {
             { name: "Name", characterLimit: 256, value: "" },
             { name: "Description", characterLimit: 2048, value: "" },
             { name: "Image URL", characterLimit: 2048, value: "" },
-            { name: "Awarding Distance", min: 1, max: 1000, value: 1 },
-            { name: "Close Distance", min: 1, max: 1000, value: 1 },
+            { name: "Awarding Distance (meters)", min: 1, max: 1000, value: 1 },
+            { name: "Close Distance (meters)", min: 1, max: 1000, value: 1 },
           ] as EntryForm[]
         }
       />

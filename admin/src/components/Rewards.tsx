@@ -1,5 +1,7 @@
+import { useState } from "react";
 import styled from "styled-components";
 import { RewardDto } from "../dto/update-rewards.dto";
+import { EntryForm, EntryModal } from "./EntryModal";
 import { HButton } from "./HButton";
 import {
   ButtonSizer,
@@ -38,9 +40,25 @@ export function Rewards() {
     redeemInfo: "Go to this <redeem link https://google.com> to redeem",
   };
 
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+
   return (
     <>
-      <SearchBar />
+      <EntryModal
+        title="Create Reward"
+        isOpen={createModalOpen}
+        onEntry={() => {}}
+        onCancel={() => {
+          setCreateModalOpen(false);
+        }}
+        form={
+          [
+            { name: "Description", characterLimit: 2048, value: "" },
+            { name: "Redeem Info", characterLimit: 2048, value: "" },
+          ] as EntryForm[]
+        }
+      />
+      <SearchBar onCreate={() => setCreateModalOpen(true)} />
       <RewardCard reward={reward} />
     </>
   );
