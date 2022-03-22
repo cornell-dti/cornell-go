@@ -6,6 +6,12 @@ import {
 } from '@nestjs/websockets';
 import { UserGuard } from 'src/auth/jwt-auth.guard';
 import { UpdateGroupDataDto } from 'src/client/update-group-data.dto';
+import { UpdateRewardDataDto } from 'src/client/update-reward-data.dto';
+import {
+  UpdateUserDataAuthTypeDto,
+  UpdateUserDataDto,
+} from 'src/client/update-user-data.dto';
+import { EventReward } from 'src/model/event-reward.entity';
 import { CallingUser } from '../auth/calling-user.decorator';
 import { ClientService } from '../client/client.service';
 import { EventService } from '../event/event.service';
@@ -148,6 +154,41 @@ export class ChallengeGateway {
       const member = await mem.user.load();
       this.clientService.emitUpdateGroupData(member, updateData);
     }
+    const event = await newTracker.event.load();
+    const newReward = await this.challengeService.checkForReward(
+      user,
+      event,
+      newTracker,
+    );
+
+    if (newReward !== null) {
+      const participatingEvents = await user.participatingEvents.loadItems();
+      const userRewards = await user.rewards.loadItems();
+      const updatedUser: UpdateUserDataDto = {
+        id: user.id,
+        username: user.username,
+        score: user.score,
+        groupId: group?.id ?? '',
+        rewardIds: userRewards.concat(newReward).map(reward => reward.id), //Add reward to user.rewards,
+        trackedEventIds: participatingEvents.map(ev => ev.id),
+        ignoreIdLists: false,
+        authType: user.authType as UpdateUserDataAuthTypeDto,
+      };
+      this.clientService.emitUpdateUserData(user, updatedUser);
+
+      const rewards = userRewards.concat(newReward).map(reward => ({
+        eventId: reward.containingEvent.id,
+        description: reward.rewardDescription,
+        redeemInfo: reward.rewardRedeemInfo,
+        isRedeemed: reward.isRedeemed,
+      }));
+      const updatedRewards: UpdateRewardDataDto = {
+        rewards: rewards,
+      };
+      this.clientService.emitUpdateRewardData(user, updatedRewards);
+    }
+
+    return true;
     /**
      * TODO:
      * Create PrevChallenge and associate with user
