@@ -4,7 +4,7 @@ import 'package:game/leaderboard/leaderboard_widget.dart';
 import 'package:game/settings/settings.dart';
 import 'package:game/suggestions/suggestions.dart';
 import 'package:game/visited_places/visited_places_widget.dart';
-import 'package:game/challenges/challeneges_widget.dart';
+import 'package:game/challenges/challenges_widget.dart';
 import 'package:game/events/events_widget.dart';
 
 class NavBar extends StatelessWidget {
@@ -86,7 +86,7 @@ class NavBar extends StatelessWidget {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => ChallegesWidget()))
+                              builder: (context) => ChallengesWidget()))
                     }),
             ListTile(
                 leading: Icon(

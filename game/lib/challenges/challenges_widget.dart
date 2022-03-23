@@ -1,0 +1,80 @@
+import 'dart:html';
+
+import 'package:flutter/material.dart';
+import 'package:game/model/challenge_model.dart';
+import 'package:game/model/event_model.dart';
+import 'package:game/model/user_model.dart';
+
+import 'package:game/widget/back_btn.dart';
+import 'package:game/widget/challenge_cell.dart';
+import 'package:provider/provider.dart';
+
+class ChallengesWidget extends StatefulWidget {
+  ChallengesWidget({Key? key}) : super(key: key);
+
+  @override
+  _ChallengesWidgetState createState() => _ChallengesWidgetState();
+}
+
+class _ChallengesWidgetState extends State<ChallengesWidget> {
+  final scaffoldKey = GlobalKey<ScaffoldState>();
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      key: scaffoldKey,
+      floatingActionButton: backBtn(scaffoldKey, context, "Challenges"),
+      backgroundColor: Color.fromARGB(255, 43, 47, 50),
+      body: Padding(
+        padding: const EdgeInsets.only(top: 150),
+        child: Container(
+          child: Padding(
+            padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+            child: Column(
+              children: [
+                Expanded(child:
+                    Consumer3<UserModel, EventModel, ChallengeModel>(builder:
+                        (context, myUserModel, myEventModel, myChallengeModel,
+                            child) {
+                  if (myUserModel.userData == null) {
+                    return ListView();
+                  } else {
+                    List<String> challengeIds = [];
+                    final events = myUserModel.userData!.trackedEventIds;
+                    for (String eventIds in events) {
+                      final challenges =
+                          myEventModel.getEventById(eventIds)!.challengeIds;
+                      if (challenges.isNotEmpty) {
+                        challengeIds.addAll(challenges);
+                      }
+                    }
+                    return ListView();
+                  }
+                }))
+                // Expanded(
+                //     child: ListView(
+                //         shrinkWrap: true,
+                //         scrollDirection: Axis.vertical,
+                //         children: [
+                //       challengeCell(context, "Sage Chapel", "4/19/2021", 5,
+                //           "assets/images/38582.jpg", false, false, false),
+                //       challengeCell(context, "Sage Chapel", "4/19/2021", 5,
+                //           "assets/images/38582.jpg", true, true, false),
+                //       challengeCell(context, "Sage Chapel", "4/19/2021", 5,
+                //           "assets/images/38582.jpg", false, true, false),
+                //       challengeCell(context, "Sage Chapel", "4/19/2021", 5,
+                //           "assets/images/38582.jpg", false, true, true),
+                //     ]))
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
