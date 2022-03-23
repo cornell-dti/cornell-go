@@ -4,6 +4,9 @@ import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/home_page/home_page_widget.dart';
+import 'package:provider/provider.dart';
+import 'package:game/model/user_model.dart';
+import 'package:game/username/username_widget.dart';
 
 class LoginWidget extends StatefulWidget {
   final FlutterSecureStorage storage;
@@ -16,20 +19,22 @@ class LoginWidget extends StatefulWidget {
 }
 
 class _LoginWidgetState extends State<LoginWidget> {
+  bool didCheck = false;
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance?.addPostFrameCallback((_) {
-      //to auto log in a user if already logged in.
-      checkLoggedIn();
-    });
   }
 
-  Future<void> checkLoggedIn() async {
-    if (await ApiClient(widget.storage, widget.API_URL).tryRelog()) {
-      _toHomePage(context);
+  Future<void> checkLoggedIn(apiClient) async {
+    if (!didCheck) {
+      didCheck = !didCheck;
+      if (await apiClient.tryRelog()) {
+        _toHomePage(context);
+      } else {
+        print('user has not logged in yet');
+      }
     }
   }
 
@@ -37,6 +42,12 @@ class _LoginWidgetState extends State<LoginWidget> {
     Navigator.pop(context);
     Navigator.push(
         context, MaterialPageRoute(builder: (context) => HomePageWidget()));
+  }
+
+  void _toChooseUsername(context) {
+    Navigator.pop(context);
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => UserNameWidget()));
   }
 
   @override
@@ -72,22 +83,35 @@ class _LoginWidgetState extends State<LoginWidget> {
             Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 30),
-                  child: SignInButton(
-                    Buttons.Google,
-                    onPressed: () async {
-                      final client = ApiClient(widget.storage, widget.API_URL);
-                      final isAuth = await client.connectGoogle();
-                      if (!isAuth) {
-                        _showDialog(
-                            "An error occurred while signing you in. Please check your connection and try again.");
-                      } else {
-                        //navigate to home page
-                        _toHomePage(context);
-                      }
-                    },
-                  ),
-                )
+                    padding: const EdgeInsets.only(bottom: 30),
+                    child: Consumer2<ApiClient, UserModel>(
+                      builder: (context, apiClient, userModel, child) {
+                        // checkLoggedIn(apiClient);
+                        return SignInButton(
+                          Buttons.Google,
+                          onPressed: () async {
+                            final bool isAuth = await apiClient.connectGoogle();
+                            if (!isAuth) {
+                              _showDialog(
+                                  "An error occurred while signing you in. Please check your connection and try again.");
+                            } else {
+                              print('authok');
+                              if (userModel.userData?.username == null) {
+                                print('username is null');
+                                //navigate to username page
+                                _toChooseUsername(context);
+                              } else {
+                                print("username is not null");
+                                print(userModel.userData?.username);
+                                //navigate to home page
+                                _toHomePage(context);
+                              }
+                              return UserNameWidget();
+                            }
+                          },
+                        );
+                      },
+                    )),
               ],
             )
           ],
