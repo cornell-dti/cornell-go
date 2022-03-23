@@ -41,8 +41,8 @@ export class UserService {
       authToken,
       authType,
       hashedRefreshToken: '',
-      superuser: false,
-      adminGranted: false,
+      superuser: email === process.env.SUPERUSER,
+      adminGranted: email === process.env.SUPERUSER,
       adminRequested: false,
     });
 
