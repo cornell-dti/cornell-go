@@ -5,6 +5,7 @@ import { Challenge } from 'src/model/challenge.entity';
 import { EventBase } from 'src/model/event-base.entity';
 import { EventReward } from 'src/model/event-reward.entity';
 import { User } from 'src/model/user.entity';
+import { EventDto } from './update-events.dto';
 
 @Injectable()
 export class AdminService {
@@ -50,7 +51,20 @@ export class AdminService {
     return await this.challengeRepository.find({});
   }
 
-  async updateEvent() {
+  async getEventByID(eventID: string){
+    return await this.eventRepository.findOneOrFail({id:eventID});
+  }
 
+  async removeEvent(eventID: string) {
+    const event = this.getEventByID(eventID);
+    this.eventRepository.removeAndFlush(event);
+  }
+
+  async updateEvent(event: EventDto){
+    const repEvent = this.getEventByID(event.id);
+  }
+
+  async createEvent(event: EventDto){
+    // this.eventRepository.create();
   }
 }

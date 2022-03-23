@@ -1,4 +1,3 @@
-import { UpdateEventDataDto } from './../../dist/client/update-event-data.dto.d';
 import { UseGuards } from '@nestjs/common';
 import {
   MessageBody,
@@ -20,7 +19,6 @@ import { UpdateAdminsDto } from './update-admins.dto';
 import { UpdateChallengesDto } from './update-challenges.dto';
 import { UpdateEventsDto } from './update-events.dto';
 import { UpdateRewardsDto } from './update-rewards.dto';
-import { RewardTypeDto } from 'src/client/update-event-data.dto';
 import { Challenge } from 'src/model/challenge.entity';
 import { EventReward } from 'src/model/event-reward.entity';
 
@@ -45,7 +43,7 @@ export class AdminGateway {
           isDefault:ev.isDefault,
           name: ev.name,
           description: ev.description,
-          rewardType: ev.rewardType as RewardTypeDto,
+          rewardType: ev.rewardType,
           time: ev.time.toUTCString(),
           requiredMembers: ev.requiredMembers,
           topCount: ev.topCount,
@@ -104,9 +102,13 @@ export class AdminGateway {
 
   @SubscribeMessage('updateEvents')
   async updateEvents(@CallingUser() user: User, data: UpdateEventsDto) {
-    const eventUpdates: UpdateEventsDto[] = [];
-    for (const eventData of data.events) {
-      const event = await this.adminService.updateEvent();
+    for (const id in data.deletedIds){
+      this.adminService.removeEvent(id);
+    }
+    for (const event of data.events){
+      if ((await this.adminService.getAllEventData()).some(e => e.id === event.id)){
+        this.adminService.updateEvent(event);
+      }
     }
   }
 
