@@ -47,6 +47,7 @@ export function Rewards() {
       <EntryModal
         title="Create Reward"
         isOpen={createModalOpen}
+        entryButtonText="CREATE"
         onEntry={() => {}}
         onCancel={() => {
           setCreateModalOpen(false);

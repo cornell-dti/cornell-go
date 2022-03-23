@@ -75,6 +75,7 @@ export function Events() {
       <EntryModal
         title="Create Event"
         isOpen={isCreateModalOpen}
+        entryButtonText="CREATE"
         onEntry={() => {}}
         onCancel={() => {
           setCreateModalOpen(false);

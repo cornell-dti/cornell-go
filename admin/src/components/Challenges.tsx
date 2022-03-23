@@ -66,6 +66,7 @@ export function Challenges() {
       <EntryModal
         title="Create Challenge"
         isOpen={createModelOpen}
+        entryButtonText="CREATE"
         onEntry={() => {}}
         onCancel={() => {
           setCreateModalOpen(false);

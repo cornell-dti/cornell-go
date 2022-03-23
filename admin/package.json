@@ -14,16 +14,20 @@
     "@types/node": "^12.0.0",
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
+    "@types/styled-components": "^5.1.24",
+    "google-auth-library": "^7.14.1",
     "icons": "^1.0.0",
     "leaflet": "^1.7.1",
     "prettier": "^2.4.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-google-button": "^0.7.2",
+    "react-google-login": "^5.2.2",
     "react-leaflet": "^3.2.5",
     "react-router": "^5.2.1",
     "react-router-dom": "^6.2.2",
     "react-scripts": "^5.0.0",
+    "socket.io-client": "^4.4.1",
     "string-similarity": "^4.0.4",
     "styled-components": "^5.3.3",
     "typeface-roboto": "^1.1.13",
@@ -55,8 +59,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "devDependencies": {
-    "@types/styled-components": "^5.1.24"
   }
 }

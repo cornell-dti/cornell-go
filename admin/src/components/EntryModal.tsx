@@ -208,6 +208,7 @@ export function EntryModal(props: {
   title: string;
   form: EntryForm[];
   isOpen: boolean;
+  entryButtonText: string;
   onEntry: (form: EntryForm[]) => void;
   onCancel: () => void;
 }) {
@@ -222,7 +223,7 @@ export function EntryModal(props: {
   return (
     <Modal
       title={props.title}
-      buttons={["CONFIRM", "CANCEL"]}
+      buttons={[props.entryButtonText, "CANCEL"]}
       isOpen={props.isOpen}
       onButtonClick={(idx) => {
         if (idx === 1) props.onCancel();
