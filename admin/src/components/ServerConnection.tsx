@@ -11,10 +11,12 @@ import { Modal } from "./Modal";
 export const ServerConnectionContext = createContext<{
   connection?: Socket;
   connect: (idToken: string) => Promise<boolean>;
+  disconnect: () => Promise<void>;
 }>({
   async connect() {
     return false;
   },
+  async disconnect() {},
 });
 
 export function ServerConnectionProvider(props: { children: ReactNode }) {
@@ -24,6 +26,7 @@ export function ServerConnectionProvider(props: { children: ReactNode }) {
         async connect() {
           return false;
         },
+        async disconnect() {},
       }}
     >
       {props.children}
