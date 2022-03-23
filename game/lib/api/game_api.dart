@@ -98,7 +98,7 @@ class ApiClient extends ChangeNotifier {
       final refreshResponse =
           await http.post(_refreshUrl, body: {'refreshToken': _refreshToken});
 
-      if (refreshResponse.statusCode == 201 && refreshResponse.body != "null") {
+      if (refreshResponse.statusCode == 201 && refreshResponse.body != "") {
         final responseBody = jsonDecode(refreshResponse.body);
         _accessToken = responseBody["accessToken"];
 
@@ -123,7 +123,7 @@ class ApiClient extends ChangeNotifier {
       final access = await _refreshAccess();
       authenticated = access;
       notifyListeners();
-      print(access);
+      print('in tryRelog');
       return access;
     }
 

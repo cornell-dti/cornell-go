@@ -28,28 +28,28 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-        title: 'CornellGO!',
-        localizationsDelegates: [
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
+    return MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => client),
+          ChangeNotifierProvider(create: (_) => UserModel(client)),
+          ChangeNotifierProvider(create: (_) => RewardModel(client)),
+          ChangeNotifierProvider(create: (_) => GroupModel(client)),
+          ChangeNotifierProvider(create: (_) => EventModel(client)),
+          ChangeNotifierProvider(create: (_) => TrackerModel(client)),
+          ChangeNotifierProvider(create: (_) => ChallengeModel(client))
         ],
-        supportedLocales: const [Locale('en', '')],
-        theme: ThemeData(primarySwatch: Colors.blue),
-        home: MultiProvider(
-            providers: [
-              ChangeNotifierProvider(create: (_) => client),
-              ChangeNotifierProvider(create: (_) => UserModel(client)),
-              ChangeNotifierProvider(create: (_) => RewardModel(client)),
-              ChangeNotifierProvider(create: (_) => GroupModel(client)),
-              ChangeNotifierProvider(create: (_) => EventModel(client)),
-              ChangeNotifierProvider(create: (_) => TrackerModel(client)),
-              ChangeNotifierProvider(create: (_) => ChallengeModel(client))
-            ],
-            builder: (context, child) {
-              return GameWidget(
-                  child: LoginWidget(storage: storage, API_URL: API_URL));
-            }));
+        builder: (context, child) {
+          return MaterialApp(
+              title: 'CornellGO!',
+              localizationsDelegates: [
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
+              supportedLocales: const [Locale('en', '')],
+              theme: ThemeData(primarySwatch: Colors.blue),
+              home: GameWidget(
+                  child: LoginWidget(storage: storage, API_URL: API_URL)));
+        });
   }
 }
