@@ -133,6 +133,37 @@ class ApiClient extends ChangeNotifier {
     return false;
   }
 
+  Future<bool> connectId(String id) async {
+    final pos = await GeoPoint.current();
+
+    final loginResponse = await http.post(_deviceLoginUrl,
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, String>{
+          "idToken": id,
+          "lat": pos.lat.toString(),
+          "long": pos.long.toString(),
+          "aud": Platform.isIOS ? "ios" : "android"
+        }));
+
+    if (loginResponse.statusCode == 201 && loginResponse.body != "") {
+      final responseBody = jsonDecode(loginResponse.body);
+
+      this._accessToken = responseBody["accessToken"];
+      this._refreshToken = responseBody["refreshToken"];
+
+      await _saveToken();
+
+      _createSocket(false);
+      return true;
+    }
+
+    authenticated = false;
+    notifyListeners();
+    return false;
+  }
+
   Future<bool> connectGoogle() async {
     final account = await _googleSignIn.signIn();
     if (account != null) {
