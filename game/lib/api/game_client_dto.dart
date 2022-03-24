@@ -91,10 +91,8 @@ class UpdateEventDataRewardDto {
 }
 
 enum UpdateEventDataEventRewardTypeDto {
-  NO_REWARDS,
+  PERPETUAL,
   LIMITED_TIME_EVENT,
-  WIN_ON_COMPLETION,
-  RACE_TO_WIN
 }
 
 class UpdateEventDataEventDto {
@@ -104,17 +102,11 @@ class UpdateEventDataEventDto {
     name = fields["name"];
     description = fields["description"];
     switch (fields["rewardType"]) {
-      case "no_rewards":
-        rewardType = UpdateEventDataEventRewardTypeDto.NO_REWARDS;
+      case "perpetual":
+        rewardType = UpdateEventDataEventRewardTypeDto.PERPETUAL;
         break;
       case "limited_time_event":
         rewardType = UpdateEventDataEventRewardTypeDto.LIMITED_TIME_EVENT;
-        break;
-      case "win_on_completion":
-        rewardType = UpdateEventDataEventRewardTypeDto.WIN_ON_COMPLETION;
-        break;
-      case "race_to_win":
-        rewardType = UpdateEventDataEventRewardTypeDto.RACE_TO_WIN;
         break;
     }
     time = fields["time"] == '' ? null : DateTime.parse(fields["time"]);
@@ -132,7 +124,7 @@ class UpdateEventDataEventDto {
   String name = "";
   String description = "";
   UpdateEventDataEventRewardTypeDto rewardType =
-      UpdateEventDataEventRewardTypeDto.NO_REWARDS;
+      UpdateEventDataEventRewardTypeDto.PERPETUAL;
   DateTime? time = null;
   int topCount = 0;
   List<UpdateEventDataRewardDto> rewards = [];
