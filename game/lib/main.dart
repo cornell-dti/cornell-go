@@ -30,13 +30,31 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => client),
-        ChangeNotifierProvider(create: (_) => UserModel(client)),
-        ChangeNotifierProvider(create: (_) => RewardModel(client)),
-        ChangeNotifierProvider(create: (_) => GroupModel(client)),
-        ChangeNotifierProvider(create: (_) => EventModel(client)),
-        ChangeNotifierProvider(create: (_) => TrackerModel(client)),
-        ChangeNotifierProvider(create: (_) => ChallengeModel(client))
+        ChangeNotifierProvider.value(value: client),
+        ChangeNotifierProvider(
+          create: (_) => UserModel(client),
+          lazy: false,
+        ),
+        ChangeNotifierProvider(
+          create: (_) => RewardModel(client),
+          lazy: false,
+        ),
+        ChangeNotifierProvider(
+          create: (_) => GroupModel(client),
+          lazy: false,
+        ),
+        ChangeNotifierProvider(
+          create: (_) => EventModel(client),
+          lazy: false,
+        ),
+        ChangeNotifierProvider(
+          create: (_) => TrackerModel(client),
+          lazy: false,
+        ),
+        ChangeNotifierProvider(
+          create: (_) => ChallengeModel(client),
+          lazy: false,
+        )
       ],
       child: MaterialApp(
           title: 'CornellGO!',

@@ -64,6 +64,7 @@ class ApiClient extends ChangeNotifier {
     });
     socket.onConnect((data) {
       _socket = socket;
+
       _clientApi.connectSocket(socket);
       if (refreshing) {
         _serverApi?.replaceSocket(socket);
@@ -101,6 +102,7 @@ class ApiClient extends ChangeNotifier {
       if (refreshResponse.statusCode == 201 && refreshResponse.body != "null") {
         final responseBody = jsonDecode(refreshResponse.body);
         _accessToken = responseBody["accessToken"];
+        _createSocket(true);
 
         return true;
       }
