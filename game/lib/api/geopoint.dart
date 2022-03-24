@@ -34,7 +34,6 @@ class GeoPoint {
       return Future.error(
           'Location permissions are permanently denied, we cannot request permissions.');
     }
-    print('permissionsok');
     final pos = await Geolocator.getCurrentPosition();
 
     return GeoPoint(pos.latitude, pos.longitude);

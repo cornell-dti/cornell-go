@@ -125,7 +125,6 @@ class ApiClient extends ChangeNotifier {
       final access = await _refreshAccess();
       authenticated = access;
       notifyListeners();
-      print('in tryRelog');
       return access;
     }
 
