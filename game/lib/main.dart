@@ -29,27 +29,44 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-        providers: [
-          ChangeNotifierProvider(create: (_) => client),
-          ChangeNotifierProvider(create: (_) => UserModel(client)),
-          ChangeNotifierProvider(create: (_) => RewardModel(client)),
-          ChangeNotifierProvider(create: (_) => GroupModel(client)),
-          ChangeNotifierProvider(create: (_) => EventModel(client)),
-          ChangeNotifierProvider(create: (_) => TrackerModel(client)),
-          ChangeNotifierProvider(create: (_) => ChallengeModel(client))
-        ],
-        builder: (context, child) {
-          return MaterialApp(
-              title: 'CornellGO!',
-              localizationsDelegates: [
-                GlobalMaterialLocalizations.delegate,
-                GlobalWidgetsLocalizations.delegate,
-                GlobalCupertinoLocalizations.delegate,
-              ],
-              supportedLocales: const [Locale('en', '')],
-              theme: ThemeData(primarySwatch: Colors.blue),
-              home: GameWidget(
-                  child: LoginWidget(storage: storage, API_URL: API_URL)));
-        });
+      providers: [
+        ChangeNotifierProvider.value(value: client),
+        ChangeNotifierProvider(
+          create: (_) => UserModel(client),
+          lazy: false,
+        ),
+        ChangeNotifierProvider(
+          create: (_) => RewardModel(client),
+          lazy: false,
+        ),
+        ChangeNotifierProvider(
+          create: (_) => GroupModel(client),
+          lazy: false,
+        ),
+        ChangeNotifierProvider(
+          create: (_) => EventModel(client),
+          lazy: false,
+        ),
+        ChangeNotifierProvider(
+          create: (_) => TrackerModel(client),
+          lazy: false,
+        ),
+        ChangeNotifierProvider(
+          create: (_) => ChallengeModel(client),
+          lazy: false,
+        )
+      ],
+      child: MaterialApp(
+          title: 'CornellGO!',
+          localizationsDelegates: [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [Locale('en', '')],
+          theme: ThemeData(primarySwatch: Colors.blue),
+          home: GameWidget(
+              child: LoginWidget(storage: storage, API_URL: API_URL))),
+    );
   }
 }
