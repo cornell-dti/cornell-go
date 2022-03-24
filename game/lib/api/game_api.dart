@@ -65,12 +65,12 @@ class ApiClient extends ChangeNotifier {
     socket.onConnect((data) {
       _socket = socket;
 
-      _clientApi.connectSocket(socket);
       if (refreshing) {
         _serverApi?.replaceSocket(socket);
       } else {
         _serverApi = GameServerApi(socket, _accessRefresher);
       }
+      _clientApi.connectSocket(socket);
       notifyListeners();
     });
     socket.onConnectError((data) {
@@ -150,6 +150,7 @@ class ApiClient extends ChangeNotifier {
             "long": pos.long.toString(),
             "aud": Platform.isIOS ? "ios" : "android"
           }));
+
       if (loginResponse.statusCode == 201 && loginResponse.body != "") {
         final responseBody = jsonDecode(loginResponse.body);
 
