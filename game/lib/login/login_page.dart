@@ -32,9 +32,7 @@ class _LoginWidgetState extends State<LoginWidget> {
       didCheck = !didCheck;
       if (await apiClient.tryRelog()) {
         _toHomePage(context);
-      } else {
-        print('user has not logged in yet');
-      }
+      } else {}
     }
   }
 
@@ -95,18 +93,18 @@ class _LoginWidgetState extends State<LoginWidget> {
                               _showDialog(
                                   "An error occurred while signing you in. Please check your connection and try again.");
                             } else {
-                              print('authok');
-                              if (userModel.userData?.username == null) {
-                                print('username is null');
-                                //navigate to username page
-                                _toChooseUsername(context);
-                              } else {
-                                print("username is not null");
-                                print(userModel.userData?.username);
-                                //navigate to home page
-                                _toHomePage(context);
-                              }
-                              return UserNameWidget();
+                              Future.delayed(const Duration(milliseconds: 2000),
+                                  () {
+                                if (userModel.userData?.username == null) {
+                                  print(userModel.userData?.username);
+                                  _toChooseUsername(context);
+                                } else {
+                                  print(userModel.userData?.username);
+                                  //navigate to home page
+                                  _toHomePage(context);
+                                }
+                                return UserNameWidget();
+                              });
                             }
                           },
                         );
