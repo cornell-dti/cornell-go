@@ -23,44 +23,55 @@ class _UserNameWidget extends State<UserNameWidget> {
     return Scaffold(
         key: scaffoldKey,
         backgroundColor: Colors.black,
+        floatingActionButton: FloatingActionButton(
+            elevation: 8.0,
+            child: Icon(Icons.check),
+            backgroundColor: Carnelian,
+            onPressed: () {
+              print('pressed');
+            }),
         body: Center(
-          child: Container(
-              child: step == 1 ? _initWidget() : _userNameInputWidget()),
+          child: Container(child: _userNameInputWidget()),
         ));
   }
 
-  Widget _initWidget() {
-    return Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-      Text("Hi 👋🏻",
-          style: GoogleFonts.lato(
-              textStyle: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 25))),
-      Text("Looks like you're new here",
-          style: GoogleFonts.lato(
-              textStyle: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20))),
-      Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: ElevatedButton(
-          onPressed: () => {step += 1, print(step)},
-          child: Icon(Icons.arrow_right_alt_rounded, color: Colors.white),
-          style: TextButton.styleFrom(
-              backgroundColor: Carnelian,
-              shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(10)))),
-        ),
-      )
-    ]);
-  }
-
   Widget _userNameInputWidget() {
-    return Text(
-      'hi',
-      style: TextStyle(color: Colors.white),
-    );
+    return Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+      Text("Change your username here!",
+          style: GoogleFonts.lato(
+              textStyle: TextStyle(
+                  color: Carnelian,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18))),
+      Padding(
+          padding: const EdgeInsets.only(top: 16.0, left: 12.0, right: 12.0),
+          child: Container(
+            width: 225,
+            height: 50,
+            child: TextField(
+              style: GoogleFonts.lato(
+                  textStyle: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.normal,
+                      fontSize: 16)),
+              cursorColor: Carnelian,
+              decoration: new InputDecoration(
+                  focusColor: Colors.white,
+                  fillColor: Colors.white,
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white, width: 2.0),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Carnelian, width: 2.0),
+                  ),
+                  hintText: 'Username',
+                  hintStyle: GoogleFonts.lato(
+                      textStyle: TextStyle(
+                          color: Colors.grey,
+                          fontWeight: FontWeight.normal,
+                          fontSize: 16))),
+            ),
+          )),
+    ]);
   }
 }
