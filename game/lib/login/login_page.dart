@@ -42,14 +42,10 @@ class _LoginWidgetState extends State<LoginWidget> {
         context, MaterialPageRoute(builder: (context) => HomePageWidget()));
   }
 
-  void _toChooseUsername(context) {
-    Navigator.pop(context);
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => UserNameWidget()));
-  }
-
   @override
   Widget build(BuildContext context) {
+    TextEditingController usernameController = new TextEditingController();
+    Color Carnelian = Color(0xFFB31B1B);
     return Scaffold(
         key: scaffoldKey,
         backgroundColor: Colors.black,
@@ -81,32 +77,98 @@ class _LoginWidgetState extends State<LoginWidget> {
             Column(
               children: [
                 Padding(
-                    padding: const EdgeInsets.only(bottom: 30),
-                    child: Consumer2<ApiClient, UserModel>(
-                      builder: (context, apiClient, userModel, child) {
+                    padding:
+                        const EdgeInsets.only(left: 30, right: 30, bottom: 30),
+                    child: Container(
+                      width: 225,
+                      height: 50,
+                      child: TextField(
+                        controller: usernameController,
+                        style: GoogleFonts.lato(
+                            textStyle: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.normal,
+                                fontSize: 16)),
+                        cursorColor: Carnelian,
+                        decoration: new InputDecoration(
+                            focusColor: Colors.white,
+                            fillColor: Colors.white,
+                            focusedBorder: OutlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: Colors.white, width: 2.0),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: Carnelian, width: 2.0),
+                            ),
+                            hintText: 'Username',
+                            hintStyle: GoogleFonts.lato(
+                                textStyle: TextStyle(
+                                    color: Colors.grey,
+                                    fontWeight: FontWeight.normal,
+                                    fontSize: 16))),
+                      ),
+                    )),
+                Padding(
+                    padding: const EdgeInsets.only(bottom: 0),
+                    child: Consumer<ApiClient>(
+                      builder: (context, apiClient, child) {
                         // checkLoggedIn(apiClient);
-                        return SignInButton(
-                          Buttons.Google,
-                          onPressed: () async {
+                        return Container(
+                          width: 225,
+                          height: 50,
+                          child: TextButton(
+                            style: ButtonStyle(
+                              backgroundColor:
+                                  MaterialStateProperty.all<Color>(Carnelian),
+                              foregroundColor: MaterialStateProperty.all<Color>(
+                                  Colors.white),
+                            ),
+                            onPressed: () async {
+                              final username = usernameController.text;
+                              if (username == "") {
+                                _showDialog("Please enter a username.");
+                              } else {
+                                final auth =
+                                    await apiClient.connectId(username);
+                                if (!auth) {
+                                  _showDialog(
+                                      "An error occurred while signing you in. Please check your connection and try again.");
+                                } else {
+                                  _toHomePage(context);
+                                }
+                              }
+                            },
+                            child: Text("Sign in with username"),
+                          ),
+                        );
+                      },
+                    )),
+                const Divider(
+                  height: 50,
+                  thickness: 2,
+                  indent: 50,
+                  color: Colors.grey,
+                  endIndent: 50,
+                ),
+                Padding(
+                    padding: const EdgeInsets.only(bottom: 0),
+                    child: Consumer<ApiClient>(
+                      builder: (context, apiClient, child) {
+                        // checkLoggedIn(apiClient);
+                        return Container(
+                          width: 225,
+                          height: 50,
+                          child:
+                              SignInButton(Buttons.Google, onPressed: () async {
                             final bool isAuth = await apiClient.connectGoogle();
                             if (!isAuth) {
                               _showDialog(
                                   "An error occurred while signing you in. Please check your connection and try again.");
                             } else {
-                              Future.delayed(const Duration(milliseconds: 2000),
-                                  () {
-                                if (userModel.userData?.username == null) {
-                                  print(userModel.userData?.username);
-                                  _toChooseUsername(context);
-                                } else {
-                                  print(userModel.userData?.username);
-                                  //navigate to home page
-                                  _toHomePage(context);
-                                }
-                                return UserNameWidget();
-                              });
+                              _toHomePage(context);
                             }
-                          },
+                          }),
                         );
                       },
                     )),

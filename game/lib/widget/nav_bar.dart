@@ -4,6 +4,7 @@ import 'package:game/leaderboard/leaderboard_widget.dart';
 import 'package:game/settings/settings.dart';
 import 'package:game/suggestions/suggestions.dart';
 import 'package:game/visited_places/visited_places_widget.dart';
+import 'package:game/username/username_widget.dart';
 
 class NavBar extends StatelessWidget {
   @override
@@ -58,6 +59,18 @@ class NavBar extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                         builder: (context) => LeaderboardWidget()))
+              },
+            ),
+            ListTile(
+              leading: Icon(
+                Icons.text_fields,
+                color: Color(0xFFB31B1B),
+              ),
+              title: Text('Change username', style: listTextStyle),
+              onTap: () => {
+                Navigator.pop(context),
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => UserNameWidget()))
               },
             ),
             ListTile(
