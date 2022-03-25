@@ -14,11 +14,12 @@ import { ServerApi } from "./ServerApi";
 import { ServerConnectionContext } from "./ServerConnection";
 
 const defaultData = {
-  admins: [] as UpdateAdminDataAdminDto[],
-  events: [] as EventDto[],
+  admins: new Map<string, UpdateAdminDataAdminDto>(),
+  events: new Map<string, EventDto>(),
   challenges: new Map<string, ChallengeDto>(),
   rewards: new Map<string, RewardDto>(),
-  selectedEvent: null as string | null,
+  selectedEvent: "" as string,
+  selectEvent(id: string) {},
   setAdminStatus(id: string, granted: boolean) {},
   updateReward(reward: RewardDto) {},
   deleteReward(id: string) {},
@@ -33,8 +34,6 @@ export const ServerDataContext = createContext(defaultData);
 export function ServerDataProvider(props: { children: ReactNode }) {
   const connection = useContext(ServerConnectionContext);
 
-  if (!connection.connection) return <>{props.children}</>;
-
   const sock = useMemo(
     () => new ServerApi(connection.connection!),
     [connection]
@@ -44,8 +43,14 @@ export function ServerDataProvider(props: { children: ReactNode }) {
 
   const methods = useMemo(
     () => ({
-      selectEvent(id: string | null) {
+      selectEvent(id: string) {
         setServerData({ ...serverData, selectedEvent: id });
+        sock.requestChallenges({
+          challengeIds: serverData.events.get(id)?.challengeIds ?? [],
+        });
+        sock.requestRewards({
+          rewardIds: serverData.events.get(id)?.rewardIds ?? [],
+        });
       },
       setAdminStatus(id: string, granted: boolean) {
         sock.updateAdmins({ adminUpdates: [{ id, granted }] });
@@ -74,26 +79,20 @@ export function ServerDataProvider(props: { children: ReactNode }) {
 
   useEffect(() => {
     sock.onUpdateAdminData((data) => {
-      serverData.admins = serverData.admins.filter(
-        (admin) =>
-          !data.admins.some(
-            (adminUpdate) =>
-              !adminUpdate.requesting && admin.id === adminUpdate.id
-          )
-      );
       data.admins.forEach((adminUpdate) => {
-        if (adminUpdate.requesting) serverData.admins.push(adminUpdate);
+        if (adminUpdate.requesting)
+          serverData.admins.set(adminUpdate.id, adminUpdate);
+        else serverData.admins.delete(adminUpdate.id);
       });
       setServerData(serverData);
     });
     sock.onUpdateEventData((data) => {
-      serverData.events = serverData.events.filter(
-        (ev) => !data.deletedIds.includes(ev.id)
-      );
+      data.deletedIds.forEach(serverData.events.delete);
+      data.events.forEach((ev) => serverData.events.set(ev.id, ev));
       setServerData(serverData);
     });
     sock.onUpdateChallengeData((data) => {
-      data.deletedIds.forEach((id) => serverData.challenges.delete(id));
+      data.deletedIds.forEach(serverData.challenges.delete);
       data.challenges.forEach((chal) =>
         serverData.challenges.set(chal.id, chal)
       );
@@ -104,7 +103,11 @@ export function ServerDataProvider(props: { children: ReactNode }) {
       data.rewards.forEach((rw) => serverData.rewards.set(rw.id, rw));
       setServerData(serverData);
     });
+    sock.requestAdmins({});
+    sock.requestEvents({});
   }, [sock, serverData, setServerData]);
+
+  if (!connection.connection) return <>{props.children}</>;
 
   return (
     <ServerDataContext.Provider value={{ ...serverData, ...methods }}>
