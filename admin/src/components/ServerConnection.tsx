@@ -1,12 +1,21 @@
-import { createContext, ReactNode, useContext } from "react";
-import GoogleButton from "react-google-button";
+import {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import GoogleLogin, {
   GoogleLoginResponse,
   GoogleLoginResponseOffline,
 } from "react-google-login";
-import { Socket } from "socket.io-client";
+import { io, Socket } from "socket.io-client";
 import styled from "styled-components";
+import isDev from "../development";
+import { postRequest } from "../post";
 import { Modal } from "./Modal";
+
+const serverUrl = isDev() ? "http://localhost" : "";
 
 export const ServerConnectionContext = createContext<{
   connection?: Socket;
@@ -20,13 +29,55 @@ export const ServerConnectionContext = createContext<{
 });
 
 export function ServerConnectionProvider(props: { children: ReactNode }) {
+  const [connection, setConnection] = useState<Socket | undefined>(undefined);
+
+  useEffect(() => {}, [setConnection]);
+
   return (
     <ServerConnectionContext.Provider
       value={{
-        async connect() {
-          return false;
+        connection,
+        async connect(idToken: string) {
+          const loginResponse:
+            | {
+                refreshToken: string;
+                accessToken: string;
+              }
+            | undefined = await postRequest(serverUrl + "/google", {
+            idToken,
+            lat: 1,
+            long: 1,
+            aud: "web",
+          });
+
+          if (!loginResponse) {
+            return false;
+          }
+
+          const socket = io(serverUrl, {
+            auth: { token: loginResponse.accessToken },
+            autoConnect: false,
+          });
+
+          socket.on("connect", () => {
+            setConnection(socket);
+          });
+
+          socket.on("connect_error", () => {});
+
+          socket.on("disconnect", () => {
+            this.disconnect();
+          });
+
+          socket.connect();
+
+          return true;
         },
-        async disconnect() {},
+        async disconnect() {
+          connection?.close();
+          connection?.removeAllListeners();
+          setConnection(undefined);
+        },
       }}
     >
       {props.children}
@@ -37,6 +88,7 @@ export function ServerConnectionProvider(props: { children: ReactNode }) {
 const GoogleButtonBox = styled.div`
   margin-top: 16px;
   width: 100%;
+  font-size: 12px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -44,16 +96,27 @@ const GoogleButtonBox = styled.div`
 
 export function AuthenticationGuard(props: { children: ReactNode }) {
   const connection = useContext(ServerConnectionContext);
+  const [loginMessage, setLoginMessage] = useState(
+    "After logging in for the first time, make sure you have requested access from an admin."
+  );
 
   const connect = async (
     response: GoogleLoginResponse | GoogleLoginResponseOffline
   ) => {
-    console.log(response);
-    const state = await connection.connect("");
+    if ("tokenId" in response) {
+      const state = await connection.connect(
+        response.getAuthResponse().id_token
+      );
+      setLoginMessage("Connection error");
+    }
   };
 
+  useEffect(() => {
+    if (connection.connection) setLoginMessage("");
+  }, [connection, setLoginMessage]);
+
   if (connection.connection) {
-    return <>props.children</>;
+    return <>{props.children}</>;
   } else {
     return (
       <Modal
@@ -70,6 +133,8 @@ export function AuthenticationGuard(props: { children: ReactNode }) {
             onFailure={(e) => console.log(e)}
             cookiePolicy={"single_host_origin"}
           />
+          <br />
+          <b>{loginMessage}</b>
         </GoogleButtonBox>
       </Modal>
     );

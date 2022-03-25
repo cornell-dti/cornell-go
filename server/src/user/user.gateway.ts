@@ -23,7 +23,7 @@ import { UserService } from './user.service';
 import { forwardRef, Inject, UseGuards } from '@nestjs/common';
 import { UserGuard } from 'src/auth/jwt-auth.guard';
 
-@WebSocketGateway()
+@WebSocketGateway({ cors: true })
 @UseGuards(UserGuard)
 export class UserGateway {
   constructor(

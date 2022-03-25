@@ -17,12 +17,15 @@ import {
   faLocationDot,
   faPersonWalking,
   faTrophy,
+  faUnlink,
   faUserShield,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import styled from "styled-components";
+import { useContext } from "react";
+import { ServerConnectionContext } from "./components/ServerConnection";
 
 const routes = [
   {
@@ -65,9 +68,14 @@ const SidebarIcon = styled.span`
   margin-right: 12px;
 `;
 
+const RedText = styled.div`
+  color: red;
+`;
+
 export default function App() {
   const curRoute = useLocation();
   const navigate = useNavigate();
+  const connection = useContext(ServerConnectionContext);
 
   return (
     <AppLayout>
@@ -85,6 +93,14 @@ export default function App() {
             {route.name}
           </SidebarButton>
         ))}
+        <SidebarButton onClick={() => connection.disconnect()} active={false}>
+          <RedText>
+            <SidebarIcon>
+              <FontAwesomeIcon icon={faUnlink} />
+            </SidebarIcon>
+            Disconnect
+          </RedText>
+        </SidebarButton>
       </Sidebar>
       <Container>
         <Routes>
