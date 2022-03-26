@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import styled from "styled-components";
 import { HButton } from "./HButton";
 import { Modal } from "./Modal";
+import { ServerDataContext } from "./ServerData";
 
 const AdminApprovalEntryBox = styled.div`
   border-radius: 6px;
@@ -32,11 +33,7 @@ function AdminApprovalEntry(props: {
 }
 
 export function Admins() {
-  const admins = [
-    { id: "1", email: "nk495@cornell.edu" },
-    { id: "2", email: "nk495@cornell.edu" },
-  ];
-
+  const serverData = useContext(ServerDataContext);
   const [actionAdmin, setActionAdmin] = useState({ id: "", email: "" });
   const [approveModal, setApproveModal] = useState(false);
   const [denyModal, setDenyModal] = useState(false);
@@ -48,6 +45,9 @@ export function Admins() {
         buttons={["CANCEL", "APPROVE"]}
         isOpen={approveModal}
         onButtonClick={(idx) => {
+          if (idx === 1) {
+            serverData.setAdminStatus(actionAdmin.id, true);
+          }
           setApproveModal(false);
         }}
       >
@@ -58,25 +58,30 @@ export function Admins() {
         buttons={["CANCEL", "DENY"]}
         isOpen={denyModal}
         onButtonClick={(idx) => {
+          if (idx === 1) {
+            serverData.setAdminStatus(actionAdmin.id, false);
+          }
           setDenyModal(false);
         }}
       >
         Are you sure you want to deny <b>{actionAdmin.email}</b>?
       </Modal>
-      {admins.map((admin) => (
-        <AdminApprovalEntry
-          email={admin.email}
-          key={admin.id}
-          onApprove={() => {
-            setActionAdmin(admin);
-            setApproveModal(true);
-          }}
-          onDeny={() => {
-            setActionAdmin(admin);
-            setDenyModal(true);
-          }}
-        />
-      ))}
+      {serverData.admins.size === 0
+        ? "No Admins to Approve"
+        : Array.from(serverData.admins.values()).map((admin) => (
+            <AdminApprovalEntry
+              email={admin.email}
+              key={admin.id}
+              onApprove={() => {
+                setActionAdmin(admin);
+                setApproveModal(true);
+              }}
+              onDeny={() => {
+                setActionAdmin(admin);
+                setDenyModal(true);
+              }}
+            />
+          ))}
     </>
   );
 }
