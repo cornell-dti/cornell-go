@@ -23,8 +23,10 @@ export class AuthService {
     @Inject(forwardRef(() => UserService))
     private readonly userService: UserService,
   ) {}
+
   googleIosClient = new OAuth2Client(process.env.GOOGLE_IOS_CLIENT_ID);
   googleAndroidClient = new OAuth2Client(process.env.GOOGLE_ANDROID_CLIENT_ID);
+  googleWebClient = new OAuth2Client(process.env.GOOGLE_WEB_CLIENT_ID);
 
   refreshOptions = {
     expiresIn: process.env.JWT_REFRESH_EXPIRATION,
@@ -55,7 +57,7 @@ export class AuthService {
 
   async payloadFromGoogle(
     idToken: string,
-    aud: 'android' | 'ios',
+    aud: 'android' | 'ios' | 'web',
   ): Promise<IntermediatePayload | null> {
     try {
       let ticket: LoginTicket | null = null;
@@ -65,6 +67,10 @@ export class AuthService {
         });
       } else if (aud === 'ios') {
         ticket = await this.googleIosClient.verifyIdToken({
+          idToken,
+        });
+      } else if (aud === 'web') {
+        ticket = await this.googleWebClient.verifyIdToken({
           idToken,
         });
       }
@@ -89,7 +95,7 @@ export class AuthService {
     authType: AuthType,
     lat: number,
     long: number,
-    aud?: 'ios' | 'android',
+    aud?: 'ios' | 'android' | 'web',
   ): Promise<[string, string] | null> {
     // if verify success, idToken is a string. If anything is wrong, it is undefined
     let idToken: IntermediatePayload | null = null;
@@ -135,6 +141,8 @@ export class AuthService {
         authType,
         idToken.id,
       );
+
+      user.adminRequested = !user.adminGranted && aud === 'web';
     }
 
     const accessToken = await this.jwtService.signAsync(

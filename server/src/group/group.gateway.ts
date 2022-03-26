@@ -21,7 +21,7 @@ import { UserGuard } from 'src/auth/jwt-auth.guard';
 import { UseGuards } from '@nestjs/common';
 import { Group } from 'src/model/group.entity';
 
-@WebSocketGateway()
+@WebSocketGateway({ cors: true })
 @UseGuards(UserGuard)
 export class GroupGateway {
   constructor(

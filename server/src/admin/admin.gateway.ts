@@ -19,7 +19,7 @@ import { UpdateChallengesDto } from './update-challenges.dto';
 import { UpdateEventsDto } from './update-events.dto';
 import { UpdateRewardsDto } from './update-rewards.dto';
 
-@WebSocketGateway()
+@WebSocketGateway({ cors: true })
 @UseGuards(AdminGuard)
 export class AdminGateway {
   constructor(

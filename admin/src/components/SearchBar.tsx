@@ -1,6 +1,7 @@
-import { useRef } from "react";
+import { useContext, useRef } from "react";
 import styled from "styled-components";
 import { HButton } from "./HButton";
+import { ServerDataContext } from "./ServerData";
 
 const SearchBarBox = styled.div`
   display: flex;
@@ -49,16 +50,18 @@ const SearchBarButtons = styled.div`
 export function SearchBar(props: {
   onSearch?: (query: string) => void;
   onCreate?: () => void;
-  selected?: string;
 }) {
   const searchRef = useRef<number>(-1);
+  const data = useContext(ServerDataContext);
 
   return (
     <SearchBarBox>
       <SearchBarButtons>
         <HButton onClick={props.onCreate}>Create</HButton>
       </SearchBarButtons>
-      <SearchBarText>{props.selected ?? "No Selection"}</SearchBarText>
+      <SearchBarText>
+        {data.events.get(data.selectedEvent)?.name ?? "No Selection"}
+      </SearchBarText>
       <SearchTextBox
         placeholder="Search..."
         onChange={(e) => {

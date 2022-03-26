@@ -5,12 +5,20 @@ import ReactDOM from "react-dom";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { MemoryRouter } from "react-router-dom";
+import {
+  AuthenticationGuard,
+  ServerConnectionProvider,
+} from "./components/ServerConnection";
 
 ReactDOM.render(
   <React.StrictMode>
-    <MemoryRouter>
-      <App />
-    </MemoryRouter>
+    <ServerConnectionProvider>
+      <AuthenticationGuard>
+        <MemoryRouter>
+          <App />
+        </MemoryRouter>
+      </AuthenticationGuard>
+    </ServerConnectionProvider>
   </React.StrictMode>,
   document.getElementById("root")
 );
