@@ -53,8 +53,10 @@ export class AdminService {
    * Does nothing if the reward's ID is not in the user's rewards. */
   async deleteRewards(removeIds: string[]) {
     for (const i in removeIds) {
-      const reward = this.rewardRepository.findOneOrFail({ id: removeIds[i] });
-      this.rewardRepository.removeAndFlush(reward);
+      const reward = await this.rewardRepository.findOneOrFail({
+        id: removeIds[i],
+      });
+      await this.rewardRepository.removeAndFlush(reward);
     }
   }
 
