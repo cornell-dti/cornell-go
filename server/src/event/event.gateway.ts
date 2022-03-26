@@ -21,7 +21,7 @@ import { Challenge } from 'src/model/challenge.entity';
 import { EventReward } from 'src/model/event-reward.entity';
 import { UserGuard } from 'src/auth/jwt-auth.guard';
 import { UseGuards } from '@nestjs/common';
-@WebSocketGateway()
+@WebSocketGateway({ cors: true })
 @UseGuards(UserGuard)
 export class EventGateway {
   constructor(
@@ -47,7 +47,6 @@ export class EventGateway {
           rewardType: ev.rewardType as RewardTypeDto,
           time: ev.time.toUTCString(),
           requiredMembers: ev.requiredMembers,
-          topCount: ev.topCount,
           challengeIds: (
             await ev.challenges.loadItems()
           ).map((ch: Challenge) => ch.id),
@@ -101,7 +100,7 @@ export class EventGateway {
       data.count,
     );
 
-    await this.clientService.emitUpdateLeaderData(user, {
+    this.clientService.emitUpdateLeaderData(user, {
       eventId: data.eventId,
       offset: data.offset,
       users: await Promise.all(

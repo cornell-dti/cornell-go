@@ -5,14 +5,9 @@ export interface EventDto {
   isDefault: boolean;
   name: string;
   description: string;
-  rewardType:
-    | 'limited_time_event'
-    | 'win_on_completion'
-    | 'race_to_win'
-    | 'no_rewards';
+  rewardType: 'limited_time_event' | 'perpetual';
   indexable: boolean;
   time: string;
-  topCount: number;
   rewardIds: string[];
   challengeIds: string[];
 }
