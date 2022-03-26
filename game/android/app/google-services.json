@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "757523123677-q8o2d3tahsmm9i68j1sf33ka49qsgalq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cornellgo.game",
+            "certificate_hash": "98efe77cdeb1f8f17e7c3634a8700ae7361aaa08"
+          }
+        },
+        {
           "client_id": "757523123677-2nv6haiqnvklhb134cgg5qe8bia4du4q.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -29,6 +37,13 @@
             {
               "client_id": "757523123677-2nv6haiqnvklhb134cgg5qe8bia4du4q.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "757523123677-cso74eimkjqkcuce69nrf4c637k3db6t.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.cornellgo.game"
+              }
             }
           ]
         }
