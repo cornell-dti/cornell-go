@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/widgets.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/api/geopoint.dart';
@@ -18,14 +20,12 @@ class GameWidget extends StatefulWidget {
   _GameWidgetState createState() => _GameWidgetState(_child);
 }
 
-double calcCompletionProgress(
-    double distance, double completionRadius, double closeRadius) {
-  return 0;
+double calcCompletionProgress(double distance, double completionRadius) {
+  return 1 - distance / completionRadius;
 }
 
 double calcCloseProgress(double distance, double closeRadius) {
-  final farInverted = 1 + 1 / 
-  return 1 - distance / closeRadius;
+  return pow(1.5, distance - closeRadius).toDouble();
 }
 
 class _GameWidgetState extends State<GameWidget> {
@@ -67,8 +67,8 @@ class _GameWidgetState extends State<GameWidget> {
 
               gameModel.walkingTime =
                   (distance / 80).ceil().toString() + " min";
-              gameModel.completionProgress = calcCompletionProgress(distance,
-                  curChallenge.awardingRadius, curChallenge.closeRadius);
+              gameModel.completionProgress =
+                  calcCompletionProgress(distance, curChallenge.awardingRadius);
               gameModel.closeProgress =
                   calcCloseProgress(distance, curChallenge.closeRadius);
               gameModel.directionDistance = (heading - bearing - 180) / 180;
