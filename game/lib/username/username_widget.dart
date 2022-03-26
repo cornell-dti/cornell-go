@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'package:game/api/game_api.dart';
+import 'package:game/home_page/home_page_widget.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class UserNameWidget extends StatefulWidget {
   UserNameWidget({Key? key}) : super(key: key);
@@ -24,40 +28,36 @@ class _UserNameWidget extends State<UserNameWidget> {
     return Scaffold(
         key: scaffoldKey,
         backgroundColor: bgColor,
-        floatingActionButton: FloatingActionButton(
-            elevation: 8.0,
-            child: Icon(Icons.check),
-            backgroundColor: Carnelian,
-            onPressed: () {
-              final validCharacters = RegExp(r'^[a-zA-Z0-9_]+$');
-              var userName = userNameController.text;
-              if (userName == "") {
-                showAlert("You can't have an empty username!", context);
-              } else if (!validCharacters.hasMatch(userName)) {
-                showAlert(
-                    "Your username can only have letters, numbers, and underscores",
-                    context);
-              } else if (userName.length > 64) {
-                showAlert("Username can't be more than 64 characters", context);
-              } else {
-                var hashCode = userName.hashCode;
-                while (numDigs(hashCode) != 9) {
-                  if (numDigs(hashCode) < 9) {
-                    hashCode *= 10;
+        floatingActionButton: Consumer<ApiClient>(
+          builder: (context, apiClient, child) {
+            // checkLoggedIn(apiClient);
+            return FloatingActionButton(
+                elevation: 8.0,
+                child: Icon(Icons.check),
+                backgroundColor: Carnelian,
+                onPressed: () {
+                  final validCharacters = RegExp(r'^[a-zA-Z0-9_]+$');
+                  var userName = userNameController.text;
+                  if (userName == "") {
+                    showAlert("You can't have an empty username!", context);
+                  } else if (!validCharacters.hasMatch(userName)) {
+                    showAlert(
+                        "Your username can only have letters, numbers, and underscores",
+                        context);
+                  } else if (userName.length > 64) {
+                    showAlert(
+                        "Username can't be more than 64 characters", context);
                   } else {
-                    hashCode = hashCode ~/ 10;
+                    setState(() {
+                      bgColor = constructColorFromUserName(userName);
+                    });
+                    apiClient.serverApi?.setUsername(userName);
+                    displayToast("Username changed!", Status.success);
+                    _toHomePage(context);
                   }
-                }
-                List<int> vals = [];
-                for (var i = 0; i < 3; i++) {
-                  vals.add(((hashCode % 1000) / 1000 * 255).round());
-                  hashCode = hashCode ~/ 1000;
-                }
-                setState(() {
-                  bgColor = Color.fromRGBO(vals[2], vals[1], vals[0], 1.0);
                 });
-              }
-            }),
+          },
+        ),
         body: Center(
           child: Container(child: _userNameInputWidget()),
         ));
@@ -106,5 +106,11 @@ class _UserNameWidget extends State<UserNameWidget> {
             ),
           )),
     ]);
+  }
+
+  void _toHomePage(context) {
+    Navigator.pop(context);
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => HomePageWidget()));
   }
 }
