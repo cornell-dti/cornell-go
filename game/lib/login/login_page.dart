@@ -8,10 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:game/utils/utility_functions.dart';
 
 class LoginWidget extends StatefulWidget {
-  final FlutterSecureStorage storage;
-  final String API_URL;
-  LoginWidget({Key? key, required this.storage, required this.API_URL})
-      : super(key: key);
+  LoginWidget({Key? key}) : super(key: key);
 
   @override
   _LoginWidgetState createState() => _LoginWidgetState();
