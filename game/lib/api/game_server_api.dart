@@ -26,6 +26,7 @@ class GameServerApi {
   void _invokeWithRefresh(String ev, Map<String, dynamic> data) {
     _refreshEv = ev;
     _refreshDat = data;
+    print(ev);
     _socket.emit(ev, data);
   }
 
@@ -63,17 +64,11 @@ class GameServerApi {
         "rewardTypes": rewardTypes.map((e) {
           var result = "";
           switch (e) {
-            case UpdateEventDataEventRewardTypeDto.NO_REWARDS:
-              result = "no_rewards";
+            case UpdateEventDataEventRewardTypeDto.PERPETUAL:
+              result = "perpetual";
               break;
             case UpdateEventDataEventRewardTypeDto.LIMITED_TIME_EVENT:
               result = "limited_time_event";
-              break;
-            case UpdateEventDataEventRewardTypeDto.RACE_TO_WIN:
-              result = "race_to_win";
-              break;
-            case UpdateEventDataEventRewardTypeDto.WIN_ON_COMPLETION:
-              result = "win_on_completion";
               break;
           }
           return result;
@@ -86,7 +81,7 @@ class GameServerApi {
 
   void requestEventTrackerData(List<String> trackedEventIds) =>
       _invokeWithRefresh(
-          "requestEventLeaderData", {"trackedEventIds": trackedEventIds});
+          "requestEventTrackerData", {"trackedEventIds": trackedEventIds});
 
   void requestChallengeData(List<String> challengeIds) => _invokeWithRefresh(
       "requestChallengeData", {"challengeIds": challengeIds});

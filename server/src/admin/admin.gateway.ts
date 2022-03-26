@@ -25,7 +25,7 @@ import { UpdateRewardsDto } from './update-rewards.dto';
 import { EventReward } from 'src/model/event-reward.entity';
 import { v4 } from 'uuid';
 
-@WebSocketGateway()
+@WebSocketGateway({ cors: true })
 @UseGuards(AdminGuard)
 export class AdminGateway {
   constructor(
