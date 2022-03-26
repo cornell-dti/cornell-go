@@ -5,60 +5,60 @@ import 'package:socket_io_client/socket_io_client.dart';
 
 class GameClientApi {
   final _updateUserDataController =
-      StreamController<UpdateUserDataDto>.broadcast();
+      StreamController<UpdateUserDataDto>.broadcast(sync: true);
   Stream<UpdateUserDataDto> get updateUserDataStream =>
       _updateUserDataController.stream;
 
-  final _userRewardedController = StreamController<UserRewardedDto>.broadcast();
+  final _userRewardedController =
+      StreamController<UserRewardedDto>.broadcast(sync: true);
   Stream<UserRewardedDto> get userRewardedStream =>
       _userRewardedController.stream;
 
   final _invalidateDataController =
-      StreamController<InvalidateDataDto>.broadcast();
+      StreamController<InvalidateDataDto>.broadcast(sync: true);
   Stream<InvalidateDataDto> get invalidateDataStream =>
       _invalidateDataController.stream;
 
   final _updateRewardDataController =
-      StreamController<UpdateRewardDataDto>.broadcast();
+      StreamController<UpdateRewardDataDto>.broadcast(sync: true);
   Stream<UpdateRewardDataDto> get updateRewardDataStream =>
       _updateRewardDataController.stream;
 
   final _updateEventDataController =
-      StreamController<UpdateEventDataDto>.broadcast();
+      StreamController<UpdateEventDataDto>.broadcast(sync: true);
   Stream<UpdateEventDataDto> get updateEventDataStream =>
       _updateEventDataController.stream;
 
   final _updateLeaderDataController =
-      StreamController<UpdateLeaderDataDto>.broadcast();
+      StreamController<UpdateLeaderDataDto>.broadcast(sync: true);
   Stream<UpdateLeaderDataDto> get updateLeaderDataStream =>
       _updateLeaderDataController.stream;
 
   final _updateGroupDataController =
-      StreamController<UpdateGroupDataDto>.broadcast();
+      StreamController<UpdateGroupDataDto>.broadcast(sync: true);
   Stream<UpdateGroupDataDto> get updateGroupDataStream =>
       _updateGroupDataController.stream;
 
   final _updateEventTrackerDataController =
-      StreamController<UpdateEventTrackerDataDto>.broadcast();
+      StreamController<UpdateEventTrackerDataDto>.broadcast(sync: true);
   Stream<UpdateEventTrackerDataDto> get updateEventTrackerDataStream =>
       _updateEventTrackerDataController.stream;
 
   final _updateChallengeDataController =
-      StreamController<UpdateChallengeDataDto>.broadcast();
+      StreamController<UpdateChallengeDataDto>.broadcast(sync: true);
   Stream<UpdateChallengeDataDto> get updateChallengeDataStream =>
       _updateChallengeDataController.stream;
 
-  final _reconnectedController = StreamController<Null>.broadcast();
+  final _reconnectedController = StreamController<Null>.broadcast(sync: true);
   Stream<Null> get reconnectedStream => _reconnectedController.stream;
 
-  final _reconnectingController = StreamController<Null>.broadcast();
+  final _reconnectingController = StreamController<Null>.broadcast(sync: true);
   Stream<Null> get reconnectingStream => _reconnectingController.stream;
 
-  final _connectedController = StreamController<Null>.broadcast();
+  final _connectedController = StreamController<Null>.broadcast(sync: true);
   Stream<Null> get connectedStream => _connectedController.stream;
 
   void connectSocket(Socket sock) {
-    sock.onConnect((data) => _connectedController.add(null));
     sock.onReconnect((data) => _reconnectingController.add(null));
     sock.onReconnecting((data) => _reconnectedController.add(null));
     sock.on(
@@ -95,6 +95,7 @@ class GameClientApi {
         "updateChallengeData",
         (data) => _updateChallengeDataController
             .add(UpdateChallengeDataDto.fromJson(data)));
+    _connectedController.add(null);
   }
 
   GameClientApi() {}
