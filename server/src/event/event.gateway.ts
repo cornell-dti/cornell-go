@@ -21,7 +21,7 @@ import { Challenge } from 'src/model/challenge.entity';
 import { EventReward } from 'src/model/event-reward.entity';
 import { UserGuard } from 'src/auth/jwt-auth.guard';
 import { UseGuards } from '@nestjs/common';
-@WebSocketGateway()
+@WebSocketGateway({ cors: true })
 @UseGuards(UserGuard)
 export class EventGateway {
   constructor(

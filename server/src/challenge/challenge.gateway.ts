@@ -22,7 +22,7 @@ import { CompletedChallengeDto } from './completed-challenge.dto';
 import { RequestChallengeDataDto } from './request-challenge-data.dto';
 import { SetCurrentChallengeDto } from './set-current-challenge.dto';
 
-@WebSocketGateway()
+@WebSocketGateway({ cors: true })
 @UseGuards(UserGuard)
 export class ChallengeGateway {
   constructor(
