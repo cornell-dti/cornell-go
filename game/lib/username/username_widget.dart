@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:game/utils/utility_functions.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class UserNameWidget extends StatefulWidget {
@@ -10,9 +11,9 @@ class UserNameWidget extends StatefulWidget {
 
 class _UserNameWidget extends State<UserNameWidget> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
-  var step = 1;
+  final userNameController = new TextEditingController();
   Color Carnelian = Color(0xFFB31B1B);
-
+  Color bgColor = Color.fromRGBO(0, 0, 0, 1.0);
   @override
   void initState() {
     super.initState();
@@ -22,13 +23,40 @@ class _UserNameWidget extends State<UserNameWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
         key: scaffoldKey,
-        backgroundColor: Colors.black,
+        backgroundColor: bgColor,
         floatingActionButton: FloatingActionButton(
             elevation: 8.0,
             child: Icon(Icons.check),
             backgroundColor: Carnelian,
             onPressed: () {
-              print('pressed');
+              final validCharacters = RegExp(r'^[a-zA-Z0-9_]+$');
+              var userName = userNameController.text;
+              if (userName == "") {
+                showAlert("You can't have an empty username!", context);
+              } else if (!validCharacters.hasMatch(userName)) {
+                showAlert(
+                    "Your username can only have letters, numbers, and underscores",
+                    context);
+              } else if (userName.length > 64) {
+                showAlert("Username can't be more than 64 characters", context);
+              } else {
+                var hashCode = userName.hashCode;
+                while (numDigs(hashCode) != 9) {
+                  if (numDigs(hashCode) < 9) {
+                    hashCode *= 10;
+                  } else {
+                    hashCode = hashCode ~/ 10;
+                  }
+                }
+                List<int> vals = [];
+                for (var i = 0; i < 3; i++) {
+                  vals.add(((hashCode % 1000) / 1000 * 255).round());
+                  hashCode = hashCode ~/ 1000;
+                }
+                setState(() {
+                  bgColor = Color.fromRGBO(vals[2], vals[1], vals[0], 1.0);
+                });
+              }
             }),
         body: Center(
           child: Container(child: _userNameInputWidget()),
@@ -37,10 +65,14 @@ class _UserNameWidget extends State<UserNameWidget> {
 
   Widget _userNameInputWidget() {
     return Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+      Container(
+          child: Image.asset('assets/images/logo_hires.png'),
+          width: 200,
+          height: 200),
       Text("Change your username here!",
           style: GoogleFonts.lato(
               textStyle: TextStyle(
-                  color: Carnelian,
+                  color: Colors.white,
                   fontWeight: FontWeight.bold,
                   fontSize: 18))),
       Padding(
@@ -49,6 +81,7 @@ class _UserNameWidget extends State<UserNameWidget> {
             width: 225,
             height: 50,
             child: TextField(
+              controller: userNameController,
               style: GoogleFonts.lato(
                   textStyle: TextStyle(
                       color: Colors.white,
