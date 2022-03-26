@@ -26,6 +26,7 @@ class GameServerApi {
   void _invokeWithRefresh(String ev, Map<String, dynamic> data) {
     _refreshEv = ev;
     _refreshDat = data;
+    print(ev);
     _socket.emit(ev, data);
   }
 
@@ -80,7 +81,7 @@ class GameServerApi {
 
   void requestEventTrackerData(List<String> trackedEventIds) =>
       _invokeWithRefresh(
-          "requestEventLeaderData", {"trackedEventIds": trackedEventIds});
+          "requestEventTrackerData", {"trackedEventIds": trackedEventIds});
 
   void requestChallengeData(List<String> challengeIds) => _invokeWithRefresh(
       "requestChallengeData", {"challengeIds": challengeIds});
