@@ -88,9 +88,9 @@ class _LoginWidgetState extends State<LoginWidget> {
                               SignInButton(Buttons.Google, onPressed: () async {
                             final bool isAuth = await apiClient.connectGoogle();
                             if (!isAuth) {
-                              showAlert(
-                                  "An error occurred while signing you in. Please check your connection and try again.",
-                                  context);
+                              displayToast(
+                                  "An error occured while signing you up.",
+                                  Status.error);
                             } else {
                               _toHomePage(context);
                             }
