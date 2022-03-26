@@ -6,6 +6,6 @@ import { ClientService } from './client.service';
 @Module({
   imports: [AuthModule],
   providers: [ClientGateway, ClientService],
-  exports: [ClientService],
+  exports: [ClientGateway, ClientService],
 })
 export class ClientModule {}

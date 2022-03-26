@@ -20,12 +20,7 @@ export class EventService {
     private eventTrackerRepository: EntityRepository<EventTracker>,
     @InjectRepository(Challenge)
     private challengeRepository: EntityRepository<Challenge>,
-  ) {
-    eventsRepository
-      .findOneOrFail({ isDefault: true })
-      .then(() => {})
-      .catch(() => this.makeDefaultEvent());
-  }
+  ) {}
 
   /** Get events by ids */
   async getEventsByIds(ids: string[]): Promise<EventBase[]> {
@@ -86,6 +81,14 @@ export class EventService {
 
   /** Creates an event tracker with the closest challenge as the current one */
   async createDefaultEventTracker(user: User, lat: number, long: number) {
+    try {
+      const defEv = await this.eventsRepository.findOneOrFail({
+        isDefault: true,
+      });
+    } catch {
+      await this.makeDefaultEvent();
+    }
+
     const defaultEvent = await this.eventsRepository
       .createQueryBuilder('ev')
       .select(['ev.*'])
@@ -109,6 +112,23 @@ export class EventService {
       isPlayerRanked: true,
       cooldownMinimum: new Date(),
       event: defaultEvent,
+      currentChallenge: closestChallenge,
+      completed: [],
+      user,
+    });
+
+    await this.eventTrackerRepository.persistAndFlush(progress);
+
+    return progress;
+  }
+  async createEventTracker(user: User, event: EventBase) {
+    let closestChallenge = event.challenges[0];
+
+    let progress: EventTracker = this.eventTrackerRepository.create({
+      eventScore: 0,
+      isPlayerRanked: true,
+      cooldownMinimum: new Date(),
+      event: event,
       currentChallenge: closestChallenge,
       completed: [],
       user,
@@ -149,8 +169,8 @@ export class EventService {
       name: 'New challenge',
       description: 'New challenge',
       imageUrl: '',
-      latitude: 0,
-      longitude: 0,
+      latitude: 5,
+      longitude: 5,
       awardingRadius: 0,
       closeRadius: 0,
       completions: [],
@@ -172,10 +192,8 @@ export class EventService {
       rewardType: EventRewardType.PERPETUAL,
       indexable: false,
       time: new Date(),
-      topCount: 1,
       rewards: [],
       challenges: [],
-      challengeCount: 0,
     });
 
     const chal = await this.createNew(ev);

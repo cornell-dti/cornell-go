@@ -6,7 +6,7 @@ import {
 import { Server, Socket } from 'socket.io';
 import { AuthService } from 'src/auth/auth.service';
 
-@WebSocketGateway()
+@WebSocketGateway({ cors: true })
 export class ClientGateway implements OnGatewayConnection {
   constructor(private authService: AuthService) {}
   async handleConnection(client: Socket, ...args: any[]) {
@@ -15,6 +15,7 @@ export class ClientGateway implements OnGatewayConnection {
     const user = await this.authService.userByToken(token);
     if (user) {
       client.join(user.id);
+      if (user.adminGranted) client.join('admins');
     } else {
       client.disconnect(true);
     }
