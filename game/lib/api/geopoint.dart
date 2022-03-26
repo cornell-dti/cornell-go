@@ -42,4 +42,8 @@ class GeoPoint {
   double distanceTo(GeoPoint other) {
     return Geolocator.distanceBetween(_lat, _long, other._lat, other._long);
   }
+
+  double bearingTo(GeoPoint other) {
+    return Geolocator.bearingBetween(_lat, _long, other._lat, other._long);
+  }
 }
