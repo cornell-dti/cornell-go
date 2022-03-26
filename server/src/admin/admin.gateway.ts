@@ -90,7 +90,7 @@ export class AdminGateway {
 
   @SubscribeMessage('updateRewards')
   async updateRewards(@CallingUser() user: User, data: UpdateRewardsDto) {
-    this.adminService.deleteRewards(data.deletedIds);
+    await this.adminService.deleteRewards(data.deletedIds);
     const [oldEvents, newEvents] = await this.adminService.updateRewards(
       data.rewards,
     );
