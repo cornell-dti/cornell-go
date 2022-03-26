@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:game/model/user_model.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -16,7 +17,7 @@ class UserNameWidget extends StatefulWidget {
 
 class _UserNameWidget extends State<UserNameWidget> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
-  final userNameController = new TextEditingController();
+  TextEditingController? userNameController;
   Color Carnelian = Color(0xFFB31B1B);
   Color bgColor = Color.fromRGBO(0, 0, 0, 1.0);
   final filter = ProfanityFilter();
@@ -39,7 +40,7 @@ class _UserNameWidget extends State<UserNameWidget> {
                 backgroundColor: Carnelian,
                 onPressed: () {
                   final validCharacters = RegExp(r'^[a-zA-Z0-9_]+$');
-                  var userName = userNameController.text;
+                  var userName = userNameController!.text;
                   if (userName == "") {
                     showAlert("You can't have an empty username!", context);
                   } else if (!validCharacters.hasMatch(userName)) {
@@ -63,11 +64,17 @@ class _UserNameWidget extends State<UserNameWidget> {
           },
         ),
         body: Center(
-          child: Container(child: _userNameInputWidget()),
+          child: Container(child: Consumer<UserModel>(
+            builder: (context, userModel, child) {
+              userNameController = new TextEditingController(
+                  text: userModel.userData?.username ?? "");
+              return _userNameInputWidget(userNameController!);
+            },
+          )),
         ));
   }
 
-  Widget _userNameInputWidget() {
+  Widget _userNameInputWidget(TextEditingController controller) {
     return Column(mainAxisAlignment: MainAxisAlignment.center, children: [
       Container(
           child: Image.asset('assets/images/logo_hires.png'),
@@ -85,7 +92,7 @@ class _UserNameWidget extends State<UserNameWidget> {
             width: 225,
             height: 50,
             child: TextField(
-              controller: userNameController,
+              controller: controller,
               style: GoogleFonts.lato(
                   textStyle: TextStyle(
                       color: Colors.white,
