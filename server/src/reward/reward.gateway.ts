@@ -12,7 +12,7 @@ import { User } from '../model/user.entity';
 import { RequestRewardDataDto } from './request-reward-data.dto';
 import { RewardService } from './reward.service';
 
-@WebSocketGateway()
+@WebSocketGateway({ cors: true })
 @UseGuards(UserGuard)
 export class RewardGateway {
   constructor(
