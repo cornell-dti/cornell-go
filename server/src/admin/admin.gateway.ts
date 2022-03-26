@@ -24,7 +24,7 @@ import { RewardTypeDto } from 'src/client/update-event-data.dto';
 import { Challenge } from 'src/model/challenge.entity';
 import { EventReward } from 'src/model/event-reward.entity';
 
-@WebSocketGateway()
+@WebSocketGateway({ cors: true })
 @UseGuards(AdminGuard)
 export class AdminGateway {
   constructor(

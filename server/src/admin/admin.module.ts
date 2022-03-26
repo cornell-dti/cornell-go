@@ -9,7 +9,6 @@ import { User } from 'src/model/user.entity';
 import { EventBase } from 'src/model/event-base.entity';
 import { Challenge } from 'src/model/challenge.entity';
 import { EventReward } from 'src/model/event-reward.entity';
-import { RequestAdminController } from './request-admin/request-admin.controller';
 
 @Module({
   imports: [
@@ -18,6 +17,6 @@ import { RequestAdminController } from './request-admin/request-admin.controller
     MikroOrmModule.forFeature([User, EventBase, Challenge, EventReward]),
   ],
   providers: [AdminGateway, AdminService, AdminCallbackService],
-  controllers: [RequestAdminController],
+  controllers: [],
 })
 export class AdminModule {}

@@ -16,11 +16,19 @@ services:
         target: /var/lib/postgresql/data
     networks:
       - reference
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
   server:
     ports:
       - "80:80"
     environment:
       - NO_SSL=true
+    depends_on:
+      postgres:
+        condition: service_healthy
     build: .
     networks:
       - reference

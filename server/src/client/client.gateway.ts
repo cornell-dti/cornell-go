@@ -6,7 +6,7 @@ import {
 import { Server, Socket } from 'socket.io';
 import { AuthService } from 'src/auth/auth.service';
 
-@WebSocketGateway()
+@WebSocketGateway({ cors: true })
 export class ClientGateway implements OnGatewayConnection {
   constructor(private authService: AuthService) {}
   async handleConnection(client: Socket, ...args: any[]) {
