@@ -81,7 +81,7 @@ class ApiClient extends ChangeNotifier {
   }
 
   Future<bool> _accessRefresher() async {
-    final refreshResult = await _refreshAccess();
+    final refreshResult = await _refreshAccess(false);
     if (refreshResult) {
       authenticated = true;
       _createSocket(true);
@@ -94,7 +94,7 @@ class ApiClient extends ChangeNotifier {
     return refreshResult;
   }
 
-  Future<bool> _refreshAccess() async {
+  Future<bool> _refreshAccess(bool relog) async {
     if (_refreshToken != null) {
       final refreshResponse =
           await http.post(_refreshUrl, body: {'refreshToken': _refreshToken});
@@ -102,7 +102,7 @@ class ApiClient extends ChangeNotifier {
       if (refreshResponse.statusCode == 201 && refreshResponse.body != "") {
         final responseBody = jsonDecode(refreshResponse.body);
         _accessToken = responseBody["accessToken"];
-        _createSocket(true);
+        _createSocket(!relog);
 
         return true;
       }
@@ -122,7 +122,7 @@ class ApiClient extends ChangeNotifier {
     if (token != null) {
       _refreshToken = token;
 
-      final access = await _refreshAccess();
+      final access = await _refreshAccess(true);
       authenticated = access;
       notifyListeners();
       return access;

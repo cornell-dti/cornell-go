@@ -24,7 +24,7 @@ class _LoginWidgetState extends State<LoginWidget> {
     super.initState();
   }
 
-  Future<void> checkLoggedIn(apiClient) async {
+  Future<void> checkLoggedIn(ApiClient apiClient) async {
     if (!didCheck) {
       didCheck = !didCheck;
       if (await apiClient.tryRelog()) {
@@ -76,7 +76,7 @@ class _LoginWidgetState extends State<LoginWidget> {
                     padding: const EdgeInsets.only(bottom: 0),
                     child: Consumer<ApiClient>(
                       builder: (context, apiClient, child) {
-                        // checkLoggedIn(apiClient);
+                        checkLoggedIn(apiClient);
                         return Container(
                           width: 225,
                           height: 50,
