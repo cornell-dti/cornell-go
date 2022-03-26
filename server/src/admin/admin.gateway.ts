@@ -33,16 +33,16 @@ export class AdminGateway {
     private adminService: AdminService,
     private rewardService: RewardService,
     private adminCallbackService: AdminCallbackService,
-  ) {}
+  ) { }
 
   @SubscribeMessage('requestEvents')
-  async requestEvents(@CallingUser() user: User, data: RequestEventsDto) {}
+  async requestEvents(@CallingUser() user: User, data: RequestEventsDto) { }
 
   @SubscribeMessage('requestChallenges')
   async requestChallenges(
     @CallingUser() user: User,
     data: RequestChallengesDto,
-  ) {}
+  ) { }
 
   @SubscribeMessage('requestRewards')
   async requestRewards(@CallingUser() user: User, data: RequestRewardsDto) {
@@ -80,13 +80,13 @@ export class AdminGateway {
   }
 
   @SubscribeMessage('updateEvents')
-  async updateEvents(@CallingUser() user: User, data: UpdateEventsDto) {}
+  async updateEvents(@CallingUser() user: User, data: UpdateEventsDto) { }
 
   @SubscribeMessage('updateChallenges')
   async updateChallenges(
     @CallingUser() user: User,
     data: UpdateChallengesDto,
-  ) {}
+  ) { }
 
   @SubscribeMessage('updateRewards')
   async updateRewards(@CallingUser() user: User, data: UpdateRewardsDto) {
@@ -106,7 +106,6 @@ export class AdminGateway {
         rewardType: event.rewardType,
         indexable: event.indexable,
         time: event.time.toTimeString(),
-        topCount: event.topCount,
         rewardIds: event.rewards.getIdentifiers(),
         challengeIds: event.challenges.getIdentifiers(),
       })),
@@ -125,7 +124,6 @@ export class AdminGateway {
         rewardType: event.rewardType,
         indexable: event.indexable,
         time: event.time.toTimeString(),
-        topCount: event.topCount,
         rewardIds: event.rewards.getIdentifiers(),
         challengeIds: event.challenges.getIdentifiers(),
       })),
