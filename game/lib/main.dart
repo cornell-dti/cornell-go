@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:game/api/game_api.dart';
-import 'package:game/home_page/home_page_widget.dart';
+import 'package:game/login/login_page.dart';
 import 'package:game/model/challenge_model.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/group_model.dart';
@@ -11,10 +11,11 @@ import 'package:game/model/tracker_model.dart';
 import 'package:game/model/user_model.dart';
 import 'package:game/widget/game_widget.dart';
 import 'package:provider/provider.dart';
+
 import 'dart:io' show Platform;
 
 final storage = FlutterSecureStorage();
-final LOOPBACK = (Platform.isAndroid ? "10.0.2.2" : "127.0.0.1");
+final LOOPBACK = (Platform.isAndroid ? "http://10.0.2.2" : "http://127.0.0.1");
 final API_URL = String.fromEnvironment('API_URL', defaultValue: LOOPBACK);
 
 void main() {
@@ -29,23 +30,42 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
         providers: [
-          ChangeNotifierProvider(create: (_) => client),
-          ChangeNotifierProvider(create: (_) => UserModel(client)),
-          ChangeNotifierProvider(create: (_) => RewardModel(client)),
-          ChangeNotifierProvider(create: (_) => GroupModel(client)),
-          ChangeNotifierProvider(create: (_) => EventModel(client)),
-          ChangeNotifierProvider(create: (_) => TrackerModel(client)),
-          ChangeNotifierProvider(create: (_) => ChallengeModel(client))
+          ChangeNotifierProvider.value(value: client),
+          ChangeNotifierProvider(
+            create: (_) => UserModel(client),
+            lazy: false,
+          ),
+          ChangeNotifierProvider(
+            create: (_) => RewardModel(client),
+            lazy: false,
+          ),
+          ChangeNotifierProvider(
+            create: (_) => GroupModel(client),
+            lazy: false,
+          ),
+          ChangeNotifierProvider(
+            create: (_) => EventModel(client),
+            lazy: false,
+          ),
+          ChangeNotifierProvider(
+            create: (_) => TrackerModel(client),
+            lazy: false,
+          ),
+          ChangeNotifierProvider(
+            create: (_) => ChallengeModel(client),
+            lazy: false,
+          )
         ],
         child: MaterialApp(
-            title: 'CornellGO!',
-            localizationsDelegates: [
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            supportedLocales: const [Locale('en', '')],
-            theme: ThemeData(primarySwatch: Colors.blue),
-            home: HomePageWidget()));
+          title: 'CornellGO!',
+          localizationsDelegates: [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [Locale('en', '')],
+          theme: ThemeData(primarySwatch: Colors.blue),
+          home: GameWidget(child: LoginWidget()),
+        ));
   }
 }

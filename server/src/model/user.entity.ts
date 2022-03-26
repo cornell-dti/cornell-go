@@ -65,6 +65,9 @@ export class User {
   @Property()
   adminGranted!: boolean;
 
+  @Property()
+  adminRequested!: boolean;
+
   /** Score calculated upon completion of each challenge added up */
   @Index()
   @Property()
