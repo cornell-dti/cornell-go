@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/home_page/home_page_widget.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:profanity_filter/profanity_filter.dart';
 
 class UserNameWidget extends StatefulWidget {
   UserNameWidget({Key? key}) : super(key: key);
@@ -18,6 +19,7 @@ class _UserNameWidget extends State<UserNameWidget> {
   final userNameController = new TextEditingController();
   Color Carnelian = Color(0xFFB31B1B);
   Color bgColor = Color.fromRGBO(0, 0, 0, 1.0);
+  final filter = ProfanityFilter();
   @override
   void initState() {
     super.initState();
@@ -47,6 +49,8 @@ class _UserNameWidget extends State<UserNameWidget> {
                   } else if (userName.length > 64) {
                     showAlert(
                         "Username can't be more than 64 characters", context);
+                  } else if (filter.hasProfanity(userName)) {
+                    showAlert("Let's keep this app clean please.", context);
                   } else {
                     setState(() {
                       bgColor = constructColorFromUserName(userName);
