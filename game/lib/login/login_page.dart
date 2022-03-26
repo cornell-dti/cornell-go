@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:game/api/game_api.dart';
@@ -42,7 +41,7 @@ class _LoginWidgetState extends State<LoginWidget> {
 
   @override
   Widget build(BuildContext context) {
-    Color Carnelian = Color(0xFFB31B1B);
+    //Color Carnelian = Color(0xFFB31B1B);
     return Scaffold(
         key: scaffoldKey,
         backgroundColor: Colors.black,

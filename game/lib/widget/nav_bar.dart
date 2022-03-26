@@ -10,7 +10,6 @@ import 'package:game/username/username_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/utils/utility_functions.dart';
-import 'package:game/login/login_page.dart';
 
 class NavBar extends StatelessWidget {
   @override
@@ -55,6 +54,18 @@ class NavBar extends StatelessWidget {
             ),
             ListTile(
               leading: Icon(
+                Icons.text_fields,
+                color: Color(0xFFB31B1B),
+              ),
+              title: Text('Change username', style: listTextStyle),
+              onTap: () => {
+                Navigator.pop(context),
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => UserNameWidget()))
+              },
+            ),
+            ListTile(
+              leading: Icon(
                 Icons.group_rounded,
                 color: Color(0xFFB31B1B),
               ),
@@ -65,18 +76,6 @@ class NavBar extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                         builder: (context) => LeaderboardWidget()))
-              },
-            ),
-            ListTile(
-              leading: Icon(
-                Icons.text_fields,
-                color: Color(0xFFB31B1B),
-              ),
-              title: Text('Change username', style: listTextStyle),
-              onTap: () => {
-                Navigator.pop(context),
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => UserNameWidget()))
               },
             ),
             ListTile(
@@ -94,24 +93,10 @@ class NavBar extends StatelessWidget {
                     }),
             ListTile(
               leading: Icon(
-                Icons.lightbulb_outline_rounded,
-                color: Color(0xFFB31B1B),
-              ),
-              title: Text('Suggest Location', style: listTextStyle),
-              onTap: () => {
-                Navigator.pop(context),
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => SuggestionsWidget()))
-              },
-            ),
-            ListTile(
-              leading: Icon(
                 Icons.chat_bubble_rounded,
                 color: Color(0xFFB31B1B),
               ),
-              title: Text('Give feedback', style: listTextStyle),
+              title: Text('Feedback', style: listTextStyle),
               onTap: () => {
                 Navigator.pop(context),
                 Navigator.push(context,
@@ -119,17 +104,8 @@ class NavBar extends StatelessWidget {
               },
             ),
             ListTile(
-              leading: Icon(Icons.settings_rounded, color: Color(0xFFB31B1B)),
-              title: Text('Settings', style: listTextStyle),
-              onTap: () => {
-                Navigator.pop(context),
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => SettingsWidget()))
-              },
-            ),
-            ListTile(
               leading: Icon(Icons.time_to_leave, color: Color(0xFFB31B1B)),
-              title: Text('Sign out', style: listTextStyle),
+              title: Text('Sign Out', style: listTextStyle),
               onTap: () => {
                 apiClient.disconnect(),
                 Navigator.pop(context),
