@@ -20,12 +20,7 @@ export class EventService {
     private eventTrackerRepository: EntityRepository<EventTracker>,
     @InjectRepository(Challenge)
     private challengeRepository: EntityRepository<Challenge>,
-  ) {
-    eventsRepository
-      .findOneOrFail({ isDefault: true })
-      .then(() => {})
-      .catch(() => this.makeDefaultEvent());
-  }
+  ) {}
 
   /** Get events by ids */
   async getEventsByIds(ids: string[]): Promise<EventBase[]> {
@@ -86,6 +81,14 @@ export class EventService {
 
   /** Creates an event tracker with the closest challenge as the current one */
   async createDefaultEventTracker(user: User, lat: number, long: number) {
+    try {
+      const defEv = await this.eventsRepository.findOneOrFail({
+        isDefault: true,
+      });
+    } catch {
+      await this.makeDefaultEvent();
+    }
+
     const defaultEvent = await this.eventsRepository
       .createQueryBuilder('ev')
       .select(['ev.*'])
@@ -166,8 +169,8 @@ export class EventService {
       name: 'New challenge',
       description: 'New challenge',
       imageUrl: '',
-      latitude: 0,
-      longitude: 0,
+      latitude: 5,
+      longitude: 5,
       awardingRadius: 0,
       closeRadius: 0,
       completions: [],
