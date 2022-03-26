@@ -20,6 +20,8 @@ class LoginWidget extends StatefulWidget {
 
 class _LoginWidgetState extends State<LoginWidget> {
   bool didCheck = false;
+  TextEditingController idController = new TextEditingController();
+
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
@@ -44,7 +46,6 @@ class _LoginWidgetState extends State<LoginWidget> {
 
   @override
   Widget build(BuildContext context) {
-    TextEditingController usernameController = new TextEditingController();
     Color Carnelian = Color(0xFFB31B1B);
     return Scaffold(
         key: scaffoldKey,
@@ -77,81 +78,6 @@ class _LoginWidgetState extends State<LoginWidget> {
             Column(
               children: [
                 Padding(
-                    padding:
-                        const EdgeInsets.only(left: 30, right: 30, bottom: 30),
-                    child: Container(
-                      width: 225,
-                      height: 50,
-                      child: TextField(
-                        controller: usernameController,
-                        style: GoogleFonts.lato(
-                            textStyle: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.normal,
-                                fontSize: 16)),
-                        cursorColor: Carnelian,
-                        decoration: new InputDecoration(
-                            focusColor: Colors.white,
-                            fillColor: Colors.white,
-                            focusedBorder: OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: Colors.white, width: 2.0),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: Carnelian, width: 2.0),
-                            ),
-                            hintText: 'Username',
-                            hintStyle: GoogleFonts.lato(
-                                textStyle: TextStyle(
-                                    color: Colors.grey,
-                                    fontWeight: FontWeight.normal,
-                                    fontSize: 16))),
-                      ),
-                    )),
-                Padding(
-                    padding: const EdgeInsets.only(bottom: 0),
-                    child: Consumer<ApiClient>(
-                      builder: (context, apiClient, child) {
-                        // checkLoggedIn(apiClient);
-                        return Container(
-                          width: 225,
-                          height: 50,
-                          child: TextButton(
-                            style: ButtonStyle(
-                              backgroundColor:
-                                  MaterialStateProperty.all<Color>(Carnelian),
-                              foregroundColor: MaterialStateProperty.all<Color>(
-                                  Colors.white),
-                            ),
-                            onPressed: () async {
-                              final username = usernameController.text;
-                              if (username == "") {
-                                _showDialog("Please enter a username.");
-                              } else {
-                                final auth =
-                                    await apiClient.connectId(username);
-                                if (!auth) {
-                                  _showDialog(
-                                      "An error occurred while signing you in. Please check your connection and try again.");
-                                } else {
-                                  _toHomePage(context);
-                                }
-                              }
-                            },
-                            child: Text("Sign in with username"),
-                          ),
-                        );
-                      },
-                    )),
-                const Divider(
-                  height: 50,
-                  thickness: 2,
-                  indent: 50,
-                  color: Colors.grey,
-                  endIndent: 50,
-                ),
-                Padding(
                     padding: const EdgeInsets.only(bottom: 0),
                     child: Consumer<ApiClient>(
                       builder: (context, apiClient, child) {
@@ -172,10 +98,57 @@ class _LoginWidgetState extends State<LoginWidget> {
                         );
                       },
                     )),
+                TextButton(
+                    child: Text("Use Test ID"),
+                    onPressed: () {
+                      _displayTextInputDialog(context);
+                    })
               ],
             )
           ],
         )));
+  }
+
+  Future<void> _displayTextInputDialog(BuildContext context) async {
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text('ID Sign In'),
+            content: TextField(
+              controller: idController,
+              decoration: InputDecoration(hintText: "Input ID here"),
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: Text('CANCEL'),
+                onPressed: () {
+                  setState(() {
+                    Navigator.pop(context);
+                  });
+                },
+              ),
+              Consumer<ApiClient>(
+                builder: (context, apiClient, child) {
+                  // checkLoggedIn(apiClient);
+                  return TextButton(
+                    child: Text('OK'),
+                    onPressed: () async {
+                      final bool isAuth =
+                          await apiClient.connectId(idController.text);
+                      if (!isAuth) {
+                        _showDialog(
+                            "An error occurred while signing you in. Please check your connection and try again.");
+                      } else {
+                        _toHomePage(context);
+                      }
+                    },
+                  );
+                },
+              )
+            ],
+          );
+        });
   }
 
   Future<void> _showDialog(String message) async {
