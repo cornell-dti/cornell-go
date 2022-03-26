@@ -31,7 +31,8 @@ class _LeaderboardWidgetState extends State<LeaderboardWidget> {
           child: Padding(
             padding: const EdgeInsets.only(left: 8.0, right: 8.0),
             child: Consumer3<GroupModel, EventModel, UserModel>(
-              builder: (context, myGroupModel, myEventModel, myUserModel, child) {
+              builder:
+                  (context, myGroupModel, myEventModel, myUserModel, child) {
                 int position = 1;
                 if (myGroupModel.curEventId == null) return ListView();
                 final List<UpdateLeaderDataUserDto> list = myEventModel
@@ -41,10 +42,17 @@ class _LeaderboardWidgetState extends State<LeaderboardWidget> {
                   scrollDirection: Axis.vertical,
                   children: [
                     for (int i = 0; i < list.length; i++)
-                      if (myUserModel.userData?.id != null && myUserModel.userData!.id == list.elementAt(i))
-                        leaderBoardUserCell(context, list.elementAt(i).username, i+1, myGroupModel.members.length, list.elementAt(i).score), 
+                      if (myUserModel.userData?.id != null &&
+                          myUserModel.userData!.id == list.elementAt(i))
+                        leaderBoardUserCell(
+                            context,
+                            list.elementAt(i).username,
+                            i + 1,
+                            myGroupModel.members.length,
+                            list.elementAt(i).score),
                     for (UpdateLeaderDataUserDto user in list)
-                      leaderBoardCell(context, user.username, position++, user.score, true)
+                      leaderBoardCell(
+                          context, user.username, position++, user.score, true)
                   ],
                 );
               },
