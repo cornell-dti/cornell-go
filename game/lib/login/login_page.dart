@@ -5,8 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/home_page/home_page_widget.dart';
 import 'package:provider/provider.dart';
-import 'package:game/model/user_model.dart';
-import 'package:game/username/username_widget.dart';
+import 'package:game/utils/utility_functions.dart';
 
 class LoginWidget extends StatefulWidget {
   final FlutterSecureStorage storage;
@@ -89,8 +88,9 @@ class _LoginWidgetState extends State<LoginWidget> {
                               SignInButton(Buttons.Google, onPressed: () async {
                             final bool isAuth = await apiClient.connectGoogle();
                             if (!isAuth) {
-                              _showDialog(
-                                  "An error occurred while signing you in. Please check your connection and try again.");
+                              showAlert(
+                                  "An error occurred while signing you in. Please check your connection and try again.",
+                                  context);
                             } else {
                               _toHomePage(context);
                             }
@@ -137,8 +137,9 @@ class _LoginWidgetState extends State<LoginWidget> {
                       final bool isAuth =
                           await apiClient.connectId(idController.text);
                       if (!isAuth) {
-                        _showDialog(
-                            "An error occurred while signing you in. Please check your connection and try again.");
+                        showAlert(
+                            "An error occurred while signing you in. Please check your connection and try again.",
+                            context);
                       } else {
                         _toHomePage(context);
                       }
@@ -149,32 +150,5 @@ class _LoginWidgetState extends State<LoginWidget> {
             ],
           );
         });
-  }
-
-  Future<void> _showDialog(String message) async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Alert'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text(message),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Okay'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
   }
 }
