@@ -15,12 +15,8 @@ import { EventReward } from './event-reward.entity';
 export enum EventRewardType {
   /** Event ends at specific time, top N people are rewarded */
   LIMITED_TIME_EVENT = 'limited_time_event',
-  /** N people who complete event first will be rewarded equally, will be advertised as upcoming */
-  WIN_ON_COMPLETION = 'win_on_completion',
-  /** N people who complete event first will be rewarded based on their time to completion, will be advertised as upcoming */
-  RACE_TO_WIN = 'race_to_win',
   /** Perpetual event with an infinite or null reward */
-  PERPETUAL = 'no_rewards',
+  PERPETUAL = 'perpetual',
 }
 
 @Entity()
@@ -59,10 +55,6 @@ export class EventBase {
   @Property()
   time!: Date;
 
-  /** Describes the top N people to be rewarded */
-  @Property()
-  topCount!: number;
-
   /** Describes the rewards */
   @OneToMany(() => EventReward, rew => rew.containingEvent)
   rewards = new Collection<EventReward>(this);
@@ -74,8 +66,4 @@ export class EventBase {
     orderBy: { eventIndex: 'asc' },
   })
   challenges = new Collection<Challenge>(this);
-
-  /** Amount of entities in the "challenges" field (update whenever that changes) */
-  @Property()
-  challengeCount!: number;
 }
