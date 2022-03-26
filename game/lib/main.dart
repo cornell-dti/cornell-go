@@ -29,34 +29,34 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      providers: [
-        ChangeNotifierProvider.value(value: client),
-        ChangeNotifierProvider(
-          create: (_) => UserModel(client),
-          lazy: false,
-        ),
-        ChangeNotifierProvider(
-          create: (_) => RewardModel(client),
-          lazy: false,
-        ),
-        ChangeNotifierProvider(
-          create: (_) => GroupModel(client),
-          lazy: false,
-        ),
-        ChangeNotifierProvider(
-          create: (_) => EventModel(client),
-          lazy: false,
-        ),
-        ChangeNotifierProvider(
-          create: (_) => TrackerModel(client),
-          lazy: false,
-        ),
-        ChangeNotifierProvider(
-          create: (_) => ChallengeModel(client),
-          lazy: false,
-        )
-      ],
-      child: MaterialApp(
+        providers: [
+          ChangeNotifierProvider.value(value: client),
+          ChangeNotifierProvider(
+            create: (_) => UserModel(client),
+            lazy: false,
+          ),
+          ChangeNotifierProvider(
+            create: (_) => RewardModel(client),
+            lazy: false,
+          ),
+          ChangeNotifierProvider(
+            create: (_) => GroupModel(client),
+            lazy: false,
+          ),
+          ChangeNotifierProvider(
+            create: (_) => EventModel(client),
+            lazy: false,
+          ),
+          ChangeNotifierProvider(
+            create: (_) => TrackerModel(client),
+            lazy: false,
+          ),
+          ChangeNotifierProvider(
+            create: (_) => ChallengeModel(client),
+            lazy: false,
+          )
+        ],
+        child: MaterialApp(
           title: 'CornellGO!',
           localizationsDelegates: [
             GlobalMaterialLocalizations.delegate,
@@ -65,8 +65,7 @@ class MyApp extends StatelessWidget {
           ],
           supportedLocales: const [Locale('en', '')],
           theme: ThemeData(primarySwatch: Colors.blue),
-          home: GameWidget(
-              child: LoginWidget(storage: storage, API_URL: API_URL))),
-    );
+          home: GameWidget(child: LoginWidget()),
+        ));
   }
 }

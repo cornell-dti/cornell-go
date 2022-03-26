@@ -17,8 +17,8 @@ class NavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     const listTextStyle =
         TextStyle(color: Colors.grey, fontWeight: FontWeight.bold);
-    return Drawer(
-        child: Consumer<UserModel>(builder: (context, userModel, child) {
+    return Drawer(child: Consumer2<UserModel, ApiClient>(
+        builder: (context, userModel, apiClient, child) {
       return Container(
         decoration: BoxDecoration(color: Colors.black87),
         child: ListView(
@@ -131,6 +131,7 @@ class NavBar extends StatelessWidget {
               leading: Icon(Icons.time_to_leave, color: Color(0xFFB31B1B)),
               title: Text('Sign out', style: listTextStyle),
               onTap: () => {
+                apiClient.disconnect(),
                 Navigator.pop(context),
                 Navigator.push(context,
                     MaterialPageRoute(builder: (context) => LoginWidget()))
