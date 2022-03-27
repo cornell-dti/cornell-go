@@ -104,8 +104,8 @@ class NavBar extends StatelessWidget {
             ListTile(
               leading: Icon(Icons.time_to_leave, color: Color(0xFFB31B1B)),
               title: Text('Sign Out', style: listTextStyle),
-              onTap: () => {
-                apiClient.disconnect(),
+              onTap: () async => {
+                await apiClient.disconnect(),
                 Navigator.pop(context),
                 Navigator.push(context,
                     MaterialPageRoute(builder: (context) => LoginWidget()))

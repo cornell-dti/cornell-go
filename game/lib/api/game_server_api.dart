@@ -12,7 +12,13 @@ class GameServerApi {
 
   GameServerApi(Socket socket, Future<bool> Function() refresh)
       : _refreshAccess = refresh,
-        _socket = socket;
+        _socket = socket {
+    _socket.onError((data) async {
+      if (await _refreshAccess()) {
+        _socket.emit(_refreshEv, _refreshDat);
+      }
+    });
+  }
 
   void replaceSocket(Socket socket) {
     _socket = socket;

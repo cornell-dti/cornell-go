@@ -89,7 +89,7 @@ class ApiClient extends ChangeNotifier {
     } else {
       authenticated = false;
       _clientApi.disconnectedController.add(null);
-      _socket?.disconnect();
+      _socket?.dispose();
       _socket = null;
       notifyListeners();
     }
@@ -192,13 +192,13 @@ class ApiClient extends ChangeNotifier {
   }
 
   Future<void> disconnect() async {
-    await _storage.write(key: "refresh_token", value: "");
+    await _storage.delete(key: "refresh_token");
     await _googleSignIn.signOut();
 
     _refreshToken = null;
     _accessToken = null;
 
-    _socket?.disconnect();
+    _socket?.dispose();
     _socket = null;
 
     authenticated = false;

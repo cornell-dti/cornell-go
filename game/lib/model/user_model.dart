@@ -14,7 +14,6 @@ class UserModel extends ChangeNotifier {
         userData?.score = event.score;
         userData?.username = event.username;
       }
-      print(userData?.username);
       notifyListeners();
     });
 
