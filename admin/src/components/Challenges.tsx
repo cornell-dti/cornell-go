@@ -101,7 +101,11 @@ function toForm(challenge: ChallengeDto) {
   ];
 }
 
-function fromForm(id: string, form: EntryForm[]): ChallengeDto {
+function fromForm(
+  id: string,
+  form: EntryForm[],
+  eventId: string
+): ChallengeDto {
   return {
     id,
     name: (form[1] as FreeEntryForm).value,
@@ -111,6 +115,7 @@ function fromForm(id: string, form: EntryForm[]): ChallengeDto {
     longitude: (form[0] as MapEntryForm).latitude,
     awardingRadius: (form[4] as NumberEntryForm).value,
     closeRadius: (form[5] as NumberEntryForm).value,
+    containingEventId: eventId,
   };
 }
 
@@ -130,7 +135,9 @@ export function Challenges() {
         isOpen={createModalOpen}
         entryButtonText="CREATE"
         onEntry={() => {
-          serverData.updateChallenge(fromForm("", form));
+          serverData.updateChallenge(
+            fromForm("", form, selectedEvent?.id ?? "")
+          );
           setCreateModalOpen(false);
         }}
         onCancel={() => {
@@ -143,7 +150,9 @@ export function Challenges() {
         isOpen={editModalOpen}
         entryButtonText="EDIT"
         onEntry={() => {
-          serverData.updateChallenge(fromForm(currentId, form));
+          serverData.updateChallenge(
+            fromForm(currentId, form, selectedEvent?.id ?? "")
+          );
           setEditModalOpen(false);
         }}
         onCancel={() => {
@@ -163,7 +172,7 @@ export function Challenges() {
       <SearchBar
         onCreate={() => {
           setForm(makeForm());
-          setCreateModalOpen(true);
+          setCreateModalOpen(!!selectedEvent);
         }}
       />
       {selectedEvent?.challengeIds.map((chalId) => (
