@@ -54,19 +54,19 @@ export class AdminService {
   async getAllChallengeData() {
     return await this.challengeRepository.find({});
   }
-  async getEventById(eventId: string){
-    return await this.eventRepository.findOneOrFail({id:eventId});
+  async getEventById(eventId: string) {
+    return await this.eventRepository.findOneOrFail({ id: eventId });
   }
-  async getChallengeById(challengeId: string){
-    return await this.challengeRepository.findOneOrFail({id:challengeId});
+  async getChallengeById(challengeId: string) {
+    return await this.challengeRepository.findOneOrFail({ id: challengeId });
   }
 
-  async removeEvent(eventId: string){
+  async removeEvent(eventId: string) {
     const event = await this.getEventById(eventId);
     await this.eventRepository.removeAndFlush(event);
   }
-  
-  async removeChallenge(challengeId: string){
+
+  async removeChallenge(challengeId: string) {
     const challenge = await this.getEventById(challengeId);
     await this.challengeRepository.removeAndFlush(challenge);
   }
@@ -104,31 +104,39 @@ export class AdminService {
 
   async createEventFromUpdateDTO(event: EventDto): Promise<EventBase> {
     const new_event = this.eventRepository.create({
-        id: event.id,
-        requiredMembers: event.requiredMembers,
-        skippingEnabled: event.skippingEnabled,
-        isDefault:event.isDefault,
-        name: event.name,
-        description: event.description,
-        rewardType: event.rewardType === "limited_time_event" ? EventRewardType.LIMITED_TIME_EVENT : EventRewardType.PERPETUAL,
-        time: new Date(event.time),
-        indexable: event.indexable,
-        challenges: await this.challengeRepository.find({ id: event.challengeIds})        ,
-        rewards: await this.eventRepository.find({ id: event.rewardIds})
-        ,
+      id: event.id,
+      requiredMembers: event.requiredMembers,
+      skippingEnabled: event.skippingEnabled,
+      isDefault: event.isDefault,
+      name: event.name,
+      description: event.description,
+      rewardType:
+        event.rewardType === 'limited_time_event'
+          ? EventRewardType.LIMITED_TIME_EVENT
+          : EventRewardType.PERPETUAL,
+      time: new Date(event.time),
+      indexable: event.indexable,
+      challenges: await this.challengeRepository.find({
+        id: event.challengeIds,
+      }),
+      rewards: await this.eventRepository.find({ id: event.rewardIds }),
     });
     await this.eventRepository.persistAndFlush(new_event);
     return new_event;
   }
-  async createChallengeFromUpdateDTO(challenge: ChallengeDto): Promise<Challenge> {
-    const thisEvent = await this.eventRepository.findOneOrFail({ id: challenge.containingEventId });
+  async createChallengeFromUpdateDTO(
+    challenge: ChallengeDto,
+  ): Promise<Challenge> {
+    const thisEvent = await this.eventRepository.findOneOrFail({
+      id: challenge.containingEventId,
+    });
     const maxIndexChallenge = await this.challengeRepository.findOne(
       {
-        linkedEvent:thisEvent,
-      }, 
-      {orderBy:{eventIndex:'DESC'}}
+        linkedEvent: thisEvent,
+      },
+      { orderBy: { eventIndex: 'DESC' } },
     );
-    const newEventIndex = (maxIndexChallenge?.eventIndex?? - 1);
+    const newEventIndex = maxIndexChallenge?.eventIndex ?? -1;
     const new_challenge = this.challengeRepository.create({
       id: challenge.id,
       eventIndex: newEventIndex,
@@ -144,8 +152,6 @@ export class AdminService {
     await this.challengeRepository.persistAndFlush(new_challenge);
     return new_challenge;
   }
-  
-
 
   /** Updates the repository with all rewards listed in rewards.
    * Adds a new reward if it does not exist, otherwise overwrites the
@@ -176,8 +182,7 @@ export class AdminService {
     });
     return [oldEvents, newEvents];
   }
-  
-  
+
   async updateEvents(events: EventDto[]): Promise<EventBase[]> {
     var newEvents = Array();
 
@@ -186,9 +191,9 @@ export class AdminService {
         event.id = v4();
       }
       const newEvent = await this.createEventFromUpdateDTO(event);
-      const oldEvent = await this.eventRepository.findOne({id: event.id,});
+      const oldEvent = await this.eventRepository.findOne({ id: event.id });
       (await oldEvent?.challenges.loadItems())?.forEach(challenge => {
-        challenge.eventIndex = event.challengeIds.indexOf(challenge.id)
+        challenge.eventIndex = event.challengeIds.indexOf(challenge.id);
       });
       if (oldEvent === null) {
         newEvents.push(newEvent);
@@ -207,7 +212,9 @@ export class AdminService {
         challenge.id = v4();
       }
       const newChallenge = await this.createChallengeFromUpdateDTO(challenge);
-      const oldChallenge = await this.challengeRepository.findOne({id: challenge.id,});
+      const oldChallenge = await this.challengeRepository.findOne({
+        id: challenge.id,
+      });
       if (oldChallenge === null) {
         newChallenges.push(newChallenge);
       } else if (oldChallenge.id != newChallenge.id) {
