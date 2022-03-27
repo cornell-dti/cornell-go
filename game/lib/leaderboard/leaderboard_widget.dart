@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:game/api/game_client_dto.dart';
+import 'package:game/model/event_model.dart';
+import 'package:game/model/group_model.dart';
+import 'package:game/model/user_model.dart';
 import 'package:game/widget/back_btn.dart';
 import 'package:game/widget/leaderboard_cell.dart';
 import 'package:game/widget/leaderboard_user_cell.dart';
+import 'package:provider/provider.dart';
+import 'dart:math';
 
 class LeaderboardWidget extends StatefulWidget {
   LeaderboardWidget({Key? key}) : super(key: key);
@@ -24,18 +30,32 @@ class _LeaderboardWidgetState extends State<LeaderboardWidget> {
         child: Container(
           child: Padding(
             padding: const EdgeInsets.only(left: 8.0, right: 8.0),
-            child: ListView(
-              shrinkWrap: true,
-              scrollDirection: Axis.vertical,
-              children: [
-                leaderBoardUserCell(context, "User", "1", "6", "23"),
-                leaderBoardCell(context, "User", "1", "23", true),
-                leaderBoardCell(context, "User 2", "2", "20", false),
-                leaderBoardCell(context, "User 3", "3", "19", false),
-                leaderBoardCell(context, "User 4", "4", "19", false),
-                leaderBoardCell(context, "User 5", "5", "19", false),
-                leaderBoardCell(context, "User 6", "6", "19", false),
-              ],
+            child: Consumer3<GroupModel, EventModel, UserModel>(
+              builder:
+                  (context, myGroupModel, myEventModel, myUserModel, child) {
+                int position = 1;
+                if (myGroupModel.curEventId == null) return ListView();
+                final List<UpdateLeaderDataUserDto> list = myEventModel
+                    .getTopPlayersForEvent(myGroupModel.curEventId!, 1000);
+                return ListView(
+                  shrinkWrap: true,
+                  scrollDirection: Axis.vertical,
+                  children: [
+                    for (int i = 0; i < list.length; i++)
+                      if (myUserModel.userData?.id != null &&
+                          myUserModel.userData!.id == list.elementAt(i))
+                        leaderBoardUserCell(
+                            context,
+                            list.elementAt(i).username,
+                            i + 1,
+                            myGroupModel.members.length,
+                            list.elementAt(i).score),
+                    for (UpdateLeaderDataUserDto user in list)
+                      leaderBoardCell(
+                          context, user.username, position++, user.score, true)
+                  ],
+                );
+              },
             ),
           ),
         ),

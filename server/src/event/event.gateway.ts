@@ -100,7 +100,7 @@ export class EventGateway {
       data.count,
     );
 
-    await this.clientService.emitUpdateLeaderData(user, {
+    this.clientService.emitUpdateLeaderData(user, {
       eventId: data.eventId,
       offset: data.offset,
       users: await Promise.all(
