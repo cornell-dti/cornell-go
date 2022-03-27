@@ -6,6 +6,7 @@ import { EventBase } from 'src/model/event-base.entity';
 import { EventReward } from 'src/model/event-reward.entity';
 import { User } from 'src/model/user.entity';
 import { EventDto } from './update-events.dto';
+import { v4 } from 'uuid';
 
 @Injectable()
 export class AdminService {
@@ -58,13 +59,5 @@ export class AdminService {
   async removeEvent(eventID: string) {
     const event = this.getEventByID(eventID);
     this.eventRepository.removeAndFlush(event);
-  }
-
-  async updateEvent(event: EventDto){
-    const repEvent = this.getEventByID(event.id);
-  }
-
-  async createEvent(event: EventDto){
-    // this.eventRepository.create();
   }
 }

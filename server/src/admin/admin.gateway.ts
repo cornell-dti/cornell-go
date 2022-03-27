@@ -103,13 +103,49 @@ export class AdminGateway {
   @SubscribeMessage('updateEvents')
   async updateEvents(@CallingUser() user: User, data: UpdateEventsDto) {
     for (const id in data.deletedIds){
-      this.adminService.removeEvent(id);
+      await this.adminService.removeEvent(id);
     }
-    for (const event of data.events){
-      if ((await this.adminService.getAllEventData()).some(e => e.id === event.id)){
-        this.adminService.updateEvent(event);
-      }
-    }
+    const [oldEvents, newEvents] = await this.adminService.updateEvents(data.events);
+    const oldEventDto: UpdateEventDataDto = {
+      events: oldEvents.map(event => ({
+        id: event.id,
+        requiredMembers: event.requiredMembers,
+        skippingEnabled: event.skippingEnabled,
+        isDefault: event.isDefault,
+        name: event.name,
+        description: event.description,
+        rewardType: event.rewardType,
+        indexable: event.indexable,
+        time: event.time.toTimeString(),
+        rewardIds: event.rewards.getIdentifiers(),
+        challengeIds: event.challenges.getIdentifiers(),
+      })),
+      deletedIds: data.deletedIds,
+    };
+
+    this.adminCallbackService.emitUpdateEventData(oldEventDto);
+    const newEventDto: UpdateEventDataDto = {
+      events: newEvents.map(event => ({
+        id: event.id,
+        requiredMembers: event.requiredMembers,
+        skippingEnabled: event.skippingEnabled,
+        isDefault: event.isDefault,
+        name: event.name,
+        description: event.description,
+        rewardType: event.rewardType,
+        indexable: event.indexable,
+        time: event.time.toTimeString(),
+        rewardIds: event.rewards.getIdentifiers(),
+        challengeIds: event.challenges.getIdentifiers(),
+      })),
+      deletedIds: data.deletedIds,
+    };
+    this.adminCallbackService.emitUpdateEventData(newEventDto);
+    const updatedDto: UpdateRewardDataDto = {
+      rewards: data.rewards,
+      deletedIds: data.deletedIds,
+    };
+    this.adminCallbackService.emitUpdateRewardData(updatedDto);
   }
 
   @SubscribeMessage('updateChallenges')
