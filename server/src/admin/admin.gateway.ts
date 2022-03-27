@@ -1,10 +1,5 @@
-import { CloseAccountDto } from './../../dist/user/close-account.dto.d';
 import { UseGuards } from '@nestjs/common';
-import {
-  MessageBody,
-  SubscribeMessage,
-  WebSocketGateway,
-} from '@nestjs/websockets';
+import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
 import { CallingUser } from 'src/auth/calling-user.decorator';
 import { AdminGuard } from 'src/auth/jwt-auth.guard';
 import { User } from 'src/model/user.entity';
@@ -22,12 +17,11 @@ import { UpdateRewardDataDto } from './admin-callback/update-reward-data.dto';
 import { UpdateAdminsDto } from './update-admins.dto';
 import { UpdateChallengesDto } from './update-challenges.dto';
 import { UpdateEventsDto } from './update-events.dto';
-import { UpdateEventDataDto } from './admin-callback/update-event-data.dto';
 import { UpdateRewardsDto } from './update-rewards.dto';
 import { Challenge } from 'src/model/challenge.entity';
 import { EventReward } from 'src/model/event-reward.entity';
 import { v4 } from 'uuid';
-
+import { UpdateEventDataDto } from './admin-callback/update-event-data.dto';
 @WebSocketGateway({ cors: true })
 @UseGuards(AdminGuard)
 export class AdminGateway {
@@ -42,28 +36,31 @@ export class AdminGateway {
   async requestEvents(@CallingUser() user: User, data: RequestEventsDto) {
     const events = await this.adminService.getAllEventData();
 
-    this.adminCallbackService.emitUpdateEventData({
-      deletedIds:[],
-      events: await Promise.all(
-        events.map(async (ev: EventBase) => ({
-          id: ev.id,
-          skippingEnabled: ev.skippingEnabled,
-          isDefault:ev.isDefault,
-          name: ev.name,
-          description: ev.description,
-          rewardType: ev.rewardType,
-          time: ev.time.toUTCString(),
-          requiredMembers: ev.requiredMembers,
-          indexable: ev.indexable,
-          challengeIds: (
-            await ev.challenges.loadItems()
-          ).map((ch: Challenge) => ch.id),
-          rewardIds: (
-            await ev.rewards.loadItems()
-          ).map((rw: EventReward) => (rw.id)),
-        })),
-      ),
-    })
+    this.adminCallbackService.emitUpdateEventData(
+      {
+        deletedIds: [],
+        events: await Promise.all(
+          events.map(async (ev: EventBase) => ({
+            id: ev.id,
+            skippingEnabled: ev.skippingEnabled,
+            isDefault: ev.isDefault,
+            name: ev.name,
+            description: ev.description,
+            rewardType: ev.rewardType as 'limited_time_event' | 'perpetual',
+            time: ev.time.toUTCString(),
+            requiredMembers: ev.requiredMembers,
+            indexable: ev.indexable,
+            challengeIds: (
+              await ev.challenges.loadItems()
+            ).map((ch: Challenge) => ch.id),
+            rewardIds: (
+              await ev.rewards.loadItems()
+            ).map((rw: EventReward) => rw.id),
+          })),
+        ),
+      },
+      user,
+    );
   }
 
   @SubscribeMessage('requestChallenges')
@@ -73,21 +70,25 @@ export class AdminGateway {
   ) {
     const challenges = await this.adminService.getAllChallengeData();
 
-    this.adminCallbackService.emitUpdateChallengeData({
-      deletedIds:[],
-      challenges: await Promise.all(
-        challenges.map(async (ch:Challenge) => ({
-          id: ch.id,
-          name: ch.name,
-          description: ch.description,
-          imageUrl: ch.imageUrl,
-          latitude: ch.latitude,
-          longitude: ch.longitude,
-          awardingRadius: ch.awardingRadius,
-          closeRadius: ch.closeRadius,
-        }))
-      ),
-    });
+    this.adminCallbackService.emitUpdateChallengeData(
+      {
+        deletedIds: [],
+        challenges: await Promise.all(
+          challenges.map(async (ch: Challenge) => ({
+            id: ch.id,
+            name: ch.name,
+            description: ch.description,
+            imageUrl: ch.imageUrl,
+            latitude: ch.latitude,
+            longitude: ch.longitude,
+            awardingRadius: ch.awardingRadius,
+            closeRadius: ch.closeRadius,
+            containingEventId: ch.linkedEvent.id,
+          })),
+        ),
+      },
+      user,
+    );
   }
 
   @SubscribeMessage('requestRewards')
@@ -115,20 +116,24 @@ export class AdminGateway {
   async requestAdmins(@CallingUser() user: User, data: RequestAdminsDto) {
     const admins = await this.adminService.getAllRequestingAdmins();
     // Only send to the requester
-    this.adminCallbackService.emitUpdateAdminData({
-      admins: admins.map(usr => ({
-        id: usr.id,
-        requesting: true,
-        email: usr.email,
-        superuser: usr.superuser,
-      })),
-    });
+    this.adminCallbackService.emitUpdateAdminData(
+      {
+        admins: admins.map(usr => ({
+          id: usr.id,
+          requesting: true,
+          email: usr.email,
+          superuser: usr.superuser,
+        })),
+      },
+      user,
+    );
   }
 
   @SubscribeMessage('updateEvents')
   async updateEvents(@CallingUser() user: User, data: UpdateEventsDto) {
-    for (const id in data.deletedIds){
-      await this.adminService.removeEvent(id);
+    const eventUpdates: UpdateEventsDto[] = [];
+    for (const eventData of data.events) {
+      //const event = await this.adminService.updateEvent();
     }
     const newEvents = await this.adminService.updateEvents(data.events);
     const newEventDto: UpdateEventDataDto = {
@@ -196,7 +201,7 @@ export class AdminGateway {
         rewardIds: event.rewards.getIdentifiers(),
         challengeIds: event.challenges.getIdentifiers(),
       })),
-      deletedIds: data.deletedIds,
+      deletedIds: [],
     };
 
     this.adminCallbackService.emitUpdateEventData(oldEventDto);
@@ -214,7 +219,7 @@ export class AdminGateway {
         rewardIds: event.rewards.getIdentifiers(),
         challengeIds: event.challenges.getIdentifiers(),
       })),
-      deletedIds: data.deletedIds,
+      deletedIds: [],
     };
     this.adminCallbackService.emitUpdateEventData(newEventDto);
     const updatedDto: UpdateRewardDataDto = {

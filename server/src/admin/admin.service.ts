@@ -55,22 +55,6 @@ export class AdminService {
     return await this.challengeRepository.find({});
   }
 
-  async getEventByID(eventID: string){
-    return await this.eventRepository.findOneOrFail({id:eventID});
-  }
-  async getChallengeByID(challengeID: string){
-    return await this.challengeRepository.findOneOrFail({id:challengeID});
-  }
-
-  async removeEvent(eventID: string) {
-    const event = this.getEventByID(eventID);
-    this.eventRepository.removeAndFlush(event);
-  }
-  
-  async removeChallenge(challengeID: string) {
-    const challenge = this.getChallengeByID(challengeID);
-    this.challengeRepository.removeAndFlush(challenge);
-  }
   /** Get rewards of the user */
   async getRewardsForUser(user: User): Promise<EventReward[]> {
     return user.rewards.getItems();
