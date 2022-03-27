@@ -59,9 +59,6 @@ class ApiClient extends ChangeNotifier {
             .setAuth({'token': _accessToken})
             .build());
 
-    print({'token': _accessToken});
-    print(socket.auth);
-
     socket.onDisconnect((data) {
       _serverApi = null;
       notifyListeners();
