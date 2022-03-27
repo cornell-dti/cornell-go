@@ -155,19 +155,18 @@ export class AdminGateway {
   }
 
   @SubscribeMessage('updateChallenges')
-  async updateChallenges(
-    @CallingUser() user: User,
-    data: UpdateChallengesDto,
-  ) {
-    for (const id in data.deletedIds){
+  async updateChallenges(@CallingUser() user: User, data: UpdateChallengesDto) {
+    for (const id in data.deletedIds) {
       await this.adminService.removeChallenge(id);
     }
-    const newChallenges = await this.adminService.updateChallenges(data.challenges);
+    const newChallenges = await this.adminService.updateChallenges(
+      data.challenges,
+    );
     const newChallengeDto: UpdateChallengesDto = {
       challenges: newChallenges.map(challenge => ({
         id: challenge.id,
         name: challenge.name,
-        containingEventId:challenge.linkedEvent.id,
+        containingEventId: challenge.linkedEvent.id,
         description: challenge.description,
         imageUrl: challenge.imageUrl,
         latitude: challenge.latitude,
