@@ -47,9 +47,10 @@ class ApiClient extends ChangeNotifier {
     if (_socket != null && !refreshing || _accessToken == null) return;
 
     if (refreshing && _socket != null) {
-      _socket?.disconnect();
+      _socket?.destroy();
     }
 
+    IO.cache.clear();
     final socket = IO.io(
         _apiUrl,
         IO.OptionBuilder()
@@ -57,6 +58,9 @@ class ApiClient extends ChangeNotifier {
             .disableAutoConnect()
             .setAuth({'token': _accessToken})
             .build());
+
+    print({'token': _accessToken});
+    print(socket.auth);
 
     socket.onDisconnect((data) {
       _serverApi = null;
