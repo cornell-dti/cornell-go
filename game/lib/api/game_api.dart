@@ -53,9 +53,10 @@ class ApiClient extends ChangeNotifier {
     final socket = IO.io(
         _apiUrl,
         IO.OptionBuilder()
-            .setTransports(['websocket'])
+            .setTransports(["websocket"])
             .disableAutoConnect()
-            .setAuth({'token': _accessToken}));
+            .setAuth({'token': _accessToken})
+            .build());
 
     socket.onDisconnect((data) {
       _serverApi = null;
@@ -63,12 +64,13 @@ class ApiClient extends ChangeNotifier {
     });
     socket.onConnect((data) {
       _socket = socket;
-      _clientApi.connectSocket(socket);
+
       if (refreshing) {
         _serverApi?.replaceSocket(socket);
       } else {
         _serverApi = GameServerApi(socket, _accessRefresher);
       }
+      _clientApi.connectSocket(socket);
       notifyListeners();
     });
     socket.onConnectError((data) {
@@ -79,7 +81,7 @@ class ApiClient extends ChangeNotifier {
   }
 
   Future<bool> _accessRefresher() async {
-    final refreshResult = await _refreshAccess();
+    final refreshResult = await _refreshAccess(false);
     if (refreshResult) {
       authenticated = true;
       _createSocket(true);
@@ -92,14 +94,15 @@ class ApiClient extends ChangeNotifier {
     return refreshResult;
   }
 
-  Future<bool> _refreshAccess() async {
+  Future<bool> _refreshAccess(bool relog) async {
     if (_refreshToken != null) {
       final refreshResponse =
           await http.post(_refreshUrl, body: {'refreshToken': _refreshToken});
 
-      if (refreshResponse.statusCode == 200 && refreshResponse.body != "null") {
+      if (refreshResponse.statusCode == 201 && refreshResponse.body != "") {
         final responseBody = jsonDecode(refreshResponse.body);
         _accessToken = responseBody["accessToken"];
+        _createSocket(!relog);
 
         return true;
       }
@@ -119,10 +122,41 @@ class ApiClient extends ChangeNotifier {
     if (token != null) {
       _refreshToken = token;
 
-      final access = await _refreshAccess();
+      final access = await _refreshAccess(true);
       authenticated = access;
       notifyListeners();
       return access;
+    }
+
+    authenticated = false;
+    notifyListeners();
+    return false;
+  }
+
+  Future<bool> connectId(String id) async {
+    final pos = await GeoPoint.current();
+
+    final loginResponse = await http.post(_deviceLoginUrl,
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, String>{
+          "idToken": id,
+          "lat": pos.lat.toString(),
+          "long": pos.long.toString(),
+          "aud": Platform.isIOS ? "ios" : "android"
+        }));
+
+    if (loginResponse.statusCode == 201 && loginResponse.body != "") {
+      final responseBody = jsonDecode(loginResponse.body);
+
+      this._accessToken = responseBody["accessToken"];
+      this._refreshToken = responseBody["refreshToken"];
+
+      await _saveToken();
+
+      _createSocket(false);
+      return true;
     }
 
     authenticated = false;
@@ -136,14 +170,19 @@ class ApiClient extends ChangeNotifier {
       final auth = await account.authentication;
       final idToken = auth.idToken;
       final pos = await GeoPoint.current();
-      final loginResponse = await http.post(_googleLoginUrl, body: {
-        'idToken': idToken,
-        'lat': pos.lat,
-        'long': pos.long,
-        'aud': Platform.isIOS ? "ios" : "android"
-      });
 
-      if (loginResponse.statusCode == 200 && loginResponse.body != "null") {
+      final loginResponse = await http.post(_googleLoginUrl,
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(<String, String>{
+            "idToken": idToken!,
+            "lat": pos.lat.toString(),
+            "long": pos.long.toString(),
+            "aud": Platform.isIOS ? "ios" : "android"
+          }));
+
+      if (loginResponse.statusCode == 201 && loginResponse.body != "") {
         final responseBody = jsonDecode(loginResponse.body);
 
         this._accessToken = responseBody["accessToken"];
