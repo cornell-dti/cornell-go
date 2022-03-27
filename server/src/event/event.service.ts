@@ -35,7 +35,7 @@ export class EventService {
   ): Promise<EventTracker[]> {
     return await this.eventTrackerRepository.find(
       {
-        id: eventId,
+        event: eventId,
       },
       { offset, limit: count, orderBy: { eventScore: 'desc' } },
     );
