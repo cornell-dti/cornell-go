@@ -90,7 +90,7 @@ export class UserGateway {
       id: user.id,
       username: user.username,
       score: user.score,
-      groupId: group?.id ?? '',
+      groupId: group?.friendlyId ?? 'undefined',
       authType: user.authType as UpdateUserDataAuthTypeDto,
       rewardIds: [],
       trackedEventIds: [],

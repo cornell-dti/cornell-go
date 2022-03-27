@@ -168,7 +168,7 @@ export class ChallengeGateway {
         id: user.id,
         username: user.username,
         score: user.score,
-        groupId: group?.id ?? '',
+        groupId: group?.friendlyId ?? 'undefined',
         rewardIds: userRewards.concat(newReward).map(reward => reward.id), //Add reward to user.rewards,
         trackedEventIds: participatingEvents.map(ev => ev.id),
         ignoreIdLists: false,

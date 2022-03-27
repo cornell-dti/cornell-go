@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:game/model/group_model.dart';
+import 'package:game/model/user_model.dart';
+import 'package:provider/provider.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:velocity_x/velocity_x.dart';
 import 'package:game/widget/nav_bar.dart';
@@ -166,13 +169,15 @@ class _HomePageWidgetState extends State<HomePageWidget> {
         alignment: Alignment.center,
         child: Row(
           children: [
-            const Text(
-              "Group ABCD (8/8)",
-              style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 18),
-            ),
+            Consumer<UserModel>(builder: ((context, value, child) {
+              return Text(
+                "Group [" + (value.userData?.groupId.toUpperCase() ?? "") + "]",
+                style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 18),
+              );
+            })),
             ElevatedButton(
               onPressed: () => {print("Join-Group pressed")},
               child: const Text(
