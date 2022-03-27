@@ -60,7 +60,7 @@ export class GroupService {
   }
 
   /** Get group from by the friendlyId.
-   * Throws a NotFoundError if the id does not correspond to a group. */
+   * Throws an error if the id does not correspond to a group. */
   async getGroupFromFriendlyId(id: string): Promise<Group> {
     return await this.groupsRepository.findOneOrFail({ friendlyId: id });
   }
