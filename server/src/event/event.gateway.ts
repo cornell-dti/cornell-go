@@ -45,7 +45,7 @@ export class EventGateway {
           name: ev.name,
           description: ev.description,
           rewardType: ev.rewardType as RewardTypeDto,
-          time: ev.time.toUTCString(),
+          time: ev.time.toISOString(),
           requiredMembers: ev.requiredMembers,
           challengeIds: (
             await ev.challenges.loadItems()
@@ -130,7 +130,7 @@ export class EventGateway {
         trackers.map(async (tracker: EventTracker) => ({
           eventId: tracker.event.id,
           isRanked: tracker.isPlayerRanked,
-          cooldownMinimum: tracker.cooldownMinimum.toUTCString(),
+          cooldownMinimum: tracker.cooldownMinimum.toISOString(),
           curChallengeId: tracker.currentChallenge.id,
           prevChallengeIds: (
             await tracker.completed.loadItems()

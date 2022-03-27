@@ -54,7 +54,7 @@ export class ChallengeGateway {
         long: ch.longitude,
         awardingRadius: ch.awardingRadius,
         closeRadius: ch.closeRadius,
-        completionDate: ch.completions[0]?.foundTimestamp?.toUTCString() ?? '',
+        completionDate: ch.completions[0]?.foundTimestamp?.toISOString() ?? '',
       })),
     });
 

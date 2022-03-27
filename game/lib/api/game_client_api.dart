@@ -58,9 +58,13 @@ class GameClientApi {
   final _connectedController = StreamController<Null>.broadcast(sync: true);
   Stream<Null> get connectedStream => _connectedController.stream;
 
+  final disconnectedController = StreamController<Null>.broadcast(sync: true);
+  Stream<Null> get disconnectedStream => disconnectedController.stream;
+
   void connectSocket(Socket sock) {
     sock.onReconnect((data) => _reconnectingController.add(null));
     sock.onReconnecting((data) => _reconnectedController.add(null));
+    sock.onDisconnect((data) => disconnectedController.add(null));
     sock.on(
         "updateUserData",
         (data) =>

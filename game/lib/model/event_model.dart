@@ -35,6 +35,11 @@ class EventModel extends ChangeNotifier {
       }
       notifyListeners();
     });
+
+    client.clientApi.disconnectedStream.listen((event) {
+      _events.clear();
+      _topPlayers.clear();
+    });
   }
 
   List<UpdateLeaderDataUserDto> getTopPlayersForEvent(

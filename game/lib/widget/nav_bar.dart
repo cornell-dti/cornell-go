@@ -3,8 +3,6 @@ import 'package:game/feedback/feedback.dart';
 import 'package:game/leaderboard/leaderboard_widget.dart';
 import 'package:game/login/login_page.dart';
 import 'package:game/model/user_model.dart';
-import 'package:game/settings/settings.dart';
-import 'package:game/suggestions/suggestions.dart';
 import 'package:game/visited_places/visited_places_widget.dart';
 import 'package:game/username/username_widget.dart';
 import 'package:provider/provider.dart';
@@ -25,7 +23,7 @@ class NavBar extends StatelessWidget {
           padding: EdgeInsets.zero,
           children: [
             UserAccountsDrawerHeader(
-              accountName: Text("Hi, " + userModel.userData!.username,
+              accountName: Text("Hi, " + (userModel.userData?.username ?? ""),
                   style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -42,7 +40,7 @@ class NavBar extends StatelessWidget {
                   child: Container(
                     decoration: BoxDecoration(
                         color: constructColorFromUserName(
-                            userModel.userData!.username)),
+                            userModel.userData?.username ?? "")),
                     width: 90,
                     height: 90,
                   ),
@@ -50,7 +48,7 @@ class NavBar extends StatelessWidget {
               ),
               decoration: BoxDecoration(
                   color: RGBComplement(constructColorFromUserName(
-                      userModel.userData!.username))),
+                      userModel.userData?.username ?? ""))),
             ),
             ListTile(
               leading: Icon(

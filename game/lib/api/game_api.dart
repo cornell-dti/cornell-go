@@ -71,6 +71,7 @@ class ApiClient extends ChangeNotifier {
         _serverApi = GameServerApi(socket, _accessRefresher);
       }
       _clientApi.connectSocket(socket);
+
       notifyListeners();
     });
     socket.onConnectError((data) {
@@ -87,6 +88,7 @@ class ApiClient extends ChangeNotifier {
       _createSocket(true);
     } else {
       authenticated = false;
+      _clientApi.disconnectedController.add(null);
       _socket?.disconnect();
       _socket = null;
       notifyListeners();
@@ -124,24 +126,29 @@ class ApiClient extends ChangeNotifier {
 
       final access = await _refreshAccess(true);
       authenticated = access;
+
+      if (!access) {
+        _clientApi.disconnectedController.add(null);
+      }
       notifyListeners();
       return access;
     }
 
     authenticated = false;
+    _clientApi.disconnectedController.add(null);
     notifyListeners();
     return false;
   }
 
-  Future<bool> connectId(String id) async {
+  Future<bool> _connect(String idToken, Uri url) async {
     final pos = await GeoPoint.current();
 
-    final loginResponse = await http.post(_deviceLoginUrl,
+    final loginResponse = await http.post(url,
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
         body: jsonEncode(<String, String>{
-          "idToken": id,
+          "idToken": idToken,
           "lat": pos.lat.toString(),
           "long": pos.long.toString(),
           "aud": Platform.isIOS ? "ios" : "android"
@@ -160,71 +167,42 @@ class ApiClient extends ChangeNotifier {
     }
 
     authenticated = false;
+    _clientApi.disconnectedController.add(null);
     notifyListeners();
     return false;
+  }
+
+  Future<bool> connectId(String id) async {
+    return _connect(id, _deviceLoginUrl);
   }
 
   Future<bool> connectGoogle() async {
     final account = await _googleSignIn.signIn();
+
     if (account != null) {
       final auth = await account.authentication;
-      final idToken = auth.idToken;
-      final pos = await GeoPoint.current();
+      final idToken = auth.idToken!;
 
-      final loginResponse = await http.post(_googleLoginUrl,
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-          },
-          body: jsonEncode(<String, String>{
-            "idToken": idToken!,
-            "lat": pos.lat.toString(),
-            "long": pos.long.toString(),
-            "aud": Platform.isIOS ? "ios" : "android"
-          }));
-
-      if (loginResponse.statusCode == 201 && loginResponse.body != "") {
-        final responseBody = jsonDecode(loginResponse.body);
-
-        this._accessToken = responseBody["accessToken"];
-        this._refreshToken = responseBody["refreshToken"];
-
-        await _saveToken();
-
-        _createSocket(false);
-        return true;
-      }
+      return _connect(idToken, _googleLoginUrl);
     }
     authenticated = false;
+    _clientApi.disconnectedController.add(null);
     notifyListeners();
-    return false;
-  }
-
-  Future<bool> connectDevice(String id) async {
-    final pos = await GeoPoint.current();
-    final loginResponse = await http.post(_deviceLoginUrl,
-        body: {'idToken': id, 'lat': pos.lat, 'long': pos.long});
-
-    if (loginResponse.statusCode == 200 && loginResponse.body != "null") {
-      final responseBody = jsonDecode(loginResponse.body);
-      this._accessToken = responseBody["accessToken"];
-      this._refreshToken = responseBody["refreshToken"];
-
-      await _saveToken();
-      _createSocket(false);
-
-      return true;
-    }
     return false;
   }
 
   Future<void> disconnect() async {
     await _storage.write(key: "refresh_token", value: "");
     await _googleSignIn.signOut();
+
     _refreshToken = null;
     _accessToken = null;
+
     _socket?.disconnect();
     _socket = null;
+
     authenticated = false;
+    _clientApi.disconnectedController.add(null);
     notifyListeners();
   }
 }

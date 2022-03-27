@@ -14,11 +14,16 @@ class UserModel extends ChangeNotifier {
         userData?.score = event.score;
         userData?.username = event.username;
       }
+      print(userData?.username);
       notifyListeners();
     });
 
     client.clientApi.connectedStream.listen((event) {
       client.serverApi?.requestUserData();
+    });
+
+    client.clientApi.disconnectedStream.listen((event) {
+      userData = null;
     });
   }
 }

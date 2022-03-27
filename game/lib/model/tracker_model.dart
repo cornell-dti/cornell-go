@@ -13,6 +13,10 @@ class TrackerModel extends ChangeNotifier {
       });
       notifyListeners();
     });
+
+    client.clientApi.disconnectedStream.listen((event) {
+      _trackers.clear();
+    });
   }
 
   UpdateEventTrackerDataEventTrackerDto? trackerByEventId(String eventId) {

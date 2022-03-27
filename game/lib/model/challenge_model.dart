@@ -13,6 +13,10 @@ class ChallengeModel extends ChangeNotifier {
       });
       notifyListeners();
     });
+
+    client.clientApi.disconnectedStream.listen((event) {
+      _challengesById.clear();
+    });
   }
 
   UpdateChallengeDataChallengeDto? getChallengeById(String id) {

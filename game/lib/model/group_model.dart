@@ -23,5 +23,10 @@ class GroupModel extends ChangeNotifier {
     client.clientApi.connectedStream.listen((event) {
       client.serverApi?.requestGroupData();
     });
+
+    client.clientApi.disconnectedStream.listen((event) {
+      members.clear();
+      curEventId = null;
+    });
   }
 }
