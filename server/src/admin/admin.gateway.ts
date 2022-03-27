@@ -131,9 +131,8 @@ export class AdminGateway {
 
   @SubscribeMessage('updateEvents')
   async updateEvents(@CallingUser() user: User, data: UpdateEventsDto) {
-    const eventUpdates: UpdateEventsDto[] = [];
-    for (const eventData of data.events) {
-      //const event = await this.adminService.updateEvent();
+    for (const id of data.deletedIds) {
+      await this.adminService.removeEvent(id);
     }
     const newEvents = await this.adminService.updateEvents(data.events);
     const newEventDto: UpdateEventDataDto = {
@@ -168,6 +167,7 @@ export class AdminGateway {
       challenges: newChallenges.map(challenge => ({
         id: challenge.id,
         name: challenge.name,
+        containingEventId:challenge.linkedEvent.id,
         description: challenge.description,
         imageUrl: challenge.imageUrl,
         latitude: challenge.latitude,

@@ -54,6 +54,22 @@ export class AdminService {
   async getAllChallengeData() {
     return await this.challengeRepository.find({});
   }
+  async getEventById(eventId: string){
+    return await this.eventRepository.findOneOrFail({id:eventId});
+  }
+  async getChallengeById(challengeId: string){
+    return await this.challengeRepository.findOneOrFail({id:challengeId});
+  }
+
+  async removeEvent(eventId: string){
+    const event = await this.getEventById(eventId);
+    await this.eventRepository.removeAndFlush(event);
+  }
+  
+  async removeChallenge(challengeId: string){
+    const challenge = await this.getEventById(challengeId);
+    await this.challengeRepository.removeAndFlush(challenge);
+  }
 
   /** Get rewards of the user */
   async getRewardsForUser(user: User): Promise<EventReward[]> {
@@ -105,15 +121,23 @@ export class AdminService {
     return new_event;
   }
   async createChallengeFromUpdateDTO(challenge: ChallengeDto): Promise<Challenge> {
+    const thisEvent = await this.eventRepository.findOneOrFail({ id: challenge.containingEventId });
+    const maxIndexChallenge = await this.challengeRepository.findOne(
+      {
+        linkedEvent:thisEvent,
+      }, 
+      {orderBy:{eventIndex:'DESC'}}
+    );
+    const newEventIndex = (maxIndexChallenge?.eventIndex?? - 1);
     const new_challenge = this.challengeRepository.create({
       id: challenge.id,
-      eventIndex: (await this.challengeRepository.find({id: challenge.id})).eventIndex,
+      eventIndex: newEventIndex,
       name: challenge.name,
       description: challenge.description,
       imageUrl: challenge.imageUrl,
       latitude: challenge.latitude,
       longitude: challenge.longitude,
-      linkedEvent: challenge.linkedEvent,
+      linkedEvent: thisEvent,
       awardingRadius: challenge.awardingRadius,
       closeRadius: challenge.closeRadius,
     });
@@ -163,6 +187,9 @@ export class AdminService {
       }
       const newEvent = await this.createEventFromUpdateDTO(event);
       const oldEvent = await this.eventRepository.findOne({id: event.id,});
+      (await oldEvent?.challenges.loadItems())?.forEach(challenge => {
+        challenge.eventIndex = event.challengeIds.indexOf(challenge.id)
+      });
       if (oldEvent === null) {
         newEvents.push(newEvent);
       } else if (oldEvent.id != newEvent.id) {
