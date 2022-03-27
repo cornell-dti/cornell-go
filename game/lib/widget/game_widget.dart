@@ -50,6 +50,7 @@ class _GameWidgetState extends State<GameWidget> {
             final curChallenge =
                 chalId == null ? null : challengeModel.getChallengeById(chalId);
 
+            gameModel.hasConnection = apiCient.serverApi != null;
             if (curChallenge != null) {
               gameModel.description = curChallenge.description;
               gameModel.name = curChallenge.name;
