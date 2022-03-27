@@ -218,6 +218,7 @@ class ApiClient extends ChangeNotifier {
   }
 
   Future<void> disconnect() async {
+    await _storage.write(key: "refresh_token", value: "");
     await _googleSignIn.signOut();
     _refreshToken = null;
     _accessToken = null;

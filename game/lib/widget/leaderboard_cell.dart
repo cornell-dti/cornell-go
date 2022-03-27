@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-Widget leaderBoardCell(context, name, position, points, isUser) {
+Widget leaderBoardCell(
+    context, String name, int position, int points, bool isUser) {
   Color Carnelian = Color(0xFFB31B1B);
   var posStyle = TextStyle(
       fontWeight: FontWeight.bold,
@@ -28,7 +29,7 @@ Widget leaderBoardCell(context, name, position, points, isUser) {
               Container(
                 child: Row(
                   children: [
-                    Text(position, style: posStyle),
+                    Text(position.toString(), style: posStyle),
                     Padding(
                       padding: const EdgeInsets.only(left: 12.0),
                       child: Icon(Icons.camera_alt_rounded, color: Carnelian),
@@ -47,7 +48,7 @@ Widget leaderBoardCell(context, name, position, points, isUser) {
           ),
           Container(
             child: Text(
-              points,
+              points.toString(),
               style: pointStyle,
             ),
           )
