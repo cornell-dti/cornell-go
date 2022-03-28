@@ -5,7 +5,7 @@ import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 
 export type OptionEntryForm = {
   name: string;
-  index: number;
+  value: number;
   options: string[];
 };
 
@@ -63,12 +63,26 @@ const EntrySelect = styled.select`
 `;
 
 function OptionEntryFormBox(props: { form: OptionEntryForm }) {
+  const [val, setVal] = useState(props.form.options[props.form.value]);
+
+  useEffect(() => setVal(props.form.options[props.form.value]), [props.form]);
+
   return (
     <EntryBox>
       <label htmlFor={props.form.name}>{props.form.name + ":"}</label>
-      <EntrySelect name={props.form.name}>
+      <EntrySelect
+        name={props.form.name}
+        value={val}
+        onChange={(e) =>
+          setVal(
+            props.form.options[(props.form.value = e.target.selectedIndex)]
+          )
+        }
+      >
         {props.form.options.map((val) => (
-          <option key={val}>{val}</option>
+          <option key={val} onSelect={() => console.log(val)}>
+            {val}
+          </option>
         ))}
       </EntrySelect>
     </EntryBox>
@@ -154,8 +168,8 @@ function DraggableMarker(props: {
       dragend() {
         const marker = markerRef.current;
         if (marker != null) {
-          const loc: [number, number] = marker.getLatLng();
-          props.onLocationChange(loc[0], loc[1]);
+          const { lat, lng } = marker.getLatLng();
+          props.onLocationChange(lat, lng);
           setPosition(marker.getLatLng());
         }
       },
@@ -209,17 +223,9 @@ export function EntryModal(props: {
   form: EntryForm[];
   isOpen: boolean;
   entryButtonText: string;
-  onEntry: (form: EntryForm[]) => void;
+  onEntry: () => void;
   onCancel: () => void;
 }) {
-  const formRef = useRef(props.form);
-
-  useEffect(() => {
-    if (props.isOpen) {
-      formRef.current = props.form;
-    }
-  }, [props.isOpen]);
-
   return (
     <Modal
       title={props.title}
@@ -227,10 +233,10 @@ export function EntryModal(props: {
       isOpen={props.isOpen}
       onButtonClick={(idx) => {
         if (idx === 1) props.onCancel();
-        else props.onEntry(formRef.current);
+        else props.onEntry();
       }}
     >
-      {formRef.current.map((form) => {
+      {props.form.map((form) => {
         if ("options" in form) {
           return <OptionEntryFormBox form={form} key={form.name} />;
         } else if ("characterLimit" in form) {

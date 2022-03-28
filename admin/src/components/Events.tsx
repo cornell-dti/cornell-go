@@ -44,7 +44,7 @@ function EventCard(props: {
         <ListCardTitle>{props.event.name}</ListCardTitle>
         <ListCardDescription>{props.event.description}</ListCardDescription>
         <ListCardBody>
-          Available Until: <b>{props.event.time}</b> <br />
+          Available Until: <b>{new Date(props.event.time).toString()}</b> <br />
           Required Players: <b>{requiredText}</b> <br />
           Rewarding Method: <b>{rewardingMethod}</b> <br />
           Challenge Count: <b>{props.event.challengeIds.length}</b> <br />
@@ -91,15 +91,15 @@ function fromForm(form: EntryForm[], id: string): EventDto {
   return {
     id,
     requiredMembers: (form[2] as NumberEntryForm).value,
-    skippingEnabled: (form[3] as OptionEntryForm).index === 1,
-    isDefault: (form[4] as OptionEntryForm).index === 1,
+    skippingEnabled: (form[3] as OptionEntryForm).value === 1,
+    isDefault: (form[4] as OptionEntryForm).value === 1,
     rewardType:
-      (form[5] as OptionEntryForm).index === 0
+      (form[5] as OptionEntryForm).value === 0
         ? "perpetual"
         : "limited_time_event",
     name: (form[0] as FreeEntryForm).value,
     description: (form[1] as FreeEntryForm).value,
-    indexable: (form[6] as OptionEntryForm).index === 0,
+    indexable: (form[6] as OptionEntryForm).value === 1,
     time: (form[7] as DateEntryForm).date.toUTCString(),
     rewardIds: [],
     challengeIds: [],
@@ -119,15 +119,15 @@ function toForm(event: EventDto) {
     {
       name: "Skipping",
       options: ["Disabled", "Enabled"],
-      value: event.skippingEnabled ? 0 : 1,
+      value: event.skippingEnabled ? 1 : 0,
     },
-    { name: "Default", options: ["No", "Yes"], value: event.isDefault ? 0 : 1 },
+    { name: "Default", options: ["No", "Yes"], value: event.isDefault ? 1 : 0 },
     {
       name: "Rewarding Method",
       options: ["Perpetual", "Limited Time"],
-      value: event.rewardType === "perpetual" ? 0 : 1,
+      value: event.rewardType === "perpetual" ? 1 : 0,
     },
-    { name: "Visible", options: ["No", "Yes"], value: event.indexable ? 0 : 1 },
+    { name: "Visible", options: ["No", "Yes"], value: event.indexable ? 1 : 0 },
     { name: "Available Until", date: new Date(event.time) },
   ] as EntryForm[];
 }
@@ -160,7 +160,12 @@ export function Events() {
         isOpen={isEditModalOpen}
         entryButtonText="EDIT"
         onEntry={() => {
-          serverData.updateEvent(fromForm(form, currentId));
+          const { challengeIds, rewardIds } = serverData.events.get(currentId)!;
+          serverData.updateEvent({
+            ...fromForm(form, currentId),
+            challengeIds,
+            rewardIds,
+          });
           setEditModalOpen(false);
         }}
         onCancel={() => {
@@ -185,6 +190,7 @@ export function Events() {
       />
       {Array.from(serverData.events.values()).map((ev) => (
         <EventCard
+          key={ev.id}
           event={ev}
           onSelect={() => serverData.selectEvent(ev.id)}
           onDelete={() => {

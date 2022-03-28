@@ -1,5 +1,9 @@
 import { UseGuards } from '@nestjs/common';
-import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
+import {
+  MessageBody,
+  SubscribeMessage,
+  WebSocketGateway,
+} from '@nestjs/websockets';
 import { CallingUser } from 'src/auth/calling-user.decorator';
 import { AdminGuard } from 'src/auth/jwt-auth.guard';
 import { User } from 'src/model/user.entity';
@@ -15,9 +19,9 @@ import { RequestEventsDto } from './request-events.dto';
 import { RequestRewardsDto } from './request-rewards.dto';
 import { UpdateRewardDataDto } from './admin-callback/update-reward-data.dto';
 import { UpdateAdminsDto } from './update-admins.dto';
-import { UpdateChallengesDto } from './update-challenges.dto';
-import { UpdateEventsDto } from './update-events.dto';
-import { UpdateRewardsDto } from './update-rewards.dto';
+import { ChallengeDto, UpdateChallengesDto } from './update-challenges.dto';
+import { EventDto, UpdateEventsDto } from './update-events.dto';
+import { RewardDto, UpdateRewardsDto } from './update-rewards.dto';
 import { Challenge } from 'src/model/challenge.entity';
 import { EventReward } from 'src/model/event-reward.entity';
 import { v4 } from 'uuid';
@@ -26,38 +30,21 @@ import { UpdateEventDataDto } from './admin-callback/update-event-data.dto';
 @UseGuards(AdminGuard)
 export class AdminGateway {
   constructor(
-    private clientService: ClientService,
     private adminService: AdminService,
-    private rewardService: RewardService,
     private adminCallbackService: AdminCallbackService,
   ) {}
 
   @SubscribeMessage('requestEvents')
-  async requestEvents(@CallingUser() user: User, data: RequestEventsDto) {
+  async requestEvents(
+    @CallingUser() user: User,
+    @MessageBody() data: RequestEventsDto,
+  ) {
     const events = await this.adminService.getAllEventData();
 
     this.adminCallbackService.emitUpdateEventData(
       {
         deletedIds: [],
-        events: await Promise.all(
-          events.map(async (ev: EventBase) => ({
-            id: ev.id,
-            skippingEnabled: ev.skippingEnabled,
-            isDefault: ev.isDefault,
-            name: ev.name,
-            description: ev.description,
-            rewardType: ev.rewardType as 'limited_time_event' | 'perpetual',
-            time: ev.time.toUTCString(),
-            requiredMembers: ev.requiredMembers,
-            indexable: ev.indexable,
-            challengeIds: (
-              await ev.challenges.loadItems()
-            ).map((ch: Challenge) => ch.id),
-            rewardIds: (
-              await ev.rewards.loadItems()
-            ).map((rw: EventReward) => rw.id),
-          })),
-        ),
+        events: await Promise.all(events.map(this.dtoForEvent)),
       },
       user,
     );
@@ -66,46 +53,28 @@ export class AdminGateway {
   @SubscribeMessage('requestChallenges')
   async requestChallenges(
     @CallingUser() user: User,
-    data: RequestChallengesDto,
+    @MessageBody() data: RequestChallengesDto,
   ) {
     const challenges = await this.adminService.getAllChallengeData();
 
     this.adminCallbackService.emitUpdateChallengeData(
       {
         deletedIds: [],
-        challenges: await Promise.all(
-          challenges.map(async (ch: Challenge) => ({
-            id: ch.id,
-            name: ch.name,
-            description: ch.description,
-            imageUrl: ch.imageUrl,
-            latitude: ch.latitude,
-            longitude: ch.longitude,
-            awardingRadius: ch.awardingRadius,
-            closeRadius: ch.closeRadius,
-            containingEventId: ch.linkedEvent.id,
-          })),
-        ),
+        challenges: await Promise.all(challenges.map(this.dtoForChallenge)),
       },
       user,
     );
   }
 
   @SubscribeMessage('requestRewards')
-  async requestRewards(@CallingUser() user: User, data: RequestRewardsDto) {
-    const rewardData = await this.adminService.getRewardsForUser(user);
+  async requestRewards(
+    @CallingUser() user: User,
+    @MessageBody() data: RequestRewardsDto,
+  ) {
+    const rewardData = await this.adminService.getRewards(data.rewardIds);
 
     const updateRewardData: UpdateRewardDataDto = {
-      rewards: await Promise.all(
-        rewardData.map(async (reward: EventReward) => {
-          return {
-            id: reward.id,
-            description: reward.rewardDescription,
-            redeemInfo: reward.rewardRedeemInfo,
-            containingEventId: reward.containingEvent.id,
-          };
-        }),
-      ),
+      rewards: await Promise.all(rewardData.map(this.dtoForReward)),
       deletedIds: [],
     };
     this.adminCallbackService.emitUpdateRewardData(updateRewardData, user);
@@ -113,7 +82,10 @@ export class AdminGateway {
   }
 
   @SubscribeMessage('requestAdmins')
-  async requestAdmins(@CallingUser() user: User, data: RequestAdminsDto) {
+  async requestAdmins(
+    @CallingUser() user: User,
+    @MessageBody() data: RequestAdminsDto,
+  ) {
     const admins = await this.adminService.getAllRequestingAdmins();
     // Only send to the requester
     this.adminCallbackService.emitUpdateAdminData(
@@ -130,107 +102,95 @@ export class AdminGateway {
   }
 
   @SubscribeMessage('updateEvents')
-  async updateEvents(@CallingUser() user: User, data: UpdateEventsDto) {
-    for (const id of data.deletedIds) {
-      await this.adminService.removeEvent(id);
-    }
-    const newEvents = await this.adminService.updateEvents(data.events);
-    const newEventDto: UpdateEventDataDto = {
-      events: newEvents.map(event => ({
-        id: event.id,
-        requiredMembers: event.requiredMembers,
-        skippingEnabled: event.skippingEnabled,
-        isDefault: event.isDefault,
-        name: event.name,
-        description: event.description,
-        rewardType: event.rewardType,
-        indexable: event.indexable,
-        time: event.time.toTimeString(),
-        rewardIds: event.rewards.getIdentifiers(),
-        challengeIds: event.challenges.getIdentifiers(),
-      })),
+  async updateEvents(
+    @CallingUser() user: User,
+    @MessageBody() data: UpdateEventsDto,
+  ) {
+    await Promise.all(
+      data.deletedIds.map(ev => this.adminService.removeEvent(ev)),
+    );
+
+    await this.adminService.updateEvents(data.events);
+
+    this.adminCallbackService.emitUpdateEventData({
+      events: data.events,
       deletedIds: data.deletedIds,
-    };
-    this.adminCallbackService.emitUpdateEventData(newEventDto);
+    });
   }
 
   @SubscribeMessage('updateChallenges')
   async updateChallenges(
     @CallingUser() user: User,
-    data: UpdateChallengesDto,
+    @MessageBody() data: UpdateChallengesDto,
   ) {
-    for (const id in data.deletedIds){
-      await this.adminService.removeChallenge(id);
-    }
-    const newChallenges = await this.adminService.updateChallenges(data.challenges);
-    const newChallengeDto: UpdateChallengesDto = {
-      challenges: newChallenges.map(challenge => ({
-        id: challenge.id,
-        name: challenge.name,
-        containingEventId:challenge.linkedEvent.id,
-        description: challenge.description,
-        imageUrl: challenge.imageUrl,
-        latitude: challenge.latitude,
-        longitude: challenge.longitude,
-        awardingRadius: challenge.awardingRadius,
-        closeRadius: challenge.closeRadius,
-      })),
+    this.adminCallbackService.emitUpdateEventData({
+      deletedIds: [],
+      events: await Promise.all(
+        (
+          await Promise.all(
+            data.deletedIds.map(ch => this.adminService.removeChallenge(ch)),
+          )
+        ).map(this.dtoForEvent),
+      ),
+    });
+
+    const newChallenges = await this.adminService.updateChallenges(
+      data.challenges,
+    );
+
+    this.adminCallbackService.emitUpdateChallengeData({
+      challenges: data.challenges,
       deletedIds: data.deletedIds,
-    };
-    this.adminCallbackService.emitUpdateChallengeData(newChallengeDto);
+    });
+
+    this.adminCallbackService.emitUpdateEventData({
+      deletedIds: [],
+      events: await Promise.all(
+        (
+          await Promise.all(newChallenges.map(ch => ch.linkedEvent.load()))
+        ).map(this.dtoForEvent),
+      ),
+    });
   }
 
   @SubscribeMessage('updateRewards')
-  async updateRewards(@CallingUser() user: User, data: UpdateRewardsDto) {
-    await this.adminService.deleteRewards(data.deletedIds);
-    const [oldEvents, newEvents] = await this.adminService.updateRewards(
-      data.rewards,
-    );
-
-    const oldEventDto: UpdateEventDataDto = {
-      events: oldEvents.map(event => ({
-        id: event.id,
-        requiredMembers: event.requiredMembers,
-        skippingEnabled: event.skippingEnabled,
-        isDefault: event.isDefault,
-        name: event.name,
-        description: event.description,
-        rewardType: event.rewardType,
-        indexable: event.indexable,
-        time: event.time.toTimeString(),
-        rewardIds: event.rewards.getIdentifiers(),
-        challengeIds: event.challenges.getIdentifiers(),
-      })),
+  async updateRewards(
+    @CallingUser() user: User,
+    @MessageBody() data: UpdateRewardsDto,
+  ) {
+    this.adminCallbackService.emitUpdateEventData({
       deletedIds: [],
-    };
+      events: await Promise.all(
+        (
+          await this.adminService.deleteRewards(data.deletedIds)
+        ).map(this.dtoForEvent),
+      ),
+    });
 
-    this.adminCallbackService.emitUpdateEventData(oldEventDto);
+    const rewards = await this.adminService.updateRewards(data.rewards);
+
     const newEventDto: UpdateEventDataDto = {
-      events: newEvents.map(event => ({
-        id: event.id,
-        requiredMembers: event.requiredMembers,
-        skippingEnabled: event.skippingEnabled,
-        isDefault: event.isDefault,
-        name: event.name,
-        description: event.description,
-        rewardType: event.rewardType,
-        indexable: event.indexable,
-        time: event.time.toTimeString(),
-        rewardIds: event.rewards.getIdentifiers(),
-        challengeIds: event.challenges.getIdentifiers(),
-      })),
+      events: await Promise.all(
+        (
+          await Promise.all(rewards.map(rw => rw.containingEvent.load()))
+        ).map(this.dtoForEvent),
+      ),
       deletedIds: [],
     };
-    this.adminCallbackService.emitUpdateEventData(newEventDto);
-    const updatedDto: UpdateRewardDataDto = {
+
+    this.adminCallbackService.emitUpdateRewardData({
       rewards: data.rewards,
       deletedIds: data.deletedIds,
-    };
-    this.adminCallbackService.emitUpdateRewardData(updatedDto);
+    });
+
+    this.adminCallbackService.emitUpdateEventData(newEventDto);
   }
 
   @SubscribeMessage('updateAdmins')
-  async updateAdmins(@CallingUser() user: User, data: UpdateAdminsDto) {
+  async updateAdmins(
+    @CallingUser() user: User,
+    @MessageBody() data: UpdateAdminsDto,
+  ) {
     const adminUpdates: UpdateAdminDataAdminDto[] = [];
     for (const adminData of data.adminUpdates) {
       const admin = await this.adminService.setAdminStatus(
@@ -248,5 +208,46 @@ export class AdminGateway {
     }
     // Send to all that an admin was updated
     this.adminCallbackService.emitUpdateAdminData({ admins: adminUpdates });
+  }
+
+  async dtoForEvent(ev: EventBase): Promise<EventDto> {
+    await ev.challenges.init();
+    await ev.rewards.init();
+    return {
+      id: ev.id,
+      skippingEnabled: ev.skippingEnabled,
+      isDefault: ev.isDefault,
+      name: ev.name,
+      description: ev.description,
+      rewardType: ev.rewardType as 'limited_time_event' | 'perpetual',
+      time: ev.time.toUTCString(),
+      requiredMembers: ev.requiredMembers,
+      indexable: ev.indexable,
+      challengeIds: ev.challenges.getIdentifiers(),
+      rewardIds: ev.rewards.getIdentifiers(),
+    };
+  }
+
+  async dtoForChallenge(ch: Challenge): Promise<ChallengeDto> {
+    return {
+      id: ch.id,
+      name: ch.name,
+      description: ch.description,
+      imageUrl: ch.imageUrl,
+      latitude: ch.latitude,
+      longitude: ch.longitude,
+      awardingRadius: ch.awardingRadius,
+      closeRadius: ch.closeRadius,
+      containingEventId: ch.linkedEvent.id,
+    };
+  }
+
+  async dtoForReward(rw: EventReward): Promise<RewardDto> {
+    return {
+      id: rw.id,
+      description: rw.rewardDescription,
+      redeemInfo: rw.rewardRedeemInfo,
+      containingEventId: rw.containingEvent.id,
+    };
   }
 }

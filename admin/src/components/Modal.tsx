@@ -65,14 +65,16 @@ export function Modal(props: {
   useLayoutEffect(() => {
     if (props.isOpen) {
       setOpen(true);
-      setTimeout(() => {
+      const timeout = setTimeout(() => {
         setOpacity(1);
       }, 0);
+      return () => clearTimeout(timeout);
     } else {
       setOpacity(0);
-      setTimeout(() => {
+      const timeout = setTimeout(() => {
         setOpen(false);
       }, 150);
+      return () => clearTimeout(timeout);
     }
   }, [props.isOpen, setOpen, setOpacity]);
 
