@@ -41,8 +41,10 @@ export class UserService {
       authToken,
       authType,
       hashedRefreshToken: '',
-      superuser: false,
-      adminGranted: false,
+      superuser: email === process.env.SUPERUSER,
+      adminGranted:
+        email === process.env.SUPERUSER || process.env.DEVELOPMENT === 'true',
+      adminRequested: false,
     });
 
     const eventTracker = await this.eventsService.createDefaultEventTracker(
