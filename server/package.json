@@ -36,7 +36,6 @@
     "@nestjs/platform-express": "^8.0.5",
     "@nestjs/platform-socket.io": "^8.0.5",
     "@nestjs/serve-static": "^2.2.2",
-    "@nestjs/typeorm": "github:nestjs/typeorm",
     "@nestjs/websockets": "^8.0.5",
     "@types/geojson": "^7946.0.8",
     "apple-signin-auth": "^1.5.1",
@@ -51,7 +50,6 @@
     "rimraf": "^3.0.2",
     "rxjs": "^7.3.0",
     "socket.io": "^4.1.3",
-    "typeorm": "^0.2.45",
     "uuid": "^8.3.2"
   },
   "devDependencies": {

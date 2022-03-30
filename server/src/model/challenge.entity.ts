@@ -1,6 +1,7 @@
 import {
   Collection,
   Entity,
+  IdentifiedReference,
   Index,
   ManyToOne,
   OneToMany,
@@ -36,22 +37,22 @@ export class Challenge {
   @Property({ length: 2048 })
   imageUrl!: string;
 
-  @Property()
+  @Property({ columnType: 'double precision' })
   latitude!: number;
 
-  @Property()
+  @Property({ columnType: 'double precision' })
   longitude!: number;
 
   /** Event linked to this challenge */
   @ManyToOne()
-  linkedEvent!: EventBase;
+  linkedEvent!: IdentifiedReference<EventBase>;
 
   /** Radius within which the challenge is awarded */
-  @Property()
+  @Property({ columnType: 'double precision' })
   awardingRadius!: number;
 
   /** Radius within which the player is considered close, greater than `awardingRadius` */
-  @Property()
+  @Property({ columnType: 'double precision' })
   closeRadius!: number;
 
   /** Completions linked to this challenge */

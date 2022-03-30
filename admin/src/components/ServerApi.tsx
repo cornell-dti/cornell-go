@@ -43,18 +43,18 @@ export class ServerApi {
 
   onUpdateAdminData(callback: (data: UpdateAdminDataDto) => void) {
     this.socket.removeAllListeners("updateAdminData");
-    this.socket.on("updateAdminData", (data) => callback(JSON.parse(data)));
+    this.socket.on("updateAdminData", (data) => callback(data));
   }
   onUpdateChallengeData(callback: (data: UpdateChallengeDataDto) => void) {
     this.socket.removeAllListeners("updateChallengeData");
-    this.socket.on("updateChallengeData", (data) => callback(JSON.parse(data)));
+    this.socket.on("updateChallengeData", (data) => callback(data));
   }
   onUpdateEventData(callback: (data: UpdateEventDataDto) => void) {
     this.socket.removeAllListeners("updateEventData");
-    this.socket.on("updateEventData", (data) => callback(JSON.parse(data)));
+    this.socket.on("updateEventData", (data) => callback(data));
   }
   onUpdateRewardData(callback: (data: UpdateRewardDataDto) => void) {
     this.socket.removeAllListeners("updateRewardData");
-    this.socket.on("updateRewardData", (data) => callback(JSON.parse(data)));
+    this.socket.on("updateRewardData", (data) => callback(data));
   }
 }

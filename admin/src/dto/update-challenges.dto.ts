@@ -7,6 +7,7 @@ export interface ChallengeDto {
   longitude: number;
   awardingRadius: number;
   closeRadius: number;
+  containingEventId: string;
 }
 
 export interface UpdateChallengesDto {

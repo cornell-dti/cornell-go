@@ -101,16 +101,21 @@ function toForm(challenge: ChallengeDto) {
   ];
 }
 
-function fromForm(id: string, form: EntryForm[]): ChallengeDto {
+function fromForm(
+  form: EntryForm[],
+  eventId: string,
+  id: string
+): ChallengeDto {
   return {
     id,
     name: (form[1] as FreeEntryForm).value,
     description: (form[2] as FreeEntryForm).value,
     imageUrl: (form[3] as FreeEntryForm).value,
     latitude: (form[0] as MapEntryForm).latitude,
-    longitude: (form[0] as MapEntryForm).latitude,
+    longitude: (form[0] as MapEntryForm).longitude,
     awardingRadius: (form[4] as NumberEntryForm).value,
     closeRadius: (form[5] as NumberEntryForm).value,
+    containingEventId: eventId,
   };
 }
 
@@ -130,7 +135,9 @@ export function Challenges() {
         isOpen={createModalOpen}
         entryButtonText="CREATE"
         onEntry={() => {
-          serverData.updateChallenge(fromForm("", form));
+          serverData.updateChallenge(
+            fromForm(form, serverData.selectedEvent, "")
+          );
           setCreateModalOpen(false);
         }}
         onCancel={() => {
@@ -143,7 +150,9 @@ export function Challenges() {
         isOpen={editModalOpen}
         entryButtonText="EDIT"
         onEntry={() => {
-          serverData.updateChallenge(fromForm(currentId, form));
+          serverData.updateChallenge(
+            fromForm(form, serverData.selectedEvent, currentId)
+          );
           setEditModalOpen(false);
         }}
         onCancel={() => {
@@ -163,38 +172,41 @@ export function Challenges() {
       <SearchBar
         onCreate={() => {
           setForm(makeForm());
-          setCreateModalOpen(true);
+          setCreateModalOpen(!!selectedEvent);
         }}
       />
-      {selectedEvent?.challengeIds.map((chalId) => (
-        <ChallengeCard
-          key={chalId}
-          challenge={serverData.challenges.get(chalId)!}
-          onUp={() => {
-            selectedEvent.challengeIds = moveUp(
-              selectedEvent.challengeIds,
-              selectedEvent.challengeIds.findIndex((id) => id === chalId)
-            );
-            serverData.updateEvent(selectedEvent);
-          }}
-          onDown={() => {
-            selectedEvent.challengeIds = moveDown(
-              selectedEvent.challengeIds,
-              selectedEvent.challengeIds.findIndex((id) => id === chalId)
-            );
-            serverData.updateEvent(selectedEvent);
-          }}
-          onEdit={() => {
-            setCurrentId(chalId);
-            setForm(toForm(serverData.challenges.get(chalId)!));
-            setEditModalOpen(true);
-          }}
-          onDelete={() => {
-            setCurrentId(chalId);
-            setDeleteModalOpen(true);
-          }}
-        />
-      ))}
+      {selectedEvent?.challengeIds.map(
+        (chalId) =>
+          serverData.challenges.get(chalId) && (
+            <ChallengeCard
+              key={chalId}
+              challenge={serverData.challenges.get(chalId)!}
+              onUp={() => {
+                selectedEvent.challengeIds = moveUp(
+                  selectedEvent.challengeIds,
+                  selectedEvent.challengeIds.findIndex((id) => id === chalId)
+                );
+                serverData.updateEvent(selectedEvent);
+              }}
+              onDown={() => {
+                selectedEvent.challengeIds = moveDown(
+                  selectedEvent.challengeIds,
+                  selectedEvent.challengeIds.findIndex((id) => id === chalId)
+                );
+                serverData.updateEvent(selectedEvent);
+              }}
+              onEdit={() => {
+                setCurrentId(chalId);
+                setForm(toForm(serverData.challenges.get(chalId)!));
+                setEditModalOpen(true);
+              }}
+              onDelete={() => {
+                setCurrentId(chalId);
+                setDeleteModalOpen(true);
+              }}
+            />
+          )
+      )}
     </>
   );
 }

@@ -9,14 +9,17 @@ import {
   AuthenticationGuard,
   ServerConnectionProvider,
 } from "./components/ServerConnection";
+import { ServerDataProvider } from "./components/ServerData";
 
 ReactDOM.render(
   <React.StrictMode>
     <ServerConnectionProvider>
       <AuthenticationGuard>
-        <MemoryRouter>
-          <App />
-        </MemoryRouter>
+        <ServerDataProvider>
+          <MemoryRouter>
+            <App />
+          </MemoryRouter>
+        </ServerDataProvider>
       </AuthenticationGuard>
     </ServerConnectionProvider>
   </React.StrictMode>,

@@ -54,11 +54,12 @@ function makeForm() {
   ] as EntryForm[];
 }
 
-function fromForm(form: EntryForm[], id: string) {
+function fromForm(form: EntryForm[], eventId: string, id: string) {
   return {
     id,
     description: (form[0] as FreeEntryForm).value,
     redeemInfo: (form[1] as FreeEntryForm).value,
+    containingEventId: eventId,
   };
 }
 
@@ -86,7 +87,7 @@ export function Rewards() {
         isOpen={createModalOpen}
         entryButtonText="CREATE"
         onEntry={() => {
-          serverData.updateReward(fromForm(form, ""));
+          serverData.updateReward(fromForm(form, serverData.selectedEvent, ""));
           setCreateModalOpen(false);
         }}
         onCancel={() => {
@@ -99,7 +100,9 @@ export function Rewards() {
         isOpen={editModalOpen}
         entryButtonText="EDIT"
         onEntry={() => {
-          serverData.updateReward(fromForm(form, currentId));
+          serverData.updateReward(
+            fromForm(form, serverData.selectedEvent, currentId)
+          );
           setEditModalOpen(false);
         }}
         onCancel={() => {
@@ -119,42 +122,45 @@ export function Rewards() {
       <SearchBar
         onCreate={() => {
           setForm(makeForm());
-          setCreateModalOpen(true);
+          setCreateModalOpen(!!selectedEvent);
         }}
       />
-      {selectedEvent?.challengeIds.map((rwId) => (
-        <RewardCard
-          key={rwId}
-          reward={serverData.rewards.get(rwId)!}
-          onUp={() => {
-            selectedEvent.rewardIds = moveUp(
-              selectedEvent.rewardIds,
-              selectedEvent.rewardIds.findIndex((id) => id === rwId)
-            );
-            serverData.updateEvent(selectedEvent);
-          }}
-          onDown={() => {
-            selectedEvent.rewardIds = moveDown(
-              selectedEvent.rewardIds,
-              selectedEvent.rewardIds.findIndex((id) => id === rwId)
-            );
-            serverData.updateEvent(selectedEvent);
-          }}
-          onEdit={() => {
-            setCurrentId(rwId);
-            setForm(toForm(serverData.rewards.get(rwId)!));
-            setEditModalOpen(true);
-          }}
-          onDelete={() => {
-            setCurrentId(rwId);
-            setDeleteModalOpen(true);
-          }}
-          onCopy={() => {
-            setForm(toForm(serverData.rewards.get(rwId)!));
-            setCreateModalOpen(true);
-          }}
-        />
-      ))}
+      {selectedEvent?.rewardIds.map(
+        (rwId) =>
+          serverData.rewards.get(rwId) && (
+            <RewardCard
+              key={rwId}
+              reward={serverData.rewards.get(rwId)!}
+              onUp={() => {
+                selectedEvent.rewardIds = moveUp(
+                  selectedEvent.rewardIds,
+                  selectedEvent.rewardIds.findIndex((id) => id === rwId)
+                );
+                serverData.updateEvent(selectedEvent);
+              }}
+              onDown={() => {
+                selectedEvent.rewardIds = moveDown(
+                  selectedEvent.rewardIds,
+                  selectedEvent.rewardIds.findIndex((id) => id === rwId)
+                );
+                serverData.updateEvent(selectedEvent);
+              }}
+              onEdit={() => {
+                setCurrentId(rwId);
+                setForm(toForm(serverData.rewards.get(rwId)!));
+                setEditModalOpen(true);
+              }}
+              onDelete={() => {
+                setCurrentId(rwId);
+                setDeleteModalOpen(true);
+              }}
+              onCopy={() => {
+                setForm(toForm(serverData.rewards.get(rwId)!));
+                setCreateModalOpen(true);
+              }}
+            />
+          )
+      )}
     </>
   );
 }

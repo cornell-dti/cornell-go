@@ -39,7 +39,7 @@ export function ServerDataProvider(props: { children: ReactNode }) {
     [connection]
   );
 
-  const [serverData, setServerData] = useState({ ...defaultData });
+  const [serverData, setServerData] = useState(() => ({ ...defaultData }));
 
   const methods = useMemo(
     () => ({
@@ -78,33 +78,36 @@ export function ServerDataProvider(props: { children: ReactNode }) {
   );
 
   useEffect(() => {
+    sock.requestAdmins({});
+    sock.requestEvents({});
+  }, [sock]);
+
+  useEffect(() => {
     sock.onUpdateAdminData((data) => {
       data.admins.forEach((adminUpdate) => {
         if (adminUpdate.requesting)
           serverData.admins.set(adminUpdate.id, adminUpdate);
         else serverData.admins.delete(adminUpdate.id);
       });
-      setServerData(serverData);
+      setServerData({ ...serverData });
     });
     sock.onUpdateEventData((data) => {
       data.deletedIds.forEach(serverData.events.delete);
       data.events.forEach((ev) => serverData.events.set(ev.id, ev));
-      setServerData(serverData);
+      setServerData({ ...serverData });
     });
     sock.onUpdateChallengeData((data) => {
       data.deletedIds.forEach(serverData.challenges.delete);
       data.challenges.forEach((chal) =>
         serverData.challenges.set(chal.id, chal)
       );
-      setServerData(serverData);
+      setServerData({ ...serverData });
     });
     sock.onUpdateRewardData((data) => {
       data.deletedIds.forEach((id) => serverData.rewards.delete(id));
       data.rewards.forEach((rw) => serverData.rewards.set(rw.id, rw));
-      setServerData(serverData);
+      setServerData({ ...serverData });
     });
-    sock.requestAdmins({});
-    sock.requestEvents({});
   }, [sock, serverData, setServerData]);
 
   if (!connection.connection) return <>{props.children}</>;
