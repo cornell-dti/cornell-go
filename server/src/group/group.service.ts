@@ -20,7 +20,7 @@ export class GroupService {
     private groupsRepository: EntityRepository<Group>,
     @InjectRepository(GroupMember)
     private groupMembersRepository: EntityRepository<GroupMember>,
-  ) {}
+  ) { }
 
   /** Creates a group from an event */
   async createFromEvent(event: EventBase, host: User) {
@@ -88,7 +88,7 @@ export class GroupService {
       group: group,
     });
 
-    group.members.set([groupMember]);
+    group.members.add(groupMember);
     user.groupMember?.set(groupMember);
     groupMember.user.set(user);
 
