@@ -4,6 +4,8 @@ import 'package:game/leaderboard/leaderboard_widget.dart';
 import 'package:game/login/login_page.dart';
 import 'package:game/model/user_model.dart';
 import 'package:game/visited_places/visited_places_widget.dart';
+import 'package:game/challenges/challeneges_widget.dart';
+import 'package:game/events/events_widget.dart';
 import 'package:game/username/username_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:game/api/game_api.dart';
@@ -88,6 +90,32 @@ class NavBar extends StatelessWidget {
                           context,
                           MaterialPageRoute(
                               builder: (context) => VisitedPlacesWidget()))
+                    }),
+            ListTile(
+                leading: Icon(
+                  Icons.star,
+                  color: Color(0xFFB31B1B),
+                ),
+                title: Text('Challenges', style: listTextStyle),
+                onTap: () => {
+                      Navigator.pop(context),
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ChallegesWidget()))
+                    }),
+            ListTile(
+                leading: Icon(
+                  Icons.event,
+                  color: Color(0xFFB31B1B),
+                ),
+                title: Text('Events', style: listTextStyle),
+                onTap: () => {
+                      Navigator.pop(context),
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => EventsWidget()))
                     }),
             ListTile(
               leading: Icon(
