@@ -95,10 +95,7 @@ export class ChallengeService {
         linkedEvent: chal.linkedEvent,
       });
     } catch {
-      return await this.challengeRepository.findOneOrFail({
-        eventIndex: 9999,
-        linkedEvent: chal.linkedEvent,
-      });
+      return chal;
     }
   }
 
@@ -110,8 +107,6 @@ export class ChallengeService {
     const eventTracker = await this.eventService.getCurrentEventTrackerForUser(
       user,
     );
-
-    const curChallenge = await eventTracker.currentChallenge.load();
 
     // Ensure that the correct challenge is marked complete
     if (challengeId !== eventTracker.currentChallenge.id) return eventTracker;
@@ -143,6 +138,8 @@ export class ChallengeService {
     eventTracker: EventTracker,
   ) {
     //If User has not completed the event/done all the challenges then:
+    console.log('completed :' + eventTracker.completed.count());
+    console.log('needed :' + eventBase.challenges.count());
     if (eventTracker.completed.count() !== eventBase.challenges.count()) {
       return null;
     }
