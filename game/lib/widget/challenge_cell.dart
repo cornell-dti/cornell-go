@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 Widget challengeCell(
-    context, place, date, points, imgpath, current, notVisited, noSkipping) {
+    context, place, date, imgpath, current, notVisited, noSkipping) {
   var placeStyle =
       TextStyle(fontWeight: FontWeight.bold, fontSize: 25, color: Colors.white);
   var pointsStyle = TextStyle(
@@ -41,7 +41,6 @@ Widget challengeCell(
                     child: notVisited
                         ? Text("Not Visited Yet...", style: placeStyle)
                         : Text(place, style: placeStyle)),
-                Container(child: Text("${points} Points", style: pointsStyle))
               ])),
         )
       ]));

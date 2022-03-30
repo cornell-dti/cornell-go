@@ -1,9 +1,9 @@
-import 'dart:html';
-
 import 'package:flutter/material.dart';
 import 'package:game/model/challenge_model.dart';
 import 'package:game/model/event_model.dart';
+import 'package:game/model/tracker_model.dart';
 import 'package:game/model/user_model.dart';
+import 'package:game/api/game_client_dto.dart';
 
 import 'package:game/widget/back_btn.dart';
 import 'package:game/widget/challenge_cell.dart';
@@ -37,23 +37,39 @@ class _ChallengesWidgetState extends State<ChallengesWidget> {
             padding: const EdgeInsets.only(left: 8.0, right: 8.0),
             child: Column(
               children: [
-                Expanded(child:
-                    Consumer3<UserModel, EventModel, ChallengeModel>(builder:
-                        (context, myUserModel, myEventModel, myChallengeModel,
-                            child) {
+                Expanded(child: Consumer4<UserModel, EventModel, ChallengeModel,
+                        TrackerModel>(
+                    builder: (context, myUserModel, myEventModel,
+                        myChallengeModel, myTrackerModel, child) {
                   if (myUserModel.userData == null) {
                     return ListView();
                   } else {
-                    List<String> challengeIds = [];
+                    List<Widget> challengeCells = [];
                     final events = myUserModel.userData!.trackedEventIds;
-                    for (String eventIds in events) {
+                    for (String eventId in events) {
                       final challenges =
-                          myEventModel.getEventById(eventIds)!.challengeIds;
-                      if (challenges.isNotEmpty) {
-                        challengeIds.addAll(challenges);
+                          myEventModel.getEventById(eventId)!.challengeIds;
+                      for (String challengeId in challenges) {
+                        final UpdateChallengeDataChallengeDto challenge =
+                            myChallengeModel.getChallengeById(challengeId)!;
+                        final UpdateEventDataEventDto event =
+                            myEventModel.getEventById(eventId)!;
+                        final UpdateEventTrackerDataEventTrackerDto tracker =
+                            myTrackerModel.trackerByEventId(eventId)!;
+                        challengeCells.add(challengeCell(
+                            context,
+                            challenge.name,
+                            challenge.completionDate,
+                            challenge.imageUrl,
+                            tracker.curChallengeId == challengeId,
+                            !tracker.prevChallengeIds.contains(challengeId),
+                            event.skippingEnabled));
                       }
                     }
-                    return ListView();
+                    return ListView(
+                        shrinkWrap: true,
+                        scrollDirection: Axis.vertical,
+                        children: challengeCells);
                   }
                 }))
                 // Expanded(
