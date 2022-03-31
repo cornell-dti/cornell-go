@@ -48,22 +48,26 @@ class _ChallengesWidgetState extends State<ChallengesWidget> {
                     final events = myUserModel.userData!.trackedEventIds;
                     for (String eventId in events) {
                       final challenges =
-                          myEventModel.getEventById(eventId)!.challengeIds;
-                      for (String challengeId in challenges) {
-                        final UpdateChallengeDataChallengeDto challenge =
-                            myChallengeModel.getChallengeById(challengeId)!;
-                        final UpdateEventDataEventDto event =
-                            myEventModel.getEventById(eventId)!;
-                        final UpdateEventTrackerDataEventTrackerDto tracker =
-                            myTrackerModel.trackerByEventId(eventId)!;
-                        challengeCells.add(challengeCell(
-                            context,
-                            challenge.name,
-                            challenge.completionDate,
-                            challenge.imageUrl,
-                            tracker.curChallengeId == challengeId,
-                            !tracker.prevChallengeIds.contains(challengeId),
-                            event.skippingEnabled));
+                          myEventModel.getEventById(eventId)?.challengeIds;
+                      if (challenges == null) {
+                        return ListView();
+                      } else {
+                        for (String challengeId in challenges) {
+                          final UpdateChallengeDataChallengeDto challenge =
+                              myChallengeModel.getChallengeById(challengeId)!;
+                          final UpdateEventDataEventDto event =
+                              myEventModel.getEventById(eventId)!;
+                          final UpdateEventTrackerDataEventTrackerDto tracker =
+                              myTrackerModel.trackerByEventId(eventId)!;
+                          challengeCells.add(challengeCell(
+                              context,
+                              challenge.name,
+                              challenge.completionDate,
+                              challenge.imageUrl,
+                              tracker.curChallengeId == challengeId,
+                              !tracker.prevChallengeIds.contains(challengeId),
+                              event.skippingEnabled));
+                        }
                       }
                     }
                     return ListView(
