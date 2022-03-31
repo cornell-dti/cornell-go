@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:game/api/game_api.dart';
 
 Future<void> showAlert(String message, context) async {
   return showDialog<void>(
@@ -19,6 +20,35 @@ Future<void> showAlert(String message, context) async {
           TextButton(
             child: const Text('Okay'),
             onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
+Future<void> showConfirmationAlert(
+    String message, context, ApiClient client) async {
+  return showDialog<void>(
+    context: context,
+    barrierDismissible: false, // user must tap button!
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Alert'),
+        content: SingleChildScrollView(
+          child: ListBody(
+            children: <Widget>[
+              Text(message),
+            ],
+          ),
+        ),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('Okay'),
+            onPressed: () {
+              client.serverApi?.leaveGroup();
               Navigator.of(context).pop();
             },
           ),

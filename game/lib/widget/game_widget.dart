@@ -25,7 +25,13 @@ double calcCompletionProgress(double distance, double completionRadius) {
 }
 
 double calcCloseProgress(double distance, double closeRadius) {
-  return pow(1.5, distance - closeRadius).toDouble();
+  distance = distance / 1000;
+  closeRadius = closeRadius / 1000;
+  if (distance > 50) {
+    distance = 50;
+  }
+  print(distance - closeRadius);
+  return pow(0.5, distance - closeRadius).toDouble();
 }
 
 class _GameWidgetState extends State<GameWidget> {
