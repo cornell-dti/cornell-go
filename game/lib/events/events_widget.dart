@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:game/model/challenge_model.dart';
 import 'package:game/model/event_model.dart';
-import 'package:game/model/user_model.dart';
 import 'package:game/api/game_client_dto.dart';
+import 'package:game/model/group_model.dart';
+import 'package:game/model/tracker_model.dart';
 import 'package:game/widget/back_btn.dart';
 import 'package:game/widget/events_cell.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class EventsWidget extends StatefulWidget {
@@ -34,8 +37,10 @@ class _EventsWidgetState extends State<EventsWidget> {
             padding: const EdgeInsets.only(left: 8.0, right: 8.0),
             child: Column(
               children: [
-                Expanded(child: Consumer<EventModel>(
-                    builder: (context, myEventModel, child) {
+                Expanded(child: Consumer4<EventModel, GroupModel, TrackerModel,
+                        ChallengeModel>(
+                    builder: (context, myEventModel, groupModel, trackerModel,
+                        challengeModel, child) {
                   List<Widget> eventCells = [];
                   if (myEventModel.searchResults == null) {
                     myEventModel.searchEvents(
@@ -50,20 +55,37 @@ class _EventsWidgetState extends State<EventsWidget> {
                         false);
                   }
                   for (UpdateEventDataEventDto event
-                      in myEventModel.searchResults!) {
+                      in myEventModel.searchResults ?? []) {
+                    final reward = event.rewards.length == 0
+                        ? null
+                        : event.rewards[0].description;
+                    final tracker = trackerModel.trackerByEventId(event.id);
+                    final format = DateFormat('yyyy-MM-dd');
+                    final date = event.time
+                        ?.difference(DateTime.now())
+                        .toString()
+                        .split(".")[0];
+                    final chal =
+                        challengeModel.getChallengeById(event.challengeIds[0]);
                     eventCells.add(eventsCell(
                         context,
                         event.name,
-                        "",
+                        event.time == null ? "" : format.format(event.time!),
                         event.description,
-                        false,
-                        false,
-                        event.time?.day,
-                        event.rewardType.index,
+                        tracker?.prevChallengeIds.length ==
+                            event.challengeIds.length,
+                        event.id == groupModel.curEventId,
+                        date ?? "",
+                        reward ?? "",
                         event.rewards.length,
                         event.requiredMembers,
-                        ""));
+                        chal?.imageUrl ??
+                            "https://a.rgbimg.com/users/b/ba/badk/600/qfOGvbS.jpg"));
                   }
+                  return ListView(
+                      shrinkWrap: true,
+                      scrollDirection: Axis.vertical,
+                      children: eventCells);
                 }))
                 // Expanded(
                 //     child: ListView(

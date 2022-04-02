@@ -15,4 +15,15 @@ export class RewardService {
   async getRewardsForUser(user: User, ids: string[]): Promise<EventReward[]> {
     return await this.rewardRepository.find({ id: ids, claimingUser: user });
   }
+
+  /** Get rewards that are in ids and not owned by the user */
+  async getRewardsNotForUser(
+    user: User,
+    ids: string[],
+  ): Promise<EventReward[]> {
+    return await this.rewardRepository.find({
+      id: ids,
+      $not: { claimingUser: user },
+    });
+  }
 }

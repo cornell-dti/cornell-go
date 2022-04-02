@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 Widget eventsCell(context, place, date, description, completed, current, time,
@@ -33,7 +34,7 @@ Widget eventsCell(context, place, date, description, completed, current, time,
                       ? Border.all(color: Colors.greenAccent, width: 2.0)
                       : null,
                   image: DecorationImage(
-                      image: AssetImage(imgpath),
+                      image: CachedNetworkImageProvider(imgpath),
                       fit: BoxFit.cover,
                       opacity: .5)),
               height: 150,
@@ -82,7 +83,7 @@ Widget eventsCell(context, place, date, description, completed, current, time,
                   Row(children: [
                     Container(
                         child: Text(
-                      time == -1 ? "Perpetual Event" : "${time} Days Left",
+                      time == -1 ? "Perpetual Event" : "${time} Hours Left",
                       style: timeStyle,
                     )),
                     Expanded(

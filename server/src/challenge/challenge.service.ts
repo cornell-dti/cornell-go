@@ -47,12 +47,7 @@ export class ChallengeService {
     user: User,
     ids: string[],
   ): Promise<Challenge[]> {
-    return await this.challengeRepository
-      .createQueryBuilder()
-      .select('*')
-      .join('completions', 'prevChallenge')
-      .where({ id: { $in: ids } })
-      .andWhere({ 'prevChallenge.ownerId': user.id });
+    return await this.challengeRepository.find({ id: ids });
   }
 
   /** Get a challenge by its id */

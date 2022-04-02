@@ -45,17 +45,22 @@ export class ChallengeGateway {
       );
 
     this.clientService.emitUpdateChallengeData(user, {
-      challenges: challengeEntities.map(ch => ({
-        id: ch.id,
-        name: ch.name,
-        description: ch.description,
-        imageUrl: ch.imageUrl,
-        lat: ch.latitude,
-        long: ch.longitude,
-        awardingRadius: ch.awardingRadius,
-        closeRadius: ch.closeRadius,
-        completionDate: ch.completions[0]?.foundTimestamp?.toUTCString() ?? '',
-      })),
+      challenges: await Promise.all(
+        challengeEntities.map(async ch => ({
+          id: ch.id,
+          name: ch.name,
+          description: ch.description,
+          imageUrl: ch.imageUrl,
+          lat: ch.latitude,
+          long: ch.longitude,
+          awardingRadius: ch.awardingRadius,
+          closeRadius: ch.closeRadius,
+          completionDate:
+            (
+              await ch.completions.loadItems()
+            )[0]?.foundTimestamp?.toUTCString() ?? '',
+        })),
+      ),
     });
 
     return false;

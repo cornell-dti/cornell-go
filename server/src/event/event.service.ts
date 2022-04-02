@@ -56,10 +56,9 @@ export class EventService {
       {
         indexable: true,
         rewardType: rewardTypes && { $in: rewardTypes },
-        skippingEnabled: skippable,
+        ...(skippable && { skippingEnabled: true }),
       },
       {
-        orderBy: sortBy,
         offset,
         limit: count,
       },
@@ -168,7 +167,8 @@ export class EventService {
       eventIndex: 0,
       name: 'New challenge',
       description: 'New challenge',
-      imageUrl: '',
+      imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/5/5f/CentralAvenueCornell2.jpg',
       latitude: 5,
       longitude: 5,
       awardingRadius: 0,
