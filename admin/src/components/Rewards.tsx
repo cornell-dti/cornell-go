@@ -6,6 +6,7 @@ import { EntryForm, EntryModal, FreeEntryForm } from "./EntryModal";
 import { HButton } from "./HButton";
 import {
   ButtonSizer,
+  ListCardBody,
   ListCardBox,
   ListCardButtons,
   ListCardDescription,
@@ -33,6 +34,9 @@ function RewardCard(props: {
         </ButtonSizer>
       </ListCardTitle>
       <ListCardDescription>{props.reward.redeemInfo}</ListCardDescription>
+      <ListCardBody>
+        Id: <b>{props.reward.id}</b><br />
+      </ListCardBody>
       <ListCardButtons>
         <HButton onClick={props.onUp}>UP</HButton>
         <HButton onClick={props.onDown}>DOWN</HButton>

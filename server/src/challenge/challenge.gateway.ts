@@ -169,6 +169,7 @@ export class ChallengeGateway {
     if (newReward !== null) {
       const participatingEvents = await user.participatingEvents.loadItems();
       const userRewards = await user.rewards.loadItems();
+
       const updatedUser: UpdateUserDataDto = {
         id: user.id,
         username: user.username,
@@ -180,6 +181,8 @@ export class ChallengeGateway {
         authType: user.authType as UpdateUserDataAuthTypeDto,
       };
       this.clientService.emitUpdateUserData(user, updatedUser);
+      user.rewards.add(newReward);
+      await this.userService.saveUser(user);
 
       const rewards = userRewards.concat(newReward).map(reward => ({
         eventId: reward.containingEvent.id,
