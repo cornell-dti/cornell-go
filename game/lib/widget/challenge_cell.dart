@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 Widget challengeCell(
@@ -28,11 +29,13 @@ Widget challengeCell(
                   border: current
                       ? Border.all(color: Colors.greenAccent, width: 2.0)
                       : null,
-                  color: noSkipping ? Colors.black : null,
+                  color: noSkipping && !current && notVisited
+                      ? Colors.black
+                      : null,
                   image: noSkipping
                       ? null
                       : DecorationImage(
-                          image: AssetImage(imgpath),
+                          image: CachedNetworkImageProvider(imgpath),
                           fit: BoxFit.cover,
                           opacity: .5)),
               height: 80,

@@ -53,43 +53,17 @@ class NavBar extends StatelessWidget {
                       userModel.userData!.username))),
             ),
             ListTile(
-              leading: Icon(
-                Icons.text_fields,
-                color: Color(0xFFB31B1B),
-              ),
-              title: Text('Change username', style: listTextStyle),
-              onTap: () => {
-                Navigator.pop(context),
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => UserNameWidget()))
-              },
-            ),
-            ListTile(
-              leading: Icon(
-                Icons.group_rounded,
-                color: Color(0xFFB31B1B),
-              ),
-              title: Text('Leaderboard', style: listTextStyle),
-              onTap: () => {
-                Navigator.pop(context),
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => LeaderboardWidget()))
-              },
-            ),
-            ListTile(
                 leading: Icon(
-                  Icons.location_history_rounded,
+                  Icons.event,
                   color: Color(0xFFB31B1B),
                 ),
-                title: Text('Visited places', style: listTextStyle),
+                title: Text('Events', style: listTextStyle),
                 onTap: () => {
                       Navigator.pop(context),
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => VisitedPlacesWidget()))
+                              builder: (context) => EventsWidget()))
                     }),
             ListTile(
                 leading: Icon(
@@ -105,18 +79,19 @@ class NavBar extends StatelessWidget {
                               builder: (context) => ChallengesWidget()))
                     }),
             ListTile(
-                leading: Icon(
-                  Icons.event,
-                  color: Color(0xFFB31B1B),
-                ),
-                title: Text('Events', style: listTextStyle),
-                onTap: () => {
-                      Navigator.pop(context),
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => EventsWidget()))
-                    }),
+              leading: Icon(
+                Icons.group_rounded,
+                color: Color(0xFFB31B1B),
+              ),
+              title: Text('Leaderboard', style: listTextStyle),
+              onTap: () => {
+                Navigator.pop(context),
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => LeaderboardWidget()))
+              },
+            ),
             ListTile(
               leading: Icon(
                 Icons.chat_bubble_rounded,
@@ -127,6 +102,18 @@ class NavBar extends StatelessWidget {
                 Navigator.pop(context),
                 Navigator.push(context,
                     MaterialPageRoute(builder: (context) => FeedbackWidget()))
+              },
+            ),
+            ListTile(
+              leading: Icon(
+                Icons.text_fields,
+                color: Color(0xFFB31B1B),
+              ),
+              title: Text('Change Username', style: listTextStyle),
+              onTap: () => {
+                Navigator.pop(context),
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => UserNameWidget()))
               },
             ),
             ListTile(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:game/api/game_api.dart';
 import 'package:game/model/challenge_model.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/api/game_client_dto.dart';
@@ -14,6 +15,37 @@ class EventsWidget extends StatefulWidget {
 
   @override
   _EventsWidgetState createState() => _EventsWidgetState();
+}
+
+Future<void> _showConfirmation(
+    BuildContext context, String eventId, String eventName) async {
+  await showDialog<void>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Switch to Event'),
+          content: Text('Are you sure you want to switch to $eventName?'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('CANCEL'),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+            Consumer<ApiClient>(
+              builder: (context, apiClient, child) {
+                return TextButton(
+                  child: Text('YES'),
+                  onPressed: () {
+                    apiClient.serverApi?.setCurrentEvent(eventId);
+                    Navigator.pop(context);
+                  },
+                );
+              },
+            )
+          ],
+        );
+      });
 }
 
 class _EventsWidgetState extends State<EventsWidget> {
@@ -61,26 +93,33 @@ class _EventsWidgetState extends State<EventsWidget> {
                         : event.rewards[0].description;
                     final tracker = trackerModel.trackerByEventId(event.id);
                     final format = DateFormat('yyyy-MM-dd');
-                    final date = event.time
-                        ?.difference(DateTime.now())
-                        .toString()
-                        .split(".")[0];
                     final chal =
                         challengeModel.getChallengeById(event.challengeIds[0]);
-                    eventCells.add(eventsCell(
-                        context,
-                        event.name,
-                        event.time == null ? "" : format.format(event.time!),
-                        event.description,
-                        tracker?.prevChallengeIds.length ==
-                            event.challengeIds.length,
-                        event.id == groupModel.curEventId,
-                        date ?? "",
-                        reward ?? "",
-                        event.rewards.length,
-                        event.requiredMembers,
-                        chal?.imageUrl ??
-                            "https://a.rgbimg.com/users/b/ba/badk/600/qfOGvbS.jpg"));
+                    final complete = tracker?.prevChallengeIds.length ==
+                        event.challengeIds.length;
+                    eventCells.add(GestureDetector(
+                      onTap: () {
+                        _showConfirmation(context, event.id, event.name);
+                      },
+                      child: eventsCell(
+                          context,
+                          event.name,
+                          event.time == null || !complete
+                              ? ""
+                              : format.format(event.time!),
+                          event.description,
+                          complete,
+                          event.id == groupModel.curEventId,
+                          (event.rewardType ==
+                                  UpdateEventDataEventRewardTypeDto.PERPETUAL
+                              ? null
+                              : event.time),
+                          reward ?? "",
+                          event.rewards.length,
+                          event.requiredMembers,
+                          chal?.imageUrl ??
+                              "https://a.rgbimg.com/users/b/ba/badk/600/qfOGvbS.jpg"),
+                    ));
                   }
                   return ListView(
                       shrinkWrap: true,

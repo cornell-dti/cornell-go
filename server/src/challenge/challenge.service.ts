@@ -47,7 +47,14 @@ export class ChallengeService {
     user: User,
     ids: string[],
   ): Promise<Challenge[]> {
-    return await this.challengeRepository.find({ id: ids });
+    return await this.challengeRepository
+      .createQueryBuilder('chal')
+      .leftJoinAndSelect('chal.completions', 'completion')
+      .leftJoinAndSelect(
+        'completion.completionPlayers',
+        'player',
+        `player.id = ${user.id}`,
+      );
   }
 
   /** Get a challenge by its id */

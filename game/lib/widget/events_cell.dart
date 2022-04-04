@@ -1,8 +1,31 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
-Widget eventsCell(context, place, date, description, completed, current, time,
-    reward, rewardNum, people, imgpath) {
+String timeToTimeString(DateTime time) {
+  final diff = time.difference(DateTime.now());
+  if (diff.inDays > 0) {
+    return diff.inDays.toString() + " Days";
+  } else if (diff.inHours > 0) {
+    return diff.inHours.toString() + " Hours";
+  } else if (diff.inMinutes > 0) {
+    return diff.inMinutes.toString() + " Minutes";
+  } else {
+    return diff.inSeconds.toString() + " Seconds";
+  }
+}
+
+Widget eventsCell(
+    context,
+    String place,
+    String date,
+    String description,
+    bool completed,
+    bool current,
+    DateTime? time,
+    String reward,
+    int rewardNum,
+    int people,
+    String imgpath) {
   var placeStyle =
       TextStyle(fontWeight: FontWeight.bold, fontSize: 25, color: Colors.white);
   var timeStyle = TextStyle(
@@ -83,7 +106,7 @@ Widget eventsCell(context, place, date, description, completed, current, time,
                   Row(children: [
                     Container(
                         child: Text(
-                      time == -1 ? "Perpetual Event" : "${time} Hours Left",
+                      time == null ? "" : "${timeToTimeString(time)} Left",
                       style: timeStyle,
                     )),
                     Expanded(

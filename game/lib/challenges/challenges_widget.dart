@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:game/api/game_api.dart';
 import 'package:game/model/challenge_model.dart';
 import 'package:game/model/event_model.dart';
+import 'package:game/model/group_model.dart';
 import 'package:game/model/tracker_model.dart';
 import 'package:game/model/user_model.dart';
 import 'package:game/api/game_client_dto.dart';
@@ -37,37 +39,41 @@ class _ChallengesWidgetState extends State<ChallengesWidget> {
             padding: const EdgeInsets.only(left: 8.0, right: 8.0),
             child: Column(
               children: [
-                Expanded(child: Consumer4<UserModel, EventModel, ChallengeModel,
-                        TrackerModel>(
-                    builder: (context, myUserModel, myEventModel,
-                        myChallengeModel, myTrackerModel, child) {
-                  if (myUserModel.userData == null) {
+                Expanded(child: Consumer5<EventModel, ChallengeModel,
+                        TrackerModel, GroupModel, ApiClient>(
+                    builder: (context, myEventModel, myChallengeModel,
+                        myTrackerModel, groupModel, apiClient, child) {
+                  if (groupModel.curEventId == null) {
                     return ListView();
                   } else {
                     List<Widget> challengeCells = [];
-                    final events = myUserModel.userData!.trackedEventIds;
-                    for (String eventId in events) {
-                      final challenges =
-                          myEventModel.getEventById(eventId)?.challengeIds;
-                      if (challenges == null) {
-                        return ListView();
-                      } else {
-                        for (String challengeId in challenges) {
-                          final UpdateChallengeDataChallengeDto challenge =
-                              myChallengeModel.getChallengeById(challengeId)!;
-                          final UpdateEventDataEventDto event =
-                              myEventModel.getEventById(eventId)!;
-                          final UpdateEventTrackerDataEventTrackerDto tracker =
-                              myTrackerModel.trackerByEventId(eventId)!;
-                          challengeCells.add(challengeCell(
+                    final eventId = groupModel.curEventId!;
+                    final challenges =
+                        myEventModel.getEventById(eventId)?.challengeIds;
+                    if (challenges == null) {
+                      return ListView();
+                    } else {
+                      for (String challengeId in challenges) {
+                        final UpdateChallengeDataChallengeDto challenge =
+                            myChallengeModel.getChallengeById(challengeId)!;
+                        final UpdateEventDataEventDto event =
+                            myEventModel.getEventById(eventId)!;
+                        final UpdateEventTrackerDataEventTrackerDto tracker =
+                            myTrackerModel.trackerByEventId(eventId)!;
+                        challengeCells.add(GestureDetector(
+                          onTap: () {
+                            apiClient.serverApi
+                                ?.setCurrentChallenge(challengeId);
+                          },
+                          child: challengeCell(
                               context,
                               challenge.name,
                               challenge.completionDate,
                               challenge.imageUrl,
                               tracker.curChallengeId == challengeId,
                               !tracker.prevChallengeIds.contains(challengeId),
-                              event.skippingEnabled));
-                        }
+                              !event.skippingEnabled),
+                        ));
                       }
                     }
                     return ListView(

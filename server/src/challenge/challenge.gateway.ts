@@ -38,29 +38,28 @@ export class ChallengeGateway {
     @CallingUser() user: User,
     @MessageBody() data: RequestChallengeDataDto,
   ) {
-    const challengeEntities =
+    const completeChallenges =
       await this.challengeService.getChallengesByIdsWithPrevChallenge(
         user,
         data.challengeIds,
       );
 
     this.clientService.emitUpdateChallengeData(user, {
-      challenges: await Promise.all(
-        challengeEntities.map(async ch => ({
-          id: ch.id,
-          name: ch.name,
-          description: ch.description,
-          imageUrl: ch.imageUrl,
-          lat: ch.latitude,
-          long: ch.longitude,
-          awardingRadius: ch.awardingRadius,
-          closeRadius: ch.closeRadius,
-          completionDate:
-            (
-              await ch.completions.loadItems()
-            )[0]?.foundTimestamp?.toUTCString() ?? '',
-        })),
-      ),
+      challenges: completeChallenges.map(ch => ({
+        id: ch.id,
+        name: ch.name,
+        description: ch.description,
+        imageUrl: ch.imageUrl,
+        lat: ch.latitude,
+        long: ch.longitude,
+        awardingRadius: ch.awardingRadius,
+        closeRadius: ch.closeRadius,
+        completionDate:
+          ch.completions
+            .getItems()
+            .filter(c => c.completionPlayers.length > 0)[0]
+            ?.foundTimestamp?.toUTCString() ?? '',
+      })),
     });
 
     return false;
@@ -91,17 +90,13 @@ export class ChallengeGateway {
 
     const curChallenge = await eventTracker.currentChallenge.load();
 
-    // Is user switching to or from the star challenge
-    const isStarChallengeAffected =
-      challenge.eventIndex === 9999 || curChallenge.eventIndex === 9999;
-
     // Is user skipping while it's allowed
     const isSkippingWhileAllowed =
-      curChallenge.eventIndex < challenge.eventIndex &&
-      ((await eventTracker.event.load()).skippingEnabled ||
-        this.challengeService.isChallengeCompletedByUser(user, challenge));
+      (curChallenge.eventIndex < challenge.eventIndex &&
+        this.challengeService.isChallengeCompletedByUser(user, challenge)) ||
+      (await eventTracker.event.load()).skippingEnabled;
 
-    if (isStarChallengeAffected || isSkippingWhileAllowed) return false;
+    if (!isSkippingWhileAllowed) return false;
 
     eventTracker.currentChallenge.set(challenge);
     await this.eventService.saveTracker(eventTracker);
@@ -120,10 +115,28 @@ export class ChallengeGateway {
       removeListedMembers: false,
     };
 
-    for (const mem of group?.members ?? []) {
+    console.log(updateData, group?.members);
+
+    const members = await group?.members?.loadItems();
+
+    for (const mem of members ?? []) {
       const member = await mem.user.load();
       this.clientService.emitUpdateGroupData(member, updateData);
     }
+
+    this.clientService.emitUpdateEventTrackerData(user, {
+      eventTrackers: [
+        {
+          eventId: eventTracker.event.id,
+          isRanked: eventTracker.isPlayerRanked,
+          cooldownMinimum: eventTracker.cooldownMinimum.toISOString(),
+          curChallengeId: eventTracker.currentChallenge.id,
+          prevChallengeIds: (await eventTracker.completed.loadItems()).map(
+            ev => ev.challenge.id,
+          ),
+        },
+      ],
+    });
 
     return false;
   }

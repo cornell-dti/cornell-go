@@ -237,7 +237,9 @@ class UpdateChallengeDataChallengeDto {
     long = fields["long"].toDouble();
     awardingRadius = fields["awardingRadius"].toDouble();
     closeRadius = fields["closeRadius"].toDouble();
-    completionDate = DateTime.parse(fields["completionDate"]);
+    completionDate = fields["completionDate"] == ""
+        ? null
+        : DateTime.parse(fields["completionDate"]);
   }
 
   String id = "";
@@ -248,7 +250,7 @@ class UpdateChallengeDataChallengeDto {
   double long = 0;
   double awardingRadius = 0;
   double closeRadius = 0;
-  DateTime completionDate = DateTime.now();
+  DateTime? completionDate = DateTime.now();
 }
 
 class UpdateChallengeDataDto {
