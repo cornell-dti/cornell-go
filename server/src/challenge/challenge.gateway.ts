@@ -38,14 +38,14 @@ export class ChallengeGateway {
     @CallingUser() user: User,
     @MessageBody() data: RequestChallengeDataDto,
   ) {
-    const challengeEntities =
+    const completeChallenges =
       await this.challengeService.getChallengesByIdsWithPrevChallenge(
         user,
         data.challengeIds,
       );
 
     this.clientService.emitUpdateChallengeData(user, {
-      challenges: challengeEntities.map(ch => ({
+      challenges: completeChallenges.map(ch => ({
         id: ch.id,
         name: ch.name,
         description: ch.description,
@@ -54,7 +54,11 @@ export class ChallengeGateway {
         long: ch.longitude,
         awardingRadius: ch.awardingRadius,
         closeRadius: ch.closeRadius,
-        completionDate: ch.completions[0]?.foundTimestamp?.toISOString() ?? '',
+        completionDate:
+          ch.completions
+            .getItems()
+            .filter(c => c.completionPlayers.length > 0)[0]
+            ?.foundTimestamp?.toUTCString() ?? '',
       })),
     });
 
@@ -85,17 +89,13 @@ export class ChallengeGateway {
 
     const curChallenge = await eventTracker.currentChallenge.load();
 
-    // Is user switching to or from the star challenge
-    const isStarChallengeAffected =
-      challenge.eventIndex === 9999 || curChallenge.eventIndex === 9999;
-
     // Is user skipping while it's allowed
     const isSkippingWhileAllowed =
-      curChallenge.eventIndex < challenge.eventIndex &&
-      ((await eventTracker.event.load()).skippingEnabled ||
-        this.challengeService.isChallengeCompletedByUser(user, challenge));
+      (curChallenge.eventIndex < challenge.eventIndex &&
+        this.challengeService.isChallengeCompletedByUser(user, challenge)) ||
+      (await eventTracker.event.load()).skippingEnabled;
 
-    if (isStarChallengeAffected || isSkippingWhileAllowed) return false;
+    if (!isSkippingWhileAllowed) return false;
 
     eventTracker.currentChallenge.set(challenge);
     await this.eventService.saveTracker(eventTracker);
@@ -114,9 +114,27 @@ export class ChallengeGateway {
       removeListedMembers: false,
     };
 
-    for (const mem of group?.members ?? []) {
+    console.log(updateData, group.members);
+
+    const members = await group.members?.loadItems();
+
+    for (const mem of members) {
       this.clientService.emitUpdateGroupData(mem, updateData);
     }
+
+    this.clientService.emitUpdateEventTrackerData(user, {
+      eventTrackers: [
+        {
+          eventId: eventTracker.event.id,
+          isRanked: eventTracker.isPlayerRanked,
+          cooldownMinimum: eventTracker.cooldownMinimum.toISOString(),
+          curChallengeId: eventTracker.currentChallenge.id,
+          prevChallengeIds: (await eventTracker.completed.loadItems()).map(
+            ev => ev.challenge.id,
+          ),
+        },
+      ],
+    });
 
     return false;
   }
@@ -175,6 +193,7 @@ export class ChallengeGateway {
     if (newReward !== null) {
       const participatingEvents = await user.participatingEvents.loadItems();
       const userRewards = await user.rewards.loadItems();
+
       const updatedUser: UpdateUserDataDto = {
         id: user.id,
         username: user.username,
@@ -186,6 +205,8 @@ export class ChallengeGateway {
         authType: user.authType as UpdateUserDataAuthTypeDto,
       };
       this.clientService.emitUpdateUserData(user, updatedUser);
+      user.rewards.add(newReward);
+      await this.userService.saveUser(user);
 
       const rewards = userRewards.concat(newReward).map(reward => ({
         eventId: reward.containingEvent.id,

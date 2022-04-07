@@ -30,13 +30,26 @@ export class RewardGateway {
       data.rewardIds,
     );
 
+    const rewardDataUnowned = await this.rewardService.getRewardsNotForUser(
+      user,
+      data.rewardIds,
+    );
+
     const updateData: UpdateRewardDataDto = {
-      rewards: rewardData.map(rw => ({
-        eventId: rw.containingEvent.id,
-        description: rw.rewardDescription,
-        redeemInfo: rw.rewardRedeemInfo,
-        isRedeemed: rw.isRedeemed,
-      })),
+      rewards: [
+        ...rewardData.map(rw => ({
+          eventId: rw.containingEvent.id,
+          description: rw.rewardDescription,
+          redeemInfo: rw.rewardRedeemInfo,
+          isRedeemed: rw.isRedeemed,
+        })),
+        ...rewardDataUnowned.map(rw => ({
+          eventId: rw.containingEvent.id,
+          description: rw.rewardDescription,
+          redeemInfo: '',
+          isRedeemed: false,
+        })),
+      ],
     };
 
     this.clientService.emitUpdateRewardData(user, updateData);

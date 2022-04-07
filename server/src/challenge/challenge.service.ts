@@ -47,13 +47,14 @@ export class ChallengeService {
     user: User,
     ids: string[],
   ): Promise<Challenge[]> {
-    return await this.challengeRepository.find({ id: ids });
-    /*return await this.challengeRepository
-      .createQueryBuilder()
-      .select('*')
-      .join('completions', 'prevChallenge')
-      .where({ id: { $in: ids } })
-      .andWhere({ 'prevChallenge.owner': user.id });*/
+    return await this.challengeRepository
+      .createQueryBuilder('chal')
+      .leftJoinAndSelect('chal.completions', 'completion')
+      .leftJoinAndSelect(
+        'completion.completionPlayers',
+        'player',
+        `player.id = ${user.id}`,
+      );
   }
 
   /** Get a challenge by its id */
@@ -109,14 +110,12 @@ export class ChallengeService {
       user,
     );
 
-    const curChallenge = await eventTracker.currentChallenge.load();
-
     // Ensure that the correct challenge is marked complete
     if (challengeId !== eventTracker.currentChallenge.id) return eventTracker;
 
     const prevChal = this.prevChallengeRepository.create({
       owner: user,
-      challenge: curChallenge,
+      challenge: eventTracker.currentChallenge,
       completionPlayers: groupMembers,
       foundTimestamp: new Date(),
     });

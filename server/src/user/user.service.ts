@@ -80,4 +80,8 @@ export class UserService {
   async byId(id: string) {
     return await this.usersRepository.findOne({ id });
   }
+
+  async saveUser(user: User) {
+    await this.usersRepository.persistAndFlush(user);
+  }
 }

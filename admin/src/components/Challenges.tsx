@@ -46,6 +46,7 @@ function ChallengeCard(props: {
       <ListCardDescription>{props.challenge.description}</ListCardDescription>
       <ChallengeImage url={props.challenge.imageUrl} />
       <ListCardBody>
+        Id: <b>{props.challenge.id}</b> <br />
         Latitude: <b>{props.challenge.latitude}</b>, Longitude:{" "}
         <b>{props.challenge.longitude}</b> <br />
         Awarding Distance: <b>{props.challenge.awardingRadius} meters</b> <br />

@@ -110,7 +110,6 @@ class UpdateEventDataEventDto {
         break;
     }
     time = fields["time"] == '' ? null : DateTime.parse(fields["time"]);
-    topCount = fields["topCount"];
     rewards = fields["rewards"]
         .map<UpdateEventDataRewardDto>(
             (dynamic reward) => UpdateEventDataRewardDto.fromJson(reward))
@@ -126,7 +125,6 @@ class UpdateEventDataEventDto {
   UpdateEventDataEventRewardTypeDto rewardType =
       UpdateEventDataEventRewardTypeDto.PERPETUAL;
   DateTime? time = null;
-  int topCount = 0;
   List<UpdateEventDataRewardDto> rewards = [];
   int requiredMembers = 0;
   List<String> challengeIds = [];
