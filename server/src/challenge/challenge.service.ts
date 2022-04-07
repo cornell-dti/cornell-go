@@ -96,16 +96,13 @@ export class ChallengeService {
         linkedEvent: chal.linkedEvent,
       });
     } catch {
-      return await this.challengeRepository.findOneOrFail({
-        eventIndex: 9999,
-        linkedEvent: chal.linkedEvent,
-      });
+      return chal;
     }
   }
 
   /** Progress user through challenges, ensuring challengeId is current */
   async completeChallenge(user: User, challengeId: string) {
-    const group = await (await user.groupMember?.load())?.group.load();
+    const group = await user.group?.load();
     const groupMembers = await group?.members.loadItems();
 
     const eventTracker = await this.eventService.getCurrentEventTrackerForUser(
@@ -119,8 +116,8 @@ export class ChallengeService {
 
     const prevChal = this.prevChallengeRepository.create({
       owner: user,
-      challenge: eventTracker.currentChallenge,
-      completionPlayers: groupMembers?.map(mem => mem.user),
+      challenge: curChallenge,
+      completionPlayers: groupMembers,
       foundTimestamp: new Date(),
     });
 
@@ -131,6 +128,7 @@ export class ChallengeService {
     );
 
     eventTracker.currentChallenge.set(nextChallenge);
+    eventTracker.completed.add(prevChal);
 
     await this.eventService.saveTracker(eventTracker);
 
@@ -144,7 +142,10 @@ export class ChallengeService {
     eventTracker: EventTracker,
   ) {
     //If User has not completed the event/done all the challenges then:
-    if (eventTracker.completed.count() !== eventBase.challenges.count()) {
+    if (
+      (await eventTracker.completed.loadCount()) !==
+      (await eventBase.challenges.loadCount())
+    ) {
       return null;
     }
 

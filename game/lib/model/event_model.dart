@@ -36,7 +36,7 @@ class EventModel extends ChangeNotifier {
       notifyListeners();
     });
 
-    client.clientApi.disconnectedStream.listen((event) {
+    client.clientApi.connectedStream.listen((event) {
       _events.clear();
       _topPlayers.clear();
     });

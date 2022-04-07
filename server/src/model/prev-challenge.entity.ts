@@ -29,7 +29,7 @@ export class PrevChallenge {
   completionPlayers = new Collection<User>(this);
 
   /** Player owning this completion */
-  @OneToOne()
+  @ManyToOne()
   owner!: IdentifiedReference<User>;
 
   /** The completed challenge */

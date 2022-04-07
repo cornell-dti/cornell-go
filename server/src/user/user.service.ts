@@ -5,6 +5,7 @@ import { GroupService } from '../group/group.service';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityRepository } from '@mikro-orm/postgresql';
 import { v4 } from 'uuid';
+import { Reference } from '@mikro-orm/core';
 
 @Injectable()
 export class UserService {
@@ -29,13 +30,14 @@ export class UserService {
     authType: AuthType,
     authToken: string,
   ) {
-    let user: User = this.usersRepository.create({
+    await this.eventsService.getDefaultEvent();
+    const user: User = this.usersRepository.create({
       id: v4(),
       score: 0,
       participatingEvents: [],
       rewards: [],
       logEntries: [],
-      groupMember: null,
+      group: null,
       username,
       email,
       authToken,
@@ -47,6 +49,12 @@ export class UserService {
       adminRequested: false,
     });
 
+    await this.groupsService.createFromEvent(
+      await this.eventsService.getDefaultEvent(),
+      user,
+      true,
+    );
+
     const eventTracker = await this.eventsService.createDefaultEventTracker(
       user,
       lat,
@@ -54,11 +62,6 @@ export class UserService {
     );
 
     user.participatingEvents.set([eventTracker]);
-
-    await this.groupsService.createFromEvent(
-      await eventTracker.event.load(),
-      user,
-    );
 
     await this.usersRepository.persistAndFlush(user);
 

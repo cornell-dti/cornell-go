@@ -14,7 +14,7 @@ class TrackerModel extends ChangeNotifier {
       notifyListeners();
     });
 
-    client.clientApi.disconnectedStream.listen((event) {
+    client.clientApi.connectedStream.listen((event) {
       _trackers.clear();
     });
   }

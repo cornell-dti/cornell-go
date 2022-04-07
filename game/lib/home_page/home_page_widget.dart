@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:game/model/tracker_model.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:velocity_x/velocity_x.dart';
@@ -43,26 +44,34 @@ class _HomePageWidgetState extends State<HomePageWidget> {
         drawer: NavBar(),
         key: scaffoldKey,
         backgroundColor: const Color(0xFFFFFF),
-        body: Consumer4<ApiClient, GameModel, GroupModel, UserModel>(
-          builder:
-              (context, apiClient, gameModel, groupModel, userModel, child) {
-            if (gameModel.withinCompletionRadius) {
-              print("yes");
-              setState(() {
-                _doneState = gameModel;
-              });
-            }
-            if (_doneState != null && gameModel.hasConnection) {
-              _controllerCenter.play();
-              apiClient.serverApi?.completedChallenge(_doneState.challengeId);
-              showAlert(
-                  "Congratulations! You've completed ${_doneState?.name}!",
-                  context);
-              setState(() {
-                _doneState = null;
-              });
-            }
-            print(gameModel.imageUrl);
+        body: Consumer5<ApiClient, GameModel, GroupModel, UserModel,
+            TrackerModel>(
+          builder: (context, apiClient, gameModel, groupModel, userModel,
+              trackerModel, child) {
+            WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
+              if (gameModel.withinCompletionRadius) {
+                final tracker =
+                    trackerModel.trackerByEventId(groupModel.curEventId ?? "")!;
+
+                if (tracker.prevChallengeIds.contains(tracker.curChallengeId))
+                  return;
+
+                tracker.prevChallengeIds.add(tracker.curChallengeId);
+                setState(() {
+                  _doneState = gameModel;
+                });
+              }
+              if (_doneState != null && gameModel.hasConnection) {
+                _controllerCenter.play();
+                apiClient.serverApi?.completedChallenge(_doneState.challengeId);
+                showAlert(
+                    "Congratulations! You've completed ${_doneState?.name}!",
+                    context);
+                setState(() {
+                  _doneState = null;
+                });
+              }
+            });
             return Stack(children: [
               Align(
                 alignment: Alignment.center,
@@ -204,7 +213,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                                 fontWeight: FontWeight.w700),
                           ),
                           Text(
-                            gameModel.withinCloseRadius ? "Clost" : "Closest",
+                            gameModel.withinCloseRadius ? "Found" : "Close",
                             style: TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w700),

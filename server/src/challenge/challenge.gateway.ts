@@ -66,8 +66,7 @@ export class ChallengeGateway {
     @CallingUser() user: User,
     @MessageBody() data: SetCurrentChallengeDto,
   ) {
-    const groupMember = await user.groupMember?.load();
-    const group = await groupMember?.group.load();
+    const group = await user.group?.load();
 
     const isChallengeValid = await this.eventService.isChallengeInEvent(
       data.challengeId,
@@ -108,7 +107,7 @@ export class ChallengeGateway {
           id: user.id,
           name: user.username,
           points: user.score,
-          host: groupMember?.isHost ?? false,
+          host: group?.host?.id === user.id,
           curChallengeId: data.challengeId,
         },
       ],
@@ -116,8 +115,7 @@ export class ChallengeGateway {
     };
 
     for (const mem of group?.members ?? []) {
-      const member = await mem.user.load();
-      this.clientService.emitUpdateGroupData(member, updateData);
+      this.clientService.emitUpdateGroupData(mem, updateData);
     }
 
     return false;
@@ -133,8 +131,7 @@ export class ChallengeGateway {
       data.challengeId,
     );
 
-    const groupMember = await user.groupMember?.load();
-    const group = await groupMember?.group.load();
+    const group = await user.group?.load();
 
     const updateData: UpdateGroupDataDto = {
       curEventId: group?.currentEvent.id ?? '',
@@ -143,7 +140,7 @@ export class ChallengeGateway {
           id: user.id,
           name: user.username,
           points: user.score,
-          host: groupMember?.isHost ?? false,
+          host: group?.host?.id === user.id,
           curChallengeId: newTracker.currentChallenge.id,
         },
       ],
@@ -151,9 +148,23 @@ export class ChallengeGateway {
     };
 
     for (const mem of group?.members ?? []) {
-      const member = await mem.user.load();
-      this.clientService.emitUpdateGroupData(member, updateData);
+      this.clientService.emitUpdateGroupData(mem, updateData);
     }
+
+    await newTracker.completed.init();
+
+    this.clientService.emitUpdateEventTrackerData(user, {
+      eventTrackers: [
+        {
+          eventId: newTracker.event.id,
+          isRanked: newTracker.isPlayerRanked,
+          cooldownMinimum: newTracker.cooldownMinimum.toISOString(),
+          curChallengeId: newTracker.currentChallenge.id,
+          prevChallengeIds: newTracker.completed.getIdentifiers(),
+        },
+      ],
+    });
+
     const event = await newTracker.event.load();
     const newReward = await this.challengeService.checkForReward(
       user,

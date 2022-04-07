@@ -15,7 +15,7 @@ class RewardModel extends ChangeNotifier {
       notifyListeners();
     });
 
-    client.clientApi.disconnectedStream.listen((event) {
+    client.clientApi.connectedStream.listen((event) {
       rewards.clear();
     });
   }

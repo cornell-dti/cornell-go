@@ -18,11 +18,8 @@ class UserModel extends ChangeNotifier {
     });
 
     client.clientApi.connectedStream.listen((event) {
-      client.serverApi?.requestUserData();
-    });
-
-    client.clientApi.disconnectedStream.listen((event) {
       userData = null;
+      client.serverApi?.requestUserData();
     });
   }
 }

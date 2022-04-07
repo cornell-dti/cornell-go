@@ -21,7 +21,7 @@ class GameWidget extends StatefulWidget {
 }
 
 double calcCompletionProgress(double distance, double completionRadius) {
-  return 1 - distance / completionRadius;
+  return max(0, 1 - distance / completionRadius);
 }
 
 double calcCloseProgress(double distance, double closeRadius) {
@@ -30,7 +30,6 @@ double calcCloseProgress(double distance, double closeRadius) {
   if (distance > 50) {
     distance = 50;
   }
-  print(distance - closeRadius);
   return pow(0.5, distance - closeRadius).toDouble();
 }
 
@@ -58,6 +57,7 @@ class _GameWidgetState extends State<GameWidget> {
 
             gameModel.hasConnection = apiCient.serverApi != null;
             if (curChallenge != null) {
+              gameModel.challengeId = curChallenge.id;
               gameModel.description = curChallenge.description;
               gameModel.name = curChallenge.name;
               gameModel.imageUrl = curChallenge.imageUrl;

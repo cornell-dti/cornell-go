@@ -81,13 +81,7 @@ export class EventService {
 
   /** Creates an event tracker with the closest challenge as the current one */
   async createDefaultEventTracker(user: User, lat: number, long: number) {
-    try {
-      const defEv = await this.eventsRepository.findOneOrFail({
-        isDefault: true,
-      });
-    } catch {
-      await this.makeDefaultEvent();
-    }
+    await this.getDefaultEvent();
 
     const defaultEvent = await this.eventsRepository
       .createQueryBuilder('ev')
@@ -121,6 +115,17 @@ export class EventService {
 
     return progress;
   }
+
+  async getDefaultEvent() {
+    try {
+      return await this.eventsRepository.findOneOrFail({
+        isDefault: true,
+      });
+    } catch {
+      return await this.makeDefaultEvent();
+    }
+  }
+
   async createEventTracker(user: User, event: EventBase) {
     let closestChallenge = event.challenges[0];
 
@@ -149,8 +154,7 @@ export class EventService {
 
   /** Gets a player's event tracker based on group */
   async getCurrentEventTrackerForUser(user: User) {
-    const member = await user.groupMember?.load();
-    const group = await member?.group.load();
+    const group = await user.group?.load();
 
     return await this.eventTrackerRepository.findOneOrFail({
       user,

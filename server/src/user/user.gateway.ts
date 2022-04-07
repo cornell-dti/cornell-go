@@ -54,10 +54,9 @@ export class UserGateway {
     @CallingUser() user: User,
     @MessageBody() data: RequestUserDataDto,
   ) {
-    const groupMember = await user.groupMember?.load();
     const rewards = await user.rewards.loadItems();
     const participatingEvents = await user.participatingEvents.loadItems();
-    const group = await groupMember?.group.load();
+    const group = await user.group?.load();
 
     this.clientService.emitUpdateUserData(user, {
       id: user.id,
@@ -78,8 +77,7 @@ export class UserGateway {
     @CallingUser() user: User,
     @MessageBody() data: SetUsernameDto,
   ) {
-    const groupMember = await user.groupMember?.load();
-    const group = await groupMember?.group.load();
+    const group = await user.group?.load();
     const groupMembers = group?.members;
     const participatingEvents = await user.participatingEvents.loadItems();
 
@@ -106,7 +104,7 @@ export class UserGateway {
           id: user.id,
           name: user.username,
           points: user.score,
-          host: groupMember?.isHost ?? false,
+          host: user.id === group?.id,
           curChallengeId:
             participatingEvents.find(
               ev => ev.event.id === group?.currentEvent.id,
@@ -117,10 +115,7 @@ export class UserGateway {
 
     // Update groupmates about username change
     for (const member of groupMembers ?? []) {
-      this.clientService.emitUpdateGroupData(
-        await member?.user.load(),
-        updateData,
-      );
+      this.clientService.emitUpdateGroupData(member, updateData);
     }
 
     return false;
