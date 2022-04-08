@@ -86,8 +86,14 @@ class _EventsWidgetState extends State<EventsWidget> {
                         false,
                         false);
                   }
-                  for (UpdateEventDataEventDto event
-                      in myEventModel.searchResults ?? []) {
+                  final events = myEventModel.searchResults ?? [];
+                  if (!events
+                      .any((element) => element.id == groupModel.curEventId)) {
+                    final curEvent =
+                        myEventModel.getEventById(groupModel.curEventId ?? "");
+                    if (curEvent != null) events.add(curEvent);
+                  }
+                  for (UpdateEventDataEventDto event in events) {
                     final reward = event.rewards.length == 0
                         ? null
                         : event.rewards[0].description;
