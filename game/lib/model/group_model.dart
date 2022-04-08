@@ -13,6 +13,7 @@ class GroupModel extends ChangeNotifier {
       curEventId = event.curEventId;
       members.removeWhere(
           (element) => event.members.any((mem) => mem.id == element.id));
+      members.clear();
       if (!event.removeListedMembers) {
         members.insertAll(max(members.length - 1, 0), event.members);
       }
@@ -24,6 +25,14 @@ class GroupModel extends ChangeNotifier {
       members.clear();
       curEventId = null;
       client.serverApi?.requestGroupData();
+    });
+
+    client.clientApi.invalidateDataStream.listen((event) {
+      if (event.groupData) {
+        members.clear();
+        curEventId = null;
+        client.serverApi?.requestGroupData();
+      }
     });
   }
 }

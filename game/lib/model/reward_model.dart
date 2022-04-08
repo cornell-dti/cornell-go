@@ -21,6 +21,16 @@ class RewardModel extends ChangeNotifier {
 
     client.clientApi.connectedStream.listen((event) {
       rewards.clear();
+      rewardByEventId.clear();
+      notifyListeners();
+    });
+
+    client.clientApi.invalidateDataStream.listen((event) {
+      if (event.userRewardData || event.winnerRewardData) {
+        rewards.clear();
+        rewardByEventId.clear();
+        notifyListeners();
+      }
     });
   }
 

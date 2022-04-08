@@ -37,15 +37,20 @@ export class GroupService {
 
     group.friendlyId = group.id.substring(9, 13);
 
-    oldGroup?.members.remove(host);
-    host.group = Reference.create(group);
-
     const oldGroupNew = oldGroup
-      ? await this.checkGroupSize(oldGroup)
+      ? await this.checkGroupSizeForRemoval(
+          oldGroup,
+          oldGroup.host.id === host.id,
+        )
       : undefined;
 
+    await this.groupsRepository.persistAndFlush(group);
+    if (oldGroupNew) {
+      oldGroupNew.members.remove(host);
+      await this.groupsRepository.persistAndFlush(oldGroupNew);
+    }
     group.host = Reference.create(host);
-
+    host.group = Reference.create(group);
     await this.groupsRepository.persistAndFlush(group);
 
     return [oldGroupNew, group];
@@ -67,13 +72,14 @@ export class GroupService {
   }
 
   /* If the user is the only member, deletes the group. */
-  async checkGroupSize(group: Group): Promise<Group | undefined> {
-    if (group.members.length === 0) {
-      group.host = null!;
-      await this.groupsRepository.persistAndFlush(group);
+  async checkGroupSizeForRemoval(
+    group: Group,
+    didHostLeave: boolean,
+  ): Promise<Group | undefined> {
+    if (group.members.length === 1) {
       await this.groupsRepository.removeAndFlush(group);
       return undefined;
-    } else {
+    } else if (didHostLeave) {
       group.host = Reference.create((await group.members.loadItems())[0]);
       await this.groupsRepository.persistAndFlush(group);
     }
@@ -84,14 +90,20 @@ export class GroupService {
    * Returns the old group if it still exists, or null. */
   async joinGroup(user: User, joinId: string): Promise<Group | undefined> {
     const group = await this.getGroupFromFriendlyId(joinId);
-    const oldGroup = await user.group!.load();
+    const oldGroup = await user.group.load();
+
+    if (oldGroup.friendlyId === joinId) return;
+
+    const ret = await this.checkGroupSizeForRemoval(
+      oldGroup,
+      oldGroup.host.id === user.id,
+    );
 
     group.members.add(user);
-    user.group?.set(group);
+    user.group = Reference.create(group);
 
     await this.groupsRepository.persistAndFlush(group);
-
-    return await this.checkGroupSize(oldGroup);
+    return ret;
   }
 
   /** Moves the user out of their current group into a new group.

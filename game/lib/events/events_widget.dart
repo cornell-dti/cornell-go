@@ -93,8 +93,10 @@ class _EventsWidgetState extends State<EventsWidget> {
                         : event.rewards[0].description;
                     final tracker = trackerModel.trackerByEventId(event.id);
                     final format = DateFormat('yyyy-MM-dd');
-                    final chal =
-                        challengeModel.getChallengeById(event.challengeIds[0]);
+                    final chal = event.challengeIds.length == 0
+                        ? null
+                        : challengeModel
+                            .getChallengeById(event.challengeIds[0]);
                     final complete = tracker?.prevChallengeIds.length ==
                         event.challengeIds.length;
                     eventCells.add(GestureDetector(
@@ -126,48 +128,6 @@ class _EventsWidgetState extends State<EventsWidget> {
                       scrollDirection: Axis.vertical,
                       children: eventCells);
                 }))
-                // Expanded(
-                //     child: ListView(
-                //         shrinkWrap: true,
-                //         scrollDirection: Axis.vertical,
-                //         children: [
-                //       eventsCell(
-                //           context,
-                //           "Central Campus Event",
-                //           "4/19/2021",
-                //           "Learn more about this commonly visited area through the central campus event",
-                //           true,
-                //           false,
-                //           -1,
-                //           "Completion certificate",
-                //           -1,
-                //           -1,
-                //           "assets/images/38582.jpg"),
-                //       eventsCell(
-                //           context,
-                //           "Central Campus Event",
-                //           "4/19/2021",
-                //           "Learn more about this commonly visited area through the central campus event",
-                //           false,
-                //           true,
-                //           3,
-                //           "3\$ Cornell Store",
-                //           3,
-                //           -1,
-                //           "assets/images/38582.jpg"),
-                //       eventsCell(
-                //           context,
-                //           "Central Campus Event",
-                //           "4/19/2021",
-                //           "Learn more about this commonly visited area through the central campus event",
-                //           false,
-                //           false,
-                //           -1,
-                //           "",
-                //           0,
-                //           3,
-                //           "assets/images/38582.jpg"),
-                //     ]))
               ],
             ),
           ),

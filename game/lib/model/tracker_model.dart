@@ -17,6 +17,14 @@ class TrackerModel extends ChangeNotifier {
 
     client.clientApi.connectedStream.listen((event) {
       _trackers.clear();
+      notifyListeners();
+    });
+
+    client.clientApi.invalidateDataStream.listen((event) {
+      if (event.challengeData) {
+        _trackers.clear();
+        notifyListeners();
+      }
     });
   }
 

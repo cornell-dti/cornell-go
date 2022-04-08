@@ -2,6 +2,7 @@ import { useContext, useState } from "react";
 import styled, { css } from "styled-components";
 import { ChallengeDto } from "../dto/update-challenges.dto";
 import { moveDown, moveUp } from "../ordering";
+import { AlertModal } from "./AlertModal";
 import { DeleteModal } from "./DeleteModal";
 import {
   EntryForm,
@@ -124,13 +125,21 @@ export function Challenges() {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [selectModalOpen, setSelectModalOpen] = useState(false);
+
   const [form, setForm] = useState(() => makeForm());
   const [currentId, setCurrentId] = useState("");
+
   const serverData = useContext(ServerDataContext);
   const selectedEvent = serverData.events.get(serverData.selectedEvent);
 
   return (
     <>
+      <AlertModal
+        description="To create a challenge, select an event."
+        isOpen={selectModalOpen}
+        onClose={() => setSelectModalOpen(false)}
+      />
       <EntryModal
         title="Create Challenge"
         isOpen={createModalOpen}
@@ -174,6 +183,9 @@ export function Challenges() {
         onCreate={() => {
           setForm(makeForm());
           setCreateModalOpen(!!selectedEvent);
+          if (!selectedEvent) {
+            setSelectModalOpen(true);
+          }
         }}
       />
       {selectedEvent?.challengeIds.map(

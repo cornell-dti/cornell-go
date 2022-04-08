@@ -78,7 +78,7 @@ export class User {
   rewards = new Collection<EventReward>(this);
 
   /** A user's membership in a group */
-  @ManyToOne({ inversedBy: 'members' })
+  @ManyToOne({ inversedBy: 'members', nullable: true })
   group!: IdentifiedReference<Group>;
 
   /** Event trackers for each event the player participated in */

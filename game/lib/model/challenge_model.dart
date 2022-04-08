@@ -16,6 +16,14 @@ class ChallengeModel extends ChangeNotifier {
 
     client.clientApi.connectedStream.listen((event) {
       _challengesById.clear();
+      notifyListeners();
+    });
+
+    client.clientApi.invalidateDataStream.listen((event) {
+      if (event.challengeData) {
+        _challengesById.clear();
+        notifyListeners();
+      }
     });
   }
 

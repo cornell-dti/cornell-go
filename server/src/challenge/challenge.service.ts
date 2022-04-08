@@ -9,6 +9,7 @@ import { PrevChallenge } from '../model/prev-challenge.entity';
 import { User } from '../model/user.entity';
 import { EventTracker } from 'src/model/event-tracker.entity';
 import { v4 } from 'uuid';
+import { Reference } from '@mikro-orm/core';
 
 @Injectable()
 export class ChallengeService {
@@ -103,8 +104,8 @@ export class ChallengeService {
 
   /** Progress user through challenges, ensuring challengeId is current */
   async completeChallenge(user: User, challengeId: string) {
-    const group = await user.group?.load();
-    const groupMembers = await group?.members.loadItems();
+    const group = await user.group.load();
+    const groupMembers = await group.members.loadItems();
 
     const eventTracker = await this.eventService.getCurrentEventTrackerForUser(
       user,
@@ -122,6 +123,9 @@ export class ChallengeService {
 
     await this.prevChallengeRepository.persistAndFlush(prevChal);
 
+    user.score += 1;
+    eventTracker.eventScore += 1;
+
     const nextChallenge = await this.nextChallenge(
       await eventTracker.currentChallenge.load(),
     );
@@ -135,11 +139,8 @@ export class ChallengeService {
   }
 
   /** Check if the current event can return rewards */
-  async checkForReward(
-    user: User,
-    eventBase: EventBase,
-    eventTracker: EventTracker,
-  ) {
+  async checkForReward(eventTracker: EventTracker) {
+    const eventBase = await eventTracker.event.load();
     //If User has not completed the event/done all the challenges then:
     if (
       (await eventTracker.completed.loadCount()) !==
@@ -161,7 +162,7 @@ export class ChallengeService {
         containingEvent: eventBase,
       });
       if (newReward !== null) {
-        newReward?.claimingUser?.set(user);
+        newReward.claimingUser = Reference.create(eventTracker.user);
         newReward.isRedeemed = false;
         const reward = this.rewardRepository.create({ ...newReward, id: v4() });
         await this.rewardRepository.persistAndFlush(reward);
@@ -175,7 +176,7 @@ export class ChallengeService {
       containingEvent: eventBase,
     });
     if (unclaimedReward !== null) {
-      unclaimedReward.claimingUser?.set(user);
+      unclaimedReward.claimingUser = Reference.create(eventTracker.user);
       return unclaimedReward;
     }
     return null;

@@ -23,9 +23,9 @@ const SearchBarBox = styled.div`
 `;
 
 const SearchTextBox = styled.input`
-  flex-shrink: 0;
+  flex-shrink: 1;
   margin-left: 12px;
-  width: calc(50% - 12px);
+  width: calc(100% - 12px);
   font-size: 18px;
   justify-self: flex-end;
 `;
@@ -52,16 +52,12 @@ export function SearchBar(props: {
   onCreate?: () => void;
 }) {
   const searchRef = useRef<number>(-1);
-  const data = useContext(ServerDataContext);
 
   return (
     <SearchBarBox>
       <SearchBarButtons>
         <HButton onClick={props.onCreate}>Create</HButton>
       </SearchBarButtons>
-      <SearchBarText>
-        {data.events.get(data.selectedEvent)?.name ?? "No Selection"}
-      </SearchBarText>
       <SearchTextBox
         placeholder="Search..."
         onChange={(e) => {

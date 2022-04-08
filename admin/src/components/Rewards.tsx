@@ -1,6 +1,7 @@
 import { useContext, useState } from "react";
 import { RewardDto } from "../dto/update-rewards.dto";
 import { moveDown, moveUp } from "../ordering";
+import { AlertModal } from "./AlertModal";
 import { DeleteModal } from "./DeleteModal";
 import { EntryForm, EntryModal, FreeEntryForm } from "./EntryModal";
 import { HButton } from "./HButton";
@@ -35,7 +36,8 @@ function RewardCard(props: {
       </ListCardTitle>
       <ListCardDescription>{props.reward.redeemInfo}</ListCardDescription>
       <ListCardBody>
-        Id: <b>{props.reward.id}</b><br />
+        Id: <b>{props.reward.id}</b>
+        <br />
       </ListCardBody>
       <ListCardButtons>
         <HButton onClick={props.onUp}>UP</HButton>
@@ -80,12 +82,20 @@ export function Rewards() {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [selectModalOpen, setSelectModalOpen] = useState(false);
+
   const [currentId, setCurrentId] = useState("");
   const [form, setForm] = useState(() => makeForm());
+
   const selectedEvent = serverData.events.get(serverData.selectedEvent);
 
   return (
     <>
+      <AlertModal
+        description="To create a reward, select an event."
+        isOpen={selectModalOpen}
+        onClose={() => setSelectModalOpen(false)}
+      />
       <EntryModal
         title="Create Reward"
         isOpen={createModalOpen}
@@ -127,6 +137,9 @@ export function Rewards() {
         onCreate={() => {
           setForm(makeForm());
           setCreateModalOpen(!!selectedEvent);
+          if (!selectedEvent) {
+            setSelectModalOpen(true);
+          }
         }}
       />
       {selectedEvent?.rewardIds.map(

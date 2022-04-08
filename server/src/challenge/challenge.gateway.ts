@@ -114,8 +114,6 @@ export class ChallengeGateway {
       removeListedMembers: false,
     };
 
-    console.log(updateData, group.members);
-
     const members = await group.members?.loadItems();
 
     for (const mem of members) {
@@ -183,12 +181,7 @@ export class ChallengeGateway {
       ],
     });
 
-    const event = await newTracker.event.load();
-    const newReward = await this.challengeService.checkForReward(
-      user,
-      event,
-      newTracker,
-    );
+    const newReward = await this.challengeService.checkForReward(newTracker);
 
     if (newReward !== null) {
       const participatingEvents = await user.participatingEvents.loadItems();

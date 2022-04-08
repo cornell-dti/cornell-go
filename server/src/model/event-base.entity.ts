@@ -56,7 +56,9 @@ export class EventBase {
   time!: Date;
 
   /** Describes the rewards */
-  @OneToMany(() => EventReward, rew => rew.containingEvent)
+  @OneToMany(() => EventReward, rew => rew.containingEvent, {
+    orphanRemoval: true,
+  })
   rewards = new Collection<EventReward>(this);
 
   /** Ordered list of challenges */
@@ -64,6 +66,7 @@ export class EventBase {
     entity: () => Challenge,
     mappedBy: 'linkedEvent',
     orderBy: { eventIndex: 'asc' },
+    orphanRemoval: true,
   })
   challenges = new Collection<Challenge>(this);
 }

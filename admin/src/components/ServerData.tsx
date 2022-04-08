@@ -92,12 +92,12 @@ export function ServerDataProvider(props: { children: ReactNode }) {
       setServerData({ ...serverData });
     });
     sock.onUpdateEventData((data) => {
-      data.deletedIds.forEach(serverData.events.delete);
+      data.deletedIds.forEach((id) => serverData.events.delete(id));
       data.events.forEach((ev) => serverData.events.set(ev.id, ev));
-      setServerData({ ...serverData });
+      setTimeout(() => setServerData({ ...serverData }), 0);
     });
     sock.onUpdateChallengeData((data) => {
-      data.deletedIds.forEach(serverData.challenges.delete);
+      data.deletedIds.forEach((id) => serverData.challenges.delete(id));
       data.challenges.forEach((chal) =>
         serverData.challenges.set(chal.id, chal)
       );

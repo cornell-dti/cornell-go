@@ -24,6 +24,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
   late ConfettiController _controllerCenter =
       ConfettiController(duration: Duration(seconds: 10));
   TextEditingController textController = TextEditingController();
+  TextEditingController idController = new TextEditingController();
   final scaffoldKey = GlobalKey<ScaffoldState>();
   Color Carnelian = Color(0xFFB31B1B);
   var _doneState = null;
@@ -118,12 +119,14 @@ class _HomePageWidgetState extends State<HomePageWidget> {
   }
 
   Widget _panel() {
-    return Consumer2<GameModel, GroupModel>(
-        builder: (context, gameModel, groupModel, child) {
-      var progressToUse = gameModel.withinCloseRadius
+    return Consumer3<GameModel, GroupModel, UserModel>(
+        builder: (context, gameModel, groupModel, userModel, child) {
+      final progressToUse = gameModel.withinCloseRadius
           ? gameModel.completionProgress
           : gameModel.closeProgress;
-      var wrongPath = gameModel.directionDistance.abs() > 0.5;
+      final wrongPath = gameModel.directionDistance.abs() > 0.5;
+      final isDoneWithoutConnection =
+          _doneState != null && !gameModel.hasConnection;
       if (wrongPath) {
         displayToast("You're going the wrong way!", Status.error);
       }
@@ -143,6 +146,10 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                         style: TextStyle(color: Colors.white, fontSize: 16)),
                   )
                 ])),
+            if (!gameModel.hasConnection)
+              Padding(
+                  padding: EdgeInsets.all(3),
+                  child: Icon(Icons.signal_wifi_off, color: Carnelian)),
             Padding(
                 padding: EdgeInsets.all(6),
                 child: HStack([
@@ -165,9 +172,12 @@ class _HomePageWidgetState extends State<HomePageWidget> {
           width: MediaQuery.of(context).size.width,
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 10),
-            child: Text(
-              gameModel.description,
-              style: TextStyle(color: Colors.white, fontSize: 16),
+            child: ConstrainedBox(
+              constraints: BoxConstraints.tightFor(height: 48),
+              child: Text(
+                gameModel.description,
+                style: TextStyle(color: Colors.white, fontSize: 18),
+              ),
             ),
           ),
         ),
@@ -196,36 +206,51 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                         gradient: LinearGradient(
                           begin: Alignment.topLeft,
                           end: Alignment.topRight,
-                          colors: [
-                            Colors.blue,
-                            Colors.red,
-                          ],
+                          colors: isDoneWithoutConnection
+                              ? [Colors.green, Colors.green]
+                              : [
+                                  Colors.blue,
+                                  Colors.red,
+                                ],
                         ),
                         borderRadius: BorderRadius.all(Radius.circular(32))),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Row(
-                        children: [
-                          Text(
-                            gameModel.withinCloseRadius ? "Close" : "Far",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700),
-                          ),
-                          Text(
-                            gameModel.withinCloseRadius ? "Found" : "Close",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700),
-                          )
-                        ],
+                        children: isDoneWithoutConnection
+                            ? [
+                                Text(
+                                  "Find an internet connection to finish...",
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w700),
+                                )
+                              ]
+                            : [
+                                Text(
+                                  gameModel.withinCloseRadius ? "Close" : "Far",
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w700),
+                                ),
+                                Text(
+                                  gameModel.withinCloseRadius
+                                      ? "Found"
+                                      : "Close",
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w700),
+                                )
+                              ],
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       ),
                     )),
                 Container(
-                    width: MediaQuery.of(context).size.width *
-                        0.95 *
-                        progressToUse,
+                    width: isDoneWithoutConnection
+                        ? 0
+                        : MediaQuery.of(context).size.width *
+                            0.95 *
+                            progressToUse,
                     height: 40,
                     decoration: BoxDecoration(
                         color: Colors.black.withOpacity(0.5),
@@ -253,7 +278,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                 );
               })),
               ElevatedButton(
-                onPressed: () => {print("Join-Group pressed")},
+                onPressed: () => {_joinGroupDialog(context)},
                 child: const Text(
                   "Join!",
                   style: TextStyle(fontWeight: FontWeight.bold),
@@ -267,19 +292,36 @@ class _HomePageWidgetState extends State<HomePageWidget> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
           ),
         ),
-        ListView(
-          shrinkWrap: true,
-          scrollDirection: Axis.vertical,
-          children: getMembers(groupModel),
+        Container(
+          height: 200,
+          decoration: BoxDecoration(
+              border: Border(
+                  top: BorderSide(color: Colors.grey),
+                  bottom: BorderSide(color: Colors.grey),
+                  left: BorderSide(color: Colors.grey),
+                  right: BorderSide(color: Colors.grey))),
+          child: MediaQuery.removePadding(
+            context: context,
+            removeTop: true,
+            child: ListView(
+              shrinkWrap: true,
+              scrollDirection: Axis.vertical,
+              children: getMembers(userModel, groupModel),
+            ),
+          ),
         )
       ]);
     });
   }
 
-  List<Widget> getMembers(groupModel) {
+  List<Widget> getMembers(UserModel userModel, GroupModel groupModel) {
     List<Widget> children = [];
     for (var member in groupModel.members) {
-      children.add(_listCell(member.name, member.points.toString(), member.host,
+      children.add(_listCell(
+          member.name,
+          member.points.toString(),
+          member.id == userModel.userData?.id,
+          member.host,
           constructColorFromUserName(member.name)));
     }
     return children;
@@ -289,6 +331,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
     String name,
     String points,
     bool isUser,
+    bool isHost,
     Color userColor,
   ) {
     return Container(
@@ -306,7 +349,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                     Icon(Icons.check_box_rounded, color: Colors.grey),
                     Container(
                       alignment: Alignment.center,
-                      child: isUser
+                      child: isHost
                           ? Text(
                               "👑",
                               style: TextStyle(fontSize: 20),
@@ -342,29 +385,68 @@ class _HomePageWidgetState extends State<HomePageWidget> {
             builder: (context, apiClient, userModel, child) {
               return Container(
                   width: MediaQuery.of(context).size.width / 4,
-                  child: ElevatedButton(
-                    onPressed: () => {
-                      showConfirmationAlert(
-                          "You're about to leave this group. Please confirm.",
-                          context,
-                          apiClient)
-                    },
-                    child: Text(
-                      "Leave",
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    style: TextButton.styleFrom(
-                        backgroundColor: Carnelian,
-                        shape: const RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(8)))),
-                  ));
+                  child: isUser
+                      ? Padding(
+                          padding: EdgeInsets.only(right: 6),
+                          child: ElevatedButton(
+                            onPressed: () => {
+                              showLeaveConfirmationAlert(
+                                  "Are you sure you want to leave this group?",
+                                  context,
+                                  apiClient)
+                            },
+                            child: Text(
+                              "Leave",
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            style: TextButton.styleFrom(
+                                backgroundColor: Carnelian,
+                                shape: const RoundedRectangleBorder(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(8)))),
+                          ),
+                        )
+                      : Container(height: 45));
             },
           )
         ],
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
       ),
     );
+  }
+
+  Future<void> _joinGroupDialog(BuildContext context) async {
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text('Join Group'),
+            content: TextField(
+              controller: idController,
+              decoration: InputDecoration(hintText: "Group ID"),
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: Text('CANCEL'),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+              Consumer<ApiClient>(
+                builder: (context, apiClient, child) {
+                  return TextButton(
+                    child: Text('JOIN'),
+                    onPressed: () {
+                      apiClient.serverApi
+                          ?.joinGroup(idController.text.toLowerCase());
+                      Navigator.pop(context);
+                    },
+                  );
+                },
+              )
+            ],
+          );
+        });
   }
 
   void dispose() {

@@ -17,6 +17,7 @@ export class ClientService {
 
   private makeCallback<TData>(event: string) {
     return (user: User, data: TData) => {
+      console.log(`Sent ${event} to user ${user.id}`);
       this.gateway.server.to(user.id).emit(event, data);
     };
   }
@@ -25,7 +26,9 @@ export class ClientService {
 
   emitUserRewarded = this.makeCallback<UserRewardedDto>('userRewarded');
 
-  emitInvalidateData = this.makeCallback<InvalidateDataDto>('invalidateData');
+  emitInvalidateData(data: InvalidateDataDto) {
+    this.gateway.server.emit('invalidateData', data);
+  }
 
   emitUpdateRewardData =
     this.makeCallback<UpdateRewardDataDto>('updateRewardData');
