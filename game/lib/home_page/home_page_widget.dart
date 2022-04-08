@@ -65,8 +65,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
               if (_doneState != null && gameModel.hasConnection) {
                 _controllerCenter.play();
                 apiClient.serverApi?.completedChallenge(_doneState.challengeId);
-                showAlert(
-                    "Congratulations! You've completed ${_doneState?.name}!",
+                showAlert("Congratulations! You've found ${_doneState?.name}!",
                     context);
                 setState(() {
                   _doneState = null;

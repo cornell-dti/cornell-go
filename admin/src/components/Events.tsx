@@ -44,7 +44,8 @@ function EventCard(props: {
         <ListCardTitle>{props.event.name}</ListCardTitle>
         <ListCardDescription>{props.event.description}</ListCardDescription>
         <ListCardBody>
-          Id: <b>{props.event.id}</b><br />
+          Id: <b>{props.event.id}</b>
+          <br />
           Available Until: <b>{new Date(props.event.time).toString()}</b> <br />
           Required Players: <b>{requiredText}</b> <br />
           Rewarding Method: <b>{rewardingMethod}</b> <br />
@@ -126,7 +127,7 @@ function toForm(event: EventDto) {
     {
       name: "Rewarding Method",
       options: ["Perpetual", "Limited Time"],
-      value: event.rewardType === "perpetual" ? 1 : 0,
+      value: event.rewardType === "perpetual" ? 0 : 1,
     },
     { name: "Visible", options: ["No", "Yes"], value: event.indexable ? 1 : 0 },
     { name: "Available Until", date: new Date(event.time) },

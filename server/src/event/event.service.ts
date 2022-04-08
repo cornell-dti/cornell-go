@@ -170,13 +170,13 @@ export class EventService {
     const chal = this.challengeRepository.create({
       eventIndex: 0,
       name: 'New challenge',
-      description: 'New challenge',
+      description: 'McGraw Tower',
       imageUrl:
         'https://upload.wikimedia.org/wikipedia/commons/5/5f/CentralAvenueCornell2.jpg',
-      latitude: 5,
-      longitude: 5,
-      awardingRadius: 0,
-      closeRadius: 0,
+      latitude: 42.447393513632406,
+      longitude: -76.48500323295593,
+      awardingRadius: 5,
+      closeRadius: 20,
       completions: [],
       linkedEvent: event,
     });

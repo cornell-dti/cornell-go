@@ -58,7 +58,7 @@ export class ChallengeGateway {
           ch.completions
             .getItems()
             .filter(c => c.completionPlayers.length > 0)[0]
-            ?.foundTimestamp?.toUTCString() ?? '',
+            ?.foundTimestamp?.toISOString() ?? '',
       })),
     });
 
