@@ -35,6 +35,10 @@ double calcCloseProgress(double distance, double closeRadius) {
 
 class _GameWidgetState extends State<GameWidget> {
   final Widget _child;
+
+  DateTime lastCheckTime = DateTime.now();
+  double lastDistance = 0;
+
   _GameWidgetState(Widget child) : _child = child;
   @override
   Widget build(BuildContext context) {
@@ -67,10 +71,7 @@ class _GameWidgetState extends State<GameWidget> {
               final chalLoc = GeoPoint(curChallenge.lat, curChallenge.long);
               final location =
                   GeoPoint(snapshot.data!.latitude, snapshot.data!.longitude);
-              final heading = snapshot.data!.heading;
-
               final distance = location.distanceTo(chalLoc);
-              final bearing = location.bearingTo(chalLoc);
 
               gameModel.walkingTime =
                   (distance / 80).ceil().toString() + " min";
@@ -78,10 +79,15 @@ class _GameWidgetState extends State<GameWidget> {
                   calcCompletionProgress(distance, curChallenge.awardingRadius);
               gameModel.closeProgress =
                   calcCloseProgress(distance, curChallenge.closeRadius);
-              gameModel.directionDistance = (heading - bearing - 180) / 180;
+              gameModel.directionDistance = lastDistance - distance;
               gameModel.withinCompletionRadius =
                   distance < curChallenge.awardingRadius;
               gameModel.withinCloseRadius = distance < curChallenge.closeRadius;
+
+              if (DateTime.now().difference(lastCheckTime).inSeconds > 10) {
+                lastDistance = distance;
+                lastCheckTime = DateTime.now();
+              }
             }
 
             return Provider.value(value: gameModel, child: _child);

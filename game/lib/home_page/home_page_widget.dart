@@ -124,10 +124,9 @@ class _HomePageWidgetState extends State<HomePageWidget> {
       final progressToUse = gameModel.withinCloseRadius
           ? gameModel.completionProgress
           : gameModel.closeProgress;
-      final wrongPath = gameModel.directionDistance.abs() > 0.5;
       final isDoneWithoutConnection =
           _doneState != null && !gameModel.hasConnection;
-      if (wrongPath) {
+      if (gameModel.directionDistance < 0) {
         displayToast("You're going the wrong way!", Status.error);
       }
       return VStack([
@@ -184,11 +183,17 @@ class _HomePageWidgetState extends State<HomePageWidget> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
           child: Text(
-              wrongPath
-                  ? "You're going the wrong way"
-                  : "You're on the right path",
+              gameModel.directionDistance == 0
+                  ? "Start moving!"
+                  : gameModel.directionDistance < 0
+                      ? "You're going the wrong way"
+                      : "You're on the right path",
               style: TextStyle(
-                  color: wrongPath ? Colors.red : Colors.green,
+                  color: gameModel.directionDistance == 0
+                      ? Colors.orange
+                      : gameModel.directionDistance < 0
+                          ? Colors.red
+                          : Colors.green,
                   fontWeight: FontWeight.bold)),
         ),
         Container(
