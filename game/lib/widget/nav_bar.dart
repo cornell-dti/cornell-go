@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:game/feedback/feedback.dart';
 import 'package:game/leaderboard/leaderboard_widget.dart';
@@ -10,6 +12,12 @@ import 'package:game/username/username_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/utils/utility_functions.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+const androidForm =
+    "https://docs.google.com/forms/d/e/1FAIpQLScpffXZMHHfvY9zD_11wqrEaZTEy3dVD3OZz4iugzBKTEKQtw/viewform";
+const iosForm =
+    "https://docs.google.com/forms/d/e/1FAIpQLSdE3Hrt9OXvYEakj0n0wHuUUd_D_LGRpx_YkvA7-D_05ybGSw/viewform";
 
 class NavBar extends StatelessWidget {
   @override
@@ -98,10 +106,13 @@ class NavBar extends StatelessWidget {
                 color: Color(0xFFB31B1B),
               ),
               title: Text('Feedback', style: listTextStyle),
-              onTap: () => {
-                Navigator.pop(context),
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => FeedbackWidget()))
+              onTap: () async {
+                if (Platform.isAndroid) {
+                  await launch(androidForm,
+                      forceWebView: true, enableJavaScript: true);
+                } else if (Platform.isIOS) {
+                  await launch(iosForm, forceSafariVC: true);
+                }
               },
             ),
             ListTile(
