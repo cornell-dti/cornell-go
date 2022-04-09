@@ -1,4 +1,5 @@
 import { useContext, useState } from "react";
+import { compareTwoStrings } from "string-similarity";
 import { RewardDto } from "../dto/update-rewards.dto";
 import { moveDown, moveUp } from "../ordering";
 import { AlertModal } from "./AlertModal";
@@ -86,6 +87,7 @@ export function Rewards() {
 
   const [currentId, setCurrentId] = useState("");
   const [form, setForm] = useState(() => makeForm());
+  const [query, setQuery] = useState("");
 
   const selectedEvent = serverData.events.get(serverData.selectedEvent);
 
@@ -141,43 +143,53 @@ export function Rewards() {
             setSelectModalOpen(true);
           }
         }}
+        onSearch={(query) => setQuery(query)}
       />
-      {selectedEvent?.rewardIds.map(
-        (rwId) =>
-          serverData.rewards.get(rwId) && (
-            <RewardCard
-              key={rwId}
-              reward={serverData.rewards.get(rwId)!}
-              onUp={() => {
-                selectedEvent.rewardIds = moveUp(
-                  selectedEvent.rewardIds,
-                  selectedEvent.rewardIds.findIndex((id) => id === rwId)
-                );
-                serverData.updateEvent(selectedEvent);
-              }}
-              onDown={() => {
-                selectedEvent.rewardIds = moveDown(
-                  selectedEvent.rewardIds,
-                  selectedEvent.rewardIds.findIndex((id) => id === rwId)
-                );
-                serverData.updateEvent(selectedEvent);
-              }}
-              onEdit={() => {
-                setCurrentId(rwId);
-                setForm(toForm(serverData.rewards.get(rwId)!));
-                setEditModalOpen(true);
-              }}
-              onDelete={() => {
-                setCurrentId(rwId);
-                setDeleteModalOpen(true);
-              }}
-              onCopy={() => {
-                setForm(toForm(serverData.rewards.get(rwId)!));
-                setCreateModalOpen(true);
-              }}
-            />
-          )
-      )}
+      {selectedEvent?.rewardIds
+        .filter((rwId) => serverData.rewards.get(rwId))
+        .map((rwId) => serverData.rewards.get(rwId)!)
+        .sort(
+          (a, b) =>
+            compareTwoStrings(b.description, query) -
+            compareTwoStrings(a.description, query) +
+            compareTwoStrings(b.redeemInfo, query) -
+            compareTwoStrings(a.redeemInfo, query)
+        )
+        .map((rw) => (
+          <RewardCard
+            key={rw.id}
+            reward={rw}
+            onUp={() => {
+              if (query !== "") return;
+              selectedEvent.rewardIds = moveUp(
+                selectedEvent.rewardIds,
+                selectedEvent.rewardIds.findIndex((id) => id === rw.id)
+              );
+              serverData.updateEvent(selectedEvent);
+            }}
+            onDown={() => {
+              if (query !== "") return;
+              selectedEvent.rewardIds = moveDown(
+                selectedEvent.rewardIds,
+                selectedEvent.rewardIds.findIndex((id) => id === rw.id)
+              );
+              serverData.updateEvent(selectedEvent);
+            }}
+            onEdit={() => {
+              setCurrentId(rw.id);
+              setForm(toForm(rw));
+              setEditModalOpen(true);
+            }}
+            onDelete={() => {
+              setCurrentId(rw.id);
+              setDeleteModalOpen(true);
+            }}
+            onCopy={() => {
+              setForm(toForm(rw));
+              setCreateModalOpen(true);
+            }}
+          />
+        ))}
     </>
   );
 }

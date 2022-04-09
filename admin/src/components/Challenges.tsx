@@ -1,4 +1,5 @@
 import { useContext, useState } from "react";
+import { compareTwoStrings } from "string-similarity";
 import styled, { css } from "styled-components";
 import { ChallengeDto } from "../dto/update-challenges.dto";
 import { moveDown, moveUp } from "../ordering";
@@ -129,6 +130,7 @@ export function Challenges() {
 
   const [form, setForm] = useState(() => makeForm());
   const [currentId, setCurrentId] = useState("");
+  const [query, setQuery] = useState("");
 
   const serverData = useContext(ServerDataContext);
   const selectedEvent = serverData.events.get(serverData.selectedEvent);
@@ -187,39 +189,49 @@ export function Challenges() {
             setSelectModalOpen(true);
           }
         }}
+        onSearch={(query) => setQuery(query)}
       />
-      {selectedEvent?.challengeIds.map(
-        (chalId) =>
-          serverData.challenges.get(chalId) && (
-            <ChallengeCard
-              key={chalId}
-              challenge={serverData.challenges.get(chalId)!}
-              onUp={() => {
-                selectedEvent.challengeIds = moveUp(
-                  selectedEvent.challengeIds,
-                  selectedEvent.challengeIds.findIndex((id) => id === chalId)
-                );
-                serverData.updateEvent(selectedEvent);
-              }}
-              onDown={() => {
-                selectedEvent.challengeIds = moveDown(
-                  selectedEvent.challengeIds,
-                  selectedEvent.challengeIds.findIndex((id) => id === chalId)
-                );
-                serverData.updateEvent(selectedEvent);
-              }}
-              onEdit={() => {
-                setCurrentId(chalId);
-                setForm(toForm(serverData.challenges.get(chalId)!));
-                setEditModalOpen(true);
-              }}
-              onDelete={() => {
-                setCurrentId(chalId);
-                setDeleteModalOpen(true);
-              }}
-            />
-          )
-      )}
+      {selectedEvent?.challengeIds
+        .filter((chalId) => serverData.challenges.get(chalId))
+        .map((chalId) => serverData.challenges.get(chalId)!)
+        .sort(
+          (a, b) =>
+            compareTwoStrings(b.name, query) -
+            compareTwoStrings(a.name, query) +
+            compareTwoStrings(b.description, query) -
+            compareTwoStrings(a.description, query)
+        )
+        .map((chal) => (
+          <ChallengeCard
+            key={chal.id}
+            challenge={chal}
+            onUp={() => {
+              if (query !== "") return;
+              selectedEvent.challengeIds = moveUp(
+                selectedEvent.challengeIds,
+                selectedEvent.challengeIds.findIndex((id) => id === chal.id)
+              );
+              serverData.updateEvent(selectedEvent);
+            }}
+            onDown={() => {
+              if (query !== "") return;
+              selectedEvent.challengeIds = moveDown(
+                selectedEvent.challengeIds,
+                selectedEvent.challengeIds.findIndex((id) => id === chal.id)
+              );
+              serverData.updateEvent(selectedEvent);
+            }}
+            onEdit={() => {
+              setCurrentId(chal.id);
+              setForm(toForm(chal));
+              setEditModalOpen(true);
+            }}
+            onDelete={() => {
+              setCurrentId(chal.id);
+              setDeleteModalOpen(true);
+            }}
+          />
+        ))}
     </>
   );
 }

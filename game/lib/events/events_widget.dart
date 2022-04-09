@@ -5,6 +5,8 @@ import 'package:game/model/event_model.dart';
 import 'package:game/api/game_client_dto.dart';
 import 'package:game/model/group_model.dart';
 import 'package:game/model/tracker_model.dart';
+import 'package:game/model/user_model.dart';
+import 'package:game/utils/utility_functions.dart';
 import 'package:game/widget/back_btn.dart';
 import 'package:game/widget/events_cell.dart';
 import 'package:intl/intl.dart';
@@ -69,10 +71,10 @@ class _EventsWidgetState extends State<EventsWidget> {
             padding: const EdgeInsets.only(left: 8.0, right: 8.0),
             child: Column(
               children: [
-                Expanded(child: Consumer4<EventModel, GroupModel, TrackerModel,
-                        ChallengeModel>(
+                Expanded(child: Consumer5<EventModel, GroupModel, TrackerModel,
+                        ChallengeModel, UserModel>(
                     builder: (context, myEventModel, groupModel, trackerModel,
-                        challengeModel, child) {
+                        challengeModel, userModel, child) {
                   List<Widget> eventCells = [];
                   if (myEventModel.searchResults == null) {
                     myEventModel.searchEvents(
@@ -107,7 +109,14 @@ class _EventsWidgetState extends State<EventsWidget> {
                         event.challengeIds.length;
                     eventCells.add(GestureDetector(
                       onTap: () {
-                        _showConfirmation(context, event.id, event.name);
+                        if (groupModel.members.any((element) =>
+                            element.id == userModel.userData?.id &&
+                            element.host)) {
+                          _showConfirmation(context, event.id, event.name);
+                        } else {
+                          showAlert("Ask the group leader to change the event.",
+                              context);
+                        }
                       },
                       child: eventsCell(
                           context,

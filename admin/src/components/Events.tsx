@@ -20,6 +20,8 @@ import {
 import { SearchBar } from "./SearchBar";
 import { ServerDataContext } from "./ServerData";
 
+import { compareTwoStrings } from "string-similarity";
+
 function EventCard(props: {
   event: EventDto;
   onSelect: () => void;
@@ -141,6 +143,7 @@ export function Events() {
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
   const [form, setForm] = useState(() => makeForm());
   const [currentId, setCurrentId] = useState("");
+  const [query, setQuery] = useState("");
 
   return (
     <>
@@ -189,23 +192,32 @@ export function Events() {
           setForm(makeForm());
           setCreateModalOpen(true);
         }}
+        onSearch={(query) => setQuery(query)}
       />
-      {Array.from(serverData.events.values()).map((ev) => (
-        <EventCard
-          key={ev.id}
-          event={ev}
-          onSelect={() => serverData.selectEvent(ev.id)}
-          onDelete={() => {
-            setCurrentId(ev.id);
-            setDeleteModalOpen(true);
-          }}
-          onEdit={() => {
-            setCurrentId(ev.id);
-            setForm(toForm(ev));
-            setEditModalOpen(true);
-          }}
-        />
-      ))}
+      {Array.from(serverData.events.values())
+        .sort(
+          (a, b) =>
+            compareTwoStrings(b.name, query) -
+            compareTwoStrings(a.name, query) +
+            compareTwoStrings(b.description, query) -
+            compareTwoStrings(a.description, query)
+        )
+        .map((ev) => (
+          <EventCard
+            key={ev.id}
+            event={ev}
+            onSelect={() => serverData.selectEvent(ev.id)}
+            onDelete={() => {
+              setCurrentId(ev.id);
+              setDeleteModalOpen(true);
+            }}
+            onEdit={() => {
+              setCurrentId(ev.id);
+              setForm(toForm(ev));
+              setEditModalOpen(true);
+            }}
+          />
+        ))}
     </>
   );
 }

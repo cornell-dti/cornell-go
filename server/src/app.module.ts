@@ -43,7 +43,7 @@ const storage = new AsyncLocalStorage<EntityManager>();
         },
       },
       migrations: {
-        path: 'dist/migrations',
+        path: 'dist/src/migrations',
         pathTs: 'src/migrations',
         disableForeignKeys: false,
       },
@@ -52,7 +52,7 @@ const storage = new AsyncLocalStorage<EntityManager>();
       },
     }),
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', '..', 'admin', 'build'),
+      rootPath: join(__dirname, '..', '..', '..', 'admin', 'build'),
     }),
     EventModule,
     GroupModule,

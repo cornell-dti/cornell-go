@@ -118,8 +118,8 @@ class _HomePageWidgetState extends State<HomePageWidget> {
   }
 
   Widget _panel() {
-    return Consumer3<GameModel, GroupModel, UserModel>(
-        builder: (context, gameModel, groupModel, userModel, child) {
+    return Consumer4<GameModel, GroupModel, UserModel, TrackerModel>(builder:
+        (context, gameModel, groupModel, userModel, trackerModel, child) {
       final progressToUse = gameModel.withinCloseRadius
           ? gameModel.completionProgress
           : gameModel.closeProgress;
@@ -310,7 +310,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
             child: ListView(
               shrinkWrap: true,
               scrollDirection: Axis.vertical,
-              children: getMembers(userModel, groupModel),
+              children: getMembers(userModel, groupModel, trackerModel),
             ),
           ),
         )
@@ -318,7 +318,8 @@ class _HomePageWidgetState extends State<HomePageWidget> {
     });
   }
 
-  List<Widget> getMembers(UserModel userModel, GroupModel groupModel) {
+  List<Widget> getMembers(
+      UserModel userModel, GroupModel groupModel, TrackerModel trackerModel) {
     List<Widget> children = [];
     for (var member in groupModel.members) {
       children.add(_listCell(
@@ -326,6 +327,10 @@ class _HomePageWidgetState extends State<HomePageWidget> {
           member.points.toString(),
           member.id == userModel.userData?.id,
           member.host,
+          member.curChallengeId ==
+              trackerModel
+                  .trackerByEventId(groupModel.curEventId ?? '')
+                  ?.curChallengeId,
           constructColorFromUserName(member.name)));
     }
     return children;
@@ -336,6 +341,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
     String points,
     bool isUser,
     bool isHost,
+    bool isSameChallenge,
     Color userColor,
   ) {
     return Container(
@@ -350,7 +356,11 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                 width: MediaQuery.of(context).size.width / 5,
                 child: Row(
                   children: [
-                    Icon(Icons.check_box_rounded, color: Colors.grey),
+                    Icon(
+                        isSameChallenge
+                            ? Icons.search
+                            : Icons.check_box_rounded,
+                        color: Colors.grey),
                     Container(
                       alignment: Alignment.center,
                       child: isHost

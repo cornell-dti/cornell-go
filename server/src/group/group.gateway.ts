@@ -50,7 +50,7 @@ export class GroupGateway {
             host: member.id === groupData.host?.id,
             curChallengeId: (
               await this.eventService.getCurrentEventTrackerForUser(member)
-            ).event.id,
+            ).currentChallenge.id,
           };
         }),
       ),

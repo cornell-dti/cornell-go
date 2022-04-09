@@ -73,6 +73,16 @@ class _LoginWidgetState extends State<LoginWidget> {
             Column(
               children: [
                 Padding(
+                  padding: const EdgeInsets.only(bottom: 20),
+                  child: Container(
+                    child: Text(
+                      "Use your @cornell.edu account to sign in.\n\nCornellGO! uses location permissions to determine your distance to landmarks.",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    width: 280,
+                  ),
+                ),
+                Padding(
                     padding: const EdgeInsets.only(bottom: 0),
                     child: Consumer<ApiClient>(
                       builder: (context, apiClient, child) {
