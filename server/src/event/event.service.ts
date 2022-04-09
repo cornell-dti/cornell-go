@@ -150,12 +150,28 @@ export class EventService {
 
   /** Gets a player's event tracker based on group */
   async getCurrentEventTrackerForUser(user: User) {
-    const group = await user.group?.load();
+    const group = await user.group.load();
 
-    return await this.eventTrackerRepository.findOneOrFail({
+    const evTracker = await this.eventTrackerRepository.findOne({
       user,
-      event: group?.currentEvent,
+      event: group.currentEvent,
     });
+
+    if (!evTracker) {
+      const chals = (await group.currentEvent.load()).challenges;
+      await chals.init();
+      const newTracker = this.eventTrackerRepository.create({
+        event: group.currentEvent,
+        eventScore: 0,
+        isPlayerRanked: true,
+        cooldownMinimum: new Date(),
+        user,
+        currentChallenge: chals[0],
+      });
+      this.eventTrackerRepository.persistAndFlush(newTracker);
+      return newTracker;
+    }
+    return evTracker;
   }
 
   /** Saves an event tracker */

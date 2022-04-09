@@ -133,13 +133,8 @@ export class GroupGateway {
     });
     group.currentEvent.set(newEvent);
     await this.groupService.saveGroup(group);
-    let updateGroupData: UpdateGroupDataDto = {
-      curEventId: data.eventId,
-      members: [],
-      removeListedMembers: false,
-    };
     groupMembers.forEach(async (member: User) => {
-      this.clientService.emitUpdateGroupData(member, updateGroupData);
+      this.requestGroupData(member, {});
     });
   }
 }
