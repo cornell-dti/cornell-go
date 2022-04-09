@@ -84,7 +84,7 @@ Widget eventsCell(
                     ),
                     Container(
                         child: Text(
-                      people == -1 || completed ? "" : " ${people}",
+                      people < 0 || completed ? "" : " ${people}",
                       style: placeStyle,
                     ))
                   ]),

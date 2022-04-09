@@ -15,6 +15,7 @@ import { EventReward } from 'src/model/event-reward.entity';
 import { CallingUser } from '../auth/calling-user.decorator';
 import { ClientService } from '../client/client.service';
 import { EventService } from '../event/event.service';
+import { Challenge } from '../model/challenge.entity';
 import { User } from '../model/user.entity';
 import { UserService } from '../user/user.service';
 import { ChallengeService } from './challenge.service';
@@ -44,22 +45,34 @@ export class ChallengeGateway {
         data.challengeIds,
       );
 
+    const completionDateFun = async (ch: Challenge) => {
+      const completions = await ch.completions.loadItems();
+      for (const completion of completions) {
+        const completers = await completion.completionPlayers.loadItems();
+        const completer = completers.find(
+          completer => completer.id === user.id,
+        );
+        if (completer) {
+          return completion.foundTimestamp.toISOString();
+        }
+      }
+      return '';
+    };
+
     this.clientService.emitUpdateChallengeData(user, {
-      challenges: completeChallenges.map(ch => ({
-        id: ch.id,
-        name: ch.name,
-        description: ch.description,
-        imageUrl: ch.imageUrl,
-        lat: ch.latitude,
-        long: ch.longitude,
-        awardingRadius: ch.awardingRadius,
-        closeRadius: ch.closeRadius,
-        completionDate:
-          ch.completions
-            .getItems()
-            .filter(c => c.completionPlayers.length > 0)[0]
-            ?.foundTimestamp?.toISOString() ?? '',
-      })),
+      challenges: await Promise.all(
+        completeChallenges.map(async ch => ({
+          id: ch.id,
+          name: ch.name,
+          description: ch.description,
+          imageUrl: ch.imageUrl,
+          lat: ch.latitude,
+          long: ch.longitude,
+          awardingRadius: ch.awardingRadius,
+          closeRadius: ch.closeRadius,
+          completionDate: await completionDateFun(ch),
+        })),
+      ),
     });
 
     return false;

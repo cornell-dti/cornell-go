@@ -43,7 +43,19 @@ Widget challengeCell(
                 Container(
                     child: notVisited
                         ? Text("Not Visited Yet...", style: placeStyle)
-                        : Text(place, style: placeStyle)),
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Center(child: Text(place, style: placeStyle)),
+                              Padding(
+                                padding: EdgeInsets.only(left: 6),
+                                child: notVisited
+                                    ? null
+                                    : Icon(Icons.star,
+                                        color: Colors.yellow, size: 25),
+                              )
+                            ],
+                          )),
               ])),
         )
       ]));

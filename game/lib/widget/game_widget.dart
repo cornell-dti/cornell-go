@@ -20,8 +20,10 @@ class GameWidget extends StatefulWidget {
   _GameWidgetState createState() => _GameWidgetState(_child);
 }
 
-double calcCompletionProgress(double distance, double completionRadius) {
-  return max(0, 1 - distance / completionRadius);
+double calcCompletionProgress(
+    double distance, double closeRadius, double completionRadius) {
+  return max(
+      0, 1 - (distance - completionRadius) / (closeRadius - completionRadius));
 }
 
 double calcCloseProgress(double distance, double closeRadius) {
@@ -75,8 +77,8 @@ class _GameWidgetState extends State<GameWidget> {
 
               gameModel.walkingTime =
                   (distance / 80).ceil().toString() + " min";
-              gameModel.completionProgress =
-                  calcCompletionProgress(distance, curChallenge.awardingRadius);
+              gameModel.completionProgress = calcCompletionProgress(distance,
+                  curChallenge.closeRadius, curChallenge.awardingRadius);
               gameModel.closeProgress =
                   calcCloseProgress(distance, curChallenge.closeRadius);
               gameModel.directionDistance = lastDistance - distance;

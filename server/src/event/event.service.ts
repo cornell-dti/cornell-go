@@ -87,11 +87,8 @@ export class EventService {
       .select(['ev.*'])
       .where({ isDefault: true })
       .joinAndSelect('ev.challenges', 'chal')
-      .andWhere(
-        `((chal.latitude - ${+lat})^2 + (chal.longitude - ${+long})^2) > 0.000000128205 * chal.close_radius * chal.close_radius`,
-      )
       .orderBy({
-        [`((chal.latitude - ${+lat})^2 + (chal.longitude - ${+long})^2)`]:
+        [`((chal.latitude - (${+lat}))^2 + (chal.longitude - (${+long}))^2)`]:
           'asc',
       })
       .getSingleResult();

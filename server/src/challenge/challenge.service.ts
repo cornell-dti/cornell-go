@@ -24,38 +24,12 @@ export class ChallengeService {
     private rewardRepository: EntityRepository<EventReward>,
   ) {}
 
-  async createNew(event: EventBase) {
-    const chal = this.challengeRepository.create({
-      eventIndex: 0,
-      name: 'New challenge',
-      description: 'New challenge',
-      imageUrl: '',
-      latitude: 0,
-      longitude: 0,
-      awardingRadius: 0,
-      closeRadius: 0,
-      completions: [],
-      linkedEvent: event,
-    });
-
-    await this.challengeRepository.persistAndFlush(chal);
-
-    return chal;
-  }
-
   /** Get challenges with prev challenges for a given user */
   async getChallengesByIdsWithPrevChallenge(
     user: User,
     ids: string[],
   ): Promise<Challenge[]> {
-    return await this.challengeRepository
-      .createQueryBuilder('chal')
-      .leftJoinAndSelect('chal.completions', 'completion')
-      .leftJoinAndSelect(
-        'completion.completionPlayers',
-        'player',
-        `player.id = ${user.id}`,
-      );
+    return await this.challengeRepository.find({ id: ids });
   }
 
   /** Get a challenge by its id */

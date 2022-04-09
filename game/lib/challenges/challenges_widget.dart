@@ -9,6 +9,7 @@ import 'package:game/api/game_client_dto.dart';
 
 import 'package:game/widget/back_btn.dart';
 import 'package:game/widget/challenge_cell.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class ChallengesWidget extends StatefulWidget {
@@ -28,6 +29,7 @@ class _ChallengesWidgetState extends State<ChallengesWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final format = DateFormat('yyyy-MM-dd');
     return Scaffold(
       key: scaffoldKey,
       floatingActionButton: backBtn(scaffoldKey, context, "Challenges"),
@@ -68,10 +70,12 @@ class _ChallengesWidgetState extends State<ChallengesWidget> {
                           child: challengeCell(
                               context,
                               challenge.name,
-                              challenge.completionDate,
+                              challenge.completionDate == null
+                                  ? ""
+                                  : format.format(challenge.completionDate!),
                               challenge.imageUrl,
                               tracker.curChallengeId == challengeId,
-                              !tracker.prevChallengeIds.contains(challengeId),
+                              challenge.completionDate == null,
                               !event.skippingEnabled),
                         ));
                       }
@@ -82,20 +86,6 @@ class _ChallengesWidgetState extends State<ChallengesWidget> {
                         children: challengeCells);
                   }
                 }))
-                // Expanded(
-                //     child: ListView(
-                //         shrinkWrap: true,
-                //         scrollDirection: Axis.vertical,
-                //         children: [
-                //       challengeCell(context, "Sage Chapel", "4/19/2021", 5,
-                //           "assets/images/38582.jpg", false, false, false),
-                //       challengeCell(context, "Sage Chapel", "4/19/2021", 5,
-                //           "assets/images/38582.jpg", true, true, false),
-                //       challengeCell(context, "Sage Chapel", "4/19/2021", 5,
-                //           "assets/images/38582.jpg", false, true, false),
-                //       challengeCell(context, "Sage Chapel", "4/19/2021", 5,
-                //           "assets/images/38582.jpg", false, true, true),
-                //     ]))
               ],
             ),
           ),
