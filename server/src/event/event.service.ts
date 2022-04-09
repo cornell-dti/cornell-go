@@ -170,10 +170,10 @@ export class EventService {
       description: 'McGraw Tower',
       imageUrl:
         'https://upload.wikimedia.org/wikipedia/commons/5/5f/CentralAvenueCornell2.jpg',
-      latitude: 42.447393513632406,
-      longitude: -76.48500323295593,
-      awardingRadius: 5,
-      closeRadius: 20,
+      latitude: 42.44755580740012,
+      longitude: -76.48504614830019,
+      awardingRadius: 10,
+      closeRadius: 50,
       completions: [],
       linkedEvent: event,
     });

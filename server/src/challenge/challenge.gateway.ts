@@ -163,24 +163,24 @@ export class ChallengeGateway {
     const group = await user.group?.load();
 
     const updateData: UpdateGroupDataDto = {
-      curEventId: group?.currentEvent.id ?? '',
+      curEventId: group.currentEvent.id,
       members: [
         {
           id: user.id,
           name: user.username,
           points: user.score,
-          host: group?.host?.id === user.id,
+          host: group.host.id === user.id,
           curChallengeId: newTracker.currentChallenge.id,
         },
       ],
       removeListedMembers: false,
     };
 
-    for (const mem of group?.members ?? []) {
+    for (const mem of group.members) {
       this.clientService.emitUpdateGroupData(mem, updateData);
     }
 
-    await newTracker.completed.init();
+    await newTracker.completed.loadItems();
 
     this.clientService.emitUpdateEventTrackerData(user, {
       eventTrackers: [
@@ -190,6 +190,27 @@ export class ChallengeGateway {
           cooldownMinimum: newTracker.cooldownMinimum.toISOString(),
           curChallengeId: newTracker.currentChallenge.id,
           prevChallengeIds: newTracker.completed.getIdentifiers(),
+        },
+      ],
+    });
+
+    const ch = await newTracker.currentChallenge.load();
+
+    this.clientService.emitUpdateChallengeData(user, {
+      challenges: [
+        {
+          id: ch.id,
+          name: ch.name,
+          description: ch.description,
+          imageUrl: ch.imageUrl,
+          lat: ch.latitude,
+          long: ch.longitude,
+          awardingRadius: ch.awardingRadius,
+          closeRadius: ch.closeRadius,
+          completionDate: newTracker.completed
+            .getItems()
+            .filter(ch => ch.challenge.id === data.challengeId)[0]
+            .foundTimestamp.toISOString(),
         },
       ],
     });
@@ -227,13 +248,5 @@ export class ChallengeGateway {
     }
 
     return true;
-    /**
-     * TODO:
-     * Create PrevChallenge and associate with user
-     * Progress the user to the next challenge (if possible)
-     * Reward player upon completion of last challenge (if conditions met)
-     * If conditions involve other players, check for reward for all players
-     *
-     */
   }
 }
