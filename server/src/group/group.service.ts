@@ -80,7 +80,11 @@ export class GroupService {
       await this.groupsRepository.removeAndFlush(group);
       return undefined;
     } else if (didHostLeave) {
-      group.host = Reference.create((await group.members.loadItems())[0]);
+      group.host = Reference.create(
+        (await group.members.loadItems()).filter(
+          u => group.host.id !== u.id,
+        )[0],
+      );
       await this.groupsRepository.persistAndFlush(group);
     }
     return group;
