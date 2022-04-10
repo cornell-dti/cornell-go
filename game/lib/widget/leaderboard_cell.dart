@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:game/utils/utility_functions.dart';
 
 Widget leaderBoardCell(
     context, String name, int position, int points, bool isUser) {
@@ -32,7 +33,13 @@ Widget leaderBoardCell(
                     Text(position.toString(), style: posStyle),
                     Padding(
                       padding: const EdgeInsets.only(left: 12.0),
-                      child: Icon(Icons.camera_alt_rounded, color: Carnelian),
+                      child: Container(
+                        width: 30,
+                        height: 30,
+                        decoration: BoxDecoration(
+                            color: constructColorFromUserName(name),
+                            borderRadius: BorderRadius.circular(15)),
+                      ),
                     )
                   ],
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,

@@ -36,13 +36,14 @@ class _LeaderboardWidgetState extends State<LeaderboardWidget> {
                 if (myGroupModel.curEventId == null) return ListView();
                 final List<UpdateLeaderDataUserDto> list = myEventModel
                     .getTopPlayersForEvent(myGroupModel.curEventId!, 1000);
+
                 return ListView(
                   shrinkWrap: true,
                   scrollDirection: Axis.vertical,
                   children: [
                     for (int i = 0; i < list.length; i++)
                       if (myUserModel.userData?.id != null &&
-                          myUserModel.userData!.id == list.elementAt(i))
+                          myUserModel.userData!.id == list.elementAt(i).userId)
                         leaderBoardUserCell(
                             context,
                             list.elementAt(i).username,

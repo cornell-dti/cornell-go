@@ -22,6 +22,7 @@ import { RequestGlobalLeaderDataDto } from './request-global-leader-data.dto';
 import { UserService } from './user.service';
 import { forwardRef, Inject, UseGuards } from '@nestjs/common';
 import { UserGuard } from 'src/auth/jwt-auth.guard';
+import { GroupGateway } from '../group/group.gateway';
 
 @WebSocketGateway({ cors: true })
 @UseGuards(UserGuard)
@@ -31,6 +32,7 @@ export class UserGateway {
     private userService: UserService,
     @Inject(forwardRef(() => AuthService))
     private authService: AuthService,
+    private groupGateway: GroupGateway,
   ) {}
 
   private providerToAuthType(provider: string) {
@@ -77,9 +79,8 @@ export class UserGateway {
     @CallingUser() user: User,
     @MessageBody() data: SetUsernameDto,
   ) {
-    const group = await user.group?.load();
-    const groupMembers = group?.members;
-    const participatingEvents = await user.participatingEvents.loadItems();
+    const group = await user.group.load();
+    const groupMembers = await group.members.loadItems();
 
     user.username = data.newUsername;
 
@@ -96,27 +97,7 @@ export class UserGateway {
     });
 
     // Update data for the group
-    const updateData: UpdateGroupDataDto = {
-      curEventId: group?.currentEvent.id ?? '',
-      removeListedMembers: false,
-      members: [
-        {
-          id: user.id,
-          name: user.username,
-          points: user.score,
-          host: user.id === group?.id,
-          curChallengeId:
-            participatingEvents.find(
-              ev => ev.event.id === group?.currentEvent.id,
-            )?.currentChallenge.id ?? '',
-        },
-      ],
-    };
-
-    // Update groupmates about username change
-    for (const member of groupMembers ?? []) {
-      this.clientService.emitUpdateGroupData(member, updateData);
-    }
+    groupMembers.forEach(u => this.groupGateway.requestGroupData(u, {}));
 
     return false;
   }
