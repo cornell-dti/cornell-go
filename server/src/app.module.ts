@@ -18,8 +18,6 @@ import { AsyncLocalStorage } from 'async_hooks';
 import { InitService } from './init.service';
 import { TsMorphMetadataProvider } from '@mikro-orm/reflection';
 
-const storage = new AsyncLocalStorage<EntityManager>();
-
 @Module({
   imports: [
     ConfigModule.forRoot(),
@@ -35,8 +33,6 @@ const storage = new AsyncLocalStorage<EntityManager>();
       strict: true,
       debug: true,
       persistOnCreate: true,
-      registerRequestContext: false, // disable automatatic middleware
-      context: () => storage.getStore(), // use our AsyncLocalStorage instance
       driverOptions: {
         connection: {
           ssl: !process.env.NO_SSL && { rejectUnauthorized: false },
