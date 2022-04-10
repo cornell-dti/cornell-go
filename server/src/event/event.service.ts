@@ -134,8 +134,10 @@ export class EventService {
   }
 
   async createEventTracker(user: User, event: EventBase) {
-    await event.challenges.init();
-    const closestChallenge = event.challenges[0];
+    const closestChallenge = await this.challengeRepository.findOneOrFail({
+      eventIndex: 0,
+      linkedEvent: event,
+    });
 
     const progress: EventTracker = this.eventTrackerRepository.create({
       eventScore: 0,

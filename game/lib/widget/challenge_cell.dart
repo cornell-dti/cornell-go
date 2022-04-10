@@ -32,7 +32,7 @@ Widget challengeCell(
                   color: noSkipping && !current && notVisited
                       ? Colors.black
                       : null,
-                  image: noSkipping
+                  image: noSkipping && !current && notVisited
                       ? null
                       : DecorationImage(
                           image: CachedNetworkImageProvider(imgpath),

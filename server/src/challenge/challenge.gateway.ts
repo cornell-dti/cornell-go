@@ -61,17 +61,19 @@ export class ChallengeGateway {
 
     this.clientService.emitUpdateChallengeData(user, {
       challenges: await Promise.all(
-        completeChallenges.map(async ch => ({
-          id: ch.id,
-          name: ch.name,
-          description: ch.description,
-          imageUrl: ch.imageUrl,
-          lat: ch.latitude,
-          long: ch.longitude,
-          awardingRadius: ch.awardingRadius,
-          closeRadius: ch.closeRadius,
-          completionDate: await completionDateFun(ch),
-        })),
+        completeChallenges
+          .sort((a, b) => a.eventIndex - b.eventIndex)
+          .map(async ch => ({
+            id: ch.id,
+            name: ch.name,
+            description: ch.description,
+            imageUrl: ch.imageUrl,
+            lat: ch.latitude,
+            long: ch.longitude,
+            awardingRadius: ch.awardingRadius,
+            closeRadius: ch.closeRadius,
+            completionDate: await completionDateFun(ch),
+          })),
       ),
     });
 
