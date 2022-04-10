@@ -251,7 +251,9 @@ export class AdminGateway {
       time: ev.time.toUTCString(),
       requiredMembers: ev.requiredMembers,
       indexable: ev.indexable,
-      challengeIds: ev.challenges.getIdentifiers(),
+      challengeIds: (await ev.challenges.loadItems())
+        .sort((a, b) => a.eventIndex - b.eventIndex)
+        .map(c => c.id),
       rewardIds: ev.rewards.getIdentifiers(),
     };
   }

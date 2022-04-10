@@ -47,9 +47,9 @@ export class EventGateway {
           rewardType: ev.rewardType as RewardTypeDto,
           time: ev.time.toISOString(),
           requiredMembers: ev.requiredMembers,
-          challengeIds: (
-            await ev.challenges.loadItems()
-          ).map((ch: Challenge) => ch.id),
+          challengeIds: (await ev.challenges.loadItems())
+            .sort((a, b) => a.eventIndex - b.eventIndex)
+            .map((ch: Challenge) => ch.id),
           rewards: (
             await ev.rewards.loadItems()
           ).map((rw: EventReward) => ({
