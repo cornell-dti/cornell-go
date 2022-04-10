@@ -15,6 +15,7 @@ import { EventReward } from 'src/model/event-reward.entity';
 import { CallingUser } from '../auth/calling-user.decorator';
 import { ClientService } from '../client/client.service';
 import { EventService } from '../event/event.service';
+import { Challenge } from '../model/challenge.entity';
 import { User } from '../model/user.entity';
 import { UserService } from '../user/user.service';
 import { ChallengeService } from './challenge.service';
@@ -38,24 +39,40 @@ export class ChallengeGateway {
     @CallingUser() user: User,
     @MessageBody() data: RequestChallengeDataDto,
   ) {
-    const challengeEntities =
+    const completeChallenges =
       await this.challengeService.getChallengesByIdsWithPrevChallenge(
         user,
         data.challengeIds,
       );
 
+    const completionDateFun = async (ch: Challenge) => {
+      const completions = await ch.completions.loadItems();
+      for (const completion of completions) {
+        const completers = await completion.completionPlayers.loadItems();
+        const completer = completers.find(
+          completer => completer.id === user.id,
+        );
+        if (completer) {
+          return completion.foundTimestamp.toISOString();
+        }
+      }
+      return '';
+    };
+
     this.clientService.emitUpdateChallengeData(user, {
-      challenges: challengeEntities.map(ch => ({
-        id: ch.id,
-        name: ch.name,
-        description: ch.description,
-        imageUrl: ch.imageUrl,
-        lat: ch.latitude,
-        long: ch.longitude,
-        awardingRadius: ch.awardingRadius,
-        closeRadius: ch.closeRadius,
-        completionDate: ch.completions[0]?.foundTimestamp?.toUTCString() ?? '',
-      })),
+      challenges: await Promise.all(
+        completeChallenges.map(async ch => ({
+          id: ch.id,
+          name: ch.name,
+          description: ch.description,
+          imageUrl: ch.imageUrl,
+          lat: ch.latitude,
+          long: ch.longitude,
+          awardingRadius: ch.awardingRadius,
+          closeRadius: ch.closeRadius,
+          completionDate: await completionDateFun(ch),
+        })),
+      ),
     });
 
     return false;
@@ -66,8 +83,7 @@ export class ChallengeGateway {
     @CallingUser() user: User,
     @MessageBody() data: SetCurrentChallengeDto,
   ) {
-    const groupMember = await user.groupMember?.load();
-    const group = await groupMember?.group.load();
+    const group = await user.group?.load();
 
     const isChallengeValid = await this.eventService.isChallengeInEvent(
       data.challengeId,
@@ -86,17 +102,13 @@ export class ChallengeGateway {
 
     const curChallenge = await eventTracker.currentChallenge.load();
 
-    // Is user switching to or from the star challenge
-    const isStarChallengeAffected =
-      challenge.eventIndex === 9999 || curChallenge.eventIndex === 9999;
-
     // Is user skipping while it's allowed
     const isSkippingWhileAllowed =
-      curChallenge.eventIndex < challenge.eventIndex &&
-      ((await eventTracker.event.load()).skippingEnabled ||
-        this.challengeService.isChallengeCompletedByUser(user, challenge));
+      (curChallenge.eventIndex < challenge.eventIndex &&
+        this.challengeService.isChallengeCompletedByUser(user, challenge)) ||
+      (await eventTracker.event.load()).skippingEnabled;
 
-    if (isStarChallengeAffected || isSkippingWhileAllowed) return false;
+    if (!isSkippingWhileAllowed) return false;
 
     eventTracker.currentChallenge.set(challenge);
     await this.eventService.saveTracker(eventTracker);
@@ -108,17 +120,32 @@ export class ChallengeGateway {
           id: user.id,
           name: user.username,
           points: user.score,
-          host: groupMember?.isHost ?? false,
+          host: group?.host?.id === user.id,
           curChallengeId: data.challengeId,
         },
       ],
       removeListedMembers: false,
     };
 
-    for (const mem of group?.members ?? []) {
-      const member = await mem.user.load();
-      this.clientService.emitUpdateGroupData(member, updateData);
+    const members = await group.members?.loadItems();
+
+    for (const mem of members) {
+      this.clientService.emitUpdateGroupData(mem, updateData);
     }
+
+    this.clientService.emitUpdateEventTrackerData(user, {
+      eventTrackers: [
+        {
+          eventId: eventTracker.event.id,
+          isRanked: eventTracker.isPlayerRanked,
+          cooldownMinimum: eventTracker.cooldownMinimum.toISOString(),
+          curChallengeId: eventTracker.currentChallenge.id,
+          prevChallengeIds: (await eventTracker.completed.loadItems()).map(
+            ev => ev.challenge.id,
+          ),
+        },
+      ],
+    });
 
     return false;
   }
@@ -133,33 +160,62 @@ export class ChallengeGateway {
       data.challengeId,
     );
 
-    const groupMember = await user.groupMember?.load();
-    const group = await groupMember?.group.load();
+    const group = await user.group?.load();
 
     const updateData: UpdateGroupDataDto = {
-      curEventId: group?.currentEvent.id ?? '',
+      curEventId: group.currentEvent.id,
       members: [
         {
           id: user.id,
           name: user.username,
           points: user.score,
-          host: groupMember?.isHost ?? false,
+          host: group.host.id === user.id,
           curChallengeId: newTracker.currentChallenge.id,
         },
       ],
       removeListedMembers: false,
     };
 
-    for (const mem of group?.members ?? []) {
-      const member = await mem.user.load();
-      this.clientService.emitUpdateGroupData(member, updateData);
+    for (const mem of group.members) {
+      this.clientService.emitUpdateGroupData(mem, updateData);
     }
-    const event = await newTracker.event.load();
-    const newReward = await this.challengeService.checkForReward(
-      user,
-      event,
-      newTracker,
-    );
+
+    await newTracker.completed.loadItems();
+
+    this.clientService.emitUpdateEventTrackerData(user, {
+      eventTrackers: [
+        {
+          eventId: newTracker.event.id,
+          isRanked: newTracker.isPlayerRanked,
+          cooldownMinimum: newTracker.cooldownMinimum.toISOString(),
+          curChallengeId: newTracker.currentChallenge.id,
+          prevChallengeIds: newTracker.completed.getIdentifiers(),
+        },
+      ],
+    });
+
+    const ch = await newTracker.currentChallenge.load();
+
+    this.clientService.emitUpdateChallengeData(user, {
+      challenges: [
+        {
+          id: ch.id,
+          name: ch.name,
+          description: ch.description,
+          imageUrl: ch.imageUrl,
+          lat: ch.latitude,
+          long: ch.longitude,
+          awardingRadius: ch.awardingRadius,
+          closeRadius: ch.closeRadius,
+          completionDate: newTracker.completed
+            .getItems()
+            .filter(ch => ch.challenge.id === data.challengeId)[0]
+            .foundTimestamp.toISOString(),
+        },
+      ],
+    });
+
+    const newReward = await this.challengeService.checkForReward(newTracker);
 
     if (newReward !== null) {
       const participatingEvents = await user.participatingEvents.loadItems();
@@ -169,7 +225,7 @@ export class ChallengeGateway {
         id: user.id,
         username: user.username,
         score: user.score,
-        groupId: group?.id ?? '',
+        groupId: group?.friendlyId ?? 'undefined',
         rewardIds: userRewards.concat(newReward).map(reward => reward.id), //Add reward to user.rewards,
         trackedEventIds: participatingEvents.map(ev => ev.id),
         ignoreIdLists: false,
@@ -192,13 +248,5 @@ export class ChallengeGateway {
     }
 
     return true;
-    /**
-     * TODO:
-     * Create PrevChallenge and associate with user
-     * Progress the user to the next challenge (if possible)
-     * Reward player upon completion of last challenge (if conditions met)
-     * If conditions involve other players, check for reward for all players
-     *
-     */
   }
 }

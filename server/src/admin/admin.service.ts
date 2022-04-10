@@ -104,16 +104,16 @@ export class AdminService {
     let rewardEntity = await this.rewardRepository.findOne({ id: reward.id });
 
     if (rewardEntity) {
-      rewardEntity.rewardDescription = reward.description;
-      rewardEntity.rewardRedeemInfo = reward.redeemInfo;
+      rewardEntity.rewardDescription = reward.description.substring(0, 2048);
+      rewardEntity.rewardRedeemInfo = reward.redeemInfo.substring(0, 2048);
     } else {
       rewardEntity = this.rewardRepository.create({
         id: v4(),
         containingEvent: await this.eventRepository.findOneOrFail({
           id: reward.containingEventId,
         }),
-        rewardDescription: reward.description,
-        rewardRedeemInfo: reward.redeemInfo,
+        rewardDescription: reward.description.substring(0, 2048),
+        rewardRedeemInfo: reward.redeemInfo.substring(0, 2048),
         isRedeemed: false,
       });
     }
@@ -128,8 +128,8 @@ export class AdminService {
       requiredMembers: event.requiredMembers,
       skippingEnabled: event.skippingEnabled,
       isDefault: event.isDefault,
-      name: event.name,
-      description: event.description,
+      name: event.name.substring(0, 2048),
+      description: event.description.substring(0, 2048),
       rewardType:
         event.rewardType === 'limited_time_event'
           ? EventRewardType.LIMITED_TIME_EVENT
@@ -169,9 +169,9 @@ export class AdminService {
     challenge: ChallengeDto,
   ): Promise<Challenge> {
     const assignData = {
-      name: challenge.name,
-      description: challenge.description,
-      imageUrl: challenge.imageUrl,
+      name: challenge.name.substring(0, 2048),
+      description: challenge.description.substring(0, 2048),
+      imageUrl: challenge.imageUrl.substring(0, 2048),
       latitude: challenge.latitude,
       longitude: challenge.longitude,
       awardingRadius: challenge.awardingRadius,

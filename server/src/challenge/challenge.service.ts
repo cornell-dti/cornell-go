@@ -9,6 +9,7 @@ import { PrevChallenge } from '../model/prev-challenge.entity';
 import { User } from '../model/user.entity';
 import { EventTracker } from 'src/model/event-tracker.entity';
 import { v4 } from 'uuid';
+import { Reference } from '@mikro-orm/core';
 
 @Injectable()
 export class ChallengeService {
@@ -23,36 +24,12 @@ export class ChallengeService {
     private rewardRepository: EntityRepository<EventReward>,
   ) {}
 
-  async createNew(event: EventBase) {
-    const chal = this.challengeRepository.create({
-      eventIndex: 0,
-      name: 'New challenge',
-      description: 'New challenge',
-      imageUrl: '',
-      latitude: 0,
-      longitude: 0,
-      awardingRadius: 0,
-      closeRadius: 0,
-      completions: [],
-      linkedEvent: event,
-    });
-
-    await this.challengeRepository.persistAndFlush(chal);
-
-    return chal;
-  }
-
   /** Get challenges with prev challenges for a given user */
   async getChallengesByIdsWithPrevChallenge(
     user: User,
     ids: string[],
   ): Promise<Challenge[]> {
-    return await this.challengeRepository
-      .createQueryBuilder()
-      .select('*')
-      .join('completions', 'prevChallenge')
-      .where({ id: { $in: ids } })
-      .andWhere({ 'prevChallenge.ownerId': user.id });
+    return await this.challengeRepository.find({ id: ids });
   }
 
   /** Get a challenge by its id */
@@ -101,8 +78,8 @@ export class ChallengeService {
 
   /** Progress user through challenges, ensuring challengeId is current */
   async completeChallenge(user: User, challengeId: string) {
-    const group = await (await user.groupMember?.load())?.group.load();
-    const groupMembers = await group?.members.loadItems();
+    const group = await user.group.load();
+    const groupMembers = await group.members.loadItems();
 
     const eventTracker = await this.eventService.getCurrentEventTrackerForUser(
       user,
@@ -114,17 +91,21 @@ export class ChallengeService {
     const prevChal = this.prevChallengeRepository.create({
       owner: user,
       challenge: eventTracker.currentChallenge,
-      completionPlayers: groupMembers?.map(mem => mem.user),
+      completionPlayers: groupMembers,
       foundTimestamp: new Date(),
     });
 
     await this.prevChallengeRepository.persistAndFlush(prevChal);
+
+    user.score += 1;
+    eventTracker.eventScore += 1;
 
     const nextChallenge = await this.nextChallenge(
       await eventTracker.currentChallenge.load(),
     );
 
     eventTracker.currentChallenge.set(nextChallenge);
+    eventTracker.completed.add(prevChal);
 
     await this.eventService.saveTracker(eventTracker);
 
@@ -132,15 +113,13 @@ export class ChallengeService {
   }
 
   /** Check if the current event can return rewards */
-  async checkForReward(
-    user: User,
-    eventBase: EventBase,
-    eventTracker: EventTracker,
-  ) {
+  async checkForReward(eventTracker: EventTracker) {
+    const eventBase = await eventTracker.event.load();
     //If User has not completed the event/done all the challenges then:
-    console.log('completed :' + eventTracker.completed.count());
-    console.log('needed :' + eventBase.challenges.count());
-    if (eventTracker.completed.count() !== eventBase.challenges.count()) {
+    if (
+      (await eventTracker.completed.loadCount()) !==
+      (await eventBase.challenges.loadCount())
+    ) {
       return null;
     }
 
@@ -157,7 +136,7 @@ export class ChallengeService {
         containingEvent: eventBase,
       });
       if (newReward !== null) {
-        newReward?.claimingUser?.set(user);
+        newReward.claimingUser = Reference.create(eventTracker.user);
         newReward.isRedeemed = false;
         const reward = this.rewardRepository.create({ ...newReward, id: v4() });
         await this.rewardRepository.persistAndFlush(reward);
@@ -171,7 +150,7 @@ export class ChallengeService {
       containingEvent: eventBase,
     });
     if (unclaimedReward !== null) {
-      unclaimedReward.claimingUser?.set(user);
+      unclaimedReward.claimingUser = Reference.create(eventTracker.user);
       return unclaimedReward;
     }
     return null;

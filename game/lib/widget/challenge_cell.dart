@@ -1,7 +1,8 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 Widget challengeCell(
-    context, place, date, points, imgpath, current, notVisited, noSkipping) {
+    context, place, date, imgpath, current, notVisited, noSkipping) {
   var placeStyle =
       TextStyle(fontWeight: FontWeight.bold, fontSize: 25, color: Colors.white);
   var pointsStyle = TextStyle(
@@ -28,11 +29,13 @@ Widget challengeCell(
                   border: current
                       ? Border.all(color: Colors.greenAccent, width: 2.0)
                       : null,
-                  color: noSkipping ? Colors.black : null,
+                  color: noSkipping && !current && notVisited
+                      ? Colors.black
+                      : null,
                   image: noSkipping
                       ? null
                       : DecorationImage(
-                          image: AssetImage(imgpath),
+                          image: CachedNetworkImageProvider(imgpath),
                           fit: BoxFit.cover,
                           opacity: .5)),
               height: 80,
@@ -40,8 +43,19 @@ Widget challengeCell(
                 Container(
                     child: notVisited
                         ? Text("Not Visited Yet...", style: placeStyle)
-                        : Text(place, style: placeStyle)),
-                Container(child: Text("${points} Points", style: pointsStyle))
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Center(child: Text(place, style: placeStyle)),
+                              Padding(
+                                padding: EdgeInsets.only(left: 6),
+                                child: notVisited
+                                    ? null
+                                    : Icon(Icons.star,
+                                        color: Colors.yellow, size: 25),
+                              )
+                            ],
+                          )),
               ])),
         )
       ]));

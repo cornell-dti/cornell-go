@@ -32,6 +32,7 @@ export class AdminGateway {
   constructor(
     private adminService: AdminService,
     private adminCallbackService: AdminCallbackService,
+    private clientService: ClientService,
   ) {}
 
   @SubscribeMessage('requestEvents')
@@ -110,11 +111,20 @@ export class AdminGateway {
       data.deletedIds.map(ev => this.adminService.removeEvent(ev)),
     );
 
-    await this.adminService.updateEvents(data.events);
+    const newEvents = await this.adminService.updateEvents(data.events);
 
     this.adminCallbackService.emitUpdateEventData({
-      events: data.events,
+      events: await Promise.all(newEvents.map(this.dtoForEvent)),
       deletedIds: data.deletedIds,
+    });
+
+    this.clientService.emitInvalidateData({
+      userEventData: true,
+      userRewardData: true,
+      winnerRewardData: true,
+      groupData: true,
+      challengeData: true,
+      leaderboardData: true,
     });
   }
 
@@ -139,7 +149,7 @@ export class AdminGateway {
     );
 
     this.adminCallbackService.emitUpdateChallengeData({
-      challenges: data.challenges,
+      challenges: await Promise.all(newChallenges.map(this.dtoForChallenge)),
       deletedIds: data.deletedIds,
     });
 
@@ -150,6 +160,15 @@ export class AdminGateway {
           await Promise.all(newChallenges.map(ch => ch.linkedEvent.load()))
         ).map(this.dtoForEvent),
       ),
+    });
+
+    this.clientService.emitInvalidateData({
+      userEventData: true,
+      userRewardData: true,
+      winnerRewardData: true,
+      groupData: true,
+      challengeData: true,
+      leaderboardData: true,
     });
   }
 
@@ -179,11 +198,20 @@ export class AdminGateway {
     };
 
     this.adminCallbackService.emitUpdateRewardData({
-      rewards: data.rewards,
+      rewards: await Promise.all(rewards.map(this.dtoForReward)),
       deletedIds: data.deletedIds,
     });
 
     this.adminCallbackService.emitUpdateEventData(newEventDto);
+
+    this.clientService.emitInvalidateData({
+      userEventData: true,
+      userRewardData: true,
+      winnerRewardData: true,
+      groupData: true,
+      challengeData: true,
+      leaderboardData: true,
+    });
   }
 
   @SubscribeMessage('updateAdmins')

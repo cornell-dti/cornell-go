@@ -8,10 +8,23 @@ class TrackerModel extends ChangeNotifier {
 
   TrackerModel(ApiClient client) : _client = client {
     client.clientApi.updateEventTrackerDataStream.listen((event) {
+      if (event.eventTrackers.length == 0) return;
       event.eventTrackers.forEach((element) {
         _trackers[element.eventId] = element;
       });
       notifyListeners();
+    });
+
+    client.clientApi.connectedStream.listen((event) {
+      _trackers.clear();
+      notifyListeners();
+    });
+
+    client.clientApi.invalidateDataStream.listen((event) {
+      if (event.challengeData) {
+        _trackers.clear();
+        notifyListeners();
+      }
     });
   }
 

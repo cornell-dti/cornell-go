@@ -13,6 +13,7 @@ class EventModel extends ChangeNotifier {
     client.clientApi.updateEventDataStream.listen((event) {
       if (event.isSearch) {
         searchResults = event.events;
+        print(event.events.length);
       }
       event.events.forEach((element) {
         _events[element.id] = element;
@@ -34,6 +35,26 @@ class EventModel extends ChangeNotifier {
         }
       }
       notifyListeners();
+    });
+
+    client.clientApi.connectedStream.listen((event) {
+      _events.clear();
+      _topPlayers.clear();
+      searchResults = null;
+      notifyListeners();
+    });
+
+    client.clientApi.invalidateDataStream.listen((event) {
+      if (event.userEventData) {
+        _events.clear();
+        searchResults = null;
+      }
+      if (event.leaderboardData) {
+        _topPlayers.clear();
+      }
+      if (event.leaderboardData || event.userEventData) {
+        notifyListeners();
+      }
     });
   }
 

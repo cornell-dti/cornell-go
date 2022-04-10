@@ -56,10 +56,9 @@ export class EventService {
       {
         indexable: true,
         rewardType: rewardTypes && { $in: rewardTypes },
-        skippingEnabled: skippable,
+        ...(skippable && { skippingEnabled: true }),
       },
       {
-        orderBy: sortBy,
         offset,
         limit: count,
       },
@@ -81,24 +80,15 @@ export class EventService {
 
   /** Creates an event tracker with the closest challenge as the current one */
   async createDefaultEventTracker(user: User, lat: number, long: number) {
-    try {
-      const defEv = await this.eventsRepository.findOneOrFail({
-        isDefault: true,
-      });
-    } catch {
-      await this.makeDefaultEvent();
-    }
+    await this.getDefaultEvent();
 
     const defaultEvent = await this.eventsRepository
       .createQueryBuilder('ev')
       .select(['ev.*'])
       .where({ isDefault: true })
       .joinAndSelect('ev.challenges', 'chal')
-      .andWhere(
-        `((chal.latitude - ${+lat})^2 + (chal.longitude - ${+long})^2) > 0.000000128205 * chal.close_radius * chal.close_radius`,
-      )
       .orderBy({
-        [`((chal.latitude - ${+lat})^2 + (chal.longitude - ${+long})^2)`]:
+        [`((chal.latitude - (${+lat}))^2 + (chal.longitude - (${+long}))^2)`]:
           'asc',
       })
       .getSingleResult();
@@ -121,6 +111,17 @@ export class EventService {
 
     return progress;
   }
+
+  async getDefaultEvent() {
+    try {
+      return await this.eventsRepository.findOneOrFail({
+        isDefault: true,
+      });
+    } catch {
+      return await this.makeDefaultEvent();
+    }
+  }
+
   async createEventTracker(user: User, event: EventBase) {
     let closestChallenge = event.challenges[0];
 
@@ -149,13 +150,28 @@ export class EventService {
 
   /** Gets a player's event tracker based on group */
   async getCurrentEventTrackerForUser(user: User) {
-    const member = await user.groupMember?.load();
-    const group = await member?.group.load();
+    const group = await user.group.load();
 
-    return await this.eventTrackerRepository.findOneOrFail({
+    const evTracker = await this.eventTrackerRepository.findOne({
       user,
-      event: group?.currentEvent,
+      event: group.currentEvent,
     });
+
+    if (!evTracker) {
+      const chals = (await group.currentEvent.load()).challenges;
+      await chals.init();
+      const newTracker = this.eventTrackerRepository.create({
+        event: group.currentEvent,
+        eventScore: 0,
+        isPlayerRanked: true,
+        cooldownMinimum: new Date(),
+        user,
+        currentChallenge: chals[0],
+      });
+      this.eventTrackerRepository.persistAndFlush(newTracker);
+      return newTracker;
+    }
+    return evTracker;
   }
 
   /** Saves an event tracker */
@@ -167,12 +183,13 @@ export class EventService {
     const chal = this.challengeRepository.create({
       eventIndex: 0,
       name: 'New challenge',
-      description: 'New challenge',
-      imageUrl: '',
-      latitude: 5,
-      longitude: 5,
-      awardingRadius: 0,
-      closeRadius: 0,
+      description: 'McGraw Tower',
+      imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/5/5f/CentralAvenueCornell2.jpg',
+      latitude: 42.44755580740012,
+      longitude: -76.48504614830019,
+      awardingRadius: 10,
+      closeRadius: 50,
       completions: [],
       linkedEvent: event,
     });

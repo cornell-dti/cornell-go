@@ -26,6 +26,7 @@ import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { useContext } from "react";
 import { ServerConnectionContext } from "./components/ServerConnection";
+import { ServerDataContext } from "./components/ServerData";
 
 const routes = [
   {
@@ -68,6 +69,18 @@ const SidebarIcon = styled.span`
   margin-right: 12px;
 `;
 
+const SidebarText = styled.div`
+  width: 100%;
+  text-align: center;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow-x: clip;
+  font-weight: bold;
+  font-size: 16px;
+  align-self: center;
+  padding-top: 16px;
+`;
+
 const RedText = styled.div`
   color: red;
 `;
@@ -76,6 +89,7 @@ export default function App() {
   const curRoute = useLocation();
   const navigate = useNavigate();
   const connection = useContext(ServerConnectionContext);
+  const data = useContext(ServerDataContext);
 
   return (
     <AppLayout>
@@ -101,6 +115,9 @@ export default function App() {
             Disconnect
           </RedText>
         </SidebarButton>
+        <SidebarText>
+          {data.events.get(data.selectedEvent)?.name ?? "No Event Selected"}
+        </SidebarText>
       </Sidebar>
       <Container>
         <Routes>

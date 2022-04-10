@@ -7,7 +7,6 @@ import 'package:game/widget/back_btn.dart';
 import 'package:game/widget/leaderboard_cell.dart';
 import 'package:game/widget/leaderboard_user_cell.dart';
 import 'package:provider/provider.dart';
-import 'dart:math';
 
 class LeaderboardWidget extends StatefulWidget {
   LeaderboardWidget({Key? key}) : super(key: key);

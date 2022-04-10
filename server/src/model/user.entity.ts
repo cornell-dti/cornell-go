@@ -1,6 +1,5 @@
 import { EventTracker } from './event-tracker.entity';
 import { EventReward } from './event-reward.entity';
-import { GroupMember } from './group-member.entity';
 import { SessionLogEntry } from './session-log-entry.entity';
 import {
   Collection,
@@ -8,6 +7,7 @@ import {
   Enum,
   IdentifiedReference,
   Index,
+  ManyToOne,
   OneToMany,
   OneToOne,
   PrimaryKey,
@@ -15,6 +15,7 @@ import {
   Unique,
 } from '@mikro-orm/core';
 import { v4 } from 'uuid';
+import { Group } from './group.entity';
 
 /**
  * Enum describing the type of authentication token
@@ -77,8 +78,8 @@ export class User {
   rewards = new Collection<EventReward>(this);
 
   /** A user's membership in a group */
-  @OneToOne()
-  groupMember?: IdentifiedReference<GroupMember>;
+  @ManyToOne({ inversedBy: 'members', nullable: true })
+  group!: IdentifiedReference<Group>;
 
   /** Event trackers for each event the player participated in */
   @OneToMany(() => EventTracker, ev => ev.user)

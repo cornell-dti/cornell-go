@@ -13,8 +13,10 @@ export class AdminCallbackService {
   private makeCallback<TData>(event: string) {
     return (data: TData, user?: User) => {
       if (user && user.adminGranted) {
+        console.log(`Sent ${event} to admin ${user.id}`);
         this.gateway.server.to(user.id).emit(event, data);
       } else {
+        console.log(`Sent ${event} to admins`);
         this.gateway.server.to('admins').emit(event, data);
       }
     };
