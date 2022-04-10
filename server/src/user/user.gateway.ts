@@ -84,6 +84,17 @@ export class UserGateway {
 
     user.username = data.newUsername;
 
+    await this.userService.saveUser(user);
+
+    this.clientService.emitInvalidateData({
+      userEventData: false,
+      userRewardData: false,
+      winnerRewardData: false,
+      groupData: false,
+      challengeData: false,
+      leaderboardData: true,
+    });
+
     // Update user that name has changed
     this.clientService.emitUpdateUserData(user, {
       id: user.id,

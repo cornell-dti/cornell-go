@@ -99,7 +99,7 @@ export class EventService {
 
     if (!closestChallenge) throw 'Cannot find closest challenge!';
 
-    let progress: EventTracker = this.eventTrackerRepository.create({
+    const progress: EventTracker = this.eventTrackerRepository.create({
       eventScore: 0,
       isPlayerRanked: true,
       cooldownMinimum: new Date(),
@@ -107,6 +107,15 @@ export class EventService {
       currentChallenge: closestChallenge,
       completed: [],
       user,
+    });
+
+    this.clientService.emitInvalidateData({
+      userEventData: false,
+      userRewardData: false,
+      winnerRewardData: false,
+      groupData: false,
+      challengeData: false,
+      leaderboardData: true,
     });
 
     await this.eventTrackerRepository.persistAndFlush(progress);
@@ -126,9 +135,9 @@ export class EventService {
 
   async createEventTracker(user: User, event: EventBase) {
     await event.challenges.init();
-    let closestChallenge = event.challenges[0];
+    const closestChallenge = event.challenges[0];
 
-    let progress: EventTracker = this.eventTrackerRepository.create({
+    const progress: EventTracker = this.eventTrackerRepository.create({
       eventScore: 0,
       isPlayerRanked: true,
       cooldownMinimum: new Date(),
@@ -139,6 +148,15 @@ export class EventService {
     });
 
     await this.eventTrackerRepository.persistAndFlush(progress);
+
+    this.clientService.emitInvalidateData({
+      userEventData: false,
+      userRewardData: false,
+      winnerRewardData: false,
+      groupData: false,
+      challengeData: false,
+      leaderboardData: true,
+    });
 
     return progress;
   }
@@ -165,15 +183,6 @@ export class EventService {
         user,
         await group.currentEvent.load(),
       );
-
-      this.clientService.emitInvalidateData({
-        userEventData: false,
-        userRewardData: false,
-        winnerRewardData: false,
-        groupData: false,
-        challengeData: false,
-        leaderboardData: true,
-      });
 
       return newTracker;
     }

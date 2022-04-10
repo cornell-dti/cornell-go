@@ -37,24 +37,23 @@ class _LeaderboardWidgetState extends State<LeaderboardWidget> {
                 final List<UpdateLeaderDataUserDto> list = myEventModel
                     .getTopPlayersForEvent(myGroupModel.curEventId!, 1000);
 
-                return ListView(
-                  shrinkWrap: true,
-                  scrollDirection: Axis.vertical,
-                  children: [
-                    for (int i = 0; i < list.length; i++)
-                      if (myUserModel.userData?.id != null &&
-                          myUserModel.userData!.id == list.elementAt(i).userId)
-                        leaderBoardUserCell(
-                            context,
-                            list.elementAt(i).username,
-                            i + 1,
-                            myGroupModel.members.length,
-                            list.elementAt(i).score),
-                    for (UpdateLeaderDataUserDto user in list)
-                      leaderBoardCell(
-                          context, user.username, position++, user.score, true)
-                  ],
-                );
+                return Column(children: [
+                  for (int i = 0; i < list.length; i++)
+                    if (myUserModel.userData?.id != null &&
+                        myUserModel.userData!.id == list.elementAt(i).userId)
+                      leaderBoardUserCell(context, list.elementAt(i).username,
+                          i + 1, list.length, list.elementAt(i).score),
+                  Expanded(
+                      child: ListView(
+                    shrinkWrap: true,
+                    scrollDirection: Axis.vertical,
+                    children: [
+                      for (UpdateLeaderDataUserDto user in list)
+                        leaderBoardCell(context, user.username, position++,
+                            user.score, user.userId == myUserModel.userData?.id)
+                    ],
+                  ))
+                ]);
               },
             ),
           ),
