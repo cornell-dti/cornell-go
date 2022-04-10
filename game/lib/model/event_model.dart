@@ -25,6 +25,7 @@ class EventModel extends ChangeNotifier {
       if (event.users.length == 0) {
         return;
       }
+      print(event.users.length);
 
       final players = _topPlayers[event.eventId];
       for (int i = event.offset; i < event.users.length; i++) {
@@ -65,7 +66,7 @@ class EventModel extends ChangeNotifier {
     if (topPlayers == null) {
       _topPlayers[eventId] = [];
     }
-    if (diff > 0) {
+    if (_topPlayers[eventId]?.length == 0) {
       _client.serverApi
           ?.requestEventLeaderData((topPlayers?.length ?? 0), diff, eventId);
     }

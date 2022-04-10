@@ -109,6 +109,7 @@ class _EventsWidgetState extends State<EventsWidget> {
                         event.challengeIds.length;
                     eventCells.add(GestureDetector(
                       onTap: () {
+                        if (groupModel.curEventId == event.id) return;
                         if (groupModel.members.any((element) =>
                             element.id == userModel.userData?.id &&
                             element.host)) {

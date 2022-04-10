@@ -253,8 +253,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                     width: isDoneWithoutConnection
                         ? 0
                         : MediaQuery.of(context).size.width *
-                            0.95 *
-                            progressToUse,
+                            (0.85 * progressToUse + 0.1),
                     height: 40,
                     decoration: BoxDecoration(
                         color: Colors.black.withOpacity(0.5),

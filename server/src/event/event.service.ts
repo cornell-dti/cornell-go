@@ -9,11 +9,13 @@ import { UserService } from '../user/user.service';
 import { ChallengeService } from 'src/challenge/challenge.service';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityRepository } from '@mikro-orm/postgresql';
+import { ClientService } from '../client/client.service';
 
 @Injectable()
 export class EventService {
   constructor(
     private userService: UserService,
+    private clientService: ClientService,
     @InjectRepository(EventBase)
     private eventsRepository: EntityRepository<EventBase>,
     @InjectRepository(EventTracker)
@@ -97,7 +99,7 @@ export class EventService {
 
     if (!closestChallenge) throw 'Cannot find closest challenge!';
 
-    let progress: EventTracker = this.eventTrackerRepository.create({
+    const progress: EventTracker = this.eventTrackerRepository.create({
       eventScore: 0,
       isPlayerRanked: true,
       cooldownMinimum: new Date(),
@@ -105,6 +107,15 @@ export class EventService {
       currentChallenge: closestChallenge,
       completed: [],
       user,
+    });
+
+    this.clientService.emitInvalidateData({
+      userEventData: false,
+      userRewardData: false,
+      winnerRewardData: false,
+      groupData: false,
+      challengeData: false,
+      leaderboardData: true,
     });
 
     await this.eventTrackerRepository.persistAndFlush(progress);
@@ -123,9 +134,10 @@ export class EventService {
   }
 
   async createEventTracker(user: User, event: EventBase) {
-    let closestChallenge = event.challenges[0];
+    await event.challenges.init();
+    const closestChallenge = event.challenges[0];
 
-    let progress: EventTracker = this.eventTrackerRepository.create({
+    const progress: EventTracker = this.eventTrackerRepository.create({
       eventScore: 0,
       isPlayerRanked: true,
       cooldownMinimum: new Date(),
@@ -136,6 +148,15 @@ export class EventService {
     });
 
     await this.eventTrackerRepository.persistAndFlush(progress);
+
+    this.clientService.emitInvalidateData({
+      userEventData: false,
+      userRewardData: false,
+      winnerRewardData: false,
+      groupData: false,
+      challengeData: false,
+      leaderboardData: true,
+    });
 
     return progress;
   }
@@ -158,17 +179,11 @@ export class EventService {
     });
 
     if (!evTracker) {
-      const chals = (await group.currentEvent.load()).challenges;
-      await chals.init();
-      const newTracker = this.eventTrackerRepository.create({
-        event: group.currentEvent,
-        eventScore: 0,
-        isPlayerRanked: true,
-        cooldownMinimum: new Date(),
+      const newTracker = await this.createEventTracker(
         user,
-        currentChallenge: chals[0],
-      });
-      this.eventTrackerRepository.persistAndFlush(newTracker);
+        await group.currentEvent.load(),
+      );
+
       return newTracker;
     }
     return evTracker;
