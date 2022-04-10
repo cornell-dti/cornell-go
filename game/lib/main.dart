@@ -14,11 +14,14 @@ import 'package:provider/provider.dart';
 
 import 'dart:io' show Platform;
 
+const ENV_URL = String.fromEnvironment('API_URL', defaultValue: "");
+
 final storage = FlutterSecureStorage();
 final LOOPBACK = (Platform.isAndroid ? "http://10.0.2.2" : "http://127.0.0.1");
-final API_URL = String.fromEnvironment('API_URL', defaultValue: LOOPBACK);
+final API_URL = ENV_URL == "" ? LOOPBACK : ENV_URL;
 
 void main() {
+  print(API_URL);
   runApp(MyApp());
 }
 

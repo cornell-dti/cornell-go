@@ -247,6 +247,15 @@ export class ChallengeGateway {
       this.clientService.emitUpdateRewardData(user, updatedRewards);
     }
 
+    this.clientService.emitInvalidateData({
+      userEventData: false,
+      userRewardData: false,
+      winnerRewardData: false,
+      groupData: false,
+      challengeData: false,
+      leaderboardData: true,
+    });
+
     return true;
   }
 }

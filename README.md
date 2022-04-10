@@ -65,7 +65,7 @@ Open the main.dart file, then click the Play button
 *OR* to run with a custom server url
 
 cd game
-flutter run --dart-define=API_URL=https://example.com
+flutter run --dart-define="API_URL=https://example.com"
 ```
 
 ## Contributors
