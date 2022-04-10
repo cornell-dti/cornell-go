@@ -1,5 +1,4 @@
 import { forwardRef, Module } from '@nestjs/common';
-import { GroupMember } from '../model/group-member.entity';
 import { Group } from '../model/group.entity';
 import { GroupService } from './group.service';
 import { GroupGateway } from './group.gateway';
@@ -11,7 +10,7 @@ import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   imports: [
-    MikroOrmModule.forFeature([Group, GroupMember]),
+    MikroOrmModule.forFeature([Group]),
     forwardRef(() => UserModule),
     ClientModule,
     AuthModule,

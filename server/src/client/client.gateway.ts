@@ -15,7 +15,10 @@ export class ClientGateway implements OnGatewayConnection {
     const user = await this.authService.userByToken(token);
     if (user) {
       client.join(user.id);
-      if (user.adminGranted) client.join('admins');
+      if (user.adminGranted) {
+        console.log(`Admin ${user.id} joined admins`);
+        client.join('admins');
+      }
     } else {
       client.disconnect(true);
     }

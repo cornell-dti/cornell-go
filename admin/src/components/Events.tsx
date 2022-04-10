@@ -20,6 +20,8 @@ import {
 import { SearchBar } from "./SearchBar";
 import { ServerDataContext } from "./ServerData";
 
+import { compareTwoStrings } from "string-similarity";
+
 function EventCard(props: {
   event: EventDto;
   onSelect: () => void;
@@ -44,7 +46,8 @@ function EventCard(props: {
         <ListCardTitle>{props.event.name}</ListCardTitle>
         <ListCardDescription>{props.event.description}</ListCardDescription>
         <ListCardBody>
-          Id: <b>{props.event.id}</b><br />
+          Id: <b>{props.event.id}</b>
+          <br />
           Available Until: <b>{new Date(props.event.time).toString()}</b> <br />
           Required Players: <b>{requiredText}</b> <br />
           Rewarding Method: <b>{rewardingMethod}</b> <br />
@@ -126,7 +129,7 @@ function toForm(event: EventDto) {
     {
       name: "Rewarding Method",
       options: ["Perpetual", "Limited Time"],
-      value: event.rewardType === "perpetual" ? 1 : 0,
+      value: event.rewardType === "perpetual" ? 0 : 1,
     },
     { name: "Visible", options: ["No", "Yes"], value: event.indexable ? 1 : 0 },
     { name: "Available Until", date: new Date(event.time) },
@@ -140,6 +143,7 @@ export function Events() {
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
   const [form, setForm] = useState(() => makeForm());
   const [currentId, setCurrentId] = useState("");
+  const [query, setQuery] = useState("");
 
   return (
     <>
@@ -188,23 +192,32 @@ export function Events() {
           setForm(makeForm());
           setCreateModalOpen(true);
         }}
+        onSearch={(query) => setQuery(query)}
       />
-      {Array.from(serverData.events.values()).map((ev) => (
-        <EventCard
-          key={ev.id}
-          event={ev}
-          onSelect={() => serverData.selectEvent(ev.id)}
-          onDelete={() => {
-            setCurrentId(ev.id);
-            setDeleteModalOpen(true);
-          }}
-          onEdit={() => {
-            setCurrentId(ev.id);
-            setForm(toForm(ev));
-            setEditModalOpen(true);
-          }}
-        />
-      ))}
+      {Array.from(serverData.events.values())
+        .sort(
+          (a, b) =>
+            compareTwoStrings(b.name, query) -
+            compareTwoStrings(a.name, query) +
+            compareTwoStrings(b.description, query) -
+            compareTwoStrings(a.description, query)
+        )
+        .map((ev) => (
+          <EventCard
+            key={ev.id}
+            event={ev}
+            onSelect={() => serverData.selectEvent(ev.id)}
+            onDelete={() => {
+              setCurrentId(ev.id);
+              setDeleteModalOpen(true);
+            }}
+            onEdit={() => {
+              setCurrentId(ev.id);
+              setForm(toForm(ev));
+              setEditModalOpen(true);
+            }}
+          />
+        ))}
     </>
   );
 }

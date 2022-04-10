@@ -5,7 +5,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/home_page/home_page_widget.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:profanity_filter/profanity_filter.dart';
 
 class UserNameWidget extends StatefulWidget {

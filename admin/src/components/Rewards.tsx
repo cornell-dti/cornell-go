@@ -1,6 +1,8 @@
 import { useContext, useState } from "react";
+import { compareTwoStrings } from "string-similarity";
 import { RewardDto } from "../dto/update-rewards.dto";
 import { moveDown, moveUp } from "../ordering";
+import { AlertModal } from "./AlertModal";
 import { DeleteModal } from "./DeleteModal";
 import { EntryForm, EntryModal, FreeEntryForm } from "./EntryModal";
 import { HButton } from "./HButton";
@@ -35,7 +37,8 @@ function RewardCard(props: {
       </ListCardTitle>
       <ListCardDescription>{props.reward.redeemInfo}</ListCardDescription>
       <ListCardBody>
-        Id: <b>{props.reward.id}</b><br />
+        Id: <b>{props.reward.id}</b>
+        <br />
       </ListCardBody>
       <ListCardButtons>
         <HButton onClick={props.onUp}>UP</HButton>
@@ -80,12 +83,21 @@ export function Rewards() {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [selectModalOpen, setSelectModalOpen] = useState(false);
+
   const [currentId, setCurrentId] = useState("");
   const [form, setForm] = useState(() => makeForm());
+  const [query, setQuery] = useState("");
+
   const selectedEvent = serverData.events.get(serverData.selectedEvent);
 
   return (
     <>
+      <AlertModal
+        description="To create a reward, select an event."
+        isOpen={selectModalOpen}
+        onClose={() => setSelectModalOpen(false)}
+      />
       <EntryModal
         title="Create Reward"
         isOpen={createModalOpen}
@@ -127,44 +139,57 @@ export function Rewards() {
         onCreate={() => {
           setForm(makeForm());
           setCreateModalOpen(!!selectedEvent);
+          if (!selectedEvent) {
+            setSelectModalOpen(true);
+          }
         }}
+        onSearch={(query) => setQuery(query)}
       />
-      {selectedEvent?.rewardIds.map(
-        (rwId) =>
-          serverData.rewards.get(rwId) && (
-            <RewardCard
-              key={rwId}
-              reward={serverData.rewards.get(rwId)!}
-              onUp={() => {
-                selectedEvent.rewardIds = moveUp(
-                  selectedEvent.rewardIds,
-                  selectedEvent.rewardIds.findIndex((id) => id === rwId)
-                );
-                serverData.updateEvent(selectedEvent);
-              }}
-              onDown={() => {
-                selectedEvent.rewardIds = moveDown(
-                  selectedEvent.rewardIds,
-                  selectedEvent.rewardIds.findIndex((id) => id === rwId)
-                );
-                serverData.updateEvent(selectedEvent);
-              }}
-              onEdit={() => {
-                setCurrentId(rwId);
-                setForm(toForm(serverData.rewards.get(rwId)!));
-                setEditModalOpen(true);
-              }}
-              onDelete={() => {
-                setCurrentId(rwId);
-                setDeleteModalOpen(true);
-              }}
-              onCopy={() => {
-                setForm(toForm(serverData.rewards.get(rwId)!));
-                setCreateModalOpen(true);
-              }}
-            />
-          )
-      )}
+      {selectedEvent?.rewardIds
+        .filter((rwId) => serverData.rewards.get(rwId))
+        .map((rwId) => serverData.rewards.get(rwId)!)
+        .sort(
+          (a, b) =>
+            compareTwoStrings(b.description, query) -
+            compareTwoStrings(a.description, query) +
+            compareTwoStrings(b.redeemInfo, query) -
+            compareTwoStrings(a.redeemInfo, query)
+        )
+        .map((rw) => (
+          <RewardCard
+            key={rw.id}
+            reward={rw}
+            onUp={() => {
+              if (query !== "") return;
+              selectedEvent.rewardIds = moveUp(
+                selectedEvent.rewardIds,
+                selectedEvent.rewardIds.findIndex((id) => id === rw.id)
+              );
+              serverData.updateEvent(selectedEvent);
+            }}
+            onDown={() => {
+              if (query !== "") return;
+              selectedEvent.rewardIds = moveDown(
+                selectedEvent.rewardIds,
+                selectedEvent.rewardIds.findIndex((id) => id === rw.id)
+              );
+              serverData.updateEvent(selectedEvent);
+            }}
+            onEdit={() => {
+              setCurrentId(rw.id);
+              setForm(toForm(rw));
+              setEditModalOpen(true);
+            }}
+            onDelete={() => {
+              setCurrentId(rw.id);
+              setDeleteModalOpen(true);
+            }}
+            onCopy={() => {
+              setForm(toForm(rw));
+              setCreateModalOpen(true);
+            }}
+          />
+        ))}
     </>
   );
 }

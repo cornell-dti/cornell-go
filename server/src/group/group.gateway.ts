@@ -16,10 +16,10 @@ import {
   UpdateGroupDataMemberDto,
 } from '../client/update-group-data.dto';
 import { GroupService } from './group.service';
-import { GroupMember } from '../model/group-member.entity';
 import { UserGuard } from 'src/auth/jwt-auth.guard';
 import { UseGuards } from '@nestjs/common';
 import { Group } from 'src/model/group.entity';
+import { UpdateUserDataAuthTypeDto } from '../client/update-user-data.dto';
 
 @WebSocketGateway({ cors: true })
 @UseGuards(UserGuard)
@@ -42,16 +42,15 @@ export class GroupGateway {
       members: await Promise.all(
         (
           await groupData.members.loadItems()
-        ).map(async (member: GroupMember) => {
-          const usr = await member.user.load();
+        ).map(async (member: User) => {
           return {
-            id: usr.id,
-            name: usr.username,
-            points: usr.score,
-            host: member.isHost,
+            id: member.id,
+            name: member.username,
+            points: member.score,
+            host: member.id === groupData.host?.id,
             curChallengeId: (
-              await this.eventService.getCurrentEventTrackerForUser(usr)
-            ).event.id,
+              await this.eventService.getCurrentEventTrackerForUser(member)
+            ).currentChallenge.id,
           };
         }),
       ),
@@ -64,18 +63,32 @@ export class GroupGateway {
 
   /** Helper function that notifies the user, all old group members,
    * and all new members that the user has moved groups. */
-  async notifyAll(user: User, oldGroup: Group | null) {
-    this.requestGroupData(user, {});
-    if (oldGroup != null) {
-      const oldMembers = oldGroup!.members;
+  async notifyAll(user: User, oldGroup: Group | undefined) {
+    if (oldGroup) {
+      const oldMembers = oldGroup.members;
       for (const member of oldMembers) {
-        this.requestGroupData(await member.user.load(), {});
+        await this.requestGroupData(member, {});
       }
     }
     const newMembers = (await this.groupService.getGroupForUser(user)).members;
     for (const member of newMembers) {
-      this.requestGroupData(await member.user.load(), {});
+      await this.requestGroupData(member, {});
     }
+  }
+
+  /** Helper function that notifies the user of a change in group */
+  async notifyUser(user: User) {
+    const group = await user.group.load();
+    await this.clientService.emitUpdateUserData(user, {
+      id: user.id,
+      username: user.username,
+      score: user.score,
+      groupId: group.friendlyId,
+      rewardIds: [],
+      trackedEventIds: [],
+      ignoreIdLists: true,
+      authType: user.authType as UpdateUserDataAuthTypeDto,
+    });
   }
 
   @SubscribeMessage('joinGroup')
@@ -84,7 +97,8 @@ export class GroupGateway {
     @MessageBody() data: JoinGroupDto,
   ) {
     const oldGroup = await this.groupService.joinGroup(user, data.groupId);
-    this.notifyAll(user, oldGroup);
+    await this.notifyAll(user, oldGroup);
+    await this.notifyUser(user);
   }
 
   @SubscribeMessage('leaveGroup')
@@ -93,7 +107,8 @@ export class GroupGateway {
     @MessageBody() data: LeaveGroupDto,
   ) {
     const oldGroup = await this.groupService.leaveGroup(user);
-    this.notifyAll(user, oldGroup);
+    await this.notifyAll(user, oldGroup);
+    await this.notifyUser(user);
   }
 
   @SubscribeMessage('setCurrentEvent')
@@ -101,32 +116,25 @@ export class GroupGateway {
     @CallingUser() user: User,
     @MessageBody() data: SetCurrentEventDto,
   ) {
-    const userMember = await user.groupMember!.load();
-    const userGroup = await userMember.group.load();
+    const group = await user.group?.load();
+    if (group?.host?.id !== user.id) {
+      return;
+    }
     let newEvent = (await this.eventService.getEventsByIds([data.eventId]))[0];
-    let groupMembers = await userGroup.members.loadItems();
-    groupMembers.forEach(async (member: GroupMember) => {
+    let groupMembers = await group.members.loadItems();
+    groupMembers.forEach(async (member: User) => {
       //if the user already has the event, keep their tracker
-      let currentUser = await member.user.load();
       const evTrackers = await this.eventService.getEventTrackersByEventId(
         user,
         [data.eventId],
       );
       if (evTrackers.length === 0)
-        this.eventService.createEventTracker(currentUser, newEvent);
+        this.eventService.createEventTracker(member, newEvent);
     });
-    userGroup.currentEvent.set(newEvent);
-    await this.groupService.saveGroup(userGroup);
-    let updateGroupData: UpdateGroupDataDto = {
-      curEventId: data.eventId,
-      members: [],
-      removeListedMembers: false,
-    };
-    groupMembers.forEach(async (member: GroupMember) => {
-      this.clientService.emitUpdateGroupData(
-        await member.user.load(),
-        updateGroupData,
-      );
+    group.currentEvent.set(newEvent);
+    await this.groupService.saveGroup(group);
+    groupMembers.forEach(async (member: User) => {
+      this.requestGroupData(member, {});
     });
   }
 }

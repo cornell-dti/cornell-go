@@ -4,12 +4,13 @@ import {
   IdentifiedReference,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryKey,
   Property,
   Unique,
 } from '@mikro-orm/core';
 import { EventBase } from './event-base.entity';
-import { GroupMember } from './group-member.entity';
+import { User } from './user.entity';
 
 @Entity()
 export class Group {
@@ -25,7 +26,11 @@ export class Group {
   @Unique()
   friendlyId!: string;
 
+  /** The host of the group */
+  @OneToOne({ nullable: true })
+  host!: IdentifiedReference<User>;
+
   /** Members of the group, with the host at index 0 */
-  @OneToMany(() => GroupMember, mem => mem.group)
-  members = new Collection<GroupMember>(this);
+  @OneToMany(() => User, mem => mem.group)
+  members = new Collection<User>(this);
 }

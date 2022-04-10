@@ -56,7 +56,8 @@ class MyApp extends StatelessWidget {
             lazy: false,
           )
         ],
-        child: MaterialApp(
+        child: GameWidget(
+            child: MaterialApp(
           title: 'CornellGO!',
           localizationsDelegates: [
             GlobalMaterialLocalizations.delegate,
@@ -65,7 +66,7 @@ class MyApp extends StatelessWidget {
           ],
           supportedLocales: const [Locale('en', '')],
           theme: ThemeData(primarySwatch: Colors.blue),
-          home: GameWidget(child: LoginWidget()),
-        ));
+          home: LoginWidget(),
+        )));
   }
 }

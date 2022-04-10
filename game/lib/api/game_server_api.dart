@@ -12,7 +12,13 @@ class GameServerApi {
 
   GameServerApi(Socket socket, Future<bool> Function() refresh)
       : _refreshAccess = refresh,
-        _socket = socket;
+        _socket = socket {
+    _socket.onError((data) async {
+      if (await _refreshAccess()) {
+        _socket.emit(_refreshEv, _refreshDat);
+      }
+    });
+  }
 
   void replaceSocket(Socket socket) {
     _socket = socket;
@@ -55,24 +61,17 @@ class GameServerApi {
           bool closestToEnding,
           bool shortestFirst,
           bool skippableOnly) =>
-      _invokeWithRefresh("requestEventData", {
+      _invokeWithRefresh("requestAllEventData", {
         "offset": offset,
         "count": count,
         "closestToEnding": closestToEnding,
         "shortestFirst": shortestFirst,
         "skippableOnly": skippableOnly,
-        "rewardTypes": rewardTypes.map((e) {
-          var result = "";
-          switch (e) {
-            case UpdateEventDataEventRewardTypeDto.PERPETUAL:
-              result = "perpetual";
-              break;
-            case UpdateEventDataEventRewardTypeDto.LIMITED_TIME_EVENT:
-              result = "limited_time_event";
-              break;
-          }
-          return result;
-        })
+        "rewardTypes": rewardTypes
+            .map((e) => e == UpdateEventDataEventRewardTypeDto.PERPETUAL
+                ? 'perpetual'
+                : 'limited_time_event')
+            .toList()
       });
 
   void requestEventLeaderData(int offset, int count, String eventId) =>

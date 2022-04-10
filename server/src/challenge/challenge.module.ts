@@ -5,6 +5,7 @@ import { ClientModule } from 'src/client/client.module';
 import { EventModule } from 'src/event/event.module';
 import { EventReward } from 'src/model/event-reward.entity';
 import { RewardModule } from 'src/reward/reward.module';
+import { GroupModule } from '../group/group.module';
 import { Challenge } from '../model/challenge.entity';
 import { PrevChallenge } from '../model/prev-challenge.entity';
 import { UserModule } from '../user/user.module';
