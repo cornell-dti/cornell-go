@@ -9,11 +9,13 @@ import { UserService } from '../user/user.service';
 import { ChallengeService } from 'src/challenge/challenge.service';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityRepository } from '@mikro-orm/postgresql';
+import { ClientService } from '../client/client.service';
 
 @Injectable()
 export class EventService {
   constructor(
     private userService: UserService,
+    private clientService: ClientService,
     @InjectRepository(EventBase)
     private eventsRepository: EntityRepository<EventBase>,
     @InjectRepository(EventTracker)
@@ -123,6 +125,7 @@ export class EventService {
   }
 
   async createEventTracker(user: User, event: EventBase) {
+    await event.challenges.init();
     let closestChallenge = event.challenges[0];
 
     let progress: EventTracker = this.eventTrackerRepository.create({
@@ -158,17 +161,20 @@ export class EventService {
     });
 
     if (!evTracker) {
-      const chals = (await group.currentEvent.load()).challenges;
-      await chals.init();
-      const newTracker = this.eventTrackerRepository.create({
-        event: group.currentEvent,
-        eventScore: 0,
-        isPlayerRanked: true,
-        cooldownMinimum: new Date(),
+      const newTracker = await this.createEventTracker(
         user,
-        currentChallenge: chals[0],
+        await group.currentEvent.load(),
+      );
+
+      this.clientService.emitInvalidateData({
+        userEventData: false,
+        userRewardData: false,
+        winnerRewardData: false,
+        groupData: false,
+        challengeData: false,
+        leaderboardData: true,
       });
-      this.eventTrackerRepository.persistAndFlush(newTracker);
+
       return newTracker;
     }
     return evTracker;
