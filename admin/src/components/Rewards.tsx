@@ -148,12 +148,13 @@ export function Rewards() {
       {selectedEvent?.rewardIds
         .filter((rwId) => serverData.rewards.get(rwId))
         .map((rwId) => serverData.rewards.get(rwId)!)
-        .sort(
-          (a, b) =>
-            compareTwoStrings(b.description, query) -
-            compareTwoStrings(a.description, query) +
-            compareTwoStrings(b.redeemInfo, query) -
-            compareTwoStrings(a.redeemInfo, query)
+        .sort((a, b) =>
+          query === ""
+            ? 0
+            : compareTwoStrings(b.description, query) -
+              compareTwoStrings(a.description, query) +
+              compareTwoStrings(b.redeemInfo, query) -
+              compareTwoStrings(a.redeemInfo, query)
         )
         .map((rw) => (
           <RewardCard

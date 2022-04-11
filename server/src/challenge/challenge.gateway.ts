@@ -104,11 +104,16 @@ export class ChallengeGateway {
 
     const curChallenge = await eventTracker.currentChallenge.load();
 
+    const wasCompleted = await this.challengeService.isChallengeCompletedByUser(
+      user,
+      challenge,
+    );
+
     // Is user skipping while it's allowed
     const isSkippingWhileAllowed =
-      (curChallenge.eventIndex < challenge.eventIndex &&
-        this.challengeService.isChallengeCompletedByUser(user, challenge)) ||
-      (await eventTracker.event.load()).skippingEnabled;
+      wasCompleted ||
+      (await eventTracker.event.load()).skippingEnabled ||
+      (!wasCompleted && challenge.eventIndex === curChallenge.eventIndex + 1);
 
     if (!isSkippingWhileAllowed) return false;
 
@@ -129,7 +134,7 @@ export class ChallengeGateway {
       removeListedMembers: false,
     };
 
-    const members = await group.members?.loadItems();
+    const members = await group.members.loadItems();
 
     for (const mem of members) {
       this.clientService.emitUpdateGroupData(mem, updateData);

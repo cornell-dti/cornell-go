@@ -43,6 +43,7 @@ export class ChallengeService {
       owner: user,
       challenge,
     });
+
     return num > 0;
   }
 
