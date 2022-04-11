@@ -145,6 +145,8 @@ export class AuthService {
       user.adminRequested = !user.adminGranted && aud === 'web';
     }
 
+    if (!user) return null;
+
     const accessToken = await this.jwtService.signAsync(
       {
         userId: user.id,
