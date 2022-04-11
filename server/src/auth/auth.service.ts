@@ -111,13 +111,10 @@ export class AuthService {
         idToken = await this.payloadFromApple(token);
         break;
       case AuthType.DEVICE:
-        idToken =
-          process.env.DEVELOPMENT === 'true'
-            ? {
-                id: token,
-                email: 'dev@cornell.edu',
-              }
-            : null;
+        idToken = {
+          id: token,
+          email: 'dev@cornell.edu',
+        };
         break;
     }
 
@@ -132,7 +129,10 @@ export class AuthService {
 
     let user = await this.userService.byAuth(authType, idToken.id);
 
-    if (!user) {
+    const isDevWhileDevice =
+      process.env.DEVELOPMENT === 'true' || authType !== AuthType.DEVICE;
+
+    if (!user && isDevWhileDevice) {
       user = await this.userService.register(
         idToken.email,
         idToken.email?.split('@')[0],
@@ -144,6 +144,8 @@ export class AuthService {
 
       user.adminRequested = !user.adminGranted && aud === 'web';
     }
+
+    if (!user) return null;
 
     const accessToken = await this.jwtService.signAsync(
       {
