@@ -1,0 +1,12 @@
+name: Check admin build CI
+
+on: pull_request
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build the image
+        run: docker build . --file ci/admin-build/Dockerfile -t app

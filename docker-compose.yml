@@ -1,0 +1,36 @@
+version: "3.3"
+services:
+  postgres:
+    image: postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: test
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - type: bind
+        source: ./postgres-data
+        target: /var/lib/postgresql/data
+    networks:
+      - reference
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  server:
+    ports:
+      - "80:80"
+    environment:
+      - NO_SSL=true
+    depends_on:
+      postgres:
+        condition: service_healthy
+    build: .
+    networks:
+      - reference
+networks:
+  reference:

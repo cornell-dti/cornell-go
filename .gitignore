@@ -1,6 +1,7 @@
 # compiled output
 /dist
 /node_modules
+yarn.lock
 
 # Logs
 logs
@@ -16,6 +17,7 @@ lerna-debug.log*
 # Tests
 /coverage
 /.nyc_output
+postgres-data
 
 # IDEs and editors
 /.idea
@@ -32,3 +34,6 @@ lerna-debug.log*
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+pubspec.lock
+package-lock.json
+/.vs/CornellGo/v16

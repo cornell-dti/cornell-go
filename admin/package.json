@@ -1,0 +1,66 @@
+{
+  "name": "admin",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^6.1.0",
+    "@fortawesome/free-solid-svg-icons": "^6.1.0",
+    "@fortawesome/react-fontawesome": "^0.1.18",
+    "@testing-library/jest-dom": "^5.11.4",
+    "@testing-library/react": "^11.1.0",
+    "@testing-library/user-event": "^12.1.10",
+    "@types/jest": "^26.0.15",
+    "@types/leaflet": "^1.7.9",
+    "@types/node": "^12.0.0",
+    "@types/react": "^17.0.0",
+    "@types/react-dom": "^17.0.0",
+    "@types/styled-components": "^5.1.24",
+    "google-auth-library": "^7.14.1",
+    "icons": "^1.0.0",
+    "leaflet": "^1.7.1",
+    "prettier": "^2.4.1",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-google-button": "^0.7.2",
+    "react-google-login": "^5.2.2",
+    "react-leaflet": "^3.2.5",
+    "react-router": "^5.2.1",
+    "react-router-dom": "^6.2.2",
+    "react-scripts": "^5.0.0",
+    "socket.io-client": "^4.4.1",
+    "string-similarity": "^4.0.4",
+    "styled-components": "^5.3.3",
+    "typeface-roboto": "^1.1.13",
+    "typescript": "^4.1.2",
+    "web-vitals": "^1.0.1",
+    "yarn": "^1.22.17"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "checkformat": "prettier --check \"src/**/*.ts\""
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@types/string-similarity": "^4.0.0"
+  }
+}
