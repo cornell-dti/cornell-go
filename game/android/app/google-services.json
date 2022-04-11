@@ -7,12 +7,67 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:757523123677:android:4ef89c78d8845cb3507a34",
+        "android_client_info": {
+          "package_name": "com.cornellgo.CornellGO"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "757523123677-93vbdd71i7kh9c9an1mj7ck6kll5deer.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cornellgo.CornellGO",
+            "certificate_hash": "d6e7da6b98f7884510d3826068e668c5bb7ec89b"
+          }
+        },
+        {
+          "client_id": "757523123677-2nv6haiqnvklhb134cgg5qe8bia4du4q.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDSKPt3T-sBGcaS5vQGw-FDkgOBTryxhUQ"
+        },
+        {
+          "current_key": "AIzaSyBBGoQlbjlNCBfxiob-mkm1TCougaHqcu4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "757523123677-2nv6haiqnvklhb134cgg5qe8bia4du4q.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "757523123677-cso74eimkjqkcuce69nrf4c637k3db6t.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.cornellgo.game"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:757523123677:android:7c0e70e35a2d54a8507a34",
         "android_client_info": {
           "package_name": "com.cornellgo.game"
         }
       },
       "oauth_client": [
+        {
+          "client_id": "757523123677-lhftm1kuh7k0uqkhc62d378um4nb5e3g.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cornellgo.game",
+            "certificate_hash": "d6e7da6b98f7884510d3826068e668c5bb7ec89b"
+          }
+        },
         {
           "client_id": "757523123677-q8o2d3tahsmm9i68j1sf33ka49qsgalq.apps.googleusercontent.com",
           "client_type": 1,
@@ -27,6 +82,9 @@
         }
       ],
       "api_key": [
+        {
+          "current_key": "AIzaSyDSKPt3T-sBGcaS5vQGw-FDkgOBTryxhUQ"
+        },
         {
           "current_key": "AIzaSyBBGoQlbjlNCBfxiob-mkm1TCougaHqcu4"
         }

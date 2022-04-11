@@ -3,19 +3,19 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>757523123677-cso74eimkjqkcuce69nrf4c637k3db6t.apps.googleusercontent.com</string>
+	<string>757523123677-5uct36sksguq3v4ngeec8ofc31ipf8hl.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.757523123677-cso74eimkjqkcuce69nrf4c637k3db6t</string>
+	<string>com.googleusercontent.apps.757523123677-5uct36sksguq3v4ngeec8ofc31ipf8hl</string>
 	<key>ANDROID_CLIENT_ID</key>
-	<string>757523123677-q8o2d3tahsmm9i68j1sf33ka49qsgalq.apps.googleusercontent.com</string>
+	<string>757523123677-93vbdd71i7kh9c9an1mj7ck6kll5deer.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
-	<string>AIzaSyCY0CGQ4jIci2NsKQ7oWhM6cXXoNM-lT3I</string>
+	<string>AIzaSyDVntid74xv5Hregs4qMLRP8IpbvF_DAco</string>
 	<key>GCM_SENDER_ID</key>
 	<string>757523123677</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.cornellgo.game</string>
+	<string>com.cornellgo.CornellGO</string>
 	<key>PROJECT_ID</key>
 	<string>cornell-go</string>
 	<key>STORAGE_BUCKET</key>
@@ -31,6 +31,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:757523123677:ios:253331c11f6cb206507a34</string>
+	<string>1:757523123677:ios:076917d7608ab08d507a34</string>
 </dict>
 </plist>
