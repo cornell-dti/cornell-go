@@ -194,12 +194,13 @@ export function Challenges() {
       {selectedEvent?.challengeIds
         .filter((chalId) => serverData.challenges.get(chalId))
         .map((chalId) => serverData.challenges.get(chalId)!)
-        .sort(
-          (a, b) =>
-            compareTwoStrings(b.name, query) -
-            compareTwoStrings(a.name, query) +
-            compareTwoStrings(b.description, query) -
-            compareTwoStrings(a.description, query)
+        .sort((a, b) =>
+          query === ""
+            ? 0
+            : compareTwoStrings(b.name, query) -
+              compareTwoStrings(a.name, query) +
+              compareTwoStrings(b.description, query) -
+              compareTwoStrings(a.description, query)
         )
         .map((chal) => (
           <ChallengeCard
