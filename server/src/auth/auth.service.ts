@@ -141,9 +141,9 @@ export class AuthService {
         authType,
         idToken.id,
       );
-
-      user.adminRequested = !user.adminGranted && aud === 'web';
     }
+
+    user.adminRequested = !user.adminGranted && aud === 'web';
 
     const accessToken = await this.jwtService.signAsync(
       {
@@ -162,6 +162,8 @@ export class AuthService {
     user.hashedRefreshToken = await this.hashSalt(refreshToken);
 
     await this.userRepository.persistAndFlush(user);
+
+    if (aud === 'web' && !user.adminGranted) return null;
 
     return [accessToken, refreshToken];
   }
