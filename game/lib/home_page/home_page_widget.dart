@@ -238,15 +238,15 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                               ]
                             : [
                                 Text(
-                                  gameModel.withinCloseRadius ? "Close" : "Far",
+                                  gameModel.withinCloseRadius
+                                      ? "You're almost there!"
+                                      : "Far",
                                   style: TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.w700),
                                 ),
                                 Text(
-                                  gameModel.withinCloseRadius
-                                      ? "Found"
-                                      : "Close",
+                                  gameModel.withinCloseRadius ? "" : "Close",
                                   style: TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.w700),

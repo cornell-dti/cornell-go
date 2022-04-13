@@ -205,8 +205,8 @@ export class EventService {
         'https://upload.wikimedia.org/wikipedia/commons/5/5f/CentralAvenueCornell2.jpg',
       latitude: 42.44755580740012,
       longitude: -76.48504614830019,
-      awardingRadius: 10,
-      closeRadius: 50,
+      awardingRadius: 50,
+      closeRadius: 100,
       completions: [],
       linkedEvent: event,
     });

@@ -90,8 +90,8 @@ class _GameWidgetState extends State<GameWidget> {
                             ? "1 member required"
                             : reqMembers.toString() + " members required")
                         : "Location Disabled";
-                    gameModel.closeProgress = -0.117647059;
-                    gameModel.completionProgress = -0.117647059;
+                    gameModel.closeProgress = -1;
+                    gameModel.completionProgress = -1;
                   }
 
                   if (snapshot.data != null &&
