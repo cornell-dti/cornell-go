@@ -86,8 +86,15 @@ export class ChallengeService {
       user,
     );
 
+    const curEvent = await eventTracker.event.load();
+
     // Ensure that the correct challenge is marked complete
-    if (challengeId !== eventTracker.currentChallenge.id) return eventTracker;
+    if (
+      challengeId !== eventTracker.currentChallenge.id ||
+      (groupMembers.length !== curEvent.requiredMembers &&
+        curEvent.requiredMembers >= 0)
+    )
+      return eventTracker;
 
     const prevChal = this.prevChallengeRepository.create({
       owner: user,

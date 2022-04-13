@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/api/geopoint.dart';
 import 'package:game/model/challenge_model.dart';
+import 'package:game/model/event_model.dart';
 import 'package:game/model/game_model.dart';
 import 'package:game/model/group_model.dart';
 import 'package:game/model/tracker_model.dart';
@@ -46,9 +47,10 @@ class _GameWidgetState extends State<GameWidget> {
   Widget build(BuildContext context) {
     final serviceStream = Geolocator.getServiceStatusStream();
 
-    return Consumer4<GroupModel, TrackerModel, ChallengeModel, ApiClient>(
-        builder: (builder, groupModel, trackerModel, challengeModel, apiCient,
-            child) {
+    return Consumer5<GroupModel, TrackerModel, ChallengeModel, EventModel,
+            ApiClient>(
+        builder: (builder, groupModel, trackerModel, challengeModel, eventModel,
+            apiCient, child) {
       return StreamBuilder<ServiceStatus>(
           stream: serviceStream,
           builder: (context, service) {
@@ -62,12 +64,16 @@ class _GameWidgetState extends State<GameWidget> {
                 builder: ((context, snapshot) {
                   final gameModel = GameModel();
                   final evId = groupModel.curEventId;
+                  final ev = eventModel.getEventById(evId ?? "");
                   final chalId = evId == null
                       ? null
                       : trackerModel.trackerByEventId(evId)?.curChallengeId;
                   final curChallenge = chalId == null
                       ? null
                       : challengeModel.getChallengeById(chalId);
+                  final reqMembers = ev?.requiredMembers ?? 0;
+                  final requiredSizeMet =
+                      groupModel.members.length == reqMembers || reqMembers < 0;
 
                   gameModel.hasConnection = apiCient.serverApi != null;
                   if (curChallenge != null) {
@@ -77,13 +83,20 @@ class _GameWidgetState extends State<GameWidget> {
                     gameModel.imageUrl = curChallenge.imageUrl;
                   }
 
-                  if (serviceStatus == ServiceStatus.disabled) {
-                    gameModel.walkingTime = "Location Disabled";
+                  if (serviceStatus == ServiceStatus.disabled ||
+                      !requiredSizeMet) {
+                    gameModel.walkingTime = !requiredSizeMet
+                        ? (reqMembers == 1
+                            ? "1 member required"
+                            : reqMembers.toString() + " members required")
+                        : "Location Disabled";
                     gameModel.closeProgress = -0.117647059;
                     gameModel.completionProgress = -0.117647059;
                   }
 
-                  if (snapshot.data != null && curChallenge != null) {
+                  if (snapshot.data != null &&
+                      curChallenge != null &&
+                      requiredSizeMet) {
                     final chalLoc =
                         GeoPoint(curChallenge.lat, curChallenge.long);
                     final location = GeoPoint(

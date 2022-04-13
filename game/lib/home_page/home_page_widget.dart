@@ -161,7 +161,10 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                   Padding(
                     padding: EdgeInsets.all(3),
                     child: Text(
-                        groupModel.members.length.toString() + " members",
+                        groupModel.members.length.toString() +
+                            (groupModel.members.length == 1
+                                ? " member"
+                                : " members"),
                         style: TextStyle(color: Colors.white, fontSize: 16)),
                   )
                 ]))
@@ -253,14 +256,16 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                       ),
                     )),
                 Container(
-                  width: isDoneWithoutConnection
-                      ? 0
+                  width: isDoneWithoutConnection || progressToUse < 0
+                      ? MediaQuery.of(context).size.width * 0.95
                       : MediaQuery.of(context).size.width *
                           (1 - (0.85 * progressToUse + 0.15)),
                   height: 40,
                   margin: EdgeInsets.only(
-                      left: MediaQuery.of(context).size.width *
-                          (0.85 * progressToUse + 0.1)),
+                      left: isDoneWithoutConnection || progressToUse < 0
+                          ? 0
+                          : MediaQuery.of(context).size.width *
+                              ((0.85 * progressToUse + 0.1))),
                   decoration: BoxDecoration(
                       color: Colors.black.withOpacity(0.7),
                       borderRadius:
