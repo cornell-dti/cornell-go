@@ -185,13 +185,13 @@ class _HomePageWidgetState extends State<HomePageWidget> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
           child: Text(
-              gameModel.directionDistance == 0
+              gameModel.directionDistance.abs() < 0.3
                   ? "Start moving!"
                   : gameModel.directionDistance < 0
                       ? "You're going the wrong way"
                       : "You're on the right path",
               style: TextStyle(
-                  color: gameModel.directionDistance == 0
+                  color: gameModel.directionDistance < 0.2
                       ? Colors.orange
                       : gameModel.directionDistance < 0
                           ? Colors.red
