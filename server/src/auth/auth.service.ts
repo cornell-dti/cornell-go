@@ -142,9 +142,9 @@ export class AuthService {
         idToken.id,
       );
     }
-      
+
     if (!user) return null;
-      
+
     user.adminRequested = !user.adminGranted && aud === 'web';
 
     const accessToken = await this.jwtService.signAsync(
