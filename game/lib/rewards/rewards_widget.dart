@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
-
 import 'package:game/widget/back_btn.dart';
 import 'package:game/widget/rewards_cell.dart';
-import 'package:game/widget/visited_places_cell.dart';
 
-class VisitedPlacesWidget extends StatefulWidget {
-  VisitedPlacesWidget({Key? key}) : super(key: key);
+class RewardsWidget extends StatefulWidget {
+  RewardsWidget({Key? key}) : super(key: key);
 
   @override
-  _VisitedPlacesWidgetState createState() => _VisitedPlacesWidgetState();
+  _RewardsWidgetState createState() => _RewardsWidgetState();
 }
 
-class _VisitedPlacesWidgetState extends State<VisitedPlacesWidget> {
+class _RewardsWidgetState extends State<RewardsWidget> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
