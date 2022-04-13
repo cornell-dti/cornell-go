@@ -55,6 +55,8 @@ class _GameWidgetState extends State<GameWidget> {
             final posStream = Geolocator.getPositionStream(
                 locationSettings: new LocationSettings());
 
+            final serviceStatus = service.data;
+
             return StreamBuilder<Position>(
                 stream: posStream,
                 builder: ((context, snapshot) {
@@ -73,6 +75,12 @@ class _GameWidgetState extends State<GameWidget> {
                     gameModel.description = curChallenge.description;
                     gameModel.name = curChallenge.name;
                     gameModel.imageUrl = curChallenge.imageUrl;
+                  }
+
+                  if (serviceStatus == ServiceStatus.disabled) {
+                    gameModel.walkingTime = "Location Disabled";
+                    gameModel.closeProgress = -0.117647059;
+                    gameModel.completionProgress = -0.117647059;
                   }
 
                   if (snapshot.data != null && curChallenge != null) {

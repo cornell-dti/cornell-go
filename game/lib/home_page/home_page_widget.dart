@@ -83,12 +83,15 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                 ),
               ),
               Container(
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: NetworkImage(gameModel.imageUrl),
-                    fit: BoxFit.cover,
-                  ),
+                child: FadeInImage(
+                  image: NetworkImage(gameModel.imageUrl == ""
+                      ? "https://images.freeimages.com/images/large-previews/bdb/free-blurry-background-1636594.jpg"
+                      : gameModel.imageUrl),
+                  fit: BoxFit.cover,
+                  placeholder: AssetImage("assets/images/black.png"),
+                  placeholderFit: BoxFit.cover,
                 ),
+                height: 1000,
               ),
               SlidingUpPanel(
                   minHeight: 200,
