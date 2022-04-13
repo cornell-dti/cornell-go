@@ -128,7 +128,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
           : gameModel.closeProgress;
       final isDoneWithoutConnection =
           _doneState != null && !gameModel.hasConnection;
-      if (gameModel.directionDistance < 0) {
+      if (gameModel.directionDistance < -2) {
         displayToast("You're going the wrong way!", Status.error);
       }
       return VStack([
@@ -185,13 +185,13 @@ class _HomePageWidgetState extends State<HomePageWidget> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
           child: Text(
-              gameModel.directionDistance.abs() < 2
+              gameModel.directionDistance.abs() <= 2
                   ? "Start moving!"
                   : gameModel.directionDistance < 0
                       ? "You're going the wrong way"
                       : "You're on the right path",
               style: TextStyle(
-                  color: gameModel.directionDistance < 2
+                  color: gameModel.directionDistance <= 2
                       ? Colors.orange
                       : gameModel.directionDistance < 0
                           ? Colors.red
