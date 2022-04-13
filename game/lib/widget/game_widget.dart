@@ -44,8 +44,6 @@ class _GameWidgetState extends State<GameWidget> {
   _GameWidgetState(Widget child) : _child = child;
   @override
   Widget build(BuildContext context) {
-    final posStream =
-        Geolocator.getPositionStream(locationSettings: new LocationSettings());
     final serviceStream = Geolocator.getServiceStatusStream();
 
     return Consumer4<GroupModel, TrackerModel, ChallengeModel, ApiClient>(
@@ -54,7 +52,8 @@ class _GameWidgetState extends State<GameWidget> {
       return StreamBuilder<ServiceStatus>(
           stream: serviceStream,
           builder: (context, service) {
-            print(service.data.toString());
+            final posStream = Geolocator.getPositionStream(
+                locationSettings: new LocationSettings());
 
             return StreamBuilder<Position>(
                 stream: posStream,
