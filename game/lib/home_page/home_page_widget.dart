@@ -250,17 +250,19 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                       ),
                     )),
                 Container(
-                    width: isDoneWithoutConnection
-                        ? 0
-                        : MediaQuery.of(context).size.width *
-                            (0.85 * progressToUse + 0.1),
-                    height: 40,
-                    decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.5),
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(32),
-                          bottomLeft: Radius.circular(32),
-                        ))),
+                  width: isDoneWithoutConnection
+                      ? 0
+                      : MediaQuery.of(context).size.width *
+                          (1 - (0.85 * progressToUse + 0.15)),
+                  height: 40,
+                  margin: EdgeInsets.only(
+                      left: MediaQuery.of(context).size.width *
+                          (0.85 * progressToUse + 0.1)),
+                  decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.7),
+                      borderRadius:
+                          BorderRadius.horizontal(right: Radius.circular(32))),
+                ),
               ],
             )
           ]),
@@ -324,7 +326,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
       children.add(_listCell(
           member.name,
           member.points.toString(),
-          member.id == userModel.userData?.id,
+          member.id == userModel.userData?.id && groupModel.members.length > 1,
           member.host,
           member.curChallengeId ==
               trackerModel
@@ -419,7 +421,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                                         BorderRadius.all(Radius.circular(8)))),
                           ),
                         )
-                      : Container(height: 45));
+                      : Container(height: 48));
             },
           )
         ],
