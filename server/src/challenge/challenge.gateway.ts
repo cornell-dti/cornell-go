@@ -109,11 +109,18 @@ export class ChallengeGateway {
       challenge,
     );
 
+    const curCompleted = await this.challengeService.isChallengeCompletedByUser(
+      user,
+      curChallenge,
+    );
+
     // Is user skipping while it's allowed
     const isSkippingWhileAllowed =
       wasCompleted ||
       (await eventTracker.event.load()).skippingEnabled ||
-      (!wasCompleted && challenge.eventIndex === curChallenge.eventIndex + 1);
+      (!wasCompleted &&
+        curCompleted &&
+        challenge.eventIndex === curChallenge.eventIndex + 1);
 
     if (!isSkippingWhileAllowed) return false;
 
