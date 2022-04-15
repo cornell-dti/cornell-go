@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:game/model/user_model.dart';
 import 'package:game/utils/utility_functions.dart';
@@ -6,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/home_page/home_page_widget.dart';
 import 'package:profanity_filter/profanity_filter.dart';
+import 'package:http/http.dart' as http;
 
 class UserNameWidget extends StatefulWidget {
   UserNameWidget({Key? key}) : super(key: key);
@@ -20,9 +23,34 @@ class _UserNameWidget extends State<UserNameWidget> {
   Color Carnelian = Color(0xFFB31B1B);
   Color bgColor = Color.fromRGBO(0, 0, 0, 1.0);
   final filter = ProfanityFilter();
+  final profanityListURL =
+      "https://raw.githubusercontent.com/coffee-and-fun/google-profanity-words/main/data/list.txt";
+  late Future<List> futureProfanityWords;
+  late List profanityWords;
+
+  Future<http.Response> getProfanityWords() {
+    return http.get(Uri.parse(profanityListURL));
+  }
+
+  Future<List> fetchProfanityWords() async {
+    final response = await getProfanityWords();
+    if (response.statusCode == 200) {
+      return response.body.split("\n");
+    } else {
+      throw Exception("Failed to load assets.");
+    }
+  }
+
+  void populateProfanityWords() async {
+    futureProfanityWords = fetchProfanityWords();
+    profanityWords = await futureProfanityWords;
+    print(profanityWords);
+  }
+
   @override
   void initState() {
     super.initState();
+    populateProfanityWords();
   }
 
   @override
@@ -40,6 +68,7 @@ class _UserNameWidget extends State<UserNameWidget> {
                 onPressed: () {
                   final validCharacters = RegExp(r'^[a-zA-Z0-9_]+$');
                   var userName = userNameController!.text;
+                  test(String value) => userName.contains(value);
                   if (userName == "") {
                     showAlert("You can't have an empty username!", context);
                   } else if (!validCharacters.hasMatch(userName)) {
@@ -49,7 +78,8 @@ class _UserNameWidget extends State<UserNameWidget> {
                   } else if (userName.length > 64) {
                     showAlert(
                         "Username can't be more than 64 characters", context);
-                  } else if (filter.hasProfanity(userName)) {
+                  } else if (filter.hasProfanity(userName) ||
+                      profanityWords.any((element) => test(element))) {
                     showAlert("Let's keep this app clean please.", context);
                   } else {
                     setState(() {
