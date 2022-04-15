@@ -109,7 +109,10 @@ class UpdateEventDataEventDto {
         rewardType = UpdateEventDataEventRewardTypeDto.LIMITED_TIME_EVENT;
         break;
     }
-    time = fields["time"] == '' ? null : DateTime.parse(fields["time"]);
+    time = fields["time"] == '' ||
+            rewardType == UpdateEventDataEventRewardTypeDto.PERPETUAL
+        ? null
+        : DateTime.parse(fields["time"]);
     rewards = fields["rewards"]
         .map<UpdateEventDataRewardDto>(
             (dynamic reward) => UpdateEventDataRewardDto.fromJson(reward))
