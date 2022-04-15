@@ -83,12 +83,15 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                 ),
               ),
               Container(
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: NetworkImage(gameModel.imageUrl),
-                    fit: BoxFit.cover,
-                  ),
+                child: FadeInImage(
+                  image: NetworkImage(gameModel.imageUrl == ""
+                      ? "https://images.freeimages.com/images/large-previews/bdb/free-blurry-background-1636594.jpg"
+                      : gameModel.imageUrl),
+                  fit: BoxFit.cover,
+                  placeholder: AssetImage("assets/images/black.png"),
+                  placeholderFit: BoxFit.cover,
                 ),
+                height: 1000,
               ),
               SlidingUpPanel(
                   minHeight: 200,
@@ -125,7 +128,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
           : gameModel.closeProgress;
       final isDoneWithoutConnection =
           _doneState != null && !gameModel.hasConnection;
-      if (gameModel.directionDistance < 0) {
+      if (gameModel.directionDistance < -2) {
         displayToast("You're going the wrong way!", Status.error);
       }
       return VStack([
@@ -158,7 +161,10 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                   Padding(
                     padding: EdgeInsets.all(3),
                     child: Text(
-                        groupModel.members.length.toString() + " members",
+                        groupModel.members.length.toString() +
+                            (groupModel.members.length == 1
+                                ? " member"
+                                : " members"),
                         style: TextStyle(color: Colors.white, fontSize: 16)),
                   )
                 ]))
@@ -182,13 +188,13 @@ class _HomePageWidgetState extends State<HomePageWidget> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
           child: Text(
-              gameModel.directionDistance == 0
+              gameModel.directionDistance.abs() <= 2
                   ? "Start moving!"
                   : gameModel.directionDistance < 0
                       ? "You're going the wrong way"
                       : "You're on the right path",
               style: TextStyle(
-                  color: gameModel.directionDistance == 0
+                  color: gameModel.directionDistance <= 2
                       ? Colors.orange
                       : gameModel.directionDistance < 0
                           ? Colors.red
@@ -232,15 +238,15 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                               ]
                             : [
                                 Text(
-                                  gameModel.withinCloseRadius ? "Close" : "Far",
+                                  gameModel.withinCloseRadius
+                                      ? "You're almost there!"
+                                      : "Far",
                                   style: TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.w700),
                                 ),
                                 Text(
-                                  gameModel.withinCloseRadius
-                                      ? "Found"
-                                      : "Close",
+                                  gameModel.withinCloseRadius ? "" : "Close",
                                   style: TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.w700),
@@ -250,17 +256,21 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                       ),
                     )),
                 Container(
-                    width: isDoneWithoutConnection
-                        ? 0
-                        : MediaQuery.of(context).size.width *
-                            (0.85 * progressToUse + 0.1),
-                    height: 40,
-                    decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.5),
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(32),
-                          bottomLeft: Radius.circular(32),
-                        ))),
+                  width: isDoneWithoutConnection || progressToUse < 0
+                      ? MediaQuery.of(context).size.width * 0.95
+                      : MediaQuery.of(context).size.width *
+                          (1 - (0.85 * progressToUse + 0.15)),
+                  height: 40,
+                  margin: EdgeInsets.only(
+                      left: isDoneWithoutConnection || progressToUse < 0
+                          ? 0
+                          : MediaQuery.of(context).size.width *
+                              ((0.85 * progressToUse + 0.1))),
+                  decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.7),
+                      borderRadius:
+                          BorderRadius.horizontal(right: Radius.circular(32))),
+                ),
               ],
             )
           ]),
@@ -324,7 +334,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
       children.add(_listCell(
           member.name,
           member.points.toString(),
-          member.id == userModel.userData?.id,
+          member.id == userModel.userData?.id && groupModel.members.length > 1,
           member.host,
           member.curChallengeId ==
               trackerModel
@@ -419,7 +429,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                                         BorderRadius.all(Radius.circular(8)))),
                           ),
                         )
-                      : Container(height: 45));
+                      : Container(height: 48));
             },
           )
         ],

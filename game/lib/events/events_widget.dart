@@ -107,6 +107,9 @@ class _EventsWidgetState extends State<EventsWidget> {
                             .getChallengeById(event.challengeIds[0]);
                     final complete = tracker?.prevChallengeIds.length ==
                         event.challengeIds.length;
+                    final timeTillExpire =
+                        event.time?.difference(DateTime.now()) ??
+                            Duration(days: 9999);
                     eventCells.add(GestureDetector(
                       onTap: () {
                         if (groupModel.curEventId == event.id) return;
@@ -119,24 +122,34 @@ class _EventsWidgetState extends State<EventsWidget> {
                               context);
                         }
                       },
-                      child: eventsCell(
-                          context,
-                          event.name,
-                          event.time == null || !complete
-                              ? ""
-                              : format.format(event.time!),
-                          event.description,
-                          complete,
-                          event.id == groupModel.curEventId,
-                          (event.rewardType ==
-                                  UpdateEventDataEventRewardTypeDto.PERPETUAL
-                              ? null
-                              : event.time),
-                          reward ?? "",
-                          event.rewards.length,
-                          event.requiredMembers,
-                          chal?.imageUrl ??
-                              "https://a.rgbimg.com/users/b/ba/badk/600/qfOGvbS.jpg"),
+                      child: StreamBuilder(
+                        stream:
+                            Stream.fromFuture(Future.delayed(timeTillExpire)),
+                        builder: (stream, value) => timeTillExpire.isNegative
+                            ? Consumer<ApiClient>(
+                                builder: (context, apiClient, child) {
+                                  if (event.id == groupModel.curEventId) {
+                                    apiClient.serverApi?.setCurrentEvent("");
+                                  }
+                                  return Container();
+                                },
+                              )
+                            : eventsCell(
+                                context,
+                                event.name,
+                                event.time == null || !complete
+                                    ? ""
+                                    : format.format(event.time!),
+                                event.description,
+                                complete,
+                                event.id == groupModel.curEventId,
+                                event.time,
+                                reward ?? "",
+                                event.rewards.length,
+                                event.requiredMembers,
+                                chal?.imageUrl ??
+                                    "https://a.rgbimg.com/users/b/ba/badk/600/qfOGvbS.jpg"),
+                      ),
                     ));
                   }
                   return ListView(
