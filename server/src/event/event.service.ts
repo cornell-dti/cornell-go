@@ -62,7 +62,7 @@ export class EventService {
       },
       {
         offset,
-        limit: count,
+        //limit: count,
       },
     );
 
@@ -221,6 +221,7 @@ export class EventService {
       name: 'Default Event',
       description: 'Default Event',
       requiredMembers: 1,
+      minimumScore: 1,
       skippingEnabled: true,
       isDefault: true,
       rewardType: EventRewardType.PERPETUAL,

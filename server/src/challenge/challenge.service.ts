@@ -124,10 +124,7 @@ export class ChallengeService {
   async checkForReward(eventTracker: EventTracker) {
     const eventBase = await eventTracker.event.load();
     //If User has not completed the event/done all the challenges then:
-    if (
-      (await eventTracker.completed.loadCount()) !==
-      (await eventBase.challenges.loadCount())
-    ) {
+    if (eventTracker.eventScore < eventBase.minimumScore) {
       return null;
     }
 
@@ -144,9 +141,12 @@ export class ChallengeService {
         containingEvent: eventBase,
       });
       if (newReward !== null) {
-        newReward.claimingUser = Reference.create(eventTracker.user);
-        newReward.isRedeemed = false;
-        const reward = this.rewardRepository.create({ ...newReward, id: v4() });
+        const reward = this.rewardRepository.create({
+          ...newReward,
+          claimingUser: eventTracker.user,
+          isRedeemed: false,
+          id: v4(),
+        });
         await this.rewardRepository.persistAndFlush(reward);
         return newReward;
       }

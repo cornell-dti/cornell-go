@@ -55,6 +55,10 @@ export class EventBase {
   @Property()
   time!: Date;
 
+  /** Describes minimum score to get a reward */
+  @Property()
+  minimumScore = 1;
+
   /** Describes the rewards */
   @OneToMany(() => EventReward, rew => rew.containingEvent, {
     orphanRemoval: true,

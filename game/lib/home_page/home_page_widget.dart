@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:game/model/tracker_model.dart';
 import 'package:game/utils/utility_functions.dart';
@@ -256,10 +258,12 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                       ),
                     )),
                 Container(
-                  width: isDoneWithoutConnection || progressToUse < 0
-                      ? MediaQuery.of(context).size.width * 0.95
-                      : MediaQuery.of(context).size.width *
-                          (1 - (0.85 * progressToUse + 0.15)),
+                  width: max(
+                      isDoneWithoutConnection || progressToUse < 0
+                          ? MediaQuery.of(context).size.width * 0.95
+                          : MediaQuery.of(context).size.width *
+                              (1 - (0.85 * progressToUse + 0.15)),
+                      0),
                   height: 40,
                   margin: EdgeInsets.only(
                       left: isDoneWithoutConnection || progressToUse < 0

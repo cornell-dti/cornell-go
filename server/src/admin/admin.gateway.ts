@@ -255,6 +255,7 @@ export class AdminGateway {
         .sort((a, b) => a.eventIndex - b.eventIndex)
         .map(c => c.id),
       rewardIds: ev.rewards.getIdentifiers(),
+      minimumScore: ev.minimumScore,
     };
   }
 

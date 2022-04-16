@@ -203,7 +203,9 @@ export class ChallengeGateway {
           isRanked: newTracker.isPlayerRanked,
           cooldownMinimum: newTracker.cooldownMinimum.toISOString(),
           curChallengeId: newTracker.currentChallenge.id,
-          prevChallengeIds: newTracker.completed.getIdentifiers(),
+          prevChallengeIds: (await newTracker.completed.loadItems()).map(
+            ch => ch.challenge.id,
+          ),
         },
       ],
     });

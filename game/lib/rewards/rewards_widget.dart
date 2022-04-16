@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:game/model/event_model.dart';
+import 'package:game/model/reward_model.dart';
 import 'package:game/widget/back_btn.dart';
 import 'package:game/widget/rewards_cell.dart';
+import 'package:provider/provider.dart';
 
 class RewardsWidget extends StatefulWidget {
   RewardsWidget({Key? key}) : super(key: key);
@@ -21,7 +24,7 @@ class _RewardsWidgetState extends State<RewardsWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: scaffoldKey,
-      floatingActionButton: backBtn(scaffoldKey, context, "Rewards Page"),
+      floatingActionButton: backBtn(scaffoldKey, context, "Rewards"),
       backgroundColor: Color.fromARGB(255, 43, 47, 50),
       body: Padding(
         padding: const EdgeInsets.only(top: 150),
@@ -30,39 +33,22 @@ class _RewardsWidgetState extends State<RewardsWidget> {
             padding: const EdgeInsets.only(left: 8.0, right: 8.0),
             child: Column(
               children: [
-                Container(
-                    child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.search,
-                        size: 25,
-                        color: Colors.white,
-                      ),
-                      Expanded(
-                          child: TextField(
-                              cursorColor: Colors.white,
-                              decoration: InputDecoration(
-                                  enabledBorder: UnderlineInputBorder(
-                                      borderSide:
-                                          BorderSide(color: Colors.white)),
-                                  border: UnderlineInputBorder(),
-                                  hintText: 'search...',
-                                  hintStyle: TextStyle(
-                                      fontSize: 20, color: Colors.white),
-                                  fillColor: Colors.white)))
-                    ],
-                  ),
-                )),
-                Expanded(
-                    child: ListView(
+                Expanded(child: Consumer2<RewardModel, EventModel>(
+                  builder: (context, rewardModel, eventModel, child) {
+                    return ListView(
                         shrinkWrap: true,
                         scrollDirection: Axis.vertical,
-                        children: [
-                      rewardsCell(context, "Certificate of Completion", "From Central Campus Event", "4/19/2021", false),
-                      rewardsCell(context, "\$3 Cornell Store", "From Central Campus Event", "4/19/2021", true, redeemText: "Visit cornellstore.com and type in XYZ at the checkout")
-                    ]))
+                        children: rewardModel.rewards.map(
+                          (e) {
+                            final ev = eventModel.getEventById(e.eventId);
+                            return AnimatedRewardCell(
+                                e.description,
+                                "From " + (ev?.name ?? "an Event"),
+                                e.redeemInfo);
+                          },
+                        ).toList());
+                  },
+                ))
               ],
             ),
           ),
