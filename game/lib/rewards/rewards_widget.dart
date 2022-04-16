@@ -61,7 +61,7 @@ class _RewardsWidgetState extends State<RewardsWidget> {
                         scrollDirection: Axis.vertical,
                         children: [
                       rewardsCell(context, "Certificate of Completion", "From Central Campus Event", "4/19/2021", false),
-                      rewardsCell(context, "\$3 Cornell Store", "From Central Campus Event", "4/19/2021", true, ["Visit cornellstore.com and type in XYZ at the checkout"])
+                      rewardsCell(context, "\$3 Cornell Store", "From Central Campus Event", "4/19/2021", true, redeemText: "Visit cornellstore.com and type in XYZ at the checkout")
                     ]))
               ],
             ),

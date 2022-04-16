@@ -5,6 +5,7 @@ import 'package:game/feedback/feedback.dart';
 import 'package:game/leaderboard/leaderboard_widget.dart';
 import 'package:game/login/login_page.dart';
 import 'package:game/model/user_model.dart';
+import 'package:game/rewards/rewards_widget.dart';
 import 'package:game/visited_places/visited_places_widget.dart';
 import 'package:game/challenges/challenges_widget.dart';
 import 'package:game/events/events_widget.dart';
@@ -85,6 +86,19 @@ class NavBar extends StatelessWidget {
                           context,
                           MaterialPageRoute(
                               builder: (context) => ChallengesWidget()))
+                    }),
+            ListTile(
+                leading: Icon(
+                  Icons.star,
+                  color: Color(0xFFB31B1B),
+                ),
+                title: Text('Rewards', style: listTextStyle),
+                onTap: () => {
+                      Navigator.pop(context),
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => RewardsWidget()))
                     }),
             ListTile(
               leading: Icon(
