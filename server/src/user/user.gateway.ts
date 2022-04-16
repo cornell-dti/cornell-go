@@ -23,6 +23,10 @@ import { UserService } from './user.service';
 import { forwardRef, Inject, UseGuards } from '@nestjs/common';
 import { UserGuard } from 'src/auth/jwt-auth.guard';
 import { GroupGateway } from '../group/group.gateway';
+import { CensorSensor } from 'censor-sensor';
+
+const replaceAll = require('string.prototype.replaceall');
+replaceAll.shim();
 
 @WebSocketGateway({ cors: true })
 @UseGuards(UserGuard)
@@ -82,7 +86,15 @@ export class UserGateway {
     const group = await user.group.load();
     const groupMembers = await group.members.loadItems();
 
-    user.username = data.newUsername;
+    user.username = new CensorSensor()
+      .cleanProfanityIsh(
+        data.newUsername
+          .substring(0, 128)
+          .replaceAll(/[^_A-z0-9]/g, ' ')
+          .replaceAll('_', ' '),
+      )
+      .replaceAll('*', '_')
+      .replaceAll(' ', '_');
 
     await this.userService.saveUser(user);
 

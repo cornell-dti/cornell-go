@@ -105,10 +105,14 @@ Widget eventsCell(
                   )),
                   Row(children: [
                     Container(
-                        child: Text(
-                      time == null ? "" : "${timeToTimeString(time)} Left",
-                      style: timeStyle,
-                    )),
+                        child: StreamBuilder(
+                            stream: Stream.periodic(Duration(seconds: 1)),
+                            builder: (builder, value) => Text(
+                                  time == null
+                                      ? ""
+                                      : "${timeToTimeString(time)} Left",
+                                  style: timeStyle,
+                                ))),
                     Expanded(
                       child: Container(
                           child: Column(children: [
