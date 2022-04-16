@@ -124,9 +124,9 @@ Widget eventsCell(
                             child: Text(
                                 rewardNum == 0
                                     ? ""
-                                    : (rewardNum == -1
+                                    : (time == null
                                         ? "∞ Rewards"
-                                        : "${rewardNum} Rewards Left"),
+                                        : "${rewardNum} Reward${rewardNum == 1 ? "" : "s"} Left"),
                                 style: rewardStyle))
                       ])),
                     )

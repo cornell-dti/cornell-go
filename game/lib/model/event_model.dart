@@ -46,14 +46,16 @@ class EventModel extends ChangeNotifier {
     });
 
     client.clientApi.invalidateDataStream.listen((event) {
-      if (event.userEventData) {
+      if (event.userEventData || event.winnerRewardData) {
         _events.clear();
         searchResults = null;
       }
       if (event.leaderboardData) {
         _topPlayers.clear();
       }
-      if (event.leaderboardData || event.userEventData) {
+      if (event.leaderboardData ||
+          event.userEventData ||
+          event.winnerRewardData) {
         notifyListeners();
       }
     });

@@ -91,6 +91,15 @@
           "nullable": false,
           "length": 6,
           "mappedType": "datetime"
+        },
+        "minimum_score": {
+          "name": "minimum_score",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
         }
       },
       "name": "event_base",

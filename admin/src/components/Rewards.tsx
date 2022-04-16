@@ -39,6 +39,8 @@ function RewardCard(props: {
       <ListCardBody>
         Id: <b>{props.reward.id}</b>
         <br />
+        Claiming User Id: <b>{props.reward.claimingUserId}</b>
+        <br />
       </ListCardBody>
       <ListCardButtons>
         <HButton onClick={props.onUp}>UP</HButton>
@@ -61,12 +63,13 @@ function makeForm() {
   ] as EntryForm[];
 }
 
-function fromForm(form: EntryForm[], eventId: string, id: string) {
+function fromForm(form: EntryForm[], eventId: string, id: string): RewardDto {
   return {
     id,
     description: (form[0] as FreeEntryForm).value,
     redeemInfo: (form[1] as FreeEntryForm).value,
     containingEventId: eventId,
+    claimingUserId: "",
   };
 }
 
