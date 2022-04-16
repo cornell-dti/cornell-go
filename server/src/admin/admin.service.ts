@@ -136,6 +136,7 @@ export class AdminService {
           : EventRewardType.PERPETUAL,
       time: new Date(event.time),
       indexable: event.indexable,
+      minimumScore: event.minimumScore,
     };
 
     if (eventEntity) {

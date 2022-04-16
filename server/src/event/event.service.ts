@@ -24,6 +24,11 @@ export class EventService {
     private challengeRepository: EntityRepository<Challenge>,
   ) {}
 
+  /** Get event by id */
+  async getEventById(id: string) {
+    return await this.eventsRepository.findOne({ id });
+  }
+
   /** Get events by ids */
   async getEventsByIds(ids: string[]): Promise<EventBase[]> {
     return await this.eventsRepository.find({ id: { $in: ids } });
@@ -62,7 +67,7 @@ export class EventService {
       },
       {
         offset,
-        limit: count,
+        //limit: count,
       },
     );
 
@@ -221,6 +226,7 @@ export class EventService {
       name: 'Default Event',
       description: 'Default Event',
       requiredMembers: 1,
+      minimumScore: 1,
       skippingEnabled: true,
       isDefault: true,
       rewardType: EventRewardType.PERPETUAL,

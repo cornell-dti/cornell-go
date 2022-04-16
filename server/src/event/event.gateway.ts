@@ -52,10 +52,12 @@ export class EventGateway {
           ).map((ch: Challenge) => ch.id),
           rewards: (
             await ev.rewards.loadItems()
-          ).map((rw: EventReward) => ({
-            id: rw.id,
-            description: rw.rewardDescription,
-          })),
+          )
+            .filter(rw => !rw.claimingUser)
+            .map((rw: EventReward) => ({
+              id: rw.id,
+              description: rw.rewardDescription,
+            })),
         })),
       ),
     };
