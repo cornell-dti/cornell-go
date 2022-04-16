@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/reward_model.dart';
+import 'package:game/model/user_model.dart';
 import 'package:game/widget/back_btn.dart';
 import 'package:game/widget/rewards_cell.dart';
 import 'package:provider/provider.dart';
@@ -33,12 +34,18 @@ class _RewardsWidgetState extends State<RewardsWidget> {
             padding: const EdgeInsets.only(left: 8.0, right: 8.0),
             child: Column(
               children: [
-                Expanded(child: Consumer2<RewardModel, EventModel>(
-                  builder: (context, rewardModel, eventModel, child) {
+                Expanded(child: Consumer3<RewardModel, UserModel, EventModel>(
+                  builder:
+                      (context, rewardModel, userModel, eventModel, child) {
                     return ListView(
                         shrinkWrap: true,
                         scrollDirection: Axis.vertical,
-                        children: rewardModel.rewards.map(
+                        children: rewardModel.rewardByEventId.values
+                            .where((element) =>
+                                userModel.userData?.rewardIds
+                                    .contains(element.rewardId) ??
+                                false)
+                            .map(
                           (e) {
                             final ev = eventModel.getEventById(e.eventId);
                             return AnimatedRewardCell(

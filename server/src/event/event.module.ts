@@ -24,6 +24,6 @@ import { AuthModule } from 'src/auth/auth.module';
     AuthModule,
   ],
   providers: [EventService, EventGateway],
-  exports: [EventService],
+  exports: [EventService, EventGateway],
 })
 export class EventModule {}

@@ -51,7 +51,7 @@ export class EventBase {
   @Property()
   indexable!: boolean;
 
-  /** Describes end time for limited time events and begin time for others */
+  /** Describes end time for the event */
   @Property()
   time!: Date;
 

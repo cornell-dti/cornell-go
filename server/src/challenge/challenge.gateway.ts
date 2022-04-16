@@ -6,6 +6,7 @@ import {
 } from '@nestjs/websockets';
 import { UserGuard } from 'src/auth/jwt-auth.guard';
 import { UpdateGroupDataDto } from 'src/client/update-group-data.dto';
+import { EventGateway } from 'src/event/event.gateway';
 import { GroupGateway } from 'src/group/group.gateway';
 import { UserGateway } from 'src/user/user.gateway';
 import { CallingUser } from '../auth/calling-user.decorator';
@@ -26,6 +27,7 @@ export class ChallengeGateway {
     private challengeService: ChallengeService,
     private userGateway: UserGateway,
     private groupGateway: GroupGateway,
+    private eventGateway: EventGateway,
     @Inject(forwardRef(() => EventService))
     private eventService: EventService,
   ) {}
@@ -85,7 +87,7 @@ export class ChallengeGateway {
 
     const isChallengeValid = await this.eventService.isChallengeInEvent(
       data.challengeId,
-      group?.currentEvent.id ?? '',
+      group.currentEvent.id,
     );
 
     if (!isChallengeValid) return false;
@@ -123,38 +125,14 @@ export class ChallengeGateway {
     eventTracker.currentChallenge.set(challenge);
     await this.eventService.saveTracker(eventTracker);
 
-    const updateData: UpdateGroupDataDto = {
-      curEventId: group?.currentEvent.id ?? '',
-      members: [
-        {
-          id: user.id,
-          name: user.username,
-          points: user.score,
-          host: group?.host?.id === user.id,
-          curChallengeId: data.challengeId,
-        },
-      ],
-      removeListedMembers: false,
-    };
-
     const members = await group.members.loadItems();
 
     for (const mem of members) {
-      this.clientService.emitUpdateGroupData(mem, updateData);
+      this.groupGateway.requestGroupData(mem, {});
     }
 
-    this.clientService.emitUpdateEventTrackerData(user, {
-      eventTrackers: [
-        {
-          eventId: eventTracker.event.id,
-          isRanked: eventTracker.isPlayerRanked,
-          cooldownMinimum: eventTracker.cooldownMinimum.toISOString(),
-          curChallengeId: eventTracker.currentChallenge.id,
-          prevChallengeIds: (await eventTracker.completed.loadItems()).map(
-            ev => ev.challenge.id,
-          ),
-        },
-      ],
+    await this.eventGateway.requestEventTrackerData(user, {
+      trackedEventIds: [eventTracker.event.id],
     });
 
     return false;
@@ -178,18 +156,8 @@ export class ChallengeGateway {
 
     await newTracker.completed.loadItems();
 
-    this.clientService.emitUpdateEventTrackerData(user, {
-      eventTrackers: [
-        {
-          eventId: newTracker.event.id,
-          isRanked: newTracker.isPlayerRanked,
-          cooldownMinimum: newTracker.cooldownMinimum.toISOString(),
-          curChallengeId: newTracker.currentChallenge.id,
-          prevChallengeIds: (await newTracker.completed.loadItems()).map(
-            ch => ch.challenge.id,
-          ),
-        },
-      ],
+    await this.eventGateway.requestEventTrackerData(user, {
+      trackedEventIds: [newTracker.event.id],
     });
 
     await this.requestChallengeData(user, {
@@ -202,7 +170,7 @@ export class ChallengeGateway {
     this.clientService.emitInvalidateData({
       userEventData: false,
       userRewardData: false,
-      winnerRewardData: false,
+      winnerRewardData: true,
       groupData: false,
       challengeData: false,
       leaderboardData: true,

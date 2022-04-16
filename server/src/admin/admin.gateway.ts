@@ -279,6 +279,7 @@ export class AdminGateway {
       description: rw.rewardDescription,
       redeemInfo: rw.rewardRedeemInfo,
       containingEventId: rw.containingEvent.id,
+      claimingUserId: rw.claimingUser?.id ?? '',
     };
   }
 }

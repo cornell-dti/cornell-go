@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AnimatedRewardCell extends StatefulWidget {
   final String _title;
@@ -38,6 +40,10 @@ class _AnimatedRewardCellState extends State<AnimatedRewardCell> {
         fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black45);
     final redeemStyle = TextStyle(
         fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black);
+    final redeemLinkStyle = TextStyle(
+        fontWeight: FontWeight.normal,
+        fontSize: 12,
+        color: Colors.lightBlueAccent);
     return Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(children: [
@@ -94,7 +100,14 @@ class _AnimatedRewardCellState extends State<AnimatedRewardCell> {
                           fit: BoxFit.scaleDown,
                           child: Padding(
                               padding: const EdgeInsets.all(8),
-                              child: Text(_redeemText!, style: redeemStyle)))))
+                              child: Linkify(
+                                  onOpen: (link) async => await launch(link.url,
+                                      forceWebView: true,
+                                      enableJavaScript: true,
+                                      forceSafariVC: true),
+                                  style: redeemStyle,
+                                  text: _redeemText!,
+                                  linkStyle: redeemLinkStyle)))))
             ])
         ]));
   }

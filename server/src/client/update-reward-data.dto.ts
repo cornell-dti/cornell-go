@@ -1,5 +1,6 @@
 /** DTO for event data in updateRewardData */
 export interface UpdateRewardDataRewardDto {
+  rewardId: string;
   eventId: string;
   description: string;
   redeemInfo: string;

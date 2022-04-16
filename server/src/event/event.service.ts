@@ -24,6 +24,11 @@ export class EventService {
     private challengeRepository: EntityRepository<Challenge>,
   ) {}
 
+  /** Get event by id */
+  async getEventById(id: string) {
+    return await this.eventsRepository.findOne({ id });
+  }
+
   /** Get events by ids */
   async getEventsByIds(ids: string[]): Promise<EventBase[]> {
     return await this.eventsRepository.find({ id: { $in: ids } });

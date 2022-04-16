@@ -22,6 +22,8 @@ export class ChallengeService {
     private prevChallengeRepository: EntityRepository<PrevChallenge>,
     @InjectRepository(EventReward)
     private rewardRepository: EntityRepository<EventReward>,
+    @InjectRepository(User)
+    private userRepository: EntityRepository<User>,
   ) {}
 
   /** Get challenges with prev challenges for a given user */
@@ -133,38 +135,41 @@ export class ChallengeService {
         containingEvent: eventTracker.event,
       })) > 0 ||
       //If event has expired:
-      eventBase.time > new Date()
+      eventBase.time < new Date()
     ) {
       return false;
     }
 
     if (eventBase.rewardType === EventRewardType.PERPETUAL) {
-      const newReward = await this.rewardRepository.findOne({
+      const rewardTemplate = await this.rewardRepository.findOne({
         containingEvent: eventBase,
       });
-      if (newReward !== null) {
+
+      if (rewardTemplate !== null) {
         const reward = this.rewardRepository.create({
-          ...newReward,
+          ...rewardTemplate,
           claimingUser: eventTracker.user,
           isRedeemed: false,
           id: v4(),
         });
         await this.rewardRepository.persistAndFlush(reward);
+        await this.userRepository.persistAndFlush(eventTracker.user);
         return true;
       }
-      return false;
-    }
+    } else if (eventBase.rewardType === EventRewardType.LIMITED_TIME_EVENT) {
+      const unclaimedReward = await this.rewardRepository.findOne({
+        claimingUser: null,
+        containingEvent: eventBase,
+      });
 
-    const unclaimedReward = await this.rewardRepository.findOne({
-      claimingUser: null,
-      containingEvent: eventBase,
-    });
+      if (unclaimedReward !== null) {
+        unclaimedReward.claimingUser = Reference.create(eventTracker.user);
 
-    if (unclaimedReward !== null) {
-      unclaimedReward.claimingUser = Reference.create(eventTracker.user);
-      await this.rewardRepository.persistAndFlush(unclaimedReward);
+        await this.rewardRepository.persistAndFlush(unclaimedReward);
+        await this.userRepository.persistAndFlush(eventTracker.user);
 
-      return true;
+        return true;
+      }
     }
 
     return false;
