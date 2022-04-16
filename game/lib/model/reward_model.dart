@@ -9,7 +9,9 @@ class RewardModel extends ChangeNotifier {
 
   RewardModel(ApiClient client) : _client = client {
     client.clientApi.updateUserDataStream.listen((event) {
-      client.serverApi?.requestRewardData(event.rewardIds);
+      if (!event.ignoreIdLists) {
+        client.serverApi?.requestRewardData(event.rewardIds);
+      }
     });
 
     client.clientApi.updateRewardDataStream.listen((event) {

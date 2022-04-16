@@ -16,6 +16,7 @@ import { ChallengeService } from './challenge.service';
   imports: [
     MikroOrmModule.forFeature([Challenge, PrevChallenge, EventReward]),
     forwardRef(() => EventModule),
+    GroupModule,
     UserModule,
     RewardModule,
     ClientModule,

@@ -89,7 +89,7 @@ class NavBar extends StatelessWidget {
                     }),
             ListTile(
                 leading: Icon(
-                  Icons.star,
+                  Icons.emoji_events,
                   color: Color(0xFFB31B1B),
                 ),
                 title: Text('Rewards', style: listTextStyle),

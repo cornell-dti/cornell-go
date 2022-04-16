@@ -6,18 +6,13 @@ import {
 } from '@nestjs/websockets';
 import { UserGuard } from 'src/auth/jwt-auth.guard';
 import { UpdateGroupDataDto } from 'src/client/update-group-data.dto';
-import { UpdateRewardDataDto } from 'src/client/update-reward-data.dto';
-import {
-  UpdateUserDataAuthTypeDto,
-  UpdateUserDataDto,
-} from 'src/client/update-user-data.dto';
-import { EventReward } from 'src/model/event-reward.entity';
+import { GroupGateway } from 'src/group/group.gateway';
+import { UserGateway } from 'src/user/user.gateway';
 import { CallingUser } from '../auth/calling-user.decorator';
 import { ClientService } from '../client/client.service';
 import { EventService } from '../event/event.service';
 import { Challenge } from '../model/challenge.entity';
 import { User } from '../model/user.entity';
-import { UserService } from '../user/user.service';
 import { ChallengeService } from './challenge.service';
 import { CompletedChallengeDto } from './completed-challenge.dto';
 import { RequestChallengeDataDto } from './request-challenge-data.dto';
@@ -29,7 +24,8 @@ export class ChallengeGateway {
   constructor(
     private clientService: ClientService,
     private challengeService: ChallengeService,
-    private userService: UserService,
+    private userGateway: UserGateway,
+    private groupGateway: GroupGateway,
     @Inject(forwardRef(() => EventService))
     private eventService: EventService,
   ) {}
@@ -174,24 +170,10 @@ export class ChallengeGateway {
       data.challengeId,
     );
 
-    const group = await user.group?.load();
-
-    const updateData: UpdateGroupDataDto = {
-      curEventId: group.currentEvent.id,
-      members: [
-        {
-          id: user.id,
-          name: user.username,
-          points: user.score,
-          host: group.host.id === user.id,
-          curChallengeId: newTracker.currentChallenge.id,
-        },
-      ],
-      removeListedMembers: false,
-    };
+    const group = await user.group.load();
 
     for (const mem of group.members) {
-      this.clientService.emitUpdateGroupData(mem, updateData);
+      await this.groupGateway.requestGroupData(mem, {});
     }
 
     await newTracker.completed.loadItems();
@@ -210,58 +192,12 @@ export class ChallengeGateway {
       ],
     });
 
-    const ch = await newTracker.currentChallenge.load();
-
-    this.clientService.emitUpdateChallengeData(user, {
-      challenges: [
-        {
-          id: ch.id,
-          name: ch.name,
-          description: ch.description,
-          imageUrl: ch.imageUrl,
-          lat: ch.latitude,
-          long: ch.longitude,
-          awardingRadius: ch.awardingRadius,
-          closeRadius: ch.closeRadius,
-          completionDate: newTracker.completed
-            .getItems()
-            .filter(ch => ch.challenge.id === data.challengeId)[0]
-            .foundTimestamp.toISOString(),
-        },
-      ],
+    await this.requestChallengeData(user, {
+      challengeIds: [data.challengeId, newTracker.currentChallenge.id],
     });
 
-    const newReward = await this.challengeService.checkForReward(newTracker);
-
-    if (newReward !== null) {
-      const participatingEvents = await user.participatingEvents.loadItems();
-      const userRewards = await user.rewards.loadItems();
-
-      const updatedUser: UpdateUserDataDto = {
-        id: user.id,
-        username: user.username,
-        score: user.score,
-        groupId: group?.friendlyId ?? 'undefined',
-        rewardIds: userRewards.concat(newReward).map(reward => reward.id), //Add reward to user.rewards,
-        trackedEventIds: participatingEvents.map(ev => ev.id),
-        ignoreIdLists: false,
-        authType: user.authType as UpdateUserDataAuthTypeDto,
-      };
-      this.clientService.emitUpdateUserData(user, updatedUser);
-      user.rewards.add(newReward);
-      await this.userService.saveUser(user);
-
-      const rewards = userRewards.concat(newReward).map(reward => ({
-        eventId: reward.containingEvent.id,
-        description: reward.rewardDescription,
-        redeemInfo: reward.rewardRedeemInfo,
-        isRedeemed: reward.isRedeemed,
-      }));
-      const updatedRewards: UpdateRewardDataDto = {
-        rewards: rewards,
-      };
-      this.clientService.emitUpdateRewardData(user, updatedRewards);
-    }
+    await this.challengeService.checkForReward(newTracker);
+    await this.userGateway.requestUserData(user, {});
 
     this.clientService.emitInvalidateData({
       userEventData: false,
@@ -271,7 +207,5 @@ export class ChallengeGateway {
       challengeData: false,
       leaderboardData: true,
     });
-
-    return true;
   }
 }

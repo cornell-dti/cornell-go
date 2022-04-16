@@ -123,20 +123,22 @@ export class ChallengeService {
   /** Check if the current event can return rewards */
   async checkForReward(eventTracker: EventTracker) {
     const eventBase = await eventTracker.event.load();
-    //If User has not completed the event/done all the challenges then:
-    if (eventTracker.eventScore < eventBase.minimumScore) {
-      return null;
-    }
 
-    const rewardType = eventBase.rewardType;
     if (
-      rewardType === EventRewardType.LIMITED_TIME_EVENT &&
+      //If user has not completed enough challenges:
+      eventTracker.eventScore < eventBase.minimumScore ||
+      //If user has a reward for this event:
+      (await this.rewardRepository.count({
+        claimingUser: eventTracker.user,
+        containingEvent: eventTracker.event,
+      })) > 0 ||
+      //If event has expired:
       eventBase.time > new Date()
     ) {
-      return null;
+      return false;
     }
 
-    if (rewardType === EventRewardType.PERPETUAL) {
+    if (eventBase.rewardType === EventRewardType.PERPETUAL) {
       const newReward = await this.rewardRepository.findOne({
         containingEvent: eventBase,
       });
@@ -148,19 +150,23 @@ export class ChallengeService {
           id: v4(),
         });
         await this.rewardRepository.persistAndFlush(reward);
-        return newReward;
+        return true;
       }
-      return null;
+      return false;
     }
 
     const unclaimedReward = await this.rewardRepository.findOne({
       claimingUser: null,
       containingEvent: eventBase,
     });
+
     if (unclaimedReward !== null) {
       unclaimedReward.claimingUser = Reference.create(eventTracker.user);
-      return unclaimedReward;
+      await this.rewardRepository.persistAndFlush(unclaimedReward);
+
+      return true;
     }
-    return null;
+
+    return false;
   }
 }
