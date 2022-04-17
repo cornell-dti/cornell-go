@@ -18,6 +18,6 @@ import { SessionLogEntry } from 'src/model/session-log-entry.entity';
     ClientModule,
   ],
   providers: [UserService, UserGateway],
-  exports: [UserService],
+  exports: [UserService, UserGateway],
 })
 export class UserModule {}

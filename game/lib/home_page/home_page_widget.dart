@@ -1,4 +1,7 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:game/model/reward_model.dart';
 import 'package:game/model/tracker_model.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
@@ -28,6 +31,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
   Color Carnelian = Color(0xFFB31B1B);
   var _doneState = null;
+  var _mightShowRewardNotif = false;
   @override
   void initState() {
     super.initState();
@@ -65,10 +69,11 @@ class _HomePageWidgetState extends State<HomePageWidget> {
               if (_doneState != null && gameModel.hasConnection) {
                 _controllerCenter.play();
                 apiClient.serverApi?.completedChallenge(_doneState.challengeId);
-                showAlert("Congratulations! You've found ${_doneState?.name}!",
-                    context);
+                showAlert(
+                    "Good job! You've found ${_doneState?.name}!", context);
                 setState(() {
                   _doneState = null;
+                  _mightShowRewardNotif = true;
                 });
               }
             });
@@ -256,10 +261,12 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                       ),
                     )),
                 Container(
-                  width: isDoneWithoutConnection || progressToUse < 0
-                      ? MediaQuery.of(context).size.width * 0.95
-                      : MediaQuery.of(context).size.width *
-                          (1 - (0.85 * progressToUse + 0.15)),
+                  width: max(
+                      isDoneWithoutConnection || progressToUse < 0
+                          ? MediaQuery.of(context).size.width * 0.95
+                          : MediaQuery.of(context).size.width *
+                              (1 - (0.85 * progressToUse + 0.15)),
+                      0),
                   height: 40,
                   margin: EdgeInsets.only(
                       left: isDoneWithoutConnection || progressToUse < 0
@@ -292,9 +299,29 @@ class _HomePageWidgetState extends State<HomePageWidget> {
               })),
               ElevatedButton(
                 onPressed: () => {_joinGroupDialog(context)},
-                child: const Text(
-                  "Join!",
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                child: Consumer<RewardModel>(
+                  builder: (context, rewardModel, child) {
+                    if (_mightShowRewardNotif) {
+                      final reward =
+                          rewardModel.rewardByEventId[groupModel.curEventId];
+
+                      if (userModel.userData?.rewardIds
+                              .contains(reward?.rewardId ?? "") ??
+                          false) {
+                        _mightShowRewardNotif = false;
+                        Future.delayed(Duration.zero, () {
+                          showAlert(
+                              "Congratulations! You've have earned ${reward!.description}! Check the Rewards page.",
+                              context);
+                        });
+                      }
+                    }
+
+                    return const Text(
+                      "Join!",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    );
+                  },
                 ),
                 style: TextButton.styleFrom(
                     backgroundColor: Carnelian,

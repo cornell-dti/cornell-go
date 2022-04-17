@@ -3,6 +3,7 @@ export interface RewardDto {
   description: string;
   redeemInfo: string;
   containingEventId: string;
+  claimingUserId: string;
 }
 
 export interface UpdateRewardsDto {

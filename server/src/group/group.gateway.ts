@@ -118,15 +118,20 @@ export class GroupGateway {
   ) {
     const group = await user.group.load();
     const curEvent = await group.currentEvent.load();
+    const stillActive = curEvent.time.getTime() - Date.now() > 0;
 
-    if (group.host.id !== user.id && curEvent.time.getTime() - Date.now() > 0) {
+    if (
+      (group.host.id !== user.id || data.eventId === curEvent.id) &&
+      stillActive
+    ) {
       return;
     }
 
-    const newEvent =
-      curEvent.time.getTime() - Date.now() <= 0
-        ? await this.eventService.getDefaultEvent()
-        : (await this.eventService.getEventsByIds([data.eventId]))[0];
+    const newEvent = !stillActive
+      ? await this.eventService.getDefaultEvent()
+      : await this.eventService.getEventById(data.eventId);
+
+    if (!newEvent) return;
 
     const groupMembers = await group.members.loadItems();
 

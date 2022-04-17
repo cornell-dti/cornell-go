@@ -255,6 +255,7 @@ export class AdminGateway {
         .sort((a, b) => a.eventIndex - b.eventIndex)
         .map(c => c.id),
       rewardIds: ev.rewards.getIdentifiers(),
+      minimumScore: ev.minimumScore,
     };
   }
 
@@ -278,6 +279,7 @@ export class AdminGateway {
       description: rw.rewardDescription,
       redeemInfo: rw.rewardRedeemInfo,
       containingEventId: rw.containingEvent.id,
+      claimingUserId: rw.claimingUser?.id ?? '',
     };
   }
 }
