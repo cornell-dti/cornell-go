@@ -105,10 +105,14 @@ Widget eventsCell(
                   )),
                   Row(children: [
                     Container(
-                        child: Text(
-                      time == null ? "" : "${timeToTimeString(time)} Left",
-                      style: timeStyle,
-                    )),
+                        child: StreamBuilder(
+                            stream: Stream.periodic(Duration(seconds: 1)),
+                            builder: (builder, value) => Text(
+                                  time == null
+                                      ? ""
+                                      : "${timeToTimeString(time)} Left",
+                                  style: timeStyle,
+                                ))),
                     Expanded(
                       child: Container(
                           child: Column(children: [
@@ -120,9 +124,9 @@ Widget eventsCell(
                             child: Text(
                                 rewardNum == 0
                                     ? ""
-                                    : (rewardNum == -1
+                                    : (time == null
                                         ? "∞ Rewards"
-                                        : "${rewardNum} Rewards Left"),
+                                        : "${rewardNum} Reward${rewardNum == 1 ? "" : "s"} Left"),
                                 style: rewardStyle))
                       ])),
                     )

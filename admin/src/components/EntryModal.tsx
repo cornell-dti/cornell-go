@@ -99,6 +99,7 @@ function FreeEntryFormBox(props: { form: FreeEntryForm }) {
       <span>{props.form.name + ":"}</span>
       <EntryTextBox
         value={val}
+        maxLength={props.form.characterLimit}
         onChange={(e) => setVal((props.form.value = e.target.value))}
       />
     </EntryBox>
