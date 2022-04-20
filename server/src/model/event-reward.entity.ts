@@ -22,7 +22,7 @@ export class EventReward {
   containingEvent!: IdentifiedReference<EventBase>;
 
   /** User who earned this reward */
-  @ManyToOne()
+  @ManyToOne({ onDelete: 'cascade' })
   claimingUser?: IdentifiedReference<User>;
 
   /** Short description of reward displayed to users e.g "50% off at XYZ store" */

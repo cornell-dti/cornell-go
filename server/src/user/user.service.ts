@@ -6,6 +6,7 @@ import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityRepository } from '@mikro-orm/postgresql';
 import { v4 } from 'uuid';
 import { Reference } from '@mikro-orm/core';
+import { RestrictionGroup } from 'src/model/restriction-group.entity';
 
 @Injectable()
 export class UserService {
@@ -83,5 +84,10 @@ export class UserService {
 
   async saveUser(user: User) {
     await this.usersRepository.persistAndFlush(user);
+  }
+
+  async deleteUser(user: User) {
+    await this.groupsService.orphanUser(user);
+    await this.usersRepository.removeAndFlush(user);
   }
 }

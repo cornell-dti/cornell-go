@@ -7,6 +7,7 @@ import {
   Enum,
   IdentifiedReference,
   Index,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   OneToOne,
@@ -16,6 +17,7 @@ import {
 } from '@mikro-orm/core';
 import { v4 } from 'uuid';
 import { Group } from './group.entity';
+import { RestrictionGroup } from './restriction-group.entity';
 
 /**
  * Enum describing the type of authentication token
@@ -88,4 +90,12 @@ export class User {
   /** Actions recorded relating to this user */
   @OneToMany(() => SessionLogEntry, entry => entry.user)
   logEntries = new Collection<SessionLogEntry>(this);
+
+  /** The restriction group this user is made for */
+  @ManyToOne()
+  generatedBy?: IdentifiedReference<RestrictionGroup>;
+
+  /** The restriction group this user is in */
+  @ManyToOne({ onDelete: 'set null' })
+  restrictedBy?: IdentifiedReference<RestrictionGroup>;
 }

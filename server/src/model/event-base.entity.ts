@@ -3,6 +3,7 @@ import {
   Entity,
   Enum,
   Index,
+  ManyToMany,
   OneToMany,
   PrimaryKey,
   Property,
@@ -10,6 +11,7 @@ import {
 import { v4 } from 'uuid';
 import { Challenge } from './challenge.entity';
 import { EventReward } from './event-reward.entity';
+import { RestrictionGroup } from './restriction-group.entity';
 
 /** Enum describing how this event will reward players */
 export enum EventRewardType {
@@ -73,4 +75,7 @@ export class EventBase {
     orphanRemoval: true,
   })
   challenges = new Collection<Challenge>(this);
+
+  @ManyToMany(() => RestrictionGroup, rg => rg.restrictedUsers)
+  allowedIn = new Collection<RestrictionGroup>(this);
 }
