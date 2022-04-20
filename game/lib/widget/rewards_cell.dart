@@ -33,7 +33,6 @@ class _AnimatedRewardCellState extends State<AnimatedRewardCell> {
 
   @override
   Widget build(BuildContext context) {
-    final imgpath = "assets/images/trophy.png";
     final titleStyle = TextStyle(
         fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black);
     final locStyle = TextStyle(
@@ -61,7 +60,7 @@ class _AnimatedRewardCellState extends State<AnimatedRewardCell> {
                     child: Row(
                       children: [
                         Container(
-                            child: Image.asset(imgpath, height: 75, width: 75)),
+                            child: Icon(Icons.emoji_events, color: Color(0xFFE6D23E))),
                         Expanded(
                             child: Column(children: [
                           Text(
