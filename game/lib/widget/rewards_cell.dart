@@ -38,7 +38,7 @@ class _AnimatedRewardCellState extends State<AnimatedRewardCell> {
     final locStyle = TextStyle(
         fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black45);
     final redeemStyle = TextStyle(
-        fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black);
+        fontWeight: FontWeight.normal, fontSize: 20, color: Colors.black);
     final redeemLinkStyle = TextStyle(
         fontWeight: FontWeight.normal,
         fontSize: 12,
@@ -78,7 +78,7 @@ class _AnimatedRewardCellState extends State<AnimatedRewardCell> {
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                     fontWeight: FontWeight.normal,
-                                    fontSize: 10,
+                                    fontSize: 16,
                                     color: Colors.black,
                                     fontStyle: FontStyle.italic))
                         ]))
