@@ -45,12 +45,10 @@ export class ChallengeGateway {
 
     const completionDateFun = async (ch: Challenge) => {
       const completions = await ch.completions.loadItems();
+      // TODO: this can be made more efficient if
+      // getChallengesByIdsWithPrevChallenge is made more efficient
       for (const completion of completions) {
-        const completers = await completion.completionPlayers.loadItems();
-        const completer = completers.find(
-          completer => completer.id === user.id,
-        );
-        if (completer) {
+        if (completion.owner.id === user.id) {
           return completion.foundTimestamp.toISOString();
         }
       }
