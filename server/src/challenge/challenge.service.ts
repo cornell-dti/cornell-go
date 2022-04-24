@@ -31,6 +31,7 @@ export class ChallengeService {
     user: User,
     ids: string[],
   ): Promise<Challenge[]> {
+    // TODO: this can be made more efficient
     return await this.challengeRepository.find({ id: ids });
   }
 
