@@ -81,10 +81,9 @@ export class EventService {
   ) {
     const events = await this.eventsRepository.find(
       {
-        indexable: true,
-        rewardType: rewardTypes && { $in: rewardTypes },
+        indexable: !restriction,
+        //rewardType: rewardTypes && { $in: rewardTypes },
         allowedIn: restriction,
-        ...(skippable && { skippingEnabled: true }),
       },
       {
         offset,
