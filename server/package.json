@@ -48,6 +48,7 @@
     "apple-signin-auth": "^1.5.1",
     "censor-sensor": "^1.0.6",
     "dotenv": "^10.0.0",
+    "friendly-words": "^1.2.0",
     "google-auth-library": "^7.14.1",
     "passport": "^0.4.1",
     "passport-jwt": "^4.0.0",

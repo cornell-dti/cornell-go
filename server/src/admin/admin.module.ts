@@ -9,12 +9,15 @@ import { User } from 'src/model/user.entity';
 import { EventBase } from 'src/model/event-base.entity';
 import { Challenge } from 'src/model/challenge.entity';
 import { EventReward } from 'src/model/event-reward.entity';
+import { UserModule } from 'src/user/user.module';
+import { Group } from 'src/model/group.entity';
 
 @Module({
   imports: [
     AuthModule,
     ClientModule,
-    MikroOrmModule.forFeature([User, EventBase, Challenge, EventReward]),
+    UserModule,
+    MikroOrmModule.forFeature([User, Group, EventBase, Challenge, EventReward]),
   ],
   providers: [AdminGateway, AdminService, AdminCallbackService],
   controllers: [],

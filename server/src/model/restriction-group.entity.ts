@@ -18,15 +18,15 @@ export class RestrictionGroup {
 
   /** Any name for this restriction group */
   @Property()
-  displayName!: string; // Curie
+  displayName!: string; // A very cool org#1
 
   /** Lowercase alphanumeric name with underscores */
   @Property()
-  name!: string; // curie
+  name!: string; // a_very_cool_org_1
 
   /** True if the users here can update their username */
   @Property()
-  canEditUsername!: boolean; 
+  canEditUsername!: boolean;
 
   /** Users restricted by this group */
   @OneToMany(() => User, u => u.restrictedBy)
@@ -37,6 +37,6 @@ export class RestrictionGroup {
   allowedEvents = new Collection<EventBase>(this);
 
   /** Users with id-login that are made specifically for this restriction */
-  @OneToMany(() => User, u => u.generatedBy)
+  @OneToMany(() => User, u => u.generatedBy, { orderBy: { id: 'ASC' } })
   generatedUsers = new Collection<User>(this);
 }
