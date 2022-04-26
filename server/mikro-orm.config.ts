@@ -1,4 +1,5 @@
 import { TsMorphMetadataProvider } from '@mikro-orm/reflection';
+import { RestrictionGroup } from './src/model/restriction-group.entity';
 import { Challenge } from './src/model/challenge.entity';
 import { EventBase } from './src/model/event-base.entity';
 import { EventReward } from './src/model/event-reward.entity';
@@ -19,6 +20,7 @@ export default {
     PrevChallenge,
     SessionLogEntry,
     User,
+    RestrictionGroup,
   ],
   allowGlobalContext: true,
   name: 'CornellGO PostgreSQL DB',
