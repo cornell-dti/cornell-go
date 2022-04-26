@@ -76,6 +76,6 @@ export class EventBase {
   })
   challenges = new Collection<Challenge>(this);
 
-  @ManyToMany(() => RestrictionGroup, rg => rg.restrictedUsers)
+  @ManyToMany(() => RestrictionGroup, rg => rg.allowedEvents)
   allowedIn = new Collection<RestrictionGroup>(this);
 }
