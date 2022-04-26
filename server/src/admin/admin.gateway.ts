@@ -336,7 +336,7 @@ export class AdminGateway {
   async dtoForRestrictionGroup(
     restrictionGroup: RestrictionGroup,
   ): Promise<RestrictionDto> {
-    const genUserCount = await restrictionGroup.generatedUsers.loadCount();
+    const genUsers = await restrictionGroup.generatedUsers.loadItems();
     await restrictionGroup.restrictedUsers.loadItems();
     await restrictionGroup.allowedEvents.loadItems();
 
@@ -346,7 +346,8 @@ export class AdminGateway {
       canEditUsername: restrictionGroup.canEditUsername,
       restrictedUsers: restrictionGroup.restrictedUsers.getIdentifiers(),
       allowedEvents: restrictionGroup.allowedEvents.getIdentifiers(),
-      generatedUserCount: genUserCount,
+      generatedUserCount: genUsers.length,
+      generatedUserAuthIds: genUsers.map(u => u.authToken),
     };
   }
 }

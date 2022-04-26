@@ -5,6 +5,7 @@ export interface RestrictionDto {
   restrictedUsers: string[];
   allowedEvents: string[];
   generatedUserCount: number;
+  generatedUserAuthIds: string[];
 }
 
 export interface RequestRestrictionsDto {}

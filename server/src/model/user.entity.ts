@@ -96,6 +96,6 @@ export class User {
   generatedBy?: IdentifiedReference<RestrictionGroup>;
 
   /** The restriction group this user is in */
-  @ManyToOne({ onDelete: 'set null' })
+  @ManyToOne()
   restrictedBy?: IdentifiedReference<RestrictionGroup>;
 }

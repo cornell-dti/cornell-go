@@ -1,4 +1,4 @@
-import { RestrictionDto } from './request-restrictions.dto';
+import { RestrictionDto } from "./request-restrictions.dto";
 
 export interface UpdateRestrictionsDto {
   restrictions: RestrictionDto[];
