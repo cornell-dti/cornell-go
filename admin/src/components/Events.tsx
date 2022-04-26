@@ -87,7 +87,7 @@ function makeForm() {
     },
     { name: "Minimum Score for Reward", value: 1, min: 1, max: 999999 },
     { name: "Publicly Visible", options: ["No", "Yes"], value: 0 },
-    { name: "Available Until", date: new Date() },
+    { name: "Available Until", date: new Date("2050") },
   ] as EntryForm[];
 }
 
