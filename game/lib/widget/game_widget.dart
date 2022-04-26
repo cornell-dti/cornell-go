@@ -33,7 +33,8 @@ double calcCloseProgress(double distance, double closeRadius) {
   if (distance > 50) {
     distance = 50;
   }
-  return pow(0.5, distance - closeRadius).toDouble();
+
+  return pow(0.1, distance - closeRadius).toDouble();
 }
 
 class _GameWidgetState extends State<GameWidget> {
