@@ -259,17 +259,17 @@ export class AdminService {
 
   /** Creates a new restricted user */
   async newRestrictedUser(
-    name: string,
+    id: string,
     word: string,
     group: RestrictionGroup,
   ): Promise<User> {
     const user = await this.userService.register(
-      name + '@cornell.edu',
+      id + '@cornell.edu',
       word,
       10.019,
       10.019,
       AuthType.DEVICE,
-      name,
+      id,
     );
 
     user.restrictedBy = Reference.create(group);
@@ -283,21 +283,23 @@ export class AdminService {
   async generateMembers(group: RestrictionGroup, expectedCount: number) {
     const genCount = await group.generatedUsers.loadCount();
 
-    if (genCount < expectedCount) {
+    if (genCount > expectedCount) {
       const genUsers = await group.generatedUsers.loadItems();
       group.generatedUsers.remove(...genUsers.slice(expectedCount));
     } else {
       const seed = group.id[0].charCodeAt(0);
       for (let i = genCount; i < expectedCount; ++i) {
-        const word =
-          friendlyWords.objects[(10 * i + seed) % friendlyWords.objects.length];
-        const newName = group.name + '_' + word;
-        const user = await this.newRestrictedUser(newName, word, group);
+        const index = (10 * i + seed) % friendlyWords.objects.length;
+        const word = friendlyWords.objects[index];
+        const id = group.name + '_' + word + index;
+        const user = await this.newRestrictedUser(id, word, group);
 
         group.generatedUsers.add(user);
         group.restrictedUsers.add(user);
       }
     }
+
+    await this.restrictionGroupRepository.persistAndFlush(group);
   }
 
   /** Ensures all restricted users are on an allowed event */
@@ -318,9 +320,9 @@ export class AdminService {
       currentEvent: { $nin: allowedEvents },
     });
 
-    for (const group of violatingGroups) {
-      group.currentEvent.set(allowedEvent);
-      await this.groupRepository.persistAndFlush(group);
+    for (const userGroup of violatingGroups) {
+      userGroup.currentEvent.set(allowedEvent);
+      await this.groupRepository.persistAndFlush(userGroup);
     }
   }
 
@@ -344,13 +346,6 @@ export class AdminService {
       id: restriction.allowedEvents,
     });
 
-    if (curRestriction) {
-      const genCount = await curRestriction.generatedUsers.loadCount();
-      if (restriction.generatedUserCount < genCount) {
-        return curRestriction;
-      }
-    }
-
     const restrictionGroupEntity =
       curRestriction ??
       this.restrictionGroupRepository.create({
@@ -369,10 +364,14 @@ export class AdminService {
       restrictionGroupEntity,
     );
 
-    await this.generateMembers(
-      restrictionGroupEntity,
-      restriction.generatedUserCount,
-    );
+    const genCount = await restrictionGroupEntity.generatedUsers.loadCount();
+
+    if (restriction.generatedUserCount > genCount) {
+      await this.generateMembers(
+        restrictionGroupEntity,
+        restriction.generatedUserCount,
+      );
+    }
 
     await this.ensureEventRestriction(restrictionGroupEntity);
 
