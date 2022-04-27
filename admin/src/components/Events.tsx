@@ -34,9 +34,7 @@ function EventCard(props: {
       : props.event.requiredMembers;
 
   const rewardingMethod =
-    props.event.rewardType === "limited_time_event"
-      ? "Limited Time"
-      : "Perpetual";
+    props.event.rewardType === "limited_time_event" ? "Limited" : "Unlimited";
 
   const affirmOfBool = (val: boolean) => (val ? "Yes" : "No");
 
@@ -59,7 +57,7 @@ function EventCard(props: {
           </b>{" "}
           <br />
           Default: <b>{affirmOfBool(props.event.isDefault)}</b> <br />
-          Visible: <b>{affirmOfBool(props.event.indexable)}</b>
+          Publicly Visible: <b>{affirmOfBool(props.event.indexable)}</b>
         </ListCardBody>
         <ListCardButtons>
           <HButton onClick={props.onSelect}>SELECT</HButton>
@@ -83,13 +81,13 @@ function makeForm() {
     { name: "Skipping", options: ["Disabled", "Enabled"], value: 0 },
     { name: "Default", options: ["No", "Yes"], value: 0 },
     {
-      name: "Rewarding Method",
-      options: ["Perpetual", "Limited Time"],
+      name: "Reward Type",
+      options: ["Unlimited", "Limited"],
       value: 0,
     },
-    { name: "Minimum Rewarding Score", value: 1, min: 1, max: 999999 },
-    { name: "Visible", options: ["No", "Yes"], value: 0 },
-    { name: "Available Until", date: new Date() },
+    { name: "Minimum Score for Reward", value: 1, min: 1, max: 999999 },
+    { name: "Publicly Visible", options: ["No", "Yes"], value: 0 },
+    { name: "Available Until", date: new Date("2050") },
   ] as EntryForm[];
 }
 
@@ -130,17 +128,21 @@ function toForm(event: EventDto) {
     },
     { name: "Default", options: ["No", "Yes"], value: event.isDefault ? 1 : 0 },
     {
-      name: "Rewarding Method",
-      options: ["Perpetual", "Limited Time"],
+      name: "Reward Type",
+      options: ["Unlimited", "Limited"],
       value: event.rewardType === "perpetual" ? 0 : 1,
     },
     {
-      name: "Minimum Rewarding Score",
+      name: "Minimum Score for Reward",
       value: event.minimumScore,
       min: 1,
       max: 999999,
     },
-    { name: "Visible", options: ["No", "Yes"], value: event.indexable ? 1 : 0 },
+    {
+      name: "Publicly Visible",
+      options: ["No", "Yes"],
+      value: event.indexable ? 1 : 0,
+    },
     { name: "Available Until", date: new Date(event.time) },
   ] as EntryForm[];
 }
