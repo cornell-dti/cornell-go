@@ -1,5 +1,5 @@
 import { useContext, useState } from "react";
-import { RestrictionDto } from "../dto/update-restrictions.dto";
+import { RestrictionDto } from "../dto/request-restrictions.dto";
 import { DeleteModal } from "./DeleteModal";
 import {
   EntryModal,
@@ -23,33 +23,35 @@ import { ServerDataContext } from "./ServerData";
 import { compareTwoStrings } from "string-similarity";
 
 function GroupCard(props: {
-  restrictedGroup: RestrictionDto;
-  onSelect: () => void;
+  restriction: RestrictionDto;
+  onAdd: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  onClear: () => void;
 }) {
-
   const affirmOfBool = (val: boolean) => (val ? "Yes" : "No");
 
   return (
     <>
       <ListCardBox>
-        <ListCardTitle>{props.restrictedGroup.name}</ListCardTitle>
+        <ListCardTitle>{props.restriction.displayName}</ListCardTitle>
         <ListCardBody>
-          Id: <b>{props.restrictedGroup.id}</b>
+          Id: <b>{props.restriction.id}</b>
           <br />
-          
-          Event Count: <b>{props.restrictedGroup.allowedEventsIds.length}</b> <br />
-          User Count: <b>{props.restrictedGroup.restrictedUsersIds.length}</b> <br />
-          Username Editting Enabled: <b>
-            {affirmOfBool(props.restrictedGroup.canEditUsername)}
-          </b>{" "}
-          <br />
+          Event Count: <b>{props.restriction.allowedEvents.length}</b> <br />
+          Events: <b>{props.restriction.allowedEvents.join(", ")}</b> <br />
+          User Count: <b>{props.restriction.restrictedUsers.length}</b> <br />
+          Users: <b>{props.restriction.restrictedUsers.join(", ")}</b> <br />
+          Username Editting Enabled:{" "}
+          <b>{affirmOfBool(props.restriction.canEditUsername)}</b> <br />
         </ListCardBody>
         <ListCardButtons>
-          <HButton onClick={props.onSelect}>SELECT</HButton>
+          <HButton onClick={props.onAdd}>Add</HButton>
           <HButton onClick={props.onDelete} float="right">
             DELETE
+          </HButton>
+          <HButton onClick={props.onClear} float="right">
+            CLEAR EVENTS
           </HButton>
           <HButton onClick={props.onEdit} float="right">
             EDIT
@@ -63,34 +65,34 @@ function GroupCard(props: {
 function makeForm() {
   return [
     { name: "Name", characterLimit: 256, value: "" },
-    { name: "Can edit username", options: ["No", "Yes"], value: 0}
+    { name: "Can edit username", options: ["No", "Yes"], value: 0 },
   ] as EntryForm[];
 }
 
-function fromForm(form: EntryForm[], id: string): RestrictedGroupDto {
+function fromForm(form: EntryForm[], id: string): RestrictionDto {
   return {
     id,
-    displayName : (form[0] as FreeEntryForm).value,
-    name: "",
+    displayName: (form[0] as FreeEntryForm).value,
     canEditUsername: (form[1] as OptionEntryForm).value === 1,
-    restrictedUsersIds: [],
-    allowedEventsIds: [],
-    generatedUsersIds: [],
+    restrictedUsers: [],
+    allowedEvents: [],
+    generatedUserCount: 0,
+    generatedUserAuthIds: [],
   };
 }
 
-function toForm(group: RestrictedGroupDto) {
+function toForm(group: RestrictionDto) {
   return [
-    { name: "Display Name", characterLimit: 256, value: group.displayName },    
+    { name: "Display Name", characterLimit: 256, value: group.displayName },
     {
       name: "Can edit username",
       options: ["No", "Yes"],
       value: group.canEditUsername ? 1 : 0,
-    }
+    },
   ] as EntryForm[];
 }
 
-export function RestrictedGroups() {
+export function Restrictions() {
   const serverData = useContext(ServerDataContext);
   const [isCreateModalOpen, setCreateModalOpen] = useState(false);
   const [isEditModalOpen, setEditModalOpen] = useState(false);
@@ -106,7 +108,7 @@ export function RestrictedGroups() {
         isOpen={isCreateModalOpen}
         entryButtonText="CREATE"
         onEntry={() => {
-          serverData.updateRestrictedGroup(fromForm(form, ""));
+          serverData.updateRestriction(fromForm(form, ""));
           setCreateModalOpen(false);
         }}
         onCancel={() => {
@@ -119,12 +121,7 @@ export function RestrictedGroups() {
         isOpen={isEditModalOpen}
         entryButtonText="EDIT"
         onEntry={() => {
-          const { challengeIds, rewardIds } = serverData.restrictedGroups.get(currentId)!;
-          serverData.updateEvent({
-            ...fromForm(form, currentId),
-            challengeIds,
-            rewardIds,
-          });
+          serverData.updateRestriction(fromForm(form, currentId));
           setEditModalOpen(false);
         }}
         onCancel={() => {
@@ -133,11 +130,11 @@ export function RestrictedGroups() {
         form={form}
       />
       <DeleteModal
-        objectName={serverData.restrictedGroups.get(currentId)?.name ?? ""}
+        objectName={serverData.restrictions.get(currentId)?.displayName ?? ""}
         isOpen={isDeleteModalOpen}
         onClose={() => setDeleteModalOpen(false)}
         onDelete={() => {
-          serverData.deleteEvent(currentId);
+          serverData.deleteRestriction(currentId);
           setDeleteModalOpen(false);
         }}
       />
@@ -148,27 +145,34 @@ export function RestrictedGroups() {
         }}
         onSearch={(query) => setQuery(query)}
       />
-      {Array.from(serverData.events.values())
+      {Array.from(serverData.restrictions.values())
         .sort(
           (a, b) =>
-            compareTwoStrings(b.name, query) -
-            compareTwoStrings(a.name, query) +
-            compareTwoStrings(b.description, query) -
-            compareTwoStrings(a.description, query)
+            compareTwoStrings(b.displayName, query) -
+            compareTwoStrings(a.displayName, query)
         )
-        .map((ev) => (
+        .map((r) => (
           <GroupCard
-            key={ev.id}
-            event={ev}
-            onSelect={() => serverData.selectEvent(ev.id)}
+            key={r.id}
+            restriction={r}
+            onAdd={() => {
+              setCurrentId(r.id);
+              r.allowedEvents.push(serverData.selectedEvent);
+              serverData.updateRestriction(r);
+            }}
             onDelete={() => {
-              setCurrentId(ev.id);
+              setCurrentId(r.id);
               setDeleteModalOpen(true);
             }}
             onEdit={() => {
-              setCurrentId(ev.id);
-              setForm(toForm(ev));
+              setCurrentId(r.id);
+              setForm(toForm(r));
               setEditModalOpen(true);
+            }}
+            onClear={() => {
+              setCurrentId(r.id);
+              r.allowedEvents = [];
+              serverData.updateRestriction(r);
             }}
           />
         ))}

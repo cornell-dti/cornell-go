@@ -3,7 +3,7 @@ import { Rewards } from "./components/Rewards";
 import { Admins } from "./components/Admins";
 import { Challenges } from "./components/Challenges";
 import { Events } from "./components/Events";
-import { RestrictedGroups } from "./components/RestrictedGroups"
+import { Restrictions } from "./components/Restrictions"
 
 import {
   AppBar,
@@ -63,7 +63,7 @@ const routes = [
   },
   {
     path: "/restricted-groups",
-    element: <RestrictedGroups />,
+    element: <Restrictions />,
     icon: faLock,
     name: "Restricted Groups",
   },
