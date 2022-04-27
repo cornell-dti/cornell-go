@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:game/model/tracker_model.dart';
+import 'package:game/rewarded/rewarded_page.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:velocity_x/velocity_x.dart';
@@ -67,6 +68,17 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                 apiClient.serverApi?.completedChallenge(_doneState.challengeId);
                 showAlert("Congratulations! You've found ${_doneState?.name}!",
                     context);
+                Navigator.push(
+                  context,
+                  PageRouteBuilder(
+                    pageBuilder: (c, a1, a2) =>
+                        RewardWidget(location: _doneState),
+                    transitionsBuilder: (c, anim, a2, child) =>
+                        FadeTransition(opacity: anim, child: child),
+                    transitionDuration: Duration(milliseconds: 500),
+                  ),
+                );
+
                 setState(() {
                   _doneState = null;
                 });
@@ -281,7 +293,19 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                 );
               })),
               ElevatedButton(
-                onPressed: () => {_joinGroupDialog(context)},
+                onPressed: () => {
+                  //_joinGroupDialog(context)
+                  Navigator.push(
+                    context,
+                    PageRouteBuilder(
+                      pageBuilder: (c, a1, a2) =>
+                          RewardWidget(location: _doneState),
+                      transitionsBuilder: (c, anim, a2, child) =>
+                          FadeTransition(opacity: anim, child: child),
+                      transitionDuration: Duration(milliseconds: 500),
+                    ),
+                  )
+                },
                 child: const Text(
                   "Join!",
                   style: TextStyle(fontWeight: FontWeight.bold),
