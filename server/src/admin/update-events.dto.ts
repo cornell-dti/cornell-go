@@ -10,6 +10,7 @@ export interface EventDto {
   time: string;
   rewardIds: string[];
   challengeIds: string[];
+  minimumScore: number;
 }
 
 export interface UpdateEventsDto {

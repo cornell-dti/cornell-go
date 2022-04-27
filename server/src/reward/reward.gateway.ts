@@ -38,12 +38,14 @@ export class RewardGateway {
     const updateData: UpdateRewardDataDto = {
       rewards: [
         ...rewardData.map(rw => ({
+          rewardId: rw.id,
           eventId: rw.containingEvent.id,
           description: rw.rewardDescription,
           redeemInfo: rw.rewardRedeemInfo,
           isRedeemed: rw.isRedeemed,
         })),
         ...rewardDataUnowned.map(rw => ({
+          rewardId: rw.id,
           eventId: rw.containingEvent.id,
           description: rw.rewardDescription,
           redeemInfo: '',

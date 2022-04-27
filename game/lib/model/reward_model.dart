@@ -4,38 +4,32 @@ import 'package:game/api/game_client_dto.dart';
 
 class RewardModel extends ChangeNotifier {
   ApiClient _client;
-  List<UpdateRewardDataRewardDto> rewards = [];
   Map<String, UpdateRewardDataRewardDto> rewardByEventId = {};
 
   RewardModel(ApiClient client) : _client = client {
     client.clientApi.updateUserDataStream.listen((event) {
-      client.serverApi?.requestRewardData(event.rewardIds);
+      if (!event.ignoreIdLists) {
+        client.serverApi?.requestRewardData(event.rewardIds);
+      }
     });
 
     client.clientApi.updateRewardDataStream.listen((event) {
-      rewards = event.rewards;
       event.rewards
           .forEach((element) => rewardByEventId[element.eventId] = element);
       notifyListeners();
     });
 
     client.clientApi.connectedStream.listen((event) {
-      rewards.clear();
       rewardByEventId.clear();
       notifyListeners();
     });
 
     client.clientApi.invalidateDataStream.listen((event) {
       if (event.userRewardData || event.winnerRewardData) {
-        rewards.clear();
         rewardByEventId.clear();
         notifyListeners();
       }
     });
-  }
-
-  List<UpdateRewardDataRewardDto> getRewards() {
-    return rewards;
   }
 
   UpdateRewardDataRewardDto? getRewardByEventId(

@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/api/geopoint.dart';
 import 'package:game/model/challenge_model.dart';
+import 'package:game/model/event_model.dart';
 import 'package:game/model/game_model.dart';
 import 'package:game/model/group_model.dart';
 import 'package:game/model/tracker_model.dart';
@@ -32,7 +33,8 @@ double calcCloseProgress(double distance, double closeRadius) {
   if (distance > 50) {
     distance = 50;
   }
-  return pow(0.5, distance - closeRadius).toDouble();
+
+  return pow(0.1, distance - closeRadius).toDouble();
 }
 
 class _GameWidgetState extends State<GameWidget> {
@@ -44,56 +46,88 @@ class _GameWidgetState extends State<GameWidget> {
   _GameWidgetState(Widget child) : _child = child;
   @override
   Widget build(BuildContext context) {
-    final posStream =
-        Geolocator.getPositionStream(locationSettings: new LocationSettings());
+    final serviceStream = Geolocator.getServiceStatusStream();
 
-    return Consumer4<GroupModel, TrackerModel, ChallengeModel, ApiClient>(
-        builder: (builder, groupModel, trackerModel, challengeModel, apiCient,
-            child) {
-      return StreamBuilder<Position>(
-          stream: posStream,
-          builder: ((context, snapshot) {
-            final gameModel = GameModel();
-            final evId = groupModel.curEventId;
-            final chalId = evId == null
-                ? null
-                : trackerModel.trackerByEventId(evId)?.curChallengeId;
-            final curChallenge =
-                chalId == null ? null : challengeModel.getChallengeById(chalId);
+    return Consumer5<GroupModel, TrackerModel, ChallengeModel, EventModel,
+            ApiClient>(
+        builder: (builder, groupModel, trackerModel, challengeModel, eventModel,
+            apiCient, child) {
+      return StreamBuilder<ServiceStatus>(
+          stream: serviceStream,
+          builder: (context, service) {
+            final posStream = Geolocator.getPositionStream(
+                locationSettings: new LocationSettings());
 
-            gameModel.hasConnection = apiCient.serverApi != null;
-            if (curChallenge != null) {
-              gameModel.challengeId = curChallenge.id;
-              gameModel.description = curChallenge.description;
-              gameModel.name = curChallenge.name;
-              gameModel.imageUrl = curChallenge.imageUrl;
-            }
+            final serviceStatus = service.data;
 
-            if (snapshot.data != null && curChallenge != null) {
-              final chalLoc = GeoPoint(curChallenge.lat, curChallenge.long);
-              final location =
-                  GeoPoint(snapshot.data!.latitude, snapshot.data!.longitude);
-              final distance = location.distanceTo(chalLoc);
+            return StreamBuilder<Position>(
+                stream: posStream,
+                builder: ((context, snapshot) {
+                  final gameModel = GameModel();
+                  final evId = groupModel.curEventId;
+                  final ev = eventModel.getEventById(evId ?? "");
+                  final chalId = evId == null
+                      ? null
+                      : trackerModel.trackerByEventId(evId)?.curChallengeId;
+                  final curChallenge = chalId == null
+                      ? null
+                      : challengeModel.getChallengeById(chalId);
+                  final reqMembers = ev?.requiredMembers ?? 0;
+                  final requiredSizeMet =
+                      groupModel.members.length == reqMembers || reqMembers < 0;
 
-              gameModel.walkingTime =
-                  (distance / 80).ceil().toString() + " min";
-              gameModel.completionProgress = calcCompletionProgress(distance,
-                  curChallenge.closeRadius, curChallenge.awardingRadius);
-              gameModel.closeProgress =
-                  calcCloseProgress(distance, curChallenge.closeRadius);
-              gameModel.directionDistance = lastDistance - distance;
-              gameModel.withinCompletionRadius =
-                  distance < curChallenge.awardingRadius;
-              gameModel.withinCloseRadius = distance < curChallenge.closeRadius;
+                  gameModel.hasConnection = apiCient.serverApi != null;
+                  if (curChallenge != null) {
+                    gameModel.challengeId = curChallenge.id;
+                    gameModel.description = curChallenge.description;
+                    gameModel.name = curChallenge.name;
+                    gameModel.imageUrl = curChallenge.imageUrl;
+                  }
 
-              if (DateTime.now().difference(lastCheckTime).inSeconds > 10) {
-                lastDistance = distance;
-                lastCheckTime = DateTime.now();
-              }
-            }
+                  if (serviceStatus == ServiceStatus.disabled ||
+                      !requiredSizeMet) {
+                    gameModel.walkingTime = !requiredSizeMet
+                        ? (reqMembers == 1
+                            ? "1 member required"
+                            : reqMembers.toString() + " members required")
+                        : "Location Disabled";
+                    gameModel.closeProgress = -1;
+                    gameModel.completionProgress = -1;
+                  }
 
-            return Provider.value(value: gameModel, child: _child);
-          }));
+                  if (snapshot.data != null &&
+                      curChallenge != null &&
+                      requiredSizeMet) {
+                    final chalLoc =
+                        GeoPoint(curChallenge.lat, curChallenge.long);
+                    final location = GeoPoint(
+                        snapshot.data!.latitude, snapshot.data!.longitude);
+                    final distance = location.distanceTo(chalLoc);
+
+                    gameModel.walkingTime =
+                        (distance / 80).ceil().toString() + " min";
+                    gameModel.completionProgress = calcCompletionProgress(
+                        distance,
+                        curChallenge.closeRadius,
+                        curChallenge.awardingRadius);
+                    gameModel.closeProgress =
+                        calcCloseProgress(distance, curChallenge.closeRadius);
+                    gameModel.directionDistance = lastDistance - distance;
+                    gameModel.withinCompletionRadius =
+                        distance < curChallenge.awardingRadius;
+                    gameModel.withinCloseRadius =
+                        distance < curChallenge.closeRadius;
+
+                    if (DateTime.now().difference(lastCheckTime).inSeconds >
+                        10) {
+                      lastDistance = distance;
+                      lastCheckTime = DateTime.now();
+                    }
+                  }
+
+                  return Provider.value(value: gameModel, child: _child);
+                }));
+          });
     });
   }
 }

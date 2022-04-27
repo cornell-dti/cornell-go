@@ -57,12 +57,14 @@ class InvalidateDataDto {
 
 class UpdateRewardDataRewardDto {
   UpdateRewardDataRewardDto.fromJson(Map<String, dynamic> fields) {
+    rewardId = fields["rewardId"];
     eventId = fields["eventId"];
     description = fields["description"];
     redeemInfo = fields["redeemInfo"];
     isRedeemed = fields["isRedeemed"];
   }
 
+  String rewardId = "";
   String eventId = "";
   String description = "";
   String redeemInfo = "";
@@ -109,7 +111,10 @@ class UpdateEventDataEventDto {
         rewardType = UpdateEventDataEventRewardTypeDto.LIMITED_TIME_EVENT;
         break;
     }
-    time = fields["time"] == '' ? null : DateTime.parse(fields["time"]);
+    time = fields["time"] == '' ||
+            rewardType == UpdateEventDataEventRewardTypeDto.PERPETUAL
+        ? null
+        : DateTime.parse(fields["time"]);
     rewards = fields["rewards"]
         .map<UpdateEventDataRewardDto>(
             (dynamic reward) => UpdateEventDataRewardDto.fromJson(reward))

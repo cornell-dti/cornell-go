@@ -1,5 +1,5 @@
 name: game
-description: A new Flutter project.
+description: An interactive scavenger hunt for the cornell campus.
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `pub publish`. This is preferred for private packages.
@@ -15,7 +15,7 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.0.0+1
+version: 1.0.1+5
 
 environment:
   sdk: ">=2.12.0 <3.0.0"
@@ -27,6 +27,7 @@ dependencies:
     sdk: flutter
   sliding_up_panel: ^2.0.0+1
   velocity_x: ^3.3.0
+  flutter_blurhash:
   cached_network_image: ^3.1.0
   google_fonts: 2.2.0
   url_launcher:
@@ -36,13 +37,14 @@ dependencies:
   socket_io_client: ^2.0.0-beta.4-nullsafety.0
   provider: ^5.0.0
   flutter_secure_storage: ^5.0.2
-  geolocator: ^8.2.0
+  geolocator: 8.0.1
   http: ^0.13.4
   flutter_signin_button: ^2.0.0
   permission_handler: ^9.2.0
   fluttertoast: ^8.0.9
   profanity_filter: ^2.0.0
   intl:
+  flutter_linkify:
 
 flutter_icons:
   android: true
