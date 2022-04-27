@@ -35,7 +35,8 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
                 int position = 1;
                 if (myGroupModel.curEventId == null) return ListView();
                 final List<UpdateLeaderDataUserDto> list = myEventModel
-                    .getTopPlayersForEvent("", 1000);
+                    .getTopPlayersForEvent('', 1000);
+                print('returned list $list');
                 return Column(children: [
                   for (int i = 0; i < list.length; i++)
                     if (myUserModel.userData?.id != null &&
