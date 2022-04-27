@@ -8,14 +8,14 @@ import 'package:game/widget/leaderboard_cell.dart';
 import 'package:game/widget/leaderboard_user_cell.dart';
 import 'package:provider/provider.dart';
 
-class LeaderboardWidget extends StatefulWidget {
-  LeaderboardWidget({Key? key}) : super(key: key);
+class EventsLeaderboardWidget extends StatefulWidget {
+  EventsLeaderboardWidget({Key? key}) : super(key: key);
 
   @override
-  _LeaderboardWidgetState createState() => _LeaderboardWidgetState();
+  _EventsLeaderboardWidgetState createState() => _EventsLeaderboardWidgetState();
 }
 
-class _LeaderboardWidgetState extends State<LeaderboardWidget> {
+class _EventsLeaderboardWidgetState extends State<EventsLeaderboardWidget> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override

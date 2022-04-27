@@ -60,7 +60,7 @@ class _AnimatedRewardCellState extends State<AnimatedRewardCell> {
                     child: Row(
                       children: [
                         Container(
-                            child: Icon(Icons.emoji_events, color: Color(0xFFE6D23E))),
+                            child: Icon(Icons.emoji_events, color: Color(0xFFE6D23E), size: 75,)),
                         Expanded(
                             child: Column(children: [
                           Text(
