@@ -72,7 +72,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                   context,
                   PageRouteBuilder(
                     pageBuilder: (c, a1, a2) =>
-                        RewardWidget(location: _doneState),
+                        RewardWidget(homePageState: _doneState),
                     transitionsBuilder: (c, anim, a2, child) =>
                         FadeTransition(opacity: anim, child: child),
                     transitionDuration: Duration(milliseconds: 500),
@@ -299,7 +299,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                     context,
                     PageRouteBuilder(
                       pageBuilder: (c, a1, a2) =>
-                          RewardWidget(location: _doneState),
+                          RewardWidget(homePageState: gameModel),
                       transitionsBuilder: (c, anim, a2, child) =>
                           FadeTransition(opacity: anim, child: child),
                       transitionDuration: Duration(milliseconds: 500),

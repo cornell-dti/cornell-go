@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:game/model/game_model.dart';
 
 class RewardWidget extends StatefulWidget {
-  const RewardWidget({Key? key, required this.location}) : super(key: key);
-  final String location;
+  const RewardWidget({Key? key, required this.homePageState}) : super(key: key);
+  final GameModel homePageState;
   @override
   State<RewardWidget> createState() => _RewardWidgetState();
 }
@@ -34,7 +35,7 @@ class _RewardWidgetState extends State<RewardWidget> {
               style: TextStyle(fontSize: 40),
             ),
             Text(
-              widget.location,
+              widget.homePageState.name,
               style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
             ),
             Text(
