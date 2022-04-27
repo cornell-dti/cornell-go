@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/home_page/home_page_widget.dart';
@@ -33,7 +34,7 @@ class _LoginWidgetState extends State<LoginWidget> {
     }
   }
 
-  void _toHomePage(context) {
+  void _toHomePage(context) async {
     Navigator.pop(context);
     Navigator.push(
         context, MaterialPageRoute(builder: (context) => HomePageWidget()));

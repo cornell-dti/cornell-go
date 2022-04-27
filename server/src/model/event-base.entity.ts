@@ -3,6 +3,7 @@ import {
   Entity,
   Enum,
   Index,
+  ManyToMany,
   OneToMany,
   PrimaryKey,
   Property,
@@ -10,6 +11,7 @@ import {
 import { v4 } from 'uuid';
 import { Challenge } from './challenge.entity';
 import { EventReward } from './event-reward.entity';
+import { RestrictionGroup } from './restriction-group.entity';
 
 /** Enum describing how this event will reward players */
 export enum EventRewardType {
@@ -51,9 +53,13 @@ export class EventBase {
   @Property()
   indexable!: boolean;
 
-  /** Describes end time for limited time events and begin time for others */
+  /** Describes end time for the event */
   @Property()
   time!: Date;
+
+  /** Describes minimum score to get a reward */
+  @Property()
+  minimumScore = 1;
 
   /** Describes the rewards */
   @OneToMany(() => EventReward, rew => rew.containingEvent, {
@@ -69,4 +75,7 @@ export class EventBase {
     orphanRemoval: true,
   })
   challenges = new Collection<Challenge>(this);
+
+  @ManyToMany(() => RestrictionGroup, rg => rg.allowedEvents)
+  allowedIn = new Collection<RestrictionGroup>(this);
 }

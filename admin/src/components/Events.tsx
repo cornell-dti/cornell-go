@@ -34,9 +34,7 @@ function EventCard(props: {
       : props.event.requiredMembers;
 
   const rewardingMethod =
-    props.event.rewardType === "limited_time_event"
-      ? "Limited Time"
-      : "Perpetual";
+    props.event.rewardType === "limited_time_event" ? "Limited" : "Unlimited";
 
   const affirmOfBool = (val: boolean) => (val ? "Yes" : "No");
 
@@ -51,6 +49,7 @@ function EventCard(props: {
           Available Until: <b>{new Date(props.event.time).toString()}</b> <br />
           Required Players: <b>{requiredText}</b> <br />
           Rewarding Method: <b>{rewardingMethod}</b> <br />
+          Minimum Rewarding Score: <b>{props.event.minimumScore}</b> <br />
           Challenge Count: <b>{props.event.challengeIds.length}</b> <br />
           Reward Count: <b>{props.event.rewardIds.length}</b> <br />
           Skipping Enabled: <b>
@@ -58,7 +57,7 @@ function EventCard(props: {
           </b>{" "}
           <br />
           Default: <b>{affirmOfBool(props.event.isDefault)}</b> <br />
-          Visible: <b>{affirmOfBool(props.event.indexable)}</b>
+          Publicly Visible: <b>{affirmOfBool(props.event.indexable)}</b>
         </ListCardBody>
         <ListCardButtons>
           <HButton onClick={props.onSelect}>SELECT</HButton>
@@ -82,12 +81,13 @@ function makeForm() {
     { name: "Skipping", options: ["Disabled", "Enabled"], value: 0 },
     { name: "Default", options: ["No", "Yes"], value: 0 },
     {
-      name: "Rewarding Method",
-      options: ["Perpetual", "Limited Time"],
+      name: "Reward Type",
+      options: ["Unlimited", "Limited"],
       value: 0,
     },
-    { name: "Visible", options: ["No", "Yes"], value: 0 },
-    { name: "Available Until", date: new Date() },
+    { name: "Minimum Score for Reward", value: 1, min: 1, max: 999999 },
+    { name: "Publicly Visible", options: ["No", "Yes"], value: 0 },
+    { name: "Available Until", date: new Date("2050") },
   ] as EntryForm[];
 }
 
@@ -103,10 +103,11 @@ function fromForm(form: EntryForm[], id: string): EventDto {
         : "limited_time_event",
     name: (form[0] as FreeEntryForm).value,
     description: (form[1] as FreeEntryForm).value,
-    indexable: (form[6] as OptionEntryForm).value === 1,
-    time: (form[7] as DateEntryForm).date.toUTCString(),
+    indexable: (form[7] as OptionEntryForm).value === 1,
+    time: (form[8] as DateEntryForm).date.toUTCString(),
     rewardIds: [],
     challengeIds: [],
+    minimumScore: (form[6] as NumberEntryForm).value,
   };
 }
 
@@ -127,11 +128,21 @@ function toForm(event: EventDto) {
     },
     { name: "Default", options: ["No", "Yes"], value: event.isDefault ? 1 : 0 },
     {
-      name: "Rewarding Method",
-      options: ["Perpetual", "Limited Time"],
+      name: "Reward Type",
+      options: ["Unlimited", "Limited"],
       value: event.rewardType === "perpetual" ? 0 : 1,
     },
-    { name: "Visible", options: ["No", "Yes"], value: event.indexable ? 1 : 0 },
+    {
+      name: "Minimum Score for Reward",
+      value: event.minimumScore,
+      min: 1,
+      max: 999999,
+    },
+    {
+      name: "Publicly Visible",
+      options: ["No", "Yes"],
+      value: event.indexable ? 1 : 0,
+    },
     { name: "Available Until", date: new Date(event.time) },
   ] as EntryForm[];
 }

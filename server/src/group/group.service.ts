@@ -71,6 +71,12 @@ export class GroupService {
     return await this.groupsRepository.findOneOrFail({ friendlyId: id });
   }
 
+  /** Invalidates a user's group data forever */
+  async orphanUser(user: User) {
+    await this.leaveGroup(user);
+    await this.groupsRepository.removeAndFlush(user.group);
+  }
+
   /* If the user is the only member, deletes the group. */
   async checkGroupSizeForRemoval(
     group: Group,
@@ -97,6 +103,10 @@ export class GroupService {
     const oldGroup = await user.group.load();
 
     if (oldGroup.friendlyId === joinId) return;
+
+    const host = await group.host.load();
+
+    if (host.restrictedBy?.id !== user.restrictedBy?.id) return;
 
     const ret = await this.checkGroupSizeForRemoval(
       oldGroup,

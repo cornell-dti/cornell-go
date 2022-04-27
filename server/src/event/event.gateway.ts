@@ -52,10 +52,12 @@ export class EventGateway {
           ).map((ch: Challenge) => ch.id),
           rewards: (
             await ev.rewards.loadItems()
-          ).map((rw: EventReward) => ({
-            id: rw.id,
-            description: rw.rewardDescription,
-          })),
+          )
+            .filter(rw => !rw.claimingUser)
+            .map((rw: EventReward) => ({
+              id: rw.id,
+              description: rw.rewardDescription,
+            })),
         })),
       ),
     };
@@ -70,15 +72,20 @@ export class EventGateway {
     @CallingUser() user: User,
     @MessageBody() data: RequestAllEventDataDto,
   ) {
+    const restriction = await user.restrictedBy?.load();
+    const restrictedCount = await restriction?.allowedEvents.loadCount();
+    const searchRestriction = restrictedCount === 0 ? undefined : restriction;
+
     const results = await this.eventService.searchEvents(
       data.offset,
-      Math.min(data.count, 32), // Maxed out at 32 events
+      Math.min(data.count, 1024), // Maxed out at 1024 events
       data.rewardTypes as EventRewardType[],
       data.skippableOnly ? true : undefined,
       {
         time: data.closestToEnding ? 'ASC' : undefined,
         challengeCount: data.shortestFirst ? 'ASC' : undefined,
       },
+      searchRestriction,
     );
 
     await this.requestEventData(user, {
@@ -94,6 +101,10 @@ export class EventGateway {
     @CallingUser() user: User,
     @MessageBody() data: RequestEventLeaderDataDto,
   ) {
+    if (!(await this.eventService.isAllowedEvent(user, data.eventId))) {
+      return;
+    }
+
     const progresses = await this.eventService.getTopTrackersForEvent(
       data.eventId,
       data.offset,
@@ -111,8 +122,6 @@ export class EventGateway {
         })),
       ),
     });
-
-    return false;
   }
 
   @SubscribeMessage('requestEventTrackerData')
