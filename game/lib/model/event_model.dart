@@ -71,7 +71,7 @@ class EventModel extends ChangeNotifier {
     if (_topPlayers[eventId]?.length == 0) {
       eventId.isEmpty
           ? _client.serverApi
-              ?.requestGlobalLeaderData((topPlayers?.length ?? 0), diff)
+              ?.requestGlobalLeaderData((topPlayers?.length ?? 0), 1000)
           : _client.serverApi?.requestEventLeaderData(
               (topPlayers?.length ?? 0), diff, eventId);
     }
