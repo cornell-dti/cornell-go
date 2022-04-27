@@ -293,19 +293,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                 );
               })),
               ElevatedButton(
-                onPressed: () => {
-                  //_joinGroupDialog(context)
-                  Navigator.push(
-                    context,
-                    PageRouteBuilder(
-                      pageBuilder: (c, a1, a2) =>
-                          RewardWidget(homePageState: gameModel),
-                      transitionsBuilder: (c, anim, a2, child) =>
-                          FadeTransition(opacity: anim, child: child),
-                      transitionDuration: Duration(milliseconds: 500),
-                    ),
-                  )
-                },
+                onPressed: () => {_joinGroupDialog(context)},
                 child: const Text(
                   "Join!",
                   style: TextStyle(fontWeight: FontWeight.bold),
