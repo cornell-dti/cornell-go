@@ -26,6 +26,12 @@ import { Challenge } from 'src/model/challenge.entity';
 import { EventReward } from 'src/model/event-reward.entity';
 import { v4 } from 'uuid';
 import { UpdateEventDataDto } from './admin-callback/update-event-data.dto';
+import {
+  RequestRestrictionsDto,
+  RestrictionDto,
+} from './request-restrictions.dto';
+import { RestrictionGroup } from 'src/model/restriction-group.entity';
+import { UpdateRestrictionsDto } from './update-restrictions.dto';
 @WebSocketGateway({ cors: true })
 @UseGuards(AdminGuard)
 export class AdminGateway {
@@ -97,6 +103,25 @@ export class AdminGateway {
           email: usr.email,
           superuser: usr.superuser,
         })),
+      },
+      user,
+    );
+  }
+
+  @SubscribeMessage('requestRestrictions')
+  async requestRestrictions(
+    @CallingUser() user: User,
+    @MessageBody() data: RequestRestrictionsDto,
+  ) {
+    const restrictionGroups =
+      await this.adminService.getAllRestrictionGroupData();
+
+    this.adminCallbackService.emitUpdateRestrictionData(
+      {
+        restrictions: await Promise.all(
+          restrictionGroups.map(this.dtoForRestrictionGroup),
+        ),
+        deletedIds: [],
       },
       user,
     );
@@ -238,6 +263,31 @@ export class AdminGateway {
     this.adminCallbackService.emitUpdateAdminData({ admins: adminUpdates });
   }
 
+  @SubscribeMessage('updateRestrictions')
+  async updateRestrictions(
+    @CallingUser() user: User,
+    @MessageBody() data: UpdateRestrictionsDto,
+  ) {
+    await this.adminService.deleteRestrictionGroups(data.deletedIds);
+    const updated = await this.adminService.updateRestrictionGroups(
+      data.restrictions,
+    );
+
+    await this.adminCallbackService.emitUpdateRestrictionData({
+      restrictions: await Promise.all(updated.map(this.dtoForRestrictionGroup)),
+      deletedIds: data.deletedIds,
+    });
+
+    this.clientService.emitInvalidateData({
+      userEventData: true,
+      userRewardData: true,
+      winnerRewardData: true,
+      groupData: true,
+      challengeData: true,
+      leaderboardData: true,
+    });
+  }
+
   async dtoForEvent(ev: EventBase): Promise<EventDto> {
     await ev.challenges.init();
     await ev.rewards.init();
@@ -280,6 +330,24 @@ export class AdminGateway {
       redeemInfo: rw.rewardRedeemInfo,
       containingEventId: rw.containingEvent.id,
       claimingUserId: rw.claimingUser?.id ?? '',
+    };
+  }
+
+  async dtoForRestrictionGroup(
+    restrictionGroup: RestrictionGroup,
+  ): Promise<RestrictionDto> {
+    const genUsers = await restrictionGroup.generatedUsers.loadItems();
+    await restrictionGroup.restrictedUsers.loadItems();
+    await restrictionGroup.allowedEvents.loadItems();
+
+    return {
+      id: restrictionGroup.id,
+      displayName: restrictionGroup.displayName,
+      canEditUsername: restrictionGroup.canEditUsername,
+      restrictedUsers: restrictionGroup.restrictedUsers.getIdentifiers(),
+      allowedEvents: restrictionGroup.allowedEvents.getIdentifiers(),
+      generatedUserCount: genUsers.length,
+      generatedUserAuthIds: genUsers.map(u => u.authToken),
     };
   }
 }

@@ -85,6 +85,9 @@ export class UserGateway {
   ) {
     const group = await user.group.load();
     const groupMembers = await group.members.loadItems();
+    const restrictionGroup = await user.restrictedBy?.load();
+
+    if (!(restrictionGroup?.canEditUsername ?? true)) return;
 
     user.username = new CensorSensor()
       .cleanProfanityIsh(
@@ -152,7 +155,18 @@ export class UserGateway {
     @CallingUser() user: User,
     @MessageBody() data: CloseAccountDto,
   ) {
-    await this.authService.setAuthType(user, AuthType.NONE, '');
+    await this.authService.setAuthType(user, AuthType.NONE, user.authToken);
+    await this.userService.deleteUser(user);
+
+    this.clientService.emitInvalidateData({
+      userEventData: true,
+      userRewardData: true,
+      winnerRewardData: true,
+      groupData: true,
+      challengeData: true,
+      leaderboardData: true,
+    });
+
     return false;
   }
 
@@ -161,9 +175,11 @@ export class UserGateway {
     @CallingUser() user: User,
     @MessageBody() data: RequestGlobalLeaderDataDto,
   ) {
-    let topPlayers = await this.userService.getTopPlayers(
+    if (user.restrictedBy) return;
+
+    const topPlayers = await this.userService.getTopPlayers(
       data.offset,
-      Math.min(data.count, 128), // Maxed out at 128 entries
+      Math.min(data.count, 1024), // Maxed out at 1024 entries
     );
 
     this.clientService.emitUpdateLeaderData(user, {
@@ -175,6 +191,5 @@ export class UserGateway {
         score: usr.score,
       })),
     });
-    return false;
   }
 }
