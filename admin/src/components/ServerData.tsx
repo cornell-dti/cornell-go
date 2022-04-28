@@ -6,6 +6,7 @@ import {
   useMemo,
   useState,
 } from "react";
+import { RestrictionDto } from "../dto/request-restrictions.dto";
 import { UpdateAdminDataAdminDto } from "../dto/update-admin-data.dto";
 import { ChallengeDto } from "../dto/update-challenges.dto";
 import { EventDto } from "../dto/update-events.dto";
@@ -18,6 +19,7 @@ const defaultData = {
   events: new Map<string, EventDto>(),
   challenges: new Map<string, ChallengeDto>(),
   rewards: new Map<string, RewardDto>(),
+  restrictions: new Map<string, RestrictionDto>(),
   selectedEvent: "" as string,
   selectEvent(id: string) {},
   setAdminStatus(id: string, granted: boolean) {},
@@ -27,6 +29,8 @@ const defaultData = {
   deleteChallenge(id: string) {},
   updateEvent(event: EventDto) {},
   deleteEvent(id: string) {},
+  updateRestriction(restriction: RestrictionDto) {},
+  deleteRestriction(id: string) {},
 };
 
 export const ServerDataContext = createContext(defaultData);
@@ -73,6 +77,15 @@ export function ServerDataProvider(props: { children: ReactNode }) {
       deleteEvent(id: string) {
         sock.updateEvents({ events: [], deletedIds: [id] });
       },
+      updateRestriction(restriction: RestrictionDto) {
+        sock.updateRestrictions({
+          restrictions: [restriction],
+          deletedIds: [],
+        });
+      },
+      deleteRestriction(id: string) {
+        sock.updateRestrictions({ restrictions: [], deletedIds: [id] });
+      },
     }),
     [serverData, setServerData, sock]
   );
@@ -80,6 +93,7 @@ export function ServerDataProvider(props: { children: ReactNode }) {
   useEffect(() => {
     sock.requestAdmins({});
     sock.requestEvents({});
+    sock.requestRestrictions({});
   }, [sock]);
 
   useEffect(() => {
@@ -98,15 +112,18 @@ export function ServerDataProvider(props: { children: ReactNode }) {
     });
     sock.onUpdateChallengeData((data) => {
       data.deletedIds.forEach((id) => serverData.challenges.delete(id));
-      data.challenges.forEach((chal) =>
-        serverData.challenges.set(chal.id, chal)
-      );
-      setServerData({ ...serverData });
+      data.challenges.forEach((ch) => serverData.challenges.set(ch.id, ch));
+      setTimeout(() => setServerData({ ...serverData }), 0);
     });
     sock.onUpdateRewardData((data) => {
       data.deletedIds.forEach((id) => serverData.rewards.delete(id));
       data.rewards.forEach((rw) => serverData.rewards.set(rw.id, rw));
-      setServerData({ ...serverData });
+      setTimeout(() => setServerData({ ...serverData }), 0);
+    });
+    sock.onUpdateRestrictions((data) => {
+      data.deletedIds.forEach((id) => serverData.restrictions.delete(id));
+      data.restrictions.forEach((r) => serverData.restrictions.set(r.id, r));
+      setTimeout(() => setServerData({ ...serverData }), 0);
     });
   }, [sock, serverData, setServerData]);
 

@@ -30,7 +30,7 @@ export class Group {
   @OneToOne({ nullable: true })
   host!: IdentifiedReference<User>;
 
-  /** Members of the group, with the host at index 0 */
+  /** Members of the group */
   @OneToMany(() => User, mem => mem.group)
   members = new Collection<User>(this);
 }

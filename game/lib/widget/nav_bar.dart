@@ -1,8 +1,9 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:game/events_leaderboard/events_leaderboard_widget.dart';
 import 'package:game/feedback/feedback.dart';
-import 'package:game/leaderboard/leaderboard_widget.dart';
+import 'package:game/events_leaderboard/events_leaderboard_widget.dart';
 import 'package:game/global_leaderboard/global_leaderboard_widget.dart';
 import 'package:game/login/login_page.dart';
 import 'package:game/model/user_model.dart';
@@ -106,13 +107,13 @@ class NavBar extends StatelessWidget {
                 Icons.group_rounded,
                 color: Color(0xFFB31B1B),
               ),
-              title: Text('Leaderboard', style: listTextStyle),
+              title: Text('Events Leaderboard', style: listTextStyle),
               onTap: () => {
                 Navigator.pop(context),
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => LeaderboardWidget()))
+                        builder: (context) => EventsLeaderboardWidget()))
               },
             ),
             ListTile(

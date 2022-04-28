@@ -64,6 +64,8 @@ class EventModel extends ChangeNotifier {
   List<UpdateLeaderDataUserDto> getTopPlayersForEvent(
       String eventId, int count) {
     final topPlayers = _topPlayers[eventId];
+    int length = (topPlayers != null) ? topPlayers!.length : -1;
+    print('topPlayers initial length: $length');
     final diff = count - (topPlayers?.length ?? 0);
     if (topPlayers == null) {
       _topPlayers[eventId] = [];
@@ -71,10 +73,12 @@ class EventModel extends ChangeNotifier {
     if (_topPlayers[eventId]?.length == 0) {
       eventId.isEmpty
           ? _client.serverApi
-              ?.requestGlobalLeaderData((topPlayers?.length ?? 0), diff)
+              ?.requestGlobalLeaderData((topPlayers?.length ?? 0), 1000)
           : _client.serverApi?.requestEventLeaderData(
               (topPlayers?.length ?? 0), diff, eventId);
     }
+    length = (topPlayers != null) ? topPlayers!.length : -1;
+    print('topPlayers final length: $length');
     return topPlayers ?? [];
   }
 
