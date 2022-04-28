@@ -56,6 +56,8 @@ export class Challenge {
   closeRadius!: number;
 
   /** Completions linked to this challenge */
-  @OneToMany(() => PrevChallenge, pc => pc.challenge)
+  @OneToMany(() => PrevChallenge, pc => pc.challenge, {
+    orphanRemoval: true,
+  })
   completions = new Collection<PrevChallenge>(this);
 }

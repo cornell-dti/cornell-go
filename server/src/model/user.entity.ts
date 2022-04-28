@@ -19,6 +19,7 @@ import {
 import { v4 } from 'uuid';
 import { Group } from './group.entity';
 import { RestrictionGroup } from './restriction-group.entity';
+import { PrevChallenge } from './prev-challenge.entity';
 
 /**
  * Enum describing the type of authentication token
@@ -86,15 +87,21 @@ export class User {
 
   /** Event trackers for each event the player participated in */
   @OneToMany(() => EventTracker, ev => ev.user, {
-    cascade: [Cascade.SCHEDULE_ORPHAN_REMOVAL, Cascade.REMOVE],
+    orphanRemoval: true,
   })
   participatingEvents = new Collection<EventTracker>(this);
 
   /** Actions recorded relating to this user */
   @OneToMany(() => SessionLogEntry, entry => entry.user, {
-    cascade: [Cascade.SCHEDULE_ORPHAN_REMOVAL, Cascade.REMOVE],
+    orphanRemoval: true,
   })
   logEntries = new Collection<SessionLogEntry>(this);
+
+  /** Prev challenges */
+  @OneToMany(() => PrevChallenge, pc => pc.owner, {
+    orphanRemoval: true,
+  })
+  prevChallenges = new Collection<PrevChallenge>(this);
 
   /** The restriction group this user is made for */
   @ManyToOne()
@@ -103,4 +110,8 @@ export class User {
   /** The restriction group this user is in */
   @ManyToOne()
   restrictedBy?: IdentifiedReference<RestrictionGroup>;
+
+  /** Is player ranked on the leaderboards */
+  @Property()
+  isRanked = true;
 }
