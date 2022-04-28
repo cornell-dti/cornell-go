@@ -31,6 +31,6 @@ export class Group {
   host!: IdentifiedReference<User>;
 
   /** Members of the group */
-  @OneToMany(() => User, mem => mem.group, { orphanRemoval: true })
+  @OneToMany(() => User, mem => mem.group)
   members = new Collection<User>(this);
 }

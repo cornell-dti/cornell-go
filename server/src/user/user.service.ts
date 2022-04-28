@@ -87,6 +87,7 @@ export class UserService {
   }
 
   async deleteUser(user: User) {
+    
     await this.groupsService.orphanUser(user);
     await this.usersRepository.removeAndFlush(user);
   }
