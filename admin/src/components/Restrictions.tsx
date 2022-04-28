@@ -38,20 +38,18 @@ function GroupCard(props: {
         <ListCardBody>
           Id: <b>{props.restriction.id}</b>
           <br />
-          Event Count: <b>{props.restriction.allowedEvents.length}</b> <br />
           Events: <b>{props.restriction.allowedEvents.join(", ")}</b> <br />
           User Count: <b>{props.restriction.restrictedUsers.length}</b> <br />
-          Users: <b>{props.restriction.restrictedUsers.join(", ")}</b> <br />
-          Username Editting Enabled:{" "}
+          Generated Users:{" "}
+          <b>{props.restriction.generatedUserAuthIds.join(", ")}</b> <br />
+          Username Editing Enabled:{" "}
           <b>{affirmOfBool(props.restriction.canEditUsername)}</b> <br />
         </ListCardBody>
         <ListCardButtons>
-          <HButton onClick={props.onAdd}>Add</HButton>
+          <HButton onClick={props.onAdd}>ADD EVENT</HButton>
+          <HButton onClick={props.onClear}>CLEAR EVENTS</HButton>
           <HButton onClick={props.onDelete} float="right">
             DELETE
-          </HButton>
-          <HButton onClick={props.onClear} float="right">
-            CLEAR EVENTS
           </HButton>
           <HButton onClick={props.onEdit} float="right">
             EDIT
@@ -65,19 +63,27 @@ function GroupCard(props: {
 function makeForm() {
   return [
     { name: "Name", characterLimit: 256, value: "" },
-    { name: "Can edit username", options: ["No", "Yes"], value: 0 },
+    { name: "Can Edit Username", options: ["No", "Yes"], value: 0 },
+    {
+      name: "Users to Generate",
+      min: 0,
+      max: 99,
+      value: 0,
+    },
   ] as EntryForm[];
 }
 
-function fromForm(form: EntryForm[], id: string): RestrictionDto {
+function fromForm(
+  form: EntryForm[],
+  id: string,
+  oldDto: RestrictionDto
+): RestrictionDto {
   return {
+    ...oldDto,
     id,
     displayName: (form[0] as FreeEntryForm).value,
     canEditUsername: (form[1] as OptionEntryForm).value === 1,
-    restrictedUsers: [],
-    allowedEvents: [],
-    generatedUserCount: 0,
-    generatedUserAuthIds: [],
+    generatedUserCount: (form[2] as NumberEntryForm).value,
   };
 }
 
@@ -85,12 +91,28 @@ function toForm(group: RestrictionDto) {
   return [
     { name: "Display Name", characterLimit: 256, value: group.displayName },
     {
-      name: "Can edit username",
+      name: "Can Edit Username",
       options: ["No", "Yes"],
       value: group.canEditUsername ? 1 : 0,
     },
+    {
+      name: "Users to Generate",
+      min: 0,
+      max: 99,
+      value: group.generatedUserCount,
+    },
   ] as EntryForm[];
 }
+
+const emptyDto: RestrictionDto = {
+  id: "",
+  displayName: "",
+  canEditUsername: false,
+  restrictedUsers: [],
+  allowedEvents: [],
+  generatedUserAuthIds: [],
+  generatedUserCount: 0,
+};
 
 export function Restrictions() {
   const serverData = useContext(ServerDataContext);
@@ -100,6 +122,7 @@ export function Restrictions() {
   const [form, setForm] = useState(() => makeForm());
   const [currentId, setCurrentId] = useState("");
   const [query, setQuery] = useState("");
+  const [oldDto, setOldDto] = useState(emptyDto);
 
   return (
     <>
@@ -108,7 +131,7 @@ export function Restrictions() {
         isOpen={isCreateModalOpen}
         entryButtonText="CREATE"
         onEntry={() => {
-          serverData.updateRestriction(fromForm(form, ""));
+          serverData.updateRestriction(fromForm(form, "", emptyDto));
           setCreateModalOpen(false);
         }}
         onCancel={() => {
@@ -121,7 +144,7 @@ export function Restrictions() {
         isOpen={isEditModalOpen}
         entryButtonText="EDIT"
         onEntry={() => {
-          serverData.updateRestriction(fromForm(form, currentId));
+          serverData.updateRestriction(fromForm(form, currentId, oldDto));
           setEditModalOpen(false);
         }}
         onCancel={() => {
@@ -167,6 +190,7 @@ export function Restrictions() {
             onEdit={() => {
               setCurrentId(r.id);
               setForm(toForm(r));
+              setOldDto(r);
               setEditModalOpen(true);
             }}
             onClear={() => {
