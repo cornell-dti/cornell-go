@@ -2,6 +2,7 @@ import { EventTracker } from './event-tracker.entity';
 import { EventReward } from './event-reward.entity';
 import { SessionLogEntry } from './session-log-entry.entity';
 import {
+  Cascade,
   Collection,
   Entity,
   Enum,
@@ -84,11 +85,15 @@ export class User {
   group!: IdentifiedReference<Group>;
 
   /** Event trackers for each event the player participated in */
-  @OneToMany(() => EventTracker, ev => ev.user)
+  @OneToMany(() => EventTracker, ev => ev.user, {
+    cascade: [Cascade.SCHEDULE_ORPHAN_REMOVAL, Cascade.REMOVE],
+  })
   participatingEvents = new Collection<EventTracker>(this);
 
   /** Actions recorded relating to this user */
-  @OneToMany(() => SessionLogEntry, entry => entry.user)
+  @OneToMany(() => SessionLogEntry, entry => entry.user, {
+    cascade: [Cascade.SCHEDULE_ORPHAN_REMOVAL, Cascade.REMOVE],
+  })
   logEntries = new Collection<SessionLogEntry>(this);
 
   /** The restriction group this user is made for */
