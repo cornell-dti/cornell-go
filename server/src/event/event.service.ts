@@ -62,6 +62,10 @@ export class EventService {
     return await this.eventTrackerRepository.find(
       {
         event: eventId,
+        isPlayerRanked: true,
+        user: {
+          isRanked: true,
+        },
       },
       { offset, limit: count, orderBy: { eventScore: 'desc' } },
     );

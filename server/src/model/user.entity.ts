@@ -110,4 +110,8 @@ export class User {
   /** The restriction group this user is in */
   @ManyToOne()
   restrictedBy?: IdentifiedReference<RestrictionGroup>;
+
+  /** Is player ranked on the leaderboards */
+  @Property()
+  isRanked = true;
 }
