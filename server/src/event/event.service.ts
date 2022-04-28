@@ -251,7 +251,7 @@ export class EventService {
       isDefault: true,
       rewardType: EventRewardType.PERPETUAL,
       indexable: false,
-      time: new Date(),
+      time: new Date('2060'),
       rewards: [],
       challenges: [],
     });

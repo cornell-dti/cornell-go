@@ -46,29 +46,30 @@ class _RewardWidgetState extends State<RewardWidget> {
                     style: TextStyle(fontSize: 40, color: Colors.white),
                   ),
                   Text(
-                    widget.homePageState.name,
+                    widget.homePageState.name + "!",
                     style: TextStyle(
                         fontSize: 40,
                         fontWeight: FontWeight.bold,
                         color: Colors.white),
                   ),
-                  const Text(
-                    '+1!',
-                    style: TextStyle(fontSize: 40, color: Colors.white),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: const Text(
-                      'Keep Searching',
-                      style: TextStyle(fontSize: 30),
-                    ),
-                    style: TextButton.styleFrom(
-                      backgroundColor: Colors.red,
-                      primary: Colors.black,
-                    ),
-                  ),
+                  Padding(
+                      padding: EdgeInsets.only(top: 48),
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: Padding(
+                            padding: EdgeInsets.only(
+                                left: 25, right: 25, top: 4, bottom: 4),
+                            child: const Text(
+                              'Keep Searching',
+                              style: TextStyle(fontSize: 24),
+                            )),
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          primary: Colors.black,
+                        ),
+                      )),
                 ],
               ),
             ),

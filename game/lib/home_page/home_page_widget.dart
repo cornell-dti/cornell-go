@@ -31,7 +31,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
   TextEditingController idController = new TextEditingController();
   final scaffoldKey = GlobalKey<ScaffoldState>();
   Color Carnelian = Color(0xFFB31B1B);
-  var _doneState = null;
+  GameModel? _doneState = null;
   var _mightShowRewardNotif = false;
   @override
   void initState() {
@@ -68,23 +68,25 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                 });
               }
               if (_doneState != null && gameModel.hasConnection) {
-                _controllerCenter.play();
-                apiClient.serverApi?.completedChallenge(_doneState.challengeId);
-                Navigator.push(
-                  context,
-                  PageRouteBuilder(
-                    pageBuilder: (c, a1, a2) =>
-                        RewardWidget(homePageState: _doneState),
-                    transitionsBuilder: (c, anim, a2, child) =>
-                        FadeTransition(opacity: anim, child: child),
-                    transitionDuration: Duration(milliseconds: 500),
-                  ),
-                );
+                final doneState = _doneState!;
 
                 setState(() {
                   _doneState = null;
                   _mightShowRewardNotif = true;
                 });
+
+                _controllerCenter.play();
+                apiClient.serverApi?.completedChallenge(doneState.challengeId);
+                Navigator.push(
+                  context,
+                  PageRouteBuilder(
+                    pageBuilder: (c, a1, a2) =>
+                        RewardWidget(homePageState: doneState),
+                    transitionsBuilder: (c, anim, a2, child) =>
+                        FadeTransition(opacity: anim, child: child),
+                    transitionDuration: Duration(milliseconds: 500),
+                  ),
+                );
               }
             });
             return Stack(children: [
