@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 Widget visitedPlacesCell(context, place, date, points, imgpath) {
   var placeStyle =
       TextStyle(fontWeight: FontWeight.bold, fontSize: 25, color: Colors.white);

@@ -12,7 +12,8 @@ class EventsLeaderboardWidget extends StatefulWidget {
   EventsLeaderboardWidget({Key? key}) : super(key: key);
 
   @override
-  _EventsLeaderboardWidgetState createState() => _EventsLeaderboardWidgetState();
+  _EventsLeaderboardWidgetState createState() =>
+      _EventsLeaderboardWidgetState();
 }
 
 class _EventsLeaderboardWidgetState extends State<EventsLeaderboardWidget> {
