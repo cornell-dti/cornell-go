@@ -107,7 +107,7 @@ class NavBar extends StatelessWidget {
                 Icons.group_rounded,
                 color: Color(0xFFB31B1B),
               ),
-              title: Text('Events Leaderboard', style: listTextStyle),
+              title: Text('Event Leaderboard', style: listTextStyle),
               onTap: () => {
                 Navigator.pop(context),
                 Navigator.push(

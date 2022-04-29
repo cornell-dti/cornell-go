@@ -12,7 +12,8 @@ class GlobalLeaderboardWidget extends StatefulWidget {
   GlobalLeaderboardWidget({Key? key}) : super(key: key);
 
   @override
-  _GlobalLeaderboardWidgetState createState() => _GlobalLeaderboardWidgetState();
+  _GlobalLeaderboardWidgetState createState() =>
+      _GlobalLeaderboardWidgetState();
 }
 
 class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
@@ -34,9 +35,8 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
                   (context, myGroupModel, myEventModel, myUserModel, child) {
                 int position = 1;
                 if (myGroupModel.curEventId == null) return ListView();
-                final List<UpdateLeaderDataUserDto> list = myEventModel
-                    .getTopPlayersForEvent('', 1000);
-                print('returned list $list');
+                final List<UpdateLeaderDataUserDto> list =
+                    myEventModel.getTopPlayersForEvent('', 1000);
                 return Column(children: [
                   for (int i = 0; i < list.length; i++)
                     if (myUserModel.userData?.id != null &&
