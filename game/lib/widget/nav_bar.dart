@@ -147,7 +147,7 @@ class NavBar extends StatelessWidget {
             ),
             ListTile(
               leading: Icon(
-                Icons.text_fields,
+                Icons.edit,
                 color: Color(0xFFB31B1B),
               ),
               title: Text('Change Username', style: listTextStyle),
@@ -158,7 +158,7 @@ class NavBar extends StatelessWidget {
               },
             ),
             ListTile(
-              leading: Icon(Icons.time_to_leave, color: Color(0xFFB31B1B)),
+              leading: Icon(Icons.exit_to_app, color: Color(0xFFB31B1B)),
               title: Text('Sign Out', style: listTextStyle),
               onTap: () async => {
                 await apiClient.disconnect(),
