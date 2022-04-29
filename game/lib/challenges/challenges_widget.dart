@@ -21,10 +21,16 @@ class ChallengesWidget extends StatefulWidget {
 
 class _ChallengesWidgetState extends State<ChallengesWidget> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
+  bool loaded = false;
 
   @override
   void initState() {
     super.initState();
+    Future.delayed(Duration.zero, () {
+      setState(() {
+        loaded = true;
+      });
+    });
   }
 
   @override
@@ -36,57 +42,61 @@ class _ChallengesWidgetState extends State<ChallengesWidget> {
       backgroundColor: Color.fromARGB(255, 43, 47, 50),
       body: Padding(
         padding: const EdgeInsets.only(top: 150),
-        child: Container(
-          child: Padding(
-            padding: const EdgeInsets.only(left: 8.0, right: 8.0),
-            child: Column(
-              children: [
-                Expanded(child: Consumer5<EventModel, ChallengeModel,
-                        TrackerModel, GroupModel, ApiClient>(
-                    builder: (context, myEventModel, myChallengeModel,
-                        myTrackerModel, groupModel, apiClient, child) {
-                  if (groupModel.curEventId == null) {
-                    return ListView();
-                  } else {
-                    List<Widget> challengeCells = [];
-                    final eventId = groupModel.curEventId!;
-                    final challenges =
-                        myEventModel.getEventById(eventId)?.challengeIds;
-                    if (challenges == null) {
+        child: AnimatedOpacity(
+          opacity: loaded ? 1.0 : 0.0,
+          duration: const Duration(milliseconds: 100),
+          child: Container(
+            child: Padding(
+              padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+              child: Column(
+                children: [
+                  Expanded(child: Consumer5<EventModel, ChallengeModel,
+                          TrackerModel, GroupModel, ApiClient>(
+                      builder: (context, myEventModel, myChallengeModel,
+                          myTrackerModel, groupModel, apiClient, child) {
+                    if (groupModel.curEventId == null) {
                       return ListView();
                     } else {
-                      for (String challengeId in challenges) {
-                        final UpdateChallengeDataChallengeDto challenge =
-                            myChallengeModel.getChallengeById(challengeId)!;
-                        final UpdateEventDataEventDto event =
-                            myEventModel.getEventById(eventId)!;
-                        final UpdateEventTrackerDataEventTrackerDto tracker =
-                            myTrackerModel.trackerByEventId(eventId)!;
-                        challengeCells.add(GestureDetector(
-                          onTap: () {
-                            apiClient.serverApi
-                                ?.setCurrentChallenge(challengeId);
-                          },
-                          child: challengeCell(
-                              context,
-                              challenge.name,
-                              challenge.completionDate == null
-                                  ? ""
-                                  : format.format(challenge.completionDate!),
-                              challenge.imageUrl,
-                              tracker.curChallengeId == challengeId,
-                              challenge.completionDate == null,
-                              !event.skippingEnabled),
-                        ));
+                      List<Widget> challengeCells = [];
+                      final eventId = groupModel.curEventId!;
+                      final challenges =
+                          myEventModel.getEventById(eventId)?.challengeIds;
+                      if (challenges == null) {
+                        return ListView();
+                      } else {
+                        for (String challengeId in challenges) {
+                          final UpdateChallengeDataChallengeDto challenge =
+                              myChallengeModel.getChallengeById(challengeId)!;
+                          final UpdateEventDataEventDto event =
+                              myEventModel.getEventById(eventId)!;
+                          final UpdateEventTrackerDataEventTrackerDto tracker =
+                              myTrackerModel.trackerByEventId(eventId)!;
+                          challengeCells.add(GestureDetector(
+                            onTap: () {
+                              apiClient.serverApi
+                                  ?.setCurrentChallenge(challengeId);
+                            },
+                            child: challengeCell(
+                                context,
+                                challenge.name,
+                                challenge.completionDate == null
+                                    ? ""
+                                    : format.format(challenge.completionDate!),
+                                challenge.imageUrl,
+                                tracker.curChallengeId == challengeId,
+                                challenge.completionDate == null,
+                                !event.skippingEnabled),
+                          ));
+                        }
                       }
+                      return ListView(
+                          shrinkWrap: true,
+                          scrollDirection: Axis.vertical,
+                          children: challengeCells);
                     }
-                    return ListView(
-                        shrinkWrap: true,
-                        scrollDirection: Axis.vertical,
-                        children: challengeCells);
-                  }
-                }))
-              ],
+                  }))
+                ],
+              ),
             ),
           ),
         ),

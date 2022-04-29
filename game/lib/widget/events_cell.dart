@@ -51,88 +51,96 @@ Widget eventsCell(
           )),
         ),
         Expanded(
-          child: Container(
-              decoration: BoxDecoration(
-                  border: current
-                      ? Border.all(color: Colors.greenAccent, width: 2.0)
-                      : null,
-                  image: DecorationImage(
-                      image: CachedNetworkImageProvider(imgpath),
-                      fit: BoxFit.cover,
-                      opacity: .5)),
-              height: 150,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(children: [
-                  Row(children: [
-                    Container(
-                        child: Text(
-                      place,
-                      style: placeStyle,
-                      textAlign: TextAlign.left,
-                    )),
-                    Expanded(
-                      child: Container(
-                          alignment: Alignment.topRight,
-                          child: (people == -1 && !completed
-                              ? Container()
-                              : (completed
-                                  ? Icon(Icons.star,
-                                      color: Colors.yellow, size: 25)
-                                  : Icon(Icons.people,
-                                      color: Colors.white, size: 25)))),
-                    ),
-                    Container(
-                        child: Text(
-                      people < 0 || completed ? "" : " ${people}",
-                      style: placeStyle,
-                    ))
-                  ]),
-                  Expanded(
-                      child: Row(
-                    children: [
+          child: Stack(fit: StackFit.passthrough, children: [
+            Container(
+                decoration: BoxDecoration(
+                    image: DecorationImage(
+                        image: CachedNetworkImageProvider(imgpath),
+                        fit: BoxFit.cover,
+                        opacity: .5)),
+                height: 150,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(children: [
+                    Row(children: [
                       Container(
-                        padding: const EdgeInsets.all(8.0),
-                        width: 150,
-                        alignment: Alignment.topLeft,
-                        child: Text(
-                          description,
-                          style: descriptionStyle,
-                          textAlign: TextAlign.left,
-                        ),
+                          child: Text(
+                        place,
+                        style: placeStyle,
+                        textAlign: TextAlign.left,
+                      )),
+                      Expanded(
+                        child: Container(
+                            alignment: Alignment.topRight,
+                            child: (people == -1 && !completed
+                                ? Container()
+                                : (completed
+                                    ? Icon(Icons.star,
+                                        color: Colors.yellow, size: 25)
+                                    : Icon(Icons.people,
+                                        color: Colors.white, size: 25)))),
                       ),
-                    ],
-                  )),
-                  Row(children: [
-                    Container(
-                        child: StreamBuilder(
-                            stream: Stream.periodic(Duration(seconds: 1)),
-                            builder: (builder, value) => Text(
-                                  time == null
-                                      ? ""
-                                      : "${timeToTimeString(time)} Left",
-                                  style: timeStyle,
-                                ))),
+                      Container(
+                          child: Text(
+                        people < 0 || completed ? "" : " ${people}",
+                        style: placeStyle,
+                      ))
+                    ]),
                     Expanded(
-                      child: Container(
-                          child: Column(children: [
+                        child: Row(
+                      children: [
                         Container(
-                            alignment: Alignment.bottomRight,
-                            child: Text(reward, style: rewardStyle)),
-                        Container(
-                            alignment: Alignment.bottomRight,
-                            child: Text(
-                                rewardNum == 0
-                                    ? ""
-                                    : (time == null
-                                        ? "∞ Rewards"
-                                        : "${rewardNum} Reward${rewardNum == 1 ? "" : "s"} Left"),
-                                style: rewardStyle))
-                      ])),
-                    )
+                          padding: const EdgeInsets.all(8.0),
+                          width: 150,
+                          alignment: Alignment.topLeft,
+                          child: Text(
+                            description,
+                            style: descriptionStyle,
+                            textAlign: TextAlign.left,
+                          ),
+                        ),
+                      ],
+                    )),
+                    Row(children: [
+                      Container(
+                          child: StreamBuilder(
+                              stream: Stream.periodic(Duration(seconds: 1)),
+                              builder: (builder, value) => Text(
+                                    time == null
+                                        ? ""
+                                        : "${timeToTimeString(time)} Left",
+                                    style: timeStyle,
+                                  ))),
+                      Expanded(
+                        child: Container(
+                            child: Column(children: [
+                          Container(
+                              alignment: Alignment.bottomRight,
+                              child: Text(reward, style: rewardStyle)),
+                          Container(
+                              alignment: Alignment.bottomRight,
+                              child: Text(
+                                  rewardNum == 0
+                                      ? ""
+                                      : (time == null
+                                          ? "∞ Rewards"
+                                          : "${rewardNum} Reward${rewardNum == 1 ? "" : "s"} Left"),
+                                  style: rewardStyle))
+                        ])),
+                      )
+                    ]),
                   ]),
-                ]),
-              )),
+                )),
+            AnimatedOpacity(
+                opacity: current ? 1 : 0,
+                duration: const Duration(milliseconds: 100),
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.greenAccent, width: 2.0),
+                  ),
+                  height: 80,
+                ))
+          ]),
         )
       ]));
 }
