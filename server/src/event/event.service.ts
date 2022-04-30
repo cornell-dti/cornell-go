@@ -10,6 +10,7 @@ import { ChallengeService } from 'src/challenge/challenge.service';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityRepository } from '@mikro-orm/postgresql';
 import { ClientService } from '../client/client.service';
+import { RestrictionGroup } from 'src/model/restriction-group.entity';
 
 @Injectable()
 export class EventService {
@@ -34,6 +35,24 @@ export class EventService {
     return await this.eventsRepository.find({ id: { $in: ids } });
   }
 
+  /** Checks if a user is allowed to see an event */
+  async isAllowedEvent(user: User, eventId: string) {
+    if (user.restrictedBy) {
+      const restriction = await user.restrictedBy.load();
+      const hasEventRestrictions =
+        (await restriction.allowedEvents.loadCount()) > 0;
+      if (hasEventRestrictions) {
+        return (
+          (await this.eventsRepository.count({
+            allowedIn: restriction,
+            id: eventId,
+          })) > 0
+        );
+      }
+    }
+    return true;
+  }
+
   /** Get top players for event */
   async getTopTrackersForEvent(
     eventId: string,
@@ -43,6 +62,10 @@ export class EventService {
     return await this.eventTrackerRepository.find(
       {
         event: eventId,
+        isPlayerRanked: true,
+        user: {
+          isRanked: true,
+        },
       },
       { offset, limit: count, orderBy: { eventScore: 'desc' } },
     );
@@ -58,12 +81,13 @@ export class EventService {
       time?: 'ASC' | 'DESC';
       challengeCount?: 'ASC' | 'DESC';
     } = {},
+    restriction?: RestrictionGroup,
   ) {
     const events = await this.eventsRepository.find(
       {
-        indexable: true,
-        rewardType: rewardTypes && { $in: rewardTypes },
-        ...(skippable && { skippingEnabled: true }),
+        indexable: !restriction,
+        //rewardType: rewardTypes && { $in: rewardTypes },
+        allowedIn: restriction,
       },
       {
         offset,
@@ -231,7 +255,7 @@ export class EventService {
       isDefault: true,
       rewardType: EventRewardType.PERPETUAL,
       indexable: false,
-      time: new Date(),
+      time: new Date('2060'),
       rewards: [],
       challenges: [],
     });

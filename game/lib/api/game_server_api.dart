@@ -40,7 +40,7 @@ class GameServerApi {
       _invokeWithRefresh("requestRewardData", {'rewardIds': rewardIds});
 
   void requestGlobalLeaderData(int offset, int count) => _invokeWithRefresh(
-      "requestRewardData", {'offset': offset, 'count': count});
+      "requestGlobalLeaderData", {'offset': offset, 'count': count});
 
   void closeAccount() => _invokeWithRefresh("closeAccount", {});
   void setUsername(String newUsername) =>

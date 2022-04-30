@@ -7,21 +7,34 @@ import { Challenge } from 'src/model/challenge.entity';
 import { EventBase } from 'src/model/event-base.entity';
 import { EventReward } from 'src/model/event-reward.entity';
 import { RewardDto } from './update-rewards.dto';
-import { User } from 'src/model/user.entity';
+import { AuthType, User } from 'src/model/user.entity';
 import { EventDto } from './update-events.dto';
 import { v4 } from 'uuid';
-import e from 'express';
+import { RestrictionGroup } from 'src/model/restriction-group.entity';
+import { EventTracker } from 'src/model/event-tracker.entity';
+import { RestrictionDto } from './request-restrictions.dto';
+import { UserService } from 'src/user/user.service';
+import { Reference } from '@mikro-orm/core';
+import { Group } from 'src/model/group.entity';
+
+const friendlyWords = require('friendly-words');
 
 @Injectable()
 export class AdminService {
   constructor(
+    private userService: UserService,
     @InjectRepository(User) private userRepository: EntityRepository<User>,
+    @InjectRepository(Group) private groupRepository: EntityRepository<Group>,
     @InjectRepository(EventReward)
     private rewardRepository: EntityRepository<EventReward>,
     @InjectRepository(EventBase)
     private eventRepository: EntityRepository<EventBase>,
     @InjectRepository(Challenge)
     private challengeRepository: EntityRepository<Challenge>,
+    @InjectRepository(RestrictionGroup)
+    private restrictionGroupRepository: EntityRepository<RestrictionGroup>,
+    @InjectRepository(EventTracker)
+    private eventTrackerRepository: EntityRepository<EventTracker>,
   ) {}
 
   async requestAdminAccess(adminId: string) {
@@ -49,11 +62,15 @@ export class AdminService {
   }
 
   async getAllEventData() {
-    return await this.eventRepository.find({});
+    return await this.eventRepository.findAll();
   }
 
   async getAllChallengeData() {
-    return await this.challengeRepository.find({});
+    return await this.challengeRepository.findAll();
+  }
+
+  async getAllRestrictionGroupData() {
+    return await this.restrictionGroupRepository.findAll();
   }
 
   async getEventById(eventId: string) {
@@ -66,6 +83,7 @@ export class AdminService {
 
   async removeEvent(eventId: string) {
     const event = await this.getEventById(eventId);
+
     await this.eventRepository.removeAndFlush(event);
     return event;
   }
@@ -74,8 +92,23 @@ export class AdminService {
     const challenge = await this.challengeRepository.findOneOrFail({
       id: challengeId,
     });
+
     const event = await challenge.linkedEvent.load();
+    const firstChallengeOfEvent = (await event.challenges.loadItems())[0];
+
+    const usedTrackers = await this.eventTrackerRepository.find({
+      currentChallenge: challenge,
+    });
+
+    if (usedTrackers.length > 0 && !firstChallengeOfEvent) return event;
+
+    for (const tracker of usedTrackers) {
+      tracker.currentChallenge.set(firstChallengeOfEvent);
+    }
+
+    await this.eventTrackerRepository.persistAndFlush(usedTrackers);
     await this.challengeRepository.removeAndFlush(challenge);
+
     return event;
   }
 
@@ -97,6 +130,19 @@ export class AdminService {
         return ev;
       }),
     );
+  }
+
+  async deleteRestrictionGroups(ids: string[]) {
+    const restrictionGroups = await this.restrictionGroupRepository.find({
+      id: ids,
+    });
+
+    for (const rGroup of restrictionGroups) {
+      const genUsers = await rGroup.generatedUsers.loadItems();
+      await Promise.all(genUsers.map(u => this.userService.deleteUser(u)));
+    }
+
+    await this.restrictionGroupRepository.removeAndFlush(restrictionGroups);
   }
 
   /** Creates a EventReward given RewardDto reward */
@@ -209,6 +255,132 @@ export class AdminService {
 
     this.challengeRepository.persistAndFlush(challengeEntity);
     return challengeEntity;
+  }
+
+  /** Creates a new restricted user */
+  async newRestrictedUser(
+    id: string,
+    word: string,
+    group: RestrictionGroup,
+  ): Promise<User> {
+    const user = await this.userService.register(
+      id + '@cornell.edu',
+      word,
+      10.019,
+      10.019,
+      AuthType.DEVICE,
+      id,
+    );
+
+    user.restrictedBy = Reference.create(group);
+    user.generatedBy = Reference.create(group);
+
+    await this.userService.saveUser(user);
+    return user;
+  }
+
+  /** Adjusts member count in a group up based on expectedCount */
+  async generateMembers(group: RestrictionGroup, expectedCount: number) {
+    const genCount = await group.generatedUsers.loadCount();
+
+    if (genCount < expectedCount) {
+      const seed = group.id[0].charCodeAt(0);
+      for (let i = genCount; i < expectedCount; ++i) {
+        const index = (10 * i + seed) % friendlyWords.objects.length;
+        const word = friendlyWords.objects[index];
+        const id = group.name + '_' + word + index;
+        const user = await this.newRestrictedUser(id, word, group);
+
+        group.generatedUsers.add(user);
+        group.restrictedUsers.add(user);
+      }
+    }
+
+    await this.restrictionGroupRepository.persistAndFlush(group);
+  }
+
+  /** Ensures all restricted users are on an allowed event */
+  async ensureEventRestriction(group: RestrictionGroup) {
+    const allowedEventCount = await group.allowedEvents.loadCount();
+
+    if (allowedEventCount === 0) {
+      return; // No event restrictions
+    }
+
+    const allowedEvents = await group.allowedEvents.loadItems();
+    const allowedEvent = allowedEvents[0];
+
+    const violatingGroups = await this.groupRepository.find({
+      host: {
+        restrictedBy: group,
+      },
+      currentEvent: { $nin: allowedEvents },
+    });
+
+    for (const userGroup of violatingGroups) {
+      userGroup.currentEvent.set(allowedEvent);
+      await this.groupRepository.persistAndFlush(userGroup);
+    }
+  }
+
+  /** Update/insert a restriction group */
+  async updateRestrictionGroupWithDto(restriction: RestrictionDto) {
+    const curRestriction = await this.restrictionGroupRepository.findOne({
+      id: restriction.id,
+    });
+
+    const assignData = {
+      displayName: restriction.displayName,
+      name: restriction.displayName.toLowerCase().replaceAll(/[^a-z0-9]/g, '_'),
+      canEditUsername: restriction.canEditUsername,
+    };
+
+    const restrictedUsers = await this.userRepository.find({
+      id: restriction.restrictedUsers,
+    });
+
+    const allowedEvents = await this.eventRepository.find({
+      id: restriction.allowedEvents,
+    });
+
+    const restrictionGroupEntity =
+      curRestriction ??
+      this.restrictionGroupRepository.create({
+        id: v4(),
+        ...assignData,
+      });
+
+    if (curRestriction) {
+      Object.assign(curRestriction, assignData);
+    }
+
+    restrictionGroupEntity.restrictedUsers.set(restrictedUsers);
+    restrictionGroupEntity.allowedEvents.set(allowedEvents);
+
+    await this.restrictionGroupRepository.persistAndFlush(
+      restrictionGroupEntity,
+    );
+
+    const genCount = await restrictionGroupEntity.generatedUsers.loadCount();
+
+    if (restriction.generatedUserCount > genCount) {
+      await this.generateMembers(
+        restrictionGroupEntity,
+        restriction.generatedUserCount,
+      );
+    }
+
+    await this.ensureEventRestriction(restrictionGroupEntity);
+
+    return restrictionGroupEntity;
+  }
+
+  async updateRestrictionGroups(
+    restrictions: RestrictionDto[],
+  ): Promise<RestrictionGroup[]> {
+    return await Promise.all(
+      restrictions.map(r => this.updateRestrictionGroupWithDto(r)),
+    );
   }
 
   /** Updates the repository with all rewards listed in rewards.

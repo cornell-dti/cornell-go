@@ -45,7 +45,7 @@ dependencies:
   profanity_filter: ^2.0.0
   intl:
   align_positioned: ^3.0.0
-  flutter_linkify:
+  flutter_linkify: ^5.0.2
 
 flutter_icons:
   android: true

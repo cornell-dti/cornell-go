@@ -8,21 +8,22 @@ import 'package:game/widget/leaderboard_cell.dart';
 import 'package:game/widget/leaderboard_user_cell.dart';
 import 'package:provider/provider.dart';
 
-class LeaderboardWidget extends StatefulWidget {
-  LeaderboardWidget({Key? key}) : super(key: key);
+class EventsLeaderboardWidget extends StatefulWidget {
+  EventsLeaderboardWidget({Key? key}) : super(key: key);
 
   @override
-  _LeaderboardWidgetState createState() => _LeaderboardWidgetState();
+  _EventsLeaderboardWidgetState createState() =>
+      _EventsLeaderboardWidgetState();
 }
 
-class _LeaderboardWidgetState extends State<LeaderboardWidget> {
+class _EventsLeaderboardWidgetState extends State<EventsLeaderboardWidget> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: scaffoldKey,
-      floatingActionButton: backBtn(scaffoldKey, context, "Leaderboard"),
+      floatingActionButton: backBtn(scaffoldKey, context, "Events Leaderboard"),
       backgroundColor: Colors.black,
       body: Padding(
         padding: const EdgeInsets.only(top: 150),
@@ -36,7 +37,6 @@ class _LeaderboardWidgetState extends State<LeaderboardWidget> {
                 if (myGroupModel.curEventId == null) return ListView();
                 final List<UpdateLeaderDataUserDto> list = myEventModel
                     .getTopPlayersForEvent(myGroupModel.curEventId!, 1000);
-
                 return Column(children: [
                   for (int i = 0; i < list.length; i++)
                     if (myUserModel.userData?.id != null &&

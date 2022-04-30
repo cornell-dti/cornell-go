@@ -106,7 +106,7 @@ class _LoginWidgetState extends State<LoginWidget> {
                       },
                     )),
                 TextButton(
-                    child: Text("Use Test ID"),
+                    child: Text("Use ID"),
                     onPressed: () {
                       _displayTextInputDialog(context);
                     })

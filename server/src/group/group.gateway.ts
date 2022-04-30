@@ -43,14 +43,15 @@ export class GroupGateway {
         (
           await groupData.members.loadItems()
         ).map(async (member: User) => {
+          const tracker = await this.eventService.getCurrentEventTrackerForUser(
+            member,
+          );
           return {
             id: member.id,
             name: member.username,
-            points: member.score,
-            host: member.id === groupData.host?.id,
-            curChallengeId: (
-              await this.eventService.getCurrentEventTrackerForUser(member)
-            ).currentChallenge.id,
+            points: tracker.eventScore,
+            host: member.id === groupData.host.id,
+            curChallengeId: tracker.currentChallenge.id,
           };
         }),
       ),

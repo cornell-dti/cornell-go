@@ -6,6 +6,7 @@ import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityRepository } from '@mikro-orm/postgresql';
 import { v4 } from 'uuid';
 import { Reference } from '@mikro-orm/core';
+import { RestrictionGroup } from 'src/model/restriction-group.entity';
 
 @Injectable()
 export class UserService {
@@ -47,6 +48,7 @@ export class UserService {
       adminGranted:
         email === process.env.SUPERUSER || process.env.DEVELOPMENT === 'true',
       adminRequested: false,
+      isRanked: true,
     });
 
     await this.groupsService.createFromEvent(
@@ -70,11 +72,14 @@ export class UserService {
 
   /** Get the top N users by score */
   async getTopPlayers(firstIndex: number, count: number) {
-    return await this.usersRepository.findAll({
-      orderBy: { score: 'DESC' },
-      offset: firstIndex,
-      limit: count,
-    });
+    return await this.usersRepository.find(
+      { isRanked: true },
+      {
+        orderBy: { score: 'DESC' },
+        offset: firstIndex,
+        limit: count,
+      },
+    );
   }
 
   async byId(id: string) {
@@ -83,5 +88,10 @@ export class UserService {
 
   async saveUser(user: User) {
     await this.usersRepository.persistAndFlush(user);
+  }
+
+  async deleteUser(user: User) {
+    await this.groupsService.orphanUser(user);
+    await this.usersRepository.removeAndFlush(user);
   }
 }
