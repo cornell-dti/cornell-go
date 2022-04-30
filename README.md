@@ -16,17 +16,10 @@ cd ../game
 flutter pub get
 ```
 
-### Update container with new changes
-
-```
-docker compose build
-```
-
 ### Run project in container
 
 ```
-docker compose build
-docker compose up
+docker compose up --build
 ```
 
 ### Start the container in the background (for flutter/react frontend)
