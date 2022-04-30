@@ -28,8 +28,9 @@ export function Home() {
       UP/DOWN: change the order of challenges in the selected event <br />
       <br />
       To edit rewards of events, select an event from the Events page, and
-      switch to the Rewards page to continue editing Id: unique identifier for
-      this reward <br />
+      switch to the Rewards page to continue editing
+      <br />
+      Id: unique identifier for this reward <br />
       Redeem info: the information to redeem this reward (can be empty or
       contain clickable links) <br />
       Claiming User Id: the unique identifier of a the user who has earned this
