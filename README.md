@@ -22,26 +22,11 @@ flutter pub get
 docker compose up --build
 ```
 
-### Start the container in the background (for flutter/react frontend)
-
-```
-docker compose restart
-```
-
-### Stop the container
-
-```
-Press Control + C
-*OR* (if done in the background)
-docker compose stop
-```
-
 ### Delete container artifacts
 
 ```
 docker compose down
-rm -rf ./postgres-data
-mkdir postgres-data
+rm -rf ./postgres-data/pgdata
 ```
 
 ### Start the frontend
