@@ -30,14 +30,14 @@ class _RewardWidgetState extends State<RewardWidget> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  const Text('Congrats!',
+                  const Text('Well Done!',
                       style: TextStyle(
-                        fontSize: 80,
+                        fontSize: 72,
                         color: Colors.white,
                       )),
                   const Icon(
                     Icons.star,
-                    color: Colors.white,
+                    color: Colors.yellow,
                     size: 120.0,
                     semanticLabel: 'Text to announce in accessibility modes',
                   ),
@@ -47,10 +47,12 @@ class _RewardWidgetState extends State<RewardWidget> {
                   ),
                   Text(
                     widget.homePageState.name + "!",
+                    textAlign: TextAlign.center,
                     style: TextStyle(
-                        fontSize: 40,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white),
+                      fontSize: 40,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
                   Padding(
                       padding: EdgeInsets.only(top: 48),
@@ -62,8 +64,8 @@ class _RewardWidgetState extends State<RewardWidget> {
                             padding: EdgeInsets.only(
                                 left: 25, right: 25, top: 4, bottom: 4),
                             child: const Text(
-                              'Keep Searching',
-                              style: TextStyle(fontSize: 24),
+                              'Continue',
+                              style: TextStyle(fontSize: 28),
                             )),
                         style: TextButton.styleFrom(
                           backgroundColor: Colors.red,
