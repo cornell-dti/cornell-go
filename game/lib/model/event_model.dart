@@ -69,8 +69,11 @@ class EventModel extends ChangeNotifier {
       _topPlayers[eventId] = [];
     }
     if (_topPlayers[eventId]?.length == 0) {
-      _client.serverApi
-          ?.requestEventLeaderData((topPlayers?.length ?? 0), diff, eventId);
+      eventId.isEmpty
+          ? _client.serverApi
+              ?.requestGlobalLeaderData((topPlayers?.length ?? 0), 1000)
+          : _client.serverApi?.requestEventLeaderData(
+              (topPlayers?.length ?? 0), diff, eventId);
     }
     return topPlayers ?? [];
   }
