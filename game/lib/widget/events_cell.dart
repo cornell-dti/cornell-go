@@ -36,20 +36,12 @@ Widget eventsCell(
       color: Colors.white,
       fontStyle: FontStyle.italic);
   var descriptionStyle = TextStyle(
-      fontWeight: FontWeight.normal, fontSize: 10, color: Colors.white);
+      fontWeight: FontWeight.normal, fontSize: 15, color: Colors.white);
   var rewardStyle = TextStyle(
       fontWeight: FontWeight.normal, fontSize: 15, color: Colors.white);
   return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: Row(children: [
-        RotatedBox(
-          quarterTurns: 3,
-          child: Container(
-              child: Text(
-            date,
-            style: dateStyle,
-          )),
-        ),
+      child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
         Expanded(
           child: Container(
               decoration: BoxDecoration(
@@ -90,6 +82,7 @@ Widget eventsCell(
                   ]),
                   Expanded(
                       child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Container(
                         padding: const EdgeInsets.all(8.0),
@@ -101,6 +94,10 @@ Widget eventsCell(
                           textAlign: TextAlign.left,
                         ),
                       ),
+                      Container(
+                          padding: const EdgeInsets.all(8.0),
+                          alignment: Alignment.topLeft,
+                          child: Text(date, style: dateStyle)),
                     ],
                   )),
                   Row(children: [

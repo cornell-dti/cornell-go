@@ -137,7 +137,7 @@ class _EventsWidgetState extends State<EventsWidget> {
                             : eventsCell(
                                 context,
                                 event.name,
-                                event.time == null || !complete
+                                event.time == null || complete
                                     ? ""
                                     : format.format(event.time!),
                                 event.description,
@@ -152,10 +152,13 @@ class _EventsWidgetState extends State<EventsWidget> {
                       ),
                     ));
                   }
-                  return ListView(
-                      shrinkWrap: true,
-                      scrollDirection: Axis.vertical,
-                      children: eventCells);
+                  return Align(
+                    alignment: Alignment.topCenter,
+                    child: ListView(
+                        shrinkWrap: true,
+                        scrollDirection: Axis.vertical,
+                        children: eventCells),
+                  );
                 }))
               ],
             ),

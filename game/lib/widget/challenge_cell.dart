@@ -15,14 +15,6 @@ Widget challengeCell(
   return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Row(children: [
-        RotatedBox(
-          quarterTurns: 3,
-          child: Container(
-              child: Text(
-            notVisited ? "" : date,
-            style: dateStyle,
-          )),
-        ),
         Expanded(
           child: Container(
               decoration: BoxDecoration(
@@ -39,24 +31,30 @@ Widget challengeCell(
                           fit: BoxFit.cover,
                           opacity: .5)),
               height: 80,
-              child: Column(children: [
-                Container(
-                    child: notVisited
-                        ? Text("Not Visited Yet...", style: placeStyle)
-                        : Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Center(child: Text(place, style: placeStyle)),
-                              Padding(
-                                padding: EdgeInsets.only(left: 6),
-                                child: notVisited
-                                    ? null
-                                    : Icon(Icons.star,
-                                        color: Colors.yellow, size: 25),
-                              )
-                            ],
-                          )),
-              ])),
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                        child: notVisited
+                            ? Text("Not Visited Yet...", style: placeStyle)
+                            : Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Center(child: Text(place, style: placeStyle)),
+                                  Padding(
+                                    padding: EdgeInsets.only(left: 6),
+                                    child: notVisited
+                                        ? null
+                                        : Icon(Icons.star,
+                                            color: Colors.yellow, size: 25),
+                                  )
+                                ],
+                              )),
+                    Container(
+                        padding: const EdgeInsets.all(8.0),
+                        alignment: Alignment.center,
+                        child: Text(date, style: dateStyle))
+                  ])),
         )
       ]));
 }

@@ -128,13 +128,17 @@ class _HomePageWidgetState extends State<HomePageWidget> {
   Widget _panel() {
     return Consumer4<GameModel, GroupModel, UserModel, TrackerModel>(builder:
         (context, gameModel, groupModel, userModel, trackerModel, child) {
+      int displayCount = 0;
       final progressToUse = gameModel.withinCloseRadius
           ? gameModel.completionProgress
           : gameModel.closeProgress;
       final isDoneWithoutConnection =
           _doneState != null && !gameModel.hasConnection;
       if (gameModel.directionDistance < -2) {
-        displayToast("You're going the wrong way!", Status.error);
+        if (displayCount <= 2) {
+          displayToast("You're going the wrong way!", Status.error);
+        }
+        displayCount++;
       }
       return VStack([
         Row(
