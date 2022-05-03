@@ -411,6 +411,9 @@ export class AdminService {
 
   async checkEventTrackers() {
     const users = await this.userRepository.findAll();
+    var invalidateRewardData = false;
+    var invalidateEventData = false;
+    var invalidateLeaderboardData = false;
     for (const usr of users) {
       const all_trackers = usr.participatingEvents;
       var score = usr.score;
@@ -425,72 +428,50 @@ export class AdminService {
             dup_found = true;
             // keep event tracker that has higher score
             if (t.eventScore > existing_t.eventScore) {
+              // update user's score
               score -= existing_t.eventScore;
               usr.participatingEvents.remove(existing_t);
               trackers.push(t);
-              // also removes any rewards related to duplicate event tracker
+              // removes any rewards related to duplicate event tracker
               const rewards_to_remove = (await existing_t.event.load()).rewards;
               for (const rwd of rewards_to_remove) {
                 if (usr.rewards.contains(rwd)) {
                   usr.rewards.remove(rwd);
-                  this.clientService.emitInvalidateData({
-                    userEventData: false,
-                    userRewardData: true,
-                    winnerRewardData: false,
-                    groupData: false,
-                    challengeData: false,
-                    leaderboardData: false,
-                  });
+                  invalidateRewardData = true;
                 }
               }
-            }
-            else {
+            } else {
+              // update user's score
               score -= t.eventScore;
               usr.participatingEvents.remove(t);
-
-              // also removes any rewards related to duplicate event tracker
+              // removes any rewards related to duplicate event tracker
               const rewards_to_remove = (await t.event.load()).rewards;
               for (const rwd of rewards_to_remove) {
                 if (usr.rewards.contains(rwd)) {
                   usr.rewards.remove(rwd);
-                  this.clientService.emitInvalidateData({
-                    userEventData: false,
-                    userRewardData: true,
-                    winnerRewardData: false,
-                    groupData: false,
-                    challengeData: false,
-                    leaderboardData: false,
-                  });
+                  invalidateRewardData = true;
                 }
               }
             }
-            this.clientService.emitInvalidateData({
-              userEventData: true,
-              userRewardData: false,
-              winnerRewardData: false,
-              groupData: false,
-              challengeData: false,
-              leaderboardData: false,
-            });
+            invalidateEventData = true;
           }
         }
-        if (!dup_found)
-          trackers.push(t);
+        if (!dup_found) trackers.push(t);
       }
       // updates score if some events have been deleted
       if (usr.score != score) {
         usr.score = score;
         // changing user's score may change leaderboard positions
-        this.clientService.emitInvalidateData({
-          userEventData: false,
-          userRewardData: false,
-          winnerRewardData: false,
-          groupData: false,
-          challengeData: false,
-          leaderboardData: true,
-        });
+        invalidateLeaderboardData = true;
       }
     }
+    this.clientService.emitInvalidateData({
+      userEventData: invalidateEventData,
+      userRewardData: invalidateRewardData,
+      winnerRewardData: false,
+      groupData: false,
+      challengeData: false,
+      leaderboardData: invalidateLeaderboardData,
+    });
   }
-
 }

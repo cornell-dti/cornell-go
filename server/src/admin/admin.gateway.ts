@@ -41,7 +41,7 @@ export class AdminGateway {
     private adminService: AdminService,
     private adminCallbackService: AdminCallbackService,
     private clientService: ClientService,
-  ) { }
+  ) {}
 
   @SubscribeMessage('requestEvents')
   async requestEvents(
@@ -355,6 +355,6 @@ export class AdminGateway {
 
   @Interval('check-errors', 900000) // 15 minutes in milliseconds
   async checkErrors() {
-    this.adminService.checkEventTrackers()
+    this.adminService.checkEventTrackers();
   }
 }

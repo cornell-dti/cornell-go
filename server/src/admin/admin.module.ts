@@ -34,4 +34,4 @@ import { ScheduleModule } from '@nestjs/schedule';
   providers: [AdminGateway, AdminService, AdminCallbackService],
   controllers: [],
 })
-export class AdminModule { }
+export class AdminModule {}
