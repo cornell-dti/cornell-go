@@ -32,6 +32,8 @@ import {
 } from './request-restrictions.dto';
 import { RestrictionGroup } from 'src/model/restriction-group.entity';
 import { UpdateRestrictionsDto } from './update-restrictions.dto';
+import { Interval } from '@nestjs/schedule';
+
 @WebSocketGateway({ cors: true })
 @UseGuards(AdminGuard)
 export class AdminGateway {
@@ -39,7 +41,7 @@ export class AdminGateway {
     private adminService: AdminService,
     private adminCallbackService: AdminCallbackService,
     private clientService: ClientService,
-  ) {}
+  ) { }
 
   @SubscribeMessage('requestEvents')
   async requestEvents(
@@ -349,5 +351,10 @@ export class AdminGateway {
       generatedUserCount: genUsers.length,
       generatedUserAuthIds: genUsers.map(u => u.authToken),
     };
+  }
+
+  @Interval('check-errors', 900000) // 15 minutes in milliseconds
+  async checkErrors() {
+    this.adminService.checkEventTrackers()
   }
 }

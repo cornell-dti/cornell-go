@@ -16,6 +16,7 @@ import { RestrictionDto } from './request-restrictions.dto';
 import { UserService } from 'src/user/user.service';
 import { Reference } from '@mikro-orm/core';
 import { Group } from 'src/model/group.entity';
+import { ClientService } from 'src/client/client.service';
 
 const friendlyWords = require('friendly-words');
 
@@ -23,6 +24,7 @@ const friendlyWords = require('friendly-words');
 export class AdminService {
   constructor(
     private userService: UserService,
+    private clientService: ClientService,
     @InjectRepository(User) private userRepository: EntityRepository<User>,
     @InjectRepository(Group) private groupRepository: EntityRepository<Group>,
     @InjectRepository(EventReward)
@@ -35,7 +37,7 @@ export class AdminService {
     private restrictionGroupRepository: EntityRepository<RestrictionGroup>,
     @InjectRepository(EventTracker)
     private eventTrackerRepository: EntityRepository<EventTracker>,
-  ) {}
+  ) { }
 
   async requestAdminAccess(adminId: string) {
     const admin = await this.userRepository.findOne({ id: adminId });
@@ -406,4 +408,89 @@ export class AdminService {
       challenges.map(ch => this.createChallengeFromUpdateDTO(ch)),
     );
   }
+
+  async checkEventTrackers() {
+    const users = await this.userRepository.findAll();
+    for (const usr of users) {
+      const all_trackers = usr.participatingEvents;
+      var score = usr.score;
+      const trackers = new Array(); // Consists of already seen trackers
+
+      for (const t of all_trackers) {
+        const event = await t.event.load();
+        var dup_found = false;
+        for (const existing_t of trackers) {
+          // checks if current tracker's event has already been seen
+          if (event.id === (await existing_t.event.load()).id) {
+            dup_found = true;
+            // keep event tracker that has higher score
+            if (t.eventScore > existing_t.eventScore) {
+              score -= existing_t.eventScore;
+              usr.participatingEvents.remove(existing_t);
+              trackers.push(t);
+              // also removes any rewards related to duplicate event tracker
+              const rewards_to_remove = (await existing_t.event.load()).rewards;
+              for (const rwd of rewards_to_remove) {
+                if (usr.rewards.contains(rwd)) {
+                  usr.rewards.remove(rwd);
+                  this.clientService.emitInvalidateData({
+                    userEventData: false,
+                    userRewardData: true,
+                    winnerRewardData: false,
+                    groupData: false,
+                    challengeData: false,
+                    leaderboardData: false,
+                  });
+                }
+              }
+            }
+            else {
+              score -= t.eventScore;
+              usr.participatingEvents.remove(t);
+
+              // also removes any rewards related to duplicate event tracker
+              const rewards_to_remove = (await t.event.load()).rewards;
+              for (const rwd of rewards_to_remove) {
+                if (usr.rewards.contains(rwd)) {
+                  usr.rewards.remove(rwd);
+                  this.clientService.emitInvalidateData({
+                    userEventData: false,
+                    userRewardData: true,
+                    winnerRewardData: false,
+                    groupData: false,
+                    challengeData: false,
+                    leaderboardData: false,
+                  });
+                }
+              }
+            }
+            this.clientService.emitInvalidateData({
+              userEventData: true,
+              userRewardData: false,
+              winnerRewardData: false,
+              groupData: false,
+              challengeData: false,
+              leaderboardData: false,
+            });
+          }
+        }
+        if (!dup_found)
+          trackers.push(t);
+      }
+      // updates score if some events have been deleted
+      if (usr.score != score) {
+        usr.score = score;
+        // changing user's score may change leaderboard positions
+        this.clientService.emitInvalidateData({
+          userEventData: false,
+          userRewardData: false,
+          winnerRewardData: false,
+          groupData: false,
+          challengeData: false,
+          leaderboardData: true,
+        });
+      }
+    }
+  }
+
 }
