@@ -138,7 +138,7 @@ Widget eventsCell(
                   decoration: BoxDecoration(
                     border: Border.all(color: Colors.greenAccent, width: 2.0),
                   ),
-                  height: 80,
+                  height: 150,
                 ))
           ]),
         )
