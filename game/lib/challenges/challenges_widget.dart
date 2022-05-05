@@ -65,28 +65,33 @@ class _ChallengesWidgetState extends State<ChallengesWidget> {
                         return ListView();
                       } else {
                         for (String challengeId in challenges) {
-                          final UpdateChallengeDataChallengeDto challenge =
-                              myChallengeModel.getChallengeById(challengeId)!;
-                          final UpdateEventDataEventDto event =
-                              myEventModel.getEventById(eventId)!;
-                          final UpdateEventTrackerDataEventTrackerDto tracker =
-                              myTrackerModel.trackerByEventId(eventId)!;
-                          challengeCells.add(GestureDetector(
-                            onTap: () {
-                              apiClient.serverApi
-                                  ?.setCurrentChallenge(challengeId);
-                            },
-                            child: challengeCell(
-                                context,
-                                challenge.name,
-                                challenge.completionDate == null
-                                    ? ""
-                                    : format.format(challenge.completionDate!),
-                                challenge.imageUrl,
-                                tracker.curChallengeId == challengeId,
-                                challenge.completionDate == null,
-                                !event.skippingEnabled),
-                          ));
+                          final UpdateChallengeDataChallengeDto? challenge =
+                              myChallengeModel.getChallengeById(challengeId);
+                          final UpdateEventDataEventDto? event =
+                              myEventModel.getEventById(eventId);
+                          final UpdateEventTrackerDataEventTrackerDto? tracker =
+                              myTrackerModel.trackerByEventId(eventId);
+                          if (challenge != null &&
+                              event != null &&
+                              tracker != null) {
+                            challengeCells.add(GestureDetector(
+                              onTap: () {
+                                apiClient.serverApi
+                                    ?.setCurrentChallenge(challengeId);
+                              },
+                              child: challengeCell(
+                                  context,
+                                  challenge.name,
+                                  challenge.completionDate == null
+                                      ? ""
+                                      : format
+                                          .format(challenge.completionDate!),
+                                  challenge.imageUrl,
+                                  tracker.curChallengeId == challengeId,
+                                  challenge.completionDate == null,
+                                  !event.skippingEnabled),
+                            ));
+                          }
                         }
                       }
                       return ListView(
