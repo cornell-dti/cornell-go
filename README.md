@@ -16,39 +16,17 @@ cd ../game
 flutter pub get
 ```
 
-### Update container with new changes
-
-```
-docker compose build
-```
-
 ### Run project in container
 
 ```
-docker compose build
-docker compose up
-```
-
-### Start the container in the background (for flutter/react frontend)
-
-```
-docker compose restart
-```
-
-### Stop the container
-
-```
-Press Control + C
-*OR* (if done in the background)
-docker compose stop
+docker compose up --build
 ```
 
 ### Delete container artifacts
 
 ```
 docker compose down
-rm -rf ./postgres-data
-mkdir postgres-data
+rm -rf ./postgres-data/pgdata
 ```
 
 ### Start the frontend
