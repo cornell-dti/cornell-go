@@ -276,7 +276,8 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       ),
                     )),
-                Container(
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
                   width: max(
                       isDoneWithoutConnection || progressToUse < 0
                           ? MediaQuery.of(context).size.width * 0.95
