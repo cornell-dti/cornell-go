@@ -416,7 +416,6 @@ export class AdminService {
     var invalidateLeaderboardData = false;
     for (const usr of users) {
       const all_trackers = usr.participatingEvents;
-      var score = usr.score;
       const trackers = new Array(); // Consists of already seen trackers
 
       for (const t of all_trackers) {
@@ -428,8 +427,6 @@ export class AdminService {
             dup_found = true;
             // keep event tracker that has higher score
             if (t.eventScore > existing_t.eventScore) {
-              // update user's score
-              score -= existing_t.eventScore;
               usr.participatingEvents.remove(existing_t);
               trackers.push(t);
               // removes any rewards related to duplicate event tracker
@@ -441,8 +438,6 @@ export class AdminService {
                 }
               }
             } else {
-              // update user's score
-              score -= t.eventScore;
               usr.participatingEvents.remove(t);
               // removes any rewards related to duplicate event tracker
               const rewards_to_remove = (await t.event.load()).rewards;
@@ -459,11 +454,13 @@ export class AdminService {
         if (!dup_found) trackers.push(t);
       }
       // updates score if some events have been deleted
-      if (usr.score != score) {
-        usr.score = score;
-        // changing user's score may change leaderboard positions
-        invalidateLeaderboardData = true;
+      var new_score = 0;
+      for (const t of usr.participatingEvents) {
+        new_score += t.eventScore;
       }
+      usr.score = new_score;
+      // changing user's score may change leaderboard positions
+      invalidateLeaderboardData = true;
     }
     this.clientService.emitInvalidateData({
       userEventData: invalidateEventData,
