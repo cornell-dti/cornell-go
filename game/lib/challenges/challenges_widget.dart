@@ -4,13 +4,13 @@ import 'package:game/model/challenge_model.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/group_model.dart';
 import 'package:game/model/tracker_model.dart';
-import 'package:game/model/user_model.dart';
 import 'package:game/api/game_client_dto.dart';
 
 import 'package:game/widget/back_btn.dart';
-import 'package:game/widget/challenge_cell.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+
+import 'challenge_cell.dart';
 
 class ChallengesWidget extends StatefulWidget {
   ChallengesWidget({Key? key}) : super(key: key);
@@ -79,8 +79,7 @@ class _ChallengesWidgetState extends State<ChallengesWidget> {
                                 apiClient.serverApi
                                     ?.setCurrentChallenge(challengeId);
                               },
-                              child: challengeCell(
-                                  context,
+                              child: ChallengeCell(
                                   challenge.name,
                                   challenge.completionDate == null
                                       ? ""
