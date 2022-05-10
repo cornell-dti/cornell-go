@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:game/api/game_api.dart';
+import 'package:game/events/event_cell.dart';
 import 'package:game/model/challenge_model.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/api/game_client_dto.dart';
@@ -8,7 +9,6 @@ import 'package:game/model/tracker_model.dart';
 import 'package:game/model/user_model.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:game/widget/back_btn.dart';
-import 'package:game/widget/events_cell.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -50,13 +50,9 @@ Future<void> _showConfirmation(
       });
 }
 
-class _EventsWidgetState extends State<EventsWidget> {
+class _EventsWidgetState extends State<EventsWidget>
+    with TickerProviderStateMixin {
   final scaffoldKey = GlobalKey<ScaffoldState>();
-
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -134,8 +130,7 @@ class _EventsWidgetState extends State<EventsWidget> {
                                   return Container();
                                 },
                               )
-                            : eventsCell(
-                                context,
+                            : EventCell(
                                 event.name,
                                 event.time == null || !complete
                                     ? ""
