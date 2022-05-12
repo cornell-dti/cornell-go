@@ -16,6 +16,7 @@ import { RestrictionDto } from './request-restrictions.dto';
 import { UserService } from 'src/user/user.service';
 import { Reference } from '@mikro-orm/core';
 import { Group } from 'src/model/group.entity';
+import { ClientService } from 'src/client/client.service';
 
 const friendlyWords = require('friendly-words');
 
@@ -23,6 +24,7 @@ const friendlyWords = require('friendly-words');
 export class AdminService {
   constructor(
     private userService: UserService,
+    private clientService: ClientService,
     @InjectRepository(User) private userRepository: EntityRepository<User>,
     @InjectRepository(Group) private groupRepository: EntityRepository<Group>,
     @InjectRepository(EventReward)
@@ -402,5 +404,68 @@ export class AdminService {
     return await Promise.all(
       challenges.map(ch => this.createChallengeFromUpdateDTO(ch)),
     );
+  }
+
+  async checkEventTrackers() {
+    const users = await this.userRepository.findAll();
+    var invalidateRewardData = false;
+    var invalidateEventData = false;
+    var invalidateLeaderboardData = false;
+    for (const usr of users) {
+      const all_trackers = usr.participatingEvents;
+      const trackers = new Array(); // Consists of already seen trackers
+
+      for (const t of all_trackers) {
+        const event = await t.event.load();
+        var dup_found = false;
+        for (const existing_t of trackers) {
+          // checks if current tracker's event has already been seen
+          if (event.id === (await existing_t.event.load()).id) {
+            dup_found = true;
+            // keep event tracker that has higher score
+            if (t.eventScore > existing_t.eventScore) {
+              usr.participatingEvents.remove(existing_t);
+              trackers.push(t);
+              // removes any rewards related to duplicate event tracker
+              const rewards_to_remove = (await existing_t.event.load()).rewards;
+              for (const rwd of rewards_to_remove) {
+                if (usr.rewards.contains(rwd)) {
+                  usr.rewards.remove(rwd);
+                  invalidateRewardData = true;
+                }
+              }
+            } else {
+              usr.participatingEvents.remove(t);
+              // removes any rewards related to duplicate event tracker
+              const rewards_to_remove = (await t.event.load()).rewards;
+              for (const rwd of rewards_to_remove) {
+                if (usr.rewards.contains(rwd)) {
+                  usr.rewards.remove(rwd);
+                  invalidateRewardData = true;
+                }
+              }
+            }
+            invalidateEventData = true;
+          }
+        }
+        if (!dup_found) trackers.push(t);
+      }
+      // updates score if some events have been deleted
+      var new_score = 0;
+      for (const t of usr.participatingEvents) {
+        new_score += t.eventScore;
+      }
+      usr.score = new_score;
+      // changing user's score may change leaderboard positions
+      invalidateLeaderboardData = true;
+    }
+    this.clientService.emitInvalidateData({
+      userEventData: invalidateEventData,
+      userRewardData: invalidateRewardData,
+      winnerRewardData: false,
+      groupData: false,
+      challengeData: false,
+      leaderboardData: invalidateLeaderboardData,
+    });
   }
 }
