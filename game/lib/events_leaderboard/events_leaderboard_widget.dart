@@ -23,7 +23,7 @@ class _EventsLeaderboardWidgetState extends State<EventsLeaderboardWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: scaffoldKey,
-      floatingActionButton: backBtn(scaffoldKey, context, "Events Leaderboard"),
+      floatingActionButton: backBtn(scaffoldKey, context, "Event Leaderboard"),
       backgroundColor: Colors.black,
       body: Padding(
         padding: const EdgeInsets.only(top: 150),
