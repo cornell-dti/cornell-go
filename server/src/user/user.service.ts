@@ -38,7 +38,7 @@ export class UserService {
       participatingEvents: [],
       rewards: [],
       logEntries: [],
-      group: null,
+      group: null!, // TODO: Fix this
       username,
       email,
       authToken,
