@@ -32,7 +32,7 @@ export class GroupService {
       currentEvent: event,
       members: [host],
       friendlyId: '',
-      host: null,
+      host: null!, // TODO: Fix this
     });
 
     group.friendlyId = group.id.substring(9, 13);
