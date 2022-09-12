@@ -37,7 +37,7 @@ export class AdminService {
     private restrictionGroupRepository: EntityRepository<RestrictionGroup>,
     @InjectRepository(EventTracker)
     private eventTrackerRepository: EntityRepository<EventTracker>,
-  ) {}
+  ) { }
 
   async requestAdminAccess(adminId: string) {
     const admin = await this.userRepository.findOne({ id: adminId });
@@ -420,11 +420,11 @@ export class AdminService {
 
       for (const t of all_trackers) {
         const event = await t.event.load();
-        var dup_found = false;
+        let dupFound = false;
         for (const existing_t of trackers) {
           // checks if current tracker's event has already been seen
           if (event.id === (await existing_t.event.load()).id) {
-            dup_found = true;
+            dupFound = true;
             // keep event tracker that has higher score
             if (t.eventScore > existing_t.eventScore) {
               usr.participatingEvents.remove(existing_t);
@@ -451,7 +451,7 @@ export class AdminService {
             invalidateEventData = true;
           }
         }
-        if (!dup_found) trackers.push(t);
+        if (!dupFound) trackers.push(t);
       }
       // updates score if some events have been deleted
       var new_score = 0;
