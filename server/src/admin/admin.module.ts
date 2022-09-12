@@ -13,7 +13,6 @@ import { UserModule } from 'src/user/user.module';
 import { Group } from 'src/model/group.entity';
 import { RestrictionGroup } from 'src/model/restriction-group.entity';
 import { EventTracker } from 'src/model/event-tracker.entity';
-import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -29,9 +28,8 @@ import { ScheduleModule } from '@nestjs/schedule';
       Challenge,
       RestrictionGroup,
     ]),
-    ScheduleModule,
   ],
   providers: [AdminGateway, AdminService, AdminCallbackService],
   controllers: [],
 })
-export class AdminModule {}
+export class AdminModule { }
