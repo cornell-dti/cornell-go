@@ -44,6 +44,7 @@
     "@nestjs/platform-socket.io": "^8.4.4",
     "@nestjs/serve-static": "^2.2.2",
     "@nestjs/websockets": "^8.4.4",
+    "@nestjs/schedule": "^2.1.0",
     "@types/geojson": "^7946.0.8",
     "apple-signin-auth": "^1.5.1",
     "censor-sensor": "^1.0.6",
