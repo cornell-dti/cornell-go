@@ -409,6 +409,15 @@
           "primary": false,
           "nullable": true,
           "mappedType": "string"
+        },
+        "is_ranked": {
+          "name": "is_ranked",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "boolean"
         }
       },
       "name": "user",

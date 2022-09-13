@@ -62,6 +62,10 @@ export class EventService {
     return await this.eventTrackerRepository.find(
       {
         event: eventId,
+        isPlayerRanked: true,
+        user: {
+          isRanked: true,
+        },
       },
       { offset, limit: count, orderBy: { eventScore: 'desc' } },
     );
@@ -251,7 +255,7 @@ export class EventService {
       isDefault: true,
       rewardType: EventRewardType.PERPETUAL,
       indexable: false,
-      time: new Date(),
+      time: new Date('2060'),
       rewards: [],
       challenges: [],
     });

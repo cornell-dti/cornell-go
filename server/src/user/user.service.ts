@@ -38,7 +38,7 @@ export class UserService {
       participatingEvents: [],
       rewards: [],
       logEntries: [],
-      group: null,
+      group: null!, // TODO: Fix this
       username,
       email,
       authToken,
@@ -48,6 +48,7 @@ export class UserService {
       adminGranted:
         email === process.env.SUPERUSER || process.env.DEVELOPMENT === 'true',
       adminRequested: false,
+      isRanked: true,
     });
 
     await this.groupsService.createFromEvent(
@@ -71,11 +72,14 @@ export class UserService {
 
   /** Get the top N users by score */
   async getTopPlayers(firstIndex: number, count: number) {
-    return await this.usersRepository.findAll({
-      orderBy: { score: 'DESC' },
-      offset: firstIndex,
-      limit: count,
-    });
+    return await this.usersRepository.find(
+      { isRanked: true },
+      {
+        orderBy: { score: 'DESC' },
+        offset: firstIndex,
+        limit: count,
+      },
+    );
   }
 
   async byId(id: string) {

@@ -281,14 +281,11 @@ export class AdminService {
     return user;
   }
 
-  /** Adjusts member count in a group up or down based on expectedCount */
+  /** Adjusts member count in a group up based on expectedCount */
   async generateMembers(group: RestrictionGroup, expectedCount: number) {
     const genCount = await group.generatedUsers.loadCount();
 
-    if (genCount > expectedCount) {
-      const genUsers = await group.generatedUsers.loadItems();
-      group.generatedUsers.remove(...genUsers.slice(expectedCount));
-    } else {
+    if (genCount < expectedCount) {
       const seed = group.id[0].charCodeAt(0);
       for (let i = genCount; i < expectedCount; ++i) {
         const index = (10 * i + seed) % friendlyWords.objects.length;

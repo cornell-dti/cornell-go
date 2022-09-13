@@ -32,7 +32,7 @@ export class GroupService {
       currentEvent: event,
       members: [host],
       friendlyId: '',
-      host: null,
+      host: null!, // TODO: Fix this
     });
 
     group.friendlyId = group.id.substring(9, 13);
@@ -82,7 +82,7 @@ export class GroupService {
     group: Group,
     didHostLeave: boolean,
   ): Promise<Group | undefined> {
-    if (group.members.length === 1) {
+    if ((await group.members.loadCount()) === 1) {
       await this.groupsRepository.removeAndFlush(group);
       return undefined;
     } else if (didHostLeave) {
