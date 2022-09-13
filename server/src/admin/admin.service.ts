@@ -37,7 +37,7 @@ export class AdminService {
     private restrictionGroupRepository: EntityRepository<RestrictionGroup>,
     @InjectRepository(EventTracker)
     private eventTrackerRepository: EntityRepository<EventTracker>,
-  ) { }
+  ) {}
 
   async requestAdminAccess(adminId: string) {
     const admin = await this.userRepository.findOne({ id: adminId });

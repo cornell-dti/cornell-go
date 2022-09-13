@@ -32,4 +32,4 @@ import { EventTracker } from 'src/model/event-tracker.entity';
   providers: [AdminGateway, AdminService, AdminCallbackService],
   controllers: [],
 })
-export class AdminModule { }
+export class AdminModule {}
