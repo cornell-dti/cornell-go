@@ -35,5 +35,5 @@ postgres-data
 !.vscode/launch.json
 !.vscode/extensions.json
 pubspec.lock
-package-lock.json
+# package-lock.json
 /.vs/CornellGo/v16
