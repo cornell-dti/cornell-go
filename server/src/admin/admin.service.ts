@@ -37,7 +37,7 @@ export class AdminService {
     private restrictionGroupRepository: EntityRepository<RestrictionGroup>,
     @InjectRepository(EventTracker)
     private eventTrackerRepository: EntityRepository<EventTracker>,
-  ) {}
+  ) { }
 
   async requestAdminAccess(adminId: string) {
     const admin = await this.userRepository.findOne({ id: adminId });
@@ -408,54 +408,52 @@ export class AdminService {
 
   async checkEventTrackers() {
     const users = await this.userRepository.findAll();
-    var invalidateRewardData = false;
-    var invalidateEventData = false;
-    var invalidateLeaderboardData = false;
-    for (const usr of users) {
-      const all_trackers = usr.participatingEvents;
-      const trackers = new Array(); // Consists of already seen trackers
+    let invalidateRewardData = false;
+    let invalidateEventData = false;
+    let invalidateLeaderboardData = false;
 
-      for (const t of all_trackers) {
-        const event = await t.event.load();
+    for (const usr of users) {
+      const all_user_trackers = await usr.participatingEvents.loadItems();
+      const seen_trackers = []; // Consists of already seen trackers
+
+      for (const t of all_user_trackers) {
         let dupFound = false;
-        for (const existing_t of trackers) {
+        for (const existing_t of seen_trackers) {
           // checks if current tracker's event has already been seen
-          if (event.id === (await existing_t.event.load()).id) {
+          if (t.event.id === existing_t.event.id) {
             dupFound = true;
+            let rewards_to_remove;
             // keep event tracker that has higher score
             if (t.eventScore > existing_t.eventScore) {
               usr.participatingEvents.remove(existing_t);
-              trackers.push(t);
-              // removes any rewards related to duplicate event tracker
-              const rewards_to_remove = (await existing_t.event.load()).rewards;
-              for (const rwd of rewards_to_remove) {
-                if (usr.rewards.contains(rwd)) {
-                  usr.rewards.remove(rwd);
-                  invalidateRewardData = true;
-                }
-              }
+              rewards_to_remove = (await existing_t.event.load()).rewards;
+              // replace existing_t in seen_trackers with t, since t has
+              // the higher score and should be compared to other duplicate
+              // trackers from now on
+              seen_trackers.splice(seen_trackers.indexOf(existing_t), 1, t);
             } else {
               usr.participatingEvents.remove(t);
-              // removes any rewards related to duplicate event tracker
-              const rewards_to_remove = (await t.event.load()).rewards;
-              for (const rwd of rewards_to_remove) {
-                if (usr.rewards.contains(rwd)) {
-                  usr.rewards.remove(rwd);
-                  invalidateRewardData = true;
-                }
+              rewards_to_remove = (await t.event.load()).rewards;
+            }
+            // removes any rewards related to duplicate event tracker
+            for (const rwd of rewards_to_remove) {
+              if (usr.rewards.contains(rwd)) {
+                usr.rewards.remove(rwd);
               }
             }
             invalidateEventData = true;
           }
         }
-        if (!dupFound) trackers.push(t);
+        if (!dupFound) seen_trackers.push(t);
       }
       // updates score if some events have been deleted
-      var new_score = 0;
+      let new_score = 0;
       for (const t of usr.participatingEvents) {
         new_score += t.eventScore;
       }
       usr.score = new_score;
+      // save data in the userRepository
+      await this.userRepository.persistAndFlush(usr);
       // changing user's score may change leaderboard positions
       invalidateLeaderboardData = true;
     }
