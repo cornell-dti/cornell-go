@@ -1,3 +1,4 @@
+import { EventService } from 'src/event/event.service';
 import { forwardRef, Module } from '@nestjs/common';
 import { Group } from '../model/group.entity';
 import { GroupService } from './group.service';

@@ -267,4 +267,9 @@ export class EventService {
 
     return ev;
   }
+
+  async deleteAllEventTrackers(user: User) {
+    // Delete all event trackers for user
+    await this.eventTrackerRepository.createQueryBuilder().delete().where({ user });
+  }
 }

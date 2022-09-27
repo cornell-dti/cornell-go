@@ -1,3 +1,4 @@
+import { EventService } from 'src/event/event.service';
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { EventBase } from '../model/event-base.entity';
 import { Group } from '../model/group.entity';
@@ -15,6 +16,8 @@ export class GroupService {
   constructor(
     @Inject(forwardRef(() => UserService))
     private userService: UserService,
+    @Inject(forwardRef(() => EventService))
+    private eventService: EventService,
     @InjectRepository(Group)
     private groupsRepository: EntityRepository<Group>,
   ) {}
@@ -32,7 +35,7 @@ export class GroupService {
       currentEvent: event,
       members: [host],
       friendlyId: '',
-      host: null,
+      host: null!,
     });
 
     group.friendlyId = group.id.substring(9, 13);
@@ -75,8 +78,10 @@ export class GroupService {
 
   /** Invalidates a user's group data forever */
   async orphanUser(user: User) {
+    await this.eventService.deleteAllEventTrackers(user);
     await this.leaveGroup(user);
-    await this.groupsRepository.removeAndFlush(user.group);
+    if (user.group)
+      await this.groupsRepository.removeAndFlush(await user.group.load());
   }
 
   /* If the user is the only member, deletes the group. */
@@ -86,7 +91,6 @@ export class GroupService {
   ): Promise<Group | undefined> {
     // If the user is the only member then delete the group and return undefined.
     if ((await group.members.loadCount()) === 1) {
-      group.host = null!;
       await this.groupsRepository.removeAndFlush(group);
       return undefined;
     } else if (didHostLeave) {
@@ -128,6 +132,7 @@ export class GroupService {
   /** Moves the user out of their current group into a new group.
    * Returns the old group if it still exists, or null. */
   async leaveGroup(user: User): Promise<Group | undefined> {
+    if (!user.group) return;
     const userOldGroup = await this.getGroupForUser(user);
     const [oldGroup] = await this.createFromEvent(
       await userOldGroup.currentEvent.load(),
