@@ -36,7 +36,7 @@ export class GroupService {
     });
 
     group.friendlyId = group.id.substring(9, 13);
-    
+
     // If there is an oldGroup then create a new oldGroup that is processed based on whether the user is the host.
     const oldGroupNew = oldGroup
       ? await this.checkGroupSizeForRemoval(
