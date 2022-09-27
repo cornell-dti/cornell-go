@@ -32,11 +32,12 @@ export class GroupService {
       currentEvent: event,
       members: [host],
       friendlyId: '',
-      host,
+      host: null!,
     });
 
     group.friendlyId = group.id.substring(9, 13);
-
+    
+    // If there is an oldGroup then create a new oldGroup that is processed based on whether the user is the host.
     const oldGroupNew = oldGroup
       ? await this.checkGroupSizeForRemoval(
           oldGroup,
@@ -83,11 +84,13 @@ export class GroupService {
     group: Group,
     didHostLeave: boolean,
   ): Promise<Group | undefined> {
+    // If the user is the only member then delete the group and return undefined.
     if ((await group.members.loadCount()) === 1) {
       group.host = null!;
       await this.groupsRepository.removeAndFlush(group);
       return undefined;
     } else if (didHostLeave) {
+      // If the user is the host and they left the group then a new host is chosen from the remaining users in the group.
       group.host = Reference.create(
         (await group.members.loadItems()).filter(
           u => group.host.id !== u.id,
