@@ -7,6 +7,7 @@ import 'package:game/api/game_api.dart';
 import 'package:game/home_page/home_page_widget.dart';
 import 'package:profanity_filter/profanity_filter.dart';
 import 'package:http/http.dart' as http;
+import 'package:game/widget/back_btn.dart';
 
 class UserNameWidget extends StatefulWidget {
   UserNameWidget({Key? key}) : super(key: key);
@@ -55,49 +56,59 @@ class _UserNameWidget extends State<UserNameWidget> {
     return Scaffold(
         key: scaffoldKey,
         backgroundColor: bgColor,
-        floatingActionButton: Consumer<ApiClient>(
-          builder: (context, apiClient, child) {
-            // checkLoggedIn(apiClient);
-            return FloatingActionButton(
-                elevation: 8.0,
-                child: Icon(Icons.check),
-                backgroundColor: Carnelian,
-                onPressed: () {
-                  final validCharacters = RegExp(r'^[a-zA-Z0-9_]+$');
-                  var userName = userNameController!.text;
-                  test(String value) => userName.contains(value);
-                  if (userName == "") {
-                    showAlert("You can't have an empty username!", context);
-                  } else if (!validCharacters.hasMatch(userName)) {
-                    showAlert(
-                        "Your username can only have letters, numbers, and underscores",
-                        context);
-                  } else if (userName.length > 64) {
-                    showAlert(
-                        "Username can't be more than 64 characters", context);
-                  } else if (filter.hasProfanity(userName) ||
-                      profanityWords.any((element) => test(element))) {
-                    showAlert("Let's keep this app clean please.", context);
-                  } else {
-                    setState(() {
-                      bgColor = constructColorFromUserName(userName);
-                    });
-                    apiClient.serverApi?.setUsername(userName);
-                    displayToast("Username changed!", Status.success);
-                    _toHomePage(context);
-                  }
-                });
-          },
-        ),
+        floatingActionButton: backBtn(scaffoldKey, context, "Change username"),
         body: Center(
-          child: Container(child: Consumer<UserModel>(
-            builder: (context, userModel, child) {
-              userNameController = new TextEditingController(
-                  text: userModel.userData?.username ?? "");
-              return _userNameInputWidget(userNameController!);
-            },
-          )),
-        ));
+            child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(child: Consumer<UserModel>(
+              builder: (context, userModel, child) {
+                userNameController = new TextEditingController(
+                    text: userModel.userData?.username ?? "");
+                return _userNameInputWidget(userNameController!);
+              },
+            )),
+            Consumer<ApiClient>(
+              builder: (context, apiClient, child) {
+                // checkLoggedIn(apiClient);
+                return ElevatedButton(
+                    child: Icon(
+                      Icons.check,
+                      size: 40,
+                    ),
+                    style: ButtonStyle(
+                        foregroundColor:
+                            MaterialStateProperty.all<Color>(Carnelian),
+                        backgroundColor: MaterialStateProperty.all<Color>(
+                            Colors.transparent)),
+                    onPressed: () {
+                      final validCharacters = RegExp(r'^[a-zA-Z0-9_]+$');
+                      var userName = userNameController!.text;
+                      if (userName == "") {
+                        showAlert("You can't have an empty username!", context);
+                      } else if (!validCharacters.hasMatch(userName)) {
+                        showAlert(
+                            "Your username can only have letters, numbers, and underscores",
+                            context);
+                      } else if (userName.length > 64) {
+                        showAlert("Username can't be more than 64 characters",
+                            context);
+                      } else if (filter.hasProfanity(userName)) {
+                        showAlert("Let's keep this app clean please.", context);
+                      } else {
+                        setState(() {
+                          bgColor = constructColorFromUserName(userName);
+                        });
+                        apiClient.serverApi?.setUsername(userName);
+                        displayToast("Username changed!", Status.success);
+                        _toHomePage(context);
+                      }
+                    });
+              },
+            ),
+          ],
+        )));
   }
 
   Widget _userNameInputWidget(TextEditingController controller) {
