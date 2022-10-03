@@ -8,7 +8,7 @@ import { EventBase, EventRewardType } from '../model/event-base.entity';
 import { UserService } from '../user/user.service';
 import { ChallengeService } from 'src/challenge/challenge.service';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { EntityRepository } from '@mikro-orm/postgresql';
+import { EntityManager, EntityRepository } from '@mikro-orm/postgresql';
 import { ClientService } from '../client/client.service';
 import { RestrictionGroup } from 'src/model/restriction-group.entity';
 
@@ -17,6 +17,7 @@ export class EventService {
   constructor(
     private userService: UserService,
     private clientService: ClientService,
+    private readonly em: EntityManager,
     @InjectRepository(EventBase)
     private eventsRepository: EntityRepository<EventBase>,
     @InjectRepository(EventTracker)
@@ -274,5 +275,6 @@ export class EventService {
       .createQueryBuilder()
       .delete()
       .where({ user });
+    this.em.clear();
   }
 }
