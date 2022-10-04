@@ -5,10 +5,11 @@ import {
   useEffect,
   useState,
 } from "react";
-import GoogleLogin, {
-  GoogleLoginResponse,
-  GoogleLoginResponseOffline,
-} from "react-google-login";
+
+import { GoogleLogin , TokenResponse } from "@react-oauth/google";
+import {GoogleOAuthProvider} from '@react-oauth/google';
+import { useGoogleLogin } from '@react-oauth/google';
+
 import { io, Socket } from "socket.io-client";
 import styled from "styled-components";
 import isDev from "../development";
@@ -100,14 +101,18 @@ export function AuthenticationGuard(props: { children: ReactNode }) {
     "After logging in for the first time, make sure you have requested access from an admin."
   );
 
+
   const connect = async (
-    response: GoogleLoginResponse | GoogleLoginResponseOffline
+    response:any
   ) => {
-    if ("tokenId" in response) {
+    //New package returns key 'clientId'
+    if ("clientId" in response) {
       const state = await connection.connect(
-        response.getAuthResponse().id_token
+        response.credential
       );
+    }else{
       setLoginMessage("Connection error");
+      console.log(response)
     }
   };
 
@@ -116,6 +121,7 @@ export function AuthenticationGuard(props: { children: ReactNode }) {
   }, [connection, setLoginMessage]);
 
   if (connection.connection) {
+    console.log(connection.connection)
     return <>{props.children}</>;
   } else {
     return (
@@ -125,17 +131,19 @@ export function AuthenticationGuard(props: { children: ReactNode }) {
         onButtonClick={() => {}}
         buttons={[]}
       >
-        <GoogleButtonBox>
+        <GoogleOAuthProvider clientId="757523123677-2nv6haiqnvklhb134cgg5qe8bia4du4q.apps.googleusercontent.com">
           <GoogleLogin
-            clientId="757523123677-2nv6haiqnvklhb134cgg5qe8bia4du4q.apps.googleusercontent.com"
-            buttonText="Continue with Google"
-            onSuccess={connect}
-            onFailure={(e) => console.log(e)}
-            cookiePolicy={"single_host_origin"}
+          // Call connect on credential response
+          onSuccess={(credentialResponse:any) => {
+            connect(credentialResponse)
+          }}
+          onError={() => {
+            console.log('Login Failed')
+          }}
           />
-          <br />
-          <b>{loginMessage}</b>
-        </GoogleButtonBox>
+        </GoogleOAuthProvider>
+        <b>{loginMessage}</b>
+
       </Modal>
     );
   }
