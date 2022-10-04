@@ -24,6 +24,8 @@ class NavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     const listTextStyle =
         TextStyle(color: Colors.grey, fontWeight: FontWeight.bold);
+    Color Carnelian = Color(0xFFB31B1B);
+
     return Drawer(child: Consumer2<UserModel, ApiClient>(
         builder: (context, userModel, apiClient, child) {
       return Container(
@@ -63,7 +65,7 @@ class NavBar extends StatelessWidget {
             ListTile(
                 leading: Icon(
                   Icons.event,
-                  color: Color(0xFFB31B1B),
+                  color: Carnelian,
                 ),
                 title: Text('Events', style: listTextStyle),
                 onTap: () => {
@@ -76,7 +78,7 @@ class NavBar extends StatelessWidget {
             ListTile(
                 leading: Icon(
                   Icons.star,
-                  color: Color(0xFFB31B1B),
+                  color: Carnelian,
                 ),
                 title: Text('Challenges', style: listTextStyle),
                 onTap: () => {
@@ -89,7 +91,7 @@ class NavBar extends StatelessWidget {
             ListTile(
                 leading: Icon(
                   Icons.emoji_events,
-                  color: Color(0xFFB31B1B),
+                  color: Carnelian,
                 ),
                 title: Text('Rewards', style: listTextStyle),
                 onTap: () => {
@@ -102,7 +104,7 @@ class NavBar extends StatelessWidget {
             ListTile(
               leading: Icon(
                 Icons.group_rounded,
-                color: Color(0xFFB31B1B),
+                color: Carnelian,
               ),
               title: Text('Event Leaderboard', style: listTextStyle),
               onTap: () => {
@@ -116,7 +118,7 @@ class NavBar extends StatelessWidget {
             ListTile(
               leading: Icon(
                 Icons.leaderboard,
-                color: Color(0xFFB31B1B),
+                color: Carnelian,
               ),
               title: Text('Global Leaderboard', style: listTextStyle),
               onTap: () => {
@@ -130,7 +132,7 @@ class NavBar extends StatelessWidget {
             ListTile(
               leading: Icon(
                 Icons.chat_bubble_rounded,
-                color: Color(0xFFB31B1B),
+                color: Carnelian,
               ),
               title: Text('Feedback', style: listTextStyle),
               onTap: () async {
@@ -145,7 +147,7 @@ class NavBar extends StatelessWidget {
             ListTile(
               leading: Icon(
                 Icons.edit,
-                color: Color(0xFFB31B1B),
+                color: Carnelian,
               ),
               title: Text('Change Username', style: listTextStyle),
               onTap: () => {
@@ -155,7 +157,7 @@ class NavBar extends StatelessWidget {
               },
             ),
             ListTile(
-              leading: Icon(Icons.exit_to_app, color: Color(0xFFB31B1B)),
+              leading: Icon(Icons.exit_to_app, color: Carnelian),
               title: Text('Sign Out', style: listTextStyle),
               onTap: () async => {
                 await apiClient.disconnect(),
