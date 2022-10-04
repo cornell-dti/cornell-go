@@ -7,8 +7,6 @@ Widget leaderBoardUserCell(
       TextStyle(fontWeight: FontWeight.bold, fontSize: 40, color: Colors.white);
   var totalPosStyle =
       TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Colors.white);
-  var nameStyle =
-      TextStyle(fontWeight: FontWeight.w800, fontSize: 22, color: Colors.white);
   var pointStyle = TextStyle(
       fontWeight: FontWeight.normal,
       fontSize: 18,
