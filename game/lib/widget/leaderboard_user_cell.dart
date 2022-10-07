@@ -5,8 +5,7 @@ Widget leaderBoardUserCell(
   Color Carnelian = Color(0xFFB31B1B);
   var posStyle =
       TextStyle(fontWeight: FontWeight.bold, fontSize: 40, color: Colors.white);
-  var totalPosStyle =
-      TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Colors.white);
+  var totalPosStyle = posStyle.copyWith(fontSize: 20);
   var pointStyle = TextStyle(
       fontWeight: FontWeight.normal,
       fontSize: 18,

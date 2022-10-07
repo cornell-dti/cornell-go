@@ -41,7 +41,6 @@ class _LoginWidgetState extends State<LoginWidget> {
 
   @override
   Widget build(BuildContext context) {
-    //Color Carnelian = Color(0xFFB31B1B);
     return Scaffold(
         key: scaffoldKey,
         backgroundColor: Colors.black,

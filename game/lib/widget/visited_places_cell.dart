@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 
+final defaultStyle =
+    TextStyle(fontWeight: FontWeight.normal, fontSize: 20, color: Colors.white);
 Widget visitedPlacesCell(context, place, date, points, imgpath) {
   var placeStyle =
-      TextStyle(fontWeight: FontWeight.bold, fontSize: 25, color: Colors.white);
-  var pointsStyle = TextStyle(
-      fontWeight: FontWeight.normal, fontSize: 20, color: Colors.white);
-  var dateStyle = TextStyle(
-      fontWeight: FontWeight.normal,
-      fontSize: 15,
-      color: Colors.white,
-      fontStyle: FontStyle.italic);
+      defaultStyle.copyWith(fontWeight: FontWeight.bold, fontSize: 25);
+  var pointsStyle = defaultStyle;
+  var dateStyle =
+      defaultStyle.copyWith(fontSize: 15, fontStyle: FontStyle.italic);
   return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Row(children: [
