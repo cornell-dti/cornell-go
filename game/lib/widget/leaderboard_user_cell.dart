@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 
+final defaultStyle =
+    TextStyle(fontWeight: FontWeight.normal, color: Colors.white);
 Widget leaderBoardUserCell(
     context, String name, int position, int total_positions, int points) {
   Color Carnelian = Color(0xFFB31B1B);
   var posStyle =
-      TextStyle(fontWeight: FontWeight.bold, fontSize: 40, color: Colors.white);
+      defaultStyle.copyWith(fontWeight: FontWeight.bold, color: Colors.white);
   var totalPosStyle = posStyle.copyWith(fontSize: 20);
-  var pointStyle = TextStyle(
-      fontWeight: FontWeight.normal,
-      fontSize: 18,
-      color: Colors.white,
-      fontStyle: FontStyle.italic);
+  var pointStyle =
+      defaultStyle.copyWith(fontSize: 18, fontStyle: FontStyle.italic);
   return Padding(
     padding: const EdgeInsets.all(8.0),
     child: Container(
