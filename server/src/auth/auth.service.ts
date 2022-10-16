@@ -1,14 +1,11 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import { User, AuthType } from '../model/user.entity';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
 import appleSignin from 'apple-signin-auth';
 import { JwtPayload } from './jwt-payload';
 import { LoginTicket, OAuth2Client } from 'google-auth-library';
 import { pbkdf2, randomBytes } from 'crypto';
-import { InjectRepository } from '@mikro-orm/nestjs';
-import { EntityRepository } from '@mikro-orm/postgresql';
-import { MikroORM } from '@mikro-orm/core';
+import { AuthType, PrismaClient, User } from '@prisma/client';
 
 interface IntermediatePayload {
   id: string;
@@ -18,7 +15,7 @@ interface IntermediatePayload {
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(User) private userRepository: EntityRepository<User>,
+    private readonly prisma: PrismaClient,
     private readonly jwtService: JwtService,
     @Inject(forwardRef(() => UserService))
     private readonly userService: UserService,
@@ -145,8 +142,6 @@ export class AuthService {
 
     if (!user) return null;
 
-    user.adminRequested = !user.adminGranted && aud === 'web';
-
     const accessToken = await this.jwtService.signAsync(
       {
         userId: user.id,
@@ -160,10 +155,13 @@ export class AuthService {
       } as JwtPayload,
       this.refreshOptions,
     );
-
-    user.hashedRefreshToken = await this.hashSalt(refreshToken);
-
-    await this.userRepository.persistAndFlush(user);
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        adminRequested: !user.adminGranted && aud === 'web',
+        hashedRefreshToken: await this.hashSalt(refreshToken),
+      },
+    });
 
     if (aud === 'web' && !user.adminGranted) return null;
 
@@ -200,10 +198,10 @@ export class AuthService {
 
   /** Sets a user's authentication type based on token */
   async setAuthType(user: User, authType: AuthType, token: string) {
-    user.authType = authType;
-    user.authToken = token;
-
-    await this.userRepository.persistAndFlush(user);
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { authToken: token, authType: authType },
+    });
   }
 
   async userByToken(token: string): Promise<User | null> {

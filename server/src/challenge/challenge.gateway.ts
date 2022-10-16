@@ -4,6 +4,7 @@ import {
   SubscribeMessage,
   WebSocketGateway,
 } from '@nestjs/websockets';
+import { Challenge, User } from '@prisma/client';
 import { UserGuard } from 'src/auth/jwt-auth.guard';
 import { UpdateGroupDataDto } from 'src/client/update-group-data.dto';
 import { EventGateway } from 'src/event/event.gateway';
@@ -12,8 +13,6 @@ import { UserGateway } from 'src/user/user.gateway';
 import { CallingUser } from '../auth/calling-user.decorator';
 import { ClientService } from '../client/client.service';
 import { EventService } from '../event/event.service';
-import { Challenge } from '../model/challenge.entity';
-import { User } from '../model/user.entity';
 import { ChallengeService } from './challenge.service';
 import { CompletedChallengeDto } from './completed-challenge.dto';
 import { RequestChallengeDataDto } from './request-challenge-data.dto';
@@ -43,18 +42,6 @@ export class ChallengeGateway {
         data.challengeIds,
       );
 
-    const completionDateFun = async (ch: Challenge) => {
-      const completions = await ch.completions.loadItems();
-      // TODO: this can be made more efficient if
-      // getChallengesByIdsWithPrevChallenge is made more efficient
-      for (const completion of completions) {
-        if (completion.owner.id === user.id) {
-          return completion.foundTimestamp.toISOString();
-        }
-      }
-      return '';
-    };
-
     this.clientService.emitUpdateChallengeData(user, {
       challenges: await Promise.all(
         completeChallenges
@@ -68,7 +55,10 @@ export class ChallengeGateway {
             long: ch.longitude,
             awardingRadius: ch.awardingRadius,
             closeRadius: ch.closeRadius,
-            completionDate: await completionDateFun(ch),
+            completionDate: await this.challengeService.getUserCompletionDate(
+              user,
+              ch,
+            ),
           })),
       ),
     });
@@ -81,56 +71,17 @@ export class ChallengeGateway {
     @CallingUser() user: User,
     @MessageBody() data: SetCurrentChallengeDto,
   ) {
-    const group = await user.group?.load();
-
-    const isChallengeValid = await this.eventService.isChallengeInEvent(
-      data.challengeId,
-      group.currentEvent.id,
-    );
-
-    if (!isChallengeValid) return false;
-
-    const eventTracker = await this.eventService.getCurrentEventTrackerForUser(
+    const [ev, mems] = await this.challengeService.setCurrentChallenge(
       user,
-    );
-
-    const challenge = await this.challengeService.getChallengeById(
       data.challengeId,
     );
 
-    const curChallenge = await eventTracker.currentChallenge.load();
-
-    const wasCompleted = await this.challengeService.isChallengeCompletedByUser(
-      user,
-      challenge,
-    );
-
-    const curCompleted = await this.challengeService.isChallengeCompletedByUser(
-      user,
-      curChallenge,
-    );
-
-    // Is user skipping while it's allowed
-    const isSkippingWhileAllowed =
-      wasCompleted ||
-      (await eventTracker.event.load()).skippingEnabled ||
-      (!wasCompleted &&
-        curCompleted &&
-        challenge.eventIndex === curChallenge.eventIndex + 1);
-
-    if (!isSkippingWhileAllowed) return false;
-
-    eventTracker.currentChallenge.set(challenge);
-    await this.eventService.saveTracker(eventTracker);
-
-    const members = await group.members.loadItems();
-
-    for (const mem of members) {
+    for (const mem of mems) {
       this.groupGateway.requestGroupData(mem, {});
     }
 
     await this.eventGateway.requestEventTrackerData(user, {
-      trackedEventIds: [eventTracker.event.id],
+      trackedEventIds: [ev.id],
     });
 
     return false;
@@ -141,25 +92,21 @@ export class ChallengeGateway {
     @CallingUser() user: User,
     @MessageBody() data: CompletedChallengeDto,
   ) {
-    const newTracker = await this.challengeService.completeChallenge(
+    const [newTracker, mems] = await this.challengeService.completeChallenge(
       user,
       data.challengeId,
     );
 
-    const group = await user.group.load();
-
-    for (const mem of group.members) {
+    for (const mem of mems) {
       await this.groupGateway.requestGroupData(mem, {});
     }
 
-    await newTracker.completed.loadItems();
-
     await this.eventGateway.requestEventTrackerData(user, {
-      trackedEventIds: [newTracker.event.id],
+      trackedEventIds: [newTracker.eventId],
     });
 
     await this.requestChallengeData(user, {
-      challengeIds: [data.challengeId, newTracker.currentChallenge.id],
+      challengeIds: [data.challengeId, newTracker.curChallengeId],
     });
 
     await this.challengeService.checkForReward(newTracker);

@@ -6,8 +6,6 @@ import { AuthService } from './auth.service';
 import { UserModule } from '../user/user.module';
 import { JwtModule } from '@nestjs/jwt';
 import { RefreshAccessController } from './refresh-access/refresh-access.controller';
-import { User } from 'src/model/user.entity';
-import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { AdminGuard, UserGuard } from './jwt-auth.guard';
 
 @Module({
@@ -17,7 +15,6 @@ import { AdminGuard, UserGuard } from './jwt-auth.guard';
       secret: process.env.JWT_ACCESS_SECRET,
       signOptions: { expiresIn: process.env.JWT_ACCESS_EXPIRATION },
     }),
-    MikroOrmModule.forFeature([User]),
   ],
   controllers: [
     GoogleController,

@@ -1,45 +1,40 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import { Point } from 'geojson';
-import { Challenge } from '../model/challenge.entity';
-import { EventTracker } from '../model/event-tracker.entity';
-import { EventReward } from '../model/event-reward.entity';
-import { User } from '../model/user.entity';
-import { EventBase, EventRewardType } from '../model/event-base.entity';
 import { UserService } from '../user/user.service';
 import { ChallengeService } from 'src/challenge/challenge.service';
-import { InjectRepository } from '@mikro-orm/nestjs';
-import { EntityManager, EntityRepository } from '@mikro-orm/postgresql';
 import { ClientService } from '../client/client.service';
-import { RestrictionGroup } from 'src/model/restriction-group.entity';
+import {
+  EventBase,
+  EventRewardType,
+  EventTracker,
+  PrismaClient,
+  RestrictionGroup,
+  User,
+} from '@prisma/client';
 
 @Injectable()
 export class EventService {
   constructor(
     private userService: UserService,
     private clientService: ClientService,
-    private readonly em: EntityManager,
-    @InjectRepository(EventBase)
-    private eventsRepository: EntityRepository<EventBase>,
-    @InjectRepository(EventTracker)
-    private eventTrackerRepository: EntityRepository<EventTracker>,
-    @InjectRepository(Challenge)
-    private challengeRepository: EntityRepository<Challenge>,
+    private readonly prisma: PrismaClient,
   ) {}
 
   /** Get event by id */
   async getEventById(id: string) {
-    return await this.eventsRepository.findOne({ id });
+    return await this.prisma.eventBase.findUniqueOrThrow({ where: { id } });
   }
 
   /** Get events by ids */
   async getEventsByIds(ids: string[]): Promise<EventBase[]> {
-    return await this.eventsRepository.find({ id: { $in: ids } });
+    return await this.prisma.eventBase.findMany({ where: { id: { in: ids } } });
   }
 
   /** Checks if a user is allowed to see an event */
   async isAllowedEvent(user: User, eventId: string) {
-    if (user.restrictedBy) {
-      const restriction = await user.restrictedBy.load();
+    if (user.restrictedById) {
+      const restriction = this.prisma.restrictionGroup.findFirst({
+        where: { id: user.restrictedById },
+      });
       const hasEventRestrictions =
         (await restriction.allowedEvents.loadCount()) > 0;
       if (hasEventRestrictions) {

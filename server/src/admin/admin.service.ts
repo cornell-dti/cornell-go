@@ -1,120 +1,110 @@
 import { ChallengeDto } from './update-challenges.dto';
-import { EventRewardType } from './../model/event-base.entity';
-import { InjectRepository } from '@mikro-orm/nestjs';
-import { EntityRepository } from '@mikro-orm/postgresql';
-import { ConsoleLogger, Injectable } from '@nestjs/common';
-import { Challenge } from 'src/model/challenge.entity';
-import { EventBase } from 'src/model/event-base.entity';
-import { EventReward } from 'src/model/event-reward.entity';
+import { Injectable } from '@nestjs/common';
 import { RewardDto } from './update-rewards.dto';
-import { AuthType, User } from 'src/model/user.entity';
 import { EventDto } from './update-events.dto';
 import { v4 } from 'uuid';
-import { RestrictionGroup } from 'src/model/restriction-group.entity';
-import { EventTracker } from 'src/model/event-tracker.entity';
 import { RestrictionDto } from './request-restrictions.dto';
 import { UserService } from 'src/user/user.service';
-import { Reference } from '@mikro-orm/core';
-import { Group } from 'src/model/group.entity';
+import {
+  AuthType,
+  Challenge,
+  EventBase,
+  EventReward,
+  EventRewardType,
+  PrismaClient,
+  RestrictionGroup,
+} from '@prisma/client';
 
 const friendlyWords = require('friendly-words');
 
 @Injectable()
 export class AdminService {
-  constructor(
-    private userService: UserService,
-    @InjectRepository(User) private userRepository: EntityRepository<User>,
-    @InjectRepository(Group) private groupRepository: EntityRepository<Group>,
-    @InjectRepository(EventReward)
-    private rewardRepository: EntityRepository<EventReward>,
-    @InjectRepository(EventBase)
-    private eventRepository: EntityRepository<EventBase>,
-    @InjectRepository(Challenge)
-    private challengeRepository: EntityRepository<Challenge>,
-    @InjectRepository(RestrictionGroup)
-    private restrictionGroupRepository: EntityRepository<RestrictionGroup>,
-    @InjectRepository(EventTracker)
-    private eventTrackerRepository: EntityRepository<EventTracker>,
-  ) {}
+  constructor(private userService: UserService, private prisma: PrismaClient) {}
 
   async requestAdminAccess(adminId: string) {
-    const admin = await this.userRepository.findOne({ id: adminId });
-    if (admin) {
-      admin.adminRequested = true;
-      await this.userRepository.persistAndFlush(admin);
-    }
+    await this.prisma.user.update({
+      where: { id: adminId },
+      data: { adminRequested: true },
+    });
   }
 
   async setAdminStatus(adminId: string, granted: boolean) {
-    const admin = await this.userRepository.findOne({ id: adminId });
-    if (admin) {
-      admin.adminGranted = granted;
-      admin.adminRequested = false;
-      await this.userRepository.persistAndFlush(admin);
-    }
-    return admin;
+    return await this.prisma.user.update({
+      where: { id: adminId },
+      data: {
+        adminGranted: granted,
+        adminRequested: false,
+      },
+    });
   }
 
   async getAllRequestingAdmins() {
-    return await this.userRepository.find({
-      adminRequested: true,
-    });
+    return await this.prisma.user.findMany({ where: { adminRequested: true } });
   }
 
   async getAllEventData() {
-    return await this.eventRepository.findAll();
+    return await this.prisma.eventBase.findMany();
   }
 
   async getAllChallengeData() {
-    return await this.challengeRepository.findAll();
+    return await this.prisma.challenge.findMany();
   }
 
   async getAllRestrictionGroupData() {
-    return await this.restrictionGroupRepository.findAll();
+    return await this.prisma.restrictionGroup.findMany();
   }
 
   async getEventById(eventId: string) {
-    return await this.eventRepository.findOneOrFail({ id: eventId });
+    return await this.prisma.eventBase.findFirstOrThrow({
+      where: { id: eventId },
+    });
   }
 
   async getChallengeById(challengeId: string) {
-    return await this.challengeRepository.findOneOrFail({ id: challengeId });
+    return await this.prisma.challenge.findFirstOrThrow({
+      where: { id: challengeId },
+    });
   }
 
   async removeEvent(eventId: string) {
-    const event = await this.getEventById(eventId);
-
-    await this.eventRepository.removeAndFlush(event);
-    return event;
+    return await this.prisma.eventBase.delete({ where: { id: eventId } });
   }
 
   async removeChallenge(challengeId: string) {
-    const challenge = await this.challengeRepository.findOneOrFail({
-      id: challengeId,
+    const challenge = this.prisma.challenge.findFirstOrThrow({
+      where: { id: challengeId },
     });
 
-    const event = await challenge.linkedEvent.load();
-    const firstChallengeOfEvent = (await event.challenges.loadItems())[0];
-
-    const usedTrackers = await this.eventTrackerRepository.find({
-      currentChallenge: challenge,
+    const usedTrackers = await this.prisma.eventTracker.findMany({
+      where: {
+        curChallengeId: challengeId,
+      },
     });
 
-    if (usedTrackers.length > 0 && !firstChallengeOfEvent) return event;
+    const firstChallengeOfEvent = (
+      await challenge.linkedEvent().challenges()
+    )[0];
+
+    if (usedTrackers.length > 0 && !firstChallengeOfEvent)
+      return await challenge.linkedEvent();
 
     for (const tracker of usedTrackers) {
-      tracker.currentChallenge.set(firstChallengeOfEvent);
+      this.prisma.eventTracker.update({
+        where: { id: tracker.id },
+        data: { curChallengeId: firstChallengeOfEvent.id },
+      });
     }
 
-    await this.eventTrackerRepository.persistAndFlush(usedTrackers);
-    await this.challengeRepository.removeAndFlush(challenge);
+    await this.prisma.challenge.delete({ where: { id: challengeId } });
 
-    return event;
+    return await challenge.linkedEvent();
   }
 
   /** Get rewards of the user */
-  async getRewards(ids: string[]): Promise<EventReward[]> {
-    return await this.rewardRepository.find({ id: ids });
+  async getRewards(ids: string[]) {
+    return await this.prisma.eventReward.findMany({
+      where: { id: { in: ids } },
+    });
   }
 
   /** Deletes all rewards with IDs listed in removeIds.
@@ -122,54 +112,60 @@ export class AdminService {
   async deleteRewards(removeIds: string[]) {
     return await Promise.all(
       removeIds.map(async id => {
-        const reward = await this.rewardRepository.findOneOrFail({
-          id,
+        const reward = this.prisma.eventReward.findFirstOrThrow({
+          where: {
+            id,
+          },
         });
-        const ev = await reward.containingEvent.load();
-        await this.rewardRepository.removeAndFlush(reward);
-        return ev;
+        await this.prisma.eventReward.delete({
+          where: { id },
+        });
+        return await reward.event();
       }),
     );
   }
 
   async deleteRestrictionGroups(ids: string[]) {
-    const restrictionGroups = await this.restrictionGroupRepository.find({
-      id: ids,
+    const genedUsers = await this.prisma.user.findMany({
+      where: { generatedById: { in: ids } },
     });
 
-    for (const rGroup of restrictionGroups) {
-      const genUsers = await rGroup.generatedUsers.loadItems();
-      await Promise.all(genUsers.map(u => this.userService.deleteUser(u)));
-    }
+    await Promise.all(genedUsers.map(u => this.userService.deleteUser(u)));
 
-    await this.restrictionGroupRepository.removeAndFlush(restrictionGroups);
+    this.prisma.restrictionGroup.findMany({
+      where: { id: { in: ids } },
+    });
   }
 
   /** Creates a EventReward given RewardDto reward */
-  async createRewardFromUpdateDTO(reward: RewardDto): Promise<EventReward> {
-    let rewardEntity = await this.rewardRepository.findOne({ id: reward.id });
+  async createRewardFromUpdateDTO(reward: RewardDto) {
+    let rewardEntity = await this.prisma.eventReward.findFirst({
+      where: { id: reward.id },
+    });
 
     if (rewardEntity) {
-      rewardEntity.rewardDescription = reward.description.substring(0, 2048);
-      rewardEntity.rewardRedeemInfo = reward.redeemInfo.substring(0, 2048);
+      rewardEntity = await this.prisma.eventReward.update({
+        where: { id: reward.id },
+        data: {
+          description: reward.description.substring(0, 2048),
+          redeemInfo: reward.redeemInfo.substring(0, 2048),
+        },
+      });
     } else {
-      rewardEntity = this.rewardRepository.create({
-        id: v4(),
-        containingEvent: await this.eventRepository.findOneOrFail({
-          id: reward.containingEventId,
-        }),
-        rewardDescription: reward.description.substring(0, 2048),
-        rewardRedeemInfo: reward.redeemInfo.substring(0, 2048),
-        isRedeemed: false,
+      rewardEntity = await this.prisma.eventReward.create({
+        data: {
+          eventId: reward.containingEventId,
+          description: reward.description.substring(0, 2048),
+          redeemInfo: reward.redeemInfo.substring(0, 2048),
+          isRedeemed: false,
+        },
       });
     }
 
-    await this.rewardRepository.persistAndFlush(rewardEntity);
     return rewardEntity;
   }
 
-  async createEventFromUpdateDTO(event: EventDto): Promise<EventBase> {
-    let eventEntity = await this.eventRepository.findOne({ id: event.id });
+  async createEventFromUpdateDTO(event: EventDto) {
     const assignData = {
       requiredMembers: event.requiredMembers,
       skippingEnabled: event.skippingEnabled,
@@ -178,37 +174,39 @@ export class AdminService {
       description: event.description.substring(0, 2048),
       rewardType:
         event.rewardType === 'limited_time_event'
-          ? EventRewardType.LIMITED_TIME_EVENT
+          ? EventRewardType.LIMITED_TIME
           : EventRewardType.PERPETUAL,
-      time: new Date(event.time),
+      endTime: new Date(event.time),
       indexable: event.indexable,
       minimumScore: event.minimumScore,
     };
 
-    if (eventEntity) {
-      Object.assign(eventEntity, assignData);
-      eventEntity.challenges.set(
-        await this.challengeRepository.find({
-          id: event.challengeIds,
-        }),
-      );
-      eventEntity.rewards.set(
-        await this.rewardRepository.find({ id: event.rewardIds }),
-      );
-    } else {
-      eventEntity = this.eventRepository.create({
+    const eventEntity = await this.prisma.eventBase.upsert({
+      where: { id: event.id },
+      create: assignData,
+      update: {
         ...assignData,
-        id: v4(),
-        challenges: [],
-        rewards: [],
-      });
-    }
-
-    (await eventEntity?.challenges.loadItems())?.forEach(challenge => {
-      challenge.eventIndex = event.challengeIds.indexOf(challenge.id);
+        challenges: {
+          set: event.challengeIds.map(id => ({ id })),
+        },
+        rewards: {
+          set: event.rewardIds.map(id => ({ id })),
+        },
+      },
     });
 
-    await this.eventRepository.persistAndFlush(eventEntity);
+    let eventIndex = 0;
+    for (const id of event.rewardIds) {
+      await this.prisma.challenge.update({
+        where: { id },
+        data: {
+          eventIndex,
+        },
+      });
+
+      ++eventIndex;
+    }
+
     return eventEntity;
   }
 
@@ -225,44 +223,33 @@ export class AdminService {
       closeRadius: challenge.closeRadius,
     };
 
-    let challengeEntity = await this.challengeRepository.findOne({
-      id: challenge.id,
+    const challengeEntity = await this.prisma.challenge.upsert({
+      where: { id: challenge.id },
+      update: assignData,
+      create: {
+        ...assignData,
+        eventIndex: -10,
+        linkedEventId: challenge.containingEventId,
+      },
     });
 
-    if (challengeEntity) {
-      Object.assign(challengeEntity, assignData);
-    } else {
-      const thisEvent = await this.eventRepository.findOneOrFail({
-        id: challenge.containingEventId,
+    if (challengeEntity.eventIndex === -10) {
+      const maxIndexChallenge = await this.prisma.challenge.findFirst({
+        where: { linkedEventId: challenge.containingEventId },
+        orderBy: { eventIndex: 'desc' },
       });
 
-      const maxIndexChallenge = await this.challengeRepository.findOne(
-        {
-          linkedEvent: thisEvent,
-        },
-        { orderBy: { eventIndex: 'DESC' } },
-      );
-
-      const newEventIndex = (maxIndexChallenge?.eventIndex ?? -1) + 1;
-      challengeEntity = this.challengeRepository.create({
-        ...assignData,
-        id: v4(),
-        eventIndex: newEventIndex,
-        linkedEvent: thisEvent,
-        completions: [],
+      await this.prisma.challenge.update({
+        where: { id: challengeEntity.id },
+        data: { eventIndex: (maxIndexChallenge?.eventIndex ?? -1) + 1 },
       });
     }
 
-    this.challengeRepository.persistAndFlush(challengeEntity);
     return challengeEntity;
   }
 
   /** Creates a new restricted user */
-  async newRestrictedUser(
-    id: string,
-    word: string,
-    group: RestrictionGroup,
-  ): Promise<User> {
+  async newRestrictedUser(id: string, word: string, group: RestrictionGroup) {
     const user = await this.userService.register(
       id + '@cornell.edu',
       word,
@@ -272,16 +259,17 @@ export class AdminService {
       id,
     );
 
-    user.restrictedBy = Reference.create(group);
-    user.generatedBy = Reference.create(group);
-
-    await this.userService.saveUser(user);
-    return user;
+    return await this.prisma.user.update({
+      where: { id: user.id },
+      data: { restrictedById: group.id, generatedById: group.id },
+    });
   }
 
   /** Adjusts member count in a group up based on expectedCount */
   async generateMembers(group: RestrictionGroup, expectedCount: number) {
-    const genCount = await group.generatedUsers.loadCount();
+    const genCount = await this.prisma.user.count({
+      where: { generatedById: group.id },
+    });
 
     if (genCount < expectedCount) {
       const seed = group.id[0].charCodeAt(0);
@@ -291,88 +279,91 @@ export class AdminService {
         const id = group.name + '_' + word + index;
         const user = await this.newRestrictedUser(id, word, group);
 
-        group.generatedUsers.add(user);
-        group.restrictedUsers.add(user);
+        await this.prisma.restrictionGroup.update({
+          where: { id: group.id },
+          data: {
+            generatedUsers: { connect: user },
+            restrictedUsers: { connect: user },
+          },
+        });
       }
     }
-
-    await this.restrictionGroupRepository.persistAndFlush(group);
   }
 
   /** Ensures all restricted users are on an allowed event */
   async ensureEventRestriction(group: RestrictionGroup) {
-    const allowedEventCount = await group.allowedEvents.loadCount();
+    const allowedEventCount = await this.prisma.eventBase.count({
+      where: {
+        allowedIn: { some: group },
+      },
+    });
 
     if (allowedEventCount === 0) {
       return; // No event restrictions
     }
 
-    const allowedEvents = await group.allowedEvents.loadItems();
-    const allowedEvent = allowedEvents[0];
+    const allowedEvents = (
+      await this.prisma.eventBase.findMany({
+        where: { allowedIn: { some: group } },
+      })
+    ).map(({ id }) => id);
 
-    const violatingGroups = await this.groupRepository.find({
-      host: {
-        restrictedBy: group,
+    const violatingGroups = await this.prisma.group.findMany({
+      where: {
+        host: { restrictedBy: group },
+        curEventId: { notIn: allowedEvents },
       },
-      currentEvent: { $nin: allowedEvents },
     });
 
     for (const userGroup of violatingGroups) {
-      userGroup.currentEvent.set(allowedEvent);
-      await this.groupRepository.persistAndFlush(userGroup);
+      await this.prisma.group.update({
+        where: { id: userGroup.id },
+        data: { curEventId: allowedEvents[0] },
+      });
     }
   }
 
   /** Update/insert a restriction group */
   async updateRestrictionGroupWithDto(restriction: RestrictionDto) {
-    const curRestriction = await this.restrictionGroupRepository.findOne({
-      id: restriction.id,
+    const restrictionEntity = await this.prisma.restrictionGroup.upsert({
+      where: { id: restriction.id },
+      create: {
+        displayName: restriction.displayName,
+        name: restriction.displayName
+          .toLowerCase()
+          .replaceAll(/[^a-z0-9]/g, '_'),
+        canEditUsername: restriction.canEditUsername,
+        restrictedUsers: {
+          connect: restriction.restrictedUsers.map(id => ({ id })),
+        },
+        allowedEvents: {
+          connect: restriction.allowedEvents.map(id => ({ id })),
+        },
+      },
+      update: {
+        restrictedUsers: {
+          set: restriction.restrictedUsers.map(id => ({ id })),
+        },
+        allowedEvents: {
+          set: restriction.allowedEvents.map(id => ({ id })),
+        },
+      },
     });
 
-    const assignData = {
-      displayName: restriction.displayName,
-      name: restriction.displayName.toLowerCase().replaceAll(/[^a-z0-9]/g, '_'),
-      canEditUsername: restriction.canEditUsername,
-    };
-
-    const restrictedUsers = await this.userRepository.find({
-      id: restriction.restrictedUsers,
+    const genCount = await this.prisma.user.count({
+      where: { generatedBy: restrictionEntity },
     });
-
-    const allowedEvents = await this.eventRepository.find({
-      id: restriction.allowedEvents,
-    });
-
-    const restrictionGroupEntity =
-      curRestriction ??
-      this.restrictionGroupRepository.create({
-        id: v4(),
-        ...assignData,
-      });
-
-    if (curRestriction) {
-      Object.assign(curRestriction, assignData);
-    }
-
-    restrictionGroupEntity.restrictedUsers.set(restrictedUsers);
-    restrictionGroupEntity.allowedEvents.set(allowedEvents);
-
-    await this.restrictionGroupRepository.persistAndFlush(
-      restrictionGroupEntity,
-    );
-
-    const genCount = await restrictionGroupEntity.generatedUsers.loadCount();
 
     if (restriction.generatedUserCount > genCount) {
       await this.generateMembers(
-        restrictionGroupEntity,
+        restrictionEntity,
         restriction.generatedUserCount,
       );
     }
 
-    await this.ensureEventRestriction(restrictionGroupEntity);
+    await this.ensureEventRestriction(restrictionEntity);
 
-    return restrictionGroupEntity;
+    return restrictionEntity;
   }
 
   async updateRestrictionGroups(
@@ -386,21 +377,106 @@ export class AdminService {
   /** Updates the repository with all rewards listed in rewards.
    * Adds a new reward if it does not exist, otherwise overwrites the
    * old reward. */
-  async updateRewards(rewards: RewardDto[]): Promise<EventReward[]> {
+  async updateRewards(rewards: RewardDto[]) {
     return await Promise.all(
       rewards.map(rw => this.createRewardFromUpdateDTO(rw)),
     );
   }
 
-  async updateEvents(events: EventDto[]): Promise<EventBase[]> {
+  async updateEvents(events: EventDto[]) {
     return await Promise.all(
       events.map(ev => this.createEventFromUpdateDTO(ev)),
     );
   }
 
-  async updateChallenges(challenges: ChallengeDto[]): Promise<Challenge[]> {
+  async updateChallenges(challenges: ChallengeDto[]) {
     return await Promise.all(
       challenges.map(ch => this.createChallengeFromUpdateDTO(ch)),
     );
+  }
+
+  async eventForId(eventId: string) {
+    return await this.prisma.eventBase.findUniqueOrThrow({
+      where: { id: eventId },
+    });
+  }
+
+  async dtoForEvent(ev: EventBase): Promise<EventDto> {
+    const chals = await this.prisma.challenge.findMany({
+      where: { linkedEventId: ev.id },
+    });
+
+    const rwIds = await this.prisma.eventReward.findMany({
+      where: { eventId: ev.id },
+      select: { id: true },
+    });
+
+    return {
+      id: ev.id,
+      skippingEnabled: ev.skippingEnabled,
+      isDefault: ev.isDefault,
+      name: ev.name,
+      description: ev.description,
+      rewardType:
+        ev.rewardType == EventRewardType.LIMITED_TIME
+          ? 'limited_time_event'
+          : 'perpetual',
+      time: ev.endTime.toUTCString(),
+      requiredMembers: ev.requiredMembers,
+      indexable: ev.indexable,
+      challengeIds: chals
+        .sort((a, b) => a.eventIndex - b.eventIndex)
+        .map(c => c.id),
+      rewardIds: rwIds.map(({ id }) => id),
+      minimumScore: ev.minimumScore,
+    };
+  }
+
+  async dtoForChallenge(ch: Challenge): Promise<ChallengeDto> {
+    return {
+      id: ch.id,
+      name: ch.name,
+      description: ch.description,
+      imageUrl: ch.imageUrl,
+      latitude: ch.latitude,
+      longitude: ch.longitude,
+      awardingRadius: ch.awardingRadius,
+      closeRadius: ch.closeRadius,
+      containingEventId: ch.linkedEventId,
+    };
+  }
+
+  async dtoForReward(rw: EventReward): Promise<RewardDto> {
+    return {
+      id: rw.id,
+      description: rw.description,
+      redeemInfo: rw.redeemInfo,
+      containingEventId: rw.eventId,
+      claimingUserId: rw.userId ?? '',
+    };
+  }
+
+  async dtoForRestrictionGroup(
+    restrictionGroup: RestrictionGroup,
+  ): Promise<RestrictionDto> {
+    const fullRestric = this.prisma.restrictionGroup.findUniqueOrThrow({
+      where: restrictionGroup,
+    });
+
+    const genUsers = await fullRestric.generatedUsers();
+
+    return {
+      id: restrictionGroup.id,
+      displayName: restrictionGroup.displayName,
+      canEditUsername: restrictionGroup.canEditUsername,
+      restrictedUsers: (
+        await fullRestric.restrictedUsers({ select: { id: true } })
+      ).map(e => e.id),
+      allowedEvents: (
+        await fullRestric.allowedEvents({ select: { id: true } })
+      ).map(e => e.id),
+      generatedUserCount: genUsers.length,
+      generatedUserAuthIds: genUsers.map(u => u.authToken),
+    };
   }
 }
