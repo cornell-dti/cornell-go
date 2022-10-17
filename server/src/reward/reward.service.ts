@@ -1,19 +1,18 @@
-import { InjectRepository } from '@mikro-orm/nestjs';
-import { EntityRepository } from '@mikro-orm/postgresql';
 import { Injectable } from '@nestjs/common';
-import { EventReward } from '../model/event-reward.entity';
-import { User } from '../model/user.entity';
+import { EventReward, PrismaClient, User } from '@prisma/client';
 
 @Injectable()
 export class RewardService {
-  constructor(
-    @InjectRepository(EventReward)
-    private rewardRepository: EntityRepository<EventReward>,
-  ) {}
+  constructor(private prisma: PrismaClient) {}
 
   /** Get rewards that are in ids and owned by the user */
   async getRewardsForUser(user: User, ids: string[]): Promise<EventReward[]> {
-    return await this.rewardRepository.find({ id: ids, claimingUser: user });
+    return await this.prisma.eventReward.findMany({
+      where: {
+        id: { in: ids },
+        user: user,
+      },
+    });
   }
 
   /** Get rewards that are in ids and not owned by the user */
@@ -21,9 +20,11 @@ export class RewardService {
     user: User,
     ids: string[],
   ): Promise<EventReward[]> {
-    return await this.rewardRepository.find({
-      id: ids,
-      $not: { claimingUser: user },
+    return await this.prisma.eventReward.findMany({
+      where: {
+        id: { in: ids },
+        user: { isNot: user },
+      },
     });
   }
 }
