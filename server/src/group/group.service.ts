@@ -1,16 +1,7 @@
 import { EventService } from 'src/event/event.service';
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import { EventBase } from '../model/event-base.entity';
-import { Group } from '../model/group.entity';
-import { User } from '../model/user.entity';
-import { EventTracker } from '../model/event-tracker.entity';
 import { UserService } from '../user/user.service';
-import { InjectRepository } from '@mikro-orm/nestjs';
-import { EntityRepository } from '@mikro-orm/postgresql';
-import { v4 } from 'uuid';
-import { elementAt, NotFoundError } from 'rxjs';
-import { Reference, Unique } from '@mikro-orm/core';
-import { User } from '@prisma/client';
+import { EventBase, Group, PrismaClient, User } from '@prisma/client';
 
 @Injectable()
 export class GroupService {
@@ -19,24 +10,17 @@ export class GroupService {
     private userService: UserService,
     @Inject(forwardRef(() => EventService))
     private eventService: EventService,
-    @InjectRepository(Group)
-    private groupsRepository: EntityRepository<Group>,
+    private prisma: PrismaClient,
   ) {}
 
   /** Creates a group from an event and removes from an old group (does delete empty groups) */
-  async createFromEvent(
-    event: EventBase,
-    host: User,
-    isNew = false,
-  ): Promise<[Group | undefined, Group]> {
-    const oldGroup = isNew ? null : await host.group.load();
-
-    const group: Group = this.groupsRepository.create({
-      id: v4(),
-      currentEvent: event,
-      members: [host],
-      friendlyId: '',
-      host: null!,
+  async createFromEvent(event: EventBase): Promise<Group> {
+    const group: Group = this.prisma.group.create({
+      data: {
+        currentEvent: event,
+        friendlyId: '',
+        host: null,
+      },
     });
 
     group.friendlyId = group.id.substring(9, 13);
@@ -112,7 +96,9 @@ export class GroupService {
     );
     return oldGroup;
   }
-
+  // If no host, and empty, delete
+  // If no host, and not empty, replace host
+  // If host, and empty, delete
   async fixOrDeleteGroup(group: Group) {
     throw new Error('Method not implemented.');
   }
