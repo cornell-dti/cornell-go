@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 final defaultStyle =
     TextStyle(fontWeight: FontWeight.normal, fontSize: 20, color: Colors.white);
+
 Widget visitedPlacesCell(context, place, date, points, imgpath) {
   var placeStyle =
       defaultStyle.copyWith(fontWeight: FontWeight.bold, fontSize: 25);

@@ -14,6 +14,7 @@ import 'package:game/api/game_api.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:game/feedback/feedback.dart';
+import 'nav_widget.dart';
 
 const androidForm =
     "https://docs.google.com/forms/d/e/1FAIpQLScpffXZMHHfvY9zD_11wqrEaZTEy3dVD3OZz4iugzBKTEKQtw/viewform";
@@ -63,73 +64,13 @@ class NavBar extends StatelessWidget {
                   color: RGBComplement(constructColorFromUserName(
                       userModel.userData?.username ?? ""))),
             ),
-            ListTile(
-                leading: Icon(
-                  Icons.event,
-                  color: Carnelian,
-                ),
-                title: Text('Events', style: listTextStyle),
-                onTap: () => {
-                      Navigator.pop(context),
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => EventsWidget()))
-                    }),
-            ListTile(
-                leading: Icon(
-                  Icons.star,
-                  color: Carnelian,
-                ),
-                title: Text('Challenges', style: listTextStyle),
-                onTap: () => {
-                      Navigator.pop(context),
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => ChallengesWidget()))
-                    }),
-            ListTile(
-                leading: Icon(
-                  Icons.emoji_events,
-                  color: Carnelian,
-                ),
-                title: Text('Rewards', style: listTextStyle),
-                onTap: () => {
-                      Navigator.pop(context),
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => RewardsWidget()))
-                    }),
-            ListTile(
-              leading: Icon(
-                Icons.group_rounded,
-                color: Carnelian,
-              ),
-              title: Text('Event Leaderboard', style: listTextStyle),
-              onTap: () => {
-                Navigator.pop(context),
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => EventsLeaderboardWidget()))
-              },
-            ),
-            ListTile(
-              leading: Icon(
-                Icons.leaderboard,
-                color: Carnelian,
-              ),
-              title: Text('Global Leaderboard', style: listTextStyle),
-              onTap: () => {
-                Navigator.pop(context),
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => GlobalLeaderboardWidget()))
-              },
-            ),
+            navTab(context, Icons.event, 'Events', EventsWidget()),
+            navTab(context, Icons.star, 'Challenges', ChallengesWidget()),
+            navTab(context, Icons.emoji_events, 'Events', RewardsWidget()),
+            navTab(context, Icons.group_rounded, 'Event Leaderboard',
+                EventsLeaderboardWidget()),
+            navTab(context, Icons.leaderboard, 'Global Leaderboard',
+                GlobalLeaderboardWidget()),
             ListTile(
               leading: Icon(
                 Icons.chat_bubble_rounded,
@@ -145,18 +86,7 @@ class NavBar extends StatelessWidget {
                 }
               },
             ),
-            ListTile(
-              leading: Icon(
-                Icons.edit,
-                color: Carnelian,
-              ),
-              title: Text('Change Username', style: listTextStyle),
-              onTap: () => {
-                Navigator.pop(context),
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => UserNameWidget()))
-              },
-            ),
+            navTab(context, Icons.edit, 'Change Username', UserNameWidget()),
             ListTile(
               leading: Icon(Icons.exit_to_app, color: Carnelian),
               title: Text('Sign Out', style: listTextStyle),
