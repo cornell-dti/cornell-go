@@ -10,6 +10,7 @@ import { EntityRepository } from '@mikro-orm/postgresql';
 import { v4 } from 'uuid';
 import { elementAt, NotFoundError } from 'rxjs';
 import { Reference, Unique } from '@mikro-orm/core';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class GroupService {
@@ -76,35 +77,6 @@ export class GroupService {
     return await this.groupsRepository.findOneOrFail({ friendlyId: id });
   }
 
-  /** Invalidates a user's group data forever */
-  async orphanUser(user: User) {
-    await this.eventService.deleteAllEventTrackers(user);
-    await this.leaveGroup(user);
-    if (user.group)
-      await this.groupsRepository.removeAndFlush(await user.group.load());
-  }
-
-  /* If the user is the only member, deletes the group. */
-  async checkGroupSizeForRemoval(
-    group: Group,
-    didHostLeave: boolean,
-  ): Promise<Group | undefined> {
-    // If the user is the only member then delete the group and return undefined.
-    if ((await group.members.loadCount()) === 1) {
-      await this.groupsRepository.removeAndFlush(group);
-      return undefined;
-    } else if (didHostLeave) {
-      // If the user is the host and they left the group then a new host is chosen from the remaining users in the group.
-      group.host = Reference.create(
-        (await group.members.loadItems()).filter(
-          u => group.host.id !== u.id,
-        )[0],
-      );
-      await this.groupsRepository.persistAndFlush(group);
-    }
-    return group;
-  }
-
   /** Adds user to an existing group, given by the group's id.
    * Returns the old group if it still exists, or null. */
   async joinGroup(user: User, joinId: string): Promise<Group | undefined> {
@@ -139,5 +111,9 @@ export class GroupService {
       user,
     );
     return oldGroup;
+  }
+
+  async fixOrDeleteGroup(group: Group) {
+    throw new Error('Method not implemented.');
   }
 }

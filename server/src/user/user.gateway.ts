@@ -11,7 +11,6 @@ import {
   UpdateUserDataAuthTypeDto,
   UpdateUserDataDto,
 } from '../client/update-user-data.dto';
-import { AuthType, User } from '../model/user.entity';
 import { CloseAccountDto } from './close-account.dto';
 import { RequestUserDataDto } from './request-user-data.dto';
 import { SetAuthToDeviceDto } from './set-auth-to-device.dto';
@@ -24,6 +23,7 @@ import { forwardRef, Inject, UseGuards } from '@nestjs/common';
 import { UserGuard } from 'src/auth/jwt-auth.guard';
 import { GroupGateway } from '../group/group.gateway';
 import { CensorSensor } from 'censor-sensor';
+import { AuthType } from '@prisma/client';
 
 const replaceAll = require('string.prototype.replaceall');
 replaceAll.shim();
@@ -89,7 +89,7 @@ export class UserGateway {
 
     if (!(restrictionGroup?.canEditUsername ?? true)) return;
 
-    user.username = new CensorSensor()
+    const username = new CensorSensor()
       .cleanProfanityIsh(
         data.newUsername
           .substring(0, 128)
@@ -99,7 +99,7 @@ export class UserGateway {
       .replaceAll('*', '_')
       .replaceAll(' ', '_');
 
-    await this.userService.saveUser(user);
+    await this.userService.setUsername(user, username);
 
     this.clientService.emitInvalidateData({
       userEventData: false,
