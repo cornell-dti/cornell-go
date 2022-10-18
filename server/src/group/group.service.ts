@@ -24,7 +24,6 @@ export class GroupService {
     });
 
     group.friendlyId = group.id.substring(9, 13);
-
     return group;
   }
 
