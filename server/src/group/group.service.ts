@@ -57,10 +57,12 @@ export class GroupService {
     if (hostUser.restrictedById !== user.restrictedById) return;
 
     // remove user from old group
+    await this.leaveGroup(user)
     // call fix on old group
+    this.fixOrDeleteGroup(oldGroup)
     // add user to group
-
-    return oldGroup ?? null;
+    // this.prisma.group.update({})
+    return oldGroup;
   }
 
   /** Moves the user out of their current group into a new group.
@@ -70,6 +72,7 @@ export class GroupService {
   // remove from old
   // fix old
   // fix new
+  // This function is not done
   async leaveGroup(user: User): Promise<Group | undefined> {
     if (!user.groupId) return;
     const userOldGroup = await this.getGroupForUser(user);
