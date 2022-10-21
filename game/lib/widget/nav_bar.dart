@@ -2,13 +2,10 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:game/events_leaderboard/events_leaderboard_widget.dart';
-import 'package:game/feedback/feedback.dart';
-import 'package:game/events_leaderboard/events_leaderboard_widget.dart';
 import 'package:game/global_leaderboard/global_leaderboard_widget.dart';
 import 'package:game/login/login_page.dart';
 import 'package:game/model/user_model.dart';
 import 'package:game/rewards/rewards_widget.dart';
-import 'package:game/visited_places/visited_places_widget.dart';
 import 'package:game/challenges/challenges_widget.dart';
 import 'package:game/events/events_widget.dart';
 import 'package:game/username/username_widget.dart';
@@ -16,6 +13,8 @@ import 'package:provider/provider.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:game/feedback/feedback.dart';
+import 'nav_widget.dart';
 
 const androidForm =
     "https://docs.google.com/forms/d/e/1FAIpQLScpffXZMHHfvY9zD_11wqrEaZTEy3dVD3OZz4iugzBKTEKQtw/viewform";
@@ -27,6 +26,8 @@ class NavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     const listTextStyle =
         TextStyle(color: Colors.grey, fontWeight: FontWeight.bold);
+    Color Carnelian = Color(0xFFB31B1B);
+
     return Drawer(child: Consumer2<UserModel, ApiClient>(
         builder: (context, userModel, apiClient, child) {
       return Container(
@@ -63,77 +64,17 @@ class NavBar extends StatelessWidget {
                   color: RGBComplement(constructColorFromUserName(
                       userModel.userData?.username ?? ""))),
             ),
-            ListTile(
-                leading: Icon(
-                  Icons.event,
-                  color: Color(0xFFB31B1B),
-                ),
-                title: Text('Events', style: listTextStyle),
-                onTap: () => {
-                      Navigator.pop(context),
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => EventsWidget()))
-                    }),
-            ListTile(
-                leading: Icon(
-                  Icons.star,
-                  color: Color(0xFFB31B1B),
-                ),
-                title: Text('Challenges', style: listTextStyle),
-                onTap: () => {
-                      Navigator.pop(context),
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => ChallengesWidget()))
-                    }),
-            ListTile(
-                leading: Icon(
-                  Icons.emoji_events,
-                  color: Color(0xFFB31B1B),
-                ),
-                title: Text('Rewards', style: listTextStyle),
-                onTap: () => {
-                      Navigator.pop(context),
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => RewardsWidget()))
-                    }),
-            ListTile(
-              leading: Icon(
-                Icons.group_rounded,
-                color: Color(0xFFB31B1B),
-              ),
-              title: Text('Event Leaderboard', style: listTextStyle),
-              onTap: () => {
-                Navigator.pop(context),
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => EventsLeaderboardWidget()))
-              },
-            ),
-            ListTile(
-              leading: Icon(
-                Icons.leaderboard,
-                color: Color(0xFFB31B1B),
-              ),
-              title: Text('Global Leaderboard', style: listTextStyle),
-              onTap: () => {
-                Navigator.pop(context),
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => GlobalLeaderboardWidget()))
-              },
-            ),
+            navTab(context, Icons.event, 'Events', EventsWidget()),
+            navTab(context, Icons.star, 'Challenges', ChallengesWidget()),
+            navTab(context, Icons.emoji_events, 'Events', RewardsWidget()),
+            navTab(context, Icons.group_rounded, 'Event Leaderboard',
+                EventsLeaderboardWidget()),
+            navTab(context, Icons.leaderboard, 'Global Leaderboard',
+                GlobalLeaderboardWidget()),
             ListTile(
               leading: Icon(
                 Icons.chat_bubble_rounded,
-                color: Color(0xFFB31B1B),
+                color: Carnelian,
               ),
               title: Text('Feedback', style: listTextStyle),
               onTap: () async {
@@ -145,20 +86,9 @@ class NavBar extends StatelessWidget {
                 }
               },
             ),
+            navTab(context, Icons.edit, 'Change Username', UserNameWidget()),
             ListTile(
-              leading: Icon(
-                Icons.edit,
-                color: Color(0xFFB31B1B),
-              ),
-              title: Text('Change Username', style: listTextStyle),
-              onTap: () => {
-                Navigator.pop(context),
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => UserNameWidget()))
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.exit_to_app, color: Color(0xFFB31B1B)),
+              leading: Icon(Icons.exit_to_app, color: Carnelian),
               title: Text('Sign Out', style: listTextStyle),
               onTap: () async => {
                 await apiClient.disconnect(),
