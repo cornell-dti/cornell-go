@@ -2,6 +2,8 @@ import { EventService } from 'src/event/event.service';
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { EventBase, Group, PrismaClient, User } from '@prisma/client';
+import { connect } from 'http2';
+import { hostname } from 'os';
 
 @Injectable()
 export class GroupService {
@@ -56,11 +58,15 @@ export class GroupService {
     if (hostUser.restrictedById !== user.restrictedById) return;
 
     // remove user from old group
-    await this.leaveGroup(user)
+    await this.leaveGroup(user);
     // call fix on old group
-    this.fixOrDeleteGroup(oldGroup)
+    await this.fixOrDeleteGroup(oldGroup);
     // add user to group
-    // this.prisma.group.update({})
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { hostOf: undefined, groupId: group.id },
+    });
+
     return oldGroup;
   }
 
@@ -74,18 +80,45 @@ export class GroupService {
   // This function is not done
   async leaveGroup(user: User): Promise<Group | undefined> {
     if (!user.groupId) return;
-    const userOldGroup = await this.getGroupForUser(user);
-    const oldGroup = await this.createFromEvent(
-      await this.prisma.eventBase.findFirstOrThrow({
-        where: { id: userOldGroup.curEventId },
-      }),
-    );
+
+    //get user's old group
+    const oldGroup = await this.prisma.group.findFirstOrThrow({
+      where: { id: user.groupId },
+      include: { curEvent: true },
+    });
+
+    //create new group and make user the host
+    const newGroup = await this.createFromEvent(oldGroup.curEvent);
+
+    await this.prisma.group.update({
+      where: { id: newGroup.id },
+      data: { hostId: user.id, members: { connect: user } },
+    });
+
+    //remove user from old group
+    await this.prisma.group.update({
+      where: { id: oldGroup.id },
+      data: { members: { disconnect: user } },
+    });
+
     return oldGroup;
   }
-  // If no host, and empty, delete
-  // If no host, and not empty, replace host
-  // If host, and empty, delete
+
   async fixOrDeleteGroup(group: Group) {
-    throw new Error('Method not implemented.');
+    const oldGroup = await this.prisma.group.findFirstOrThrow({
+      where: { id: group.id },
+      select: { host: true, members: true },
+    });
+
+    // If empty, delete
+    if (oldGroup.members.length === 0) {
+      await this.prisma.group.delete({ where: { id: group.id } });
+      // If no host, and not empty, replace host
+    } else if (!oldGroup.host && oldGroup.members.length > 0) {
+      await this.prisma.group.update({
+        where: { id: group.id },
+        data: { host: { connect: oldGroup.members.at(0) } },
+      });
+    }
   }
 }
