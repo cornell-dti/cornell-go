@@ -57,15 +57,20 @@ export class GroupService {
     // check restriction
     if (hostUser.restrictedById !== user.restrictedById) return;
 
-    // remove user from old group
+    // remove user from old group and fix old group
     await this.leaveGroup(user);
-    // call fix on old group
     await this.fixOrDeleteGroup(oldGroup);
+
+    const tempGroup = await this.prisma.group.findFirstOrThrow({
+      where: { hostId: user.id },
+    });
     // add user to group
     await this.prisma.user.update({
       where: { id: user.id },
       data: { hostOf: undefined, groupId: group.id },
     });
+
+    await this.fixOrDeleteGroup(tempGroup);
 
     return oldGroup;
   }
