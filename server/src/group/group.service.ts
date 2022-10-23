@@ -4,6 +4,8 @@ import { UserService } from '../user/user.service';
 import { EventBase, Group, PrismaClient, User } from '@prisma/client';
 import { connect } from 'http2';
 import { hostname } from 'os';
+import { group } from 'console';
+import { join } from 'path';
 
 @Injectable()
 export class GroupService {
@@ -49,28 +51,13 @@ export class GroupService {
 
   async joinGroup(user: User, joinId: string): Promise<Group | undefined> {
     const oldGroup = await this.getGroupForUser(user);
-    const group = await this.getGroupFromFriendlyId(joinId);
-    const hostUser = await this.prisma.user.findFirstOrThrow({
-      where: { id: group.hostId! },
+
+    await this.prisma.group.update({
+      where: { id: joinId },
+      data: { members: { connect: user } },
     });
 
-    // check restriction
-    if (hostUser.restrictedById !== user.restrictedById) return;
-
-    // remove user from old group and fix old group
-    await this.leaveGroup(user);
     await this.fixOrDeleteGroup(oldGroup);
-
-    const tempGroup = await this.prisma.group.findFirstOrThrow({
-      where: { hostId: user.id },
-    });
-    // add user to group
-    await this.prisma.user.update({
-      where: { id: user.id },
-      data: { hostOf: undefined, groupId: group.id },
-    });
-
-    await this.fixOrDeleteGroup(tempGroup);
 
     return oldGroup;
   }
@@ -81,8 +68,6 @@ export class GroupService {
   // move user to new group
   // remove from old
   // fix old
-  // fix new
-  // This function is not done
   async leaveGroup(user: User): Promise<Group | undefined> {
     if (!user.groupId) return;
 
