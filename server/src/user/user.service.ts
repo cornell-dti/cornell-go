@@ -3,11 +3,16 @@ import { EventService } from '../event/event.service';
 import { GroupService } from '../group/group.service';
 import { v4 } from 'uuid';
 import { AuthType, Group, PrismaClient, User } from '@prisma/client';
+import {
+  UpdateUserDataAuthTypeDto,
+  UpdateUserDataDto,
+} from '../client/update-user-data.dto';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class UserService {
   constructor(
-    private prisma: PrismaClient,
+    private prisma: PrismaService,
     @Inject(forwardRef(() => EventService))
     private eventsService: EventService,
     private groupsService: GroupService,
@@ -28,13 +33,12 @@ export class UserService {
     authToken: string,
   ) {
     const defEv = await this.eventsService.getDefaultEvent();
-
     const group: Group = await this.groupsService.createFromEvent(defEv);
-
     const user: User = await this.prisma.user.create({
       data: {
         score: 0,
-        groupId: group.id,
+        group: { connect: { id: group.id } },
+        hostOf: { connect: { id: group.id } },
         username,
         email,
         authToken,
@@ -68,7 +72,46 @@ export class UserService {
   }
 
   async deleteUser(user: User) {
-    await this.groupsService.fixOrDeleteGroup(user.groupId);
     await this.prisma.user.delete({ where: { id: user.id } });
+    await this.groupsService.fixOrDeleteGroup({ id: user.groupId });
+  }
+
+  async dtoForUserData(user: User): Promise<UpdateUserDataDto> {
+    const joinedUser = await this.prisma.user.findUniqueOrThrow({
+      where: { id: user.id },
+      include: {
+        rewards: true,
+        eventTrackers: true,
+        group: { select: { friendlyId: true } },
+      },
+    });
+
+    return {
+      id: joinedUser.id,
+      username: joinedUser.username,
+      score: joinedUser.score,
+      groupId: joinedUser.group.friendlyId,
+      authType: (
+        joinedUser.authType as string
+      ).toLowerCase() as UpdateUserDataAuthTypeDto,
+      rewardIds: joinedUser.rewards.map(rw => rw.id),
+      trackedEventIds: joinedUser.eventTrackers.map(ev => ev.eventId),
+      ignoreIdLists: false,
+    };
+  }
+
+  async setUsername(user: User, username: string) {
+    const restriction = await this.prisma.restrictionGroup.findUnique({
+      where: { id: user.restrictedById ?? '' },
+    });
+
+    if (!restriction?.canEditUsername) {
+      return false;
+    }
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { username },
+    });
   }
 }

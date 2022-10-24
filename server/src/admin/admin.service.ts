@@ -14,12 +14,16 @@ import {
   PrismaClient,
   RestrictionGroup,
 } from '@prisma/client';
+import { PrismaService } from '../prisma/prisma.service';
 
 const friendlyWords = require('friendly-words');
 
 @Injectable()
 export class AdminService {
-  constructor(private userService: UserService, private prisma: PrismaClient) {}
+  constructor(
+    private userService: UserService,
+    private prisma: PrismaService,
+  ) {}
 
   async requestAdminAccess(adminId: string) {
     await this.prisma.user.update({

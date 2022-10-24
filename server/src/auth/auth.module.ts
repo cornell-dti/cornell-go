@@ -7,9 +7,11 @@ import { UserModule } from '../user/user.module';
 import { JwtModule } from '@nestjs/jwt';
 import { RefreshAccessController } from './refresh-access/refresh-access.controller';
 import { AdminGuard, UserGuard } from './jwt-auth.guard';
+import { PrismaModule } from '../prisma/prisma.module';
 
 @Module({
   imports: [
+    PrismaModule,
     forwardRef(() => UserModule),
     JwtModule.register({
       secret: process.env.JWT_ACCESS_SECRET,

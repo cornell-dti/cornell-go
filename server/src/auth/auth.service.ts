@@ -6,6 +6,7 @@ import { JwtPayload } from './jwt-payload';
 import { LoginTicket, OAuth2Client } from 'google-auth-library';
 import { pbkdf2, randomBytes } from 'crypto';
 import { AuthType, PrismaClient, User } from '@prisma/client';
+import { PrismaService } from '../prisma/prisma.service';
 
 interface IntermediatePayload {
   id: string;
@@ -15,7 +16,7 @@ interface IntermediatePayload {
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly prisma: PrismaClient,
+    private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
     @Inject(forwardRef(() => UserService))
     private readonly userService: UserService,

@@ -5,9 +5,10 @@ import { AdminService } from './admin.service';
 import { AdminCallbackService } from './admin-callback/admin-callback.service';
 import { ClientModule } from 'src/client/client.module';
 import { UserModule } from 'src/user/user.module';
+import { PrismaModule } from '../prisma/prisma.module';
 
 @Module({
-  imports: [AuthModule, ClientModule, UserModule],
+  imports: [AuthModule, ClientModule, UserModule, PrismaModule],
   providers: [AdminGateway, AdminService, AdminCallbackService],
   controllers: [],
 })

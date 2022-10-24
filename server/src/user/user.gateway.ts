@@ -23,7 +23,8 @@ import { forwardRef, Inject, UseGuards } from '@nestjs/common';
 import { UserGuard } from 'src/auth/jwt-auth.guard';
 import { GroupGateway } from '../group/group.gateway';
 import { CensorSensor } from 'censor-sensor';
-import { AuthType } from '@prisma/client';
+import { AuthType, User } from '@prisma/client';
+import { GroupService } from '../group/group.service';
 
 const replaceAll = require('string.prototype.replaceall');
 replaceAll.shim();
@@ -34,6 +35,7 @@ export class UserGateway {
   constructor(
     private clientService: ClientService,
     private userService: UserService,
+    private groupService: GroupService,
     @Inject(forwardRef(() => AuthService))
     private authService: AuthService,
     private groupGateway: GroupGateway,
@@ -60,20 +62,10 @@ export class UserGateway {
     @CallingUser() user: User,
     @MessageBody() data: RequestUserDataDto,
   ) {
-    const rewards = await user.rewards.loadItems();
-    const participatingEvents = await user.participatingEvents.loadItems();
-    const group = await user.group?.load();
-
-    this.clientService.emitUpdateUserData(user, {
-      id: user.id,
-      username: user.username,
-      score: user.score,
-      groupId: group?.friendlyId ?? 'undefined',
-      authType: user.authType as UpdateUserDataAuthTypeDto,
-      rewardIds: rewards.map(rw => rw.id),
-      trackedEventIds: participatingEvents.map(ev => ev.event.id),
-      ignoreIdLists: false,
-    });
+    this.clientService.emitUpdateUserData(
+      user,
+      await this.userService.dtoForUserData(user),
+    );
 
     return false;
   }
@@ -83,12 +75,6 @@ export class UserGateway {
     @CallingUser() user: User,
     @MessageBody() data: SetUsernameDto,
   ) {
-    const group = await user.group.load();
-    const groupMembers = await group.members.loadItems();
-    const restrictionGroup = await user.restrictedBy?.load();
-
-    if (!(restrictionGroup?.canEditUsername ?? true)) return;
-
     const username = new CensorSensor()
       .cleanProfanityIsh(
         data.newUsername
@@ -99,7 +85,9 @@ export class UserGateway {
       .replaceAll('*', '_')
       .replaceAll(' ', '_');
 
-    await this.userService.setUsername(user, username);
+    if (!(await this.userService.setUsername(user, username))) {
+      return;
+    }
 
     this.clientService.emitInvalidateData({
       userEventData: false,
@@ -111,19 +99,14 @@ export class UserGateway {
     });
 
     // Update user that name has changed
-    this.clientService.emitUpdateUserData(user, {
-      id: user.id,
-      username: user.username,
-      score: user.score,
-      groupId: group?.friendlyId ?? 'undefined',
-      authType: user.authType as UpdateUserDataAuthTypeDto,
-      rewardIds: [],
-      trackedEventIds: [],
-      ignoreIdLists: true,
-    });
+    this.clientService.emitUpdateUserData(
+      user,
+      await this.userService.dtoForUserData(user),
+    );
 
     // Update data for the group
-    groupMembers.forEach(u => this.groupGateway.requestGroupData(u, {}));
+    const members = await this.groupService.getMembers({ id: user.groupId });
+    members.forEach(u => this.groupGateway.requestGroupData(u, {}));
 
     return false;
   }
@@ -175,7 +158,7 @@ export class UserGateway {
     @CallingUser() user: User,
     @MessageBody() data: RequestGlobalLeaderDataDto,
   ) {
-    if (user.restrictedBy) return;
+    if (user.restrictedById) return;
 
     const topPlayers = await this.userService.getTopPlayers(
       data.offset,

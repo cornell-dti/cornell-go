@@ -11,13 +11,14 @@ import {
   User,
 } from '@prisma/client';
 import { UpdateEventDataEventDto } from 'src/client/update-event-data.dto';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class EventService {
   constructor(
     private userService: UserService,
     private clientService: ClientService,
-    private readonly prisma: PrismaClient,
+    private readonly prisma: PrismaService,
   ) {}
 
   /** Get event by id */
@@ -163,6 +164,14 @@ export class EventService {
   }
 
   async createEventTracker(user: User, event: EventBase) {
+    const existing = await this.prisma.eventTracker.findFirst({
+      where: { user, event },
+    });
+
+    if (existing) {
+      return existing;
+    }
+
     const closestChallenge = await this.prisma.challenge.findFirstOrThrow({
       where: {
         eventIndex: 0,

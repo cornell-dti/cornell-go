@@ -6,6 +6,8 @@ import { connect } from 'http2';
 import { hostname } from 'os';
 import { group } from 'console';
 import { join } from 'path';
+import { UpdateGroupDataMemberDto } from '../client/update-group-data.dto';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class GroupService {
@@ -14,7 +16,7 @@ export class GroupService {
     private userService: UserService,
     @Inject(forwardRef(() => EventService))
     private eventService: EventService,
-    private prisma: PrismaClient,
+    private prisma: PrismaService,
   ) {}
 
   /** Creates a group from an event and removes from an old group (does delete empty groups) */
@@ -94,7 +96,7 @@ export class GroupService {
     return oldGroup;
   }
 
-  async fixOrDeleteGroup(group: Group) {
+  async fixOrDeleteGroup(group: Group | { id: string }) {
     const oldGroup = await this.prisma.group.findFirstOrThrow({
       where: { id: group.id },
       select: { host: true, members: true },
@@ -110,5 +112,69 @@ export class GroupService {
         data: { host: { connect: oldGroup.members.at(0) } },
       });
     }
+  }
+
+  async dtoForMemberData(group: Group): Promise<UpdateGroupDataMemberDto[]> {
+    const members = await this.getMembers(group);
+
+    return await Promise.all(
+      members.map(async mem => {
+        const tracker = await this.eventService.getCurrentEventTrackerForUser(
+          mem,
+        );
+        return {
+          id: mem.id,
+          name: mem.username,
+          points: tracker.score,
+          host: mem.id === group.hostId,
+          curChallengeId: tracker.curChallengeId,
+        };
+      }),
+    );
+  }
+
+  async getMembers(group: Group | { id: string }) {
+    return await this.prisma.user.findMany({
+      where: {
+        groupId: group.id,
+      },
+    });
+  }
+
+  async setCurrentEvent(actor: User, eventId: string) {
+    const group = await this.prisma.group.findUniqueOrThrow({
+      where: { id: actor.groupId },
+      include: { curEvent: { select: { endTime: true } } },
+    });
+
+    const stillActive = group.curEvent.endTime.getTime() - Date.now() > 0;
+
+    if (
+      (group.hostId !== actor.id || eventId === group.curEventId) &&
+      stillActive
+    ) {
+      return;
+    }
+
+    const newEvent = !stillActive
+      ? await this.eventService.getDefaultEvent()
+      : await this.eventService.getEventById(eventId);
+
+    if (!newEvent) return;
+
+    const groupMembers = await this.getMembers(group);
+
+    await Promise.all(
+      groupMembers.map(async (member: User) => {
+        await this.eventService.createEventTracker(member, newEvent);
+      }),
+    );
+
+    await this.prisma.group.update({
+      where: { id: group.id },
+      data: { curEventId: eventId },
+    });
+
+    return groupMembers;
   }
 }

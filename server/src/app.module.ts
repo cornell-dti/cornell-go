@@ -12,7 +12,8 @@ import { RewardModule } from './reward/reward.module';
 import { ClientModule } from './client/client.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
-import { InitService } from './init.service';
+import { PrismaClient } from '@prisma/client';
+import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
   imports: [
@@ -28,8 +29,9 @@ import { InitService } from './init.service';
     AuthModule,
     RewardModule,
     ClientModule,
+    PrismaModule,
   ],
   controllers: [],
-  providers: [InitService],
+  providers: [],
 })
 export class AppModule {}

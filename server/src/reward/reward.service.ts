@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { EventReward, PrismaClient, User } from '@prisma/client';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class RewardService {
-  constructor(private prisma: PrismaClient) {}
+  constructor(private prisma: PrismaService) {}
 
   /** Get rewards that are in ids and owned by the user */
   async getRewardsForUser(user: User, ids: string[]): Promise<EventReward[]> {

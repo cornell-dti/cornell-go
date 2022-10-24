@@ -9,11 +9,12 @@ import {
   User,
 } from '@prisma/client';
 import { v4 } from 'uuid';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class ChallengeService {
   constructor(
-    private readonly prisma: PrismaClient,
+    private readonly prisma: PrismaService,
     @Inject(forwardRef(() => EventService))
     private eventService: EventService,
   ) {}
