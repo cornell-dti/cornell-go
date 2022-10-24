@@ -16,7 +16,6 @@ import { PrismaService } from '../prisma/prisma.service';
 @Injectable()
 export class EventService {
   constructor(
-    private userService: UserService,
     private clientService: ClientService,
     private readonly prisma: PrismaService,
   ) {}

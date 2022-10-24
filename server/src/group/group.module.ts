@@ -9,13 +9,7 @@ import { AuthModule } from 'src/auth/auth.module';
 import { PrismaModule } from '../prisma/prisma.module';
 
 @Module({
-  imports: [
-    forwardRef(() => UserModule),
-    ClientModule,
-    AuthModule,
-    forwardRef(() => EventModule),
-    PrismaModule,
-  ],
+  imports: [ClientModule, EventModule, PrismaModule],
   providers: [GroupService, GroupGateway],
   exports: [GroupService, GroupGateway],
 })

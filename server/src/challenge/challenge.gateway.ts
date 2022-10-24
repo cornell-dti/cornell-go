@@ -27,8 +27,6 @@ export class ChallengeGateway {
     private userGateway: UserGateway,
     private groupGateway: GroupGateway,
     private eventGateway: EventGateway,
-    @Inject(forwardRef(() => EventService))
-    private eventService: EventService,
   ) {}
 
   @SubscribeMessage('requestChallengeData')

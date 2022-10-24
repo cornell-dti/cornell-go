@@ -12,9 +12,6 @@ import { PrismaService } from '../prisma/prisma.service';
 @Injectable()
 export class GroupService {
   constructor(
-    @Inject(forwardRef(() => UserService))
-    private userService: UserService,
-    @Inject(forwardRef(() => EventService))
     private eventService: EventService,
     private prisma: PrismaService,
   ) {}

@@ -26,7 +26,6 @@ export class GroupGateway {
   constructor(
     private clientService: ClientService,
     private groupService: GroupService,
-    private eventService: EventService,
   ) {}
 
   @SubscribeMessage('requestGroupData')

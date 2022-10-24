@@ -9,7 +9,6 @@ import { PrismaModule } from '../prisma/prisma.module';
 
 @Module({
   imports: [
-    forwardRef(() => EventModule),
     forwardRef(() => AuthModule),
     GroupModule,
     ClientModule,

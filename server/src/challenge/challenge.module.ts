@@ -11,12 +11,11 @@ import { ChallengeService } from './challenge.service';
 
 @Module({
   imports: [
-    forwardRef(() => EventModule),
+    EventModule,
     GroupModule,
     UserModule,
     RewardModule,
     ClientModule,
-    AuthModule,
     PrismaModule,
   ],
   providers: [ChallengeGateway, ChallengeService],

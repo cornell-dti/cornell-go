@@ -15,7 +15,6 @@ import { PrismaService } from '../prisma/prisma.service';
 export class ChallengeService {
   constructor(
     private readonly prisma: PrismaService,
-    @Inject(forwardRef(() => EventService))
     private eventService: EventService,
   ) {}
 

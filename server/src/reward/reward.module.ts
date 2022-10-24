@@ -6,7 +6,7 @@ import { RewardGateway } from './reward.gateway';
 import { RewardService } from './reward.service';
 
 @Module({
-  imports: [ClientModule, AuthModule, PrismaModule],
+  imports: [ClientModule, PrismaModule],
   providers: [RewardGateway, RewardService],
 })
 export class RewardModule {}
