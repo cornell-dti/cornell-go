@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { GoogleController } from './google/google.controller';
 import { AppleController } from './apple/apple.controller';
 import { DeviceLoginController } from './device-login/device-login.controller';
@@ -8,10 +8,11 @@ import { JwtModule } from '@nestjs/jwt';
 import { RefreshAccessController } from './refresh-access/refresh-access.controller';
 import { AdminGuard, UserGuard } from './jwt-auth.guard';
 import { PrismaModule } from '../prisma/prisma.module';
+import { AuthGateway } from './auth.gateway';
 
 @Module({
   imports: [
-    UserModule,
+    forwardRef(() => UserModule),
     PrismaModule,
     JwtModule.register({
       secret: process.env.JWT_ACCESS_SECRET,
@@ -24,7 +25,7 @@ import { PrismaModule } from '../prisma/prisma.module';
     DeviceLoginController,
     RefreshAccessController,
   ],
-  providers: [AuthService, UserGuard, AdminGuard],
+  providers: [AuthService, UserGuard, AdminGuard, AuthGateway],
   exports: [AuthService],
 })
 export class AuthModule {}

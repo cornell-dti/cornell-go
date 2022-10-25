@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { AuthModule } from 'src/auth/auth.module';
 import { ClientModule } from 'src/client/client.module';
 import { UserModule } from 'src/user/user.module';
@@ -8,7 +8,12 @@ import { AdminGateway } from './admin.gateway';
 import { AdminService } from './admin.service';
 
 @Module({
-  imports: [ClientModule, UserModule, PrismaModule],
+  imports: [
+    forwardRef(() => AuthModule),
+    ClientModule,
+    UserModule,
+    PrismaModule,
+  ],
   providers: [AdminGateway, AdminService, AdminCallbackService],
   controllers: [],
 })
