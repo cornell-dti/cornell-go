@@ -1,29 +1,19 @@
-import { InjectRepository } from '@mikro-orm/nestjs';
-import { EntityRepository } from '@mikro-orm/postgresql';
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import {
+  Challenge,
+  EventBase,
+  EventRewardType,
+  EventTracker,
+  User,
+} from '@prisma/client';
 import { EventService } from 'src/event/event.service';
-import { Challenge } from '../model/challenge.entity';
-import { EventReward } from '../model/event-reward.entity';
-import { EventBase, EventRewardType } from '../model/event-base.entity';
-import { PrevChallenge } from '../model/prev-challenge.entity';
-import { User } from '../model/user.entity';
-import { EventTracker } from 'src/model/event-tracker.entity';
-import { v4 } from 'uuid';
-import { Reference } from '@mikro-orm/core';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class ChallengeService {
   constructor(
-    @Inject(forwardRef(() => EventService))
+    private readonly prisma: PrismaService,
     private eventService: EventService,
-    @InjectRepository(Challenge)
-    private challengeRepository: EntityRepository<Challenge>,
-    @InjectRepository(PrevChallenge)
-    private prevChallengeRepository: EntityRepository<PrevChallenge>,
-    @InjectRepository(EventReward)
-    private rewardRepository: EntityRepository<EventReward>,
-    @InjectRepository(User)
-    private userRepository: EntityRepository<User>,
   ) {}
 
   /** Get challenges with prev challenges for a given user */
@@ -32,147 +22,226 @@ export class ChallengeService {
     ids: string[],
   ): Promise<Challenge[]> {
     // TODO: this can be made more efficient
-    return await this.challengeRepository.find({ id: ids });
+    return await this.prisma.challenge.findMany({ where: { id: { in: ids } } });
   }
 
   /** Get a challenge by its id */
   async getChallengeById(id: string) {
-    return await this.challengeRepository.findOneOrFail({ id });
+    return await this.prisma.challenge.findFirstOrThrow({ where: { id } });
   }
 
   /** Is challenge completed by user */
   async isChallengeCompletedByUser(user: User, challenge: Challenge) {
-    const num = await this.prevChallengeRepository.count({
-      owner: user,
-      challenge,
+    const num = await this.prisma.prevChallenge.count({
+      where: {
+        user,
+        challenge,
+      },
     });
 
     return num > 0;
   }
 
-  /** Save a challenge entity */
-  async saveChallenge(chal: Challenge) {
-    await this.challengeRepository.persistAndFlush(chal);
-  }
-
-  /** Save a prev challenge entity */
-  async savePrevChallenge(prevChal: PrevChallenge) {
-    await this.prevChallengeRepository.persistAndFlush(prevChal);
-  }
-
   /** Find first challenge */
   async getFirstChallengeForEvent(event: EventBase) {
-    return await this.challengeRepository.findOneOrFail({
-      eventIndex: 0,
-      linkedEvent: event,
+    return await this.prisma.challenge.findFirstOrThrow({
+      where: {
+        eventIndex: 0,
+        linkedEvent: event,
+      },
     });
   }
 
   /** Get next challenge in a sequence of challenges */
   async nextChallenge(chal: Challenge) {
-    try {
-      return await this.challengeRepository.findOneOrFail({
-        eventIndex: chal.eventIndex + 1,
-        linkedEvent: chal.linkedEvent,
-      });
-    } catch {
-      return chal;
-    }
+    return (
+      (await this.prisma.challenge.findFirst({
+        where: {
+          eventIndex: chal.eventIndex + 1,
+          linkedEventId: chal.linkedEventId,
+        },
+      })) ?? chal
+    );
   }
 
   /** Progress user through challenges, ensuring challengeId is current */
-  async completeChallenge(user: User, challengeId: string) {
-    const group = await user.group.load();
-    const groupMembers = await group.members.loadItems();
+  async completeChallenge(
+    user: User,
+    challengeId: string,
+  ): Promise<[EventTracker, User[]]> {
+    const groupMembers = await this.prisma.user.findMany({
+      where: { groupId: user.groupId },
+    });
 
-    const eventTracker = await this.eventService.getCurrentEventTrackerForUser(
-      user,
-    );
+    const eventTracker: EventTracker =
+      await this.eventService.getCurrentEventTrackerForUser(user);
 
-    const curEvent = await eventTracker.event.load();
+    const curEvent = await this.prisma.eventBase.findUniqueOrThrow({
+      where: { id: eventTracker.eventId },
+    });
 
     // Ensure that the correct challenge is marked complete
     if (
-      challengeId !== eventTracker.currentChallenge.id ||
+      challengeId !== eventTracker.curChallengeId ||
       (groupMembers.length !== curEvent.requiredMembers &&
         curEvent.requiredMembers >= 0)
     )
-      return eventTracker;
+      return [eventTracker, groupMembers];
 
-    const prevChal = this.prevChallengeRepository.create({
-      owner: user,
-      challenge: eventTracker.currentChallenge,
-      completionPlayers: groupMembers,
-      foundTimestamp: new Date(),
+    const prevChal = await this.prisma.prevChallenge.create({
+      data: {
+        userId: user.id,
+        challengeId: eventTracker.curChallengeId,
+        participants: {
+          connect: groupMembers.map(m => ({ id: m.id })),
+        },
+        trackerId: eventTracker.id,
+      },
     });
 
-    await this.prevChallengeRepository.persistAndFlush(prevChal);
+    const curChallenge = await this.prisma.challenge.findUniqueOrThrow({
+      where: { id: eventTracker.curChallengeId },
+    });
 
-    user.score += 1;
-    eventTracker.eventScore += 1;
+    const nextChallenge = await this.nextChallenge(curChallenge);
 
-    const nextChallenge = await this.nextChallenge(
-      await eventTracker.currentChallenge.load(),
-    );
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { score: { increment: 1 } },
+    });
 
-    eventTracker.currentChallenge.set(nextChallenge);
-    eventTracker.completed.add(prevChal);
+    await this.prisma.eventTracker.update({
+      where: { id: eventTracker.id },
+      data: {
+        score: { increment: 1 },
+        curChallenge: { connect: { id: nextChallenge.id } },
+        completedChallenges: { connect: { id: prevChal.id } },
+      },
+    });
 
-    await this.eventService.saveTracker(eventTracker);
-
-    return eventTracker;
+    return [eventTracker, groupMembers];
   }
 
   /** Check if the current event can return rewards */
   async checkForReward(eventTracker: EventTracker) {
-    const eventBase = await eventTracker.event.load();
+    const eventBase = await this.prisma.eventBase.findUniqueOrThrow({
+      where: { id: eventTracker.eventId },
+    });
 
     if (
       //If user has not completed enough challenges:
-      eventTracker.eventScore < eventBase.minimumScore ||
+      eventTracker.score < eventBase.minimumScore ||
       //If user has a reward for this event:
-      (await this.rewardRepository.count({
-        claimingUser: eventTracker.user,
-        containingEvent: eventTracker.event,
+      (await this.prisma.eventReward.count({
+        where: {
+          userId: eventTracker.userId,
+          eventId: eventTracker.eventId,
+        },
       })) > 0 ||
       //If event has expired:
-      eventBase.time < new Date()
+      eventBase.endTime < new Date()
     ) {
       return false;
     }
 
     if (eventBase.rewardType === EventRewardType.PERPETUAL) {
-      const rewardTemplate = await this.rewardRepository.findOne({
-        containingEvent: eventBase,
+      const rewardTemplate = await this.prisma.eventReward.findFirst({
+        where: { eventId: eventBase.id },
       });
 
       if (rewardTemplate !== null) {
-        const reward = this.rewardRepository.create({
-          ...rewardTemplate,
-          claimingUser: eventTracker.user,
-          isRedeemed: false,
-          id: v4(),
+        await this.prisma.eventReward.create({
+          data: {
+            ...rewardTemplate,
+            userId: eventTracker.userId,
+            isRedeemed: false,
+            id: undefined,
+          },
         });
-        await this.rewardRepository.persistAndFlush(reward);
-        await this.userRepository.persistAndFlush(eventTracker.user);
+
         return true;
       }
-    } else if (eventBase.rewardType === EventRewardType.LIMITED_TIME_EVENT) {
-      const unclaimedReward = await this.rewardRepository.findOne({
-        claimingUser: null,
-        containingEvent: eventBase,
+    } else if (eventBase.rewardType === EventRewardType.LIMITED_TIME) {
+      const unclaimedReward = await this.prisma.eventReward.findFirst({
+        where: {
+          user: null,
+          event: eventBase,
+        },
       });
 
       if (unclaimedReward !== null) {
-        unclaimedReward.claimingUser = Reference.create(eventTracker.user);
-
-        await this.rewardRepository.persistAndFlush(unclaimedReward);
-        await this.userRepository.persistAndFlush(eventTracker.user);
+        await this.prisma.eventReward.update({
+          where: { id: unclaimedReward.id },
+          data: {
+            userId: eventTracker.userId,
+          },
+        });
 
         return true;
       }
     }
 
     return false;
+  }
+
+  async getUserCompletionDate(user: User, challenge: Challenge) {
+    return (
+      (
+        await this.prisma.prevChallenge.findFirst({
+          where: { user, challenge },
+        })
+      )?.timestamp.toISOString() ?? ''
+    );
+  }
+
+  async setCurrentChallenge(
+    user: User,
+    challengeId: string,
+  ): Promise<[EventBase, User[]]> {
+    const group = await this.prisma.group.findUniqueOrThrow({
+      where: { id: user.groupId },
+      include: { curEvent: true, members: true },
+    });
+
+    const event = group.curEvent;
+
+    const isChallengeValid = await this.eventService.isChallengeInEvent(
+      challengeId,
+      group.curEventId,
+    );
+
+    if (!isChallengeValid) return [event, group.members];
+
+    const eventTracker: EventTracker =
+      await this.eventService.getCurrentEventTrackerForUser(user);
+
+    const challenge = await this.getChallengeById(challengeId);
+    const curChallenge = await this.getChallengeById(
+      eventTracker.curChallengeId,
+    );
+    const wasCompleted = await this.isChallengeCompletedByUser(user, challenge);
+    const curCompleted = await this.isChallengeCompletedByUser(
+      user,
+      curChallenge,
+    );
+
+    // Is user skipping while it's allowed
+    const isSkippingWhileAllowed =
+      wasCompleted ||
+      event.skippingEnabled ||
+      (!wasCompleted &&
+        curCompleted &&
+        challenge.eventIndex === curChallenge.eventIndex + 1);
+
+    if (!isSkippingWhileAllowed) return [event, group.members];
+
+    await this.prisma.eventTracker.update({
+      where: { id: eventTracker.id },
+      data: {
+        curChallengeId: challenge.id,
+      },
+    });
+
+    return [event, group.members];
   }
 }

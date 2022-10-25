@@ -16,6 +16,7 @@ class EventModel extends ChangeNotifier {
         print(event.events.length);
       }
       event.events.forEach((element) {
+        print(element.name);
         _events[element.id] = element;
       });
       notifyListeners();
