@@ -15,9 +15,9 @@ class _RewardWidgetState extends State<RewardWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        key: scaffoldKey,
-        body: Center(
-            child: Container(
+      key: scaffoldKey,
+      body: Center(
+        child: Container(
           decoration: BoxDecoration(
             image: DecorationImage(
               image: NetworkImage(widget.homePageState.imageUrl),
@@ -30,11 +30,13 @@ class _RewardWidgetState extends State<RewardWidget> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  const Text('Well Done!',
-                      style: TextStyle(
-                        fontSize: 72,
-                        color: Colors.white,
-                      )),
+                  const Text(
+                    'Well Done!',
+                    style: TextStyle(
+                      fontSize: 72,
+                      color: Colors.white,
+                    ),
+                  ),
                   const Icon(
                     Icons.star,
                     color: Colors.yellow,
@@ -55,27 +57,31 @@ class _RewardWidgetState extends State<RewardWidget> {
                     ),
                   ),
                   Padding(
-                      padding: EdgeInsets.only(top: 48),
-                      child: TextButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        child: Padding(
-                            padding: EdgeInsets.only(
-                                left: 25, right: 25, top: 4, bottom: 4),
-                            child: const Text(
-                              'Continue',
-                              style: TextStyle(fontSize: 28),
-                            )),
-                        style: TextButton.styleFrom(
-                          backgroundColor: Colors.red,
-                          primary: Colors.black,
+                    padding: EdgeInsets.only(top: 48),
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: Padding(
+                        padding: EdgeInsets.only(
+                            left: 25, right: 25, top: 4, bottom: 4),
+                        child: const Text(
+                          'Continue',
+                          style: TextStyle(fontSize: 28),
                         ),
-                      )),
+                      ),
+                      style: TextButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        primary: Colors.black,
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
           ),
-        )));
+        ),
+      ),
+    );
   }
 }

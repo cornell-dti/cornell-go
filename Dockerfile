@@ -18,5 +18,6 @@ RUN npm run build
 
 WORKDIR /app/server
 COPY server .
+RUN npx prisma generate
 RUN npm run build
 ENTRYPOINT ["npm", "run", "start:prod"]
