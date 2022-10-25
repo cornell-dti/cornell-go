@@ -52,7 +52,7 @@ export class GroupService {
   /** Get group of the user */
   async getGroupForUser(user: User): Promise<Group> {
     return await this.prisma.group.findFirstOrThrow({
-      where: { members: { some: user } },
+      where: { members: { some: { id: user.id } } },
     });
   }
 
@@ -67,17 +67,17 @@ export class GroupService {
   /** Adds user to an existing group, given by the group's id.
    * Returns the old group if it still exists, or null. */
 
-  async joinGroup(user: User, joinId: string): Promise<Group | undefined> {
+  async joinGroup(user: User, joinId: string): Promise<Group | null> {
     const oldGroup = await this.getGroupForUser(user);
 
-    await this.prisma.group.update({
-      where: { id: joinId },
+    const newGroup = await this.prisma.group.update({
+      where: { friendlyId: joinId.toUpperCase() },
       data: { members: { connect: { id: user.id } } },
     });
 
-    await this.fixOrDeleteGroup(oldGroup);
+    user.groupId = newGroup.id;
 
-    return oldGroup;
+    return await this.fixOrDeleteGroup(oldGroup);
   }
 
   /** Moves the user out of their current group into a new group.
@@ -86,8 +86,8 @@ export class GroupService {
   // move user to new group
   // remove from old
   // fix old
-  async leaveGroup(user: User): Promise<Group | undefined> {
-    if (!user.groupId) return;
+  async leaveGroup(user: User): Promise<Group | null> {
+    if (!user.groupId) return null;
 
     //get user's old group
     const oldGroup = await this.prisma.group.findFirstOrThrow({
@@ -96,25 +96,30 @@ export class GroupService {
     });
 
     //create new group and make user the host
+    const oldFixed = await this.fixOrDeleteGroup(oldGroup);
     const newGroup = await this.createFromEvent(oldGroup.curEvent);
 
     await this.prisma.group.update({
       where: { id: newGroup.id },
-      data: { hostId: user.id, members: { connect: { id: user.id } } },
+      data: { members: { connect: { id: user.id } } },
     });
 
-    return oldGroup;
+    await this.fixOrDeleteGroup(newGroup);
+    user.groupId = newGroup.id;
+
+    return oldFixed;
   }
 
-  async fixOrDeleteGroup(group: Group | { id: string }) {
+  async fixOrDeleteGroup(group: Group | { id: string }): Promise<Group | null> {
     const oldGroup = await this.prisma.group.findFirstOrThrow({
       where: { id: group.id },
-      select: { host: true, members: true },
+      include: { host: true, members: { take: 1 } },
     });
 
     // If empty, delete
     if (oldGroup.members.length === 0) {
       await this.prisma.group.delete({ where: { id: group.id } });
+      return null;
       // If no host, and not empty, replace host
     } else if (!oldGroup.host && oldGroup.members.length > 0) {
       await this.prisma.group.update({
@@ -122,6 +127,8 @@ export class GroupService {
         data: { host: { connect: { id: oldGroup.members[0].id } } },
       });
     }
+
+    return oldGroup;
   }
 
   async dtoForMemberData(group: Group): Promise<UpdateGroupDataMemberDto[]> {

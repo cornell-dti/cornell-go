@@ -80,6 +80,8 @@ export class UserGateway {
       return;
     }
 
+    user.username = username; // Updated so change here too
+
     this.clientService.emitInvalidateData({
       userEventData: false,
       userRewardData: false,

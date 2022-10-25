@@ -251,7 +251,9 @@ export class AdminService {
 
       await this.prisma.challenge.update({
         where: { id: challengeEntity.id },
-        data: { eventIndex: (maxIndexChallenge?.eventIndex ?? -1) + 1 },
+        data: {
+          eventIndex: Math.max((maxIndexChallenge?.eventIndex ?? -1) + 1, 0),
+        },
       });
     }
 
@@ -304,7 +306,7 @@ export class AdminService {
   async ensureEventRestriction(group: RestrictionGroup) {
     const allowedEventCount = await this.prisma.eventBase.count({
       where: {
-        allowedIn: { some: group },
+        allowedIn: { some: { id: group.id } },
       },
     });
 
@@ -314,7 +316,7 @@ export class AdminService {
 
     const allowedEvents = (
       await this.prisma.eventBase.findMany({
-        where: { allowedIn: { some: group } },
+        where: { allowedIn: { some: { id: group.id } } },
       })
     ).map(({ id }) => id);
 

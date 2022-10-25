@@ -146,7 +146,7 @@ export class ChallengeService {
 
     if (eventBase.rewardType === EventRewardType.PERPETUAL) {
       const rewardTemplate = await this.prisma.eventReward.findFirst({
-        where: { event: eventBase },
+        where: { eventId: eventBase.id },
       });
 
       if (rewardTemplate !== null) {

@@ -79,11 +79,15 @@ export class EventService {
       where: {
         indexable: !restriction,
         //rewardType: rewardTypes && { $in: rewardTypes },
-        allowedIn: { some: restriction },
+        allowedIn: {
+          some: restriction?.id ? { id: restriction.id } : undefined,
+        },
       },
       select: { id: true },
       skip: offset,
     });
+
+    console.log(events, offset);
 
     return events.map(ev => ev.id);
   }
@@ -160,7 +164,7 @@ export class EventService {
 
   async createEventTracker(user: User, event: EventBase) {
     const existing = await this.prisma.eventTracker.findFirst({
-      where: { user, event },
+      where: { userId: user.id, eventId: event.id },
     });
 
     if (existing) {
@@ -170,7 +174,7 @@ export class EventService {
     const closestChallenge = await this.prisma.challenge.findFirstOrThrow({
       where: {
         eventIndex: 0,
-        linkedEvent: event,
+        linkedEvent: { id: event.id },
       },
     });
 
@@ -308,7 +312,7 @@ export class EventService {
     if (!restriction) return undefined;
 
     const restrictions = await this.prisma.restrictionGroup.findMany({
-      where: { id: restriction, allowedEvents: { some: {} } },
+      where: { id: restriction, allowedEvents: { none: {} } },
     });
 
     return restrictions.length === 0 ? undefined : restrictions[0];
