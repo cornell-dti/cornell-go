@@ -11,17 +11,41 @@ export class GroupService {
     private prisma: PrismaService,
   ) {}
 
+  genFriendlyId() {
+    const codes = [];
+    for (let i = 0; i < 5; ++i) {
+      const val = Math.floor(Math.random() * 35);
+      if (val < 26) {
+        codes.push(val + 65);
+      } else {
+        codes.push(val + 22);
+      }
+    }
+
+    return String.fromCharCode(...codes);
+  }
+
   /** Creates a group from an event and removes from an old group (does delete empty groups) */
   async createFromEvent(event: EventBase): Promise<Group> {
+    let code = this.genFriendlyId();
+
+    // Keep trying until one does not collide
+    while (
+      (await this.prisma.group.count({ where: { friendlyId: code } })) > 0
+    ) {
+      code = this.genFriendlyId();
+    }
+
     const group: Group = await this.prisma.group.create({
       data: {
         curEventId: event.id,
-        friendlyId: '',
+        friendlyId: code,
         hostId: null,
       },
     });
 
-    group.friendlyId = group.id.substring(9, 13);
+    console.log(`Group ${code} created!`);
+
     return group;
   }
 
@@ -48,7 +72,7 @@ export class GroupService {
 
     await this.prisma.group.update({
       where: { id: joinId },
-      data: { members: { connect: user } },
+      data: { members: { connect: { id: user.id } } },
     });
 
     await this.fixOrDeleteGroup(oldGroup);
@@ -76,13 +100,7 @@ export class GroupService {
 
     await this.prisma.group.update({
       where: { id: newGroup.id },
-      data: { hostId: user.id, members: { connect: user } },
-    });
-
-    //remove user from old group
-    await this.prisma.group.update({
-      where: { id: oldGroup.id },
-      data: { members: { disconnect: user } },
+      data: { hostId: user.id, members: { connect: { id: user.id } } },
     });
 
     return oldGroup;
@@ -101,7 +119,7 @@ export class GroupService {
     } else if (!oldGroup.host && oldGroup.members.length > 0) {
       await this.prisma.group.update({
         where: { id: group.id },
-        data: { host: { connect: oldGroup.members.at(0) } },
+        data: { host: { connect: { id: oldGroup.members[0].id } } },
       });
     }
   }

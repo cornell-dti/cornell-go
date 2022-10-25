@@ -136,7 +136,7 @@ export class AdminService {
 
     await Promise.all(genedUsers.map(u => this.userService.deleteUser(u)));
 
-    this.prisma.restrictionGroup.findMany({
+    await this.prisma.restrictionGroup.deleteMany({
       where: { id: { in: ids } },
     });
   }
@@ -286,8 +286,8 @@ export class AdminService {
         await this.prisma.restrictionGroup.update({
           where: { id: group.id },
           data: {
-            generatedUsers: { connect: user },
-            restrictedUsers: { connect: user },
+            generatedUsers: { connect: { id: user.id } },
+            restrictedUsers: { connect: { id: user.id } },
           },
         });
       }
@@ -464,7 +464,7 @@ export class AdminService {
     restrictionGroup: RestrictionGroup,
   ): Promise<RestrictionDto> {
     const fullRestric = this.prisma.restrictionGroup.findUniqueOrThrow({
-      where: restrictionGroup,
+      where: { id: restrictionGroup.id },
     });
 
     const genUsers = await fullRestric.generatedUsers();

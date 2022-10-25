@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import {
+  Challenge,
   EventBase,
   EventRewardType,
   RestrictionGroup,
@@ -110,27 +111,26 @@ export class EventService {
     lat = +lat;
     long = +long;
 
-    const defaultEvent: { 'ev.id': string; 'chal.id': string }[] = await this
-      .prisma.$queryRaw`
+    const defaultEvent: Challenge[] = await this.prisma.$queryRaw`
       select * from "EventBase" ev 
-      left join "Challenge" chal 
-      on ev.id = chal.linkedEventId and chal.isDefault = true
-      order by ((chal.latitude - ${lat})^2 + (chal.longitude - ${long})^2) desc
+      inner join "Challenge" chal 
+      on ev.id = chal."linkedEventId" and ev."isDefault" = true
+      order by ((chal."latitude" - ${lat})^2 + (chal."longitude" - ${long})^2) desc
     `;
 
     if (defaultEvent.length === 0) throw 'Cannot find closest challenge!';
 
-    const closestChalId = defaultEvent[0]['chal.id'];
-    const defaultEvId = defaultEvent[0]['ev.id'];
+    const closestChalId = defaultEvent[0].id;
+    const defaultEvId = defaultEvent[0].linkedEventId;
 
     const progress = await this.prisma.eventTracker.create({
       data: {
         score: 0,
         isRankedForEvent: true,
         cooldownEnd: new Date(),
-        eventId: defaultEvId,
-        curChallengeId: closestChalId,
-        userId: user.id,
+        event: { connect: { id: defaultEvId } },
+        curChallenge: { connect: { id: closestChalId } },
+        user: { connect: { id: user.id } },
       },
     });
 

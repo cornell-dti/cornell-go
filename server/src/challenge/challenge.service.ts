@@ -3,7 +3,8 @@ import {
   Challenge,
   EventBase,
   EventRewardType,
-  EventTracker, User
+  EventTracker,
+  User,
 } from '@prisma/client';
 import { EventService } from 'src/event/event.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -91,7 +92,9 @@ export class ChallengeService {
       data: {
         userId: user.id,
         challengeId: eventTracker.curChallengeId,
-        participants: { connect: groupMembers },
+        participants: {
+          connect: groupMembers.map(m => ({ id: m.id })),
+        },
         trackerId: eventTracker.id,
       },
     });
@@ -111,8 +114,8 @@ export class ChallengeService {
       where: { id: eventTracker.id },
       data: {
         score: { increment: 1 },
-        curChallenge: { connect: nextChallenge },
-        completedChallenges: { connect: prevChal },
+        curChallenge: { connect: { id: nextChallenge.id } },
+        completedChallenges: { connect: { id: prevChal.id } },
       },
     });
 
