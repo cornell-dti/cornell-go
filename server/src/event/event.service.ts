@@ -112,8 +112,8 @@ export class EventService {
 
     const defaultEvent: { 'ev.id': string; 'chal.id': string }[] = await this
       .prisma.$queryRaw`
-      select * from EventBase ev 
-      left join Challenge chal 
+      select * from "EventBase" ev 
+      left join "Challenge" chal 
       on ev.id = chal.linkedEventId and chal.isDefault = true
       order by ((chal.latitude - ${lat})^2 + (chal.longitude - ${long})^2) desc
     `;
