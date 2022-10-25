@@ -1,19 +1,17 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import { EventService } from '../event/event.service';
-import { GroupService } from '../group/group.service';
-import { v4 } from 'uuid';
-import { AuthType, Group, PrismaClient, User } from '@prisma/client';
+import { Injectable } from '@nestjs/common';
+import { AuthType, Group, User } from '@prisma/client';
 import {
   UpdateUserDataAuthTypeDto,
   UpdateUserDataDto,
 } from '../client/update-user-data.dto';
+import { EventService } from '../event/event.service';
+import { GroupService } from '../group/group.service';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class UserService {
   constructor(
     private prisma: PrismaService,
-    @Inject(forwardRef(() => EventService))
     private eventsService: EventService,
     private groupsService: GroupService,
   ) {}
@@ -21,6 +19,14 @@ export class UserService {
   /** Find a user by their authentication token */
   async byAuth(authType: AuthType, authToken: string) {
     return await this.prisma.user.findFirst({ where: { authType, authToken } });
+  }
+
+  /** Sets a user's authentication type based on token */
+  async setAuthType(user: User, authType: AuthType, token: string) {
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { authToken: token, authType: authType },
+    });
   }
 
   /** Registers a user using a certain authentication scheme */

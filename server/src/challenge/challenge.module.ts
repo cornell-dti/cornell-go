@@ -1,5 +1,4 @@
-import { forwardRef, Module } from '@nestjs/common';
-import { AuthModule } from 'src/auth/auth.module';
+import { Module } from '@nestjs/common';
 import { ClientModule } from 'src/client/client.module';
 import { EventModule } from 'src/event/event.module';
 import { RewardModule } from 'src/reward/reward.module';

@@ -1,12 +1,12 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { UserService } from '../user/user.service';
+import { AuthType, User } from '@prisma/client';
 import appleSignin from 'apple-signin-auth';
-import { JwtPayload } from './jwt-payload';
-import { LoginTicket, OAuth2Client } from 'google-auth-library';
 import { pbkdf2, randomBytes } from 'crypto';
-import { AuthType, PrismaClient, User } from '@prisma/client';
+import { LoginTicket, OAuth2Client } from 'google-auth-library';
 import { PrismaService } from '../prisma/prisma.service';
+import { UserService } from '../user/user.service';
+import { JwtPayload } from './jwt-payload';
 
 interface IntermediatePayload {
   id: string;
@@ -18,7 +18,6 @@ export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
-    @Inject(forwardRef(() => UserService))
     private readonly userService: UserService,
   ) {}
 
@@ -195,14 +194,6 @@ export class AuthService {
     } catch {
       return null;
     }
-  }
-
-  /** Sets a user's authentication type based on token */
-  async setAuthType(user: User, authType: AuthType, token: string) {
-    await this.prisma.user.update({
-      where: { id: user.id },
-      data: { authToken: token, authType: authType },
-    });
   }
 
   async userByToken(token: string): Promise<User | null> {

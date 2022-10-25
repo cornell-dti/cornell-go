@@ -1,4 +1,4 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { GoogleController } from './google/google.controller';
 import { AppleController } from './apple/apple.controller';
 import { DeviceLoginController } from './device-login/device-login.controller';
@@ -11,7 +11,7 @@ import { PrismaModule } from '../prisma/prisma.module';
 
 @Module({
   imports: [
-    forwardRef(() => UserModule),
+    UserModule,
     PrismaModule,
     JwtModule.register({
       secret: process.env.JWT_ACCESS_SECRET,

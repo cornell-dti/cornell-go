@@ -1,16 +1,12 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import { UserService } from '../user/user.service';
-import { ChallengeService } from 'src/challenge/challenge.service';
-import { ClientService } from '../client/client.service';
+import { Injectable } from '@nestjs/common';
 import {
   EventBase,
   EventRewardType,
-  EventTracker,
-  PrismaClient,
   RestrictionGroup,
   User,
 } from '@prisma/client';
 import { UpdateEventDataEventDto } from 'src/client/update-event-data.dto';
+import { ClientService } from '../client/client.service';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()

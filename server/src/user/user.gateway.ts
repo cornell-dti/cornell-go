@@ -1,30 +1,23 @@
+import { UseGuards } from '@nestjs/common';
 import {
   MessageBody,
   SubscribeMessage,
   WebSocketGateway,
 } from '@nestjs/websockets';
-import { AuthService } from '../auth/auth.service';
+import { AuthType, User } from '@prisma/client';
+import { CensorSensor } from 'censor-sensor';
+import { UserGuard } from 'src/auth/jwt-auth.guard';
 import { CallingUser } from '../auth/calling-user.decorator';
 import { ClientService } from '../client/client.service';
-import { UpdateGroupDataDto } from '../client/update-group-data.dto';
-import {
-  UpdateUserDataAuthTypeDto,
-  UpdateUserDataDto,
-} from '../client/update-user-data.dto';
+import { GroupGateway } from '../group/group.gateway';
+import { GroupService } from '../group/group.service';
 import { CloseAccountDto } from './close-account.dto';
+import { RequestGlobalLeaderDataDto } from './request-global-leader-data.dto';
 import { RequestUserDataDto } from './request-user-data.dto';
 import { SetAuthToDeviceDto } from './set-auth-to-device.dto';
 import { SetAuthToOAuthDto } from './set-auth-to-oauth.dto';
 import { SetUsernameDto } from './set-username.dto';
-import { RequestEventLeaderDataDto } from '../event/request-event-leader-data.dto';
-import { RequestGlobalLeaderDataDto } from './request-global-leader-data.dto';
 import { UserService } from './user.service';
-import { forwardRef, Inject, UseGuards } from '@nestjs/common';
-import { UserGuard } from 'src/auth/jwt-auth.guard';
-import { GroupGateway } from '../group/group.gateway';
-import { CensorSensor } from 'censor-sensor';
-import { AuthType, User } from '@prisma/client';
-import { GroupService } from '../group/group.service';
 
 const replaceAll = require('string.prototype.replaceall');
 replaceAll.shim();
@@ -36,8 +29,6 @@ export class UserGateway {
     private clientService: ClientService,
     private userService: UserService,
     private groupService: GroupService,
-    @Inject(forwardRef(() => AuthService))
-    private authService: AuthService,
     private groupGateway: GroupGateway,
   ) {}
 
@@ -116,7 +107,7 @@ export class UserGateway {
     @CallingUser() user: User,
     @MessageBody() data: SetAuthToDeviceDto,
   ) {
-    await this.authService.setAuthType(user, AuthType.DEVICE, data.deviceId);
+    await this.userService.setAuthType(user, AuthType.DEVICE, data.deviceId);
     return false;
   }
 
@@ -125,7 +116,7 @@ export class UserGateway {
     @CallingUser() user: User,
     @MessageBody() data: SetAuthToOAuthDto,
   ) {
-    await this.authService.setAuthType(
+    await this.userService.setAuthType(
       user,
       this.providerToAuthType(data.provider),
       data.authId,
@@ -138,7 +129,7 @@ export class UserGateway {
     @CallingUser() user: User,
     @MessageBody() data: CloseAccountDto,
   ) {
-    await this.authService.setAuthType(user, AuthType.NONE, user.authToken);
+    await this.userService.setAuthType(user, AuthType.NONE, user.authToken);
     await this.userService.deleteUser(user);
 
     this.clientService.emitInvalidateData({

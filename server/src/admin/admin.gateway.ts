@@ -2,38 +2,31 @@ import { UseGuards } from '@nestjs/common';
 import {
   MessageBody,
   SubscribeMessage,
-  WebSocketGateway,
+  WebSocketGateway
 } from '@nestjs/websockets';
+import {
+  User
+} from '@prisma/client';
 import { CallingUser } from 'src/auth/calling-user.decorator';
 import { AdminGuard } from 'src/auth/jwt-auth.guard';
+import { ClientService } from 'src/client/client.service';
 import { AdminCallbackService } from './admin-callback/admin-callback.service';
 import { UpdateAdminDataAdminDto } from './admin-callback/update-admin-data.dto';
+import { UpdateEventDataDto } from './admin-callback/update-event-data.dto';
+import { UpdateRewardDataDto } from './admin-callback/update-reward-data.dto';
 import { AdminService } from './admin.service';
-import { ClientService } from 'src/client/client.service';
-import { RewardService } from 'src/reward/reward.service';
 import { RequestAdminsDto } from './request-admins.dto';
 import { RequestChallengesDto } from './request-challenges.dto';
 import { RequestEventsDto } from './request-events.dto';
-import { RequestRewardsDto } from './request-rewards.dto';
-import { UpdateRewardDataDto } from './admin-callback/update-reward-data.dto';
-import { UpdateAdminsDto } from './update-admins.dto';
-import { ChallengeDto, UpdateChallengesDto } from './update-challenges.dto';
-import { EventDto, UpdateEventsDto } from './update-events.dto';
-import { RewardDto, UpdateRewardsDto } from './update-rewards.dto';
-import { v4 } from 'uuid';
-import { UpdateEventDataDto } from './admin-callback/update-event-data.dto';
 import {
-  RequestRestrictionsDto,
-  RestrictionDto,
+  RequestRestrictionsDto
 } from './request-restrictions.dto';
+import { RequestRewardsDto } from './request-rewards.dto';
+import { UpdateAdminsDto } from './update-admins.dto';
+import { UpdateChallengesDto } from './update-challenges.dto';
+import { UpdateEventsDto } from './update-events.dto';
 import { UpdateRestrictionsDto } from './update-restrictions.dto';
-import {
-  Challenge,
-  EventBase,
-  EventReward,
-  RestrictionGroup,
-  User,
-} from '@prisma/client';
+import { UpdateRewardsDto } from './update-rewards.dto';
 @WebSocketGateway({ cors: true })
 @UseGuards(AdminGuard)
 export class AdminGateway {

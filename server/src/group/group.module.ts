@@ -1,12 +1,9 @@
-import { EventService } from 'src/event/event.service';
-import { forwardRef, Module } from '@nestjs/common';
-import { GroupService } from './group.service';
-import { GroupGateway } from './group.gateway';
-import { UserModule } from '../user/user.module';
+import { Module } from '@nestjs/common';
 import { ClientModule } from 'src/client/client.module';
 import { EventModule } from '../event/event.module';
-import { AuthModule } from 'src/auth/auth.module';
 import { PrismaModule } from '../prisma/prisma.module';
+import { GroupGateway } from './group.gateway';
+import { GroupService } from './group.service';
 
 @Module({
   imports: [ClientModule, EventModule, PrismaModule],

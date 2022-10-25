@@ -1,11 +1,6 @@
+import { Injectable } from '@nestjs/common';
+import { EventBase, Group, User } from '@prisma/client';
 import { EventService } from 'src/event/event.service';
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import { UserService } from '../user/user.service';
-import { EventBase, Group, PrismaClient, User } from '@prisma/client';
-import { connect } from 'http2';
-import { hostname } from 'os';
-import { group } from 'console';
-import { join } from 'path';
 import { UpdateGroupDataMemberDto } from '../client/update-group-data.dto';
 import { PrismaService } from '../prisma/prisma.service';
 
