@@ -2,7 +2,7 @@ import { UseGuards } from '@nestjs/common';
 import {
   MessageBody,
   SubscribeMessage,
-  WebSocketGateway
+  WebSocketGateway,
 } from '@nestjs/websockets';
 import { User } from '@prisma/client';
 import { UserGuard } from 'src/auth/jwt-auth.guard';
