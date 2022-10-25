@@ -59,6 +59,7 @@ export class UserService {
     });
 
     await this.eventsService.createDefaultEventTracker(user, lat, long);
+    console.log(`User ${user.id} created!`);
 
     return user;
   }

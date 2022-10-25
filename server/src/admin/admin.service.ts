@@ -26,6 +26,8 @@ export class AdminService {
   ) {}
 
   async requestAdminAccess(adminId: string) {
+    console.log(`User ${adminId} requested admin access!`);
+
     await this.prisma.user.update({
       where: { id: adminId },
       data: { adminRequested: true },
@@ -33,6 +35,10 @@ export class AdminService {
   }
 
   async setAdminStatus(adminId: string, granted: boolean) {
+    console.log(
+      `User was ${adminId} ${granted ? 'granted' : 'denied'} admin access!`,
+    );
+
     return await this.prisma.user.update({
       where: { id: adminId },
       data: {
