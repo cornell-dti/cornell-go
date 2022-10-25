@@ -1,21 +1,19 @@
 import { forwardRef, Module } from '@nestjs/common';
+import { ClientModule } from 'src/client/client.module';
+import { AuthModule } from '../auth/auth.module';
 import { EventModule } from '../event/event.module';
 import { GroupModule } from '../group/group.module';
-import { User } from '../model/user.entity';
-import { UserService } from './user.service';
+import { PrismaModule } from '../prisma/prisma.module';
 import { UserGateway } from './user.gateway';
-import { ClientModule } from 'src/client/client.module';
-import { AuthModule } from 'src/auth/auth.module';
-import { MikroOrmModule } from '@mikro-orm/nestjs';
-import { SessionLogEntry } from 'src/model/session-log-entry.entity';
+import { UserService } from './user.service';
 
 @Module({
   imports: [
-    MikroOrmModule.forFeature([User, SessionLogEntry]),
-    forwardRef(() => EventModule),
     forwardRef(() => AuthModule),
-    GroupModule,
     ClientModule,
+    GroupModule,
+    PrismaModule,
+    EventModule,
   ],
   providers: [UserService, UserGateway],
   exports: [UserService, UserGateway],

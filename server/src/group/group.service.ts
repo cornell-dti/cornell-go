@@ -1,138 +1,197 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import { EventBase } from '../model/event-base.entity';
-import { Group } from '../model/group.entity';
-import { User } from '../model/user.entity';
-import { EventTracker } from '../model/event-tracker.entity';
-import { UserService } from '../user/user.service';
-import { InjectRepository } from '@mikro-orm/nestjs';
-import { EntityRepository } from '@mikro-orm/postgresql';
-import { v4 } from 'uuid';
-import { elementAt, NotFoundError } from 'rxjs';
-import { Reference, Unique } from '@mikro-orm/core';
+import { Injectable } from '@nestjs/common';
+import { EventBase, Group, User } from '@prisma/client';
+import { EventService } from 'src/event/event.service';
+import { UpdateGroupDataMemberDto } from '../client/update-group-data.dto';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class GroupService {
   constructor(
-    @Inject(forwardRef(() => UserService))
-    private userService: UserService,
-    @InjectRepository(Group)
-    private groupsRepository: EntityRepository<Group>,
+    private eventService: EventService,
+    private prisma: PrismaService,
   ) {}
 
-  /** Creates a group from an event and removes from an old group (does delete empty groups) */
-  async createFromEvent(
-    event: EventBase,
-    host: User,
-    isNew = false,
-  ): Promise<[Group | undefined, Group]> {
-    const oldGroup = isNew ? null : await host.group.load();
-
-    const group: Group = this.groupsRepository.create({
-      id: v4(),
-      currentEvent: event,
-      members: [host],
-      friendlyId: '',
-      host: null!, // TODO: Fix this
-    });
-
-    group.friendlyId = group.id.substring(9, 13);
-
-    // If there is an oldGroup then create a new oldGroup that is processed based on whether the user is the host.
-    const oldGroupNew = oldGroup
-      ? await this.checkGroupSizeForRemoval(
-          oldGroup,
-          oldGroup.host.id === host.id,
-        )
-      : undefined;
-
-    await this.groupsRepository.persistAndFlush(group);
-    if (oldGroupNew) {
-      oldGroupNew.members.remove(host);
-      await this.groupsRepository.persistAndFlush(oldGroupNew);
+  genFriendlyId() {
+    const codes = [];
+    for (let i = 0; i < 5; ++i) {
+      const val = Math.floor(Math.random() * 35);
+      if (val < 26) {
+        codes.push(val + 65);
+      } else {
+        codes.push(val + 22);
+      }
     }
-    group.host = Reference.create(host);
-    await this.groupsRepository.persistAndFlush(group);
-    host.group = Reference.create(group);
-    await this.groupsRepository.persistAndFlush(group);
 
-    return [oldGroupNew, group];
+    return String.fromCharCode(...codes);
   }
 
-  async saveGroup(group: Group) {
-    await this.groupsRepository.persistAndFlush(group);
+  /** Creates a group from an event and removes from an old group (does delete empty groups) */
+  async createFromEvent(event: EventBase): Promise<Group> {
+    let code = this.genFriendlyId();
+
+    // Keep trying until one does not collide
+    while (
+      (await this.prisma.group.count({ where: { friendlyId: code } })) > 0
+    ) {
+      code = this.genFriendlyId();
+    }
+
+    const group: Group = await this.prisma.group.create({
+      data: {
+        curEventId: event.id,
+        friendlyId: code,
+        hostId: null,
+      },
+    });
+
+    console.log(`Group ${code} created!`);
+
+    return group;
   }
 
   /** Get group of the user */
   async getGroupForUser(user: User): Promise<Group> {
-    return await user.group.load();
+    return await this.prisma.group.findFirstOrThrow({
+      where: { members: { some: { id: user.id } } },
+    });
   }
 
   /** Get group from by the friendlyId.
    * Throws an error if the id does not correspond to a group. */
   async getGroupFromFriendlyId(id: string): Promise<Group> {
-    return await this.groupsRepository.findOneOrFail({ friendlyId: id });
-  }
-
-  /** Invalidates a user's group data forever */
-  async orphanUser(user: User) {
-    await this.leaveGroup(user);
-    await this.groupsRepository.removeAndFlush(user.group);
-  }
-
-  /* If the user is the only member, deletes the group. */
-  async checkGroupSizeForRemoval(
-    group: Group,
-    didHostLeave: boolean,
-  ): Promise<Group | undefined> {
-    // If the user is the only member then delete the group and return undefined.
-    if ((await group.members.loadCount()) === 1) {
-      group.host = null!;
-      await this.groupsRepository.removeAndFlush(group);
-      return undefined;
-    } else if (didHostLeave) {
-      // If the user is the host and they left the group then a new host is chosen from the remaining users in the group.
-      group.host = Reference.create(
-        (await group.members.loadItems()).filter(
-          u => group.host.id !== u.id,
-        )[0],
-      );
-      await this.groupsRepository.persistAndFlush(group);
-    }
-    return group;
+    return await this.prisma.group.findFirstOrThrow({
+      where: { friendlyId: id },
+    });
   }
 
   /** Adds user to an existing group, given by the group's id.
    * Returns the old group if it still exists, or null. */
-  async joinGroup(user: User, joinId: string): Promise<Group | undefined> {
-    const group = await this.getGroupFromFriendlyId(joinId);
-    const oldGroup = await user.group.load();
 
-    if (oldGroup.friendlyId === joinId) return;
+  async joinGroup(user: User, joinId: string): Promise<Group | null> {
+    const oldGroup = await this.getGroupForUser(user);
 
-    const host = await group.host.load();
+    const newGroup = await this.prisma.group.update({
+      where: { friendlyId: joinId.toUpperCase() },
+      data: { members: { connect: { id: user.id } } },
+    });
 
-    if (host.restrictedBy?.id !== user.restrictedBy?.id) return;
+    user.groupId = newGroup.id;
 
-    const ret = await this.checkGroupSizeForRemoval(
-      oldGroup,
-      oldGroup.host.id === user.id,
-    );
-
-    group.members.add(user);
-    user.group = Reference.create(group);
-
-    await this.groupsRepository.persistAndFlush(group);
-    return ret;
+    return await this.fixOrDeleteGroup(oldGroup);
   }
 
   /** Moves the user out of their current group into a new group.
    * Returns the old group if it still exists, or null. */
-  async leaveGroup(user: User): Promise<Group | undefined> {
-    const userOldGroup = await this.getGroupForUser(user);
-    const [oldGroup] = await this.createFromEvent(
-      await userOldGroup.currentEvent.load(),
-      user,
-    );
+  // create new group
+  // move user to new group
+  // remove from old
+  // fix old
+  async leaveGroup(user: User): Promise<Group | null> {
+    if (!user.groupId) return null;
+
+    //get user's old group
+    const oldGroup = await this.prisma.group.findFirstOrThrow({
+      where: { id: user.groupId },
+      include: { curEvent: true },
+    });
+
+    //create new group and make user the host
+    const oldFixed = await this.fixOrDeleteGroup(oldGroup);
+    const newGroup = await this.createFromEvent(oldGroup.curEvent);
+
+    await this.prisma.group.update({
+      where: { id: newGroup.id },
+      data: { members: { connect: { id: user.id } } },
+    });
+
+    await this.fixOrDeleteGroup(newGroup);
+    user.groupId = newGroup.id;
+
+    return oldFixed;
+  }
+
+  async fixOrDeleteGroup(group: Group | { id: string }): Promise<Group | null> {
+    const oldGroup = await this.prisma.group.findFirstOrThrow({
+      where: { id: group.id },
+      include: { host: true, members: { take: 1 } },
+    });
+
+    // If empty, delete
+    if (oldGroup.members.length === 0) {
+      await this.prisma.group.delete({ where: { id: group.id } });
+      return null;
+      // If no host, and not empty, replace host
+    } else if (!oldGroup.host && oldGroup.members.length > 0) {
+      await this.prisma.group.update({
+        where: { id: group.id },
+        data: { host: { connect: { id: oldGroup.members[0].id } } },
+      });
+    }
+
     return oldGroup;
+  }
+
+  async dtoForMemberData(group: Group): Promise<UpdateGroupDataMemberDto[]> {
+    const members = await this.getMembers(group);
+
+    return await Promise.all(
+      members.map(async mem => {
+        const tracker = await this.eventService.getCurrentEventTrackerForUser(
+          mem,
+        );
+        return {
+          id: mem.id,
+          name: mem.username,
+          points: tracker.score,
+          host: mem.id === group.hostId,
+          curChallengeId: tracker.curChallengeId,
+        };
+      }),
+    );
+  }
+
+  async getMembers(group: Group | { id: string }) {
+    return await this.prisma.user.findMany({
+      where: {
+        groupId: group.id,
+      },
+    });
+  }
+
+  async setCurrentEvent(actor: User, eventId: string) {
+    const group = await this.prisma.group.findUniqueOrThrow({
+      where: { id: actor.groupId },
+      include: { curEvent: { select: { endTime: true } } },
+    });
+
+    const stillActive = group.curEvent.endTime.getTime() - Date.now() > 0;
+
+    if (
+      (group.hostId !== actor.id || eventId === group.curEventId) &&
+      stillActive
+    ) {
+      return;
+    }
+
+    const newEvent = !stillActive
+      ? await this.eventService.getDefaultEvent()
+      : await this.eventService.getEventById(eventId);
+
+    if (!newEvent) return;
+
+    const groupMembers = await this.getMembers(group);
+
+    await Promise.all(
+      groupMembers.map(async (member: User) => {
+        await this.eventService.createEventTracker(member, newEvent);
+      }),
+    );
+
+    await this.prisma.group.update({
+      where: { id: group.id },
+      data: { curEventId: eventId },
+    });
+
+    return groupMembers;
   }
 }

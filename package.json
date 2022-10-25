@@ -1,0 +1,23 @@
+{
+  "devDependencies": {
+    "prisma": "^4.5.0"
+  },
+  "name": "cornell-go",
+  "description": "CornellGO! is an interactive scavenger hunt aimed at sparking interest in exploring the historic Cornell campus by leading the player around campus, seeking landmarks while competing with others.",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cornell-dti/cornell-go.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cornell-dti/cornell-go/issues"
+  },
+  "homepage": "https://github.com/cornell-dti/cornell-go#readme"
+}
