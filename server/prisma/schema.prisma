@@ -19,6 +19,12 @@ enum EventRewardType {
   PERPETUAL
 }
 
+enum RestrictionGroupSpecialUsage {
+  DEVICE_LOGIN
+  CORNELL_LOGIN
+  NONE
+}
+
 model User {
   id                  String            @id() @default(uuid())
   authToken           String
@@ -36,8 +42,8 @@ model User {
   hostOf              Group?            @relation("host")
   eventTrackers       EventTracker[]
   completedChallenges PrevChallenge[]   @relation("owner")
-  restrictedBy        RestrictionGroup? @relation("restricted", fields: [restrictedById], references: [id])
-  restrictedById      String?
+  restrictedBy        RestrictionGroup  @relation("restricted", fields: [restrictedById], references: [id])
+  restrictedById      String
   generatedBy         RestrictionGroup? @relation("generated", fields: [generatedById], references: [id])
   generatedById       String?
   isRanked            Boolean           @default(true)
@@ -126,11 +132,12 @@ model PrevChallenge {
 }
 
 model RestrictionGroup {
-  id              String      @id @default(uuid())
+  id              String                       @id @default(uuid())
   displayName     String // A very cool org#1
   name            String // a_very_cool_org_1
   canEditUsername Boolean
-  restrictedUsers User[]      @relation("restricted")
-  generatedUsers  User[]      @relation("generated")
+  restrictedUsers User[]                       @relation("restricted")
+  generatedUsers  User[]                       @relation("generated")
   allowedEvents   EventBase[]
+  specialUsage    RestrictionGroupSpecialUsage
 }
