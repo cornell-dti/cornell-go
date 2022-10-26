@@ -31,18 +31,15 @@ class _AnimatedRewardCellState extends State<AnimatedRewardCell> {
         _eventName = eventName,
         _redeemText = redeemText;
 
+  final defaultStyle = TextStyle(
+      fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black);
   @override
   Widget build(BuildContext context) {
-    final titleStyle = TextStyle(
-        fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black);
-    final locStyle = TextStyle(
-        fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black45);
-    final redeemStyle = TextStyle(
-        fontWeight: FontWeight.normal, fontSize: 20, color: Colors.black);
-    final redeemLinkStyle = TextStyle(
-        fontWeight: FontWeight.normal,
-        fontSize: 12,
-        color: Colors.lightBlueAccent);
+    final titleStyle =
+        defaultStyle.copyWith(fontWeight: FontWeight.bold, fontSize: 16);
+    final locStyle = defaultStyle.copyWith(color: Colors.black45);
+    final redeemStyle = defaultStyle.copyWith(fontSize: 20);
+    final redeemLinkStyle = defaultStyle.copyWith(color: Colors.black);
     return Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(children: [
@@ -80,11 +77,8 @@ class _AnimatedRewardCellState extends State<AnimatedRewardCell> {
                           if (_redeemText != null)
                             Text("Tap to show how to redeem",
                                 textAlign: TextAlign.center,
-                                style: TextStyle(
-                                    fontWeight: FontWeight.normal,
-                                    fontSize: 16,
-                                    color: Colors.black,
-                                    fontStyle: FontStyle.italic))
+                                style: defaultStyle.copyWith(
+                                    fontSize: 16, fontStyle: FontStyle.italic))
                         ]))
                       ],
                     )),

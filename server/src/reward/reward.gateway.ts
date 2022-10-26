@@ -4,11 +4,11 @@ import {
   SubscribeMessage,
   WebSocketGateway,
 } from '@nestjs/websockets';
+import { User } from '@prisma/client';
 import { UserGuard } from 'src/auth/jwt-auth.guard';
 import { CallingUser } from '../auth/calling-user.decorator';
 import { ClientService } from '../client/client.service';
 import { UpdateRewardDataDto } from '../client/update-reward-data.dto';
-import { User } from '../model/user.entity';
 import { RequestRewardDataDto } from './request-reward-data.dto';
 import { RewardService } from './reward.service';
 
@@ -39,15 +39,15 @@ export class RewardGateway {
       rewards: [
         ...rewardData.map(rw => ({
           rewardId: rw.id,
-          eventId: rw.containingEvent.id,
-          description: rw.rewardDescription,
-          redeemInfo: rw.rewardRedeemInfo,
+          eventId: rw.eventId,
+          description: rw.description,
+          redeemInfo: rw.redeemInfo,
           isRedeemed: rw.isRedeemed,
         })),
         ...rewardDataUnowned.map(rw => ({
           rewardId: rw.id,
-          eventId: rw.containingEvent.id,
-          description: rw.rewardDescription,
+          eventId: rw.eventId,
+          description: rw.description,
           redeemInfo: '',
           isRedeemed: false,
         })),

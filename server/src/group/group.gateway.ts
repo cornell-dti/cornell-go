@@ -6,7 +6,6 @@ import {
 } from '@nestjs/websockets';
 import { CallingUser } from '../auth/calling-user.decorator';
 import { ClientService } from '../client/client.service';
-import { User } from '../model/user.entity';
 import { JoinGroupDto } from './join-group.dto';
 import { LeaveGroupDto } from './leave-group.dto';
 import { RequestGroupDataDto } from './request-group-data.dto';
@@ -18,8 +17,8 @@ import {
 import { GroupService } from './group.service';
 import { UserGuard } from 'src/auth/jwt-auth.guard';
 import { UseGuards } from '@nestjs/common';
-import { Group } from 'src/model/group.entity';
 import { UpdateUserDataAuthTypeDto } from '../client/update-user-data.dto';
+import { Group, User } from '@prisma/client';
 
 @WebSocketGateway({ cors: true })
 @UseGuards(UserGuard)
@@ -27,7 +26,6 @@ export class GroupGateway {
   constructor(
     private clientService: ClientService,
     private groupService: GroupService,
-    private eventService: EventService,
   ) {}
 
   @SubscribeMessage('requestGroupData')
@@ -38,23 +36,8 @@ export class GroupGateway {
     const groupData = await this.groupService.getGroupForUser(user);
 
     const updateGroupData: UpdateGroupDataDto = {
-      curEventId: groupData.currentEvent.id,
-      members: await Promise.all(
-        (
-          await groupData.members.loadItems()
-        ).map(async (member: User) => {
-          const tracker = await this.eventService.getCurrentEventTrackerForUser(
-            member,
-          );
-          return {
-            id: member.id,
-            name: member.username,
-            points: tracker.eventScore,
-            host: member.id === groupData.host.id,
-            curChallengeId: tracker.currentChallenge.id,
-          };
-        }),
-      ),
+      curEventId: groupData.curEventId,
+      members: await this.groupService.dtoForMemberData(groupData),
       removeListedMembers: false,
     };
 
@@ -64,14 +47,14 @@ export class GroupGateway {
 
   /** Helper function that notifies the user, all old group members,
    * and all new members that the user has moved groups. */
-  async notifyAll(user: User, oldGroup: Group | undefined) {
+  async notifyAll(user: User, oldGroup: Group | null) {
     if (oldGroup) {
-      const oldMembers = oldGroup.members;
+      const oldMembers = await this.groupService.getMembers(oldGroup);
       for (const member of oldMembers) {
         await this.requestGroupData(member, {});
       }
     }
-    const newMembers = (await this.groupService.getGroupForUser(user)).members;
+    const newMembers = await this.groupService.getMembers({ id: user.groupId });
     for (const member of newMembers) {
       await this.requestGroupData(member, {});
     }
@@ -79,7 +62,7 @@ export class GroupGateway {
 
   /** Helper function that notifies the user of a change in group */
   async notifyUser(user: User) {
-    const group = await user.group.load();
+    const group = await this.groupService.getGroupForUser(user);
     await this.clientService.emitUpdateUserData(user, {
       id: user.id,
       username: user.username,
@@ -117,41 +100,10 @@ export class GroupGateway {
     @CallingUser() user: User,
     @MessageBody() data: SetCurrentEventDto,
   ) {
-    const group = await user.group.load();
-    const curEvent = await group.currentEvent.load();
-    const stillActive = curEvent.time.getTime() - Date.now() > 0;
+    const members = await this.groupService.setCurrentEvent(user, data.eventId);
 
-    if (
-      (group.host.id !== user.id || data.eventId === curEvent.id) &&
-      stillActive
-    ) {
-      return;
-    }
-
-    const newEvent = !stillActive
-      ? await this.eventService.getDefaultEvent()
-      : await this.eventService.getEventById(data.eventId);
-
-    if (!newEvent) return;
-
-    const groupMembers = await group.members.loadItems();
-
-    await Promise.all(
-      groupMembers.map(async (member: User) => {
-        //if the user already has the event, keep their tracker
-        const evTrackers = await this.eventService.getEventTrackersByEventId(
-          user,
-          [data.eventId],
-        );
-        if (evTrackers.length === 0)
-          await this.eventService.createEventTracker(member, newEvent);
-      }),
-    );
-
-    group.currentEvent.set(newEvent);
-    await this.groupService.saveGroup(group);
-    groupMembers.forEach(async (member: User) => {
-      this.requestGroupData(member, {});
+    members?.forEach(async (member: User) => {
+      await this.requestGroupData(member, {});
     });
   }
 }

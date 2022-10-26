@@ -1,5 +1,5 @@
 import { Controller, Post, Body } from '@nestjs/common';
-import { AuthType } from 'src/model/user.entity';
+import { AuthType } from '@prisma/client';
 import { AuthService } from '../auth.service';
 import { LoginDto } from '../login.dto';
 
