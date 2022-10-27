@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { AuthType, Group, User } from '@prisma/client';
+import { AuthType, Group, PrismaClient, User } from '@prisma/client';
 import {
   UpdateUserDataAuthTypeDto,
   UpdateUserDataDto,
@@ -80,7 +80,10 @@ export class UserService {
 
   async deleteUser(user: User) {
     await this.prisma.user.delete({ where: { id: user.id } });
-    await this.groupsService.fixOrDeleteGroup({ id: user.groupId });
+    await this.groupsService.fixOrDeleteGroup(
+      { id: user.groupId },
+      this.prisma,
+    );
   }
 
   async dtoForUserData(user: User): Promise<UpdateUserDataDto> {
