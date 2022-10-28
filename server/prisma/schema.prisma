@@ -20,6 +20,7 @@ enum EventRewardType {
 }
 
 enum RestrictionGroupSpecialUsage {
+  ///DEVICE_LOGIN is a device assigned-id that acts as a user login for non-Cornell users.
   DEVICE_LOGIN
   CORNELL_LOGIN
   NONE
