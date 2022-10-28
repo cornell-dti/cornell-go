@@ -1,5 +1,6 @@
-import { UseGuards } from '@nestjs/common';
+import { UseFilters, UseGuards } from '@nestjs/common';
 import {
+  BaseWsExceptionFilter,
   MessageBody,
   SubscribeMessage,
   WebSocketGateway,
@@ -32,7 +33,9 @@ import {
 } from './request-restrictions.dto';
 import { RestrictionGroup } from 'src/model/restriction-group.entity';
 import { UpdateRestrictionsDto } from './update-restrictions.dto';
+import { AllExceptionsFilter } from './admin-error-filter';
 @WebSocketGateway({ cors: true })
+@UseFilters(AllExceptionsFilter)
 @UseGuards(AdminGuard)
 export class AdminGateway {
   constructor(

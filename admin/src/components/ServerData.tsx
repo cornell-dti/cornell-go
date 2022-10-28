@@ -6,6 +6,7 @@ import {
   useMemo,
   useState,
 } from "react";
+import { ErrorDTO } from "../dto/error.dto";
 import { RestrictionDto } from "../dto/request-restrictions.dto";
 import { UpdateAdminDataAdminDto } from "../dto/update-admin-data.dto";
 import { ChallengeDto } from "../dto/update-challenges.dto";
@@ -21,6 +22,7 @@ const defaultData = {
   rewards: new Map<string, RewardDto>(),
   restrictions: new Map<string, RestrictionDto>(),
   selectedEvent: "" as string,
+  errors: new Map<string, ErrorDTO>(),
   selectEvent(id: string) {},
   setAdminStatus(id: string, granted: boolean) {},
   updateReward(reward: RewardDto) {},
@@ -123,6 +125,10 @@ export function ServerDataProvider(props: { children: ReactNode }) {
     sock.onUpdateRestrictions((data) => {
       data.deletedIds.forEach((id) => serverData.restrictions.delete(id));
       data.restrictions.forEach((r) => serverData.restrictions.set(r.id, r));
+      setTimeout(() => setServerData({ ...serverData }), 0);
+    });
+    sock.onUpdateErrorData((data) => {
+      serverData.errors.set("Error", data);
       setTimeout(() => setServerData({ ...serverData }), 0);
     });
   }, [sock, serverData, setServerData]);

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ClientGateway } from 'src/client/client.gateway';
 import { User } from 'src/model/user.entity';
+import { updateErrorDTO } from '../update-error.dto';
 import { UpdateRestrictionsDto } from '../update-restrictions.dto';
 import { UpdateAdminDataDto } from './update-admin-data.dto';
 import { UpdateChallengeDataDto } from './update-challenge-data.dto';
@@ -38,4 +39,6 @@ export class AdminCallbackService {
 
   emitUpdateRestrictionData =
     this.makeCallback<UpdateRestrictionsDto>('updateRestrictions');
+
+  emitUpdateErrorData = this.makeCallback<updateErrorDTO>('updateErrorData');
 }

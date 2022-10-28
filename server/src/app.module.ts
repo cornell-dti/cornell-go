@@ -1,4 +1,4 @@
-import { Module, OnModuleInit } from '@nestjs/common';
+import { Module, OnModuleInit, UseFilters } from '@nestjs/common';
 import { EventModule } from './event/event.module';
 import { GroupModule } from './group/group.module';
 import { ChallengeModule } from './challenge/challenge.module';
