@@ -19,6 +19,22 @@ enum EventRewardType {
   PERPETUAL
 }
 
+enum SessionLogEvent {
+  JOIN_GROUP //data = groupId
+  LEAVE_GROUP //data = groupId
+  LOGIN_USER //data = userId
+  CREATE_USER //data = userId
+  DELETE_USER //data = userId
+  EDIT_USERNAME //data = userId
+  SELECT_EVENT //data = eventId
+  DELETE_EVENT //data = eventId
+  SET_CHALLENGE //data = challengeId
+  DELETE_CHALLENGE //data = challengeId
+  COMPLETE_CHALLENGE //data = challengeId
+  DELETE_REWARD //data = rewardId
+  DISCONNECT //data = ""
+}
+
 model User {
   id                  String            @id() @default(uuid())
   authToken           String
@@ -42,6 +58,7 @@ model User {
   generatedById       String?
   isRanked            Boolean           @default(true)
   participatedIn      PrevChallenge[]   @relation("participant")
+  SessionLogEntry     SessionLogEntry[]
 }
 
 model Group {
@@ -133,4 +150,13 @@ model RestrictionGroup {
   restrictedUsers User[]      @relation("restricted")
   generatedUsers  User[]      @relation("generated")
   allowedEvents   EventBase[]
+}
+
+model SessionLogEntry {
+  id         String          @id @default(uuid())
+  linkedUser User?           @relation(fields: [userId], references: [id])
+  eventType  SessionLogEvent
+  data       String
+  timestamp  DateTime        @default(now())
+  userId     String?
 }

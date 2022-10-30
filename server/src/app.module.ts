@@ -14,6 +14,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { PrismaClient } from '@prisma/client';
 import { PrismaModule } from './prisma/prisma.module';
+import { SessionLogModule } from './session-log/session-log.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { PrismaModule } from './prisma/prisma.module';
     RewardModule,
     ClientModule,
     PrismaModule,
+    SessionLogModule,
   ],
   controllers: [],
   providers: [],

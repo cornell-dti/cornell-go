@@ -1,3 +1,4 @@
+import { SessionLogService } from './../session-log/session-log.service';
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { EventService } from 'src/event/event.service';
 import {
@@ -6,6 +7,7 @@ import {
   EventRewardType,
   EventTracker,
   PrismaClient,
+  SessionLogEvent,
   User,
 } from '@prisma/client';
 import { v4 } from 'uuid';
@@ -14,6 +16,7 @@ import { PrismaService } from '../prisma/prisma.service';
 @Injectable()
 export class ChallengeService {
   constructor(
+    private log: SessionLogService,
     private readonly prisma: PrismaService,
     private eventService: EventService,
   ) {}
@@ -119,6 +122,11 @@ export class ChallengeService {
       },
     });
 
+    await this.log.logEvent(
+      SessionLogEvent.COMPLETE_CHALLENGE,
+      challengeId,
+      user.id,
+    );
     return [eventTracker, groupMembers];
   }
 
@@ -241,6 +249,12 @@ export class ChallengeService {
         curChallengeId: challenge.id,
       },
     });
+
+    await this.log.logEvent(
+      SessionLogEvent.SET_CHALLENGE,
+      challengeId,
+      user.id,
+    );
 
     return [event, group.members];
   }

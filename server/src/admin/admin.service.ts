@@ -1,3 +1,4 @@
+import { SessionLogService } from './../session-log/session-log.service';
 import { ChallengeDto } from './update-challenges.dto';
 import { Injectable } from '@nestjs/common';
 import { RewardDto } from './update-rewards.dto';

@@ -1,8 +1,15 @@
+import { SessionLogService } from './../session-log/session-log.service';
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { EventService } from '../event/event.service';
 import { GroupService } from '../group/group.service';
 import { v4 } from 'uuid';
-import { AuthType, Group, PrismaClient, User } from '@prisma/client';
+import {
+  AuthType,
+  Group,
+  PrismaClient,
+  SessionLogEvent,
+  User,
+} from '@prisma/client';
 import {
   UpdateUserDataAuthTypeDto,
   UpdateUserDataDto,
@@ -12,6 +19,7 @@ import { PrismaService } from '../prisma/prisma.service';
 @Injectable()
 export class UserService {
   constructor(
+    private log: SessionLogService,
     private prisma: PrismaService,
     @Inject(forwardRef(() => EventService))
     private eventsService: EventService,
@@ -54,6 +62,8 @@ export class UserService {
 
     await this.eventsService.createDefaultEventTracker(user, lat, long);
 
+    await this.log.logEvent(SessionLogEvent.CREATE_USER, user.id, user.id);
+
     return user;
   }
 
@@ -72,6 +82,7 @@ export class UserService {
   }
 
   async deleteUser(user: User) {
+    await this.log.logEvent(SessionLogEvent.DELETE_USER, user.id, user.id);
     await this.prisma.user.delete({ where: { id: user.id } });
     await this.groupsService.fixOrDeleteGroup({ id: user.groupId });
   }
@@ -108,6 +119,8 @@ export class UserService {
     if (!restriction?.canEditUsername) {
       return false;
     }
+
+    await this.log.logEvent(SessionLogEvent.EDIT_USERNAME, user.id, user.id);
 
     await this.prisma.user.update({
       where: { id: user.id },

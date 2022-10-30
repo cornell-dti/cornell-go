@@ -1,7 +1,14 @@
+import { SessionLogService } from './../session-log/session-log.service';
 import { EventService } from 'src/event/event.service';
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { UserService } from '../user/user.service';
-import { EventBase, Group, PrismaClient, User } from '@prisma/client';
+import {
+  EventBase,
+  Group,
+  PrismaClient,
+  SessionLogEvent,
+  User,
+} from '@prisma/client';
 import { connect } from 'http2';
 import { hostname } from 'os';
 import { group } from 'console';
@@ -12,6 +19,7 @@ import { PrismaService } from '../prisma/prisma.service';
 @Injectable()
 export class GroupService {
   constructor(
+    private log: SessionLogService,
     private eventService: EventService,
     private prisma: PrismaService,
   ) {}
@@ -58,6 +66,8 @@ export class GroupService {
 
     await this.fixOrDeleteGroup(oldGroup);
 
+    await this.log.logEvent(SessionLogEvent.JOIN_GROUP, oldGroup.id, user.id);
+
     return oldGroup;
   }
 
@@ -89,6 +99,8 @@ export class GroupService {
       where: { id: oldGroup.id },
       data: { members: { disconnect: user } },
     });
+
+    await this.log.logEvent(SessionLogEvent.LEAVE_GROUP, oldGroup.id, user.id);
 
     return oldGroup;
   }
@@ -171,6 +183,8 @@ export class GroupService {
       where: { id: group.id },
       data: { curEventId: eventId },
     });
+
+    await this.log.logEvent(SessionLogEvent.SELECT_EVENT, eventId, actor.id);
 
     return groupMembers;
   }
