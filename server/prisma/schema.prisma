@@ -58,7 +58,7 @@ model User {
   generatedById       String?
   isRanked            Boolean           @default(true)
   participatedIn      PrevChallenge[]   @relation("participant")
-  SessionLogEntry     SessionLogEntry[]
+  sessionLogEntries     SessionLogEntry[]
 }
 
 model Group {
