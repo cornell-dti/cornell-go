@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { ClientGateway } from 'src/client/client.gateway';
-import { User } from 'src/model/user.entity';
 import { updateErrorDTO } from '../update-error.dto';
 import { UpdateRestrictionsDto } from '../update-restrictions.dto';
 import { UpdateAdminDataDto } from './update-admin-data.dto';

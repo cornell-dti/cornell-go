@@ -1,7 +1,7 @@
 import { Catch, ArgumentsHost } from '@nestjs/common';
 import { BaseWsExceptionFilter } from '@nestjs/websockets';
 import { AdminCallbackService } from './admin-callback/admin-callback.service';
-import { User } from 'src/model/user.entity';
+import { User } from '@prisma/client';
 import { WsException } from '@nestjs/websockets/errors/ws-exception';
 
 @Catch()
