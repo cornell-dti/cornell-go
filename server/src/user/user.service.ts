@@ -14,7 +14,7 @@ export class UserService {
     private prisma: PrismaService,
     private eventsService: EventService,
     private groupsService: GroupService,
-  ) {}
+  ) { }
 
   /** Find a user by their authentication token */
   async byAuth(authType: AuthType, authToken: string) {
@@ -80,10 +80,9 @@ export class UserService {
 
   async deleteUser(user: User) {
     await this.prisma.user.delete({ where: { id: user.id } });
-    await this.groupsService.fixOrDeleteGroup(
-      { id: user.groupId },
-      this.prisma,
-    );
+    await this.prisma.$transaction(async tx => {
+      this.groupsService.fixOrDeleteGroup({ id: user.groupId }, tx);
+    });
   }
 
   async dtoForUserData(user: User): Promise<UpdateUserDataDto> {
