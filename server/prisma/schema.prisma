@@ -1,0 +1,136 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AuthType {
+  GOOGLE
+  APPLE
+  DEVICE
+  NONE
+}
+
+enum EventRewardType {
+  LIMITED_TIME
+  PERPETUAL
+}
+
+model User {
+  id                  String            @id() @default(uuid())
+  authToken           String
+  authType            AuthType
+  username            String
+  email               String
+  hashedRefreshToken  String
+  superuser           Boolean
+  adminGranted        Boolean
+  adminRequested      Boolean
+  score               Int
+  rewards             EventReward[]
+  group               Group             @relation("member", fields: [groupId], references: [id])
+  groupId             String
+  hostOf              Group?            @relation("host")
+  eventTrackers       EventTracker[]
+  completedChallenges PrevChallenge[]   @relation("owner")
+  restrictedBy        RestrictionGroup? @relation("restricted", fields: [restrictedById], references: [id])
+  restrictedById      String?
+  generatedBy         RestrictionGroup? @relation("generated", fields: [generatedById], references: [id])
+  generatedById       String?
+  isRanked            Boolean           @default(true)
+  participatedIn      PrevChallenge[]   @relation("participant")
+}
+
+model Group {
+  id         String    @id @default(uuid())
+  friendlyId String    @unique
+  members    User[]    @relation("member")
+  host       User?     @relation("host", fields: [hostId], references: [id], onDelete: SetNull)
+  hostId     String?   @unique
+  curEvent   EventBase @relation(fields: [curEventId], references: [id])
+  curEventId String
+}
+
+model Challenge {
+  id             String          @id @default(uuid()) @map("id")
+  linkedEvent    EventBase       @relation(fields: [linkedEventId], references: [id], onDelete: Cascade)
+  linkedEventId  String
+  eventIndex     Int
+  name           String
+  description    String
+  imageUrl       String
+  latitude       Float
+  longitude      Float
+  awardingRadius Float
+  closeRadius    Float
+  completions    PrevChallenge[]
+  activeTrackers EventTracker[]
+}
+
+model EventBase {
+  id              String             @id @default(uuid())
+  requiredMembers Int
+  skippingEnabled Boolean
+  isDefault       Boolean            @unique
+  name            String
+  description     String
+  rewardType      EventRewardType
+  indexable       Boolean
+  endTime         DateTime
+  minimumScore    Int                @default(1)
+  rewards         EventReward[]
+  challenges      Challenge[]
+  allowedIn       RestrictionGroup[]
+  trackers        EventTracker[]
+  activeGroups    Group[]
+}
+
+model EventReward {
+  id          String    @id @default(uuid())
+  user        User?     @relation(fields: [userId], references: [id])
+  userId      String?
+  event       EventBase @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId     String
+  description String
+  redeemInfo  String
+  isRedeemed  Boolean
+}
+
+model EventTracker {
+  id                  String          @id @default(uuid())
+  user                User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId              String
+  score               Int
+  isRankedForEvent    Boolean         @default(true)
+  cooldownEnd         DateTime
+  event               EventBase       @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId             String
+  curChallenge        Challenge       @relation(fields: [curChallengeId], references: [id])
+  curChallengeId      String
+  completedChallenges PrevChallenge[]
+}
+
+model PrevChallenge {
+  id           Int          @id @default(autoincrement())
+  user         User         @relation("owner", fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
+  participants User[]       @relation("participant")
+  challenge    Challenge    @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  challengeId  String
+  tracker      EventTracker @relation(fields: [trackerId], references: [id], onDelete: Cascade)
+  trackerId    String
+  timestamp    DateTime     @default(now())
+}
+
+model RestrictionGroup {
+  id              String      @id @default(uuid())
+  displayName     String // A very cool org#1
+  name            String // a_very_cool_org_1
+  canEditUsername Boolean
+  restrictedUsers User[]      @relation("restricted")
+  generatedUsers  User[]      @relation("generated")
+  allowedEvents   EventBase[]
+}

@@ -1,65 +1,35 @@
-import { Module, OnModuleInit, UseFilters } from '@nestjs/common';
-import { EventModule } from './event/event.module';
-import { GroupModule } from './group/group.module';
-import { ChallengeModule } from './challenge/challenge.module';
-import { UserModule } from './user/user.module';
+import { Module, OnModuleInit, UseFilters } from '@nestjs/common';]
+import { Module } from '@nestjs/common';
 import { AdminModule } from './admin/admin.module';
 import { AuthModule } from './auth/auth.module';
-
+import { ChallengeModule } from './challenge/challenge.module';
+import { EventModule } from './event/event.module';
+import { GroupModule } from './group/group.module';
+import { UserModule } from './user/user.module';
 import { ConfigModule } from '@nestjs/config';
-import { RewardGateway } from './reward/reward.gateway';
-import { RewardModule } from './reward/reward.module';
-import { ClientModule } from './client/client.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
-import { MikroOrmModule } from '@mikro-orm/nestjs';
-import { EntityManager } from '@mikro-orm/postgresql';
-import { AsyncLocalStorage } from 'async_hooks';
-import { InitService } from './init.service';
-import { TsMorphMetadataProvider } from '@mikro-orm/reflection';
+import { ClientModule } from './client/client.module';
+import { PrismaModule } from './prisma/prisma.module';
+import { RewardModule } from './reward/reward.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
-    MikroOrmModule.forRoot({
-      type: 'postgresql',
-      autoLoadEntities: true,
-      allowGlobalContext: true,
-      metadataProvider: TsMorphMetadataProvider,
-      name: 'CornellGO PostgreSQL DB',
-      clientUrl: process.env.DATABASE_URL,
-      forceUtcTimezone: true,
-      validate: true,
-      strict: true,
-      debug: true,
-      persistOnCreate: true,
-      driverOptions: {
-        connection: {
-          ssl: !process.env.NO_SSL && { rejectUnauthorized: false },
-        },
-      },
-      migrations: {
-        path: 'dist/src/migrations',
-        pathTs: 'src/migrations',
-        disableForeignKeys: false,
-      },
-      schemaGenerator: {
-        disableForeignKeys: false,
-      },
-    }),
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', '..', '..', 'admin', 'build'),
+      rootPath: join(__dirname, '..', '..', 'admin', 'build'),
     }),
+    AuthModule,
+    ClientModule,
+    UserModule,
     EventModule,
     GroupModule,
     ChallengeModule,
-    UserModule,
     AdminModule,
-    AuthModule,
     RewardModule,
-    ClientModule,
+    PrismaModule,
   ],
   controllers: [],
-  providers: [InitService],
+  providers: [],
 })
 export class AppModule {}
