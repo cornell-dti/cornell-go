@@ -44,8 +44,7 @@ function EventCard(props: {
         <ListCardTitle>{props.event.name}</ListCardTitle>
         <ListCardDescription>{props.event.description}</ListCardDescription>
         <ListCardBody>
-          Id: <b>{props.event.id}</b>
-          <br />
+          Id: <b>{props.event.id}</b> <br />
           Available Until: <b>{new Date(props.event.time).toString()}</b> <br />
           Required Players: <b>{requiredText}</b> <br />
           Rewarding Method: <b>{rewardingMethod}</b> <br />

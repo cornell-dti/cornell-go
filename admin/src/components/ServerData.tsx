@@ -11,6 +11,7 @@ import { UpdateAdminDataAdminDto } from "../dto/update-admin-data.dto";
 import { ChallengeDto } from "../dto/update-challenges.dto";
 import { EventDto } from "../dto/update-events.dto";
 import { RewardDto } from "../dto/update-rewards.dto";
+import { UserDto} from "../dto/update-users.dto";
 import { ServerApi } from "./ServerApi";
 import { ServerConnectionContext } from "./ServerConnection";
 
@@ -19,6 +20,7 @@ const defaultData = {
   events: new Map<string, EventDto>(),
   challenges: new Map<string, ChallengeDto>(),
   rewards: new Map<string, RewardDto>(),
+  users: new Map<string, UserDto>(),
   restrictions: new Map<string, RestrictionDto>(),
   selectedEvent: "" as string,
   selectEvent(id: string) {},
@@ -29,6 +31,8 @@ const defaultData = {
   deleteChallenge(id: string) {},
   updateEvent(event: EventDto) {},
   deleteEvent(id: string) {},
+  updateUser(event: UserDto) {},
+  deleteUser(id: string) {},
   updateRestriction(restriction: RestrictionDto) {},
   deleteRestriction(id: string) {},
 };
@@ -76,6 +80,12 @@ export function ServerDataProvider(props: { children: ReactNode }) {
       },
       deleteEvent(id: string) {
         sock.updateEvents({ events: [], deletedIds: [id] });
+      },
+      updateUser(user: UserDto) {
+        sock.updateUsers({ users: [user], deletedIds: [] });
+      },
+      deleteUser(id: string) {
+        sock.updateUsers({ users: [], deletedIds: [id] });
       },
       updateRestriction(restriction: RestrictionDto) {
         sock.updateRestrictions({

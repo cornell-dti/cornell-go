@@ -4,12 +4,15 @@ import { RequestChallengesDto } from "../dto/request-challenges.dto";
 import { RequestEventsDto } from "../dto/request-events.dto";
 import { RequestRestrictionsDto } from "../dto/request-restrictions.dto";
 import { RequestRewardsDto } from "../dto/request-rewards.dto";
+import { RequestUsersDto } from "../dto/request-users.dto";
 import { UpdateAdminDataDto } from "../dto/update-admin-data.dto";
 import { UpdateAdminsDto } from "../dto/update-admins.dto";
 import { UpdateChallengeDataDto } from "../dto/update-challenge-data.dto";
 import { UpdateChallengesDto } from "../dto/update-challenges.dto";
 import { UpdateEventDataDto } from "../dto/update-event-data.dto";
 import { UpdateEventsDto } from "../dto/update-events.dto";
+import { UpdateUserDataDto } from "../dto/update-user-data.dto";
+import { UpdateUsersDto } from "../dto/update-users.dto";
 import { UpdateRestrictionsDto } from "../dto/update-restrictions.dto";
 import { UpdateRewardDataDto } from "../dto/update-reward-data.dto";
 import { UpdateRewardsDto } from "../dto/update-rewards.dto";
@@ -26,6 +29,9 @@ export class ServerApi {
   requestRewards(data: RequestRewardsDto) {
     this.socket.emit("requestRewards", data);
   }
+  requestUsers(data: RequestUsersDto) {
+    this.socket.emit("requestUsers", data);
+  }
   requestAdmins(data: RequestAdminsDto) {
     this.socket.emit("requestAdmins", data);
   }
@@ -41,6 +47,9 @@ export class ServerApi {
   }
   updateRewards(data: UpdateRewardsDto) {
     this.socket.emit("updateRewards", data);
+  }
+  updateUsers(data: UpdateUsersDto) {
+    this.socket.emit("updateUsers", data);
   }
   updateAdmins(data: UpdateAdminsDto) {
     this.socket.emit("updateAdmins", data);
@@ -64,6 +73,10 @@ export class ServerApi {
   onUpdateRewardData(callback: (data: UpdateRewardDataDto) => void) {
     this.socket.removeAllListeners("updateRewardData");
     this.socket.on("updateRewardData", (data) => callback(data));
+  }
+  onUpdateUserData(callback: (data: UpdateUserDataDto) => void) {
+    this.socket.removeAllListeners("updateUserData");
+    this.socket.on("updateUserData", (data) => callback(data));
   }
   onUpdateRestrictions(callback: (data: UpdateRestrictionsDto) => void) {
     this.socket.removeAllListeners("updateRestrictions");

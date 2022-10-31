@@ -3,6 +3,7 @@ import { Rewards } from "./components/Rewards";
 import { Admins } from "./components/Admins";
 import { Challenges } from "./components/Challenges";
 import { Events } from "./components/Events";
+import { Users } from "./components/Users";
 import { Restrictions } from "./components/Restrictions";
 
 import {
@@ -20,6 +21,7 @@ import {
   faTrophy,
   faUnlink,
   faUserShield,
+  faPerson,
   faLock,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -60,6 +62,12 @@ const routes = [
     element: <Rewards />,
     icon: faTrophy,
     name: "Rewards",
+  },
+  {
+    path: "/users",
+    element: <Users />,
+    icon: faPerson,
+    name: "Users",
   },
   {
     path: "/restrictions",
