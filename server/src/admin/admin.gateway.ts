@@ -24,10 +24,16 @@ import { UpdateChallengesDto } from './update-challenges.dto';
 import { UpdateEventsDto } from './update-events.dto';
 import { UpdateRestrictionsDto } from './update-restrictions.dto';
 <<<<<<< HEAD
+<<<<<<< HEAD
 import { AllExceptionsFilter } from './admin-error-filter';
 =======
 import { UpdateRewardsDto } from './update-rewards.dto';
 >>>>>>> master
+=======
+import { AllExceptionsFilter } from './admin-error-filter';
+import { UpdateRewardsDto } from './update-rewards.dto';
+
+>>>>>>> 8fae6f015824553923999070734613a2a4b1d1b7
 @WebSocketGateway({ cors: true })
 @UseFilters(AllExceptionsFilter)
 @UseGuards(AdminGuard)
