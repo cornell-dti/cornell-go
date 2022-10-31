@@ -14,7 +14,7 @@ export class UserService {
     private prisma: PrismaService,
     private eventsService: EventService,
     private groupsService: GroupService,
-  ) { }
+  ) {}
 
   /** Find a user by their authentication token */
   async byAuth(authType: AuthType, authToken: string) {
