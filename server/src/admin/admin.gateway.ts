@@ -5,35 +5,29 @@ import {
   SubscribeMessage,
   WebSocketGateway,
 } from '@nestjs/websockets';
+import { User } from '@prisma/client';
 import { CallingUser } from 'src/auth/calling-user.decorator';
 import { AdminGuard } from 'src/auth/jwt-auth.guard';
-import { User } from 'src/model/user.entity';
-import { EventBase } from 'src/model/event-base.entity';
+import { ClientService } from 'src/client/client.service';
 import { AdminCallbackService } from './admin-callback/admin-callback.service';
 import { UpdateAdminDataAdminDto } from './admin-callback/update-admin-data.dto';
+import { UpdateEventDataDto } from './admin-callback/update-event-data.dto';
+import { UpdateRewardDataDto } from './admin-callback/update-reward-data.dto';
 import { AdminService } from './admin.service';
-import { ClientService } from 'src/client/client.service';
-import { RewardService } from 'src/reward/reward.service';
 import { RequestAdminsDto } from './request-admins.dto';
 import { RequestChallengesDto } from './request-challenges.dto';
 import { RequestEventsDto } from './request-events.dto';
+import { RequestRestrictionsDto } from './request-restrictions.dto';
 import { RequestRewardsDto } from './request-rewards.dto';
-import { UpdateRewardDataDto } from './admin-callback/update-reward-data.dto';
 import { UpdateAdminsDto } from './update-admins.dto';
-import { ChallengeDto, UpdateChallengesDto } from './update-challenges.dto';
-import { EventDto, UpdateEventsDto } from './update-events.dto';
-import { RewardDto, UpdateRewardsDto } from './update-rewards.dto';
-import { Challenge } from 'src/model/challenge.entity';
-import { EventReward } from 'src/model/event-reward.entity';
-import { v4 } from 'uuid';
-import { UpdateEventDataDto } from './admin-callback/update-event-data.dto';
-import {
-  RequestRestrictionsDto,
-  RestrictionDto,
-} from './request-restrictions.dto';
-import { RestrictionGroup } from 'src/model/restriction-group.entity';
+import { UpdateChallengesDto } from './update-challenges.dto';
+import { UpdateEventsDto } from './update-events.dto';
 import { UpdateRestrictionsDto } from './update-restrictions.dto';
+<<<<<<< HEAD
 import { AllExceptionsFilter } from './admin-error-filter';
+=======
+import { UpdateRewardsDto } from './update-rewards.dto';
+>>>>>>> master
 @WebSocketGateway({ cors: true })
 @UseFilters(AllExceptionsFilter)
 @UseGuards(AdminGuard)
@@ -54,7 +48,9 @@ export class AdminGateway {
     this.adminCallbackService.emitUpdateEventData(
       {
         deletedIds: [],
-        events: await Promise.all(events.map(this.dtoForEvent)),
+        events: await Promise.all(
+          events.map(ev => this.adminService.dtoForEvent(ev)),
+        ),
       },
       user,
     );
@@ -70,7 +66,9 @@ export class AdminGateway {
     this.adminCallbackService.emitUpdateChallengeData(
       {
         deletedIds: [],
-        challenges: await Promise.all(challenges.map(this.dtoForChallenge)),
+        challenges: await Promise.all(
+          challenges.map(ch => this.adminService.dtoForChallenge(ch)),
+        ),
       },
       user,
     );
@@ -84,7 +82,9 @@ export class AdminGateway {
     const rewardData = await this.adminService.getRewards(data.rewardIds);
 
     const updateRewardData: UpdateRewardDataDto = {
-      rewards: await Promise.all(rewardData.map(this.dtoForReward)),
+      rewards: await Promise.all(
+        rewardData.map(rw => this.adminService.dtoForReward(rw)),
+      ),
       deletedIds: [],
     };
     this.adminCallbackService.emitUpdateRewardData(updateRewardData, user);
@@ -122,7 +122,9 @@ export class AdminGateway {
     this.adminCallbackService.emitUpdateRestrictionData(
       {
         restrictions: await Promise.all(
-          restrictionGroups.map(this.dtoForRestrictionGroup),
+          restrictionGroups.map(rg =>
+            this.adminService.dtoForRestrictionGroup(rg),
+          ),
         ),
         deletedIds: [],
       },
@@ -142,7 +144,9 @@ export class AdminGateway {
     const newEvents = await this.adminService.updateEvents(data.events);
 
     this.adminCallbackService.emitUpdateEventData({
-      events: await Promise.all(newEvents.map(this.dtoForEvent)),
+      events: await Promise.all(
+        newEvents.map(ev => this.adminService.dtoForEvent(ev)),
+      ),
       deletedIds: data.deletedIds,
     });
 
@@ -168,7 +172,7 @@ export class AdminGateway {
           await Promise.all(
             data.deletedIds.map(ch => this.adminService.removeChallenge(ch)),
           )
-        ).map(this.dtoForEvent),
+        ).map(ev => this.adminService.dtoForEvent(ev)),
       ),
     });
 
@@ -177,7 +181,9 @@ export class AdminGateway {
     );
 
     this.adminCallbackService.emitUpdateChallengeData({
-      challenges: await Promise.all(newChallenges.map(this.dtoForChallenge)),
+      challenges: await Promise.all(
+        newChallenges.map(ch => this.adminService.dtoForChallenge(ch)),
+      ),
       deletedIds: data.deletedIds,
     });
 
@@ -185,8 +191,12 @@ export class AdminGateway {
       deletedIds: [],
       events: await Promise.all(
         (
-          await Promise.all(newChallenges.map(ch => ch.linkedEvent.load()))
-        ).map(this.dtoForEvent),
+          await Promise.all(
+            newChallenges.map(ch =>
+              this.adminService.eventForId(ch.linkedEventId),
+            ),
+          )
+        ).map(ev => this.adminService.dtoForEvent(ev)),
       ),
     });
 
@@ -210,7 +220,7 @@ export class AdminGateway {
       events: await Promise.all(
         (
           await this.adminService.deleteRewards(data.deletedIds)
-        ).map(this.dtoForEvent),
+        ).map(ev => this.adminService.dtoForEvent(ev)),
       ),
     });
 
@@ -219,14 +229,18 @@ export class AdminGateway {
     const newEventDto: UpdateEventDataDto = {
       events: await Promise.all(
         (
-          await Promise.all(rewards.map(rw => rw.containingEvent.load()))
-        ).map(this.dtoForEvent),
+          await Promise.all(
+            rewards.map(rw => this.adminService.eventForId(rw.eventId)),
+          )
+        ).map(ev => this.adminService.dtoForEvent(ev)),
       ),
       deletedIds: [],
     };
 
     this.adminCallbackService.emitUpdateRewardData({
-      rewards: await Promise.all(rewards.map(this.dtoForReward)),
+      rewards: await Promise.all(
+        rewards.map(rw => this.adminService.dtoForReward(rw)),
+      ),
       deletedIds: data.deletedIds,
     });
 
@@ -277,7 +291,9 @@ export class AdminGateway {
     );
 
     await this.adminCallbackService.emitUpdateRestrictionData({
-      restrictions: await Promise.all(updated.map(this.dtoForRestrictionGroup)),
+      restrictions: await Promise.all(
+        updated.map(rg => this.adminService.dtoForRestrictionGroup(rg)),
+      ),
       deletedIds: data.deletedIds,
     });
 
@@ -289,68 +305,5 @@ export class AdminGateway {
       challengeData: true,
       leaderboardData: true,
     });
-  }
-
-  async dtoForEvent(ev: EventBase): Promise<EventDto> {
-    await ev.challenges.init();
-    await ev.rewards.init();
-    return {
-      id: ev.id,
-      skippingEnabled: ev.skippingEnabled,
-      isDefault: ev.isDefault,
-      name: ev.name,
-      description: ev.description,
-      rewardType: ev.rewardType as 'limited_time_event' | 'perpetual',
-      time: ev.time.toUTCString(),
-      requiredMembers: ev.requiredMembers,
-      indexable: ev.indexable,
-      challengeIds: (await ev.challenges.loadItems())
-        .sort((a, b) => a.eventIndex - b.eventIndex)
-        .map(c => c.id),
-      rewardIds: ev.rewards.getIdentifiers(),
-      minimumScore: ev.minimumScore,
-    };
-  }
-
-  async dtoForChallenge(ch: Challenge): Promise<ChallengeDto> {
-    return {
-      id: ch.id,
-      name: ch.name,
-      description: ch.description,
-      imageUrl: ch.imageUrl,
-      latitude: ch.latitude,
-      longitude: ch.longitude,
-      awardingRadius: ch.awardingRadius,
-      closeRadius: ch.closeRadius,
-      containingEventId: ch.linkedEvent.id,
-    };
-  }
-
-  async dtoForReward(rw: EventReward): Promise<RewardDto> {
-    return {
-      id: rw.id,
-      description: rw.rewardDescription,
-      redeemInfo: rw.rewardRedeemInfo,
-      containingEventId: rw.containingEvent.id,
-      claimingUserId: rw.claimingUser?.id ?? '',
-    };
-  }
-
-  async dtoForRestrictionGroup(
-    restrictionGroup: RestrictionGroup,
-  ): Promise<RestrictionDto> {
-    const genUsers = await restrictionGroup.generatedUsers.loadItems();
-    await restrictionGroup.restrictedUsers.loadItems();
-    await restrictionGroup.allowedEvents.loadItems();
-
-    return {
-      id: restrictionGroup.id,
-      displayName: restrictionGroup.displayName,
-      canEditUsername: restrictionGroup.canEditUsername,
-      restrictedUsers: restrictionGroup.restrictedUsers.getIdentifiers(),
-      allowedEvents: restrictionGroup.allowedEvents.getIdentifiers(),
-      generatedUserCount: genUsers.length,
-      generatedUserAuthIds: genUsers.map(u => u.authToken),
-    };
   }
 }

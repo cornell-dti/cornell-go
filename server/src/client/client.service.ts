@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { User } from '../model/user.entity';
+import { User } from '@prisma/client';
 import { ClientGateway } from './client.gateway';
 import { InvalidateDataDto } from './invalidate-data.dto';
 import { UpdateChallengeDataDto } from './update-challenge-data.dto';
