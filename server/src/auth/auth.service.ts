@@ -1,4 +1,3 @@
-import { SessionLogService } from './../session-log/session-log.service';
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
@@ -17,7 +16,6 @@ interface IntermediatePayload {
 @Injectable()
 export class AuthService {
   constructor(
-    private log: SessionLogService,
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
     @Inject(forwardRef(() => UserService))
@@ -192,7 +190,6 @@ export class AuthService {
         } as JwtPayload,
         this.accessOptions,
       );
-      await this.log.logEvent(SessionLogEvent.LOGIN_USER, user.id, user.id);
       return accessToken;
     } catch {
       return null;

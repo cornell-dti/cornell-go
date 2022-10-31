@@ -1,3 +1,4 @@
+import { SessionLogModule } from './../session-log/session-log.module';
 import { forwardRef, Module } from '@nestjs/common';
 import { AuthModule } from 'src/auth/auth.module';
 import { ClientModule } from 'src/client/client.module';
@@ -16,6 +17,7 @@ import { ChallengeService } from './challenge.service';
     UserModule,
     RewardModule,
     ClientModule,
+    SessionLogModule,
     PrismaModule,
   ],
   providers: [ChallengeGateway, ChallengeService],
