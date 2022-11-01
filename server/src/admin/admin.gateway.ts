@@ -12,17 +12,21 @@ import { AdminCallbackService } from './admin-callback/admin-callback.service';
 import { UpdateAdminDataAdminDto } from './admin-callback/update-admin-data.dto';
 import { UpdateEventDataDto } from './admin-callback/update-event-data.dto';
 import { UpdateRewardDataDto } from './admin-callback/update-reward-data.dto';
+import { UpdateUserDataDto } from './admin-callback/update-user-data.dto';
 import { AdminService } from './admin.service';
 import { RequestAdminsDto } from './request-admins.dto';
 import { RequestChallengesDto } from './request-challenges.dto';
 import { RequestEventsDto } from './request-events.dto';
 import { RequestRestrictionsDto } from './request-restrictions.dto';
 import { RequestRewardsDto } from './request-rewards.dto';
+import { RequestUsersDto } from './request-users.dto';
 import { UpdateAdminsDto } from './update-admins.dto';
 import { UpdateChallengesDto } from './update-challenges.dto';
 import { UpdateEventsDto } from './update-events.dto';
 import { UpdateRestrictionsDto } from './update-restrictions.dto';
 import { UpdateRewardsDto } from './update-rewards.dto';
+import { UpdateUsersDto } from './update-users.dto';
+
 @WebSocketGateway({ cors: true })
 @UseGuards(AdminGuard)
 export class AdminGateway {
@@ -83,6 +87,24 @@ export class AdminGateway {
     };
     this.adminCallbackService.emitUpdateRewardData(updateRewardData, user);
     return false;
+  }
+
+  @SubscribeMessage('requestUsers')
+  async requestUsers(
+    @CallingUser() user: User,
+    @MessageBody() data: RequestUsersDto,
+  ) {
+    const users = await this.adminService.getAllUserData();
+
+    this.adminCallbackService.emitUpdateUserData(
+      {
+        deletedIds: [],
+        users: await Promise.all(
+          users.map(us => this.adminService.dtoForUser(us)),
+        ),
+      },
+      user,
+    );
   }
 
   @SubscribeMessage('requestAdmins')
@@ -239,6 +261,34 @@ export class AdminGateway {
     });
 
     this.adminCallbackService.emitUpdateEventData(newEventDto);
+
+    this.clientService.emitInvalidateData({
+      userEventData: true,
+      userRewardData: true,
+      winnerRewardData: true,
+      groupData: true,
+      challengeData: true,
+      leaderboardData: true,
+    });
+  }
+
+  @SubscribeMessage('updateUsers')
+  async updateUsers(
+    @CallingUser() user: User,
+    @MessageBody() data: UpdateUsersDto,
+  ) {
+    await Promise.all(
+      data.deletedIds.map(us => this.adminService.removeUser(us)),
+    );
+
+    const newEvents = await this.adminService.updateUsers(data.users);
+
+    this.adminCallbackService.emitUpdateUserData({
+      users: await Promise.all(
+        newEvents.map(us => this.adminService.dtoForUser(us)),
+      ),
+      deletedIds: data.deletedIds,
+    });
 
     this.clientService.emitInvalidateData({
       userEventData: true,

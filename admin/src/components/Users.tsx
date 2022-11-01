@@ -19,6 +19,7 @@ import { ServerDataContext } from "./ServerData";
 
 import { compareTwoStrings } from "string-similarity";
 import { isPropertySignature } from "typescript";
+import { AlertModal } from "./AlertModal";
 
 function UserCard(props: {
   user: UserDto;
@@ -32,7 +33,6 @@ function UserCard(props: {
         <ListCardTitle>{props.user.username}</ListCardTitle>
         <ListCardBody>
           Id: <b>{props.user.id}</b> <br />
-          Authorization Type: <b>{props.user.authType}</b> <br />
           Group Id: <b>{props.user.groupId}</b> <br />
           Email: <b>{props.user.email}</b> <br />
         </ListCardBody>
@@ -53,24 +53,13 @@ function makeForm() {
   return [
     { name: "Username", characterLimit: 256, value: "" },
     { name: "Email", characterLimit: 256, value: "" },
-    {
-      name: "Authorization Type",
-      options: ["Google", "Apple", "Device", "None"],
-      value: 0,
-    },
   ] as EntryForm[];
 }
 
-var authTypes = ["google", "apple", "device", "none"];
 
 function fromForm(form: EntryForm[], id: string, groupId: string): UserDto {
   return {
     id,
-    authType: (form[2] as OptionEntryForm).value === 0
-    ? "google"
-    : ((form[2] as OptionEntryForm).value === 1
-    ? "apple" : (form[2] as OptionEntryForm).value === 2
-    ? "device" : "none"),
     username: (form[0] as FreeEntryForm).value,
     email: (form[1] as FreeEntryForm).value,
     groupId
@@ -81,11 +70,6 @@ function toForm(user: UserDto) {
   return [
     { name: "Username", characterLimit: 256, value: user.username },
     { name: "Email", characterLimit: 256, value: user.email },
-    {
-      name: "Authorization Type",
-      options: ["Google", "Apple", "Device", "None"],
-      value: user.authType,
-    },
   ] as EntryForm[];
 }
 
@@ -101,18 +85,10 @@ export function Users() {
 
   return (
     <>
-      <EntryModal
-        title="Create User"
+      <AlertModal
+        description="Can not create a user."
         isOpen={isCreateModalOpen}
-        entryButtonText="CREATE"
-        onEntry={() => {
-          serverData.updateUser(fromForm(form, "", ""));
-          setCreateModalOpen(false);
-        }}
-        onCancel={() => {
-          setCreateModalOpen(false);
-        }}
-        form={form}
+        onClose={() => setCreateModalOpen(false)}
       />
       <EntryModal
         title="Edit User"
@@ -140,7 +116,6 @@ export function Users() {
       />
       <SearchBar
         onCreate={() => {
-          setForm(makeForm());
           setCreateModalOpen(true);
         }}
         onSearch={(query) => setQuery(query)}

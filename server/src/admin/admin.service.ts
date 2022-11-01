@@ -2,6 +2,7 @@ import { ChallengeDto } from './update-challenges.dto';
 import { Injectable } from '@nestjs/common';
 import { RewardDto } from './update-rewards.dto';
 import { EventDto } from './update-events.dto';
+import { UserDto } from './update-users.dto';
 import { v4 } from 'uuid';
 import { RestrictionDto } from './request-restrictions.dto';
 import { UserService } from 'src/user/user.service';
@@ -11,10 +12,12 @@ import {
   EventBase,
   EventReward,
   EventRewardType,
+  User,
   PrismaClient,
   RestrictionGroup,
 } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { auth } from 'google-auth-library';
 
 const friendlyWords = require('friendly-words');
 
@@ -56,6 +59,10 @@ export class AdminService {
     return await this.prisma.eventBase.findMany();
   }
 
+  async getAllUserData() {
+    return await this.prisma.user.findMany();
+  }
+
   async getAllChallengeData() {
     return await this.prisma.challenge.findMany();
   }
@@ -68,6 +75,16 @@ export class AdminService {
     return await this.prisma.eventBase.findFirstOrThrow({
       where: { id: eventId },
     });
+  }
+
+  async getUserById(userId: string) {
+    return await this.prisma.user.findFirstOrThrow({
+      where: { id: userId },
+    });
+  }
+
+  async removeUser(userId: string) {
+    return await this.prisma.user.delete({ where: { id: userId } });
   }
 
   async getChallengeById(challengeId: string) {
@@ -260,6 +277,15 @@ export class AdminService {
     return challengeEntity;
   }
 
+  async updateUser(user: UserDto): Promise<User> {
+    const userEntity = await this.prisma.user.update({
+      where: { id: user.id },
+      data: { username: user.username, email: user.email },
+    });
+
+    return userEntity;
+  }
+
   /** Creates a new restricted user */
   async newRestrictedUser(id: string, word: string, group: RestrictionGroup) {
     const user = await this.userService.register(
@@ -407,6 +433,10 @@ export class AdminService {
     );
   }
 
+  async updateUsers(users: UserDto[]) {
+    return await Promise.all(users.map(us => this.updateUser(us)));
+  }
+
   async eventForId(eventId: string) {
     return await this.prisma.eventBase.findUniqueOrThrow({
       where: { id: eventId },
@@ -465,6 +495,15 @@ export class AdminService {
       redeemInfo: rw.redeemInfo,
       containingEventId: rw.eventId,
       claimingUserId: rw.userId ?? '',
+    };
+  }
+
+  async dtoForUser(us: User): Promise<UserDto> {
+    return {
+      id: us.id,
+      username: us.username,
+      email: us.email,
+      groupId: us.groupId,
     };
   }
 

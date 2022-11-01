@@ -103,6 +103,7 @@ export function ServerDataProvider(props: { children: ReactNode }) {
   useEffect(() => {
     sock.requestAdmins({});
     sock.requestEvents({});
+    sock.requestUsers({});
     sock.requestRestrictions({});
   }, [sock]);
 
@@ -128,6 +129,11 @@ export function ServerDataProvider(props: { children: ReactNode }) {
     sock.onUpdateRewardData((data) => {
       data.deletedIds.forEach((id) => serverData.rewards.delete(id));
       data.rewards.forEach((rw) => serverData.rewards.set(rw.id, rw));
+      setTimeout(() => setServerData({ ...serverData }), 0);
+    });
+    sock.onUpdateUserData((data) => {
+      data.deletedIds.forEach((id) => serverData.users.delete(id));
+      data.users.forEach((us) => serverData.users.set(us.id, us));
       setTimeout(() => setServerData({ ...serverData }), 0);
     });
     sock.onUpdateRestrictions((data) => {
