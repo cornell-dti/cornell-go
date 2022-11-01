@@ -12,6 +12,8 @@ import { join } from 'path';
 import { ClientModule } from './client/client.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { RewardModule } from './reward/reward.module';
+import { OrganizationModule } from './organization/organization.module';
+import { OrganizationGateway } from './organization/organization.gateway';
 
 @Module({
   imports: [
@@ -28,8 +30,9 @@ import { RewardModule } from './reward/reward.module';
     AdminModule,
     RewardModule,
     PrismaModule,
+    OrganizationModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [OrganizationGateway],
 })
 export class AppModule {}

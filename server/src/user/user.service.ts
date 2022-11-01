@@ -1,11 +1,17 @@
 import { Injectable } from '@nestjs/common';
-import { AuthType, Group, User } from '@prisma/client';
+import {
+  AuthType,
+  Group,
+  RestrictionGroupSpecialUsage,
+  User,
+} from '@prisma/client';
 import {
   UpdateUserDataAuthTypeDto,
   UpdateUserDataDto,
 } from '../client/update-user-data.dto';
 import { EventService } from '../event/event.service';
 import { GroupService } from '../group/group.service';
+import { OrganizationService } from '../organization/organization.service';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -14,6 +20,7 @@ export class UserService {
     private prisma: PrismaService,
     private eventsService: EventService,
     private groupsService: GroupService,
+    private orgService: OrganizationService,
   ) {}
 
   /** Find a user by their authentication token */
@@ -38,13 +45,22 @@ export class UserService {
     authType: AuthType,
     authToken: string,
   ) {
-    const defEv = await this.eventsService.getDefaultEvent();
-    const group: Group = await this.groupsService.createFromEvent(defEv);
+    const defOrg = await this.orgService.getDefaultOrganization(
+      authType == AuthType.GOOGLE
+        ? RestrictionGroupSpecialUsage.CORNELL_LOGIN
+        : RestrictionGroupSpecialUsage.DEVICE_LOGIN,
+    );
+
+    const group: Group = await this.groupsService.createFromEvent(
+      defOrg.defaultEvent,
+    );
+
     const user: User = await this.prisma.user.create({
       data: {
         score: 0,
         group: { connect: { id: group.id } },
         hostOf: { connect: { id: group.id } },
+        restrictedBy: { connect: { id: defOrg.id } },
         username,
         email,
         authToken,

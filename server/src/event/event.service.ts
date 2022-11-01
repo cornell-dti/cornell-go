@@ -8,12 +8,14 @@ import {
 } from '@prisma/client';
 import { UpdateEventDataEventDto } from 'src/client/update-event-data.dto';
 import { ClientService } from '../client/client.service';
+import { OrganizationService } from '../organization/organization.service';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class EventService {
   constructor(
     private clientService: ClientService,
+    private orgService: OrganizationService,
     private readonly prisma: PrismaService,
   ) {}
 
@@ -110,7 +112,9 @@ export class EventService {
 
   /** Creates an event tracker with the closest challenge as the current one */
   async createDefaultEventTracker(user: User, lat: number, long: number) {
-    await this.getDefaultEvent();
+    const defEv = await this.orgService.getDefaultEvent({
+      id: user.restrictedById,
+    });
 
     lat = +lat;
     long = +long;
@@ -118,7 +122,7 @@ export class EventService {
     const defaultEvent: Challenge[] = await this.prisma.$queryRaw`
       select * from "EventBase" ev 
       inner join "Challenge" chal 
-      on ev.id = chal."linkedEventId" and ev."isDefault" = true
+      on ev.id = chal."linkedEventId" and ev."id" = ${defEv.id}
       order by ((chal."latitude" - ${lat})^2 + (chal."longitude" - ${long})^2) desc
     `;
 
@@ -148,18 +152,6 @@ export class EventService {
     });
 
     return progress;
-  }
-
-  async getDefaultEvent() {
-    try {
-      return await this.prisma.eventBase.findFirstOrThrow({
-        where: {
-          isDefault: true,
-        },
-      });
-    } catch {
-      return await this.makeDefaultEvent();
-    }
   }
 
   async createEventTracker(user: User, event: EventBase) {
@@ -241,35 +233,6 @@ export class EventService {
       return await this.createEventTracker(user, ev);
     }
     return evTracker;
-  }
-
-  async makeDefaultEvent() {
-    return await this.prisma.eventBase.create({
-      data: {
-        name: 'Default Event',
-        description: 'Default Event',
-        requiredMembers: 1,
-        minimumScore: 1,
-        skippingEnabled: true,
-        isDefault: true,
-        rewardType: EventRewardType.PERPETUAL,
-        indexable: false,
-        endTime: new Date('2060'),
-        challenges: {
-          create: {
-            eventIndex: 0,
-            name: 'New challenge',
-            description: 'McGraw Tower',
-            imageUrl:
-              'https://upload.wikimedia.org/wikipedia/commons/5/5f/CentralAvenueCornell2.jpg',
-            latitude: 42.44755580740012,
-            longitude: -76.48504614830019,
-            awardingRadius: 50,
-            closeRadius: 100,
-          },
-        },
-      },
-    });
   }
 
   async updateEventDataDtoForEvent(
