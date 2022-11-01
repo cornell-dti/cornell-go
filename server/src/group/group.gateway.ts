@@ -47,7 +47,7 @@ export class GroupGateway {
 
   /** Helper function that notifies the user, all old group members,
    * and all new members that the user has moved groups. */
-  async notifyAll(user: User, oldGroup: Group | undefined) {
+  async notifyAll(user: User, oldGroup: Group | null) {
     if (oldGroup) {
       const oldMembers = await this.groupService.getMembers(oldGroup);
       for (const member of oldMembers) {

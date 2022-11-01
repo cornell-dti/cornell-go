@@ -4,36 +4,25 @@ import {
   SubscribeMessage,
   WebSocketGateway,
 } from '@nestjs/websockets';
+import { User } from '@prisma/client';
 import { CallingUser } from 'src/auth/calling-user.decorator';
 import { AdminGuard } from 'src/auth/jwt-auth.guard';
+import { ClientService } from 'src/client/client.service';
 import { AdminCallbackService } from './admin-callback/admin-callback.service';
 import { UpdateAdminDataAdminDto } from './admin-callback/update-admin-data.dto';
+import { UpdateEventDataDto } from './admin-callback/update-event-data.dto';
+import { UpdateRewardDataDto } from './admin-callback/update-reward-data.dto';
 import { AdminService } from './admin.service';
-import { ClientService } from 'src/client/client.service';
-import { RewardService } from 'src/reward/reward.service';
 import { RequestAdminsDto } from './request-admins.dto';
 import { RequestChallengesDto } from './request-challenges.dto';
 import { RequestEventsDto } from './request-events.dto';
+import { RequestRestrictionsDto } from './request-restrictions.dto';
 import { RequestRewardsDto } from './request-rewards.dto';
-import { UpdateRewardDataDto } from './admin-callback/update-reward-data.dto';
 import { UpdateAdminsDto } from './update-admins.dto';
-import { ChallengeDto, UpdateChallengesDto } from './update-challenges.dto';
-import { EventDto, UpdateEventsDto } from './update-events.dto';
-import { RewardDto, UpdateRewardsDto } from './update-rewards.dto';
-import { v4 } from 'uuid';
-import { UpdateEventDataDto } from './admin-callback/update-event-data.dto';
-import {
-  RequestRestrictionsDto,
-  RestrictionDto,
-} from './request-restrictions.dto';
+import { UpdateChallengesDto } from './update-challenges.dto';
+import { UpdateEventsDto } from './update-events.dto';
 import { UpdateRestrictionsDto } from './update-restrictions.dto';
-import {
-  Challenge,
-  EventBase,
-  EventReward,
-  RestrictionGroup,
-  User,
-} from '@prisma/client';
+import { UpdateRewardsDto } from './update-rewards.dto';
 @WebSocketGateway({ cors: true })
 @UseGuards(AdminGuard)
 export class AdminGateway {
@@ -53,7 +42,9 @@ export class AdminGateway {
     this.adminCallbackService.emitUpdateEventData(
       {
         deletedIds: [],
-        events: await Promise.all(events.map(this.adminService.dtoForEvent)),
+        events: await Promise.all(
+          events.map(ev => this.adminService.dtoForEvent(ev)),
+        ),
       },
       user,
     );
@@ -70,7 +61,7 @@ export class AdminGateway {
       {
         deletedIds: [],
         challenges: await Promise.all(
-          challenges.map(this.adminService.dtoForChallenge),
+          challenges.map(ch => this.adminService.dtoForChallenge(ch)),
         ),
       },
       user,
@@ -86,7 +77,7 @@ export class AdminGateway {
 
     const updateRewardData: UpdateRewardDataDto = {
       rewards: await Promise.all(
-        rewardData.map(this.adminService.dtoForReward),
+        rewardData.map(rw => this.adminService.dtoForReward(rw)),
       ),
       deletedIds: [],
     };
@@ -125,7 +116,9 @@ export class AdminGateway {
     this.adminCallbackService.emitUpdateRestrictionData(
       {
         restrictions: await Promise.all(
-          restrictionGroups.map(this.adminService.dtoForRestrictionGroup),
+          restrictionGroups.map(rg =>
+            this.adminService.dtoForRestrictionGroup(rg),
+          ),
         ),
         deletedIds: [],
       },
@@ -145,7 +138,9 @@ export class AdminGateway {
     const newEvents = await this.adminService.updateEvents(data.events);
 
     this.adminCallbackService.emitUpdateEventData({
-      events: await Promise.all(newEvents.map(this.adminService.dtoForEvent)),
+      events: await Promise.all(
+        newEvents.map(ev => this.adminService.dtoForEvent(ev)),
+      ),
       deletedIds: data.deletedIds,
     });
 
@@ -171,7 +166,7 @@ export class AdminGateway {
           await Promise.all(
             data.deletedIds.map(ch => this.adminService.removeChallenge(ch)),
           )
-        ).map(this.adminService.dtoForEvent),
+        ).map(ev => this.adminService.dtoForEvent(ev)),
       ),
     });
 
@@ -181,7 +176,7 @@ export class AdminGateway {
 
     this.adminCallbackService.emitUpdateChallengeData({
       challenges: await Promise.all(
-        newChallenges.map(this.adminService.dtoForChallenge),
+        newChallenges.map(ch => this.adminService.dtoForChallenge(ch)),
       ),
       deletedIds: data.deletedIds,
     });
@@ -195,7 +190,7 @@ export class AdminGateway {
               this.adminService.eventForId(ch.linkedEventId),
             ),
           )
-        ).map(this.adminService.dtoForEvent),
+        ).map(ev => this.adminService.dtoForEvent(ev)),
       ),
     });
 
@@ -219,7 +214,7 @@ export class AdminGateway {
       events: await Promise.all(
         (
           await this.adminService.deleteRewards(data.deletedIds)
-        ).map(this.adminService.dtoForEvent),
+        ).map(ev => this.adminService.dtoForEvent(ev)),
       ),
     });
 
@@ -231,13 +226,15 @@ export class AdminGateway {
           await Promise.all(
             rewards.map(rw => this.adminService.eventForId(rw.eventId)),
           )
-        ).map(this.adminService.dtoForEvent),
+        ).map(ev => this.adminService.dtoForEvent(ev)),
       ),
       deletedIds: [],
     };
 
     this.adminCallbackService.emitUpdateRewardData({
-      rewards: await Promise.all(rewards.map(this.adminService.dtoForReward)),
+      rewards: await Promise.all(
+        rewards.map(rw => this.adminService.dtoForReward(rw)),
+      ),
       deletedIds: data.deletedIds,
     });
 
@@ -289,7 +286,7 @@ export class AdminGateway {
 
     await this.adminCallbackService.emitUpdateRestrictionData({
       restrictions: await Promise.all(
-        updated.map(this.adminService.dtoForRestrictionGroup),
+        updated.map(rg => this.adminService.dtoForRestrictionGroup(rg)),
       ),
       deletedIds: data.deletedIds,
     });

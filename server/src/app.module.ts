@@ -1,35 +1,33 @@
-import { Module, OnModuleInit } from '@nestjs/common';
-import { EventModule } from './event/event.module';
-import { GroupModule } from './group/group.module';
-import { ChallengeModule } from './challenge/challenge.module';
-import { UserModule } from './user/user.module';
+import { Module } from '@nestjs/common';
 import { AdminModule } from './admin/admin.module';
 import { AuthModule } from './auth/auth.module';
+import { ChallengeModule } from './challenge/challenge.module';
+import { EventModule } from './event/event.module';
+import { GroupModule } from './group/group.module';
+import { UserModule } from './user/user.module';
 
 import { ConfigModule } from '@nestjs/config';
-import { RewardGateway } from './reward/reward.gateway';
-import { RewardModule } from './reward/reward.module';
-import { ClientModule } from './client/client.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
-import { PrismaClient } from '@prisma/client';
+import { ClientModule } from './client/client.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { RewardModule } from './reward/reward.module';
 import { SessionLogModule } from './session-log/session-log.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', '..', '..', 'admin', 'build'),
+      rootPath: join(__dirname, '..', '..', 'admin', 'build'),
     }),
+    AuthModule,
+    ClientModule,
+    UserModule,
     EventModule,
     GroupModule,
     ChallengeModule,
-    UserModule,
     AdminModule,
-    AuthModule,
     RewardModule,
-    ClientModule,
     PrismaModule,
     SessionLogModule,
   ],

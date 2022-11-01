@@ -8,6 +8,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { RefreshAccessController } from './refresh-access/refresh-access.controller';
 import { AdminGuard, UserGuard } from './jwt-auth.guard';
 import { PrismaModule } from '../prisma/prisma.module';
+import { AuthGateway } from './auth.gateway';
 
 @Module({
   imports: [
@@ -24,7 +25,7 @@ import { PrismaModule } from '../prisma/prisma.module';
     DeviceLoginController,
     RefreshAccessController,
   ],
-  providers: [AuthService, UserGuard, AdminGuard],
+  providers: [AuthService, UserGuard, AdminGuard, AuthGateway],
   exports: [AuthService],
 })
 export class AuthModule {}

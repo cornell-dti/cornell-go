@@ -1,16 +1,13 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import { UserService } from '../user/user.service';
-import { ChallengeService } from 'src/challenge/challenge.service';
-import { ClientService } from '../client/client.service';
+import { Injectable } from '@nestjs/common';
 import {
+  Challenge,
   EventBase,
   EventRewardType,
-  EventTracker,
-  PrismaClient,
   RestrictionGroup,
   User,
 } from '@prisma/client';
 import { UpdateEventDataEventDto } from 'src/client/update-event-data.dto';
+import { ClientService } from '../client/client.service';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -82,11 +79,15 @@ export class EventService {
       where: {
         indexable: !restriction,
         //rewardType: rewardTypes && { $in: rewardTypes },
-        allowedIn: { some: restriction },
+        allowedIn: {
+          some: restriction?.id ? { id: restriction.id } : undefined,
+        },
       },
       select: { id: true },
       skip: offset,
     });
+
+    console.log(events, offset);
 
     return events.map(ev => ev.id);
   }
@@ -114,27 +115,26 @@ export class EventService {
     lat = +lat;
     long = +long;
 
-    const defaultEvent: { 'ev.id': string; 'chal.id': string }[] = await this
-      .prisma.$queryRaw`
-      select * from EventBase ev 
-      left join Challenge chal 
-      on ev.id = chal.linkedEventId and chal.isDefault = true
-      order by ((chal.latitude - ${lat})^2 + (chal.longitude - ${long})^2) desc
+    const defaultEvent: Challenge[] = await this.prisma.$queryRaw`
+      select * from "EventBase" ev 
+      inner join "Challenge" chal 
+      on ev.id = chal."linkedEventId" and ev."isDefault" = true
+      order by ((chal."latitude" - ${lat})^2 + (chal."longitude" - ${long})^2) desc
     `;
 
     if (defaultEvent.length === 0) throw 'Cannot find closest challenge!';
 
-    const closestChalId = defaultEvent[0]['chal.id'];
-    const defaultEvId = defaultEvent[0]['ev.id'];
+    const closestChalId = defaultEvent[0].id;
+    const defaultEvId = defaultEvent[0].linkedEventId;
 
     const progress = await this.prisma.eventTracker.create({
       data: {
         score: 0,
         isRankedForEvent: true,
         cooldownEnd: new Date(),
-        eventId: defaultEvId,
-        curChallengeId: closestChalId,
-        userId: user.id,
+        event: { connect: { id: defaultEvId } },
+        curChallenge: { connect: { id: closestChalId } },
+        user: { connect: { id: user.id } },
       },
     });
 
@@ -164,7 +164,7 @@ export class EventService {
 
   async createEventTracker(user: User, event: EventBase) {
     const existing = await this.prisma.eventTracker.findFirst({
-      where: { user, event },
+      where: { userId: user.id, eventId: event.id },
     });
 
     if (existing) {
@@ -174,7 +174,7 @@ export class EventService {
     const closestChallenge = await this.prisma.challenge.findFirstOrThrow({
       where: {
         eventIndex: 0,
-        linkedEvent: event,
+        linkedEvent: { id: event.id },
       },
     });
 
@@ -312,7 +312,7 @@ export class EventService {
     if (!restriction) return undefined;
 
     const restrictions = await this.prisma.restrictionGroup.findMany({
-      where: { id: restriction, allowedEvents: { some: {} } },
+      where: { id: restriction, allowedEvents: { none: {} } },
     });
 
     return restrictions.length === 0 ? undefined : restrictions[0];

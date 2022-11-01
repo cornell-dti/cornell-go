@@ -1,18 +1,16 @@
-import { forwardRef, Inject, UseGuards } from '@nestjs/common';
+import { UseGuards } from '@nestjs/common';
 import {
   MessageBody,
   SubscribeMessage,
   WebSocketGateway,
 } from '@nestjs/websockets';
-import { Challenge, User } from '@prisma/client';
+import { User } from '@prisma/client';
 import { UserGuard } from 'src/auth/jwt-auth.guard';
-import { UpdateGroupDataDto } from 'src/client/update-group-data.dto';
 import { EventGateway } from 'src/event/event.gateway';
 import { GroupGateway } from 'src/group/group.gateway';
 import { UserGateway } from 'src/user/user.gateway';
 import { CallingUser } from '../auth/calling-user.decorator';
 import { ClientService } from '../client/client.service';
-import { EventService } from '../event/event.service';
 import { ChallengeService } from './challenge.service';
 import { CompletedChallengeDto } from './completed-challenge.dto';
 import { RequestChallengeDataDto } from './request-challenge-data.dto';

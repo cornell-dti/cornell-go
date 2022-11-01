@@ -1,16 +1,14 @@
 import { SessionLogService } from './../session-log/session-log.service';
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import { EventService } from 'src/event/event.service';
+import { Injectable } from '@nestjs/common';
 import {
   Challenge,
   EventBase,
   EventRewardType,
   EventTracker,
-  PrismaClient,
   SessionLogEvent,
   User,
 } from '@prisma/client';
-import { v4 } from 'uuid';
+import { EventService } from 'src/event/event.service';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -97,7 +95,9 @@ export class ChallengeService {
       data: {
         userId: user.id,
         challengeId: eventTracker.curChallengeId,
-        participants: { connect: groupMembers },
+        participants: {
+          connect: groupMembers.map(m => ({ id: m.id })),
+        },
         trackerId: eventTracker.id,
       },
     });
@@ -117,8 +117,8 @@ export class ChallengeService {
       where: { id: eventTracker.id },
       data: {
         score: { increment: 1 },
-        curChallenge: { connect: nextChallenge },
-        completedChallenges: { connect: prevChal },
+        curChallenge: { connect: { id: nextChallenge.id } },
+        completedChallenges: { connect: { id: prevChal.id } },
       },
     });
 
@@ -127,6 +127,7 @@ export class ChallengeService {
       challengeId,
       user.id,
     );
+
     return [eventTracker, groupMembers];
   }
 
@@ -154,7 +155,7 @@ export class ChallengeService {
 
     if (eventBase.rewardType === EventRewardType.PERPETUAL) {
       const rewardTemplate = await this.prisma.eventReward.findFirst({
-        where: { event: eventBase },
+        where: { eventId: eventBase.id },
       });
 
       if (rewardTemplate !== null) {

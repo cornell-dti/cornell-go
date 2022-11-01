@@ -2,7 +2,7 @@
 
 CornellGO! is an interactive scavenger hunt aimed at sparking interest in exploring the historic Cornell campus by leading the player around campus, seeking landmarks while competing with others.
 
-This repository contains the Flutter mobile app, the React administration app, and the Nest.js backend. Visit each subfolder for a description of each project's installation.
+This repository contains the Flutter mobile app, the React administration app, and the NestJS backend. Visit each subfolder for a description of each project's installation.
 
 ### Full project setup
 
@@ -16,20 +16,13 @@ cd ../game
 flutter pub get
 ```
 
-### Update container with new changes
-
-```
-docker compose build
-```
-
 ### Run project in container
 
 ```
-docker compose build
-docker compose up
+docker compose up --build
 ```
 
-### Start the container in the background (for flutter/react frontend)
+### Start the container in the background
 
 ```
 docker compose restart
@@ -51,7 +44,7 @@ rm -rf ./postgres-data
 mkdir postgres-data
 ```
 
-### Start the frontend
+### Start the frontend (for debugging)
 
 ```
 cd admin
@@ -70,18 +63,31 @@ flutter run --dart-define="API_URL=https://example.com"
 
 ## Contributors
 
+### FA22
+
+- **Youssef Attia** - Developer
+- **Cathryn Li** - Developer
+- **Nirbhay S Narang** - Developer
+- **Chris Gu** - Developer
+- **Brian La** - Developer
+- **Robin Ahn** - Designer
+- **Hanan Abraha** - Designer
+- **Alisha Lin** - PMM
+- **Nikita Kasumov** - TPM
+- **Althea Bata** - PM
+
 ### SP22
 
-- **Nikita Kasumov** - TPM/PM
 - **Eric Huang** - Developer
 - **Youssef Attia** - Developer
 - **Cathryn Li** - Developer
 - **Nirbhay S Narang** - Developer
 - **Chris Gu** - Developer
 - **Brian La** - Developer
+- **Nikita Kasumov** - TPM/PM
 
 ### FA21
 
-- **Nikita Kasumov** - TPM/PM
 - **Boao Dong** - Backend Developer
 - **Eric Huang** - Administrative Frontend
+- **Nikita Kasumov** - TPM/PM

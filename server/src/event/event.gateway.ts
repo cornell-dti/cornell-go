@@ -36,7 +36,7 @@ export class EventGateway {
     const updateEventData: UpdateEventDataDto = {
       isSearch: !!data.isSearch,
       events: await Promise.all(
-        ids.map(this.eventService.updateEventDataDtoForEvent),
+        ids.map(ev => this.eventService.updateEventDataDtoForEvent(ev)),
       ),
     };
 
