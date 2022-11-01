@@ -43,12 +43,16 @@ export class OrganizationService {
   async getDefaultOrganization(
     usage: RestrictionGroupSpecialUsage,
   ): Promise<RestrictionGroup & { defaultEvent: EventBase }> {
+    // TODO: get (and create if does not exist) the default organization for this usage
+
     throw 'Unimplemented!';
   }
 
   async getDefaultEvent(
     group: RestrictionGroup | { id: string },
   ): Promise<EventBase> {
+    // TODO: get the default event for the org. using isDefault flag, or the defaultEvent field once implemented
+
     throw 'Unimplemented!';
   }
 }
