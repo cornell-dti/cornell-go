@@ -1,6 +1,6 @@
 import { SessionLogService } from './../session-log/session-log.service';
 import { Injectable } from '@nestjs/common';
-import { EventBase, Group, User, SessionLogEvent, } from '@prisma/client';
+import { EventBase, Group, User, SessionLogEvent } from '@prisma/client';
 import { EventService } from 'src/event/event.service';
 import { UpdateGroupDataMemberDto } from '../client/update-group-data.dto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -137,7 +137,6 @@ export class GroupService {
     return oldGroup;
   }
 
-
   async getMembers(group: Group | { id: string }) {
     return await this.prisma.user.findMany({
       where: {
@@ -185,7 +184,6 @@ export class GroupService {
     return groupMembers;
   }
 
-
   async dtoForMemberData(group: Group): Promise<UpdateGroupDataMemberDto[]> {
     const members = await this.getMembers(group);
 
@@ -204,5 +202,4 @@ export class GroupService {
       }),
     );
   }
-
 }
