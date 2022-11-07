@@ -43,10 +43,10 @@ model User {
   hostOf              Group?            @relation("host")
   eventTrackers       EventTracker[]
   completedChallenges PrevChallenge[]   @relation("owner")
-  restrictedBy        Organization  @relation("restricted", fields: [restrictedById], references: [id])
-  restrictedById      String
-  generatedBy         Organization? @relation("generated", fields: [generatedById], references: [id])
-  generatedById       String?
+  restrictedBy        Organization[]    @relation("restricted")
+  restrictedById      String[]
+  generatedBy         Organization[]    @relation("generated")
+  generatedById       String[]
   isRanked            Boolean           @default(true)
   participatedIn      PrevChallenge[]   @relation("participant")
 }
@@ -81,7 +81,7 @@ model EventBase {
   id              String             @id @default(uuid())
   requiredMembers Int
   skippingEnabled Boolean
-  isDefault       Boolean            @unique
+  isDefault       Boolean            
   name            String
   description     String
   rewardType      EventRewardType
