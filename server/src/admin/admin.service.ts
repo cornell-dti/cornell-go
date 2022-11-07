@@ -84,7 +84,11 @@ export class AdminService {
   }
 
   async removeUser(userId: string) {
-    return await this.prisma.user.delete({ where: { id: userId } });
+    const user = await this.prisma.user.findFirstOrThrow({
+      where: { id: userId },
+    });
+
+    return await this.userService.deleteUser(user);
   }
 
   async getChallengeById(challengeId: string) {

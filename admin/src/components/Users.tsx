@@ -20,13 +20,13 @@ import { ServerDataContext } from "./ServerData";
 import { compareTwoStrings } from "string-similarity";
 import { isPropertySignature } from "typescript";
 import { AlertModal } from "./AlertModal";
+import GridTable from "@nadavshaar/react-grid-table";
 
 function UserCard(props: {
   user: UserDto;
   onEdit: () => void;
   onDelete: () => void;
 }) {
-  
   return (
     <>
       <ListCardBox>
@@ -56,13 +56,12 @@ function makeForm() {
   ] as EntryForm[];
 }
 
-
 function fromForm(form: EntryForm[], id: string, groupId: string): UserDto {
   return {
     id,
     username: (form[0] as FreeEntryForm).value,
     email: (form[1] as FreeEntryForm).value,
-    groupId
+    groupId,
   };
 }
 
@@ -73,77 +72,47 @@ function toForm(user: UserDto) {
   ] as EntryForm[];
 }
 
+const cols = [
+  {
+    id: "checkbox",
+    visible: true,
+    pinned: true,
+    width: "54px",
+  },
+  {
+    id: 1,
+    field: "username",
+    label: "Username",
+  },
+  {
+    id: 2,
+    field: "id",
+    label: "Id",
+    editable: false,
+  },
+  {
+    id: 3,
+    field: "groupId",
+    label: "GroupId",
+    editable: false,
+  },
+  {
+    id: 4,
+    field: "email",
+    label: "Email",
+  },
+];
+
+const rows = [
+  {
+    username: "NAME",
+    id: "randomID",
+    groupId: "randomGroupID",
+    email: "gmail.com",
+  },
+];
+
+const Table = <GridTable columns={cols} rows={rows} />;
 export function Users() {
-  const serverData = useContext(ServerDataContext);
-  const [isCreateModalOpen, setCreateModalOpen] = useState(false);
-  const [isEditModalOpen, setEditModalOpen] = useState(false);
-  const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [form, setForm] = useState(() => makeForm());
-  const [currentId, setCurrentId] = useState("");
-  const [groupId, setGroupId] = useState("");
-  const [query, setQuery] = useState("");
-
-  return (
-    <>
-      <AlertModal
-        description="Can not create a user."
-        isOpen={isCreateModalOpen}
-        onClose={() => setCreateModalOpen(false)}
-      />
-      <EntryModal
-        title="Edit User"
-        isOpen={isEditModalOpen}
-        entryButtonText="EDIT"
-        onEntry={() => {
-          serverData.updateUser(
-            fromForm(form, currentId, groupId)
-          );
-          setEditModalOpen(false);
-        }}
-        onCancel={() => {
-          setEditModalOpen(false);
-        }}
-        form={form}
-      />
-      <DeleteModal
-        objectName={serverData.users.get(currentId)?.username ?? ""}
-        isOpen={isDeleteModalOpen}
-        onClose={() => setDeleteModalOpen(false)}
-        onDelete={() => {
-          serverData.deleteUser(currentId);
-          setDeleteModalOpen(false);
-        }}
-      />
-      <SearchBar
-        onCreate={() => {
-          setCreateModalOpen(true);
-        }}
-        onSearch={(query) => setQuery(query)}
-      />
-      {Array.from(serverData.users.values())
-        .sort(
-          (a, b) =>
-            compareTwoStrings(b.username, query) -
-            compareTwoStrings(a.username, query)
-        )
-        .map((us) => (
-          <UserCard
-            key={us.id}
-            user={us}
-            onDelete={() => {
-              setCurrentId(us.id);
-              setGroupId(us.groupId);
-              setDeleteModalOpen(true);
-            }}
-            onEdit={() => {
-              setCurrentId(us.id);
-              setGroupId(us.groupId);
-              setForm(toForm(us));
-              setEditModalOpen(true);
-            }}
-          />
-        ))}
-    </>
-  );
+  return Table;
 }
-

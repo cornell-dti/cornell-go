@@ -19,5 +19,8 @@
   "bugs": {
     "url": "https://github.com/cornell-dti/cornell-go/issues"
   },
-  "homepage": "https://github.com/cornell-dti/cornell-go#readme"
+  "homepage": "https://github.com/cornell-dti/cornell-go#readme",
+  "dependencies": {
+    "@nadavshaar/react-grid-table": "^1.1.0"
+  }
 }

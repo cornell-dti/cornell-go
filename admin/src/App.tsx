@@ -3,8 +3,8 @@ import { Rewards } from "./components/Rewards";
 import { Admins } from "./components/Admins";
 import { Challenges } from "./components/Challenges";
 import { Events } from "./components/Events";
-import { Users } from "./components/Users";
 import { Restrictions } from "./components/Restrictions";
+import { Users } from "./components/Users";
 
 import {
   AppBar,
