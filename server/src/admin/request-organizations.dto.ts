@@ -1,4 +1,4 @@
-export interface RestrictionDto {
+export interface OrganizationDto {
   id: string;
   displayName: string;
   canEditUsername: boolean;
@@ -8,4 +8,4 @@ export interface RestrictionDto {
   generatedUserAuthIds: string[];
 }
 
-export interface RequestRestrictionsDto {}
+export interface RequestOrganizationsDto { }

@@ -16,12 +16,12 @@ import { AdminService } from './admin.service';
 import { RequestAdminsDto } from './request-admins.dto';
 import { RequestChallengesDto } from './request-challenges.dto';
 import { RequestEventsDto } from './request-events.dto';
-import { RequestRestrictionsDto } from './request-restrictions.dto';
+import { RequestOrganizationsDto } from './request-organizations.dto';
 import { RequestRewardsDto } from './request-rewards.dto';
 import { UpdateAdminsDto } from './update-admins.dto';
 import { UpdateChallengesDto } from './update-challenges.dto';
 import { UpdateEventsDto } from './update-events.dto';
-import { UpdateRestrictionsDto } from './update-restrictions.dto';
+import { UpdateOrganizationsDto } from './update-organizations.dto';
 import { UpdateRewardsDto } from './update-rewards.dto';
 @WebSocketGateway({ cors: true })
 @UseGuards(AdminGuard)
@@ -30,7 +30,7 @@ export class AdminGateway {
     private adminService: AdminService,
     private adminCallbackService: AdminCallbackService,
     private clientService: ClientService,
-  ) {}
+  ) { }
 
   @SubscribeMessage('requestEvents')
   async requestEvents(
@@ -105,19 +105,19 @@ export class AdminGateway {
     );
   }
 
-  @SubscribeMessage('requestRestrictions')
-  async requestRestrictions(
+  @SubscribeMessage('requestOrganizations')
+  async requestOrganizations(
     @CallingUser() user: User,
-    @MessageBody() data: RequestRestrictionsDto,
+    @MessageBody() data: RequestOrganizationsDto,
   ) {
-    const restrictionGroups =
-      await this.adminService.getAllRestrictionGroupData();
+    const organizationGroups =
+      await this.adminService.getAllOrganizationData();
 
-    this.adminCallbackService.emitUpdateRestrictionData(
+    this.adminCallbackService.emitUpdateOrganizationData(
       {
-        restrictions: await Promise.all(
-          restrictionGroups.map(rg =>
-            this.adminService.dtoForRestrictionGroup(rg),
+        organizations: await Promise.all(
+          organizationGroups.map(org =>
+            this.adminService.dtoForOrganization(org),
           ),
         ),
         deletedIds: [],
@@ -274,19 +274,19 @@ export class AdminGateway {
     this.adminCallbackService.emitUpdateAdminData({ admins: adminUpdates });
   }
 
-  @SubscribeMessage('updateRestrictions')
-  async updateRestrictions(
+  @SubscribeMessage('updateOrganizations')
+  async updateOrganizations(
     @CallingUser() user: User,
-    @MessageBody() data: UpdateRestrictionsDto,
+    @MessageBody() data: UpdateOrganizationsDto,
   ) {
-    await this.adminService.deleteRestrictionGroups(data.deletedIds);
-    const updated = await this.adminService.updateRestrictionGroups(
-      data.restrictions,
+    await this.adminService.deleteOrganizations(data.deletedIds);
+    const updated = await this.adminService.updateOrganizations(
+      data.organizations,
     );
 
-    await this.adminCallbackService.emitUpdateRestrictionData({
-      restrictions: await Promise.all(
-        updated.map(rg => this.adminService.dtoForRestrictionGroup(rg)),
+    await this.adminCallbackService.emitUpdateOrganizationData({
+      organizations: await Promise.all(
+        updated.map(org => this.adminService.dtoForOrganization(org)),
       ),
       deletedIds: data.deletedIds,
     });

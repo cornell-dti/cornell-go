@@ -1,5 +1,5 @@
 import { useContext, useState } from "react";
-import { RestrictionDto } from "../dto/request-restrictions.dto";
+import { OrganizationDto } from "../dto/request-organizations.dto";
 import { DeleteModal } from "./DeleteModal";
 import {
   EntryModal,
@@ -23,7 +23,7 @@ import { ServerDataContext } from "./ServerData";
 import { compareTwoStrings } from "string-similarity";
 
 function GroupCard(props: {
-  restriction: RestrictionDto;
+  organization: OrganizationDto;
   onAdd: () => void;
   onEdit: () => void;
   onDelete: () => void;
@@ -34,16 +34,16 @@ function GroupCard(props: {
   return (
     <>
       <ListCardBox>
-        <ListCardTitle>{props.restriction.displayName}</ListCardTitle>
+        <ListCardTitle>{props.organization.displayName}</ListCardTitle>
         <ListCardBody>
-          Id: <b>{props.restriction.id}</b>
+          Id: <b>{props.organization.id}</b>
           <br />
-          Events: <b>{props.restriction.allowedEvents.join(", ")}</b> <br />
-          User Count: <b>{props.restriction.restrictedUsers.length}</b> <br />
+          Events: <b>{props.organization.allowedEvents.join(", ")}</b> <br />
+          User Count: <b>{props.organization.restrictedUsers.length}</b> <br />
           Generated Users:{" "}
-          <b>{props.restriction.generatedUserAuthIds.join(", ")}</b> <br />
+          <b>{props.organization.generatedUserAuthIds.join(", ")}</b> <br />
           Username Editing Enabled:{" "}
-          <b>{affirmOfBool(props.restriction.canEditUsername)}</b> <br />
+          <b>{affirmOfBool(props.organization.canEditUsername)}</b> <br />
         </ListCardBody>
         <ListCardButtons>
           <HButton onClick={props.onAdd}>ADD EVENT</HButton>
@@ -76,8 +76,8 @@ function makeForm() {
 function fromForm(
   form: EntryForm[],
   id: string,
-  oldDto: RestrictionDto
-): RestrictionDto {
+  oldDto: OrganizationDto
+): OrganizationDto {
   return {
     ...oldDto,
     id,
@@ -87,7 +87,7 @@ function fromForm(
   };
 }
 
-function toForm(group: RestrictionDto) {
+function toForm(group: OrganizationDto) {
   return [
     { name: "Display Name", characterLimit: 256, value: group.displayName },
     {
@@ -104,7 +104,7 @@ function toForm(group: RestrictionDto) {
   ] as EntryForm[];
 }
 
-const emptyDto: RestrictionDto = {
+const emptyDto: OrganizationDto = {
   id: "",
   displayName: "",
   canEditUsername: false,
@@ -114,7 +114,7 @@ const emptyDto: RestrictionDto = {
   generatedUserCount: 0,
 };
 
-export function Restrictions() {
+export function Organizations() {
   const serverData = useContext(ServerDataContext);
   const [isCreateModalOpen, setCreateModalOpen] = useState(false);
   const [isEditModalOpen, setEditModalOpen] = useState(false);
@@ -131,7 +131,7 @@ export function Restrictions() {
         isOpen={isCreateModalOpen}
         entryButtonText="CREATE"
         onEntry={() => {
-          serverData.updateRestriction(fromForm(form, "", emptyDto));
+          serverData.updateOrganization(fromForm(form, "", emptyDto));
           setCreateModalOpen(false);
         }}
         onCancel={() => {
@@ -144,7 +144,7 @@ export function Restrictions() {
         isOpen={isEditModalOpen}
         entryButtonText="EDIT"
         onEntry={() => {
-          serverData.updateRestriction(fromForm(form, currentId, oldDto));
+          serverData.updateOrganization(fromForm(form, currentId, oldDto));
           setEditModalOpen(false);
         }}
         onCancel={() => {
@@ -153,11 +153,11 @@ export function Restrictions() {
         form={form}
       />
       <DeleteModal
-        objectName={serverData.restrictions.get(currentId)?.displayName ?? ""}
+        objectName={serverData.organizations.get(currentId)?.displayName ?? ""}
         isOpen={isDeleteModalOpen}
         onClose={() => setDeleteModalOpen(false)}
         onDelete={() => {
-          serverData.deleteRestriction(currentId);
+          serverData.deleteOrganization(currentId);
           setDeleteModalOpen(false);
         }}
       />
@@ -168,7 +168,7 @@ export function Restrictions() {
         }}
         onSearch={(query) => setQuery(query)}
       />
-      {Array.from(serverData.restrictions.values())
+      {Array.from(serverData.organizations.values())
         .sort(
           (a, b) =>
             compareTwoStrings(b.displayName, query) -
@@ -177,11 +177,11 @@ export function Restrictions() {
         .map((r) => (
           <GroupCard
             key={r.id}
-            restriction={r}
+            organization={r}
             onAdd={() => {
               setCurrentId(r.id);
               r.allowedEvents.push(serverData.selectedEvent);
-              serverData.updateRestriction(r);
+              serverData.updateOrganization(r);
             }}
             onDelete={() => {
               setCurrentId(r.id);
@@ -196,7 +196,7 @@ export function Restrictions() {
             onClear={() => {
               setCurrentId(r.id);
               r.allowedEvents = [];
-              serverData.updateRestriction(r);
+              serverData.updateOrganization(r);
             }}
           />
         ))}

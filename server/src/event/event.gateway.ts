@@ -24,7 +24,7 @@ export class EventGateway {
   constructor(
     private clientService: ClientService,
     private eventService: EventService,
-  ) {}
+  ) { }
 
   @SubscribeMessage('requestEventData')
   async requestEventData(
@@ -63,7 +63,7 @@ export class EventGateway {
         time: data.closestToEnding ? 'asc' : undefined,
         challengeCount: data.shortestFirst ? 'asc' : undefined,
       },
-      await this.eventService.getEventRestrictionForUser(user),
+      await this.eventService.getEventOrganizationForUser(user),
     );
 
     await this.requestEventData(user, {

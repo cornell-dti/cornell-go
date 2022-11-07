@@ -3,7 +3,7 @@ import {
   Challenge,
   EventBase,
   EventRewardType,
-  RestrictionGroup,
+  Organization,
   User,
 } from '@prisma/client';
 import { UpdateEventDataEventDto } from 'src/client/update-event-data.dto';
@@ -17,7 +17,7 @@ export class EventService {
     private clientService: ClientService,
     private orgService: OrganizationService,
     private readonly prisma: PrismaService,
-  ) {}
+  ) { }
 
   /** Get event by id */
   async getEventById(id: string) {
@@ -32,13 +32,13 @@ export class EventService {
   /** Checks if a user is allowed to see an event */
   async isAllowedEvent(user: User, eventId: string) {
     if (user.restrictedById) {
-      const restriction = await this.prisma.restrictionGroup.findFirstOrThrow({
+      const organization = await this.prisma.organization.findFirstOrThrow({
         where: { id: user.restrictedById },
         include: { allowedEvents: true },
       });
-      const hasEventRestrictions = restriction.allowedEvents.length > 0;
-      if (hasEventRestrictions) {
-        return restriction.allowedEvents.some(e => e.id === eventId);
+      const hasEventOrganizations = organization.allowedEvents.length > 0;
+      if (hasEventOrganizations) {
+        return organization.allowedEvents.some(e => e.id === eventId);
       }
     }
     return true;
@@ -75,14 +75,14 @@ export class EventService {
       time?: 'asc' | 'desc';
       challengeCount?: 'asc' | 'desc';
     } = {},
-    restriction?: RestrictionGroup,
+    organization?: Organization,
   ) {
     const events = await this.prisma.eventBase.findMany({
       where: {
-        indexable: !restriction,
+        indexable: !organization,
         //rewardType: rewardTypes && { $in: rewardTypes },
         allowedIn: {
-          some: restriction?.id ? { id: restriction.id } : undefined,
+          some: organization?.id ? { id: organization.id } : undefined,
         },
       },
       select: { id: true },
@@ -268,16 +268,16 @@ export class EventService {
     };
   }
 
-  async getEventRestrictionForUser(
+  async getEventOrganizationForUser(
     user: User,
-  ): Promise<RestrictionGroup | undefined> {
-    const restriction = await user.restrictedById;
-    if (!restriction) return undefined;
+  ): Promise<Organization | undefined> {
+    const organization = await user.restrictedById;
+    if (!organization) return undefined;
 
-    const restrictions = await this.prisma.restrictionGroup.findMany({
-      where: { id: restriction, allowedEvents: { none: {} } },
+    const organizations = await this.prisma.organization.findMany({
+      where: { id: organization, allowedEvents: { none: {} } },
     });
 
-    return restrictions.length === 0 ? undefined : restrictions[0];
+    return organizations.length === 0 ? undefined : organizations[0];
   }
 }

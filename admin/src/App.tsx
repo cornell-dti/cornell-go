@@ -3,7 +3,7 @@ import { Rewards } from "./components/Rewards";
 import { Admins } from "./components/Admins";
 import { Challenges } from "./components/Challenges";
 import { Events } from "./components/Events";
-import { Restrictions } from "./components/Restrictions";
+import { Organizations } from "./components/Organizations";
 
 import {
   AppBar,
@@ -62,10 +62,10 @@ const routes = [
     name: "Rewards",
   },
   {
-    path: "/restrictions",
-    element: <Restrictions />,
+    path: "/organizations",
+    element: <Organizations />,
     icon: faLock,
-    name: "Restrictions",
+    name: "Organizations",
   },
 ];
 

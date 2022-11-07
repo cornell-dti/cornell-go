@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import {
   AuthType,
   Group,
-  RestrictionGroupSpecialUsage,
+  OrganizationSpecialUsage,
   User,
 } from '@prisma/client';
 import {
@@ -21,7 +21,7 @@ export class UserService {
     private eventsService: EventService,
     private groupsService: GroupService,
     private orgService: OrganizationService,
-  ) {}
+  ) { }
 
   /** Find a user by their authentication token */
   async byAuth(authType: AuthType, authToken: string) {
@@ -47,8 +47,8 @@ export class UserService {
   ) {
     const defOrg = await this.orgService.getDefaultOrganization(
       authType == AuthType.GOOGLE
-        ? RestrictionGroupSpecialUsage.CORNELL_LOGIN
-        : RestrictionGroupSpecialUsage.DEVICE_LOGIN,
+        ? OrganizationSpecialUsage.CORNELL_LOGIN
+        : OrganizationSpecialUsage.DEVICE_LOGIN,
     );
 
     const group: Group = await this.groupsService.createFromEvent(
@@ -124,11 +124,11 @@ export class UserService {
   }
 
   async setUsername(user: User, username: string) {
-    const restriction = await this.prisma.restrictionGroup.findUnique({
+    const organization = await this.prisma.organization.findUnique({
       where: { id: user.restrictedById ?? '' },
     });
 
-    if (!restriction?.canEditUsername) {
+    if (!organization?.canEditUsername) {
       return false;
     }
 

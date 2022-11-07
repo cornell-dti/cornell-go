@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { ClientGateway } from 'src/client/client.gateway';
-import { UpdateRestrictionsDto } from '../update-restrictions.dto';
+import { UpdateOrganizationsDto } from '../update-organizations.dto';
 import { UpdateAdminDataDto } from './update-admin-data.dto';
 import { UpdateChallengeDataDto } from './update-challenge-data.dto';
 import { UpdateEventDataDto } from './update-event-data.dto';
@@ -9,7 +9,7 @@ import { UpdateRewardDataDto } from './update-reward-data.dto';
 
 @Injectable()
 export class AdminCallbackService {
-  constructor(private gateway: ClientGateway) {}
+  constructor(private gateway: ClientGateway) { }
 
   private makeCallback<TData>(event: string) {
     return (data: TData, user?: User) => {
@@ -36,6 +36,6 @@ export class AdminCallbackService {
   emitUpdateRewardData =
     this.makeCallback<UpdateRewardDataDto>('updateRewardData');
 
-  emitUpdateRestrictionData =
-    this.makeCallback<UpdateRestrictionsDto>('updateRestrictions');
+  emitUpdateOrganizationData =
+    this.makeCallback<UpdateOrganizationsDto>('updateOrganizations');
 }

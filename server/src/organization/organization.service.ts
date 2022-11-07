@@ -2,14 +2,14 @@ import { Injectable } from '@nestjs/common';
 import {
   EventBase,
   EventRewardType,
-  RestrictionGroup,
-  RestrictionGroupSpecialUsage,
+  Organization,
+  OrganizationSpecialUsage,
 } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class OrganizationService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   private async makeDefaultEvent() {
     return await this.prisma.eventBase.create({
@@ -41,15 +41,15 @@ export class OrganizationService {
   }
 
   async getDefaultOrganization(
-    usage: RestrictionGroupSpecialUsage,
-  ): Promise<RestrictionGroup & { defaultEvent: EventBase }> {
+    usage: OrganizationSpecialUsage,
+  ): Promise<Organization & { defaultEvent: EventBase }> {
     // TODO: get (and create if does not exist) the default organization for this usage
 
     throw 'Unimplemented!';
   }
 
   async getDefaultEvent(
-    group: RestrictionGroup | { id: string },
+    group: Organization | { id: string },
   ): Promise<EventBase> {
     // TODO: get the default event for the org. using isDefault flag, or the defaultEvent field once implemented
 

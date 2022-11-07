@@ -6,7 +6,7 @@ import {
   useMemo,
   useState,
 } from "react";
-import { RestrictionDto } from "../dto/request-restrictions.dto";
+import { OrganizationDto } from "../dto/request-organizations.dto";
 import { UpdateAdminDataAdminDto } from "../dto/update-admin-data.dto";
 import { ChallengeDto } from "../dto/update-challenges.dto";
 import { EventDto } from "../dto/update-events.dto";
@@ -19,18 +19,18 @@ const defaultData = {
   events: new Map<string, EventDto>(),
   challenges: new Map<string, ChallengeDto>(),
   rewards: new Map<string, RewardDto>(),
-  restrictions: new Map<string, RestrictionDto>(),
+  organizations: new Map<string, OrganizationDto>(),
   selectedEvent: "" as string,
-  selectEvent(id: string) {},
-  setAdminStatus(id: string, granted: boolean) {},
-  updateReward(reward: RewardDto) {},
-  deleteReward(id: string) {},
-  updateChallenge(challenge: ChallengeDto) {},
-  deleteChallenge(id: string) {},
-  updateEvent(event: EventDto) {},
-  deleteEvent(id: string) {},
-  updateRestriction(restriction: RestrictionDto) {},
-  deleteRestriction(id: string) {},
+  selectEvent(id: string) { },
+  setAdminStatus(id: string, granted: boolean) { },
+  updateReward(reward: RewardDto) { },
+  deleteReward(id: string) { },
+  updateChallenge(challenge: ChallengeDto) { },
+  deleteChallenge(id: string) { },
+  updateEvent(event: EventDto) { },
+  deleteEvent(id: string) { },
+  updateOrganization(organization: OrganizationDto) { },
+  deleteOrganization(id: string) { },
 };
 
 export const ServerDataContext = createContext(defaultData);
@@ -77,14 +77,14 @@ export function ServerDataProvider(props: { children: ReactNode }) {
       deleteEvent(id: string) {
         sock.updateEvents({ events: [], deletedIds: [id] });
       },
-      updateRestriction(restriction: RestrictionDto) {
-        sock.updateRestrictions({
-          restrictions: [restriction],
+      updateOrganization(organization: OrganizationDto) {
+        sock.updateOrganizations({
+          organizations: [organization],
           deletedIds: [],
         });
       },
-      deleteRestriction(id: string) {
-        sock.updateRestrictions({ restrictions: [], deletedIds: [id] });
+      deleteOrganization(id: string) {
+        sock.updateOrganizations({ organizations: [], deletedIds: [id] });
       },
     }),
     [serverData, setServerData, sock]
@@ -93,7 +93,7 @@ export function ServerDataProvider(props: { children: ReactNode }) {
   useEffect(() => {
     sock.requestAdmins({});
     sock.requestEvents({});
-    sock.requestRestrictions({});
+    sock.requestOrganizations({});
   }, [sock]);
 
   useEffect(() => {
@@ -120,9 +120,9 @@ export function ServerDataProvider(props: { children: ReactNode }) {
       data.rewards.forEach((rw) => serverData.rewards.set(rw.id, rw));
       setTimeout(() => setServerData({ ...serverData }), 0);
     });
-    sock.onUpdateRestrictions((data) => {
-      data.deletedIds.forEach((id) => serverData.restrictions.delete(id));
-      data.restrictions.forEach((r) => serverData.restrictions.set(r.id, r));
+    sock.onUpdateOrganizations((data) => {
+      data.deletedIds.forEach((id) => serverData.organizations.delete(id));
+      data.organizations.forEach((r) => serverData.organizations.set(r.id, r));
       setTimeout(() => setServerData({ ...serverData }), 0);
     });
   }, [sock, serverData, setServerData]);

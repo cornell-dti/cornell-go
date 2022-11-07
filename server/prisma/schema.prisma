@@ -19,7 +19,7 @@ enum EventRewardType {
   PERPETUAL
 }
 
-enum RestrictionGroupSpecialUsage {
+enum OrganizationSpecialUsage {
   ///DEVICE_LOGIN is a device assigned-id that acts as a user login for non-Cornell users.
   DEVICE_LOGIN
   CORNELL_LOGIN
@@ -43,9 +43,9 @@ model User {
   hostOf              Group?            @relation("host")
   eventTrackers       EventTracker[]
   completedChallenges PrevChallenge[]   @relation("owner")
-  restrictedBy        RestrictionGroup  @relation("restricted", fields: [restrictedById], references: [id])
-  restrictedById      String
-  generatedBy         RestrictionGroup? @relation("generated", fields: [generatedById], references: [id])
+  restrictedBy        Organization[]  @relation("restricted", fields: [restrictedById], references: [id])
+  restrictedById      String[]
+  generatedBy         Organization? @relation("generated", fields: [generatedById], references: [id])
   generatedById       String?
   isRanked            Boolean           @default(true)
   participatedIn      PrevChallenge[]   @relation("participant")
@@ -90,7 +90,7 @@ model EventBase {
   minimumScore    Int                @default(1)
   rewards         EventReward[]
   challenges      Challenge[]
-  allowedIn       RestrictionGroup[]
+  allowedIn       Organization[]
   trackers        EventTracker[]
   activeGroups    Group[]
 }
@@ -132,7 +132,7 @@ model PrevChallenge {
   timestamp    DateTime     @default(now())
 }
 
-model RestrictionGroup {
+model Organization {
   id              String                       @id @default(uuid())
   displayName     String // A very cool org#1
   name            String // a_very_cool_org_1
@@ -140,5 +140,5 @@ model RestrictionGroup {
   restrictedUsers User[]                       @relation("restricted")
   generatedUsers  User[]                       @relation("generated")
   allowedEvents   EventBase[]
-  specialUsage    RestrictionGroupSpecialUsage
+  specialUsage    OrganizationSpecialUsage
 }

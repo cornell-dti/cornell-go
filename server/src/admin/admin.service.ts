@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { RewardDto } from './update-rewards.dto';
 import { EventDto } from './update-events.dto';
 import { v4 } from 'uuid';
-import { RestrictionDto } from './request-restrictions.dto';
+import { OrganizationDto } from './request-organizations.dto';
 import { UserService } from 'src/user/user.service';
 import {
   AuthType,
@@ -12,7 +12,8 @@ import {
   EventReward,
   EventRewardType,
   PrismaClient,
-  RestrictionGroup,
+  Organization,
+  OrganizationSpecialUsage,
 } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -23,7 +24,7 @@ export class AdminService {
   constructor(
     private userService: UserService,
     private prisma: PrismaService,
-  ) {}
+  ) { }
 
   async requestAdminAccess(adminId: string) {
     console.log(`User ${adminId} requested admin access!`);
@@ -60,8 +61,8 @@ export class AdminService {
     return await this.prisma.challenge.findMany();
   }
 
-  async getAllRestrictionGroupData() {
-    return await this.prisma.restrictionGroup.findMany();
+  async getAllOrganizationData() {
+    return await this.prisma.organization.findMany();
   }
 
   async getEventById(eventId: string) {
@@ -135,14 +136,14 @@ export class AdminService {
     );
   }
 
-  async deleteRestrictionGroups(ids: string[]) {
+  async deleteOrganizations(ids: string[]) {
     const genedUsers = await this.prisma.user.findMany({
       where: { generatedById: { in: ids } },
     });
 
     await Promise.all(genedUsers.map(u => this.userService.deleteUser(u)));
 
-    await this.prisma.restrictionGroup.deleteMany({
+    await this.prisma.organization.deleteMany({
       where: { id: { in: ids } },
     });
   }
@@ -261,7 +262,7 @@ export class AdminService {
   }
 
   /** Creates a new restricted user */
-  async newRestrictedUser(id: string, word: string, group: RestrictionGroup) {
+  async newRestrictedUser(id: string, word: string, group: Organization) {
     const user = await this.userService.register(
       id + '@cornell.edu',
       word,
@@ -278,7 +279,7 @@ export class AdminService {
   }
 
   /** Adjusts member count in a group up based on expectedCount */
-  async generateMembers(group: RestrictionGroup, expectedCount: number) {
+  async generateMembers(group: Organization, expectedCount: number) {
     const genCount = await this.prisma.user.count({
       where: { generatedById: group.id },
     });
@@ -291,7 +292,7 @@ export class AdminService {
         const id = group.name + '_' + word + index;
         const user = await this.newRestrictedUser(id, word, group);
 
-        await this.prisma.restrictionGroup.update({
+        await this.prisma.organization.update({
           where: { id: group.id },
           data: {
             generatedUsers: { connect: { id: user.id } },
@@ -303,7 +304,7 @@ export class AdminService {
   }
 
   /** Ensures all restricted users are on an allowed event */
-  async ensureEventRestriction(group: RestrictionGroup) {
+  async ensureEventOrganization(group: Organization) {
     const allowedEventCount = await this.prisma.eventBase.count({
       where: {
         allowedIn: { some: { id: group.id } },
@@ -311,7 +312,7 @@ export class AdminService {
     });
 
     if (allowedEventCount === 0) {
-      return; // No event restrictions
+      return; // No event organizations
     }
 
     const allowedEvents = (
@@ -335,54 +336,55 @@ export class AdminService {
     }
   }
 
-  /** Update/insert a restriction group */
-  async updateRestrictionGroupWithDto(restriction: RestrictionDto) {
-    const restrictionEntity = await this.prisma.restrictionGroup.upsert({
-      where: { id: restriction.id },
+  /** Update/insert a organization group */
+  async updateOrganizationWithDto(organization: OrganizationDto) {
+    const organizationEntity = await this.prisma.organization.upsert({
+      where: { id: organization.id },
       create: {
-        displayName: restriction.displayName,
-        name: restriction.displayName
+        displayName: organization.displayName,
+        name: organization.displayName
           .toLowerCase()
           .replaceAll(/[^a-z0-9]/g, '_'),
-        canEditUsername: restriction.canEditUsername,
+        canEditUsername: organization.canEditUsername,
         restrictedUsers: {
-          connect: restriction.restrictedUsers.map(id => ({ id })),
+          connect: organization.restrictedUsers.map(id => ({ id })),
         },
         allowedEvents: {
-          connect: restriction.allowedEvents.map(id => ({ id })),
+          connect: organization.allowedEvents.map(id => ({ id })),
         },
+        specialUsage: 'NONE',
       },
       update: {
         restrictedUsers: {
-          set: restriction.restrictedUsers.map(id => ({ id })),
+          set: organization.restrictedUsers.map(id => ({ id })),
         },
         allowedEvents: {
-          set: restriction.allowedEvents.map(id => ({ id })),
+          set: organization.allowedEvents.map(id => ({ id })),
         },
       },
     });
 
     const genCount = await this.prisma.user.count({
-      where: { generatedBy: restrictionEntity },
+      where: { generatedBy: organizationEntity },
     });
 
-    if (restriction.generatedUserCount > genCount) {
+    if (organization.generatedUserCount > genCount) {
       await this.generateMembers(
-        restrictionEntity,
-        restriction.generatedUserCount,
+        organizationEntity,
+        organization.generatedUserCount,
       );
     }
 
-    await this.ensureEventRestriction(restrictionEntity);
+    await this.ensureEventOrganization(organizationEntity);
 
-    return restrictionEntity;
+    return organizationEntity;
   }
 
-  async updateRestrictionGroups(
-    restrictions: RestrictionDto[],
-  ): Promise<RestrictionGroup[]> {
+  async updateOrganizations(
+    organizations: OrganizationDto[],
+  ): Promise<Organization[]> {
     return await Promise.all(
-      restrictions.map(r => this.updateRestrictionGroupWithDto(r)),
+      organizations.map(r => this.updateOrganizationWithDto(r)),
     );
   }
 
@@ -468,19 +470,19 @@ export class AdminService {
     };
   }
 
-  async dtoForRestrictionGroup(
-    restrictionGroup: RestrictionGroup,
-  ): Promise<RestrictionDto> {
-    const fullRestric = this.prisma.restrictionGroup.findUniqueOrThrow({
-      where: { id: restrictionGroup.id },
+  async dtoForOrganization(
+    organization: Organization,
+  ): Promise<OrganizationDto> {
+    const fullRestric = this.prisma.organization.findUniqueOrThrow({
+      where: { id: organization.id },
     });
 
     const genUsers = await fullRestric.generatedUsers();
 
     return {
-      id: restrictionGroup.id,
-      displayName: restrictionGroup.displayName,
-      canEditUsername: restrictionGroup.canEditUsername,
+      id: organization.id,
+      displayName: organization.displayName,
+      canEditUsername: organization.canEditUsername,
       restrictedUsers: (
         await fullRestric.restrictedUsers({ select: { id: true } })
       ).map(e => e.id),
