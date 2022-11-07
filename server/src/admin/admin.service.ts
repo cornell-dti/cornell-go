@@ -24,7 +24,7 @@ export class AdminService {
   constructor(
     private userService: UserService,
     private prisma: PrismaService,
-  ) { }
+  ) {}
 
   async requestAdminAccess(adminId: string) {
     console.log(`User ${adminId} requested admin access!`);

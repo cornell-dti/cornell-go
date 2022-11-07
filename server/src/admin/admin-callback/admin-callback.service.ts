@@ -9,7 +9,7 @@ import { UpdateRewardDataDto } from './update-reward-data.dto';
 
 @Injectable()
 export class AdminCallbackService {
-  constructor(private gateway: ClientGateway) { }
+  constructor(private gateway: ClientGateway) {}
 
   private makeCallback<TData>(event: string) {
     return (data: TData, user?: User) => {
@@ -36,6 +36,7 @@ export class AdminCallbackService {
   emitUpdateRewardData =
     this.makeCallback<UpdateRewardDataDto>('updateRewardData');
 
-  emitUpdateOrganizationData =
-    this.makeCallback<UpdateOrganizationsDto>('updateOrganizations');
+  emitUpdateOrganizationData = this.makeCallback<UpdateOrganizationsDto>(
+    'updateOrganizations',
+  );
 }

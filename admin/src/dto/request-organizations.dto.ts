@@ -8,4 +8,4 @@ export interface OrganizationDto {
   generatedUserAuthIds: string[];
 }
 
-export interface RequestOrganizationsDto { }
+export interface RequestOrganizationsDto {}

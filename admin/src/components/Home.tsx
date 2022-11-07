@@ -36,9 +36,9 @@ export function Home() {
       Claiming User Id: the unique identifier of a the user who has earned this
       reward (empty if none)
       <br /> <br />
-      To create organizations for groups of people, go to Organizations and create
-      a group (be careful with the naming since it's visible people in the
-      groups, and the name must be unique). <br />
+      To create organizations for groups of people, go to Organizations and
+      create a group (be careful with the naming since it's visible people in
+      the groups, and the name must be unique). <br />
       To restrict these groups to certain events, select an event in the Events
       page and click Add Event on the group <br />
       If you want to make temporary users for the restricted group, enter the
@@ -50,8 +50,8 @@ export function Home() {
       visible to all people who are in that organization
       <br />
       Whenever you want to test an event before making it public, be sure to
-      make a organization and test using it, then delete the organization (it will
-      remove your test account from the leaderboard)
+      make a organization and test using it, then delete the organization (it
+      will remove your test account from the leaderboard)
     </>
   );
 }

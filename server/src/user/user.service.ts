@@ -21,7 +21,7 @@ export class UserService {
     private eventsService: EventService,
     private groupsService: GroupService,
     private orgService: OrganizationService,
-  ) { }
+  ) {}
 
   /** Find a user by their authentication token */
   async byAuth(authType: AuthType, authToken: string) {

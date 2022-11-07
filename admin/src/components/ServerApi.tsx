@@ -15,7 +15,7 @@ import { UpdateRewardDataDto } from "../dto/update-reward-data.dto";
 import { UpdateRewardsDto } from "../dto/update-rewards.dto";
 
 export class ServerApi {
-  constructor(private socket: Socket) { }
+  constructor(private socket: Socket) {}
 
   requestEvents(data: RequestEventsDto) {
     this.socket.emit("requestEvents", data);

@@ -30,7 +30,7 @@ export class AdminGateway {
     private adminService: AdminService,
     private adminCallbackService: AdminCallbackService,
     private clientService: ClientService,
-  ) { }
+  ) {}
 
   @SubscribeMessage('requestEvents')
   async requestEvents(
@@ -110,8 +110,7 @@ export class AdminGateway {
     @CallingUser() user: User,
     @MessageBody() data: RequestOrganizationsDto,
   ) {
-    const organizationGroups =
-      await this.adminService.getAllOrganizationData();
+    const organizationGroups = await this.adminService.getAllOrganizationData();
 
     this.adminCallbackService.emitUpdateOrganizationData(
       {

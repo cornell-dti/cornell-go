@@ -43,8 +43,8 @@ model User {
   hostOf              Group?            @relation("host")
   eventTrackers       EventTracker[]
   completedChallenges PrevChallenge[]   @relation("owner")
-  restrictedBy        Organization[]  @relation("restricted", fields: [restrictedById], references: [id])
-  restrictedById      String[]
+  restrictedBy        Organization  @relation("restricted", fields: [restrictedById], references: [id])
+  restrictedById      String
   generatedBy         Organization? @relation("generated", fields: [generatedById], references: [id])
   generatedById       String?
   isRanked            Boolean           @default(true)
