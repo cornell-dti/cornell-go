@@ -1,25 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { UserDto } from "../dto/update-users.dto";
-import { DeleteModal } from "./DeleteModal";
-import {
-  EntryModal,
-  EntryForm,
-  OptionEntryForm,
-  FreeEntryForm,
-} from "./EntryModal";
-import { HButton } from "./HButton";
-import {
-  ListCardBody,
-  ListCardBox,
-  ListCardButtons,
-  ListCardTitle,
-} from "./ListCard";
-import { SearchBar } from "./SearchBar";
 import { ServerDataContext } from "./ServerData";
-
-import { compareTwoStrings } from "string-similarity";
-import { isPropertySignature } from "typescript";
-import { AlertModal } from "./AlertModal";
 import GridTable from "@nadavshaar/react-grid-table";
 import userEvent from "@testing-library/user-event";
 
@@ -119,14 +100,6 @@ const styles = {
   },
 };
 
-function convert(data: any) {
-  return {
-    username: data.username,
-    id: data.id,
-    groupId: data.groupId,
-    email: data.email,
-  };
-}
 function toForm(user: any) {
   return {
     username: user.username,
