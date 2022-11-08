@@ -119,13 +119,24 @@ const styles = {
   },
 };
 
-const getColumns = ({
-  setRowsData,
-  serverData,
-}: {
-  setRowsData: any;
-  serverData: any;
-}) => {
+function convert(data: any) {
+  return {
+    username: data.username,
+    id: data.id,
+    groupId: data.groupId,
+    email: data.email,
+  };
+}
+function toForm(user: any) {
+  return {
+    username: user.username,
+    id: user.id,
+    groupId: user.groupId,
+    email: user.email,
+  };
+}
+
+function getColumns(setRowsData: any, serverData: any) {
   return [
     {
       id: "checkbox",
@@ -163,18 +174,10 @@ const getColumns = ({
       resizable: false,
       cellRenderer: ({
         tableManager,
-        value,
         data,
-        column,
-        colIndex,
-        rowIndex,
       }: {
         tableManager: any;
-        value: any;
         data: any;
-        column: any;
-        colIndex: any;
-        rowIndex: any;
       }) => (
         <div style={styles.buttonsCellContainer}>
           <button
@@ -191,20 +194,10 @@ const getColumns = ({
       ),
       editorCellRenderer: ({
         tableManager,
-        value,
         data,
-        column,
-        colIndex,
-        rowIndex,
-        onChange,
       }: {
         tableManager: any;
-        value: any;
         data: any;
-        column: any;
-        colIndex: any;
-        rowIndex: any;
-        onChange: any;
       }) => (
         <div style={styles.buttonsCellEditorContainer}>
           <button
@@ -227,8 +220,9 @@ const getColumns = ({
                 (r) => r.id === data.id
               );
               rowsClone[updatedRowIndex] = data;
+
               setRowsData(rowsClone);
-              serverData.updateUser(rowsClone);
+              serverData.updateUser(rowsClone[updatedRowIndex]);
               tableManager.rowEditApi.setEditRowId(null);
             }}
           >
@@ -238,15 +232,6 @@ const getColumns = ({
       ),
     },
   ];
-};
-
-function toForm(user: UserDto) {
-  return {
-    username: user.username,
-    id: user.id,
-    groupId: user.groupId,
-    email: user.email,
-  };
 }
 
 export function Users() {
@@ -256,9 +241,6 @@ export function Users() {
   );
 
   return (
-    <GridTable
-      columns={getColumns({ setRowsData, serverData })}
-      rows={rowsData}
-    />
+    <GridTable columns={getColumns(setRowsData, serverData)} rows={rowsData} />
   );
 }
