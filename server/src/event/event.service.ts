@@ -41,13 +41,6 @@ export class EventService {
     );
   }
 
-  /** Retrieves default event */
-  async getDefaultEvent() {
-    return await this.prisma.eventBase.findFirstOrThrow({
-      where: { isDefault: true },
-    });
-  }
-
   /** Get top players for event */
   async getTopTrackersForEvent(eventId: string, offset: number, count: number) {
     return await this.prisma.eventTracker.findMany({
