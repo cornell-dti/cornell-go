@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EventBase, Group, User } from '@prisma/client';
 import { EventService } from 'src/event/event.service';
+import { OrganizationService } from '../organization/organization.service';
 import { UpdateGroupDataMemberDto } from '../client/update-group-data.dto';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -8,6 +9,7 @@ import { PrismaService } from '../prisma/prisma.service';
 export class GroupService {
   constructor(
     private eventService: EventService,
+    private orgService: OrganizationService,
     private prisma: PrismaService,
   ) {}
 
@@ -173,8 +175,15 @@ export class GroupService {
       return;
     }
 
+    const org = (
+      await this.prisma.user.findUniqueOrThrow({
+        where: { id: actor.id },
+        include: { memberOf: true },
+      })
+    ).memberOf;
+
     const newEvent = !stillActive
-      ? await this.eventService.getDefaultEvent()
+      ? await this.orgService.getDefaultEvent(org[0])
       : await this.eventService.getEventById(eventId);
 
     if (!newEvent) return;
