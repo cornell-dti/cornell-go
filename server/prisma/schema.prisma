@@ -43,10 +43,7 @@ model User {
   hostOf              Group?            @relation("host")
   eventTrackers       EventTracker[]
   completedChallenges PrevChallenge[]   @relation("owner")
-  restrictedBy        Organization[]    @relation("restricted")
-  restrictedById      String[]
-  generatedBy         Organization[]    @relation("generated")
-  generatedById       String[]
+  memberOf            Organization[]   
   isRanked            Boolean           @default(true)
   participatedIn      PrevChallenge[]   @relation("participant")
 }
@@ -136,9 +133,9 @@ model Organization {
   id              String                       @id @default(uuid())
   displayName     String // A very cool org#1
   name            String // a_very_cool_org_1
+  isDefault       Boolean  
   canEditUsername Boolean
-  restrictedUsers User[]                       @relation("restricted")
-  generatedUsers  User[]                       @relation("generated")
+  members         User[]  
   allowedEvents   EventBase[]
   specialUsage    OrganizationSpecialUsage
 }

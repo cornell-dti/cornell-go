@@ -63,7 +63,7 @@ export class EventGateway {
         time: data.closestToEnding ? 'asc' : undefined,
         challengeCount: data.shortestFirst ? 'asc' : undefined,
       },
-      await this.eventService.getEventOrganizationForUser(user),
+      await this.eventService.getEventOrganizationsForUser(user),
     );
 
     await this.requestEventData(user, {

@@ -31,22 +31,19 @@ export class EventService {
 
   /** Checks if a user is allowed to see an event */
   async isAllowedEvent(user: User, eventId: string) {
-    if (user.restrictedById) {
-      const organization = await this.prisma.organization.findFirstOrThrow({
-        where: { id: user.restrictedById },
-        include: { allowedEvents: true },
-      });
-      const hasEventOrganizations = organization.allowedEvents.length > 0;
-      if (hasEventOrganizations) {
-        return organization.allowedEvents.some(e => e.id === eventId);
-      }
-    }
-    return true;
+    return (
+      (await this.prisma.organization.count({
+        where: {
+          members: { some: { id: user.id } },
+          allowedEvents: { some: { id: eventId } },
+        },
+      })) > 0
+    );
   }
 
   /** Retrieves default event */
   async getDefaultEvent() {
-    return await this.prisma.eventBase.findUniqueOrThrow({
+    return await this.prisma.eventBase.findFirstOrThrow({
       where: { isDefault: true },
     });
   }
@@ -82,14 +79,16 @@ export class EventService {
       time?: 'asc' | 'desc';
       challengeCount?: 'asc' | 'desc';
     } = {},
-    organization?: Organization,
+    organizations?: Organization[],
   ) {
     const events = await this.prisma.eventBase.findMany({
       where: {
-        indexable: !organization,
+        indexable: !organizations,
         //rewardType: rewardTypes && { $in: rewardTypes },
         allowedIn: {
-          some: organization?.id ? { id: organization.id } : undefined,
+          some: organizations
+            ? { id: { in: organizations.map(({ id }) => id) } }
+            : undefined,
         },
       },
       select: { id: true },
@@ -119,9 +118,16 @@ export class EventService {
 
   /** Creates an event tracker with the closest challenge as the current one */
   async createDefaultEventTracker(user: User, lat: number, long: number) {
-    const defEv = await this.orgService.getDefaultEvent({
-      id: user.restrictedById,
-    });
+    // gets default event of user's first organization
+    // we let users choose which org they want the default event for
+    const defEv = await this.orgService.getDefaultEvent(
+      (
+        await this.prisma.user.findUniqueOrThrow({
+          where: { id: user.id },
+          include: { memberOf: true },
+        })
+      ).memberOf[0],
+    );
 
     lat = +lat;
     long = +long;
@@ -223,7 +229,7 @@ export class EventService {
   async getCurrentEventTrackerForUser(user: User) {
     const evTracker = await this.prisma.eventTracker.findFirst({
       where: {
-        user,
+        id: user.id,
         event: {
           activeGroups: { some: { id: user.groupId } },
         },
@@ -275,16 +281,14 @@ export class EventService {
     };
   }
 
-  async getEventOrganizationForUser(
+  async getEventOrganizationsForUser(
     user: User,
-  ): Promise<Organization | undefined> {
-    const organization = await user.restrictedById;
-    if (!organization) return undefined;
-
-    const organizations = await this.prisma.organization.findMany({
-      where: { id: organization, allowedEvents: { none: {} } },
-    });
-
-    return organizations.length === 0 ? undefined : organizations[0];
+  ): Promise<Organization[] | undefined> {
+    return (
+      await this.prisma.user.findUniqueOrThrow({
+        where: { id: user.id },
+        include: { memberOf: true },
+      })
+    ).memberOf;
   }
 }

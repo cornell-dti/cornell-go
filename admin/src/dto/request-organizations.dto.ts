@@ -2,10 +2,11 @@ export interface OrganizationDto {
   id: string;
   displayName: string;
   canEditUsername: boolean;
-  restrictedUsers: string[];
+  isDefault: boolean;
+  members: string[];
   allowedEvents: string[];
-  generatedUserCount: number;
-  generatedUserAuthIds: string[];
+  // generatedUserCount: number;
+  // generatedUserAuthIds: string[];
 }
 
 export interface RequestOrganizationsDto {}

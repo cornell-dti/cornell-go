@@ -52,7 +52,7 @@ export class UserService {
     );
 
     const group: Group = await this.groupsService.createFromEvent(
-      defOrg.defaultEvent,
+      await this.orgService.getDefaultEvent(defOrg),
     );
 
     const user: User = await this.prisma.user.create({
@@ -60,7 +60,7 @@ export class UserService {
         score: 0,
         group: { connect: { id: group.id } },
         hostOf: { connect: { id: group.id } },
-        restrictedBy: { connect: { id: defOrg.id } },
+        memberOf: { connect: { id: defOrg.id } },
         username,
         email,
         authToken,
@@ -124,8 +124,8 @@ export class UserService {
   }
 
   async setUsername(user: User, username: string) {
-    const organization = await this.prisma.organization.findUnique({
-      where: { id: user.restrictedById ?? '' },
+    const organization = await this.prisma.organization.findFirstOrThrow({
+      where: { members: { some: { id: user.id } } },
     });
 
     if (!organization?.canEditUsername) {

@@ -14,6 +14,7 @@ import {
   PrismaClient,
   Organization,
   OrganizationSpecialUsage,
+  Group,
 } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -137,11 +138,13 @@ export class AdminService {
   }
 
   async deleteOrganizations(ids: string[]) {
-    const genedUsers = await this.prisma.user.findMany({
-      where: { generatedById: { in: ids } },
-    });
+    // for (const id of ids) {
+    //   const genedUsers = await this.prisma.user.findMany({
+    //     where: { generatedById: { has: id } },
+    //   });
+    // }
 
-    await Promise.all(genedUsers.map(u => this.userService.deleteUser(u)));
+    // await Promise.all(genedUsers.map(u => this.userService.deleteUser(u)));
 
     await this.prisma.organization.deleteMany({
       where: { id: { in: ids } },
@@ -261,53 +264,38 @@ export class AdminService {
     return challengeEntity;
   }
 
-  /** Creates a new restricted user */
-  async newRestrictedUser(id: string, word: string, group: Organization) {
-    const user = await this.userService.register(
-      id + '@cornell.edu',
-      word,
-      10.019,
-      10.019,
-      AuthType.DEVICE,
-      id,
-    );
-
-    return await this.prisma.user.update({
-      where: { id: user.id },
-      data: { restrictedById: group.id, generatedById: group.id },
-    });
-  }
-
   /** Adjusts member count in a group up based on expectedCount */
-  async generateMembers(group: Organization, expectedCount: number) {
-    const genCount = await this.prisma.user.count({
-      where: { generatedById: group.id },
-    });
+  // async generateMembers(group: Organization, expectedCount: number) {
+  //   const genCount = await this.prisma.user.count({
+  //     where: { generatedById: group.id },
+  //   });
 
-    if (genCount < expectedCount) {
-      const seed = group.id[0].charCodeAt(0);
-      for (let i = genCount; i < expectedCount; ++i) {
-        const index = (10 * i + seed) % friendlyWords.objects.length;
-        const word = friendlyWords.objects[index];
-        const id = group.name + '_' + word + index;
-        const user = await this.newRestrictedUser(id, word, group);
+  //   if (genCount < expectedCount) {
+  //     const seed = group.id[0].charCodeAt(0);
+  //     for (let i = genCount; i < expectedCount; ++i) {
+  //       const index = (10 * i + seed) % friendlyWords.objects.length;
+  //       const word = friendlyWords.objects[index];
+  //       const id = group.name + '_' + word + index;
+  //       const user = await this.newUser(id, word, group);
 
-        await this.prisma.organization.update({
-          where: { id: group.id },
-          data: {
-            generatedUsers: { connect: { id: user.id } },
-            restrictedUsers: { connect: { id: user.id } },
-          },
-        });
-      }
-    }
-  }
+  //       await this.prisma.organization.update({
+  //         where: { id: group.id },
+  //         data: {
+  //           members: { connect: { id: user.id } },
+  //         },
+  //       });
+  //     }
+  //   }
+  // }
 
-  /** Ensures all restricted users are on an allowed event */
-  async ensureEventOrganization(group: Organization) {
+  /** If a user in the organization is a host of a group and is not doing an
+   *  organization-allowed event, changes the current event of the group to
+   *  the default allowed event.
+   */
+  async ensureEventOrganization(organization: Organization) {
     const allowedEventCount = await this.prisma.eventBase.count({
       where: {
-        allowedIn: { some: { id: group.id } },
+        allowedIn: { some: { id: organization.id } },
       },
     });
 
@@ -317,22 +305,39 @@ export class AdminService {
 
     const allowedEvents = (
       await this.prisma.eventBase.findMany({
-        where: { allowedIn: { some: { id: group.id } } },
+        where: { allowedIn: { some: { id: organization.id } } },
       })
     ).map(({ id }) => id);
 
-    const violatingGroups = await this.prisma.group.findMany({
-      where: {
-        host: { restrictedBy: group },
-        curEventId: { notIn: allowedEvents },
-      },
-    });
+    const members = (
+      await this.prisma.organization.findUniqueOrThrow({
+        where: { id: organization.id },
+        include: { members: true },
+      })
+    ).members;
 
-    for (const userGroup of violatingGroups) {
-      await this.prisma.group.update({
-        where: { id: userGroup.id },
-        data: { curEventId: allowedEvents[0] },
-      });
+    for (const member of members) {
+      try {
+        const hostedGroup = (
+          await this.prisma.user.findFirstOrThrow({
+            where: { id: member.id },
+            include: { hostOf: true },
+          })
+        ).hostOf;
+        if (hostedGroup === null) continue;
+        const isViolating =
+          (await this.prisma.group.count({
+            where: { id: hostedGroup.id, curEventId: { notIn: allowedEvents } },
+          })) >= 1;
+        if (isViolating) {
+          await this.prisma.group.update({
+            where: { id: hostedGroup.id },
+            data: { curEventId: allowedEvents[0] },
+          });
+        }
+      } catch (e) {
+        continue;
+      }
     }
   }
 
@@ -345,9 +350,10 @@ export class AdminService {
         name: organization.displayName
           .toLowerCase()
           .replaceAll(/[^a-z0-9]/g, '_'),
+        isDefault: false,
         canEditUsername: organization.canEditUsername,
-        restrictedUsers: {
-          connect: organization.restrictedUsers.map(id => ({ id })),
+        members: {
+          connect: organization.members.map(id => ({ id })),
         },
         allowedEvents: {
           connect: organization.allowedEvents.map(id => ({ id })),
@@ -355,8 +361,8 @@ export class AdminService {
         specialUsage: 'NONE',
       },
       update: {
-        restrictedUsers: {
-          set: organization.restrictedUsers.map(id => ({ id })),
+        members: {
+          set: organization.members.map(id => ({ id })),
         },
         allowedEvents: {
           set: organization.allowedEvents.map(id => ({ id })),
@@ -364,16 +370,16 @@ export class AdminService {
       },
     });
 
-    const genCount = await this.prisma.user.count({
-      where: { generatedBy: organizationEntity },
-    });
+    // const genCount = await this.prisma.user.count({
+    //   where: { generatedBy: organizationEntity },
+    // });
 
-    if (organization.generatedUserCount > genCount) {
-      await this.generateMembers(
-        organizationEntity,
-        organization.generatedUserCount,
-      );
-    }
+    // if (organization.generatedUserCount > genCount) {
+    //   await this.generateMembers(
+    //     organizationEntity,
+    //     organization.generatedUserCount,
+    //   );
+    // }
 
     await this.ensureEventOrganization(organizationEntity);
 
@@ -473,24 +479,23 @@ export class AdminService {
   async dtoForOrganization(
     organization: Organization,
   ): Promise<OrganizationDto> {
-    const fullRestric = this.prisma.organization.findUniqueOrThrow({
+    const org = this.prisma.organization.findUniqueOrThrow({
       where: { id: organization.id },
     });
 
-    const genUsers = await fullRestric.generatedUsers();
+    // const genUsers = await fullRestric.generatedUsers();
 
     return {
       id: organization.id,
       displayName: organization.displayName,
+      isDefault: false,
       canEditUsername: organization.canEditUsername,
-      restrictedUsers: (
-        await fullRestric.restrictedUsers({ select: { id: true } })
-      ).map(e => e.id),
-      allowedEvents: (
-        await fullRestric.allowedEvents({ select: { id: true } })
-      ).map(e => e.id),
-      generatedUserCount: genUsers.length,
-      generatedUserAuthIds: genUsers.map(u => u.authToken),
+      members: (await org.members({ select: { id: true } })).map(e => e.id),
+      allowedEvents: (await org.allowedEvents({ select: { id: true } })).map(
+        e => e.id,
+      ),
+      // generatedUserCount: genUsers.length,
+      // generatedUserAuthIds: genUsers.map(u => u.authToken),
     };
   }
 }

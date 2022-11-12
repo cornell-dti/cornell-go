@@ -40,19 +40,59 @@ export class OrganizationService {
     });
   }
 
+  /** Returns (and creates if does not exist) the default organization for
+   * this usage */
   async getDefaultOrganization(
     usage: OrganizationSpecialUsage,
-  ): Promise<Organization & { defaultEvent: EventBase }> {
-    // TODO: get (and create if does not exist) the default organization for this usage
+  ): Promise<Organization & { allowedEvents: EventBase[] }> {
+    let defaultOrg = await this.prisma.organization.findFirst({
+      where: { isDefault: true },
+      include: { allowedEvents: true },
+    });
 
-    throw 'Unimplemented!';
+    if (defaultOrg === null) {
+      let defaultEvent = await this.prisma.eventBase.findFirst({
+        where: { isDefault: true },
+      });
+      if (defaultEvent === null) {
+        defaultEvent = await this.makeDefaultEvent();
+      }
+      defaultOrg = await this.prisma.organization.create({
+        data: {
+          name: 'Default Organization',
+          displayName: 'Default Organization',
+          isDefault: true,
+          canEditUsername: true, // can we allow anyone to edit username?
+          specialUsage: usage,
+          allowedEvents: {
+            connect: {
+              id: defaultEvent.id,
+            },
+          },
+        },
+        include: { allowedEvents: true },
+      });
+    }
+
+    return defaultOrg;
   }
 
+  /** Gets the default event for the org using isDefault flag */
   async getDefaultEvent(
-    group: Organization | { id: string },
+    org: Organization | { id: string },
   ): Promise<EventBase> {
-    // TODO: get the default event for the org. using isDefault flag, or the defaultEvent field once implemented
+    let defaultOrgEvents = (
+      await this.prisma.organization.findFirstOrThrow({
+        where: { id: org.id },
+        include: { allowedEvents: true },
+      })
+    ).allowedEvents;
 
-    throw 'Unimplemented!';
+    return await this.prisma.eventBase.findFirstOrThrow({
+      where: {
+        id: { in: defaultOrgEvents.map(event => event.id) },
+        isDefault: true,
+      },
+    });
   }
 }

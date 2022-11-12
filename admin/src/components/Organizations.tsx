@@ -39,9 +39,9 @@ function GroupCard(props: {
           Id: <b>{props.organization.id}</b>
           <br />
           Events: <b>{props.organization.allowedEvents.join(", ")}</b> <br />
-          User Count: <b>{props.organization.restrictedUsers.length}</b> <br />
-          Generated Users:{" "}
-          <b>{props.organization.generatedUserAuthIds.join(", ")}</b> <br />
+          User Count: <b>{props.organization.members.length}</b> <br />
+          {/* Generated Users:{" "}
+          <b>{props.organization.generatedUserAuthIds.join(", ")}</b> <br /> */}
           Username Editing Enabled:{" "}
           <b>{affirmOfBool(props.organization.canEditUsername)}</b> <br />
         </ListCardBody>
@@ -83,7 +83,7 @@ function fromForm(
     id,
     displayName: (form[0] as FreeEntryForm).value,
     canEditUsername: (form[1] as OptionEntryForm).value === 1,
-    generatedUserCount: (form[2] as NumberEntryForm).value,
+    // generatedUserCount: (form[2] as NumberEntryForm).value,
   };
 }
 
@@ -95,23 +95,24 @@ function toForm(group: OrganizationDto) {
       options: ["No", "Yes"],
       value: group.canEditUsername ? 1 : 0,
     },
-    {
-      name: "Users to Generate",
-      min: 0,
-      max: 99,
-      value: group.generatedUserCount,
-    },
+    // {
+    //   name: "Users to Generate",
+    //   min: 0,
+    //   max: 99,
+    //   value: group.generatedUserCount,
+    // },
   ] as EntryForm[];
 }
 
 const emptyDto: OrganizationDto = {
   id: "",
   displayName: "",
+  isDefault: false,
   canEditUsername: false,
-  restrictedUsers: [],
+  members: [],
   allowedEvents: [],
-  generatedUserAuthIds: [],
-  generatedUserCount: 0,
+  // generatedUserAuthIds: [],
+  // generatedUserCount: 0,
 };
 
 export function Organizations() {
