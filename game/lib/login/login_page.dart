@@ -1,3 +1,4 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -97,6 +98,9 @@ class _LoginWidgetState extends State<LoginWidget> {
                                   "An error occured while signing you up.",
                                   Status.error);
                             } else {
+                              await FirebaseAnalytics.instance.logLogin(
+                                loginMethod: "Google",
+                              );
                               _toHomePage(context);
                             }
                           }),
