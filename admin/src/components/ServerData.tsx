@@ -31,6 +31,7 @@ const defaultData = {
   deleteChallenge(id: string) {},
   updateEvent(event: EventDto) {},
   deleteEvent(id: string) {},
+  deleteError(id: string) {},
   updateRestriction(restriction: RestrictionDto) {},
   deleteRestriction(id: string) {},
 };
@@ -78,6 +79,10 @@ export function ServerDataProvider(props: { children: ReactNode }) {
       },
       deleteEvent(id: string) {
         sock.updateEvents({ events: [], deletedIds: [id] });
+      },
+      deleteError(id: string) {
+        serverData.errors.delete(id);
+        setTimeout(() => setServerData({ ...serverData }), 0);
       },
       updateRestriction(restriction: RestrictionDto) {
         sock.updateRestrictions({

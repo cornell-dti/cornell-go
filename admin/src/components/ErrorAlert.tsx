@@ -1,23 +1,40 @@
 import { useContext, useState } from "react";
 import { AlertModal } from "./AlertModal";
 import { ServerDataContext } from "./ServerData";
+import { Modal } from "./Modal";
+
+function ErrorModal(props: { description: string; onClose: () => void }) {
+  const [open, setOpen] = useState(true);
+  const handleClose = () => setOpen(false);
+
+  return (
+    <Modal
+      title="Alert"
+      buttons={["OK"]}
+      onButtonClick={(idx) => {
+        handleClose();
+        props.onClose();
+      }}
+      isOpen={open}
+    >
+      {props.description}
+    </Modal>
+  );
+}
 
 export function ErrorAlert() {
   const serverData = useContext(ServerDataContext);
 
-  const [open, setOpen] = useState(true);
-
   return (
     <>
       {Array.from(serverData.errors.values()).map((er) => (
-        <AlertModal
-          isOpen={open}
-          description={er.error}
+        <ErrorModal
+          description={er.message}
           onClose={() => {
-            serverData.errors.delete("error");
-            setOpen(false);
+            console.log(er);
+            serverData.deleteError("Error");
           }}
-        ></AlertModal>
+        ></ErrorModal>
       ))}
     </>
   );

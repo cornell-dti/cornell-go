@@ -33,7 +33,6 @@ export class ServerApi {
   requestRestrictions(data: RequestRestrictionsDto) {
     this.socket.emit("requestRestrictions", data);
   }
-
   updateEvents(data: UpdateEventsDto) {
     this.socket.emit("updateEvents", data);
   }
