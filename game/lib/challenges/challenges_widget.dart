@@ -1,3 +1,4 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/model/challenge_model.dart';
@@ -75,7 +76,13 @@ class _ChallengesWidgetState extends State<ChallengesWidget> {
                               event != null &&
                               tracker != null) {
                             challengeCells.add(GestureDetector(
-                              onTap: () {
+                              onTap: () async {
+                                await FirebaseAnalytics.instance.logEvent(
+                                  name: "set_current_challenge",
+                                  parameters: {
+                                    "challenge_id": challengeId,
+                                  },
+                                );
                                 apiClient.serverApi
                                     ?.setCurrentChallenge(challengeId);
                               },

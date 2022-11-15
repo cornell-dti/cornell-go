@@ -1,3 +1,4 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/events/event_cell.dart';
@@ -38,8 +39,15 @@ Future<void> _showConfirmation(
             builder: (context, apiClient, child) {
               return TextButton(
                 child: Text('YES'),
-                onPressed: () {
+                onPressed: () async {
                   apiClient.serverApi?.setCurrentEvent(eventId);
+                  await FirebaseAnalytics.instance.logEvent(
+                    name: "switch_event",
+                    parameters: {
+                      "event_id": eventId,
+                      "event_name": eventName,
+                    },
+                  );
                   Navigator.pop(context);
                 },
               );

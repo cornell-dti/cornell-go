@@ -1,3 +1,4 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:game/model/user_model.dart';
 import 'package:game/utils/utility_functions.dart';
@@ -37,7 +38,7 @@ class _UserNameWidget extends State<UserNameWidget> {
                 elevation: 8.0,
                 child: Icon(Icons.check),
                 backgroundColor: Carnelian,
-                onPressed: () {
+                onPressed: () async {
                   final validCharacters = RegExp(r'^[a-zA-Z0-9_]+$');
                   var userName = userNameController!.text;
                   if (userName == "") {
@@ -55,6 +56,11 @@ class _UserNameWidget extends State<UserNameWidget> {
                     setState(() {
                       bgColor = constructColorFromUserName(userName);
                     });
+                    await FirebaseAnalytics.instance.logEvent(
+                      name: "set_username",
+                      parameters: {"username": userName},
+                    );
+
                     apiClient.serverApi?.setUsername(userName);
                     displayToast("Username changed!", Status.success);
                     _toHomePage(context);
