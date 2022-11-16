@@ -11,7 +11,7 @@ jobs:
         uses: actions/checkout@master
         
       - name: Generate deployment Package 
-        run: zip -r deploy.zip * -x "**node_modules**" 
+        run: zip -r deploy.zip * -x "**node_modules**" "server/dist" "admin/build"
         
       - name: Get timestamp
         uses: gerred/actions/current-time@master
@@ -32,7 +32,7 @@ jobs:
           aws_access_key: AKIAVNXHAEKFEFTAPLBA
           aws_secret_key: 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
           application_name:  cornell-go-aws
-          environment_name: cornell-go-aws-env
+          environment_name: cornellgoaws-env
           version_label: "cornell-go-aws-deployment#-${{ steps.format-time.outputs.replaced }}"
           region: us-east-1
           deployment_package: deploy.zip
