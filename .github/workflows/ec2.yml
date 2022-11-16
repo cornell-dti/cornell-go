@@ -31,8 +31,8 @@ jobs:
         with:
           aws_access_key: AKIAVNXHAEKFEFTAPLBA
           aws_secret_key: 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
-          application_name:  cornell-go-aws
-          environment_name: cornellgoaws-env
+          application_name:  cornell-go-docker-aws
+          environment_name: Cornellgodockeraws-env
           version_label: "cornell-go-aws-deployment-${{ steps.format-time.outputs.replaced }}"
           region: us-east-1
           deployment_package: deploy.zip
