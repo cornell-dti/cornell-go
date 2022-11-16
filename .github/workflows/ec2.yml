@@ -1,0 +1,39 @@
+name: Deployment From Github To AWS EC2
+on:
+  push:
+    branches:
+      - master
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Latest Repo
+        uses: actions/checkout@master
+        
+      - name: Generate Deployment Package 
+        run: zip -r deploy.zip * -x "**node_modules**" "server/dist" "admin/build"
+        
+      - name: Get timestamp
+        uses: gerred/actions/current-time@master
+        id: current-time
+        
+      - name: Run string replace
+        uses: frabert/replace-string-action@master
+        id: format-time
+        with:
+          pattern: '[:\.]+'
+          string: "${{ steps.current-time.outputs.time }}"
+          replace-with: '-'
+          flags: 'g'
+          
+      - name: Deploy to EB
+        uses: einaregilsson/beanstalk-deploy@v14
+        with:
+          aws_access_key: AKIAVNXHAEKFEFTAPLBA
+          aws_secret_key: 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
+          application_name: cornell-go-aws
+          environment_name: cornellgoaws-env
+          version_label: "cornell-go-aws-deployment-${{ steps.format-time.outputs.replaced }}"
+          region: us-east-1
+          deployment_package: deploy.zip
+    
