@@ -2,7 +2,7 @@ name: Dev deployment from Github to AWS
 on:
   push:
     branches:
-      - main
+      - nirbhaysinghnarang-patch-1
 
 jobs:
   deploy:
