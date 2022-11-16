@@ -2,7 +2,7 @@ name: Deployment From Github To AWS EC2
 on:
   push:
     branches:
-      - master
+      - nirbhaysinghnarang-patch-1
 jobs:
   deploy:
     runs-on: ubuntu-latest
