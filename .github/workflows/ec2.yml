@@ -27,3 +27,31 @@ jobs:
           file: Dockerfile
           push: true
           tags: nirbhaysnarang27/cornell-go:latest
+
+      - name: Get Timestamp
+        uses: gerred/actions/current-time@master
+        id: current-time
+
+      - name: Run String Replace
+        uses: frabert/replace-string-action@master
+        id: format-time
+        with:
+          pattern: '[:\.]+'
+          string: "${{ steps.current-time.outputs.time }}"
+          replace-with: '-'
+          flags: 'g'
+
+      - name: Generate Deployment Package
+        run: zip -r deploy.zip * -x "**node_modules**"
+
+      - name: Deploy to EB
+        uses: einaregilsson/beanstalk-deploy@v16
+        with:
+          aws_access_key: AKIAVNXHAEKFEFTAPLBA
+          aws_secret_key: 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
+          application_name: cornell-go
+          environment_name: Cornellgo-env
+          version_label: "docker-app-${{ steps.format-time.outputs.replaced }}"
+          region: us-east-1
+          deployment_package: deploy.zip
+
