@@ -1,0 +1,13 @@
+{
+  "AWSEBDockerrunVersion": "1",
+  "Image": {
+      "Name": "nirbhaysnarang27/cornell-go:latest",
+      "Update": "true"
+  },
+  "Ports": [
+      {
+          "ContainerPort": "80"
+      }
+  ],
+  "Logging": "/var/log/nginx"
+}
