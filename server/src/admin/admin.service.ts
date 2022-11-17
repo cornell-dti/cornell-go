@@ -105,9 +105,10 @@ export class AdminService {
       });
     }
 
+    let tempChallenge = await challenge.linkedEvent();
     await this.prisma.challenge.delete({ where: { id: challengeId } });
 
-    return await challenge.linkedEvent();
+    return tempChallenge;
   }
 
   /** Get rewards of the user */
@@ -127,10 +128,11 @@ export class AdminService {
             id,
           },
         });
+        let tempEvent = await reward.event();
         await this.prisma.eventReward.delete({
           where: { id },
         });
-        return await reward.event();
+        return tempEvent;
       }),
     );
   }
@@ -165,11 +167,25 @@ export class AdminService {
       rewardEntity = await this.prisma.eventReward.create({
         data: {
           eventId: reward.containingEventId,
+          eventIndex: -10,
           description: reward.description.substring(0, 2048),
           redeemInfo: reward.redeemInfo.substring(0, 2048),
           isRedeemed: false,
         },
       });
+      if (rewardEntity.eventIndex === -10) {
+        const maxIndexReward = await this.prisma.eventReward.findFirst({
+          where: { eventId: reward.containingEventId },
+          orderBy: { eventIndex: 'desc' },
+        });
+  
+        await this.prisma.eventReward.update({
+          where: { id: rewardEntity.id },
+          data: {
+            eventIndex: Math.max((maxIndexReward?.eventIndex ?? -1) + 1, 0),
+          },
+        });
+      }
     }
 
     return rewardEntity;
@@ -206,7 +222,7 @@ export class AdminService {
     });
 
     let eventIndex = 0;
-    for (const id of event.rewardIds) {
+    for (const id of event.challengeIds) {
       await this.prisma.challenge.update({
         where: { id },
         data: {

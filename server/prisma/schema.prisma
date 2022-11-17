@@ -74,7 +74,7 @@ model EventBase {
   id              String             @id @default(uuid())
   requiredMembers Int
   skippingEnabled Boolean
-  isDefault       Boolean            @unique
+  isDefault       Boolean
   name            String
   description     String
   rewardType      EventRewardType
@@ -94,6 +94,7 @@ model EventReward {
   userId      String?
   event       EventBase @relation(fields: [eventId], references: [id], onDelete: Cascade)
   eventId     String
+  eventIndex  Int
   description String
   redeemInfo  String
   isRedeemed  Boolean
