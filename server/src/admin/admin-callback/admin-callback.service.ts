@@ -5,6 +5,7 @@ import { UpdateRestrictionsDto } from '../update-restrictions.dto';
 import { UpdateAdminDataDto } from './update-admin-data.dto';
 import { UpdateChallengeDataDto } from './update-challenge-data.dto';
 import { UpdateEventDataDto } from './update-event-data.dto';
+import { UpdateGroupDataDto } from './update-group-data.dto';
 import { UpdateRewardDataDto } from './update-reward-data.dto';
 
 @Injectable()
@@ -35,6 +36,9 @@ export class AdminCallbackService {
 
   emitUpdateRewardData =
     this.makeCallback<UpdateRewardDataDto>('updateRewardData');
+
+  emitUpdateGroupData =
+    this.makeCallback<UpdateGroupDataDto>('updateGroupData');
 
   emitUpdateRestrictionData =
     this.makeCallback<UpdateRestrictionsDto>('updateRestrictions');

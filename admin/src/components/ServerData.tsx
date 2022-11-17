@@ -10,6 +10,7 @@ import { RestrictionDto } from "../dto/request-restrictions.dto";
 import { UpdateAdminDataAdminDto } from "../dto/update-admin-data.dto";
 import { ChallengeDto } from "../dto/update-challenges.dto";
 import { EventDto } from "../dto/update-events.dto";
+import { GroupDto } from "../dto/update-groups.dto";
 import { RewardDto } from "../dto/update-rewards.dto";
 import { ServerApi } from "./ServerApi";
 import { ServerConnectionContext } from "./ServerConnection";
@@ -19,6 +20,7 @@ const defaultData = {
   events: new Map<string, EventDto>(),
   challenges: new Map<string, ChallengeDto>(),
   rewards: new Map<string, RewardDto>(),
+  groups: new Map<string, GroupDto>(),
   restrictions: new Map<string, RestrictionDto>(),
   selectedEvent: "" as string,
   selectEvent(id: string) {},
@@ -29,6 +31,8 @@ const defaultData = {
   deleteChallenge(id: string) {},
   updateEvent(event: EventDto) {},
   deleteEvent(id: string) {},
+  updateGroup(event: GroupDto) {},
+  deleteGroup(id: string) {},
   updateRestriction(restriction: RestrictionDto) {},
   deleteRestriction(id: string) {},
 };
@@ -77,6 +81,12 @@ export function ServerDataProvider(props: { children: ReactNode }) {
       deleteEvent(id: string) {
         sock.updateEvents({ events: [], deletedIds: [id] });
       },
+      updateGroup(group: GroupDto) {
+        sock.updateGroups({ groups: [group], deletedIds: [] });
+      },
+      deleteGroup(id: string) {
+        sock.updateGroups({ groups: [], deletedIds: [id] });
+      },
       updateRestriction(restriction: RestrictionDto) {
         sock.updateRestrictions({
           restrictions: [restriction],
@@ -94,6 +104,7 @@ export function ServerDataProvider(props: { children: ReactNode }) {
     sock.requestAdmins({});
     sock.requestEvents({});
     sock.requestRestrictions({});
+    sock.requestGroups({});
   }, [sock]);
 
   useEffect(() => {
@@ -118,6 +129,11 @@ export function ServerDataProvider(props: { children: ReactNode }) {
     sock.onUpdateRewardData((data) => {
       data.deletedIds.forEach((id) => serverData.rewards.delete(id));
       data.rewards.forEach((rw) => serverData.rewards.set(rw.id, rw));
+      setTimeout(() => setServerData({ ...serverData }), 0);
+    });
+    sock.onUpdateGroupData((data) => {
+      data.deletedIds.forEach((id) => serverData.groups.delete(id));
+      data.groups.forEach((gr) => serverData.groups.set(gr.id, gr));
       setTimeout(() => setServerData({ ...serverData }), 0);
     });
     sock.onUpdateRestrictions((data) => {

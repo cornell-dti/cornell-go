@@ -11,10 +11,12 @@ import {
   EventBase,
   EventReward,
   EventRewardType,
+  Group,
   PrismaClient,
   RestrictionGroup,
 } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { GroupDto } from './update-groups.dto';
 
 const friendlyWords = require('friendly-words');
 
@@ -60,6 +62,10 @@ export class AdminService {
     return await this.prisma.challenge.findMany();
   }
 
+  async getAllGroupData() {
+    return await this.prisma.group.findMany();
+  }
+
   async getAllRestrictionGroupData() {
     return await this.prisma.restrictionGroup.findMany();
   }
@@ -73,6 +79,12 @@ export class AdminService {
   async getChallengeById(challengeId: string) {
     return await this.prisma.challenge.findFirstOrThrow({
       where: { id: challengeId },
+    });
+  }
+
+  async getGroupById(groupId: string) {
+    return await this.prisma.group.findFirstOrThrow({
+      where: { id: groupId },
     });
   }
 
@@ -134,6 +146,8 @@ export class AdminService {
       }),
     );
   }
+
+  async removeGroup(removeId: string) {}
 
   async deleteRestrictionGroups(ids: string[]) {
     const genedUsers = await this.prisma.user.findMany({
@@ -258,6 +272,20 @@ export class AdminService {
     }
 
     return challengeEntity;
+  }
+
+  async updateGroup(group: GroupDto): Promise<Group> {
+    const groupEntity = await this.prisma.group.update({
+      where: { id: group.id },
+      data: {
+        id: group.id,
+        friendlyId: group.friendlyId,
+        hostId: group.hostId,
+        curEventId: group.curEventId,
+      },
+    });
+
+    return groupEntity;
   }
 
   /** Creates a new restricted user */
@@ -406,7 +434,9 @@ export class AdminService {
       challenges.map(ch => this.createChallengeFromUpdateDTO(ch)),
     );
   }
-
+  async updateGroups(groups: GroupDto[]) {
+    return await Promise.all(groups.map(gr => this.updateGroup(gr)));
+  }
   async eventForId(eventId: string) {
     return await this.prisma.eventBase.findUniqueOrThrow({
       where: { id: eventId },
@@ -465,6 +495,15 @@ export class AdminService {
       redeemInfo: rw.redeemInfo,
       containingEventId: rw.eventId,
       claimingUserId: rw.userId ?? '',
+    };
+  }
+
+  async dtoForGroup(gr: Group): Promise<GroupDto> {
+    return {
+      id: gr.id,
+      friendlyId: gr.friendlyId,
+      hostId: gr.hostId!,
+      curEventId: gr.curEventId,
     };
   }
 
