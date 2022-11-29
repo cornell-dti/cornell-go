@@ -232,6 +232,18 @@ export class AdminService {
 
       ++eventIndex;
     }
+    
+    let eventIndex1 = 0;
+    for (const id of event.rewardIds) {
+      await this.prisma.eventReward.update({
+        where: { id },
+        data: {
+          eventIndex: eventIndex1,
+        },
+      });
+
+      ++eventIndex1;
+    }
 
     return eventEntity;
   }
