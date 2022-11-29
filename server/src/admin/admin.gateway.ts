@@ -281,11 +281,11 @@ export class AdminGateway {
       data.deletedIds.map(us => this.adminService.removeUser(us)),
     );
 
-    const newEvents = await this.adminService.updateUsers(data.users);
+    const newUsers = await this.adminService.updateUsers(data.users);
 
     this.adminCallbackService.emitUpdateUserData({
       users: await Promise.all(
-        newEvents.map(us => this.adminService.dtoForUser(us)),
+        newUsers.map(us => this.adminService.dtoForUser(us)),
       ),
       deletedIds: data.deletedIds,
     });
