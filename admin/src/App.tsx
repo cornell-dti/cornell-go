@@ -67,7 +67,7 @@ const routes = [
     path: "/groups",
     element: <Groups />,
     icon: faUserGroup,
-    name: "Users",
+    name: "Groups",
   },
   {
     path: "/restrictions",

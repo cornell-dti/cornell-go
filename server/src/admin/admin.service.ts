@@ -5,6 +5,8 @@ import { EventDto } from './update-events.dto';
 import { v4 } from 'uuid';
 import { RestrictionDto } from './request-restrictions.dto';
 import { UserService } from 'src/user/user.service';
+import { GroupService } from 'src/group/group.service';
+
 import {
   AuthType,
   Challenge,
@@ -24,6 +26,7 @@ const friendlyWords = require('friendly-words');
 export class AdminService {
   constructor(
     private userService: UserService,
+    private groupService: GroupService,
     private prisma: PrismaService,
   ) {}
 
@@ -147,7 +150,16 @@ export class AdminService {
     );
   }
 
-  async removeGroup(removeId: string) {}
+  async removeGroup(removeId: string) {
+    const deletedGroup = await this.prisma.group.findFirstOrThrow({
+      where: { id: removeId },
+      include: { members: true },
+    });
+
+    await Promise.all(
+      deletedGroup.members.map(us => this.groupService.leaveGroup(us)),
+    );
+  }
 
   async deleteRestrictionGroups(ids: string[]) {
     const genedUsers = await this.prisma.user.findMany({

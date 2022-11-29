@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { ServerDataContext } from "./ServerData";
 import GridTable from "@nadavshaar/react-grid-table";
 import userEvent from "@testing-library/user-event";
+import { DeleteModal } from "./DeleteModal";
 
 const EDIT_SVG = (
   <svg
@@ -99,16 +100,17 @@ const styles = {
   },
 };
 
-function toForm(user: any) {
+function toForm(group: any) {
   return {
-    username: user.username,
-    id: user.id,
-    groupId: user.groupId,
-    email: user.email,
+    id: group.id,
+    friendlyId: group.friendlyId,
+    hostId: group.hostId,
+    curEventId: group.curEventId,
   };
 }
 
 function getColumns(setRowsData: any, serverData: any) {
+  let deleteId: any;
   return [
     {
       id: "checkbox",
@@ -118,25 +120,27 @@ function getColumns(setRowsData: any, serverData: any) {
     },
     {
       id: 1,
-      field: "username",
-      label: "Username",
-    },
-    {
-      id: 2,
       field: "id",
       label: "Id",
       editable: false,
     },
     {
+      id: 2,
+      field: "friendlyId",
+      label: "FriendlyId",
+      editable: false,
+    },
+    {
       id: 3,
-      field: "groupId",
-      label: "GroupId",
+      field: "hostId",
+      label: "HostId",
       editable: false,
     },
     {
       id: 4,
-      field: "email",
-      label: "Email",
+      field: "curEventId",
+      label: "CurrentEventId",
+      editable: false,
     },
     {
       id: "buttons",
@@ -158,6 +162,7 @@ function getColumns(setRowsData: any, serverData: any) {
             onClick={(e) => {
               e.stopPropagation();
               tableManager.rowEditApi.setEditRowId(data.id);
+              deleteId = data.id;
             }}
           >
             {EDIT_SVG}
@@ -171,35 +176,27 @@ function getColumns(setRowsData: any, serverData: any) {
         tableManager: any;
         data: any;
       }) => (
-        <div style={styles.buttonsCellEditorContainer}>
-          <button
-            title="Cancel"
-            style={styles.cancelButton}
-            onClick={(e) => {
-              e.stopPropagation();
+        <div>
+          <DeleteModal
+            objectName={serverData.groups.get(deleteId)?.name ?? ""}
+            isOpen={tableManager.rowEditApi.editRowId !== null}
+            onClose={() => {
               tableManager.rowEditApi.setEditRowId(null);
             }}
-          >
-            {CANCEL_SVG}
-          </button>
-          <button
-            title="Save"
-            style={styles.saveButton}
-            onClick={(e) => {
-              e.stopPropagation();
+            onDelete={() => {
+              serverData.deleteGroup(deleteId);
+
               let rowsClone = [...tableManager.rowsApi.rows];
-              let updatedRowIndex = rowsClone.findIndex(
+              let deletedRowIndex = rowsClone.findIndex(
                 (r) => r.id === data.id
               );
-              rowsClone[updatedRowIndex] = data;
+              rowsClone.splice(deletedRowIndex, 1);
 
               setRowsData(rowsClone);
-              serverData.updateUser(rowsClone[updatedRowIndex]);
+
               tableManager.rowEditApi.setEditRowId(null);
             }}
-          >
-            {SAVE_SVG}
-          </button>
+          />
         </div>
       ),
     },
