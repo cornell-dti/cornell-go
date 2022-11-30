@@ -159,6 +159,8 @@ export class AdminService {
     await Promise.all(
       deletedGroup.members.map(us => this.groupService.leaveGroup(us)),
     );
+
+    await this.prisma.group.delete({ where: { id: removeId } });
   }
 
   async deleteRestrictionGroups(ids: string[]) {

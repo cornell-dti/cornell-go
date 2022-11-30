@@ -279,7 +279,8 @@ export class AdminGateway {
       data.deletedIds.map(gr => this.adminService.removeGroup(gr)),
     );
 
-    const newGroups = await this.adminService.updateGroups(data.groups);
+    await this.adminService.updateGroups(data.groups);
+    const newGroups = await this.adminService.getAllGroupData();
 
     this.adminCallbackService.emitUpdateGroupData({
       groups: await Promise.all(
