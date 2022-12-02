@@ -178,7 +178,7 @@ export class AdminService {
           where: { eventId: reward.containingEventId },
           orderBy: { eventIndex: 'desc' },
         });
-  
+
         await this.prisma.eventReward.update({
           where: { id: rewardEntity.id },
           data: {
@@ -232,7 +232,7 @@ export class AdminService {
 
       ++eventIndex;
     }
-    
+
     let eventIndex1 = 0;
     for (const id of event.rewardIds) {
       await this.prisma.eventReward.update({
