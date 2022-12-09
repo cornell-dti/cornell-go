@@ -9,6 +9,8 @@ on:
 # 3. Push to EB.
 # Reference: https://akashsingh.blog/complete-guide-on-deploying-a-docker-application-react-to-aws-elastic-beanstalk-using-docker-hub-and-github-actions
 
+#AWS/Docker Changelog
+#1. 9 Dec, 6:10 PM: add s3:DeleteObject permission to EB bucket.
 jobs:
   deploy:
     runs-on: ubuntu-latest
