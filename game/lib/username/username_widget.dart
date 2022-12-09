@@ -28,64 +28,73 @@ class _UserNameWidget extends State<UserNameWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        key: scaffoldKey,
-        backgroundColor: bgColor,
-        floatingActionButton: Consumer<ApiClient>(
-          builder: (context, apiClient, child) {
-            // checkLoggedIn(apiClient);
-            return FloatingActionButton(
-                elevation: 8.0,
-                child: Icon(Icons.check),
-                backgroundColor: Carnelian,
-                onPressed: () {
-                  final validCharacters = RegExp(r'^[a-zA-Z0-9_]+$');
-                  var userName = userNameController!.text;
-                  if (userName == "") {
-                    showAlert("You can't have an empty username!", context);
-                  } else if (!validCharacters.hasMatch(userName)) {
-                    showAlert(
-                        "Your username can only have letters, numbers, and underscores",
-                        context);
-                  } else if (userName.length > 64) {
-                    showAlert(
-                        "Username can't be more than 64 characters", context);
-                  } else if (filter.hasProfanity(userName)) {
-                    showAlert("Let's keep this app clean please.", context);
-                  } else {
-                    setState(() {
-                      bgColor = constructColorFromUserName(userName);
-                    });
-                    apiClient.serverApi?.setUsername(userName);
-                    displayToast("Username changed!", Status.success);
-                    _toHomePage(context);
-                  }
+      key: scaffoldKey,
+      backgroundColor: bgColor,
+      floatingActionButton: Consumer<ApiClient>(
+        builder: (context, apiClient, child) {
+          // checkLoggedIn(apiClient);
+          return FloatingActionButton(
+            elevation: 8.0,
+            child: Icon(Icons.check),
+            backgroundColor: Carnelian,
+            onPressed: () {
+              final validCharacters = RegExp(r'^[a-zA-Z0-9_]+$');
+              var userName = userNameController!.text;
+              if (userName == "") {
+                showAlert("You can't have an empty username!", context);
+              } else if (!validCharacters.hasMatch(userName)) {
+                showAlert(
+                    "Your username can only have letters, numbers, and underscores",
+                    context);
+              } else if (userName.length > 64) {
+                showAlert("Username can't be more than 64 characters", context);
+              } else if (filter.hasProfanity(userName)) {
+                showAlert("Let's keep this app clean please.", context);
+              } else {
+                setState(() {
+                  bgColor = constructColorFromUserName(userName);
                 });
-          },
-        ),
-        body: Center(
-          child: Container(child: Consumer<UserModel>(
+                apiClient.serverApi?.setUsername(userName);
+                displayToast("Username changed!", Status.success);
+                _toHomePage(context);
+              }
+            },
+          );
+        },
+      ),
+      body: Center(
+        child: Container(
+          child: Consumer<UserModel>(
             builder: (context, userModel, child) {
               userNameController = new TextEditingController(
                   text: userModel.userData?.username ?? "");
               return _userNameInputWidget(userNameController!);
             },
-          )),
-        ));
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _userNameInputWidget(TextEditingController controller) {
-    return Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-      Container(
-          child: Image.asset('assets/images/logo_hires.png'),
-          width: 200,
-          height: 200),
-      Text("Change your username here!",
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Container(
+            child: Image.asset('assets/images/logo_hires.png'),
+            width: 200,
+            height: 200),
+        Text(
+          "Change your username here!",
           style: GoogleFonts.lato(
-              textStyle: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18))),
-      Padding(
+            textStyle: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+            ),
+          ),
+        ),
+        Padding(
           padding: const EdgeInsets.only(top: 16.0, left: 12.0, right: 12.0),
           child: Container(
             width: 225,
@@ -99,28 +108,34 @@ class _UserNameWidget extends State<UserNameWidget> {
                       fontSize: 16)),
               cursorColor: Carnelian,
               decoration: new InputDecoration(
-                  focusColor: Colors.white,
-                  fillColor: Colors.white,
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.white, width: 2.0),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Carnelian, width: 2.0),
-                  ),
-                  hintText: 'Username',
-                  hintStyle: GoogleFonts.lato(
-                      textStyle: TextStyle(
-                          color: Colors.grey,
-                          fontWeight: FontWeight.normal,
-                          fontSize: 16))),
+                focusColor: Colors.white,
+                fillColor: Colors.white,
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.white, width: 2.0),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Carnelian, width: 2.0),
+                ),
+                hintText: 'Username',
+                hintStyle: GoogleFonts.lato(
+                  textStyle: TextStyle(
+                      color: Colors.grey,
+                      fontWeight: FontWeight.normal,
+                      fontSize: 16),
+                ),
+              ),
             ),
-          )),
-    ]);
+          ),
+        ),
+      ],
+    );
   }
 
   void _toHomePage(context) {
     Navigator.pop(context);
     Navigator.push(
-        context, MaterialPageRoute(builder: (context) => HomePageWidget()));
+      context,
+      MaterialPageRoute(builder: (context) => HomePageWidget()),
+    );
   }
 }
