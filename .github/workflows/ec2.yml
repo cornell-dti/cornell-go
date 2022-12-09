@@ -8,6 +8,7 @@ on:
 # 2. Get timestamp and generate deployment package.
 # 3. Push to EB.
 # Reference: https://akashsingh.blog/complete-guide-on-deploying-a-docker-application-react-to-aws-elastic-beanstalk-using-docker-hub-and-github-actions
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
