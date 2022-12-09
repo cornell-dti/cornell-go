@@ -13,6 +13,7 @@ on:
 #1. 9 Dec, 6:10 PM: add s3:DeleteObject permission to EB bucket.
 #2. 9 Dec, 6:20 PM: add s3:DeleteBucket permission to EB bucket.
 #3. 9 Dec 6:23 PM: remove denial of s3:DeleteBucket permission in EB bucket.
+#4. 9 Dec 6:30 PM: remove duplicate statements in EB Bucket policy.
 
 jobs:
   deploy:
