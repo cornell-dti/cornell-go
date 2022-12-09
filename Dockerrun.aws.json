@@ -9,5 +9,9 @@
           "ContainerPort": "80"
       }
   ],
-  "Logging": "/var/log/nginx"
+  "Logging": "/var/log/nginx",
+  "Authentication": {
+    "bucket": "docker-login-bucket-cornellgo",
+    "key": "dockercfg"
+  }
 }
