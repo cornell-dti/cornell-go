@@ -14,6 +14,7 @@ on:
 #2. 9 Dec, 6:20 PM: add s3:DeleteBucket permission to EB bucket.
 #3. 9 Dec 6:23 PM: remove denial of s3:DeleteBucket permission in EB bucket.
 #4. 9 Dec 6:30 PM: remove duplicate statements in EB Bucket policy.
+#5. 9 Dec 6:50 PM: add AdministratorAccess-AWSElasticBeanstalk to IAM role.
 
 jobs:
   deploy:
