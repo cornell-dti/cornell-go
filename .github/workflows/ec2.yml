@@ -12,6 +12,7 @@ on:
 #AWS/Docker Changelog
 #1. 9 Dec, 6:10 PM: add s3:DeleteObject permission to EB bucket.
 #2. 9 Dec, 6:20 PM: add s3:DeleteBucket permission to EB bucket.
+#3. 9 Dec 6:23 PM: remove denial of s3:DeleteBucket permission in EB bucket.
 
 jobs:
   deploy:
