@@ -2,7 +2,7 @@ name: Dev deployment from Github to AWS
 on:
   push:
     branches:
-      - nirbhaysinghnarang-patch-1
+      - nsn8-private-docker
 # steps:
 # 1. Build and push current docker image to dockerhub (need to integrate GH secrets)
 # 2. Get timestamp and generate deployment package.
