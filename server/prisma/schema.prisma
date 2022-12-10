@@ -27,7 +27,7 @@ enum OrganizationSpecialUsage {
 }
 
 model User {
-  id                  String            @id() @default(uuid())
+  id                  String          @id() @default(uuid())
   authToken           String
   authType            AuthType
   username            String
@@ -38,14 +38,14 @@ model User {
   adminRequested      Boolean
   score               Int
   rewards             EventReward[]
-  group               Group             @relation("member", fields: [groupId], references: [id])
+  group               Group           @relation("member", fields: [groupId], references: [id])
   groupId             String
-  hostOf              Group?            @relation("host")
+  hostOf              Group?          @relation("host")
   eventTrackers       EventTracker[]
-  completedChallenges PrevChallenge[]   @relation("owner")
-  memberOf            Organization[]   
-  isRanked            Boolean           @default(true)
-  participatedIn      PrevChallenge[]   @relation("participant")
+  completedChallenges PrevChallenge[] @relation("owner")
+  memberOf            Organization[]
+  isRanked            Boolean         @default(true)
+  participatedIn      PrevChallenge[] @relation("participant")
 }
 
 model Group {
@@ -75,19 +75,20 @@ model Challenge {
 }
 
 model EventBase {
-  id              String             @id @default(uuid())
+  id              String          @id @default(uuid())
   requiredMembers Int
   skippingEnabled Boolean
-  isDefault       Boolean            
+  isDefault       Boolean
   name            String
   description     String
   rewardType      EventRewardType
   indexable       Boolean
   endTime         DateTime
-  minimumScore    Int                @default(1)
+  minimumScore    Int             @default(1)
   rewards         EventReward[]
   challenges      Challenge[]
-  allowedIn       Organization[]
+  allowedIn       Organization[]  @relation("events")
+  defaultOf       Organization[]  @relation("default")
   trackers        EventTracker[]
   activeGroups    Group[]
 }
@@ -130,12 +131,14 @@ model PrevChallenge {
 }
 
 model Organization {
-  id              String                       @id @default(uuid())
+  id              String                   @id @default(uuid())
   displayName     String // A very cool org#1
   name            String // a_very_cool_org_1
-  isDefault       Boolean  
+  isDefault       Boolean
   canEditUsername Boolean
-  members         User[]  
-  allowedEvents   EventBase[]
+  members         User[]
+  allowedEvents   EventBase[]              @relation("events")
+  defaultEvent    EventBase                @relation("default", fields: [defaultEventId], references: [id], onDelete: Restrict)
+  defaultEventId  String
   specialUsage    OrganizationSpecialUsage
 }

@@ -25,7 +25,7 @@ export class AdminService {
   constructor(
     private userService: UserService,
     private prisma: PrismaService,
-  ) {}
+  ) { }
 
   async requestAdminAccess(adminId: string) {
     console.log(`User ${adminId} requested admin access!`);
@@ -291,6 +291,9 @@ export class AdminService {
   /** If a user in the organization is a host of a group and is not doing an
    *  organization-allowed event, changes the current event of the group to
    *  the default allowed event.
+   * 
+   * take in a group and check if the group's current event is allowed for 
+   * everyone. if not, assign any event that works
    */
   async ensureEventOrganization(organization: Organization) {
     const allowedEventCount = await this.prisma.eventBase.count({
@@ -358,6 +361,7 @@ export class AdminService {
         allowedEvents: {
           connect: organization.allowedEvents.map(id => ({ id })),
         },
+        defaultEventId: organization.defaultEvent,
         specialUsage: 'NONE',
       },
       update: {
@@ -494,6 +498,7 @@ export class AdminService {
       allowedEvents: (await org.allowedEvents({ select: { id: true } })).map(
         e => e.id,
       ),
+      defaultEvent: organization.defaultEventId,
       // generatedUserCount: genUsers.length,
       // generatedUserAuthIds: genUsers.map(u => u.authToken),
     };

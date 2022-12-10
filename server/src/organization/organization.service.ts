@@ -9,7 +9,7 @@ import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class OrganizationService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   private async makeDefaultEvent() {
     return await this.prisma.eventBase.create({
@@ -44,10 +44,10 @@ export class OrganizationService {
    * this usage */
   async getDefaultOrganization(
     usage: OrganizationSpecialUsage,
-  ): Promise<Organization & { allowedEvents: EventBase[] }> {
+  ): Promise<Organization & { defaultEvent: EventBase }> {
     let defaultOrg = await this.prisma.organization.findFirst({
       where: { isDefault: true },
-      include: { allowedEvents: true },
+      include: { defaultEvent: true },
     });
 
     if (defaultOrg === null) {
@@ -65,12 +65,14 @@ export class OrganizationService {
           canEditUsername: true, // can we allow anyone to edit username?
           specialUsage: usage,
           allowedEvents: {
-            connect: {
+            connect: [{
               id: defaultEvent.id,
-            },
+            }],
           },
+          defaultEventId: defaultEvent.id,
+
         },
-        include: { allowedEvents: true },
+        include: { defaultEvent: true },
       });
     }
 
@@ -95,4 +97,5 @@ export class OrganizationService {
       },
     });
   }
+
 }
