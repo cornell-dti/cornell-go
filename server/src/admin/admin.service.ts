@@ -5,6 +5,10 @@ import { EventDto } from './update-events.dto';
 import { v4 } from 'uuid';
 import { OrganizationDto } from './request-organizations.dto';
 import { UserService } from 'src/user/user.service';
+import { GroupService } from 'src/group/group.service';
+import { OrganizationService } from 'src/organization/organization.service';
+import { EventService } from 'src/event/event.service';
+
 import {
   AuthType,
   Challenge,
@@ -24,6 +28,9 @@ const friendlyWords = require('friendly-words');
 export class AdminService {
   constructor(
     private userService: UserService,
+    private groupService: GroupService,
+    private orgService: OrganizationService,
+    private eventService: EventService,
     private prisma: PrismaService,
   ) { }
 
@@ -288,60 +295,41 @@ export class AdminService {
   //   }
   // }
 
-  /** If a user in the organization is a host of a group and is not doing an
-   *  organization-allowed event, changes the current event of the group to
-   *  the default allowed event.
-   * 
-   * take in a group and check if the group's current event is allowed for 
-   * everyone. if not, assign any event that works
+  /** 
+   * Take in a group and check if the group's current event is allowed for 
+   * everyone. if not, assign default allowed event to group
    */
-  async ensureEventOrganization(organization: Organization) {
-    const allowedEventCount = await this.prisma.eventBase.count({
-      where: {
-        allowedIn: { some: { id: organization.id } },
-      },
-    });
+  async ensureValidGroupEvent(group: Group) {
+    const allowedEvents = await this.groupService.getAllowedEventIds(group)
 
-    if (allowedEventCount === 0) {
-      return; // No event organizations
+    if (!allowedEvents?.includes(group.curEventId)) {
+      const hostOrgs = (await this.prisma.organization.findMany({
+        where: { members: { some: { id: group.hostId! } } },
+        select: { id: true }
+      })).map((org) => org.id)
+
+      // every member of the group must have this default org (?)
+      const defaultOrg = await this.prisma.organization.findFirstOrThrow({
+        where: { isDefault: true, id: { in: hostOrgs } }
+      })
+
+      let newEvent = await this.orgService.getDefaultEvent(defaultOrg);
+
+      const groupMembers = await this.groupService.getMembers(group);
+
+      await Promise.all(
+        groupMembers.map(async (member) => {
+          await this.eventService.createEventTracker(member, newEvent);
+        }),
+      );
+
+      await this.prisma.group.update({
+        where: { id: group.id },
+        data: { curEventId: newEvent.id }
+      })
+
     }
 
-    const allowedEvents = (
-      await this.prisma.eventBase.findMany({
-        where: { allowedIn: { some: { id: organization.id } } },
-      })
-    ).map(({ id }) => id);
-
-    const members = (
-      await this.prisma.organization.findUniqueOrThrow({
-        where: { id: organization.id },
-        include: { members: true },
-      })
-    ).members;
-
-    for (const member of members) {
-      try {
-        const hostedGroup = (
-          await this.prisma.user.findFirstOrThrow({
-            where: { id: member.id },
-            include: { hostOf: true },
-          })
-        ).hostOf;
-        if (hostedGroup === null) continue;
-        const isViolating =
-          (await this.prisma.group.count({
-            where: { id: hostedGroup.id, curEventId: { notIn: allowedEvents } },
-          })) >= 1;
-        if (isViolating) {
-          await this.prisma.group.update({
-            where: { id: hostedGroup.id },
-            data: { curEventId: allowedEvents[0] },
-          });
-        }
-      } catch (e) {
-        continue;
-      }
-    }
   }
 
   /** Update/insert a organization group */
@@ -384,8 +372,6 @@ export class AdminService {
     //     organization.generatedUserCount,
     //   );
     // }
-
-    await this.ensureEventOrganization(organizationEntity);
 
     return organizationEntity;
   }

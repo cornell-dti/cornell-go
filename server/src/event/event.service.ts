@@ -3,6 +3,7 @@ import {
   Challenge,
   EventBase,
   EventRewardType,
+  Group,
   Organization,
   User,
 } from '@prisma/client';
@@ -17,7 +18,7 @@ export class EventService {
     private clientService: ClientService,
     private orgService: OrganizationService,
     private readonly prisma: PrismaService,
-  ) {}
+  ) { }
 
   /** Get event by id */
   async getEventById(id: string) {
@@ -63,35 +64,27 @@ export class EventService {
   }
 
   /** Searches events based on certain criteria */
-  async searchEvents(
-    offset: number,
-    count: number,
-    rewardTypes: EventRewardType[] | undefined = undefined,
-    skippable: boolean | undefined = undefined,
-    sortBy: {
-      time?: 'asc' | 'desc';
-      challengeCount?: 'asc' | 'desc';
-    } = {},
-    organizations?: Organization[],
-  ) {
-    const events = await this.prisma.eventBase.findMany({
-      where: {
-        indexable: !organizations,
-        //rewardType: rewardTypes && { $in: rewardTypes },
-        allowedIn: {
-          some: organizations
-            ? { id: { in: organizations.map(({ id }) => id) } }
-            : undefined,
-        },
-      },
-      select: { id: true },
-      skip: offset,
-    });
+  // async searchEvents(
+  //   group: Group,
+  // ) {
+  //   const events = await this.prisma.eventBase.findMany({
+  //     where: {
+  //       indexable: true,
+  //       //rewardType: rewardTypes && { $in: rewardTypes },
+  //       allowedIn: {
+  //         some: organizations
+  //           ? { id: { in: organizations.map(({ id }) => id) } }
+  //           : undefined,
+  //       },
+  //     },
+  //     select: { id: true },
+  //     skip: offset,
+  //   });
 
-    console.log(events, offset);
+  //   console.log(events, offset);
 
-    return events.map(ev => ev.id);
-  }
+  //   return events.map(ev => ev.id);
+  // }
 
   /** Verifies that a challenge is in an event */
   async isChallengeInEvent(challengeId: string, eventId: string) {
