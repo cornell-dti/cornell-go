@@ -1,5 +1,6 @@
-import { UseGuards } from '@nestjs/common';
+import { UseFilters, UseGuards } from '@nestjs/common';
 import {
+  BaseWsExceptionFilter,
   MessageBody,
   SubscribeMessage,
   WebSocketGateway,
@@ -24,8 +25,10 @@ import { UpdateChallengesDto } from './update-challenges.dto';
 import { UpdateEventsDto } from './update-events.dto';
 import { UpdateGroupsDto } from './update-groups.dto';
 import { UpdateRestrictionsDto } from './update-restrictions.dto';
+import { AllExceptionsFilter } from './admin-error-filter';
 import { UpdateRewardsDto } from './update-rewards.dto';
 @WebSocketGateway({ cors: true })
+@UseFilters(AllExceptionsFilter)
 @UseGuards(AdminGuard)
 export class AdminGateway {
   constructor(
@@ -151,9 +154,16 @@ export class AdminGateway {
     @CallingUser() user: User,
     @MessageBody() data: UpdateEventsDto,
   ) {
-    await Promise.all(
-      data.deletedIds.map(ev => this.adminService.removeEvent(ev)),
-    );
+    try {
+      await Promise.all(
+        data.deletedIds.map(ev => this.adminService.removeEvent(ev)),
+      );
+    } catch (e) {
+      this.adminCallbackService.emitUpdateErrorData({
+        message: 'Cannot remove default Event',
+      });
+      return;
+    }
 
     const newEvents = await this.adminService.updateEvents(data.events);
 
