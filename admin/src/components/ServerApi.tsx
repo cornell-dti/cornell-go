@@ -17,6 +17,7 @@ import { UpdateRestrictionsDto } from "../dto/update-restrictions.dto";
 import { UpdateRewardDataDto } from "../dto/update-reward-data.dto";
 import { UpdateRewardsDto } from "../dto/update-rewards.dto";
 
+//** Web Sockets callback functions are in ./ServerData.tsx*/
 export class ServerApi {
   constructor(private socket: Socket) {}
 
