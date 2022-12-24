@@ -20,8 +20,15 @@ enum EventRewardType {
   PERPETUAL
 }
 
+enum OrganizationSpecialUsage {
+  ///DEVICE_LOGIN is a device assigned-id that acts as a user login for non-Cornell users.
+  DEVICE_LOGIN
+  CORNELL_LOGIN
+  NONE
+}
+
 model User {
-  id                  String            @id() @default(uuid())
+  id                  String          @id() @default(uuid())
   authToken           String
   authType            AuthType
   username            String
@@ -32,17 +39,14 @@ model User {
   adminRequested      Boolean
   score               Int
   rewards             EventReward[]
-  group               Group             @relation("member", fields: [groupId], references: [id])
+  group               Group           @relation("member", fields: [groupId], references: [id])
   groupId             String
-  hostOf              Group?            @relation("host")
+  hostOf              Group?          @relation("host")
   eventTrackers       EventTracker[]
-  completedChallenges PrevChallenge[]   @relation("owner")
-  restrictedBy        RestrictionGroup? @relation("restricted", fields: [restrictedById], references: [id])
-  restrictedById      String?
-  generatedBy         RestrictionGroup? @relation("generated", fields: [generatedById], references: [id])
-  generatedById       String?
-  isRanked            Boolean           @default(true)
-  participatedIn      PrevChallenge[]   @relation("participant")
+  completedChallenges PrevChallenge[] @relation("owner")
+  memberOf            Organization[]
+  isRanked            Boolean         @default(true)
+  participatedIn      PrevChallenge[] @relation("participant")
 }
 
 model Group {
@@ -72,7 +76,7 @@ model Challenge {
 }
 
 model EventBase {
-  id              String             @id @default(uuid())
+  id              String          @id @default(uuid())
   requiredMembers Int
   skippingEnabled Boolean
   isDefault       Boolean
@@ -81,10 +85,11 @@ model EventBase {
   rewardType      EventRewardType
   indexable       Boolean
   endTime         DateTime
-  minimumScore    Int                @default(1)
+  minimumScore    Int             @default(1)
   rewards         EventReward[]
   challenges      Challenge[]
-  allowedIn       RestrictionGroup[]
+  allowedIn       Organization[]  @relation("events")
+  defaultOf       Organization[]  @relation("default")
   trackers        EventTracker[]
   activeGroups    Group[]
 }
@@ -127,12 +132,15 @@ model PrevChallenge {
   timestamp    DateTime     @default(now())
 }
 
-model RestrictionGroup {
-  id              String      @id @default(uuid())
+model Organization {
+  id              String                   @id @default(uuid())
   displayName     String // A very cool org#1
   name            String // a_very_cool_org_1
+  isDefault       Boolean
   canEditUsername Boolean
-  restrictedUsers User[]      @relation("restricted")
-  generatedUsers  User[]      @relation("generated")
-  allowedEvents   EventBase[]
+  members         User[]
+  allowedEvents   EventBase[]              @relation("events")
+  defaultEvent    EventBase                @relation("default", fields: [defaultEventId], references: [id], onDelete: Restrict)
+  defaultEventId  String
+  specialUsage    OrganizationSpecialUsage
 }

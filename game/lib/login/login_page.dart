@@ -104,9 +104,9 @@ class _LoginWidgetState extends State<LoginWidget> {
                       },
                     )),
                 TextButton(
-                    child: Text("Use ID"),
+                    child: Text("Play with device"),
                     onPressed: () {
-                      _displayTextInputDialog(context);
+                      print("pressedPlayWithDevice.");
                     })
               ],
             )

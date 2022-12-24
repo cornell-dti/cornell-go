@@ -34,8 +34,8 @@ export class ChallengeService {
   async isChallengeCompletedByUser(user: User, challenge: Challenge) {
     const num = await this.prisma.prevChallenge.count({
       where: {
-        user,
-        challenge,
+        userId: user.id,
+        challenge: challenge,
       },
     });
 
@@ -188,7 +188,7 @@ export class ChallengeService {
     return (
       (
         await this.prisma.prevChallenge.findFirst({
-          where: { user, challenge },
+          where: { userId: user.id, challengeId: challenge.id },
         })
       )?.timestamp.toISOString() ?? ''
     );

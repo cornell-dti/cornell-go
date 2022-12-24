@@ -3,9 +3,11 @@ import { Injectable } from '@nestjs/common';
 import { RewardDto } from './update-rewards.dto';
 import { EventDto } from './update-events.dto';
 import { v4 } from 'uuid';
-import { RestrictionDto } from './request-restrictions.dto';
+import { OrganizationDto } from './request-organizations.dto';
 import { UserService } from 'src/user/user.service';
 import { GroupService } from 'src/group/group.service';
+import { OrganizationService } from 'src/organization/organization.service';
+import { EventService } from 'src/event/event.service';
 
 import {
   AuthType,
@@ -13,9 +15,10 @@ import {
   EventBase,
   EventReward,
   EventRewardType,
-  Group,
   PrismaClient,
-  RestrictionGroup,
+  Organization,
+  OrganizationSpecialUsage,
+  Group,
 } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { GroupDto } from './update-groups.dto';
@@ -27,6 +30,8 @@ export class AdminService {
   constructor(
     private userService: UserService,
     private groupService: GroupService,
+    private orgService: OrganizationService,
+    private eventService: EventService,
     private prisma: PrismaService,
   ) {}
 
@@ -65,12 +70,12 @@ export class AdminService {
     return await this.prisma.challenge.findMany();
   }
 
-  async getAllGroupData() {
-    return await this.prisma.group.findMany();
+  async getAllOrganizationData() {
+    return await this.prisma.organization.findMany();
   }
 
-  async getAllRestrictionGroupData() {
-    return await this.prisma.restrictionGroup.findMany();
+  async getAllGroupData() {
+    return await this.prisma.group.findMany();
   }
 
   async getEventById(eventId: string) {
@@ -165,14 +170,16 @@ export class AdminService {
     await this.prisma.group.delete({ where: { id: removeId } });
   }
 
-  async deleteRestrictionGroups(ids: string[]) {
-    const genedUsers = await this.prisma.user.findMany({
-      where: { generatedById: { in: ids } },
-    });
+  async deleteOrganizations(ids: string[]) {
+    // for (const id of ids) {
+    //   const genedUsers = await this.prisma.user.findMany({
+    //     where: { generatedById: { has: id } },
+    //   });
+    // }
 
-    await Promise.all(genedUsers.map(u => this.userService.deleteUser(u)));
+    // await Promise.all(genedUsers.map(u => this.userService.deleteUser(u)));
 
-    await this.prisma.restrictionGroup.deleteMany({
+    await this.prisma.organization.deleteMany({
       where: { id: { in: ids } },
     });
   }
@@ -330,129 +337,92 @@ export class AdminService {
     return groupEntity;
   }
 
-  /** Creates a new restricted user */
-  async newRestrictedUser(id: string, word: string, group: RestrictionGroup) {
-    const user = await this.userService.register(
-      id + '@cornell.edu',
-      word,
-      10.019,
-      10.019,
-      AuthType.DEVICE,
-      id,
-    );
+  /**
+   * Take in a group and check if the group's current event is allowed for
+   * everyone. if not, assign default allowed event to group
+   */
+  async ensureValidGroupEvent(group: Group) {
+    const allowedEvents = await this.groupService.getAllowedEventIds(group);
 
-    return await this.prisma.user.update({
-      where: { id: user.id },
-      data: { restrictedById: group.id, generatedById: group.id },
-    });
-  }
+    if (!allowedEvents?.includes(group.curEventId)) {
+      const hostOrgs = (
+        await this.prisma.organization.findMany({
+          where: { members: { some: { id: group.hostId! } } },
+          select: { id: true },
+        })
+      ).map(org => org.id);
 
-  /** Adjusts member count in a group up based on expectedCount */
-  async generateMembers(group: RestrictionGroup, expectedCount: number) {
-    const genCount = await this.prisma.user.count({
-      where: { generatedById: group.id },
-    });
+      // every member of the group must have this default org (?)
+      const defaultOrg = await this.prisma.organization.findFirstOrThrow({
+        where: { isDefault: true, id: { in: hostOrgs } },
+      });
 
-    if (genCount < expectedCount) {
-      const seed = group.id[0].charCodeAt(0);
-      for (let i = genCount; i < expectedCount; ++i) {
-        const index = (10 * i + seed) % friendlyWords.objects.length;
-        const word = friendlyWords.objects[index];
-        const id = group.name + '_' + word + index;
-        const user = await this.newRestrictedUser(id, word, group);
+      let newEvent = await this.orgService.getDefaultEvent(defaultOrg);
 
-        await this.prisma.restrictionGroup.update({
-          where: { id: group.id },
-          data: {
-            generatedUsers: { connect: { id: user.id } },
-            restrictedUsers: { connect: { id: user.id } },
-          },
-        });
-      }
-    }
-  }
+      const groupMembers = await this.groupService.getMembers(group);
 
-  /** Ensures all restricted users are on an allowed event */
-  async ensureEventRestriction(group: RestrictionGroup) {
-    const allowedEventCount = await this.prisma.eventBase.count({
-      where: {
-        allowedIn: { some: { id: group.id } },
-      },
-    });
+      await Promise.all(
+        groupMembers.map(async member => {
+          await this.eventService.createEventTracker(member, newEvent);
+        }),
+      );
 
-    if (allowedEventCount === 0) {
-      return; // No event restrictions
-    }
-
-    const allowedEvents = (
-      await this.prisma.eventBase.findMany({
-        where: { allowedIn: { some: { id: group.id } } },
-      })
-    ).map(({ id }) => id);
-
-    const violatingGroups = await this.prisma.group.findMany({
-      where: {
-        host: { restrictedBy: group },
-        curEventId: { notIn: allowedEvents },
-      },
-    });
-
-    for (const userGroup of violatingGroups) {
       await this.prisma.group.update({
-        where: { id: userGroup.id },
-        data: { curEventId: allowedEvents[0] },
+        where: { id: group.id },
+        data: { curEventId: newEvent.id },
       });
     }
   }
 
-  /** Update/insert a restriction group */
-  async updateRestrictionGroupWithDto(restriction: RestrictionDto) {
-    const restrictionEntity = await this.prisma.restrictionGroup.upsert({
-      where: { id: restriction.id },
+  /** Update/insert a organization group */
+  async updateOrganizationWithDto(organization: OrganizationDto) {
+    const organizationEntity = await this.prisma.organization.upsert({
+      where: { id: organization.id },
       create: {
-        displayName: restriction.displayName,
-        name: restriction.displayName
+        displayName: organization.displayName,
+        name: organization.displayName
           .toLowerCase()
           .replaceAll(/[^a-z0-9]/g, '_'),
-        canEditUsername: restriction.canEditUsername,
-        restrictedUsers: {
-          connect: restriction.restrictedUsers.map(id => ({ id })),
+        isDefault: false,
+        canEditUsername: organization.canEditUsername,
+        members: {
+          connect: organization.members.map(id => ({ id })),
         },
         allowedEvents: {
-          connect: restriction.allowedEvents.map(id => ({ id })),
+          connect: organization.allowedEvents.map(id => ({ id })),
         },
+        defaultEventId: organization.defaultEvent,
+        specialUsage: 'NONE',
       },
       update: {
-        restrictedUsers: {
-          set: restriction.restrictedUsers.map(id => ({ id })),
+        members: {
+          set: organization.members.map(id => ({ id })),
         },
         allowedEvents: {
-          set: restriction.allowedEvents.map(id => ({ id })),
+          set: organization.allowedEvents.map(id => ({ id })),
         },
       },
     });
 
-    const genCount = await this.prisma.user.count({
-      where: { generatedBy: restrictionEntity },
-    });
+    // const genCount = await this.prisma.user.count({
+    //   where: { generatedBy: organizationEntity },
+    // });
 
-    if (restriction.generatedUserCount > genCount) {
-      await this.generateMembers(
-        restrictionEntity,
-        restriction.generatedUserCount,
-      );
-    }
+    // if (organization.generatedUserCount > genCount) {
+    //   await this.generateMembers(
+    //     organizationEntity,
+    //     organization.generatedUserCount,
+    //   );
+    // }
 
-    await this.ensureEventRestriction(restrictionEntity);
-
-    return restrictionEntity;
+    return organizationEntity;
   }
 
-  async updateRestrictionGroups(
-    restrictions: RestrictionDto[],
-  ): Promise<RestrictionGroup[]> {
+  async updateOrganizations(
+    organizations: OrganizationDto[],
+  ): Promise<Organization[]> {
     return await Promise.all(
-      restrictions.map(r => this.updateRestrictionGroupWithDto(r)),
+      organizations.map(r => this.updateOrganizationWithDto(r)),
     );
   }
 
@@ -549,27 +519,27 @@ export class AdminService {
     };
   }
 
-  async dtoForRestrictionGroup(
-    restrictionGroup: RestrictionGroup,
-  ): Promise<RestrictionDto> {
-    const fullRestric = this.prisma.restrictionGroup.findUniqueOrThrow({
-      where: { id: restrictionGroup.id },
+  async dtoForOrganization(
+    organization: Organization,
+  ): Promise<OrganizationDto> {
+    const org = this.prisma.organization.findUniqueOrThrow({
+      where: { id: organization.id },
     });
 
-    const genUsers = await fullRestric.generatedUsers();
+    // const genUsers = await fullRestric.generatedUsers();
 
     return {
-      id: restrictionGroup.id,
-      displayName: restrictionGroup.displayName,
-      canEditUsername: restrictionGroup.canEditUsername,
-      restrictedUsers: (
-        await fullRestric.restrictedUsers({ select: { id: true } })
-      ).map(e => e.id),
-      allowedEvents: (
-        await fullRestric.allowedEvents({ select: { id: true } })
-      ).map(e => e.id),
-      generatedUserCount: genUsers.length,
-      generatedUserAuthIds: genUsers.map(u => u.authToken),
+      id: organization.id,
+      displayName: organization.displayName,
+      isDefault: false,
+      canEditUsername: organization.canEditUsername,
+      members: (await org.members({ select: { id: true } })).map(e => e.id),
+      allowedEvents: (await org.allowedEvents({ select: { id: true } })).map(
+        e => e.id,
+      ),
+      defaultEvent: organization.defaultEventId,
+      // generatedUserCount: genUsers.length,
+      // generatedUserAuthIds: genUsers.map(u => u.authToken),
     };
   }
 }
