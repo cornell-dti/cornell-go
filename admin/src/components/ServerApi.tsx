@@ -16,6 +16,7 @@ import { UpdateGroupDataDto } from "../dto/update-group-data.dto";
 import { UpdateGroupsDto } from "../dto/update-groups.dto";
 import { UpdateRewardDataDto } from "../dto/update-reward-data.dto";
 import { UpdateRewardsDto } from "../dto/update-rewards.dto";
+import { ErrorDTO } from "../dto/error.dto";
 
 //** Web Sockets callback functions are in ./ServerData.tsx*/
 export class ServerApi {
@@ -39,7 +40,6 @@ export class ServerApi {
   requestOrganizations(data: RequestOrganizationsDto) {
     this.socket.emit("requestOrganizations", data);
   }
-
   updateEvents(data: UpdateEventsDto) {
     this.socket.emit("updateEvents", data);
   }
@@ -82,5 +82,9 @@ export class ServerApi {
   onUpdateGroupData(callback: (data: UpdateGroupDataDto) => void) {
     this.socket.removeAllListeners("updateGroupData");
     this.socket.on("updateGroupData", (data) => callback(data));
+  }
+  onUpdateErrorData(callback: (data: ErrorDTO) => void) {
+    this.socket.removeAllListeners("updateErrorData");
+    this.socket.on("updateErrorData", (data) => callback(data));
   }
 }

@@ -7,6 +7,7 @@ import {
   useState,
 } from "react";
 import { OrganizationDto } from "../dto/request-organizations.dto";
+import { ErrorDTO } from "../dto/error.dto";
 import { UpdateAdminDataAdminDto } from "../dto/update-admin-data.dto";
 import { ChallengeDto } from "../dto/update-challenges.dto";
 import { EventDto } from "../dto/update-events.dto";
@@ -24,6 +25,7 @@ const defaultData = {
   organizations: new Map<string, OrganizationDto>(),
   groups: new Map<string, GroupDto>(),
   selectedEvent: "" as string,
+  errors: new Map<string, ErrorDTO>(),
   selectEvent(id: string) {},
   setAdminStatus(id: string, granted: boolean) {},
   updateReward(reward: RewardDto) {},
@@ -34,6 +36,7 @@ const defaultData = {
   deleteEvent(id: string) {},
   updateOrganization(organization: OrganizationDto) {},
   deleteOrganization(id: string) {},
+  deleteError(id: string) {},
   updateGroup(event: GroupDto) {},
   deleteGroup(id: string) {},
 };
@@ -81,6 +84,10 @@ export function ServerDataProvider(props: { children: ReactNode }) {
       },
       deleteEvent(id: string) {
         sock.updateEvents({ events: [], deletedIds: [id] });
+      },
+      deleteError(id: string) {
+        serverData.errors.delete(id);
+        setTimeout(() => setServerData({ ...serverData }), 0);
       },
       updateGroup(group: GroupDto) {
         sock.updateGroups({ groups: [group], deletedIds: [] });
@@ -141,6 +148,10 @@ export function ServerDataProvider(props: { children: ReactNode }) {
     sock.onUpdateOrganizations((data) => {
       data.deletedIds.forEach((id) => serverData.organizations.delete(id));
       data.organizations.forEach((r) => serverData.organizations.set(r.id, r));
+      setTimeout(() => setServerData({ ...serverData }), 0);
+    });
+    sock.onUpdateErrorData((data) => {
+      serverData.errors.set("Error", data);
       setTimeout(() => setServerData({ ...serverData }), 0);
     });
   }, [sock, serverData, setServerData]);
