@@ -32,44 +32,50 @@ class _VisitedPlacesWidgetState extends State<VisitedPlacesWidget> {
             child: Column(
               children: [
                 Container(
-                    child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.search,
-                        size: 25,
-                        color: Colors.white,
-                      ),
-                      Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.search,
+                          size: 25,
+                          color: Colors.white,
+                        ),
+                        Expanded(
                           child: TextField(
-                              cursorColor: Colors.white,
-                              decoration: InputDecoration(
-                                  enabledBorder: UnderlineInputBorder(
-                                      borderSide:
-                                          BorderSide(color: Colors.white)),
-                                  border: UnderlineInputBorder(),
-                                  hintText: 'search...',
-                                  hintStyle: TextStyle(
-                                      fontSize: 20, color: Colors.white),
-                                  fillColor: Colors.white)))
+                            cursorColor: Colors.white,
+                            decoration: InputDecoration(
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: Colors.white),
+                              ),
+                              border: UnderlineInputBorder(),
+                              hintText: 'search...',
+                              hintStyle:
+                                  TextStyle(fontSize: 20, color: Colors.white),
+                              fillColor: Colors.white,
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: ListView(
+                    shrinkWrap: true,
+                    scrollDirection: Axis.vertical,
+                    children: [
+                      visitedPlacesCell(context, "Sage Chapel", "4/19/2021", 5,
+                          "assets/images/38582.jpg"),
+                      visitedPlacesCell(context, "Sage Chapel", "4/19/2021", 5,
+                          "assets/images/38582.jpg"),
+                      visitedPlacesCell(context, "Sage Chapel", "4/19/2021", 5,
+                          "assets/images/38582.jpg"),
+                      visitedPlacesCell(context, "Sage Chapel", "4/19/2021", 5,
+                          "assets/images/38582.jpg"),
                     ],
                   ),
-                )),
-                Expanded(
-                    child: ListView(
-                        shrinkWrap: true,
-                        scrollDirection: Axis.vertical,
-                        children: [
-                      visitedPlacesCell(context, "Sage Chapel", "4/19/2021", 5,
-                          "assets/images/38582.jpg"),
-                      visitedPlacesCell(context, "Sage Chapel", "4/19/2021", 5,
-                          "assets/images/38582.jpg"),
-                      visitedPlacesCell(context, "Sage Chapel", "4/19/2021", 5,
-                          "assets/images/38582.jpg"),
-                      visitedPlacesCell(context, "Sage Chapel", "4/19/2021", 5,
-                          "assets/images/38582.jpg"),
-                    ]))
+                )
               ],
             ),
           ),
