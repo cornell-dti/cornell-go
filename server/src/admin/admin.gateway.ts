@@ -16,11 +16,13 @@ import { AdminService } from './admin.service';
 import { RequestAdminsDto } from './request-admins.dto';
 import { RequestChallengesDto } from './request-challenges.dto';
 import { RequestEventsDto } from './request-events.dto';
+import { RequestGroupsDto } from './request-groups.dto';
 import { RequestRestrictionsDto } from './request-restrictions.dto';
 import { RequestRewardsDto } from './request-rewards.dto';
 import { UpdateAdminsDto } from './update-admins.dto';
 import { UpdateChallengesDto } from './update-challenges.dto';
 import { UpdateEventsDto } from './update-events.dto';
+import { UpdateGroupsDto } from './update-groups.dto';
 import { UpdateRestrictionsDto } from './update-restrictions.dto';
 import { UpdateRewardsDto } from './update-rewards.dto';
 @WebSocketGateway({ cors: true })
@@ -83,6 +85,24 @@ export class AdminGateway {
     };
     this.adminCallbackService.emitUpdateRewardData(updateRewardData, user);
     return false;
+  }
+
+  @SubscribeMessage('requestGroups')
+  async requestGroups(
+    @CallingUser() user: User,
+    @MessageBody() data: RequestGroupsDto,
+  ) {
+    const groups = await this.adminService.getAllGroupData();
+
+    this.adminCallbackService.emitUpdateGroupData(
+      {
+        deletedIds: [],
+        groups: await Promise.all(
+          groups.map(gr => this.adminService.dtoForGroup(gr)),
+        ),
+      },
+      user,
+    );
   }
 
   @SubscribeMessage('requestAdmins')
@@ -250,6 +270,34 @@ export class AdminGateway {
     });
   }
 
+  @SubscribeMessage('updateGroups')
+  async updateGroups(
+    @CallingUser() user: User,
+    @MessageBody() data: UpdateGroupsDto,
+  ) {
+    await Promise.all(
+      data.deletedIds.map(gr => this.adminService.removeGroup(gr)),
+    );
+
+    await this.adminService.updateGroups(data.groups);
+    const newGroups = await this.adminService.getAllGroupData();
+
+    this.adminCallbackService.emitUpdateGroupData({
+      groups: await Promise.all(
+        newGroups.map(gr => this.adminService.dtoForGroup(gr)),
+      ),
+      deletedIds: data.deletedIds,
+    });
+
+    this.clientService.emitInvalidateData({
+      userEventData: true,
+      userRewardData: true,
+      winnerRewardData: true,
+      groupData: true,
+      challengeData: true,
+      leaderboardData: true,
+    });
+  }
   @SubscribeMessage('updateAdmins')
   async updateAdmins(
     @CallingUser() user: User,
