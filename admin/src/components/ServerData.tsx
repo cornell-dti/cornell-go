@@ -10,16 +10,19 @@ import { OrganizationDto } from "../dto/request-organizations.dto";
 import { UpdateAdminDataAdminDto } from "../dto/update-admin-data.dto";
 import { ChallengeDto } from "../dto/update-challenges.dto";
 import { EventDto } from "../dto/update-events.dto";
+import { GroupDto } from "../dto/update-groups.dto";
 import { RewardDto } from "../dto/update-rewards.dto";
 import { ServerApi } from "./ServerApi";
 import { ServerConnectionContext } from "./ServerConnection";
 
+/**  object to store user data fetched from server */
 const defaultData = {
   admins: new Map<string, UpdateAdminDataAdminDto>(),
   events: new Map<string, EventDto>(),
   challenges: new Map<string, ChallengeDto>(),
   rewards: new Map<string, RewardDto>(),
   organizations: new Map<string, OrganizationDto>(),
+  groups: new Map<string, GroupDto>(),
   selectedEvent: "" as string,
   selectEvent(id: string) {},
   setAdminStatus(id: string, granted: boolean) {},
@@ -31,6 +34,8 @@ const defaultData = {
   deleteEvent(id: string) {},
   updateOrganization(organization: OrganizationDto) {},
   deleteOrganization(id: string) {},
+  updateGroup(event: GroupDto) {},
+  deleteGroup(id: string) {},
 };
 
 export const ServerDataContext = createContext(defaultData);
@@ -77,6 +82,12 @@ export function ServerDataProvider(props: { children: ReactNode }) {
       deleteEvent(id: string) {
         sock.updateEvents({ events: [], deletedIds: [id] });
       },
+      updateGroup(group: GroupDto) {
+        sock.updateGroups({ groups: [group], deletedIds: [] });
+      },
+      deleteGroup(id: string) {
+        sock.updateGroups({ groups: [], deletedIds: [id] });
+      },
       updateOrganization(organization: OrganizationDto) {
         sock.updateOrganizations({
           organizations: [organization],
@@ -94,8 +105,10 @@ export function ServerDataProvider(props: { children: ReactNode }) {
     sock.requestAdmins({});
     sock.requestEvents({});
     sock.requestOrganizations({});
+    sock.requestGroups({});
   }, [sock]);
 
+  /** Update defaultData object when ServerApi websocket receives a response */
   useEffect(() => {
     sock.onUpdateAdminData((data) => {
       data.admins.forEach((adminUpdate) => {
@@ -118,6 +131,11 @@ export function ServerDataProvider(props: { children: ReactNode }) {
     sock.onUpdateRewardData((data) => {
       data.deletedIds.forEach((id) => serverData.rewards.delete(id));
       data.rewards.forEach((rw) => serverData.rewards.set(rw.id, rw));
+      setTimeout(() => setServerData({ ...serverData }), 0);
+    });
+    sock.onUpdateGroupData((data) => {
+      data.deletedIds.forEach((id) => serverData.groups.delete(id));
+      data.groups.forEach((gr) => serverData.groups.set(gr.id, gr));
       setTimeout(() => setServerData({ ...serverData }), 0);
     });
     sock.onUpdateOrganizations((data) => {

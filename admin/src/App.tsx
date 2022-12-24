@@ -21,6 +21,7 @@ import {
   faUnlink,
   faUserShield,
   faLock,
+  faUserGroup,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -29,6 +30,7 @@ import styled from "styled-components";
 import { useContext } from "react";
 import { ServerConnectionContext } from "./components/ServerConnection";
 import { ServerDataContext } from "./components/ServerData";
+import { Groups } from "./components/Groups";
 
 const routes = [
   {
@@ -60,6 +62,12 @@ const routes = [
     element: <Rewards />,
     icon: faTrophy,
     name: "Rewards",
+  },
+  {
+    path: "/groups",
+    element: <Groups />,
+    icon: faUserGroup,
+    name: "Groups",
   },
   {
     path: "/organizations",

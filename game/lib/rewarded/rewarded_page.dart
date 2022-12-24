@@ -45,7 +45,10 @@ class _RewardWidgetState extends State<RewardWidget> {
                   ),
                   const Text(
                     'You have found',
-                    style: TextStyle(fontSize: 40, color: Colors.white),
+                    style: TextStyle(
+                      fontSize: 40,
+                      color: Colors.white,
+                    ),
                   ),
                   Text(
                     widget.homePageState.name + "!",

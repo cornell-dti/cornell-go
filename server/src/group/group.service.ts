@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { EventBase, Group, User, OrganizationSpecialUsage } from '@prisma/client';
+import { EventBase, Group, User, OrganizationSpecialUsage, PrismaClient, Prisma } from '@prisma/client';
 import { EventService } from 'src/event/event.service';
 import { OrganizationService } from '../organization/organization.service';
 import { UpdateGroupDataMemberDto } from '../client/update-group-data.dto';
@@ -70,7 +70,8 @@ export class GroupService {
    * Checks if user can play the group's current event. If not, does nothing
    * Returns the old group if it still exists, or null. */
   async joinGroup(user: User, joinId: string): Promise<Group | null> {
-    const oldGroup = await this.getGroupForUser(user);
+    return await this.prisma.$transaction(async tx => {
+      const oldGroup = await this.getGroupForUser(user);
 
     const newGroup = await this.prisma.group.findFirstOrThrow({
       where: { friendlyId: joinId.toUpperCase() }
@@ -92,7 +93,7 @@ export class GroupService {
       user.groupId = newGroup.id;
       return await this.fixOrDeleteGroup(oldGroup);
     }
-    return oldGroup
+    return oldGroup;
   }
 
   /** Moves the user out of their current group into a new group.
@@ -102,42 +103,47 @@ export class GroupService {
   // remove from old
   // fix old
   async leaveGroup(user: User): Promise<Group | null> {
-    if (!user.groupId) return null;
+    return await this.prisma.$transaction(async tx => {
+      if (!user.groupId) return null;
 
-    //get user's old group
-    const oldGroup = await this.prisma.group.findFirstOrThrow({
-      where: { id: user.groupId },
-      include: { curEvent: true },
+      //get user's old group
+      const oldGroup = await tx.group.findFirstOrThrow({
+        where: { id: user.groupId },
+        include: { curEvent: true },
+      });
+
+      //create new group and make user the host
+      const oldFixed = await this.fixOrDeleteGroup(oldGroup, tx);
+      const newGroup = await this.createFromEvent(oldGroup.curEvent);
+
+      await tx.group.update({
+        where: { id: newGroup.id },
+        data: { members: { connect: { id: user.id } } },
+      });
+
+      await this.fixOrDeleteGroup(newGroup, tx);
+      user.groupId = newGroup.id;
+
+      return oldFixed;
     });
-
-    //create new group and make user the host
-    const oldFixed = await this.fixOrDeleteGroup(oldGroup);
-    const newGroup = await this.createFromEvent(oldGroup.curEvent);
-
-    await this.prisma.group.update({
-      where: { id: newGroup.id },
-      data: { members: { connect: { id: user.id } } },
-    });
-
-    await this.fixOrDeleteGroup(newGroup);
-    user.groupId = newGroup.id;
-
-    return oldFixed;
   }
 
-  async fixOrDeleteGroup(group: Group | { id: string }): Promise<Group | null> {
-    const oldGroup = await this.prisma.group.findFirstOrThrow({
+  async fixOrDeleteGroup(
+    group: Group | { id: string },
+    tx: Prisma.TransactionClient,
+  ): Promise<Group | null> {
+    const oldGroup = await tx.group.findFirstOrThrow({
       where: { id: group.id },
       include: { host: true, members: { take: 1 } },
     });
 
     // If empty, delete
     if (oldGroup.members.length === 0) {
-      await this.prisma.group.delete({ where: { id: group.id } });
+      await tx.group.delete({ where: { id: group.id } });
       return null;
       // If no host, and not empty, replace host
     } else if (!oldGroup.host && oldGroup.members.length > 0) {
-      await this.prisma.group.update({
+      await tx.group.update({
         where: { id: group.id },
         data: { host: { connect: { id: oldGroup.members[0].id } } },
       });
@@ -258,7 +264,7 @@ export class GroupService {
     if (orgIntersect.length === 0)
       return
 
-    const eventIdIntersect = Array.from(new Set(orgIntersect.map((org) => org.allowedEvents.map((event) => event.id)).flat()))
-    return eventIdIntersect
+    const eventIdIntersect = Array.from(new Set(orgIntersect.map((org) => org.allowedEvents.map((event) => event.id)).flat()));
+    return eventIdIntersect;
   }
 }

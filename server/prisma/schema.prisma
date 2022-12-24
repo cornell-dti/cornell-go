@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["interactiveTransactions"]
 }
 
 datasource db {
@@ -99,6 +100,7 @@ model EventReward {
   userId      String?
   event       EventBase @relation(fields: [eventId], references: [id], onDelete: Cascade)
   eventId     String
+  eventIndex  Int
   description String
   redeemInfo  String
   isRedeemed  Boolean

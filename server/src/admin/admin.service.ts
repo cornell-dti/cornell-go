@@ -15,12 +15,14 @@ import {
   EventBase,
   EventReward,
   EventRewardType,
+  Group,
   PrismaClient,
   Organization,
   OrganizationSpecialUsage,
   Group,
 } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { GroupDto } from './update-groups.dto';
 
 const friendlyWords = require('friendly-words');
 
@@ -72,6 +74,10 @@ export class AdminService {
   async getAllOrganizationData() {
     return await this.prisma.organization.findMany();
   }
+  
+  async getAllGroupData() {
+    return await this.prisma.group.findMany();
+  }
 
   async getEventById(eventId: string) {
     return await this.prisma.eventBase.findFirstOrThrow({
@@ -82,6 +88,12 @@ export class AdminService {
   async getChallengeById(challengeId: string) {
     return await this.prisma.challenge.findFirstOrThrow({
       where: { id: challengeId },
+    });
+  }
+
+  async getGroupById(groupId: string) {
+    return await this.prisma.group.findFirstOrThrow({
+      where: { id: groupId },
     });
   }
 
@@ -114,9 +126,10 @@ export class AdminService {
       });
     }
 
+    let tempChallenge = await challenge.linkedEvent();
     await this.prisma.challenge.delete({ where: { id: challengeId } });
 
-    return await challenge.linkedEvent();
+    return tempChallenge;
   }
 
   /** Get rewards of the user */
@@ -136,14 +149,29 @@ export class AdminService {
             id,
           },
         });
+        let tempEvent = await reward.event();
         await this.prisma.eventReward.delete({
           where: { id },
         });
-        return await reward.event();
+        return tempEvent;
       }),
     );
   }
 
+  async removeGroup(removeId: string) {
+    const deletedGroup = await this.prisma.group.findFirstOrThrow({
+      where: { id: removeId },
+      include: { members: true },
+    });
+
+    await Promise.all(
+      deletedGroup.members.map(us => this.groupService.leaveGroup(us)),
+    );
+
+    await this.prisma.group.delete({ where: { id: removeId } });
+  }
+
+  
   async deleteOrganizations(ids: string[]) {
     // for (const id of ids) {
     //   const genedUsers = await this.prisma.user.findMany({
@@ -176,11 +204,25 @@ export class AdminService {
       rewardEntity = await this.prisma.eventReward.create({
         data: {
           eventId: reward.containingEventId,
+          eventIndex: -10,
           description: reward.description.substring(0, 2048),
           redeemInfo: reward.redeemInfo.substring(0, 2048),
           isRedeemed: false,
         },
       });
+      if (rewardEntity.eventIndex === -10) {
+        const maxIndexReward = await this.prisma.eventReward.findFirst({
+          where: { eventId: reward.containingEventId },
+          orderBy: { eventIndex: 'desc' },
+        });
+
+        await this.prisma.eventReward.update({
+          where: { id: rewardEntity.id },
+          data: {
+            eventIndex: Math.max((maxIndexReward?.eventIndex ?? -1) + 1, 0),
+          },
+        });
+      }
     }
 
     return rewardEntity;
@@ -217,7 +259,7 @@ export class AdminService {
     });
 
     let eventIndex = 0;
-    for (const id of event.rewardIds) {
+    for (const id of event.challengeIds) {
       await this.prisma.challenge.update({
         where: { id },
         data: {
@@ -226,6 +268,18 @@ export class AdminService {
       });
 
       ++eventIndex;
+    }
+
+    let eventIndex1 = 0;
+    for (const id of event.rewardIds) {
+      await this.prisma.eventReward.update({
+        where: { id },
+        data: {
+          eventIndex: eventIndex1,
+        },
+      });
+
+      ++eventIndex1;
     }
 
     return eventEntity;
@@ -269,6 +323,37 @@ export class AdminService {
     }
 
     return challengeEntity;
+  }
+
+  async updateGroup(group: GroupDto): Promise<Group> {
+    const groupEntity = await this.prisma.group.update({
+      where: { id: group.id },
+      data: {
+        id: group.id,
+        friendlyId: group.friendlyId,
+        hostId: group.hostId,
+        curEventId: group.curEventId,
+      },
+    });
+
+    return groupEntity;
+  }
+
+  /** Creates a new restricted user */
+  async newRestrictedUser(id: string, word: string, group: RestrictionGroup) {
+    const user = await this.userService.register(
+      id + '@cornell.edu',
+      word,
+      10.019,
+      10.019,
+      AuthType.DEVICE,
+      id,
+    );
+
+    return await this.prisma.user.update({
+      where: { id: user.id },
+      data: { restrictedById: group.id, generatedById: group.id },
+    });
   }
 
   /** Adjusts member count in a group up based on expectedCount */
@@ -404,7 +489,9 @@ export class AdminService {
       challenges.map(ch => this.createChallengeFromUpdateDTO(ch)),
     );
   }
-
+  async updateGroups(groups: GroupDto[]) {
+    return await Promise.all(groups.map(gr => this.updateGroup(gr)));
+  }
   async eventForId(eventId: string) {
     return await this.prisma.eventBase.findUniqueOrThrow({
       where: { id: eventId },
@@ -463,6 +550,15 @@ export class AdminService {
       redeemInfo: rw.redeemInfo,
       containingEventId: rw.eventId,
       claimingUserId: rw.userId ?? '',
+    };
+  }
+
+  async dtoForGroup(gr: Group): Promise<GroupDto> {
+    return {
+      id: gr.id,
+      friendlyId: gr.friendlyId,
+      hostId: gr.hostId!,
+      curEventId: gr.curEventId,
     };
   }
 

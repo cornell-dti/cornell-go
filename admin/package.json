@@ -6,6 +6,7 @@
     "@fortawesome/fontawesome-svg-core": "^6.1.0",
     "@fortawesome/free-solid-svg-icons": "^6.1.0",
     "@fortawesome/react-fontawesome": "^0.1.18",
+    "@nadavshaar/react-grid-table": "^1.1.0",
     "@react-oauth/google": "^0.2.8",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",

@@ -4,6 +4,7 @@ import {
   Group,
   OrganizationSpecialUsage,
   User,
+  PrismaClient,
 } from '@prisma/client';
 import {
   UpdateUserDataAuthTypeDto,
@@ -96,7 +97,9 @@ export class UserService {
 
   async deleteUser(user: User) {
     await this.prisma.user.delete({ where: { id: user.id } });
-    await this.groupsService.fixOrDeleteGroup({ id: user.groupId });
+    await this.prisma.$transaction(async tx => {
+      this.groupsService.fixOrDeleteGroup({ id: user.groupId }, tx);
+    });
   }
 
   async dtoForUserData(user: User): Promise<UpdateUserDataDto> {
