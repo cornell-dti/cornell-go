@@ -19,9 +19,10 @@ class _VisitedPlacesWidgetState extends State<SettingsWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        key: scaffoldKey,
-        floatingActionButton: backBtn(scaffoldKey, context, "Settings"),
-        backgroundColor: Color(0xFFDBE2E7),
-        body: Center(child: Text("TODO")));
+      key: scaffoldKey,
+      floatingActionButton: backBtn(scaffoldKey, context, "Settings"),
+      backgroundColor: Color(0xFFDBE2E7),
+      body: Center(child: Text("TODO")),
+    );
   }
 }
