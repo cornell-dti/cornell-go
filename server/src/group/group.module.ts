@@ -2,6 +2,7 @@ import { forwardRef, Module } from '@nestjs/common';
 import { ClientModule } from 'src/client/client.module';
 import { AuthModule } from '../auth/auth.module';
 import { EventModule } from '../event/event.module';
+import { OrganizationModule } from '../organization/organization.module';
 import { PrismaModule } from '../prisma/prisma.module';
 import { GroupGateway } from './group.gateway';
 import { GroupService } from './group.service';
@@ -12,6 +13,7 @@ import { GroupService } from './group.service';
     ClientModule,
     EventModule,
     PrismaModule,
+    OrganizationModule,
   ],
   providers: [GroupService, GroupGateway],
   exports: [GroupService, GroupGateway],

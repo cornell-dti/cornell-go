@@ -151,8 +151,6 @@ export class UserGateway {
     @CallingUser() user: User,
     @MessageBody() data: RequestGlobalLeaderDataDto,
   ) {
-    if (user.restrictedById) return;
-
     const topPlayers = await this.userService.getTopPlayers(
       data.offset,
       Math.min(data.count, 1024), // Maxed out at 1024 entries

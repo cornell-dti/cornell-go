@@ -2,8 +2,8 @@ import { Socket } from "socket.io-client";
 import { RequestAdminsDto } from "../dto/request-admins.dto";
 import { RequestChallengesDto } from "../dto/request-challenges.dto";
 import { RequestEventsDto } from "../dto/request-events.dto";
+import { RequestOrganizationsDto } from "../dto/request-organizations.dto";
 import { RequestGroupsDto } from "../dto/request-groups.dto";
-import { RequestRestrictionsDto } from "../dto/request-restrictions.dto";
 import { RequestRewardsDto } from "../dto/request-rewards.dto";
 import { UpdateAdminDataDto } from "../dto/update-admin-data.dto";
 import { UpdateAdminsDto } from "../dto/update-admins.dto";
@@ -11,9 +11,9 @@ import { UpdateChallengeDataDto } from "../dto/update-challenge-data.dto";
 import { UpdateChallengesDto } from "../dto/update-challenges.dto";
 import { UpdateEventDataDto } from "../dto/update-event-data.dto";
 import { UpdateEventsDto } from "../dto/update-events.dto";
+import { UpdateOrganizationsDto } from "../dto/update-organizations.dto";
 import { UpdateGroupDataDto } from "../dto/update-group-data.dto";
 import { UpdateGroupsDto } from "../dto/update-groups.dto";
-import { UpdateRestrictionsDto } from "../dto/update-restrictions.dto";
 import { UpdateRewardDataDto } from "../dto/update-reward-data.dto";
 import { UpdateRewardsDto } from "../dto/update-rewards.dto";
 import { ErrorDTO } from "../dto/error.dto";
@@ -37,8 +37,8 @@ export class ServerApi {
   requestAdmins(data: RequestAdminsDto) {
     this.socket.emit("requestAdmins", data);
   }
-  requestRestrictions(data: RequestRestrictionsDto) {
-    this.socket.emit("requestRestrictions", data);
+  requestOrganizations(data: RequestOrganizationsDto) {
+    this.socket.emit("requestOrganizations", data);
   }
   updateEvents(data: UpdateEventsDto) {
     this.socket.emit("updateEvents", data);
@@ -55,8 +55,8 @@ export class ServerApi {
   updateAdmins(data: UpdateAdminsDto) {
     this.socket.emit("updateAdmins", data);
   }
-  updateRestrictions(data: UpdateRestrictionsDto) {
-    this.socket.emit("updateRestrictions", data);
+  updateOrganizations(data: UpdateOrganizationsDto) {
+    this.socket.emit("updateOrganizations", data);
   }
 
   onUpdateAdminData(callback: (data: UpdateAdminDataDto) => void) {
@@ -75,13 +75,13 @@ export class ServerApi {
     this.socket.removeAllListeners("updateRewardData");
     this.socket.on("updateRewardData", (data) => callback(data));
   }
+  onUpdateOrganizations(callback: (data: UpdateOrganizationsDto) => void) {
+    this.socket.removeAllListeners("updateOrganizations");
+    this.socket.on("updateOrganizations", (data) => callback(data));
+  }
   onUpdateGroupData(callback: (data: UpdateGroupDataDto) => void) {
     this.socket.removeAllListeners("updateGroupData");
     this.socket.on("updateGroupData", (data) => callback(data));
-  }
-  onUpdateRestrictions(callback: (data: UpdateRestrictionsDto) => void) {
-    this.socket.removeAllListeners("updateRestrictions");
-    this.socket.on("updateRestrictions", (data) => callback(data));
   }
   onUpdateErrorData(callback: (data: ErrorDTO) => void) {
     this.socket.removeAllListeners("updateErrorData");

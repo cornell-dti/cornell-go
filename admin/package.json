@@ -41,7 +41,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "checkformat": "prettier --check \"src/**/*.ts\""
+    "checkformat": "prettier --check \"src/**/*.ts\"",
+    "format": "prettier --write \"src/**/*.ts\" \"src/**/*.tsx\""
   },
   "eslintConfig": {
     "extends": [

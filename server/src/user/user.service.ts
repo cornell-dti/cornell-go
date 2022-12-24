@@ -1,11 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { AuthType, Group, PrismaClient, User } from '@prisma/client';
+import {
+  AuthType,
+  Group,
+  OrganizationSpecialUsage,
+  User,
+  PrismaClient,
+} from '@prisma/client';
 import {
   UpdateUserDataAuthTypeDto,
   UpdateUserDataDto,
 } from '../client/update-user-data.dto';
 import { EventService } from '../event/event.service';
 import { GroupService } from '../group/group.service';
+import { OrganizationService } from '../organization/organization.service';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -14,6 +21,7 @@ export class UserService {
     private prisma: PrismaService,
     private eventsService: EventService,
     private groupsService: GroupService,
+    private orgService: OrganizationService,
   ) {}
 
   /** Find a user by their authentication token */
@@ -38,13 +46,22 @@ export class UserService {
     authType: AuthType,
     authToken: string,
   ) {
-    const defEv = await this.eventsService.getDefaultEvent();
-    const group: Group = await this.groupsService.createFromEvent(defEv);
+    const defOrg = await this.orgService.getDefaultOrganization(
+      authType == AuthType.GOOGLE
+        ? OrganizationSpecialUsage.CORNELL_LOGIN
+        : OrganizationSpecialUsage.DEVICE_LOGIN,
+    );
+
+    const group: Group = await this.groupsService.createFromEvent(
+      await this.orgService.getDefaultEvent(defOrg),
+    );
+
     const user: User = await this.prisma.user.create({
       data: {
         score: 0,
         group: { connect: { id: group.id } },
         hostOf: { connect: { id: group.id } },
+        memberOf: { connect: { id: defOrg.id } },
         username,
         email,
         authToken,
@@ -110,11 +127,11 @@ export class UserService {
   }
 
   async setUsername(user: User, username: string) {
-    const restriction = await this.prisma.restrictionGroup.findUnique({
-      where: { id: user.restrictedById ?? '' },
+    const organization = await this.prisma.organization.findFirstOrThrow({
+      where: { members: { some: { id: user.id } } },
     });
 
-    if (!restriction?.canEditUsername) {
+    if (!organization?.canEditUsername) {
       return false;
     }
 

@@ -100,10 +100,12 @@ export class GroupGateway {
     @CallingUser() user: User,
     @MessageBody() data: SetCurrentEventDto,
   ) {
-    const members = await this.groupService.setCurrentEvent(user, data.eventId);
+    if (await this.groupService.setCurrentEvent(user, data.eventId)) {
+      const members = await this.groupService.getMembers({ id: user.groupId });
 
-    members?.forEach(async (member: User) => {
-      await this.requestGroupData(member, {});
-    });
+      members.forEach(async (member: User) => {
+        await this.requestGroupData(member, {});
+      });
+    }
   }
 }

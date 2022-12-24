@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { ClientGateway } from 'src/client/client.gateway';
+import { UpdateOrganizationsDto } from '../update-organizations.dto';
 import { updateErrorDTO } from '../update-error.dto';
-import { UpdateRestrictionsDto } from '../update-restrictions.dto';
 import { UpdateAdminDataDto } from './update-admin-data.dto';
 import { UpdateChallengeDataDto } from './update-challenge-data.dto';
 import { UpdateEventDataDto } from './update-event-data.dto';
@@ -38,11 +38,10 @@ export class AdminCallbackService {
   emitUpdateRewardData =
     this.makeCallback<UpdateRewardDataDto>('updateRewardData');
 
+  emitUpdateOrganizationData = this.makeCallback<UpdateOrganizationsDto>(
+    'updateOrganizations',
+  );
   emitUpdateGroupData =
     this.makeCallback<UpdateGroupDataDto>('updateGroupData');
-
-  emitUpdateRestrictionData =
-    this.makeCallback<UpdateRestrictionsDto>('updateRestrictions');
-
   emitUpdateErrorData = this.makeCallback<updateErrorDTO>('updateErrorData');
 }

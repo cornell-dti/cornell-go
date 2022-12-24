@@ -3,17 +3,20 @@ import {
   Challenge,
   EventBase,
   EventRewardType,
-  RestrictionGroup,
+  Group,
+  Organization,
   User,
 } from '@prisma/client';
 import { UpdateEventDataEventDto } from 'src/client/update-event-data.dto';
 import { ClientService } from '../client/client.service';
+import { OrganizationService } from '../organization/organization.service';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class EventService {
   constructor(
     private clientService: ClientService,
+    private orgService: OrganizationService,
     private readonly prisma: PrismaService,
   ) {}
 
@@ -29,17 +32,14 @@ export class EventService {
 
   /** Checks if a user is allowed to see an event */
   async isAllowedEvent(user: User, eventId: string) {
-    if (user.restrictedById) {
-      const restriction = await this.prisma.restrictionGroup.findFirstOrThrow({
-        where: { id: user.restrictedById },
-        include: { allowedEvents: true },
-      });
-      const hasEventRestrictions = restriction.allowedEvents.length > 0;
-      if (hasEventRestrictions) {
-        return restriction.allowedEvents.some(e => e.id === eventId);
-      }
-    }
-    return true;
+    return (
+      (await this.prisma.organization.count({
+        where: {
+          members: { some: { id: user.id } },
+          allowedEvents: { some: { id: eventId } },
+        },
+      })) > 0
+    );
   }
 
   /** Get top players for event */
@@ -64,33 +64,27 @@ export class EventService {
   }
 
   /** Searches events based on certain criteria */
-  async searchEvents(
-    offset: number,
-    count: number,
-    rewardTypes: EventRewardType[] | undefined = undefined,
-    skippable: boolean | undefined = undefined,
-    sortBy: {
-      time?: 'asc' | 'desc';
-      challengeCount?: 'asc' | 'desc';
-    } = {},
-    restriction?: RestrictionGroup,
-  ) {
-    const events = await this.prisma.eventBase.findMany({
-      where: {
-        indexable: !restriction,
-        //rewardType: rewardTypes && { $in: rewardTypes },
-        allowedIn: {
-          some: restriction?.id ? { id: restriction.id } : undefined,
-        },
-      },
-      select: { id: true },
-      skip: offset,
-    });
+  // async searchEvents(
+  //   group: Group,
+  // ) {
+  //   const events = await this.prisma.eventBase.findMany({
+  //     where: {
+  //       indexable: true,
+  //       //rewardType: rewardTypes && { $in: rewardTypes },
+  //       allowedIn: {
+  //         some: organizations
+  //           ? { id: { in: organizations.map(({ id }) => id) } }
+  //           : undefined,
+  //       },
+  //     },
+  //     select: { id: true },
+  //     skip: offset,
+  //   });
 
-    console.log(events, offset);
+  //   console.log(events, offset);
 
-    return events.map(ev => ev.id);
-  }
+  //   return events.map(ev => ev.id);
+  // }
 
   /** Verifies that a challenge is in an event */
   async isChallengeInEvent(challengeId: string, eventId: string) {
@@ -110,7 +104,16 @@ export class EventService {
 
   /** Creates an event tracker with the closest challenge as the current one */
   async createDefaultEventTracker(user: User, lat: number, long: number) {
-    await this.getDefaultEvent();
+    // gets default event of user's first organization
+    // we let users choose which org they want the default event for
+    const defEv = await this.orgService.getDefaultEvent(
+      (
+        await this.prisma.user.findUniqueOrThrow({
+          where: { id: user.id },
+          include: { memberOf: true },
+        })
+      ).memberOf[0],
+    );
 
     lat = +lat;
     long = +long;
@@ -118,7 +121,7 @@ export class EventService {
     const defaultEvent: Challenge[] = await this.prisma.$queryRaw`
       select * from "EventBase" ev 
       inner join "Challenge" chal 
-      on ev.id = chal."linkedEventId" and ev."isDefault" = true
+      on ev.id = chal."linkedEventId" and ev."id" = ${defEv.id}
       order by ((chal."latitude" - ${lat})^2 + (chal."longitude" - ${long})^2) desc
     `;
 
@@ -148,18 +151,6 @@ export class EventService {
     });
 
     return progress;
-  }
-
-  async getDefaultEvent() {
-    try {
-      return await this.prisma.eventBase.findFirstOrThrow({
-        where: {
-          isDefault: true,
-        },
-      });
-    } catch {
-      return await this.makeDefaultEvent();
-    }
   }
 
   async createEventTracker(user: User, event: EventBase) {
@@ -224,7 +215,7 @@ export class EventService {
   async getCurrentEventTrackerForUser(user: User) {
     const evTracker = await this.prisma.eventTracker.findFirst({
       where: {
-        user,
+        id: user.id,
         event: {
           activeGroups: { some: { id: user.groupId } },
         },
@@ -241,35 +232,6 @@ export class EventService {
       return await this.createEventTracker(user, ev);
     }
     return evTracker;
-  }
-
-  async makeDefaultEvent() {
-    return await this.prisma.eventBase.create({
-      data: {
-        name: 'Default Event',
-        description: 'Default Event',
-        requiredMembers: 1,
-        minimumScore: 1,
-        skippingEnabled: true,
-        isDefault: true,
-        rewardType: EventRewardType.PERPETUAL,
-        indexable: false,
-        endTime: new Date('2060'),
-        challenges: {
-          create: {
-            eventIndex: 0,
-            name: 'New challenge',
-            description: 'McGraw Tower',
-            imageUrl:
-              'https://upload.wikimedia.org/wikipedia/commons/5/5f/CentralAvenueCornell2.jpg',
-            latitude: 42.44755580740012,
-            longitude: -76.48504614830019,
-            awardingRadius: 50,
-            closeRadius: 100,
-          },
-        },
-      },
-    });
   }
 
   async updateEventDataDtoForEvent(
@@ -305,16 +267,12 @@ export class EventService {
     };
   }
 
-  async getEventRestrictionForUser(
-    user: User,
-  ): Promise<RestrictionGroup | undefined> {
-    const restriction = await user.restrictedById;
-    if (!restriction) return undefined;
-
-    const restrictions = await this.prisma.restrictionGroup.findMany({
-      where: { id: restriction, allowedEvents: { none: {} } },
-    });
-
-    return restrictions.length === 0 ? undefined : restrictions[0];
+  async getEventOrganizationsForUser(user: User) {
+    return (
+      await this.prisma.user.findUniqueOrThrow({
+        where: { id: user.id },
+        include: { memberOf: { include: { allowedEvents: true } } },
+      })
+    ).memberOf;
   }
 }
