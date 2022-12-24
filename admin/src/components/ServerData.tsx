@@ -15,6 +15,7 @@ import { RewardDto } from "../dto/update-rewards.dto";
 import { ServerApi } from "./ServerApi";
 import { ServerConnectionContext } from "./ServerConnection";
 
+/**  object to store user data fetched from server */
 const defaultData = {
   admins: new Map<string, UpdateAdminDataAdminDto>(),
   events: new Map<string, EventDto>(),
@@ -107,6 +108,7 @@ export function ServerDataProvider(props: { children: ReactNode }) {
     sock.requestGroups({});
   }, [sock]);
 
+  /** Update defaultData object when ServerApi websocket receives a response */
   useEffect(() => {
     sock.onUpdateAdminData((data) => {
       data.admins.forEach((adminUpdate) => {
