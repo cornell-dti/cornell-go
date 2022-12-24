@@ -6,6 +6,7 @@ import {
   useMemo,
   useState,
 } from "react";
+import { ErrorDTO } from "../dto/error.dto";
 import { RestrictionDto } from "../dto/request-restrictions.dto";
 import { UpdateAdminDataAdminDto } from "../dto/update-admin-data.dto";
 import { ChallengeDto } from "../dto/update-challenges.dto";
@@ -24,6 +25,7 @@ const defaultData = {
   groups: new Map<string, GroupDto>(),
   restrictions: new Map<string, RestrictionDto>(),
   selectedEvent: "" as string,
+  errors: new Map<string, ErrorDTO>(),
   selectEvent(id: string) {},
   setAdminStatus(id: string, granted: boolean) {},
   updateReward(reward: RewardDto) {},
@@ -32,6 +34,7 @@ const defaultData = {
   deleteChallenge(id: string) {},
   updateEvent(event: EventDto) {},
   deleteEvent(id: string) {},
+  deleteError(id: string) {},
   updateGroup(event: GroupDto) {},
   deleteGroup(id: string) {},
   updateRestriction(restriction: RestrictionDto) {},
@@ -81,6 +84,10 @@ export function ServerDataProvider(props: { children: ReactNode }) {
       },
       deleteEvent(id: string) {
         sock.updateEvents({ events: [], deletedIds: [id] });
+      },
+      deleteError(id: string) {
+        serverData.errors.delete(id);
+        setTimeout(() => setServerData({ ...serverData }), 0);
       },
       updateGroup(group: GroupDto) {
         sock.updateGroups({ groups: [group], deletedIds: [] });
@@ -141,6 +148,10 @@ export function ServerDataProvider(props: { children: ReactNode }) {
     sock.onUpdateRestrictions((data) => {
       data.deletedIds.forEach((id) => serverData.restrictions.delete(id));
       data.restrictions.forEach((r) => serverData.restrictions.set(r.id, r));
+      setTimeout(() => setServerData({ ...serverData }), 0);
+    });
+    sock.onUpdateErrorData((data) => {
+      serverData.errors.set("Error", data);
       setTimeout(() => setServerData({ ...serverData }), 0);
     });
   }, [sock, serverData, setServerData]);

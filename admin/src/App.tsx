@@ -4,6 +4,7 @@ import { Admins } from "./components/Admins";
 import { Challenges } from "./components/Challenges";
 import { Events } from "./components/Events";
 import { Restrictions } from "./components/Restrictions";
+import { ErrorAlert } from "./components/ErrorAlert";
 
 import {
   AppBar,
@@ -30,6 +31,7 @@ import styled from "styled-components";
 import { useContext } from "react";
 import { ServerConnectionContext } from "./components/ServerConnection";
 import { ServerDataContext } from "./components/ServerData";
+import { AlertModal } from "./components/AlertModal";
 import { Groups } from "./components/Groups";
 
 const routes = [
@@ -142,6 +144,7 @@ export default function App() {
           ))}
         </Routes>
       </Container>
+      <ErrorAlert />
     </AppLayout>
   );
 }

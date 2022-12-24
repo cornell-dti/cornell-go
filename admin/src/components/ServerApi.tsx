@@ -16,6 +16,7 @@ import { UpdateGroupsDto } from "../dto/update-groups.dto";
 import { UpdateRestrictionsDto } from "../dto/update-restrictions.dto";
 import { UpdateRewardDataDto } from "../dto/update-reward-data.dto";
 import { UpdateRewardsDto } from "../dto/update-rewards.dto";
+import { ErrorDTO } from "../dto/error.dto";
 
 //** Web Sockets callback functions are in ./ServerData.tsx*/
 export class ServerApi {
@@ -39,7 +40,6 @@ export class ServerApi {
   requestRestrictions(data: RequestRestrictionsDto) {
     this.socket.emit("requestRestrictions", data);
   }
-
   updateEvents(data: UpdateEventsDto) {
     this.socket.emit("updateEvents", data);
   }
@@ -82,5 +82,9 @@ export class ServerApi {
   onUpdateRestrictions(callback: (data: UpdateRestrictionsDto) => void) {
     this.socket.removeAllListeners("updateRestrictions");
     this.socket.on("updateRestrictions", (data) => callback(data));
+  }
+  onUpdateErrorData(callback: (data: ErrorDTO) => void) {
+    this.socket.removeAllListeners("updateErrorData");
+    this.socket.on("updateErrorData", (data) => callback(data));
   }
 }
