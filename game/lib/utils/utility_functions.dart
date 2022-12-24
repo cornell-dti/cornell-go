@@ -89,15 +89,16 @@ enum Status { error, success, info }
 
 void displayToast(message, Status status) {
   Fluttertoast.showToast(
-      msg: message,
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.BOTTOM,
-      timeInSecForIosWeb: 1,
-      backgroundColor: status == Status.error
-          ? (Colors.red)
-          : (status == Status.success ? (Colors.green) : Colors.yellow),
-      textColor: Colors.white,
-      fontSize: 16.0);
+    msg: message,
+    toastLength: Toast.LENGTH_SHORT,
+    gravity: ToastGravity.BOTTOM,
+    timeInSecForIosWeb: 1,
+    backgroundColor: status == Status.error
+        ? (Colors.red)
+        : (status == Status.success ? (Colors.green) : Colors.yellow),
+    textColor: Colors.white,
+    fontSize: 16.0,
+  );
 }
 
 Color RGBComplement(Color col) {
