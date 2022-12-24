@@ -18,7 +18,7 @@ export class EventService {
     private clientService: ClientService,
     private orgService: OrganizationService,
     private readonly prisma: PrismaService,
-  ) { }
+  ) {}
 
   /** Get event by id */
   async getEventById(id: string) {
@@ -267,13 +267,11 @@ export class EventService {
     };
   }
 
-  async getEventOrganizationsForUser(
-    user: User,
-  ): Promise<Organization[] | undefined> {
+  async getEventOrganizationsForUser(user: User) {
     return (
       await this.prisma.user.findUniqueOrThrow({
         where: { id: user.id },
-        include: { memberOf: true },
+        include: { memberOf: { include: { allowedEvents: true } } },
       })
     ).memberOf;
   }

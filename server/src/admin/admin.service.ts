@@ -15,7 +15,6 @@ import {
   EventBase,
   EventReward,
   EventRewardType,
-  Group,
   PrismaClient,
   Organization,
   OrganizationSpecialUsage,
@@ -34,7 +33,7 @@ export class AdminService {
     private orgService: OrganizationService,
     private eventService: EventService,
     private prisma: PrismaService,
-  ) { }
+  ) {}
 
   async requestAdminAccess(adminId: string) {
     console.log(`User ${adminId} requested admin access!`);
@@ -74,7 +73,7 @@ export class AdminService {
   async getAllOrganizationData() {
     return await this.prisma.organization.findMany();
   }
-  
+
   async getAllGroupData() {
     return await this.prisma.group.findMany();
   }
@@ -171,7 +170,6 @@ export class AdminService {
     await this.prisma.group.delete({ where: { id: removeId } });
   }
 
-  
   async deleteOrganizations(ids: string[]) {
     // for (const id of ids) {
     //   const genedUsers = await this.prisma.user.findMany({
@@ -339,82 +337,41 @@ export class AdminService {
     return groupEntity;
   }
 
-  /** Creates a new restricted user */
-  async newRestrictedUser(id: string, word: string, group: RestrictionGroup) {
-    const user = await this.userService.register(
-      id + '@cornell.edu',
-      word,
-      10.019,
-      10.019,
-      AuthType.DEVICE,
-      id,
-    );
-
-    return await this.prisma.user.update({
-      where: { id: user.id },
-      data: { restrictedById: group.id, generatedById: group.id },
-    });
-  }
-
-  /** Adjusts member count in a group up based on expectedCount */
-  // async generateMembers(group: Organization, expectedCount: number) {
-  //   const genCount = await this.prisma.user.count({
-  //     where: { generatedById: group.id },
-  //   });
-
-  //   if (genCount < expectedCount) {
-  //     const seed = group.id[0].charCodeAt(0);
-  //     for (let i = genCount; i < expectedCount; ++i) {
-  //       const index = (10 * i + seed) % friendlyWords.objects.length;
-  //       const word = friendlyWords.objects[index];
-  //       const id = group.name + '_' + word + index;
-  //       const user = await this.newUser(id, word, group);
-
-  //       await this.prisma.organization.update({
-  //         where: { id: group.id },
-  //         data: {
-  //           members: { connect: { id: user.id } },
-  //         },
-  //       });
-  //     }
-  //   }
-  // }
-
-  /** 
-   * Take in a group and check if the group's current event is allowed for 
+  /**
+   * Take in a group and check if the group's current event is allowed for
    * everyone. if not, assign default allowed event to group
    */
   async ensureValidGroupEvent(group: Group) {
-    const allowedEvents = await this.groupService.getAllowedEventIds(group)
+    const allowedEvents = await this.groupService.getAllowedEventIds(group);
 
     if (!allowedEvents?.includes(group.curEventId)) {
-      const hostOrgs = (await this.prisma.organization.findMany({
-        where: { members: { some: { id: group.hostId! } } },
-        select: { id: true }
-      })).map((org) => org.id)
+      const hostOrgs = (
+        await this.prisma.organization.findMany({
+          where: { members: { some: { id: group.hostId! } } },
+          select: { id: true },
+        })
+      ).map(org => org.id);
 
       // every member of the group must have this default org (?)
       const defaultOrg = await this.prisma.organization.findFirstOrThrow({
-        where: { isDefault: true, id: { in: hostOrgs } }
-      })
+        where: { isDefault: true, id: { in: hostOrgs } },
+      });
 
       let newEvent = await this.orgService.getDefaultEvent(defaultOrg);
 
       const groupMembers = await this.groupService.getMembers(group);
 
       await Promise.all(
-        groupMembers.map(async (member) => {
+        groupMembers.map(async member => {
           await this.eventService.createEventTracker(member, newEvent);
         }),
       );
 
       await this.prisma.group.update({
         where: { id: group.id },
-        data: { curEventId: newEvent.id }
-      })
-
+        data: { curEventId: newEvent.id },
+      });
     }
-
   }
 
   /** Update/insert a organization group */

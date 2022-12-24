@@ -23,4 +23,4 @@ import { EventModule } from 'src/event/event.module';
   providers: [AdminGateway, AdminService, AdminCallbackService],
   controllers: [],
 })
-export class AdminModule { }
+export class AdminModule {}

@@ -1,5 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { EventBase, Group, User, OrganizationSpecialUsage, PrismaClient, Prisma } from '@prisma/client';
+import {
+  EventBase,
+  Group,
+  User,
+  OrganizationSpecialUsage,
+  PrismaClient,
+  Prisma,
+} from '@prisma/client';
 import { EventService } from 'src/event/event.service';
 import { OrganizationService } from '../organization/organization.service';
 import { UpdateGroupDataMemberDto } from '../client/update-group-data.dto';
@@ -11,7 +18,7 @@ export class GroupService {
     private eventService: EventService,
     private orgService: OrganizationService,
     private prisma: PrismaService,
-  ) { }
+  ) {}
 
   genFriendlyId() {
     const codes = [];
@@ -73,27 +80,32 @@ export class GroupService {
     return await this.prisma.$transaction(async tx => {
       const oldGroup = await this.getGroupForUser(user);
 
-    const newGroup = await this.prisma.group.findFirstOrThrow({
-      where: { friendlyId: joinId.toUpperCase() }
-    });
-
-    const currentEvent = await this.prisma.eventBase.findFirstOrThrow({
-      where: { id: newGroup.curEventId }
-    });
-
-    const isAllowed = (await this.prisma.organization.count({
-      where: { members: { some: { id: user.id } }, allowedEvents: { some: { id: newGroup.curEventId } } }
-    })) > 0;
-
-    if (isAllowed) {
-      await this.prisma.group.update({
+      const newGroup = await this.prisma.group.findFirstOrThrow({
         where: { friendlyId: joinId.toUpperCase() },
-        data: { members: { connect: { id: user.id } } },
       });
-      user.groupId = newGroup.id;
-      return await this.fixOrDeleteGroup(oldGroup);
-    }
-    return oldGroup;
+
+      const currentEvent = await this.prisma.eventBase.findFirstOrThrow({
+        where: { id: newGroup.curEventId },
+      });
+
+      const isAllowed =
+        (await this.prisma.organization.count({
+          where: {
+            members: { some: { id: user.id } },
+            allowedEvents: { some: { id: newGroup.curEventId } },
+          },
+        })) > 0;
+
+      if (isAllowed) {
+        await this.prisma.group.update({
+          where: { friendlyId: joinId.toUpperCase() },
+          data: { members: { connect: { id: user.id } } },
+        });
+        user.groupId = newGroup.id;
+        return await this.fixOrDeleteGroup(oldGroup, tx);
+      }
+      return oldGroup;
+    });
   }
 
   /** Moves the user out of their current group into a new group.
@@ -182,12 +194,12 @@ export class GroupService {
   /**
    * Handles switching events after current event has finished, or if the host
    * selects a new event while current is still active.
-   * If host selects a new event, and if eventId is in the allowed 
+   * If host selects a new event, and if eventId is in the allowed
    * events of this group, then updates the group's current event.
-   * 
+   *
    * @param actor User that requested the event change, must be a group host
    * @param eventId Id of the event to switch to
-   * @returns False if eventId is invalid, otherwise true 
+   * @returns False if eventId is invalid, otherwise true
    */
   async setCurrentEvent(actor: User, eventId: string) {
     const group = await this.prisma.group.findUniqueOrThrow({
@@ -195,30 +207,31 @@ export class GroupService {
       include: { curEvent: { select: { endTime: true } }, members: true },
     });
 
-    const actorOrgs = (await this.prisma.organization.findMany({
-      where: { members: { some: { id: actor.id } } },
-      select: { id: true }
-    })).map((org) => org.id)
+    const actorOrgs = (
+      await this.prisma.organization.findMany({
+        where: { members: { some: { id: actor.id } } },
+        select: { id: true },
+      })
+    ).map(org => org.id);
 
     const defaultOrg = await this.prisma.organization.findFirstOrThrow({
-      where: { isDefault: true, id: { in: actorOrgs } }
-    })
+      where: { isDefault: true, id: { in: actorOrgs } },
+    });
 
     let newEvent = await this.orgService.getDefaultEvent(defaultOrg);
 
     const stillActive = group.curEvent.endTime.getTime() - Date.now() > 0;
 
     if (stillActive) {
-
-      // If actor is setting a new event and actor is not host of the group, 
+      // If actor is setting a new event and actor is not host of the group,
       // then this is an invalid set event.
-      // If we are only switching an unactive event to a default event, 
+      // If we are only switching an unactive event to a default event,
       // actor and eventId do not matter.
       if (group.hostId !== actor.id || eventId === group.curEventId) {
         return;
       }
       // Uses getAllowedEvents helper method
-      const eventIdIntersect = await this.getAllowedEventIds(group)
+      const eventIdIntersect = await this.getAllowedEventIds(group);
 
       if (eventIdIntersect === null || !eventIdIntersect?.includes(eventId))
         return false;
@@ -238,10 +251,10 @@ export class GroupService {
 
     await this.prisma.group.update({
       where: { id: group.id },
-      data: { curEventId: newEvent.id }
-    })
+      data: { curEventId: newEvent.id },
+    });
 
-    return true
+    return true;
   }
 
   /**  Finds all allowed events for group based on user's orgs */
@@ -251,20 +264,27 @@ export class GroupService {
       select: { memberOf: { include: { allowedEvents: true } } },
     });
 
-    const uniqueOrgs = Array.from(new Set(users.map((user) => user.memberOf).flat()))
+    const uniqueOrgs = Array.from(
+      new Set(users.map(user => user.memberOf).flat()),
+    );
 
     const orgIntersect = users.reduce((acc, user) => {
       if (acc.length === 0) {
         return user.memberOf;
       } else {
-        return acc.filter((organization) => user.memberOf.includes(organization));
+        return acc.filter(organization => user.memberOf.includes(organization));
       }
     }, uniqueOrgs);
 
-    if (orgIntersect.length === 0)
-      return
+    if (orgIntersect.length === 0) return;
 
-    const eventIdIntersect = Array.from(new Set(orgIntersect.map((org) => org.allowedEvents.map((event) => event.id)).flat()));
+    const eventIdIntersect = Array.from(
+      new Set(
+        orgIntersect
+          .map(org => org.allowedEvents.map(event => event.id))
+          .flat(),
+      ),
+    );
     return eventIdIntersect;
   }
 }

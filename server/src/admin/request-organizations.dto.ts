@@ -5,9 +5,9 @@ export interface OrganizationDto {
   canEditUsername: boolean;
   members: string[];
   allowedEvents: string[];
-  defaultEvent: string
+  defaultEvent: string;
   // generatedUserCount: number;
   // generatedUserAuthIds: string[];
 }
 
-export interface RequestOrganizationsDto { }
+export interface RequestOrganizationsDto {}

@@ -9,7 +9,7 @@ import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class OrganizationService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
   private async makeDefaultEvent() {
     return await this.prisma.eventBase.create({
@@ -65,12 +65,13 @@ export class OrganizationService {
           canEditUsername: true, // can we allow anyone to edit username?
           specialUsage: usage,
           allowedEvents: {
-            connect: [{
-              id: defaultEvent.id,
-            }],
+            connect: [
+              {
+                id: defaultEvent.id,
+              },
+            ],
           },
           defaultEventId: defaultEvent.id,
-
         },
         include: { defaultEvent: true },
       });
@@ -97,5 +98,4 @@ export class OrganizationService {
       },
     });
   }
-
 }

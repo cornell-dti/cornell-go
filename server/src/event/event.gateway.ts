@@ -50,25 +50,14 @@ export class EventGateway {
     @CallingUser() user: User,
     @MessageBody() data: RequestAllEventDataDto,
   ) {
-    const results = await this.eventService.searchEvents(
-      data.offset,
-      Math.min(data.count, 1024), // Maxed out at 1024 events
-      data.rewardTypes.map(t =>
-        t === 'limited_time_event'
-          ? EventRewardType.LIMITED_TIME
-          : EventRewardType.PERPETUAL,
-      ),
-      data.skippableOnly ? true : undefined,
-      {
-        time: data.closestToEnding ? 'asc' : undefined,
-        challengeCount: data.shortestFirst ? 'asc' : undefined,
-      },
-      await this.eventService.getEventOrganizationsForUser(user),
-    );
+    const orgs = await this.eventService.getEventOrganizationsForUser(user);
 
     await this.requestEventData(user, {
       isSearch: true,
-      eventIds: results,
+      eventIds: orgs.reduce<string[]>(
+        (acc, org) => org.allowedEvents.map(ev => ev.id).concat(acc),
+        [],
+      ),
     });
 
     return false;
