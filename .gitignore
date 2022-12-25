@@ -37,3 +37,4 @@ postgres-data
 pubspec.lock
 package-lock.json
 /.vs/CornellGo/v16
+docs

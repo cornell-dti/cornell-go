@@ -61,6 +61,15 @@ cd game
 flutter run --dart-define="API_URL=https://example.com"
 ```
 
+### Generate docs
+
+```
+cd server
+npx typedoc
+
+The docs are now viewable at server/docs/index.html
+```
+
 ## Contributors
 
 ### FA22
