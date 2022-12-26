@@ -185,7 +185,9 @@ export class OrganizationService {
         events: {
           connect: organization.events.map(id => ({ id })),
         },
-        defaultEventId: organization.defaultEventId,
+        defaultEvent: {
+          connect: { id: (await this.makeDefaultEvent()).id },
+        },
         specialUsage: 'NONE',
       },
       update: {

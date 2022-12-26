@@ -1,5 +1,4 @@
 import { useContext, useState } from "react";
-import { OrganizationDto } from "../dto/request-organizations.dto";
 import { DeleteModal } from "./DeleteModal";
 import {
   EntryModal,
@@ -21,6 +20,7 @@ import { SearchBar } from "./SearchBar";
 import { ServerDataContext } from "./ServerData";
 
 import { compareTwoStrings } from "string-similarity";
+import { OrganizationDto } from "../dto/organization.dto";
 
 function GroupCard(props: {
   organization: OrganizationDto;
@@ -28,26 +28,36 @@ function GroupCard(props: {
   onEdit: () => void;
   onDelete: () => void;
   onClear: () => void;
+  onSetDefault: () => void;
 }) {
   const affirmOfBool = (val: boolean) => (val ? "Yes" : "No");
+  const serverData = useContext(ServerDataContext);
 
   return (
     <>
       <ListCardBox>
-        <ListCardTitle>{props.organization.displayName}</ListCardTitle>
+        <ListCardTitle>{props.organization.name}</ListCardTitle>
         <ListCardBody>
           Id: <b>{props.organization.id}</b>
           <br />
-          Events: <b>{props.organization.allowedEvents.join(", ")}</b> <br />
+          Default Event:{" "}
+          <b>
+            {serverData.events.get(props.organization.defaultEventId)?.name}
+          </b>{" "}
+          <br />
+          Events:{" "}
+          <b>
+            {props.organization.events
+              .map((ev) => serverData.events.get(ev)?.name)
+              .join(", ")}
+          </b>{" "}
+          <br />
           User Count: <b>{props.organization.members.length}</b> <br />
-          {/* Generated Users:{" "}
-          <b>{props.organization.generatedUserAuthIds.join(", ")}</b> <br /> */}
-          Username Editing Enabled:{" "}
-          <b>{affirmOfBool(props.organization.canEditUsername)}</b> <br />
         </ListCardBody>
         <ListCardButtons>
           <HButton onClick={props.onAdd}>ADD EVENT</HButton>
           <HButton onClick={props.onClear}>CLEAR EVENTS</HButton>
+          <HButton onClick={props.onAdd}>SET DEFAULT EVENT</HButton>
           <HButton onClick={props.onDelete} float="right">
             DELETE
           </HButton>
@@ -61,16 +71,7 @@ function GroupCard(props: {
 }
 
 function makeForm() {
-  return [
-    { name: "Name", characterLimit: 256, value: "" },
-    { name: "Can Edit Username", options: ["No", "Yes"], value: 0 },
-    {
-      name: "Users to Generate",
-      min: 0,
-      max: 99,
-      value: 0,
-    },
-  ] as EntryForm[];
+  return [{ name: "Name", characterLimit: 256, value: "" }] as EntryForm[];
 }
 
 function fromForm(
@@ -81,38 +82,23 @@ function fromForm(
   return {
     ...oldDto,
     id,
-    displayName: (form[0] as FreeEntryForm).value,
-    canEditUsername: (form[1] as OptionEntryForm).value === 1,
-    // generatedUserCount: (form[2] as NumberEntryForm).value,
+    name: (form[0] as FreeEntryForm).value,
   };
 }
 
 function toForm(group: OrganizationDto) {
   return [
-    { name: "Display Name", characterLimit: 256, value: group.displayName },
-    {
-      name: "Can Edit Username",
-      options: ["No", "Yes"],
-      value: group.canEditUsername ? 1 : 0,
-    },
-    // {
-    //   name: "Users to Generate",
-    //   min: 0,
-    //   max: 99,
-    //   value: group.generatedUserCount,
-    // },
+    { name: "Name", characterLimit: 256, value: group.name },
   ] as EntryForm[];
 }
 
 const emptyDto: OrganizationDto = {
   id: "",
-  displayName: "",
-  isDefault: false,
-  canEditUsername: false,
   members: [],
-  allowedEvents: [],
-  // generatedUserAuthIds: [],
-  // generatedUserCount: 0,
+  name: "",
+  accessCode: "",
+  events: [],
+  defaultEventId: "",
 };
 
 export function Organizations() {
@@ -128,7 +114,7 @@ export function Organizations() {
   return (
     <>
       <EntryModal
-        title="Create Group"
+        title="Create Organization"
         isOpen={isCreateModalOpen}
         entryButtonText="CREATE"
         onEntry={() => {
@@ -154,7 +140,7 @@ export function Organizations() {
         form={form}
       />
       <DeleteModal
-        objectName={serverData.organizations.get(currentId)?.displayName ?? ""}
+        objectName={serverData.organizations.get(currentId)?.name ?? ""}
         isOpen={isDeleteModalOpen}
         onClose={() => setDeleteModalOpen(false)}
         onDelete={() => {
@@ -172,8 +158,7 @@ export function Organizations() {
       {Array.from(serverData.organizations.values())
         .sort(
           (a, b) =>
-            compareTwoStrings(b.displayName, query) -
-            compareTwoStrings(a.displayName, query)
+            compareTwoStrings(b.name, query) - compareTwoStrings(a.name, query)
         )
         .map((r) => (
           <GroupCard
@@ -181,7 +166,7 @@ export function Organizations() {
             organization={r}
             onAdd={() => {
               setCurrentId(r.id);
-              r.allowedEvents.push(serverData.selectedEvent);
+              r.events.push(serverData.selectedEvent);
               serverData.updateOrganization(r);
             }}
             onDelete={() => {
@@ -196,8 +181,15 @@ export function Organizations() {
             }}
             onClear={() => {
               setCurrentId(r.id);
-              r.allowedEvents = [];
+              r.events = [];
               serverData.updateOrganization(r);
+            }}
+            onSetDefault={() => {
+              setCurrentId(r.id);
+              if (serverData.selectedEvent !== "") {
+                r.defaultEventId = serverData.selectedEvent;
+                serverData.updateOrganization(r);
+              }
             }}
           />
         ))}

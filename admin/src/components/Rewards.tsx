@@ -1,6 +1,6 @@
 import { useContext, useState } from "react";
 import { compareTwoStrings } from "string-similarity";
-import { RewardDto } from "../dto/update-rewards.dto";
+import { RewardDto } from "../dto/reward.dto";
 import { moveDown, moveUp } from "../ordering";
 import { AlertModal } from "./AlertModal";
 import { DeleteModal } from "./DeleteModal";
@@ -39,7 +39,7 @@ function RewardCard(props: {
       <ListCardBody>
         Id: <b>{props.reward.id}</b>
         <br />
-        Claiming User Id: <b>{props.reward.claimingUserId}</b>
+        Claiming User Id: <b>{props.reward.userId}</b>
         <br />
       </ListCardBody>
       <ListCardButtons>
@@ -68,8 +68,8 @@ function fromForm(form: EntryForm[], eventId: string, id: string): RewardDto {
     id,
     description: (form[0] as FreeEntryForm).value,
     redeemInfo: (form[1] as FreeEntryForm).value,
-    containingEventId: eventId,
-    claimingUserId: "",
+    eventId,
+    userId: "",
   };
 }
 
@@ -156,8 +156,8 @@ export function Rewards() {
             ? 0
             : compareTwoStrings(b.description, query) -
               compareTwoStrings(a.description, query) +
-              compareTwoStrings(b.redeemInfo, query) -
-              compareTwoStrings(a.redeemInfo, query)
+              compareTwoStrings(b.redeemInfo!, query) -
+              compareTwoStrings(a.redeemInfo!, query)
         )
         .map((rw) => (
           <RewardCard

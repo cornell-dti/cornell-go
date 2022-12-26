@@ -1,7 +1,7 @@
 import { useContext, useState } from "react";
 import { compareTwoStrings } from "string-similarity";
 import styled, { css } from "styled-components";
-import { ChallengeDto } from "../dto/update-challenges.dto";
+import { ChallengeDto } from "../dto/challenge.dto";
 import { moveDown, moveUp } from "../ordering";
 import { AlertModal } from "./AlertModal";
 import { DeleteModal } from "./DeleteModal";
@@ -49,8 +49,8 @@ function ChallengeCard(props: {
       <ChallengeImage url={props.challenge.imageUrl} />
       <ListCardBody>
         Id: <b>{props.challenge.id}</b> <br />
-        Latitude: <b>{props.challenge.latitude}</b>, Longitude:{" "}
-        <b>{props.challenge.longitude}</b> <br />
+        Latitude: <b>{props.challenge.lat}</b>, Longitude:{" "}
+        <b>{props.challenge.long}</b> <br />
         Awarding Distance: <b>{props.challenge.awardingRadius} meters</b> <br />
         Close Distance: <b>{props.challenge.closeRadius} meters</b>
       </ListCardBody>
@@ -83,8 +83,8 @@ function toForm(challenge: ChallengeDto) {
   return [
     {
       name: "Location",
-      latitude: challenge.latitude,
-      longitude: challenge.longitude,
+      latitude: challenge.lat,
+      longitude: challenge.long,
     },
     { name: "Name", characterLimit: 256, value: challenge.name },
     { name: "Description", characterLimit: 2048, value: challenge.description },
@@ -114,8 +114,8 @@ function fromForm(
     name: (form[1] as FreeEntryForm).value,
     description: (form[2] as FreeEntryForm).value,
     imageUrl: (form[3] as FreeEntryForm).value,
-    latitude: (form[0] as MapEntryForm).latitude,
-    longitude: (form[0] as MapEntryForm).longitude,
+    lat: (form[0] as MapEntryForm).latitude,
+    long: (form[0] as MapEntryForm).longitude,
     awardingRadius: (form[4] as NumberEntryForm).value,
     closeRadius: (form[5] as NumberEntryForm).value,
     containingEventId: eventId,

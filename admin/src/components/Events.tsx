@@ -1,5 +1,4 @@
-import { useContext, useState } from "react";
-import { EventDto } from "../dto/update-events.dto";
+import { useContext, useMemo, useState } from "react";
 import { DeleteModal } from "./DeleteModal";
 import {
   EntryModal,
@@ -21,6 +20,8 @@ import { SearchBar } from "./SearchBar";
 import { ServerDataContext } from "./ServerData";
 
 import { compareTwoStrings } from "string-similarity";
+import { EventDto } from "../dto/event.dto";
+import { AlertModal } from "./AlertModal";
 
 function EventCard(props: {
   event: EventDto;
@@ -34,7 +35,7 @@ function EventCard(props: {
       : props.event.requiredMembers;
 
   const rewardingMethod =
-    props.event.rewardType === "limited_time_event" ? "Limited" : "Unlimited";
+    props.event.rewardType === "limited_time" ? "Limited" : "Unlimited";
 
   const affirmOfBool = (val: boolean) => (val ? "Yes" : "No");
 
@@ -46,17 +47,16 @@ function EventCard(props: {
         <ListCardBody>
           Id: <b>{props.event.id}</b>
           <br />
-          Available Until: <b>{new Date(props.event.time).toString()}</b> <br />
+          Available Until: <b>
+            {new Date(props.event.endTime).toString()}
+          </b>{" "}
+          <br />
           Required Players: <b>{requiredText}</b> <br />
           Rewarding Method: <b>{rewardingMethod}</b> <br />
           Minimum Rewarding Score: <b>{props.event.minimumScore}</b> <br />
           Challenge Count: <b>{props.event.challengeIds.length}</b> <br />
           Reward Count: <b>{props.event.rewardIds.length}</b> <br />
-          Skipping Enabled: <b>
-            {affirmOfBool(props.event.skippingEnabled)}
-          </b>{" "}
           <br />
-          Default: <b>{affirmOfBool(props.event.isDefault)}</b> <br />
           Publicly Visible: <b>{affirmOfBool(props.event.indexable)}</b>
         </ListCardBody>
         <ListCardButtons>
@@ -95,18 +95,15 @@ function fromForm(form: EntryForm[], id: string): EventDto {
   return {
     id,
     requiredMembers: (form[2] as NumberEntryForm).value,
-    skippingEnabled: (form[3] as OptionEntryForm).value === 1,
-    isDefault: (form[4] as OptionEntryForm).value === 1,
     rewardType:
-      (form[5] as OptionEntryForm).value === 0
-        ? "perpetual"
-        : "limited_time_event",
+      (form[5] as OptionEntryForm).value === 0 ? "perpetual" : "limited_time",
     name: (form[0] as FreeEntryForm).value,
     description: (form[1] as FreeEntryForm).value,
     indexable: (form[7] as OptionEntryForm).value === 1,
-    time: (form[8] as DateEntryForm).date.toUTCString(),
+    endTime: (form[8] as DateEntryForm).date.toUTCString(),
     rewardIds: [],
     challengeIds: [],
+    defaultChallengeId: "",
     minimumScore: (form[6] as NumberEntryForm).value,
   };
 }
@@ -121,12 +118,6 @@ function toForm(event: EventDto) {
       min: -1,
       max: 99,
     },
-    {
-      name: "Skipping",
-      options: ["Disabled", "Enabled"],
-      value: event.skippingEnabled ? 1 : 0,
-    },
-    { name: "Default", options: ["No", "Yes"], value: event.isDefault ? 1 : 0 },
     {
       name: "Reward Type",
       options: ["Unlimited", "Limited"],
@@ -143,7 +134,7 @@ function toForm(event: EventDto) {
       options: ["No", "Yes"],
       value: event.indexable ? 1 : 0,
     },
-    { name: "Available Until", date: new Date(event.time) },
+    { name: "Available Until", date: new Date(event.endTime) },
   ] as EntryForm[];
 }
 
@@ -152,18 +143,28 @@ export function Events() {
   const [isCreateModalOpen, setCreateModalOpen] = useState(false);
   const [isEditModalOpen, setEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [selectModalOpen, setSelectModalOpen] = useState(false);
   const [form, setForm] = useState(() => makeForm());
   const [currentId, setCurrentId] = useState("");
   const [query, setQuery] = useState("");
+  const selectedOrg = serverData.organizations.get(serverData.selectedOrg);
 
   return (
     <>
+      <AlertModal
+        description="To create an event, select an organization."
+        isOpen={selectModalOpen}
+        onClose={() => setSelectModalOpen(false)}
+      />
       <EntryModal
         title="Create Event"
         isOpen={isCreateModalOpen}
         entryButtonText="CREATE"
         onEntry={() => {
-          serverData.updateEvent(fromForm(form, ""));
+          serverData.updateEvent({
+            ...fromForm(form, ""),
+            initialOrganizationId: serverData.selectedOrg,
+          });
           setCreateModalOpen(false);
         }}
         onCancel={() => {
@@ -200,6 +201,10 @@ export function Events() {
       />
       <SearchBar
         onCreate={() => {
+          if (!selectedOrg) {
+            setSelectModalOpen(true);
+            return;
+          }
           setForm(makeForm());
           setCreateModalOpen(true);
         }}

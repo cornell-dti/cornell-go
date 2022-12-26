@@ -1,6 +1,5 @@
 import { Home } from "./components/Home";
 import { Rewards } from "./components/Rewards";
-import { Admins } from "./components/Admins";
 import { Challenges } from "./components/Challenges";
 import { Events } from "./components/Events";
 import { Organizations } from "./components/Organizations";
@@ -40,12 +39,6 @@ const routes = [
     element: <Home />,
     icon: faHome,
     name: "Home",
-  },
-  {
-    path: "/admins",
-    element: <Admins />,
-    icon: faUserShield,
-    name: "Admin Approval",
   },
   {
     path: "/events",
@@ -135,6 +128,9 @@ export default function App() {
         </SidebarButton>
         <SidebarText>
           {data.events.get(data.selectedEvent)?.name ?? "No Event Selected"}
+        </SidebarText>
+        <SidebarText>
+          {data.organizations.get(data.selectedOrg)?.name ?? "No Org. Selected"}
         </SidebarText>
       </Sidebar>
       <Container>
