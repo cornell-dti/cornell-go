@@ -39,24 +39,3 @@ export class UserGuard implements CanActivate {
     return true;
   }
 }
-
-@Injectable()
-export class AdminGuard implements CanActivate {
-  constructor(private authService: AuthService) {}
-
-  async canActivate(context: ExecutionContext) {
-    const client = context.switchToWs().getClient<Socket>();
-    const token = tokenOfHandshake(client.handshake);
-
-    if (!token) return false;
-
-    const user = await this.authService.userByToken(token);
-    if (user && user.adminGranted) {
-      context.switchToWs().getData()._authenticatedUserEntity = user;
-    } else {
-      return false;
-    }
-
-    return true;
-  }
-}

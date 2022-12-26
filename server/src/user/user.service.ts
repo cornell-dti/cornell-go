@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import {
   AuthType,
   Group,
@@ -6,22 +6,22 @@ import {
   User,
   PrismaClient,
 } from '@prisma/client';
-import {
-  UpdateUserDataAuthTypeDto,
-  UpdateUserDataDto,
-} from '../client/update-user-data.dto';
+import { ClientService } from 'src/client/client.service';
 import { EventService } from '../event/event.service';
 import { GroupService } from '../group/group.service';
 import { OrganizationService } from '../organization/organization.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { UpdateUserDto, UserAuthTypeDto, UserDto } from './user.dto';
 
 @Injectable()
 export class UserService {
   constructor(
     private prisma: PrismaService,
     private eventsService: EventService,
+    @Inject(forwardRef(() => GroupService))
     private groupsService: GroupService,
     private orgService: OrganizationService,
+    private clientService: ClientService,
   ) {}
 
   /** Find a user by their authentication token */
@@ -67,10 +67,7 @@ export class UserService {
         authToken,
         authType,
         hashedRefreshToken: '',
-        superuser: email === process.env.SUPERUSER,
-        adminGranted:
-          email === process.env.SUPERUSER || process.env.DEVELOPMENT === 'true',
-        adminRequested: false,
+        administrator: email === process.env.SUPERUSER,
         isRanked: true,
       },
     });
@@ -79,16 +76,6 @@ export class UserService {
     console.log(`User ${user.id} created!`);
 
     return user;
-  }
-
-  /** Get the top N users by score */
-  async getTopPlayers(firstIndex: number, count: number) {
-    return await this.prisma.user.findMany({
-      where: { isRanked: true },
-      orderBy: { score: 'desc' },
-      skip: firstIndex,
-      take: count,
-    });
   }
 
   async byId(id: string) {
@@ -102,7 +89,14 @@ export class UserService {
     });
   }
 
-  async dtoForUserData(user: User): Promise<UpdateUserDataDto> {
+  async setUsername(user: User, username: string) {
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { username },
+    });
+  }
+
+  async dtoForUserData(user: User, partial: boolean): Promise<UserDto> {
     const joinedUser = await this.prisma.user.findUniqueOrThrow({
       where: { id: user.id },
       include: {
@@ -119,25 +113,30 @@ export class UserService {
       groupId: joinedUser.group.friendlyId,
       authType: (
         joinedUser.authType as string
-      ).toLowerCase() as UpdateUserDataAuthTypeDto,
-      rewardIds: joinedUser.rewards.map(rw => rw.id),
-      trackedEventIds: joinedUser.eventTrackers.map(ev => ev.eventId),
-      ignoreIdLists: false,
+      ).toLowerCase() as UserAuthTypeDto,
+      rewardIds: partial ? undefined : joinedUser.rewards.map(rw => rw.id),
+      trackedEventIds: partial
+        ? undefined
+        : joinedUser.eventTrackers.map(ev => ev.eventId),
     };
   }
 
-  async setUsername(user: User, username: string) {
-    const organization = await this.prisma.organization.findFirstOrThrow({
-      where: { members: { some: { id: user.id } } },
-    });
+  async emitUpdateUserData(
+    user: User,
+    deleted: boolean,
+    partial: boolean,
+    admin?: boolean,
+    client?: User,
+  ) {
+    const dto: UpdateUserDto = {
+      user: deleted ? user.id : await this.dtoForUserData(user, partial),
+      deleted,
+    };
 
-    if (!organization?.canEditUsername) {
-      return false;
+    if (client && admin) {
+      this.clientService.sendUpdate('updateUserData', client.id, false, dto);
+    } else if (admin) {
+      this.clientService.sendUpdate('updateUserData', user.id, true, dto);
     }
-
-    await this.prisma.user.update({
-      where: { id: user.id },
-      data: { username },
-    });
   }
 }

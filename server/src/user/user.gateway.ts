@@ -11,12 +11,14 @@ import { CallingUser } from '../auth/calling-user.decorator';
 import { ClientService } from '../client/client.service';
 import { GroupGateway } from '../group/group.gateway';
 import { GroupService } from '../group/group.service';
-import { CloseAccountDto } from './close-account.dto';
-import { RequestGlobalLeaderDataDto } from './request-global-leader-data.dto';
-import { RequestUserDataDto } from './request-user-data.dto';
-import { SetAuthToDeviceDto } from './set-auth-to-device.dto';
-import { SetAuthToOAuthDto } from './set-auth-to-oauth.dto';
-import { SetUsernameDto } from './set-username.dto';
+import {
+  CloseAccountDto,
+  RequestGlobalLeaderDataDto,
+  RequestUserDataDto,
+  SetAuthToDeviceDto,
+  SetAuthToOAuthDto,
+  SetUsernameDto,
+} from './user.dto';
 import { UserService } from './user.service';
 
 const replaceAll = require('string.prototype.replaceall');
@@ -29,7 +31,6 @@ export class UserGateway {
     private clientService: ClientService,
     private userService: UserService,
     private groupService: GroupService,
-    private groupGateway: GroupGateway,
   ) {}
 
   private providerToAuthType(provider: string) {
@@ -53,12 +54,21 @@ export class UserGateway {
     @CallingUser() user: User,
     @MessageBody() data: RequestUserDataDto,
   ) {
-    this.clientService.emitUpdateUserData(
-      user,
-      await this.userService.dtoForUserData(user),
-    );
+    if (user.administrator && data.userId) {
+      const queried = await this.userService.byId(data.userId);
 
-    return false;
+      if (queried) {
+        await this.userService.emitUpdateUserData(
+          queried,
+          false,
+          false,
+          true,
+          user,
+        );
+      }
+    } else {
+      await this.userService.emitUpdateUserData(user, false, false, true, user);
+    }
   }
 
   @SubscribeMessage('setUsername')
@@ -76,32 +86,14 @@ export class UserGateway {
       .replaceAll('*', '_')
       .replaceAll(' ', '_');
 
-    if (!(await this.userService.setUsername(user, username))) {
-      return;
-    }
+    await this.userService.setUsername(user, username);
 
     user.username = username; // Updated so change here too
 
-    this.clientService.emitInvalidateData({
-      userEventData: false,
-      userRewardData: false,
-      winnerRewardData: false,
-      groupData: false,
-      challengeData: false,
-      leaderboardData: true,
-    });
+    await this.userService.emitUpdateUserData(user, false, true, true);
 
-    // Update user that name has changed
-    this.clientService.emitUpdateUserData(
-      user,
-      await this.userService.dtoForUserData(user),
-    );
-
-    // Update data for the group
-    const members = await this.groupService.getMembers({ id: user.groupId });
-    members.forEach(u => this.groupGateway.requestGroupData(u, {}));
-
-    return false;
+    const group = await this.groupService.getGroupForUser(user);
+    await this.groupService.emitUpdateGroupData(group, false);
   }
 
   @SubscribeMessage('setAuthToDevice')
@@ -110,7 +102,6 @@ export class UserGateway {
     @MessageBody() data: SetAuthToDeviceDto,
   ) {
     await this.userService.setAuthType(user, AuthType.DEVICE, data.deviceId);
-    return false;
   }
 
   @SubscribeMessage('setAuthToOAuth')
@@ -123,7 +114,6 @@ export class UserGateway {
       this.providerToAuthType(data.provider),
       data.authId,
     );
-    return false;
   }
 
   @SubscribeMessage('closeAccount')
@@ -131,39 +121,9 @@ export class UserGateway {
     @CallingUser() user: User,
     @MessageBody() data: CloseAccountDto,
   ) {
+    const group = await this.groupService.getGroupForUser(user);
     await this.userService.setAuthType(user, AuthType.NONE, user.authToken);
     await this.userService.deleteUser(user);
-
-    this.clientService.emitInvalidateData({
-      userEventData: true,
-      userRewardData: true,
-      winnerRewardData: true,
-      groupData: true,
-      challengeData: true,
-      leaderboardData: true,
-    });
-
-    return false;
-  }
-
-  @SubscribeMessage('requestGlobalLeaderData')
-  async requestGlobalLeaderData(
-    @CallingUser() user: User,
-    @MessageBody() data: RequestGlobalLeaderDataDto,
-  ) {
-    const topPlayers = await this.userService.getTopPlayers(
-      data.offset,
-      Math.min(data.count, 1024), // Maxed out at 1024 entries
-    );
-
-    this.clientService.emitUpdateLeaderData(user, {
-      eventId: '',
-      offset: data.offset,
-      users: topPlayers.map(usr => ({
-        userId: usr.id,
-        username: usr.username,
-        score: usr.score,
-      })),
-    });
+    await this.groupService.emitUpdateGroupData(group, false);
   }
 }

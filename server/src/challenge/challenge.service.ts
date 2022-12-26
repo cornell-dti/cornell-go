@@ -6,23 +6,37 @@ import {
   EventTracker,
   User,
 } from '@prisma/client';
+import { ClientService } from 'src/client/client.service';
 import { EventService } from 'src/event/event.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { ChallengeDto, UpdateChallengeDataDto } from './challenge.dto';
 
 @Injectable()
 export class ChallengeService {
   constructor(
     private readonly prisma: PrismaService,
     private eventService: EventService,
+    private clientService: ClientService,
   ) {}
 
   /** Get challenges with prev challenges for a given user */
-  async getChallengesByIdsWithPrevChallenge(
+  async getChallengesByIdsForUser(
     user: User,
+    admin: boolean,
     ids: string[],
   ): Promise<Challenge[]> {
-    // TODO: this can be made more efficient
-    return await this.prisma.challenge.findMany({ where: { id: { in: ids } } });
+    return await this.prisma.challenge.findMany({
+      where: {
+        id: { in: ids },
+        linkedEvent: {
+          usedIn: {
+            some: admin
+              ? { managers: { some: { id: user.id } } }
+              : { members: { some: { id: user.id } } },
+          },
+        },
+      },
+    });
   }
 
   /** Get a challenge by its id */
@@ -65,10 +79,7 @@ export class ChallengeService {
   }
 
   /** Progress user through challenges, ensuring challengeId is current */
-  async completeChallenge(
-    user: User,
-    challengeId: string,
-  ): Promise<[EventTracker, User[]]> {
+  async completeChallenge(user: User, challengeId: string) {
     const groupMembers = await this.prisma.user.findMany({
       where: { groupId: user.groupId },
     });
@@ -86,7 +97,7 @@ export class ChallengeService {
       (groupMembers.length !== curEvent.requiredMembers &&
         curEvent.requiredMembers >= 0)
     )
-      return [eventTracker, groupMembers];
+      return false;
 
     const prevChal = await this.prisma.prevChallenge.create({
       data: {
@@ -119,7 +130,7 @@ export class ChallengeService {
       },
     });
 
-    return [eventTracker, groupMembers];
+    return true;
   }
 
   /** Check if the current event can return rewards */
@@ -141,7 +152,7 @@ export class ChallengeService {
       //If event has expired:
       eventBase.endTime < new Date()
     ) {
-      return false;
+      return null;
     }
 
     if (eventBase.rewardType === EventRewardType.PERPETUAL) {
@@ -150,7 +161,7 @@ export class ChallengeService {
       });
 
       if (rewardTemplate !== null) {
-        await this.prisma.eventReward.create({
+        const rw = await this.prisma.eventReward.create({
           data: {
             ...rewardTemplate,
             userId: eventTracker.userId,
@@ -159,7 +170,7 @@ export class ChallengeService {
           },
         });
 
-        return true;
+        return rw;
       }
     } else if (eventBase.rewardType === EventRewardType.LIMITED_TIME) {
       const unclaimedReward = await this.prisma.eventReward.findFirst({
@@ -177,11 +188,11 @@ export class ChallengeService {
           },
         });
 
-        return true;
+        return unclaimedReward;
       }
     }
 
-    return false;
+    return null;
   }
 
   async getUserCompletionDate(user: User, challenge: Challenge) {
@@ -194,10 +205,7 @@ export class ChallengeService {
     );
   }
 
-  async setCurrentChallenge(
-    user: User,
-    challengeId: string,
-  ): Promise<[EventBase, User[]]> {
+  async setCurrentChallenge(user: User, challengeId: string) {
     const group = await this.prisma.group.findUniqueOrThrow({
       where: { id: user.groupId },
       include: { curEvent: true, members: true },
@@ -210,30 +218,12 @@ export class ChallengeService {
       group.curEventId,
     );
 
-    if (!isChallengeValid) return [event, group.members];
+    if (!isChallengeValid) return false;
 
     const eventTracker: EventTracker =
       await this.eventService.getCurrentEventTrackerForUser(user);
 
     const challenge = await this.getChallengeById(challengeId);
-    const curChallenge = await this.getChallengeById(
-      eventTracker.curChallengeId,
-    );
-    const wasCompleted = await this.isChallengeCompletedByUser(user, challenge);
-    const curCompleted = await this.isChallengeCompletedByUser(
-      user,
-      curChallenge,
-    );
-
-    // Is user skipping while it's allowed
-    const isSkippingWhileAllowed =
-      wasCompleted ||
-      event.skippingEnabled ||
-      (!wasCompleted &&
-        curCompleted &&
-        challenge.eventIndex === curChallenge.eventIndex + 1);
-
-    if (!isSkippingWhileAllowed) return [event, group.members];
 
     await this.prisma.eventTracker.update({
       where: { id: eventTracker.id },
@@ -242,6 +232,127 @@ export class ChallengeService {
       },
     });
 
-    return [event, group.members];
+    return true;
+  }
+
+  async emitUpdateChallengeData(
+    challenge: Challenge,
+    deleted: boolean,
+    admin?: boolean,
+    client?: User,
+  ) {
+    const dto: UpdateChallengeDataDto = {
+      challenge: deleted ? challenge.id : await this.dtoForChallenge(challenge),
+      deleted,
+    };
+
+    if (client) {
+      this.clientService.sendUpdate<UpdateChallengeDataDto>(
+        'updateChallengeData',
+        client.id,
+        !!admin,
+        dto,
+      );
+    } else {
+      this.clientService.sendUpdate<UpdateChallengeDataDto>(
+        'updateChallengeData',
+        challenge.id,
+        false,
+        dto,
+      );
+
+      this.clientService.sendUpdate<UpdateChallengeDataDto>(
+        'updateChallengeData',
+        challenge.id,
+        true,
+        dto,
+      );
+    }
+  }
+
+  async dtoForChallenge(ch: Challenge): Promise<ChallengeDto> {
+    return {
+      id: ch.id,
+      name: ch.name,
+      description: ch.description,
+      imageUrl: ch.imageUrl,
+      lat: ch.latitude,
+      long: ch.longitude,
+      awardingRadius: ch.awardingRadius,
+      closeRadius: ch.closeRadius,
+      containingEventId: ch.linkedEventId,
+    };
+  }
+
+  async upsertChallengeFromDto(challenge: ChallengeDto): Promise<Challenge> {
+    const assignData = {
+      name: challenge.name.substring(0, 2048),
+      description: challenge.description.substring(0, 2048),
+      imageUrl: challenge.imageUrl.substring(0, 2048),
+      latitude: challenge.lat,
+      longitude: challenge.long,
+      awardingRadius: challenge.awardingRadius,
+      closeRadius: challenge.closeRadius,
+    };
+
+    const challengeEntity = await this.prisma.challenge.upsert({
+      where: { id: challenge.id },
+      update: assignData,
+      create: {
+        ...assignData,
+        eventIndex: -10,
+        linkedEventId: challenge.containingEventId,
+      },
+    });
+
+    if (challengeEntity.eventIndex === -10) {
+      const maxIndexChallenge = await this.prisma.challenge.findFirst({
+        where: { linkedEventId: challenge.containingEventId },
+        orderBy: { eventIndex: 'desc' },
+      });
+
+      await this.prisma.challenge.update({
+        where: { id: challengeEntity.id },
+        data: {
+          eventIndex: Math.max((maxIndexChallenge?.eventIndex ?? -1) + 1, 0),
+        },
+      });
+    }
+
+    return challengeEntity;
+  }
+
+  async removeChallenge(challengeId: string, accessor: User) {
+    const challenge = await this.prisma.challenge.findFirstOrThrow({
+      where: { id: challengeId },
+      include: {
+        defaultOf: true,
+        linkedEvent: { include: { challenges: true } },
+      },
+    });
+
+    const usedTrackers = await this.prisma.eventTracker.findMany({
+      where: {
+        curChallengeId: challengeId,
+      },
+    });
+
+    if (challenge.defaultOf) return;
+
+    for (const tracker of usedTrackers) {
+      this.prisma.eventTracker.update({
+        where: { id: tracker.id },
+        data: { curChallengeId: challenge.linkedEvent.defaultChallengeId },
+      });
+    }
+
+    await this.prisma.challenge.deleteMany({
+      where: {
+        id: challengeId,
+        linkedEvent: {
+          usedIn: { some: { managers: { some: { id: accessor.id } } } },
+        },
+      },
+    });
   }
 }

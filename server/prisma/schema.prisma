@@ -1,6 +1,5 @@
 generator client {
   provider = "prisma-client-js"
-  previewFeatures = ["interactiveTransactions"]
 }
 
 datasource db {
@@ -34,9 +33,7 @@ model User {
   username            String
   email               String
   hashedRefreshToken  String
-  superuser           Boolean
-  adminGranted        Boolean
-  adminRequested      Boolean
+  administrator       Boolean
   score               Int
   rewards             EventReward[]
   group               Group           @relation("member", fields: [groupId], references: [id])
@@ -44,7 +41,8 @@ model User {
   hostOf              Group?          @relation("host")
   eventTrackers       EventTracker[]
   completedChallenges PrevChallenge[] @relation("owner")
-  memberOf            Organization[]
+  memberOf            Organization[]  @relation("player")
+  managerOf           Organization[]  @relation("manager")
   isRanked            Boolean         @default(true)
   participatedIn      PrevChallenge[] @relation("participant")
 }
@@ -61,7 +59,7 @@ model Group {
 
 model Challenge {
   id             String          @id @default(uuid()) @map("id")
-  linkedEvent    EventBase       @relation(fields: [linkedEventId], references: [id], onDelete: Cascade)
+  linkedEvent    EventBase       @relation("all", fields: [linkedEventId], references: [id], onDelete: Cascade)
   linkedEventId  String
   eventIndex     Int
   name           String
@@ -73,25 +71,26 @@ model Challenge {
   closeRadius    Float
   completions    PrevChallenge[]
   activeTrackers EventTracker[]
+  defaultOf      EventBase?      @relation("default")
 }
 
 model EventBase {
-  id              String          @id @default(uuid())
-  requiredMembers Int
-  skippingEnabled Boolean
-  isDefault       Boolean
-  name            String
-  description     String
-  rewardType      EventRewardType
-  indexable       Boolean
-  endTime         DateTime
-  minimumScore    Int             @default(1)
-  rewards         EventReward[]
-  challenges      Challenge[]
-  allowedIn       Organization[]  @relation("events")
-  defaultOf       Organization[]  @relation("default")
-  trackers        EventTracker[]
-  activeGroups    Group[]
+  id                 String          @id @default(uuid())
+  requiredMembers    Int
+  name               String
+  description        String
+  rewardType         EventRewardType
+  indexable          Boolean
+  endTime            DateTime
+  minimumScore       Int             @default(1)
+  rewards            EventReward[]
+  challenges         Challenge[]     @relation("all")
+  usedIn             Organization[]  @relation("events")
+  defaultOf          Organization[]  @relation("defaultOrg")
+  defaultChallenge   Challenge       @relation("default", fields: [defaultChallengeId], references: [id])
+  defaultChallengeId String          @unique
+  trackers           EventTracker[]
+  activeGroups       Group[]
 }
 
 model EventReward {
@@ -112,7 +111,6 @@ model EventTracker {
   userId              String
   score               Int
   isRankedForEvent    Boolean         @default(true)
-  cooldownEnd         DateTime
   event               EventBase       @relation(fields: [eventId], references: [id], onDelete: Cascade)
   eventId             String
   curChallenge        Challenge       @relation(fields: [curChallengeId], references: [id])
@@ -133,14 +131,13 @@ model PrevChallenge {
 }
 
 model Organization {
-  id              String                   @id @default(uuid())
-  displayName     String // A very cool org#1
-  name            String // a_very_cool_org_1
-  isDefault       Boolean
-  canEditUsername Boolean
-  members         User[]
-  allowedEvents   EventBase[]              @relation("events")
-  defaultEvent    EventBase                @relation("default", fields: [defaultEventId], references: [id], onDelete: Restrict)
-  defaultEventId  String
-  specialUsage    OrganizationSpecialUsage
+  id             String                   @id @default(uuid())
+  name           String
+  accessCode     String
+  members        User[]                   @relation("player")
+  managers       User[]                   @relation("manager")
+  events         EventBase[]              @relation("events")
+  defaultEvent   EventBase                @relation("defaultOrg", fields: [defaultEventId], references: [id], onDelete: Restrict)
+  defaultEventId String
+  specialUsage   OrganizationSpecialUsage
 }

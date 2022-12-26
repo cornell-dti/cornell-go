@@ -1,5 +1,4 @@
 import { Module, OnModuleInit, UseFilters } from '@nestjs/common';
-import { AdminModule } from './admin/admin.module';
 import { AuthModule } from './auth/auth.module';
 import { ChallengeModule } from './challenge/challenge.module';
 import { EventModule } from './event/event.module';
@@ -27,7 +26,6 @@ import { OrganizationGateway } from './organization/organization.gateway';
     EventModule,
     GroupModule,
     ChallengeModule,
-    AdminModule,
     RewardModule,
     PrismaModule,
     OrganizationModule,

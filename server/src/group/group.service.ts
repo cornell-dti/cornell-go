@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import {
   EventBase,
   Group,
@@ -7,16 +7,20 @@ import {
   PrismaClient,
   Prisma,
 } from '@prisma/client';
+import { ClientService } from 'src/client/client.service';
 import { EventService } from 'src/event/event.service';
+import { UserService } from 'src/user/user.service';
 import { OrganizationService } from '../organization/organization.service';
-import { UpdateGroupDataMemberDto } from '../client/update-group-data.dto';
 import { PrismaService } from '../prisma/prisma.service';
+import { GroupDto, UpdateGroupDataDto } from './group.dto';
 
 @Injectable()
 export class GroupService {
   constructor(
     private eventService: EventService,
-    private orgService: OrganizationService,
+    @Inject(forwardRef(() => UserService))
+    private userService: UserService,
+    private clientService: ClientService,
     private prisma: PrismaService,
   ) {}
 
@@ -84,15 +88,11 @@ export class GroupService {
         where: { friendlyId: joinId.toUpperCase() },
       });
 
-      const currentEvent = await this.prisma.eventBase.findFirstOrThrow({
-        where: { id: newGroup.curEventId },
-      });
-
       const isAllowed =
         (await this.prisma.organization.count({
           where: {
             members: { some: { id: user.id } },
-            allowedEvents: { some: { id: newGroup.curEventId } },
+            events: { some: { id: newGroup.curEventId } },
           },
         })) > 0;
 
@@ -149,12 +149,16 @@ export class GroupService {
       include: { host: true, members: { take: 1 } },
     });
 
-    // If empty, delete
     if (oldGroup.members.length === 0) {
+      // If empty, delete
       await tx.group.delete({ where: { id: group.id } });
+      await this.emitUpdateGroupData(oldGroup, true);
       return null;
-      // If no host, and not empty, replace host
     } else if (!oldGroup.host && oldGroup.members.length > 0) {
+      // If no host, and not empty, replace host
+      oldGroup.hostId = oldGroup.members[0].id;
+      oldGroup.host = oldGroup.members[0];
+
       await tx.group.update({
         where: { id: group.id },
         data: { host: { connect: { id: oldGroup.members[0].id } } },
@@ -162,25 +166,6 @@ export class GroupService {
     }
 
     return oldGroup;
-  }
-
-  async dtoForMemberData(group: Group): Promise<UpdateGroupDataMemberDto[]> {
-    const members = await this.getMembers(group);
-
-    return await Promise.all(
-      members.map(async mem => {
-        const tracker = await this.eventService.getCurrentEventTrackerForUser(
-          mem,
-        );
-        return {
-          id: mem.id,
-          name: mem.username,
-          points: tracker.score,
-          host: mem.id === group.hostId,
-          curChallengeId: tracker.curChallengeId,
-        };
-      }),
-    );
   }
 
   async getMembers(group: Group | { id: string }) {
@@ -207,20 +192,9 @@ export class GroupService {
       include: { curEvent: { select: { endTime: true } }, members: true },
     });
 
-    const actorOrgs = (
-      await this.prisma.organization.findMany({
-        where: { members: { some: { id: actor.id } } },
-        select: { id: true },
-      })
-    ).map(org => org.id);
-
-    const defaultOrg = await this.prisma.organization.findFirstOrThrow({
-      where: { isDefault: true, id: { in: actorOrgs } },
-    });
-
-    let newEvent = await this.orgService.getDefaultEvent(defaultOrg);
-
     const stillActive = group.curEvent.endTime.getTime() - Date.now() > 0;
+
+    let newEvent: EventBase | null = null;
 
     if (stillActive) {
       // If actor is setting a new event and actor is not host of the group,
@@ -239,19 +213,19 @@ export class GroupService {
       newEvent = await this.eventService.getEventById(eventId);
     }
 
-    if (!newEvent) return;
+    if (!newEvent) return false;
 
     const groupMembers = await this.getMembers(group);
 
     await Promise.all(
       groupMembers.map(async (member: User) => {
-        await this.eventService.createEventTracker(member, newEvent);
+        await this.eventService.createEventTracker(member, newEvent!);
       }),
     );
 
     await this.prisma.group.update({
       where: { id: group.id },
-      data: { curEventId: newEvent.id },
+      data: { curEventId: eventId },
     });
 
     return true;
@@ -261,7 +235,7 @@ export class GroupService {
   async getAllowedEventIds(group: Group) {
     const users = await this.prisma.user.findMany({
       where: { groupId: group.id },
-      select: { memberOf: { include: { allowedEvents: true } } },
+      select: { memberOf: { include: { events: true } } },
     });
 
     const uniqueOrgs = Array.from(
@@ -280,11 +254,101 @@ export class GroupService {
 
     const eventIdIntersect = Array.from(
       new Set(
-        orgIntersect
-          .map(org => org.allowedEvents.map(event => event.id))
-          .flat(),
+        orgIntersect.map(org => org.events.map(event => event.id)).flat(),
       ),
     );
     return eventIdIntersect;
+  }
+
+  async dtoForGroup(group: Group): Promise<GroupDto> {
+    const members = await this.getMembers(group);
+
+    const memberDtos = await Promise.all(
+      members.map(async mem => {
+        const tracker = await this.eventService.getCurrentEventTrackerForUser(
+          mem,
+        );
+        return {
+          id: mem.id,
+          name: mem.username,
+          points: tracker.score,
+          host: mem.id === group.hostId,
+          curChallengeId: tracker.curChallengeId,
+        };
+      }),
+    );
+
+    return {
+      id: group.id,
+      friendlyId: group.friendlyId,
+      hostId: group.hostId!,
+      curEventId: group.curEventId,
+      members: memberDtos,
+    };
+  }
+
+  async emitUpdateGroupData(
+    group: Group,
+    deleted: boolean,
+    admin?: boolean,
+    user?: User,
+  ) {
+    const dto: UpdateGroupDataDto = {
+      group: deleted ? await this.dtoForGroup(group) : group.id,
+      deleted,
+    };
+
+    if (user) {
+      this.clientService.sendUpdate('updateGroupData', user.id, !!admin, dto);
+    } else {
+      this.clientService.sendUpdate('updateGroupData', group.id, false, dto);
+      this.clientService.sendUpdate('updateGroupData', group.id, true, dto);
+    }
+  }
+
+  async updateGroup(group: GroupDto): Promise<Group> {
+    const groupEntity = await this.prisma.group.update({
+      where: { id: group.id },
+      data: {
+        id: group.id,
+        friendlyId: group.friendlyId,
+        hostId: group.hostId,
+        curEventId: group.curEventId,
+      },
+    });
+
+    return groupEntity;
+  }
+
+  /** Helper function that notifies the user, all old group members,
+   * and all new members that the user has moved groups. */
+  async updateGroupMembers(user: User, oldGroup: Group | null) {
+    if (oldGroup) {
+      await this.emitUpdateGroupData(oldGroup, false);
+      this.clientService.unsubscribe(user, oldGroup.id, false);
+    }
+
+    const newGroup = await this.getGroupForUser(user);
+    this.clientService.subscribe(user, newGroup.id, false);
+    await this.emitUpdateGroupData(newGroup, false);
+  }
+
+  async removeGroup(removeId: string) {
+    const deletedGroup = await this.prisma.group.findFirstOrThrow({
+      where: { id: removeId },
+      include: { members: true },
+    });
+
+    for (const mem of deletedGroup.members) {
+      await this.leaveGroup(mem);
+      this.clientService.unsubscribe(mem, deletedGroup.id, false);
+      await this.userService.emitUpdateUserData(mem, false, true, true);
+      const group = await this.getGroupForUser(mem);
+      await this.emitUpdateGroupData(group, false);
+    }
+
+    await this.emitUpdateGroupData(deletedGroup, true, true);
+    await this.clientService.unsubscribeAll(deletedGroup.id);
+    await this.prisma.group.delete({ where: { id: removeId } });
   }
 }

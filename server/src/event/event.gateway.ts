@@ -3,20 +3,22 @@ import {
   SubscribeMessage,
   WebSocketGateway,
 } from '@nestjs/websockets';
-import {
-  RewardTypeDto,
-  UpdateEventDataDto,
-} from '../client/update-event-data.dto';
+
 import { CallingUser } from '../auth/calling-user.decorator';
 import { ClientService } from '../client/client.service';
 import { EventService } from './event.service';
-import { RequestAllEventDataDto } from './request-all-event-data.dto';
-import { RequestEventDataDto } from './request-event-data.dto';
-import { RequestEventLeaderDataDto } from './request-event-leader-data.dto';
-import { RequestEventTrackerDataDto } from '../challenge/request-event-tracker-data.dto';
 import { UserGuard } from 'src/auth/jwt-auth.guard';
 import { UseGuards } from '@nestjs/common';
 import { EventBase, EventRewardType, User } from '@prisma/client';
+import {
+  EventDto,
+  RequestAllEventDataDto,
+  RequestEventDataDto,
+  RequestEventLeaderDataDto,
+  UpdateEventDataDto,
+} from './event.dto';
+import { RequestEventTrackerDataDto } from 'src/challenge/challenge.dto';
+import { OrganizationService } from 'src/organization/organization.service';
 
 @WebSocketGateway({ cors: true })
 @UseGuards(UserGuard)
@@ -24,25 +26,35 @@ export class EventGateway {
   constructor(
     private clientService: ClientService,
     private eventService: EventService,
+    private orgService: OrganizationService,
   ) {}
 
   @SubscribeMessage('requestEventData')
   async requestEventData(
     @CallingUser() user: User,
-    @MessageBody() data: RequestEventDataDto & { isSearch?: boolean },
+    @MessageBody() data: RequestEventDataDto,
   ) {
-    const ids = await this.eventService.getEventsByIds(data.eventIds);
+    const basic = await this.eventService.getEventsByIdsForUser(
+      data.eventIds,
+      false,
+      user,
+    );
 
-    const updateEventData: UpdateEventDataDto = {
-      isSearch: !!data.isSearch,
-      events: await Promise.all(
-        ids.map(ev => this.eventService.updateEventDataDtoForEvent(ev)),
-      ),
-    };
+    const admin = await this.eventService.getEventsByIdsForUser(
+      data.eventIds,
+      true,
+      user,
+    );
 
-    this.clientService.emitUpdateEventData(user, updateEventData);
+    for (const ev of basic) {
+      this.clientService.subscribe(user, ev.id, false);
+      await this.eventService.emitUpdateEventData(ev, false, false, user);
+    }
 
-    return false;
+    for (const ev of admin) {
+      this.clientService.subscribe(user, ev.id, true);
+      await this.eventService.emitUpdateEventData(ev, false, true, user);
+    }
   }
 
   @SubscribeMessage('requestAllEventData')
@@ -50,17 +62,12 @@ export class EventGateway {
     @CallingUser() user: User,
     @MessageBody() data: RequestAllEventDataDto,
   ) {
-    const orgs = await this.eventService.getEventOrganizationsForUser(user);
+    const evs = await this.eventService.getEventsForUser(user);
 
-    await this.requestEventData(user, {
-      isSearch: true,
-      eventIds: orgs.reduce<string[]>(
-        (acc, org) => org.allowedEvents.map(ev => ev.id).concat(acc),
-        [],
-      ),
-    });
-
-    return false;
+    for (const ev of evs) {
+      this.clientService.subscribe(user, ev.id, false);
+      await this.eventService.emitUpdateEventData(ev, false, false, user);
+    }
   }
 
   @SubscribeMessage('requestEventLeaderData')
@@ -72,23 +79,13 @@ export class EventGateway {
       return;
     }
 
-    const progresses = await this.eventService.getTopTrackersForEvent(
-      data.eventId,
+    const ev = await this.eventService.getEventById(data.eventId);
+    await this.eventService.emitUpdateLeaderData(
       data.offset,
-      data.count,
+      Math.min(data.count, 1024),
+      ev,
+      user,
     );
-
-    this.clientService.emitUpdateLeaderData(user, {
-      eventId: data.eventId,
-      offset: data.offset,
-      users: await Promise.all(
-        progresses.map(evTracker => ({
-          username: evTracker.user.username,
-          userId: evTracker.user.id,
-          score: evTracker.score,
-        })),
-      ),
-    });
   }
 
   @SubscribeMessage('requestEventTrackerData')
@@ -101,20 +98,51 @@ export class EventGateway {
       data.trackedEventIds,
     );
 
-    this.clientService.emitUpdateEventTrackerData(user, {
-      eventTrackers: await Promise.all(
-        trackers.map(tracker => ({
-          eventId: tracker.eventId,
-          isRanked: tracker.isRankedForEvent,
-          cooldownMinimum: tracker.cooldownEnd.toISOString(),
-          curChallengeId: tracker.curChallengeId,
-          prevChallengeIds: tracker.completedChallenges.map(
-            pc => pc.challenge.id,
-          ),
-        })),
-      ),
-    });
+    for (const tracker of trackers) {
+      await this.eventService.emitUpdateEventTracker(tracker);
+    }
+  }
 
-    return false;
+  @SubscribeMessage('updateEventData')
+  async updateEventData(
+    @CallingUser() user: User,
+    @MessageBody() data: UpdateEventDataDto,
+  ) {
+    if (data.deleted) {
+      if (
+        !(await this.eventService.hasAdminRights(
+          { id: data.event as string },
+          user,
+        ))
+      ) {
+        return;
+      }
+
+      const ev = await this.eventService.getEventWithOrgs(data.event as string);
+      await this.eventService.removeEvent(ev.id, user);
+      await this.eventService.emitUpdateEventData(ev, true);
+      for (const org of ev.usedIn) {
+        await this.orgService.emitUpdateOrganizationData(org, false);
+      }
+    } else if ((data.event as EventDto).initialOrganizationId) {
+      const dto = data.event as EventDto;
+      if (
+        !(await this.orgService.isManagerOf(
+          { id: dto.defaultChallengeId },
+          user,
+        ))
+      ) {
+        return;
+      }
+
+      const ev = await this.eventService.upsertEventFromDto(
+        data.event as EventDto,
+      );
+
+      const org = await this.orgService.getOrganizationById(ev.id);
+
+      await this.orgService.emitUpdateOrganizationData(org, false);
+      await this.eventService.emitUpdateEventData(ev, false);
+    }
   }
 }
