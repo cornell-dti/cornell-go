@@ -11,6 +11,12 @@ export const ListCardBox = styled.div`
   margin-bottom: 16px;
 `;
 
+export const CenterText = styled.div`
+  text-align: center;
+  color: grey;
+  font-weight: bold;
+`;
+
 export const ListCardTitle = styled.div`
   font-weight: 500;
   font-size: 22px;

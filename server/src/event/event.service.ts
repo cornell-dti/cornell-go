@@ -25,7 +25,8 @@ export class EventService {
   ) {}
 
   /** Get event by id */
-  async getEventById(id: string) {
+  async getEventById(id: string | null) {
+    if (!id) throw 'Found null event id! Possible null linked event.';
     return await this.prisma.eventBase.findUniqueOrThrow({ where: { id } });
   }
 
@@ -131,7 +132,7 @@ export class EventService {
     if (defaultEvent.length === 0) throw 'Cannot find closest challenge!';
 
     const closestChalId = defaultEvent[0].id;
-    const defaultEvId = defaultEvent[0].linkedEventId;
+    const defaultEvId = defaultEvent[0].linkedEventId!;
 
     const progress = await this.prisma.eventTracker.create({
       data: {
@@ -368,7 +369,7 @@ export class EventService {
     user: User | { id: string },
   ) {
     return !!(await this.prisma.organization.findFirst({
-      select: {},
+      select: { id: true },
       where: {
         events: { some: { id: ev.id } },
         managers: { some: { id: user.id } },
@@ -390,17 +391,13 @@ export class EventService {
       minimumScore: event.minimumScore,
     };
 
-    const evId = v4();
-
     const eventEntity = await this.prisma.eventBase.upsert({
       where: { id: event.id },
       create: {
         ...assignData,
-        id: evId,
         defaultChallenge: {
           create: {
             ...defaultChallengeData,
-            linkedEventId: evId,
           },
         },
       },
@@ -411,12 +408,19 @@ export class EventService {
           connect: { id: event.initialOrganizationId },
         },
         challenges: {
-          set: event.challengeIds.map(id => ({ id })),
+          set: event.challengeIds
+            .map(id => ({ id }))
+            .concat({ id: event.defaultChallengeId }),
         },
         rewards: {
           set: event.rewardIds.map(id => ({ id })),
         },
       },
+    });
+
+    const eventEntity2 = await this.prisma.eventBase.update({
+      where: { id: eventEntity.id },
+      data: { challenges: { connect: { id: event.defaultChallengeId } } },
     });
 
     let eventIndexChal = 0;
@@ -443,7 +447,7 @@ export class EventService {
       ++eventIndexReward;
     }
 
-    return eventEntity;
+    return eventEntity2;
   }
 
   async removeEvent(eventId: string, accessor: User) {

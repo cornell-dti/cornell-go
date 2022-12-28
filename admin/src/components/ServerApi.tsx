@@ -62,8 +62,8 @@ export class ServerApi {
   onUpdateOrganizationData(
     callback: (data: UpdateOrganizationDataDto) => void
   ) {
-    this.socket.removeAllListeners("updateOrganizations");
-    this.socket.on("updateOrganizations", (data) => callback(data));
+    this.socket.removeAllListeners("updateOrganizationData");
+    this.socket.on("updateOrganizationData", (data) => callback(data));
   }
   onUpdateGroupData(callback: (data: UpdateGroupDataDto) => void) {
     this.socket.removeAllListeners("updateGroupData");

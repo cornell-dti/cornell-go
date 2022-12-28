@@ -67,7 +67,8 @@ export class UserService {
         authToken,
         authType,
         hashedRefreshToken: '',
-        administrator: email === process.env.SUPERUSER,
+        administrator:
+          email === process.env.SUPERUSER || process.env.DEVELOPMENT === 'true',
         isRanked: true,
       },
     });

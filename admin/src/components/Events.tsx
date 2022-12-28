@@ -10,6 +10,8 @@ import {
 } from "./EntryModal";
 import { HButton } from "./HButton";
 import {
+  ButtonSizer,
+  CenterText,
   ListCardBody,
   ListCardBox,
   ListCardButtons,
@@ -42,7 +44,14 @@ function EventCard(props: {
   return (
     <>
       <ListCardBox>
-        <ListCardTitle>{props.event.name}</ListCardTitle>
+        <ListCardTitle>
+          {props.event.name}
+          <ButtonSizer>
+            <HButton onClick={props.onSelect} float="right">
+              SELECT
+            </HButton>
+          </ButtonSizer>
+        </ListCardTitle>
         <ListCardDescription>{props.event.description}</ListCardDescription>
         <ListCardBody>
           Id: <b>{props.event.id}</b>
@@ -56,11 +65,10 @@ function EventCard(props: {
           Minimum Rewarding Score: <b>{props.event.minimumScore}</b> <br />
           Challenge Count: <b>{props.event.challengeIds.length}</b> <br />
           Reward Count: <b>{props.event.rewardIds.length}</b> <br />
-          <br />
           Publicly Visible: <b>{affirmOfBool(props.event.indexable)}</b>
         </ListCardBody>
         <ListCardButtons>
-          <HButton onClick={props.onSelect}>SELECT</HButton>
+          <HButton>&nbsp;</HButton>
           <HButton onClick={props.onDelete} float="right">
             DELETE
           </HButton>
@@ -78,7 +86,6 @@ function makeForm() {
     { name: "Name", characterLimit: 256, value: "" },
     { name: "Description", characterLimit: 2048, value: "" },
     { name: "Required Members", value: -1, min: -1, max: 99 },
-    { name: "Skipping", options: ["Disabled", "Enabled"], value: 0 },
     { name: "Default", options: ["No", "Yes"], value: 0 },
     {
       name: "Reward Type",
@@ -210,7 +217,20 @@ export function Events() {
         }}
         onSearch={(query) => setQuery(query)}
       />
-      {Array.from(serverData.events.values())
+      {serverData.selectedOrg === "" ? (
+        <CenterText>Select an organization to view events</CenterText>
+      ) : serverData.organizations.get(serverData.selectedOrg) ? (
+        serverData.organizations.get(serverData.selectedOrg)?.events.length ===
+          0 && <CenterText>No events in organization</CenterText>
+      ) : (
+        <CenterText>Error getting events</CenterText>
+      )}
+      {Array.from(
+        serverData.organizations
+          .get(serverData.selectedOrg)
+          ?.events.map((evId) => serverData.events.get(evId)!)
+          .filter((ev) => !!ev) ?? []
+      )
         .sort(
           (a, b) =>
             compareTwoStrings(b.name, query) -

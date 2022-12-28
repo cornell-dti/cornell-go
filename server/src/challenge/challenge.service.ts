@@ -280,7 +280,7 @@ export class ChallengeService {
       long: ch.longitude,
       awardingRadius: ch.awardingRadius,
       closeRadius: ch.closeRadius,
-      containingEventId: ch.linkedEventId,
+      containingEventId: ch.linkedEventId!,
     };
   }
 
@@ -342,7 +342,7 @@ export class ChallengeService {
     for (const tracker of usedTrackers) {
       this.prisma.eventTracker.update({
         where: { id: tracker.id },
-        data: { curChallengeId: challenge.linkedEvent.defaultChallengeId },
+        data: { curChallengeId: challenge.linkedEvent!.defaultChallengeId },
       });
     }
 

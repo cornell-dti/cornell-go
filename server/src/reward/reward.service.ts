@@ -16,7 +16,7 @@ export class RewardService {
     return await this.prisma.eventReward.findMany({
       where: {
         id: { in: ids },
-        userId: { not: user.id },
+        userId: user.id,
       },
     });
   }
@@ -29,7 +29,7 @@ export class RewardService {
     return await this.prisma.eventReward.findMany({
       where: {
         id: { in: ids },
-        userId: { not: user.id },
+        userId: null,
       },
     });
   }

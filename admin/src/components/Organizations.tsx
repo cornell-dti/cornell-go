@@ -10,6 +10,8 @@ import {
 } from "./EntryModal";
 import { HButton } from "./HButton";
 import {
+  ButtonSizer,
+  CenterText,
   ListCardBody,
   ListCardBox,
   ListCardButtons,
@@ -22,13 +24,14 @@ import { ServerDataContext } from "./ServerData";
 import { compareTwoStrings } from "string-similarity";
 import { OrganizationDto } from "../dto/organization.dto";
 
-function GroupCard(props: {
+function OrganizationCard(props: {
   organization: OrganizationDto;
   onAdd: () => void;
   onEdit: () => void;
   onDelete: () => void;
   onClear: () => void;
   onSetDefault: () => void;
+  onSelect: () => void;
 }) {
   const affirmOfBool = (val: boolean) => (val ? "Yes" : "No");
   const serverData = useContext(ServerDataContext);
@@ -36,28 +39,25 @@ function GroupCard(props: {
   return (
     <>
       <ListCardBox>
-        <ListCardTitle>{props.organization.name}</ListCardTitle>
+        <ListCardTitle>
+          {props.organization.name}
+          <ButtonSizer>
+            <HButton onClick={() => props.onSelect()} float="right">
+              SELECT
+            </HButton>
+          </ButtonSizer>
+        </ListCardTitle>
         <ListCardBody>
           Id: <b>{props.organization.id}</b>
           <br />
-          Default Event:{" "}
-          <b>
-            {serverData.events.get(props.organization.defaultEventId)?.name}
-          </b>{" "}
-          <br />
-          Events:{" "}
-          <b>
-            {props.organization.events
-              .map((ev) => serverData.events.get(ev)?.name)
-              .join(", ")}
-          </b>{" "}
-          <br />
+          Default Event: <b>{props.organization.defaultEventId}</b> <br />
+          Events: <b>{props.organization.events.join(", ")}</b> <br />
           User Count: <b>{props.organization.members.length}</b> <br />
         </ListCardBody>
         <ListCardButtons>
           <HButton onClick={props.onAdd}>ADD EVENT</HButton>
-          <HButton onClick={props.onClear}>CLEAR EVENTS</HButton>
-          <HButton onClick={props.onAdd}>SET DEFAULT EVENT</HButton>
+          <HButton onClick={props.onClear}>CLEAR</HButton>
+          <HButton onClick={props.onAdd}>SET DEFAULT</HButton>
           <HButton onClick={props.onDelete} float="right">
             DELETE
           </HButton>
@@ -127,7 +127,7 @@ export function Organizations() {
         form={form}
       />
       <EntryModal
-        title="Edit Event"
+        title="Edit Organization"
         isOpen={isEditModalOpen}
         entryButtonText="EDIT"
         onEntry={() => {
@@ -155,13 +155,16 @@ export function Organizations() {
         }}
         onSearch={(query) => setQuery(query)}
       />
+      {serverData.organizations.size === 0 && (
+        <CenterText>No organizations available</CenterText>
+      )}
       {Array.from(serverData.organizations.values())
         .sort(
           (a, b) =>
             compareTwoStrings(b.name, query) - compareTwoStrings(a.name, query)
         )
         .map((r) => (
-          <GroupCard
+          <OrganizationCard
             key={r.id}
             organization={r}
             onAdd={() => {
@@ -190,6 +193,9 @@ export function Organizations() {
                 r.defaultEventId = serverData.selectedEvent;
                 serverData.updateOrganization(r);
               }
+            }}
+            onSelect={() => {
+              serverData.selectOrg(r.id);
             }}
           />
         ))}

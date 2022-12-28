@@ -59,8 +59,8 @@ model Group {
 
 model Challenge {
   id             String          @id @default(uuid()) @map("id")
-  linkedEvent    EventBase       @relation("all", fields: [linkedEventId], references: [id], onDelete: Cascade)
-  linkedEventId  String
+  linkedEvent    EventBase?      @relation("all", fields: [linkedEventId], references: [id], onDelete: Cascade)
+  linkedEventId  String?
   eventIndex     Int
   name           String
   description    String

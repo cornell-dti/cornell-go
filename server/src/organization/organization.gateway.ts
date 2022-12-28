@@ -1,3 +1,4 @@
+import { UseGuards } from '@nestjs/common/decorators';
 import {
   MessageBody,
   SubscribeMessage,
@@ -5,6 +6,7 @@ import {
 } from '@nestjs/websockets';
 import { User } from '@prisma/client';
 import { CallingUser } from 'src/auth/calling-user.decorator';
+import { UserGuard } from 'src/auth/jwt-auth.guard';
 import { ClientService } from 'src/client/client.service';
 import {
   OrganizationDto,
@@ -13,7 +15,8 @@ import {
 } from './organization.dto';
 import { OrganizationService } from './organization.service';
 
-@WebSocketGateway()
+@WebSocketGateway({ cors: true })
+@UseGuards(UserGuard)
 export class OrganizationGateway {
   constructor(
     private clientService: ClientService,
@@ -25,6 +28,8 @@ export class OrganizationGateway {
     @CallingUser() user: User,
     @MessageBody() data: RequestOrganizationDataDto,
   ) {
+    await this.orgService.ensureFullAccessIfNeeded(user);
+
     const orgs = await this.orgService.getOrganizationsForUser(
       user,
       data.admin,

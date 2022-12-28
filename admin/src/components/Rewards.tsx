@@ -8,6 +8,7 @@ import { EntryForm, EntryModal, FreeEntryForm } from "./EntryModal";
 import { HButton } from "./HButton";
 import {
   ButtonSizer,
+  CenterText,
   ListCardBody,
   ListCardBox,
   ListCardButtons,
@@ -148,6 +149,14 @@ export function Rewards() {
         }}
         onSearch={(query) => setQuery(query)}
       />
+      {serverData.selectedEvent === "" ? (
+        <CenterText>Select an event to view rewards</CenterText>
+      ) : serverData.events.get(serverData.selectedEvent) ? (
+        serverData.events.get(serverData.selectedEvent)?.rewardIds.length ===
+          0 && <CenterText>No rewards in event</CenterText>
+      ) : (
+        <CenterText>Error getting rewards</CenterText>
+      )}
       {selectedEvent?.rewardIds
         .filter((rwId) => serverData.rewards.get(rwId))
         .map((rwId) => serverData.rewards.get(rwId)!)

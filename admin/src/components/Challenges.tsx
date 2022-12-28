@@ -14,6 +14,7 @@ import {
 } from "./EntryModal";
 import { HButton } from "./HButton";
 import {
+  CenterText,
   ListCardBody,
   ListCardBox,
   ListCardButtons,
@@ -191,6 +192,15 @@ export function Challenges() {
         }}
         onSearch={(query) => setQuery(query)}
       />
+
+      {serverData.selectedEvent === "" ? (
+        <CenterText>Select an event to view challenges</CenterText>
+      ) : serverData.events.get(serverData.selectedEvent) ? (
+        serverData.events.get(serverData.selectedEvent)?.challengeIds.length ===
+          0 && <CenterText>No challenges in event</CenterText>
+      ) : (
+        <CenterText>Error getting challenges</CenterText>
+      )}
       {selectedEvent?.challengeIds
         .filter((chalId) => serverData.challenges.get(chalId))
         .map((chalId) => serverData.challenges.get(chalId)!)

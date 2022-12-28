@@ -23,7 +23,7 @@ export const defaultEventData = {
 
 export const defaultChallengeData = {
   eventIndex: 0,
-  name: 'New challenge',
+  name: 'Default Challenge',
   description: 'McGraw Tower',
   imageUrl:
     'https://upload.wikimedia.org/wikipedia/commons/5/5f/CentralAvenueCornell2.jpg',
@@ -38,23 +38,27 @@ export class OrganizationService {
   constructor(
     private prisma: PrismaService,
     private clientService: ClientService,
-  ) {}
+  ) {
+    this.getDefaultOrganization(OrganizationSpecialUsage.CORNELL_LOGIN);
+    this.getDefaultOrganization(OrganizationSpecialUsage.DEVICE_LOGIN);
+  }
 
-  private async makeDefaultEvent() {
-    const evId = v4();
-
-    return await this.prisma.eventBase.create({
+  async makeDefaultEvent() {
+    const chal = await this.prisma.challenge.create({
       data: {
-        id: evId,
-        ...defaultEventData,
-        defaultChallenge: {
-          create: {
-            linkedEventId: evId,
-            ...defaultChallengeData,
-          },
-        },
+        ...defaultChallengeData,
       },
     });
+
+    const ev = await this.prisma.eventBase.create({
+      data: {
+        ...defaultEventData,
+        defaultChallengeId: chal.id,
+        challenges: { connect: { id: chal.id } },
+      },
+    });
+
+    return ev;
   }
 
   /** Returns (and creates if does not exist) the default organization for
@@ -76,10 +80,14 @@ export class OrganizationService {
 
       defaultOrg = await this.prisma.organization.create({
         data: {
-          name: 'Default Organization',
+          name:
+            usage === OrganizationSpecialUsage.CORNELL_LOGIN
+              ? 'Cornell Organization'
+              : 'Everyone Organization',
           specialUsage: usage,
           defaultEventId: ev.id,
           accessCode: this.genAccessCode(),
+          events: { connect: { id: ev.id } },
         },
         include: { defaultEvent: true },
       });
@@ -174,7 +182,7 @@ export class OrganizationService {
 
   /** Update/insert a organization group */
   async upsertOrganizationFromDto(organization: OrganizationDto) {
-    const organizationEntity = await this.prisma.organization.upsert({
+    return await this.prisma.organization.upsert({
       where: { id: organization.id },
       create: {
         name: organization.name,
@@ -195,12 +203,12 @@ export class OrganizationService {
           set: organization.members.map(id => ({ id })),
         },
         events: {
-          set: organization.events.map(id => ({ id })),
+          set: organization.events
+            .map(id => ({ id }))
+            .concat({ id: organization.defaultEventId }),
         },
       },
     });
-
-    return organizationEntity;
   }
 
   async addAllAdmins(org: Organization) {
@@ -217,5 +225,23 @@ export class OrganizationService {
     await this.prisma.organization.delete({
       where: { id },
     });
+  }
+
+  async ensureFullAccessIfNeeded(potentialAdmin: User) {
+    if (potentialAdmin.administrator) {
+      const orgs = await this.prisma.organization.findMany({
+        where: { managers: { none: { id: potentialAdmin.id } } },
+        select: { id: true },
+      });
+
+      for (const { id } of orgs) {
+        await this.prisma.user.update({
+          where: { id: potentialAdmin.id },
+          data: {
+            managerOf: { connect: { id } },
+          },
+        });
+      }
+    }
   }
 }

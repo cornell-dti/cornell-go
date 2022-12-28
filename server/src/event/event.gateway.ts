@@ -124,14 +124,9 @@ export class EventGateway {
       for (const org of ev.usedIn) {
         await this.orgService.emitUpdateOrganizationData(org, false);
       }
-    } else if ((data.event as EventDto).initialOrganizationId) {
+    } else {
       const dto = data.event as EventDto;
-      if (
-        !(await this.orgService.isManagerOf(
-          { id: dto.defaultChallengeId },
-          user,
-        ))
-      ) {
+      if (!(await this.eventService.hasAdminRights({ id: dto.id }, user))) {
         return;
       }
 

@@ -146,7 +146,7 @@ export class ChallengeGateway {
 
       if (
         !(await this.eventService.hasAdminRights(
-          { id: challenge.linkedEventId },
+          { id: challenge.linkedEventId! },
           user,
         ))
       ) {

@@ -20,13 +20,13 @@ export class ClientService {
 
   public subscribe(user: User, resourceId: string, admin: boolean) {
     this.gateway.server
-      .in(user.id)
+      .in('client/' + user.id)
       .socketsJoin((admin ? 'admin/' : 'client/') + resourceId);
   }
 
   public unsubscribe(user: User, resourceId: string, admin: boolean) {
     this.gateway.server
-      .in(user.id)
+      .in('client/' + user.id)
       .socketsLeave((admin ? 'admin/' : 'client/') + resourceId);
   }
 

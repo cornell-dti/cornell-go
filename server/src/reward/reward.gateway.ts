@@ -45,7 +45,12 @@ export class RewardGateway {
     }
 
     for (const rw of unowned) {
-      await this.rewardService.emitUpdateRewardData(rw, false, false, user);
+      await this.rewardService.emitUpdateRewardData(
+        rw,
+        false,
+        await this.eventService.hasAdminRights({ id: rw.eventId }, user),
+        user,
+      );
     }
   }
 

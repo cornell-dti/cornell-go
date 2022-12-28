@@ -130,7 +130,7 @@ export class AuthService {
     const isDevWhileDevice =
       process.env.DEVELOPMENT === 'true' || authType !== AuthType.DEVICE;
 
-    if (!user && isDevWhileDevice) {
+    if (!user) {
       user = await this.userService.register(
         idToken.email,
         idToken.email?.split('@')[0],
