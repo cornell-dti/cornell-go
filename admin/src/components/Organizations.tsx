@@ -50,14 +50,17 @@ function OrganizationCard(props: {
         <ListCardBody>
           Id: <b>{props.organization.id}</b>
           <br />
-          Default Event: <b>{props.organization.defaultEventId}</b> <br />
-          Events: <b>{props.organization.events.join(", ")}</b> <br />
-          User Count: <b>{props.organization.members.length}</b> <br />
+          Default Event Id: <b>{props.organization.defaultEventId}</b>
+          <br />
+          Access Code: <b>{props.organization.accessCode.toUpperCase()}</b>
+          <br />
+          User Count: <b>{props.organization.members.length}</b>
+          <br />
         </ListCardBody>
         <ListCardButtons>
-          <HButton onClick={props.onAdd}>ADD EVENT</HButton>
-          <HButton onClick={props.onClear}>CLEAR</HButton>
-          <HButton onClick={props.onAdd}>SET DEFAULT</HButton>
+          {/*<HButton onClick={props.onAdd}>ADD EVENT</HButton>*/}
+          {/*<HButton onClick={props.onClear}>CLEAR</HButton>*/}
+          <HButton onClick={props.onSetDefault}>&nbsp;</HButton>
           <HButton onClick={props.onDelete} float="right">
             DELETE
           </HButton>
@@ -163,39 +166,39 @@ export function Organizations() {
           (a, b) =>
             compareTwoStrings(b.name, query) - compareTwoStrings(a.name, query)
         )
-        .map((r) => (
+        .map((org) => (
           <OrganizationCard
-            key={r.id}
-            organization={r}
+            key={org.id}
+            organization={org}
             onAdd={() => {
-              setCurrentId(r.id);
-              r.events.push(serverData.selectedEvent);
-              serverData.updateOrganization(r);
+              setCurrentId(org.id);
+              org.events.push(serverData.selectedEvent);
+              serverData.updateOrganization(org);
             }}
             onDelete={() => {
-              setCurrentId(r.id);
+              setCurrentId(org.id);
               setDeleteModalOpen(true);
             }}
             onEdit={() => {
-              setCurrentId(r.id);
-              setForm(toForm(r));
-              setOldDto(r);
+              setCurrentId(org.id);
+              setForm(toForm(org));
+              setOldDto(org);
               setEditModalOpen(true);
             }}
             onClear={() => {
-              setCurrentId(r.id);
-              r.events = [];
-              serverData.updateOrganization(r);
+              setCurrentId(org.id);
+              org.events = [];
+              serverData.updateOrganization(org);
             }}
             onSetDefault={() => {
-              setCurrentId(r.id);
+              setCurrentId(org.id);
               if (serverData.selectedEvent !== "") {
-                r.defaultEventId = serverData.selectedEvent;
-                serverData.updateOrganization(r);
+                org.defaultEventId = serverData.selectedEvent;
+                serverData.updateOrganization(org);
               }
             }}
             onSelect={() => {
-              serverData.selectOrg(r.id);
+              serverData.selectOrg(org.id);
             }}
           />
         ))}

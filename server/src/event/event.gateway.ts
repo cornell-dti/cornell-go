@@ -126,7 +126,13 @@ export class EventGateway {
       }
     } else {
       const dto = data.event as EventDto;
-      if (!(await this.eventService.hasAdminRights({ id: dto.id }, user))) {
+      if (
+        !(await this.orgService.isManagerOf(
+          { id: dto.initialOrganizationId ?? '' },
+          user,
+        )) &&
+        !(await this.eventService.hasAdminRights({ id: dto.id }, user))
+      ) {
         return;
       }
 
@@ -134,7 +140,9 @@ export class EventGateway {
         data.event as EventDto,
       );
 
-      const org = await this.orgService.getOrganizationById(ev.id);
+      const org = await this.orgService.getOrganizationById(
+        dto.initialOrganizationId!,
+      );
 
       await this.orgService.emitUpdateOrganizationData(org, false);
       await this.eventService.emitUpdateEventData(ev, false);

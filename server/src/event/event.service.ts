@@ -237,11 +237,12 @@ export class EventService {
   async dtoForEvent(ev: EventBase): Promise<EventDto> {
     const chals = await this.prisma.challenge.findMany({
       where: { linkedEventId: ev.id },
+      select: { id: true, eventIndex: true },
     });
 
-    const rwIds = await this.prisma.eventReward.findMany({
+    const rws = await this.prisma.eventReward.findMany({
       where: { eventId: ev.id },
-      select: { id: true },
+      select: { id: true, eventIndex: true },
     });
 
     return {
@@ -258,7 +259,9 @@ export class EventService {
       challengeIds: chals
         .sort((a, b) => a.eventIndex - b.eventIndex)
         .map(c => c.id),
-      rewardIds: rwIds.map(({ id }) => id),
+      rewardIds: rws
+        .sort((a, b) => a.eventIndex - b.eventIndex)
+        .map(({ id }) => id),
       minimumScore: ev.minimumScore,
       defaultChallengeId: ev.defaultChallengeId,
     };
@@ -395,6 +398,9 @@ export class EventService {
       where: { id: event.id },
       create: {
         ...assignData,
+        usedIn: {
+          connect: { id: event.initialOrganizationId ?? '' },
+        },
         defaultChallenge: {
           create: {
             ...defaultChallengeData,
@@ -404,9 +410,6 @@ export class EventService {
       update: {
         ...assignData,
         defaultChallengeId: event.defaultChallengeId,
-        usedIn: {
-          connect: { id: event.initialOrganizationId },
-        },
         challenges: {
           set: event.challengeIds
             .map(id => ({ id }))
@@ -420,7 +423,7 @@ export class EventService {
 
     const eventEntity2 = await this.prisma.eventBase.update({
       where: { id: eventEntity.id },
-      data: { challenges: { connect: { id: event.defaultChallengeId } } },
+      data: { challenges: { connect: { id: eventEntity.defaultChallengeId } } },
     });
 
     let eventIndexChal = 0;

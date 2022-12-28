@@ -30,6 +30,7 @@ function EventCard(props: {
   onSelect: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  onSetDefault: () => void;
 }) {
   const requiredText =
     props.event.requiredMembers < 0
@@ -68,7 +69,7 @@ function EventCard(props: {
           Publicly Visible: <b>{affirmOfBool(props.event.indexable)}</b>
         </ListCardBody>
         <ListCardButtons>
-          <HButton>&nbsp;</HButton>
+          <HButton onClick={props.onSetDefault}>SET DEFAULT</HButton>
           <HButton onClick={props.onDelete} float="right">
             DELETE
           </HButton>
@@ -86,7 +87,6 @@ function makeForm() {
     { name: "Name", characterLimit: 256, value: "" },
     { name: "Description", characterLimit: 2048, value: "" },
     { name: "Required Members", value: -1, min: -1, max: 99 },
-    { name: "Default", options: ["No", "Yes"], value: 0 },
     {
       name: "Reward Type",
       options: ["Unlimited", "Limited"],
@@ -103,15 +103,15 @@ function fromForm(form: EntryForm[], id: string): EventDto {
     id,
     requiredMembers: (form[2] as NumberEntryForm).value,
     rewardType:
-      (form[5] as OptionEntryForm).value === 0 ? "perpetual" : "limited_time",
+      (form[3] as OptionEntryForm).value === 0 ? "perpetual" : "limited_time",
     name: (form[0] as FreeEntryForm).value,
     description: (form[1] as FreeEntryForm).value,
-    indexable: (form[7] as OptionEntryForm).value === 1,
-    endTime: (form[8] as DateEntryForm).date.toUTCString(),
+    indexable: (form[5] as OptionEntryForm).value === 1,
+    endTime: (form[6] as DateEntryForm).date.toUTCString(),
     rewardIds: [],
     challengeIds: [],
     defaultChallengeId: "",
-    minimumScore: (form[6] as NumberEntryForm).value,
+    minimumScore: (form[4] as NumberEntryForm).value,
   };
 }
 
@@ -184,9 +184,11 @@ export function Events() {
         isOpen={isEditModalOpen}
         entryButtonText="EDIT"
         onEntry={() => {
-          const { challengeIds, rewardIds } = serverData.events.get(currentId)!;
+          const { challengeIds, rewardIds, defaultChallengeId } =
+            serverData.events.get(currentId)!;
           serverData.updateEvent({
             ...fromForm(form, currentId),
+            defaultChallengeId,
             challengeIds,
             rewardIds,
           });
@@ -246,6 +248,15 @@ export function Events() {
             onDelete={() => {
               setCurrentId(ev.id);
               setDeleteModalOpen(true);
+            }}
+            onSetDefault={() => {
+              if (serverData.selectedOrg !== "") {
+                const org = serverData.organizations.get(
+                  serverData.selectedOrg
+                )!;
+                org.defaultEventId = ev.id;
+                serverData.updateOrganization(org);
+              }
             }}
             onEdit={() => {
               setCurrentId(ev.id);

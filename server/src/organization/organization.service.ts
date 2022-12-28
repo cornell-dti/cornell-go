@@ -150,14 +150,15 @@ export class OrganizationService {
       deleted,
     };
 
-    if (user && admin) {
+    // Only admin data for now
+    if (user) {
       await this.clientService.sendUpdate(
         'updateOrganizationData',
         user.id,
         true,
         dto,
       );
-    } else if (admin) {
+    } else {
       await this.clientService.sendUpdate(
         'updateOrganizationData',
         organization.id,
@@ -182,6 +183,11 @@ export class OrganizationService {
 
   /** Update/insert a organization group */
   async upsertOrganizationFromDto(organization: OrganizationDto) {
+    const exists =
+      (await this.prisma.organization.count({
+        where: { id: organization.id },
+      })) > 0;
+
     return await this.prisma.organization.upsert({
       where: { id: organization.id },
       create: {
@@ -194,7 +200,7 @@ export class OrganizationService {
           connect: organization.events.map(id => ({ id })),
         },
         defaultEvent: {
-          connect: { id: (await this.makeDefaultEvent()).id },
+          connect: { id: exists ? '' : (await this.makeDefaultEvent()).id },
         },
         specialUsage: 'NONE',
       },
