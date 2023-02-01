@@ -1,6 +1,6 @@
 import { useContext, useState } from "react";
 import { compareTwoStrings } from "string-similarity";
-import { RewardDto } from "../dto/update-rewards.dto";
+import { RewardDto } from "../dto/reward.dto";
 import { moveDown, moveUp } from "../ordering";
 import { AlertModal } from "./AlertModal";
 import { DeleteModal } from "./DeleteModal";
@@ -8,6 +8,7 @@ import { EntryForm, EntryModal, FreeEntryForm } from "./EntryModal";
 import { HButton } from "./HButton";
 import {
   ButtonSizer,
+  CenterText,
   ListCardBody,
   ListCardBox,
   ListCardButtons,
@@ -39,7 +40,7 @@ function RewardCard(props: {
       <ListCardBody>
         Id: <b>{props.reward.id}</b>
         <br />
-        Claiming User Id: <b>{props.reward.claimingUserId}</b>
+        Claiming User Id: <b>{props.reward.userId}</b>
         <br />
       </ListCardBody>
       <ListCardButtons>
@@ -68,8 +69,8 @@ function fromForm(form: EntryForm[], eventId: string, id: string): RewardDto {
     id,
     description: (form[0] as FreeEntryForm).value,
     redeemInfo: (form[1] as FreeEntryForm).value,
-    containingEventId: eventId,
-    claimingUserId: "",
+    eventId,
+    userId: "",
   };
 }
 
@@ -148,6 +149,14 @@ export function Rewards() {
         }}
         onSearch={(query) => setQuery(query)}
       />
+      {serverData.selectedEvent === "" ? (
+        <CenterText>Select an event to view rewards</CenterText>
+      ) : serverData.events.get(serverData.selectedEvent) ? (
+        serverData.events.get(serverData.selectedEvent)?.rewardIds.length ===
+          0 && <CenterText>No rewards in event</CenterText>
+      ) : (
+        <CenterText>Error getting rewards</CenterText>
+      )}
       {selectedEvent?.rewardIds
         .filter((rwId) => serverData.rewards.get(rwId))
         .map((rwId) => serverData.rewards.get(rwId)!)
@@ -156,8 +165,8 @@ export function Rewards() {
             ? 0
             : compareTwoStrings(b.description, query) -
               compareTwoStrings(a.description, query) +
-              compareTwoStrings(b.redeemInfo, query) -
-              compareTwoStrings(a.redeemInfo, query)
+              compareTwoStrings(b.redeemInfo!, query) -
+              compareTwoStrings(a.redeemInfo!, query)
         )
         .map((rw) => (
           <RewardCard

@@ -12,9 +12,18 @@ import { UserGateway } from 'src/user/user.gateway';
 import { CallingUser } from '../auth/calling-user.decorator';
 import { ClientService } from '../client/client.service';
 import { ChallengeService } from './challenge.service';
-import { CompletedChallengeDto } from './completed-challenge.dto';
-import { RequestChallengeDataDto } from './request-challenge-data.dto';
-import { SetCurrentChallengeDto } from './set-current-challenge.dto';
+import {
+  ChallengeDto,
+  CompletedChallengeDto,
+  RequestChallengeDataDto,
+  SetCurrentChallengeDto,
+  UpdateChallengeDataDto,
+} from './challenge.dto';
+import { GroupService } from 'src/group/group.service';
+import { UserService } from 'src/user/user.service';
+import { EventService } from 'src/event/event.service';
+import { RequestGlobalLeaderDataDto } from 'src/user/user.dto';
+import { RewardService } from 'src/reward/reward.service';
 
 @WebSocketGateway({ cors: true })
 @UseGuards(UserGuard)
@@ -22,9 +31,10 @@ export class ChallengeGateway {
   constructor(
     private clientService: ClientService,
     private challengeService: ChallengeService,
-    private userGateway: UserGateway,
-    private groupGateway: GroupGateway,
-    private eventGateway: EventGateway,
+    private userService: UserService,
+    private groupService: GroupService,
+    private eventService: EventService,
+    private rewardService: RewardService,
   ) {}
 
   @SubscribeMessage('requestChallengeData')
@@ -32,34 +42,39 @@ export class ChallengeGateway {
     @CallingUser() user: User,
     @MessageBody() data: RequestChallengeDataDto,
   ) {
-    const completeChallenges =
-      await this.challengeService.getChallengesByIdsWithPrevChallenge(
+    const adminChallenges =
+      await this.challengeService.getChallengesByIdsForUser(
         user,
+        true,
         data.challengeIds,
       );
 
-    this.clientService.emitUpdateChallengeData(user, {
-      challenges: await Promise.all(
-        completeChallenges
-          .sort((a, b) => a.eventIndex - b.eventIndex)
-          .map(async ch => ({
-            id: ch.id,
-            name: ch.name,
-            description: ch.description,
-            imageUrl: ch.imageUrl,
-            lat: ch.latitude,
-            long: ch.longitude,
-            awardingRadius: ch.awardingRadius,
-            closeRadius: ch.closeRadius,
-            completionDate: await this.challengeService.getUserCompletionDate(
-              user,
-              ch,
-            ),
-          })),
-      ),
-    });
+    const basicChallenges =
+      await this.challengeService.getChallengesByIdsForUser(
+        user,
+        true,
+        data.challengeIds,
+      );
 
-    return false;
+    for (const chal of adminChallenges) {
+      this.clientService.subscribe(user, chal.id, true);
+      await this.challengeService.emitUpdateChallengeData(
+        chal,
+        false,
+        true,
+        user,
+      );
+    }
+
+    for (const chal of basicChallenges) {
+      this.clientService.subscribe(user, chal.id, false);
+      await this.challengeService.emitUpdateChallengeData(
+        chal,
+        false,
+        false,
+        user,
+      );
+    }
   }
 
   @SubscribeMessage('setCurrentChallenge')
@@ -67,20 +82,17 @@ export class ChallengeGateway {
     @CallingUser() user: User,
     @MessageBody() data: SetCurrentChallengeDto,
   ) {
-    const [ev, mems] = await this.challengeService.setCurrentChallenge(
-      user,
-      data.challengeId,
-    );
+    if (
+      await this.challengeService.setCurrentChallenge(user, data.challengeId)
+    ) {
+      const group = await this.groupService.getGroupForUser(user);
+      const tracker = await this.eventService.getCurrentEventTrackerForUser(
+        user,
+      );
 
-    for (const mem of mems) {
-      this.groupGateway.requestGroupData(mem, {});
+      await this.groupService.emitUpdateGroupData(group, false);
+      await this.eventService.emitUpdateEventTracker(tracker);
     }
-
-    await this.eventGateway.requestEventTrackerData(user, {
-      trackedEventIds: [ev.id],
-    });
-
-    return false;
   }
 
   @SubscribeMessage('completedChallenge')
@@ -88,33 +100,79 @@ export class ChallengeGateway {
     @CallingUser() user: User,
     @MessageBody() data: CompletedChallengeDto,
   ) {
-    const [newTracker, mems] = await this.challengeService.completeChallenge(
-      user,
-      data.challengeId,
-    );
+    if (await this.challengeService.completeChallenge(user, data.challengeId)) {
+      const group = await this.groupService.getGroupForUser(user);
+      const tracker = await this.eventService.getCurrentEventTrackerForUser(
+        user,
+      );
 
-    for (const mem of mems) {
-      await this.groupGateway.requestGroupData(mem, {});
+      const rw = await this.challengeService.checkForReward(tracker);
+      if (rw) {
+        const ev = await this.eventService.getEventById(rw.eventId);
+        await this.eventService.emitUpdateEventData(ev, false);
+        await this.rewardService.emitUpdateRewardData(rw, false, true, user);
+      }
+
+      await this.groupService.emitUpdateGroupData(group, false);
+      await this.eventService.emitUpdateEventTracker(tracker);
+      await this.userService.emitUpdateUserData(user, false, false, true, user);
     }
+  }
 
-    await this.eventGateway.requestEventTrackerData(user, {
-      trackedEventIds: [newTracker.eventId],
-    });
+  @SubscribeMessage('requestGlobalLeaderData')
+  async requestGlobalLeaderData(
+    @CallingUser() user: User,
+    @MessageBody() data: RequestGlobalLeaderDataDto,
+  ) {
+    await this.eventService.emitUpdateLeaderData(
+      data.offset,
+      Math.min(data.count, 1024),
+      null,
+      user,
+    );
+  }
 
-    await this.requestChallengeData(user, {
-      challengeIds: [data.challengeId, newTracker.curChallengeId],
-    });
+  @SubscribeMessage('updateChallengeData')
+  async updateChallengeData(
+    @CallingUser() user: User,
+    @MessageBody() data: UpdateChallengeDataDto,
+  ) {
+    if (data.deleted) {
+      const challenge = await this.challengeService.getChallengeById(
+        data.challenge as string,
+      );
 
-    await this.challengeService.checkForReward(newTracker);
-    await this.userGateway.requestUserData(user, {});
+      const ev = await this.eventService.getEventById(challenge.linkedEventId);
 
-    this.clientService.emitInvalidateData({
-      userEventData: false,
-      userRewardData: false,
-      winnerRewardData: true,
-      groupData: false,
-      challengeData: false,
-      leaderboardData: true,
-    });
+      if (
+        !(await this.eventService.hasAdminRights(
+          { id: challenge.linkedEventId! },
+          user,
+        ))
+      ) {
+        return;
+      }
+
+      await this.challengeService.removeChallenge(challenge.id, user);
+
+      await this.challengeService.emitUpdateChallengeData(challenge, true);
+      await this.eventService.emitUpdateEventData(ev, false);
+    } else {
+      const dto = data.challenge as ChallengeDto;
+      if (
+        !(await this.eventService.hasAdminRights(
+          { id: dto.containingEventId },
+          user,
+        ))
+      ) {
+        return;
+      }
+
+      const challenge = await this.challengeService.upsertChallengeFromDto(dto);
+      const ev = await this.eventService.getEventById(challenge.linkedEventId);
+
+      await this.challengeService.emitUpdateChallengeData(challenge, false);
+      await this.eventService.emitUpdateEventData(ev, false);
+    }
   }
 }

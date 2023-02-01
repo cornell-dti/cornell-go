@@ -12,7 +12,7 @@ import { UserService } from './user.service';
   imports: [
     forwardRef(() => AuthModule),
     ClientModule,
-    GroupModule,
+    forwardRef(() => GroupModule),
     PrismaModule,
     EventModule,
     OrganizationModule,

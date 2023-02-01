@@ -14,10 +14,9 @@ export class AuthGateway implements OnGatewayConnection {
       client.handshake.auth['token'] ?? client.handshake.query['token'];
     const user = await this.authService.userByToken(token);
     if (user) {
-      client.join(user.id);
-      if (user.adminGranted) {
-        console.log(`Admin ${user.id} joined admins`);
-        client.join('admins');
+      client.join(['client/' + user.id, 'admin/' + user.id]);
+      for (const id of await this.authService.getManagedOrgIds(user)) {
+        client.join(id);
       }
     } else {
       client.disconnect(true);
