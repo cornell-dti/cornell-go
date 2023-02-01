@@ -130,7 +130,7 @@ export class AuthService {
     const isDevWhileDevice =
       process.env.DEVELOPMENT === 'true' || authType !== AuthType.DEVICE;
 
-    if (!user && isDevWhileDevice) {
+    if (!user) {
       user = await this.userService.register(
         idToken.email,
         idToken.email?.split('@')[0],
@@ -159,12 +159,9 @@ export class AuthService {
     await this.prisma.user.update({
       where: { id: user.id },
       data: {
-        adminRequested: !user.adminGranted && aud === 'web',
         hashedRefreshToken: await this.hashSalt(refreshToken),
       },
     });
-
-    if (aud === 'web' && !user.adminGranted) return null;
 
     return [accessToken, refreshToken];
   }
@@ -208,6 +205,15 @@ export class AuthService {
       console.log(e);
       return null;
     }
+  }
+
+  async getManagedOrgIds(user: User) {
+    return (
+      await this.prisma.organization.findMany({
+        where: { managers: { some: { id: user.id } } },
+        select: { id: true },
+      })
+    ).map(({ id }) => id);
   }
 
   private async pdfk2Async(

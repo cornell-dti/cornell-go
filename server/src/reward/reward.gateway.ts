@@ -6,10 +6,14 @@ import {
 } from '@nestjs/websockets';
 import { User } from '@prisma/client';
 import { UserGuard } from 'src/auth/jwt-auth.guard';
+import { EventService } from 'src/event/event.service';
 import { CallingUser } from '../auth/calling-user.decorator';
 import { ClientService } from '../client/client.service';
-import { UpdateRewardDataDto } from '../client/update-reward-data.dto';
-import { RequestRewardDataDto } from './request-reward-data.dto';
+import {
+  RequestRewardDataDto,
+  RewardDto,
+  UpdateRewardDataDto,
+} from './reward.dto';
 import { RewardService } from './reward.service';
 
 @WebSocketGateway({ cors: true })
@@ -18,6 +22,7 @@ export class RewardGateway {
   constructor(
     private clientService: ClientService,
     private rewardService: RewardService,
+    private eventService: EventService,
   ) {}
 
   @SubscribeMessage('requestRewardData')
@@ -25,36 +30,72 @@ export class RewardGateway {
     @CallingUser() user: User,
     @MessageBody() data: RequestRewardDataDto,
   ) {
-    const rewardData = await this.rewardService.getRewardsForUser(
+    const owned = await this.rewardService.getRewardsForUser(
       user,
       data.rewardIds,
     );
 
-    const rewardDataUnowned = await this.rewardService.getRewardsNotForUser(
+    const unowned = await this.rewardService.getRewardsNotForUser(
       user,
       data.rewardIds,
     );
 
-    const updateData: UpdateRewardDataDto = {
-      rewards: [
-        ...rewardData.map(rw => ({
-          rewardId: rw.id,
-          eventId: rw.eventId,
-          description: rw.description,
-          redeemInfo: rw.redeemInfo,
-          isRedeemed: rw.isRedeemed,
-        })),
-        ...rewardDataUnowned.map(rw => ({
-          rewardId: rw.id,
-          eventId: rw.eventId,
-          description: rw.description,
-          redeemInfo: '',
-          isRedeemed: false,
-        })),
-      ],
-    };
+    for (const rw of owned) {
+      await this.rewardService.emitUpdateRewardData(rw, false, true, user);
+    }
 
-    this.clientService.emitUpdateRewardData(user, updateData);
-    return false;
+    for (const rw of unowned) {
+      await this.rewardService.emitUpdateRewardData(
+        rw,
+        false,
+        await this.eventService.hasAdminRights({ id: rw.eventId }, user),
+        user,
+      );
+    }
+  }
+
+  @SubscribeMessage('updateRewardData')
+  async updateRewardData(
+    @CallingUser() user: User,
+    @MessageBody() data: UpdateRewardDataDto,
+  ) {
+    if (data.deleted) {
+      const rw = await this.rewardService.getRewardById(data.reward as string);
+      const ev = await this.eventService.getEventById(rw.eventId);
+
+      if (
+        !(await this.eventService.hasAdminRights(
+          {
+            id: rw.eventId,
+          },
+          user,
+        ))
+      ) {
+        return;
+      }
+
+      await this.rewardService.removeReward(rw.id, user);
+      await this.rewardService.emitUpdateRewardData(rw, true);
+      await this.eventService.emitUpdateEventData(ev, false);
+    } else {
+      const dto = data.reward as RewardDto;
+
+      if (
+        !(await this.eventService.hasAdminRights(
+          {
+            id: dto.eventId,
+          },
+          user,
+        ))
+      ) {
+        return;
+      }
+
+      const rw = await this.rewardService.upsertRewardFromDto(dto);
+      const ev = await this.eventService.getEventById(rw.eventId);
+
+      await this.rewardService.emitUpdateRewardData(rw, false);
+      await this.eventService.emitUpdateEventData(ev, false);
+    }
   }
 }

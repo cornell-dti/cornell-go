@@ -1,6 +1,5 @@
 import { Home } from "./components/Home";
 import { Rewards } from "./components/Rewards";
-import { Admins } from "./components/Admins";
 import { Challenges } from "./components/Challenges";
 import { Events } from "./components/Events";
 import { Organizations } from "./components/Organizations";
@@ -23,6 +22,11 @@ import {
   faUserShield,
   faLock,
   faUserGroup,
+  faBuildingUser,
+  faBuildingLock,
+  faBuildingShield,
+  faSitemap,
+  faBuilding,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -42,10 +46,10 @@ const routes = [
     name: "Home",
   },
   {
-    path: "/admins",
-    element: <Admins />,
-    icon: faUserShield,
-    name: "Admin Approval",
+    path: "/organizations",
+    element: <Organizations />,
+    icon: faBuilding,
+    name: "Organizations",
   },
   {
     path: "/events",
@@ -70,12 +74,6 @@ const routes = [
     element: <Groups />,
     icon: faUserGroup,
     name: "Groups",
-  },
-  {
-    path: "/organizations",
-    element: <Organizations />,
-    icon: faLock,
-    name: "Organizations",
   },
 ];
 
@@ -130,9 +128,12 @@ export default function App() {
             <SidebarIcon>
               <FontAwesomeIcon icon={faUnlink} />
             </SidebarIcon>
-            Disconnect
+            Log out
           </RedText>
         </SidebarButton>
+        <SidebarText>
+          {data.organizations.get(data.selectedOrg)?.name ?? "No Org. Selected"}
+        </SidebarText>
         <SidebarText>
           {data.events.get(data.selectedEvent)?.name ?? "No Event Selected"}
         </SidebarText>
