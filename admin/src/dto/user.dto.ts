@@ -6,6 +6,16 @@ export interface SetUsernameDto {
   newUsername: string;
 }
 
+/** DTO for setMajor */
+export interface SetMajorDto {
+  newMajor: string;
+}
+
+/** DTO for setGraduationYear */
+export interface SetGraduationYearDto {
+  newYear: string;
+}
+
 /** DTO for setAuthToOAuth */
 export interface SetAuthToOAuthDto {
   provider: "apple" | "google";
@@ -34,6 +44,8 @@ export type UserAuthTypeDto = "device" | "apple" | "google";
 export interface UserDto {
   id: string;
   username: string;
+  major: string;
+  year: string;
   score: number;
   groupId: string;
   authType: UserAuthTypeDto;
