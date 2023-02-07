@@ -31,6 +31,8 @@ model User {
   authToken           String
   authType            AuthType
   username            String
+  major               String
+  year                String
   email               String
   hashedRefreshToken  String
   administrator       Boolean
