@@ -91,6 +91,8 @@ model EventBase {
   defaultChallengeId String          @unique
   trackers           EventTracker[]
   activeGroups       Group[]
+  latitude           Float
+  longitude          Float
 }
 
 model EventReward {

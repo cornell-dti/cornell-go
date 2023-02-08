@@ -237,13 +237,15 @@ export class EventService {
   async dtoForEvent(ev: EventBase): Promise<EventDto> {
     const chals = await this.prisma.challenge.findMany({
       where: { linkedEventId: ev.id },
-      select: { id: true, eventIndex: true },
+      select: { id: true, eventIndex: true, latitude: true, longitude: true },
     });
 
     const rws = await this.prisma.eventReward.findMany({
       where: { eventId: ev.id },
       select: { id: true, eventIndex: true },
     });
+
+    const sorted_chals = chals.sort((a, b) => a.eventIndex - b.eventIndex);
 
     return {
       id: ev.id,
@@ -256,14 +258,14 @@ export class EventService {
       endTime: ev.endTime.toUTCString(),
       requiredMembers: ev.requiredMembers,
       indexable: ev.indexable,
-      challengeIds: chals
-        .sort((a, b) => a.eventIndex - b.eventIndex)
-        .map(c => c.id),
+      challengeIds: sorted_chals.map(c => c.id),
       rewardIds: rws
         .sort((a, b) => a.eventIndex - b.eventIndex)
         .map(({ id }) => id),
       minimumScore: ev.minimumScore,
       defaultChallengeId: ev.defaultChallengeId,
+      latitude: sorted_chals[0].latitude,
+      longitude: sorted_chals[0].longitude,
     };
   }
 
@@ -406,6 +408,8 @@ export class EventService {
             ...defaultChallengeData,
           },
         },
+        latitude: defaultChallengeData.latitude,
+        longitude: defaultChallengeData.longitude,
       },
       update: {
         ...assignData,
@@ -418,6 +422,8 @@ export class EventService {
         rewards: {
           set: event.rewardIds.map(id => ({ id })),
         },
+        latitude: event.latitude,
+        longitude: event.longitude,
       },
     });
 
