@@ -17,6 +17,8 @@ import {
   RequestUserDataDto,
   SetAuthToDeviceDto,
   SetAuthToOAuthDto,
+  SetGraduationYearDto,
+  SetMajorDto,
   SetUsernameDto,
 } from './user.dto';
 import { UserService } from './user.service';
@@ -94,6 +96,29 @@ export class UserGateway {
 
     const group = await this.groupService.getGroupForUser(user);
     await this.groupService.emitUpdateGroupData(group, false);
+  }
+
+  @SubscribeMessage('setMajor')
+  async setMajor(@CallingUser() user: User, @MessageBody() data: SetMajorDto) {
+    if (data.newMajor == 'Computer Science') {
+      await this.userService.setMajor(user, data.newMajor);
+
+      user.major = data.newMajor; // Updated so change here too
+
+      await this.userService.emitUpdateUserData(user, false, true, true);
+    }
+  }
+
+  @SubscribeMessage('setGraduationYear')
+  async setGraduationYear(
+    @CallingUser() user: User,
+    @MessageBody() data: SetGraduationYearDto,
+  ) {
+    await this.userService.setGraduationYear(user, data.newYear);
+
+    user.year = data.newYear; // Updated so change here too
+
+    await this.userService.emitUpdateUserData(user, false, true, true);
   }
 
   @SubscribeMessage('setAuthToDevice')
