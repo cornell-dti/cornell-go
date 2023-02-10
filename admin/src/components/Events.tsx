@@ -66,7 +66,7 @@ function EventCard(props: {
           Minimum Rewarding Score: <b>{props.event.minimumScore}</b> <br />
           Challenge Count: <b>{props.event.challengeIds.length}</b> <br />
           Reward Count: <b>{props.event.rewardIds.length}</b> <br />
-          Publicly Visible: <b>{affirmOfBool(props.event.indexable)}</b>
+          Publicly Visible: <b>{affirmOfBool(props.event.indexable)}</b> <br />
           Latitude: <b>{props.event.latitude}</b>, Longitude:{" "}
           <b>{props.event.longitude}</b> <br />
         </ListCardBody>

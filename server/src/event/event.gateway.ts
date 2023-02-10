@@ -103,6 +103,21 @@ export class EventGateway {
     }
   }
 
+  @SubscribeMessage('requestRecommendedEvents')
+  async requestRecommendedEvents(
+    @CallingUser() user: User,
+    @MessageBody() data: RequestEventTrackerDataDto,
+  ) {
+    const trackers = await this.eventService.getEventTrackersByEventId(
+      user,
+      data.trackedEventIds,
+    );
+
+    for (const tracker of trackers) {
+      await this.eventService.emitUpdateEventTracker(tracker);
+    }
+  }
+
   @SubscribeMessage('updateEventData')
   async updateEventData(
     @CallingUser() user: User,
