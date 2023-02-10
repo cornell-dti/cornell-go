@@ -250,4 +250,38 @@ export class OrganizationService {
       }
     }
   }
+
+  async addManager(
+    manager: User,
+    potentialManagerId: string,
+    org: Organization,
+  ) {
+    if (await this.isManagerOf(manager, org)) {
+      await this.prisma.organization.update({
+        where: { id: org.id },
+        data: { managers: { connect: { id: potentialManagerId } } },
+      });
+
+      await this.prisma.user.update({
+        where: { id: potentialManagerId },
+        data: { managerOf: { connect: { id: org.id } } },
+      });
+    }
+  }
+
+  async joinOrganization(user: User, code: string) {
+    const org = await this.prisma.organization.findFirstOrThrow({
+      where: { accessCode: code },
+    });
+
+    await this.prisma.organization.update({
+      where: { id: org.id },
+      data: { members: { connect: { id: user.id } } },
+    });
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { memberOf: { connect: { id: org.id } } },
+    });
+  }
 }
