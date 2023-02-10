@@ -129,6 +129,8 @@ export class UserService {
     return {
       id: joinedUser.id,
       username: joinedUser.username,
+      major: joinedUser.major,
+      year: joinedUser.year,
       score: joinedUser.score,
       groupId: joinedUser.group.friendlyId,
       authType: (

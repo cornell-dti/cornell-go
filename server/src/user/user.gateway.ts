@@ -22,7 +22,9 @@ import {
   SetUsernameDto,
 } from './user.dto';
 import { UserService } from './user.service';
+import { readFileSync } from 'fs';
 
+const majors = readFileSync("./majors.txt",'utf8').split('\n');
 const replaceAll = require('string.prototype.replaceall');
 replaceAll.shim();
 
@@ -100,7 +102,7 @@ export class UserGateway {
 
   @SubscribeMessage('setMajor')
   async setMajor(@CallingUser() user: User, @MessageBody() data: SetMajorDto) {
-    if (data.newMajor == 'Computer Science') {
+    if (majors.includes(data.newMajor)) {
       await this.userService.setMajor(user, data.newMajor);
 
       user.major = data.newMajor; // Updated so change here too
