@@ -16,6 +16,12 @@ export interface RequestEventLeaderDataDto {
   eventId: string;
 }
 
+/** DTO for requestFavoriteEventData */
+export interface RequestFavoriteEventDataDto {
+  isFavorite: boolean;
+  eventId: string;
+}
+
 export interface EventDto {
   id: string;
   requiredMembers: number;
@@ -25,7 +31,7 @@ export interface EventDto {
   endTime: string;
   rewardIds: string[];
   challengeIds: string[];
-
+  userFavoriteIds?: string[];
   initialOrganizationId?: string;
   defaultChallengeId: string;
   minimumScore: number;

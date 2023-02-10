@@ -40,6 +40,7 @@ model User {
   groupId             String
   hostOf              Group?          @relation("host")
   eventTrackers       EventTracker[]
+  favorites           EventBase[]
   completedChallenges PrevChallenge[] @relation("owner")
   memberOf            Organization[]  @relation("player")
   managerOf           Organization[]  @relation("manager")
@@ -86,6 +87,7 @@ model EventBase {
   rewards            EventReward[]
   challenges         Challenge[]     @relation("all")
   usedIn             Organization[]  @relation("events")
+  userFavorite       User[]
   defaultOf          Organization[]  @relation("defaultOrg")
   defaultChallenge   Challenge       @relation("default", fields: [defaultChallengeId], references: [id])
   defaultChallengeId String          @unique

@@ -1,5 +1,5 @@
 /** DTO for closeAccount */
-export interface CloseAccountDto {}
+export interface CloseAccountDto { }
 
 /** DTO for setUsername */
 export interface SetUsernameDto {
@@ -39,6 +39,7 @@ export interface UserDto {
   authType: UserAuthTypeDto;
   rewardIds?: string[];
   trackedEventIds?: string[];
+  favoriteIds?: string[];
 }
 
 export interface UpdateUserDto {
