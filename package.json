@@ -6,7 +6,6 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "dbreset": "node ./scripts/dbreset.js",
-    "dbmigrate": "node ./scripts/dbmigrate.js"
+    "dbreset": "node ./scripts/dbreset.js"
   }
 }
