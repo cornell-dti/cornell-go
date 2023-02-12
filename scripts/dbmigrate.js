@@ -1,6 +1,6 @@
 const { execSync, spawnSync } = require("child_process");
 const { rmSync, mkdirSync, readFileSync, writeFileSync } = require("fs");
-const { chdir, argv } = require("process");
+const { chdir } = require("process");
 
 async function main() {
   execSync("docker compose stop");
@@ -15,7 +15,7 @@ async function main() {
   const oldEnv = readFileSync("./.env", "utf-8");
   writeFileSync("./.env", "DATABASE_URL=postgresql://postgres:test@localhost:5432/postgres", { encoding: 'utf-8', flag: 'w' });
 
-  spawnSync("npx prisma migrate dev");
+  execSync("npx prisma migrate dev");
   writeFileSync("./.env", oldEnv, { encoding: 'utf-8', flag: 'w' });
 
   execSync("docker compose stop");
