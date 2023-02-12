@@ -79,7 +79,7 @@ npm run dbreset
 ### Create a database migration
 
 ```
-npm run dbmigrate
+npm run dbmigrate -- my_migration
 ```
 
 ## Contributors
