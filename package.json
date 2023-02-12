@@ -7,6 +7,6 @@
   "license": "UNLICENSED",
   "scripts": {
     "dbreset": "node ./scripts/dbreset.js",
-    "dbmigration": "node ./scripts/dbmigration.js"
+    "dbmigrate": "node ./scripts/dbmigrate.js"
   }
 }
