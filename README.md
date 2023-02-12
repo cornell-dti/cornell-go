@@ -25,7 +25,7 @@ docker compose up --build
 ### Start the container in the background
 
 ```
-docker compose restart
+docker compose up --build -d
 ```
 
 ### Stop the container
@@ -68,6 +68,18 @@ cd server
 npx typedoc
 
 The docs are now viewable at server/docs/index.html
+```
+
+### Reset database or test a new schema
+
+```
+npm run dbreset
+```
+
+### Create a database migration
+
+```
+npm run dbmigrate
 ```
 
 ## Contributors
