@@ -224,6 +224,15 @@ export class EventService {
     });
   }
 
+  async getRecommendedEventsForUser(user: User, lat: number, long: number) {
+    const evs: EventBase[] = await this.prisma.$queryRaw`
+      select * from "EventBase" ev 
+      order by ((ev."latitude" - ${lat})^2 + (ev."longitude" - ${long})^2)
+      fetch first 4 rows only
+    `;
+    return evs;
+  }
+
   /** Get the top N users by score */
   async getTopPlayers(firstIndex: number, count: number) {
     return await this.prisma.user.findMany({
@@ -264,8 +273,8 @@ export class EventService {
         .map(({ id }) => id),
       minimumScore: ev.minimumScore,
       defaultChallengeId: ev.defaultChallengeId,
-      latitude: sorted_chals[0].latitude,
-      longitude: sorted_chals[0].longitude,
+      latitude: ev.latitude,
+      longitude: ev.longitude,
     };
   }
 
@@ -383,6 +392,12 @@ export class EventService {
   }
 
   async upsertEventFromDto(event: EventDto) {
+    const firstChal = await this.prisma.challenge.findFirst({
+      where: { id: event.challengeIds[0] },
+      select: { latitude: true, longitude: true },
+    });
+    console.log(firstChal);
+
     const assignData = {
       requiredMembers: event.requiredMembers,
       name: event.name.substring(0, 2048),
@@ -394,6 +409,8 @@ export class EventService {
       endTime: new Date(event.endTime),
       indexable: event.indexable,
       minimumScore: event.minimumScore,
+      latitude: firstChal?.latitude ?? 0,
+      longitude: firstChal?.longitude ?? 0,
     };
 
     const eventEntity = await this.prisma.eventBase.upsert({
@@ -408,8 +425,6 @@ export class EventService {
             ...defaultChallengeData,
           },
         },
-        latitude: defaultChallengeData.latitude,
-        longitude: defaultChallengeData.longitude,
       },
       update: {
         ...assignData,
@@ -422,8 +437,6 @@ export class EventService {
         rewards: {
           set: event.rewardIds.map(id => ({ id })),
         },
-        latitude: event.latitude,
-        longitude: event.longitude,
       },
     });
 

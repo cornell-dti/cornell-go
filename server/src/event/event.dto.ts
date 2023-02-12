@@ -16,6 +16,11 @@ export interface RequestEventLeaderDataDto {
   eventId: string;
 }
 
+export interface RequestRecommendedEventsDto {
+  latitude: number;
+  longitude: number;
+}
+
 export interface EventDto {
   id: string;
   requiredMembers: number;
