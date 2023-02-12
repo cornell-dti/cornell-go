@@ -22,7 +22,7 @@ export class EventService {
     private clientService: ClientService,
     private orgService: OrganizationService,
     private readonly prisma: PrismaService,
-  ) { }
+  ) {}
 
   /** Get event by id */
   async getEventById(id: string | null) {
@@ -240,13 +240,12 @@ export class EventService {
     if (isFavorite) {
       return await this.prisma.user.update({
         where: { id: user.id },
-        data: { favorites: { connect: { id: ev.id } } }
+        data: { favorites: { connect: { id: ev.id } } },
       });
-    }
-    else {
+    } else {
       return await this.prisma.user.update({
         where: { id: user.id },
-        data: { favorites: { disconnect: { id: ev.id } } }
+        data: { favorites: { disconnect: { id: ev.id } } },
       });
     }
   }
