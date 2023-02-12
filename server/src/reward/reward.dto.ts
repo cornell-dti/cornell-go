@@ -13,10 +13,6 @@ export interface RewardDto {
   isRedeemed?: boolean;
 }
 
-export interface RequestRewardDataDto {
-  rewardIds: string[];
-}
-
 export interface UpdateRewardDataDto {
   reward: RewardDto | string;
   deleted: boolean;

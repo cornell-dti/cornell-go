@@ -1,21 +1,19 @@
-enum UpdateUserDataAuthTypeDto { DEVICE, APPLE, GOOGLE }
+enum UserDataAuthTypeDto { DEVICE, APPLE, GOOGLE }
 
-class UpdateUserDataDto {
-  UpdateUserDataDto.fromJson(Map<String, dynamic> fields) {
+class UserDto {
+  UserDto.fromJson(Map<String, dynamic> fields) {
     id = fields["id"];
     username = fields["username"];
     score = fields["score"];
     groupId = fields["groupId"];
     rewardIds = fields["rewardIds"].cast<String>();
     trackedEventIds = fields["trackedEventIds"].cast<String>();
-    ignoreIdLists = fields["ignoreIdLists"];
     authType = fields["authType"] == "google"
-        ? UpdateUserDataAuthTypeDto.GOOGLE
+        ? UserDataAuthTypeDto.GOOGLE
         : fields["authType"] == "apple"
-            ? UpdateUserDataAuthTypeDto.APPLE
-            : UpdateUserDataAuthTypeDto.DEVICE;
+            ? UserDataAuthTypeDto.APPLE
+            : UserDataAuthTypeDto.DEVICE;
   }
-
   String id = "";
   String username = "";
   int score = 0;
@@ -23,128 +21,121 @@ class UpdateUserDataDto {
   List<String> rewardIds = [];
   List<String> trackedEventIds = [];
   bool ignoreIdLists = false;
-  UpdateUserDataAuthTypeDto authType =
-      UpdateUserDataAuthTypeDto.DEVICE; // device, apple, google
+  UserDataAuthTypeDto authType = UserDataAuthTypeDto.DEVICE;
 }
 
-class UserRewardedDto {
-  UserRewardedDto.fromJson(Map<String, dynamic> fields) {
-    rewardId = fields["rewardId"];
-    rewardDescription = fields["rewardDescription"];
+class UpdateUserDto {
+  UpdateUserDto.fromJson(Map<String, dynamic> fields) {
+    user = fields["user"] is String ? fields['user'] : UserDto.fromJson(fields);
+    deleted = fields["deleted"];
   }
-
-  String rewardId = "";
-  String rewardDescription = "";
+  dynamic user = "";
+  bool deleted = false;
 }
 
-class InvalidateDataDto {
-  InvalidateDataDto.fromJson(Map<String, dynamic> fields) {
-    userRewardData = fields["userRewardData"];
-    winnerRewardData = fields["winnerRewardData"];
-    userEventData = fields["userEventData"];
-    groupData = fields["groupData"];
-    challengeData = fields["challengeData"];
-    leaderboardData = fields["leaderboardData"];
-  }
-
-  bool userRewardData = false;
-  bool winnerRewardData = false;
-  bool userEventData = false;
-  bool groupData = false;
-  bool challengeData = false;
-  bool leaderboardData = false;
-}
-
-class UpdateRewardDataRewardDto {
-  UpdateRewardDataRewardDto.fromJson(Map<String, dynamic> fields) {
-    rewardId = fields["rewardId"];
+class RewardDto {
+  RewardDto.fromJson(Map<String, dynamic> fields) {
+    id = fields["rewardId"];
     eventId = fields["eventId"];
+    userId = fields["userId"];
     description = fields["description"];
     redeemInfo = fields["redeemInfo"];
     isRedeemed = fields["isRedeemed"];
   }
-
-  String rewardId = "";
+  String id = "";
   String eventId = "";
   String description = "";
+  String userId = "";
   String redeemInfo = "";
   bool isRedeemed = false;
 }
 
 class UpdateRewardDataDto {
   UpdateRewardDataDto.fromJson(Map<String, dynamic> fields) {
-    rewards = fields["rewards"]
-        .map<UpdateRewardDataRewardDto>(
-            (dynamic reward) => UpdateRewardDataRewardDto.fromJson(reward))
-        .toList();
+    reward = fields["reward"] is String
+        ? fields["reward"]
+        : RewardDto.fromJson(fields);
+    deleted = fields["deleted"];
   }
-
-  List<UpdateRewardDataRewardDto> rewards = [];
+  dynamic reward = "";
+  bool deleted = false;
 }
 
-class UpdateEventDataRewardDto {
-  UpdateEventDataRewardDto.fromJson(Map<String, dynamic> fields) {
-    id = fields["id"];
-    description = fields["description"];
+class RequestRewardDataDto {
+  RequestRewardDataDto.fromJson(Map<String, dynamic> fields) {
+    rewardIds = fields["rewardIds"];
   }
-
-  String id = "";
-  String description = "";
+  List<String> rewardIds = [];
 }
 
-enum UpdateEventDataEventRewardTypeDto {
+enum EventRewardTypeDto {
   PERPETUAL,
   LIMITED_TIME_EVENT,
 }
 
-class UpdateEventDataEventDto {
-  UpdateEventDataEventDto.fromJson(Map<String, dynamic> fields) {
+class EventDto {
+  EventDto.fromJson(Map<String, dynamic> fields) {
     id = fields["id"];
-    skippingEnabled = fields["skippingEnabled"];
+    requiredMembers = fields["requiredMembers"];
     name = fields["name"];
     description = fields["description"];
-    switch (fields["rewardType"]) {
-      case "perpetual":
-        rewardType = UpdateEventDataEventRewardTypeDto.PERPETUAL;
-        break;
-      case "limited_time_event":
-        rewardType = UpdateEventDataEventRewardTypeDto.LIMITED_TIME_EVENT;
-        break;
-    }
-    time = fields["time"] == '' ||
-            rewardType == UpdateEventDataEventRewardTypeDto.PERPETUAL
-        ? null
-        : DateTime.parse(fields["time"]);
-    rewards = fields["rewards"]
-        .map<UpdateEventDataRewardDto>(
-            (dynamic reward) => UpdateEventDataRewardDto.fromJson(reward))
-        .toList();
-    requiredMembers = fields["requiredMembers"];
-    challengeIds = fields["challengeIds"].cast<String>();
+    reward = fields["rewardType"] == "limited_time"
+        ? EventRewardTypeDto.LIMITED_TIME_EVENT
+        : EventRewardTypeDto.PERPETUAL;
+    endTime = (reward == EventRewardTypeDto.LIMITED_TIME_EVENT
+        ? fields["endTime"]
+        : null);
+    rewardIds = fields["rewardIds"];
+    challengeIds = fields["challengeIds"];
+    initialOrganizationId = fields["initialOrganizationId"];
+    defaultChallengeId = fields["defaultChallengeId"];
+    minimumScore = fields["minimumScore"];
+    indexable = fields["indexable"];
   }
-
   String id = "";
-  bool skippingEnabled = false;
+  int requiredMembers = 0;
   String name = "";
   String description = "";
-  UpdateEventDataEventRewardTypeDto rewardType =
-      UpdateEventDataEventRewardTypeDto.PERPETUAL;
-  DateTime? time = null;
-  List<UpdateEventDataRewardDto> rewards = [];
-  int requiredMembers = 0;
+  EventRewardTypeDto reward = EventRewardTypeDto.PERPETUAL;
+  String endTime = "";
+  List<String> rewardIds = [];
   List<String> challengeIds = [];
+  String initialOrganizationId = "";
+  String defaultChallengeId = "";
+  int minimumScore = 0;
+  bool indexable = false;
 }
 
 class UpdateEventDataDto {
   UpdateEventDataDto.fromJson(Map<String, dynamic> fields) {
-    isSearch = fields["isSearch"];
-    events = fields["events"]
-        .map<UpdateEventDataEventDto>(
-            (dynamic event) => UpdateEventDataEventDto.fromJson(event))
-        .toList();
+    event =
+        fields["event"] is String ? fields["event"] : EventDto.fromJson(fields);
+    deleted = fields["deleted"];
   }
-  List<UpdateEventDataEventDto> events = [];
-  bool isSearch = false;
+  dynamic event = null;
+  bool deleted = false;
+}
+
+class EventTrackerDto {
+  EventTrackerDto.fromJson(Map<String, dynamic> fields) {
+    eventId = fields['eventId'];
+    isRanked = fields['isRanked'];
+    curChallengeId = fields['curChallengeId'];
+    prevChallengeIds = fields['prevChallengeIds'];
+    prevChallengeDates = fields['prevChallengeDates'];
+  }
+  String eventId = "";
+  bool isRanked = false;
+  String curChallengeId = "";
+  List<String> prevChallengeIds = [];
+  List<String> prevChallengeDates = [];
+}
+
+class UpdateEventTrackerDataDto {
+  UpdateEventTrackerDataDto.fromJson(Map<String, dynamic> fields) {
+    tracker = EventTrackerDto.fromJson(fields);
+  }
+  EventTrackerDto? tracker = null;
 }
 
 class UpdateLeaderDataUserDto {
