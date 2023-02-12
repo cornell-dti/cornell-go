@@ -43,7 +43,7 @@ export class RewardService {
       redeemInfo: restricted ? undefined : rw.redeemInfo,
       isRedeemed: restricted ? undefined : rw.isRedeemed,
       isAchievement: rw.isAchievement,
-      points: rw.points
+      points: rw.points,
     };
   }
 
