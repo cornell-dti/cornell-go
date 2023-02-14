@@ -55,7 +55,7 @@ class _UserNameWidget extends State<UserNameWidget> {
                   bgColor = constructColorFromUserName(userName);
                 });
                 apiClient.serverApi?.setUsername(userName);
-                displayToast("Username changed!", Status.success);
+                // displayToast("Username changed!", Status.success);
                 _toHomePage(context);
               }
             },

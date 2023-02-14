@@ -179,12 +179,10 @@ class ApiClient extends ChangeNotifier {
 
   Future<bool> connectGoogle() async {
     final account = await _googleSignIn.signIn();
-
     if (account != null) {
       final auth = await account.authentication;
       final idToken = auth.idToken!;
-
-      return _connect(idToken, _googleLoginUrl);
+      return await _connect(idToken, _googleLoginUrl);
     }
     authenticated = false;
     _clientApi.disconnectedController.add(null);
