@@ -257,7 +257,7 @@ export class OrganizationService {
     potentialManagerEmail: string,
     org: Organization,
   ) {
-    if (await this.isManagerOf(manager, org)) {
+    if ((await this.isManagerOf(manager, org)) || manager.administrator) {
       const potentialManager = await this.prisma.user.findFirstOrThrow({
         where: { email: potentialManagerEmail },
       });
