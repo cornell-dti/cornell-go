@@ -5,6 +5,7 @@ export interface OrganizationDto {
   members: string[];
   events: string[];
   defaultEventId: string;
+  manager_email: string;
 }
 
 export interface RequestOrganizationDataDto {

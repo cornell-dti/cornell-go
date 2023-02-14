@@ -86,12 +86,14 @@ function fromForm(
     ...oldDto,
     id,
     name: (form[0] as FreeEntryForm).value,
+    manager_email: form[1] ? (form[1] as FreeEntryForm).value : "",
   };
 }
 
 function toForm(group: OrganizationDto) {
   return [
     { name: "Name", characterLimit: 256, value: group.name },
+    { name: "Add Manager by Email", characterLimit: 256, value: "" },
   ] as EntryForm[];
 }
 
@@ -102,6 +104,7 @@ const emptyDto: OrganizationDto = {
   accessCode: "",
   events: [],
   defaultEventId: "",
+  manager_email: "",
 };
 
 export function Organizations() {
@@ -151,6 +154,7 @@ export function Organizations() {
           setDeleteModalOpen(false);
         }}
       />
+
       <SearchBar
         onCreate={() => {
           setForm(makeForm());

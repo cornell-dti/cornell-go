@@ -134,6 +134,7 @@ export class OrganizationService {
       events: (await org.events({ select: { id: true } })).map(e => e.id),
       defaultEventId: organization.defaultEventId,
       accessCode: organization.accessCode,
+      manager_email: '',
     };
   }
 
@@ -253,19 +254,23 @@ export class OrganizationService {
 
   async addManager(
     manager: User,
-    potentialManagerId: string,
+    potentialManagerEmail: string,
     org: Organization,
   ) {
     if (await this.isManagerOf(manager, org)) {
+      const potentialManager = await this.prisma.user.findFirstOrThrow({
+        where: { email: potentialManagerEmail },
+      });
       await this.prisma.organization.update({
         where: { id: org.id },
-        data: { managers: { connect: { id: potentialManagerId } } },
+        data: { managers: { connect: { id: potentialManager.id } } },
       });
 
       await this.prisma.user.update({
-        where: { id: potentialManagerId },
+        where: { id: potentialManager.id },
         data: { managerOf: { connect: { id: org.id } } },
       });
+      console.log('Manager Added');
     }
   }
 
