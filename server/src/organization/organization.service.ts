@@ -132,6 +132,7 @@ export class OrganizationService {
       name: organization.name,
       members: (await org.members({ select: { id: true } })).map(e => e.id),
       events: (await org.events({ select: { id: true } })).map(e => e.id),
+      managers: (await org.managers({ select: { id: true } })).map(e => e.id),
       defaultEventId: organization.defaultEventId,
       accessCode: organization.accessCode,
       manager_email: '',

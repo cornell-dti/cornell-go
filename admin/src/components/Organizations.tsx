@@ -86,7 +86,7 @@ function fromForm(
     ...oldDto,
     id,
     name: (form[0] as FreeEntryForm).value,
-    manager_email: form[1] ? (form[1] as FreeEntryForm).value : "",
+    add_manager_email: form[1] ? (form[1] as FreeEntryForm).value : "",
   };
 }
 
@@ -103,8 +103,9 @@ const emptyDto: OrganizationDto = {
   name: "",
   accessCode: "",
   events: [],
+  managers: [],
   defaultEventId: "",
-  manager_email: "",
+  add_manager_email: "",
 };
 
 export function Organizations() {

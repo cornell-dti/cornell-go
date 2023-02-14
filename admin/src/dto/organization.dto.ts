@@ -4,8 +4,9 @@ export interface OrganizationDto {
   accessCode: string;
   members: string[];
   events: string[];
+  managers: string[];
   defaultEventId: string;
-  manager_email: string;
+  add_manager_email: string;
 }
 
 export interface RequestOrganizationDataDto {
