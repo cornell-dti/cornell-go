@@ -6,8 +6,8 @@ async function main() {
   execSync("docker compose stop");
   try {
     mkdirSync("./postgres-data");
-  } catch {
     rmSync("./postgres-data/pgdata", { recursive: true, force: true });
+  } catch {
   }
   execSync("docker compose up -d");
   chdir("./server");
