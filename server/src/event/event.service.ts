@@ -22,7 +22,7 @@ export class EventService {
     private clientService: ClientService,
     private orgService: OrganizationService,
     private readonly prisma: PrismaService,
-  ) { }
+  ) {}
 
   /** Get event by id */
   async getEventById(id: string | null) {
