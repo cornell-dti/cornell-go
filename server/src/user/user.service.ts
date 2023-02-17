@@ -48,7 +48,7 @@ export class UserService {
     authType: AuthType,
     authToken: string,
     ) {
-    if (username == null) username = email?.split('@')[0]
+    if (username == null) username = email?.split('@')[0];
     const defOrg = await this.orgService.getDefaultOrganization(
       authType == AuthType.GOOGLE
         ? OrganizationSpecialUsage.CORNELL_LOGIN
