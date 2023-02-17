@@ -22,7 +22,7 @@ export class EventService {
     private clientService: ClientService,
     private orgService: OrganizationService,
     private readonly prisma: PrismaService,
-  ) {}
+  ) { }
 
   /** Get event by id */
   async getEventById(id: string | null) {
@@ -406,6 +406,10 @@ export class EventService {
           ? EventRewardType.LIMITED_TIME
           : EventRewardType.PERPETUAL,
       endTime: new Date(event.endTime),
+      rewardIds: event.rewardIds,
+      challengeIds: event.challengeIds,
+      userFavoriteIds: event.userFavoriteIds,
+      initialOrganizationId: event.initialOrganizationId,
       indexable: event.indexable,
       minimumScore: event.minimumScore,
     };

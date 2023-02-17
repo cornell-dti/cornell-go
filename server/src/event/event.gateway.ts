@@ -28,7 +28,7 @@ export class EventGateway {
     private clientService: ClientService,
     private eventService: EventService,
     private orgService: OrganizationService,
-  ) {}
+  ) { }
 
   @SubscribeMessage('requestEventData')
   async requestEventData(
@@ -111,6 +111,7 @@ export class EventGateway {
   ) {
     const ev = await this.eventService.getEventById(data.eventId);
     await this.eventService.setFavorite(user, ev, data.isFavorite);
+    await this.eventService.emitUpdateEventData(ev, false);
   }
 
   @SubscribeMessage('updateEventData')
