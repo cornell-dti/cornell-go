@@ -22,7 +22,7 @@ export class UserService {
     private groupsService: GroupService,
     private orgService: OrganizationService,
     private clientService: ClientService,
-  ) {}
+  ) { }
 
   /** Find a user by their authentication token */
   async byAuth(authType: AuthType, authToken: string) {
@@ -103,6 +103,7 @@ export class UserService {
       include: {
         rewards: true,
         eventTrackers: true,
+        favorites: true,
         group: { select: { friendlyId: true } },
       },
     });
@@ -119,6 +120,9 @@ export class UserService {
       trackedEventIds: partial
         ? undefined
         : joinedUser.eventTrackers.map(ev => ev.eventId),
+      favoriteIds: partial
+        ? undefined
+        : joinedUser.favorites.map(ev => ev.id),
     };
   }
 

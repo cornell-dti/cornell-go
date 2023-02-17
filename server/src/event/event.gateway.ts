@@ -7,6 +7,7 @@ import {
 import { CallingUser } from '../auth/calling-user.decorator';
 import { ClientService } from '../client/client.service';
 import { EventService } from './event.service';
+import { UserService } from 'src/user/user.service';
 import { UserGuard } from 'src/auth/jwt-auth.guard';
 import { UseGuards } from '@nestjs/common';
 import { EventBase, EventRewardType, User } from '@prisma/client';
@@ -27,8 +28,9 @@ export class EventGateway {
   constructor(
     private clientService: ClientService,
     private eventService: EventService,
+    private userService: UserService,
     private orgService: OrganizationService,
-  ) {}
+  ) { }
 
   @SubscribeMessage('requestEventData')
   async requestEventData(
@@ -111,7 +113,7 @@ export class EventGateway {
   ) {
     const ev = await this.eventService.getEventById(data.eventId);
     await this.eventService.setFavorite(user, ev, data.isFavorite);
-    await this.eventService.emitUpdateEventData(ev, false);
+    await this.userService.emitUpdateUserData(user, false, false, true, user);
   }
 
   @SubscribeMessage('updateEventData')
