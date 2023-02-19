@@ -47,7 +47,7 @@ export class UserService {
     long: number,
     authType: AuthType,
     authToken: string,
-    ) {
+  ) {
     if (username == null) username = email?.split('@')[0];
     const defOrg = await this.orgService.getDefaultOrganization(
       authType == AuthType.GOOGLE
@@ -101,7 +101,7 @@ export class UserService {
       data: { username },
     });
   }
-  
+
   async setMajor(user: User, major: string) {
     await this.prisma.user.update({
       where: { id: user.id },

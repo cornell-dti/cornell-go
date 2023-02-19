@@ -91,7 +91,7 @@ export class AuthService {
 
   async login(
     authType: AuthType,
-    req: LoginDto
+    req: LoginDto,
   ): Promise<[string, string] | null> {
     // if verify success, idToken is a string. If anything is wrong, it is undefined
     let idToken: IntermediatePayload | null = null;

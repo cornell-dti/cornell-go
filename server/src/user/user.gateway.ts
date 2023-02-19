@@ -24,7 +24,10 @@ import {
 import { UserService } from './user.service';
 import { readFileSync } from 'fs';
 
-const majors = ["Computer Science"] //readFileSync("./majors.txt",'utf8').split('\n');
+const majors = readFileSync('/app/server/src/user/majors.txt', 'utf8').split(
+  '\n',
+);
+
 const replaceAll = require('string.prototype.replaceall');
 replaceAll.shim();
 
