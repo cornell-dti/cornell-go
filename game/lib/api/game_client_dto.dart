@@ -4,6 +4,8 @@ class UpdateUserDataDto {
   UpdateUserDataDto.fromJson(Map<String, dynamic> fields) {
     id = fields["id"];
     username = fields["username"];
+    major = fields["major"];
+    year = fields["year"];
     score = fields["score"];
     groupId = fields["groupId"];
     rewardIds = fields["rewardIds"].cast<String>();
@@ -18,6 +20,8 @@ class UpdateUserDataDto {
 
   String id = "";
   String username = "";
+  String major = "";
+  String year = "";
   int score = 0;
   String groupId = "";
   List<String> rewardIds = [];

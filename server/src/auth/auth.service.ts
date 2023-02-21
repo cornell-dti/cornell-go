@@ -7,6 +7,7 @@ import { LoginTicket, OAuth2Client } from 'google-auth-library';
 import { PrismaService } from '../prisma/prisma.service';
 import { UserService } from '../user/user.service';
 import { JwtPayload } from './jwt-payload';
+import { LoginDto } from './login.dto';
 
 interface IntermediatePayload {
   id: string;
@@ -89,28 +90,25 @@ export class AuthService {
   }
 
   async login(
-    token: string,
     authType: AuthType,
-    lat: number,
-    long: number,
-    aud?: 'ios' | 'android' | 'web',
+    req: LoginDto,
   ): Promise<[string, string] | null> {
     // if verify success, idToken is a string. If anything is wrong, it is undefined
     let idToken: IntermediatePayload | null = null;
     switch (authType) {
       case AuthType.GOOGLE:
-        if (!aud) {
+        if (!req.aud) {
           console.log('Google aud is missing');
           return null;
         }
-        idToken = await this.payloadFromGoogle(token, aud);
+        idToken = await this.payloadFromGoogle(req.idToken, req.aud);
         break;
       case AuthType.APPLE:
-        idToken = await this.payloadFromApple(token);
+        idToken = await this.payloadFromApple(req.idToken);
         break;
       case AuthType.DEVICE:
         idToken = {
-          id: token,
+          id: req.idToken,
           email: 'dev@cornell.edu',
         };
         break;
@@ -130,12 +128,14 @@ export class AuthService {
     const isDevWhileDevice =
       process.env.DEVELOPMENT === 'true' || authType !== AuthType.DEVICE;
 
-    if (!user) {
+    if (!user && req.username && req.year && req.major) {
       user = await this.userService.register(
         idToken.email,
-        idToken.email?.split('@')[0],
-        lat,
-        long,
+        req.username,
+        req.year,
+        req.major,
+        req.lat,
+        req.long,
         authType,
         idToken.id,
       );

@@ -12,12 +12,7 @@ export class AppleController {
   async login(
     @Body() req: LoginDto,
   ): Promise<{ accessToken: string; refreshToken: string } | null> {
-    const tokens = await this.authService.login(
-      req.idToken,
-      AuthType.APPLE,
-      req.lat,
-      req.long,
-    );
+    const tokens = await this.authService.login(AuthType.APPLE, req);
 
     return tokens && { accessToken: tokens[0], refreshToken: tokens[1] };
   }
