@@ -34,7 +34,7 @@ export class UserGateway {
     private userService: UserService,
     private groupService: GroupService,
     private eventService: EventService,
-  ) { }
+  ) {}
 
   private providerToAuthType(provider: string) {
     let type: AuthType = AuthType.NONE;

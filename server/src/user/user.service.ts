@@ -23,7 +23,7 @@ export class UserService {
     private groupsService: GroupService,
     private orgService: OrganizationService,
     private clientService: ClientService,
-  ) { }
+  ) {}
 
   /** Find a user by their authentication token */
   async byAuth(authType: AuthType, authToken: string) {
@@ -99,7 +99,7 @@ export class UserService {
   }
 
   /** Adds event to user's favorite if isFavorite is true, else removes event
- * from favorites if it exists */
+   * from favorites if it exists */
   async setFavorite(user: User, ev: EventBase, isFavorite: boolean) {
     if (isFavorite) {
       return await this.prisma.user.update({
@@ -137,9 +137,7 @@ export class UserService {
       trackedEventIds: partial
         ? undefined
         : joinedUser.eventTrackers.map(ev => ev.eventId),
-      favoriteIds: partial
-        ? undefined
-        : joinedUser.favorites.map(ev => ev.id),
+      favoriteIds: partial ? undefined : joinedUser.favorites.map(ev => ev.id),
     };
   }
 
