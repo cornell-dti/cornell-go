@@ -16,12 +16,6 @@ export interface RequestEventLeaderDataDto {
   eventId: string;
 }
 
-/** DTO for requestFavoriteEventData */
-export interface RequestFavoriteEventDataDto {
-  isFavorite: boolean;
-  eventId: string;
-}
-
 export interface EventDto {
   id: string;
   requiredMembers: number;

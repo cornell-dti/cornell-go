@@ -1,5 +1,5 @@
 /** DTO for closeAccount */
-export interface CloseAccountDto {}
+export interface CloseAccountDto { }
 
 /** DTO for setUsername */
 export interface SetUsernameDto {
@@ -26,6 +26,12 @@ export interface RequestGlobalLeaderDataDto {
 /** DTO for requestUserData */
 export interface RequestUserDataDto {
   userId?: string;
+}
+
+/** DTO for requestFavoriteEventData */
+export interface RequestFavoriteEventDataDto {
+  isFavorite: boolean;
+  eventId: string;
 }
 
 export type UserAuthTypeDto = 'device' | 'apple' | 'google';

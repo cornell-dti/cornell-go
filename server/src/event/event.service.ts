@@ -22,7 +22,7 @@ export class EventService {
     private clientService: ClientService,
     private orgService: OrganizationService,
     private readonly prisma: PrismaService,
-  ) {}
+  ) { }
 
   /** Get event by id */
   async getEventById(id: string | null) {
@@ -232,22 +232,6 @@ export class EventService {
       skip: firstIndex,
       take: count,
     });
-  }
-
-  /** Adds event to user's favorite if isFavorite is true, else removes event
-   * from favorites if it exists */
-  async setFavorite(user: User, ev: EventBase, isFavorite: boolean) {
-    if (isFavorite) {
-      return await this.prisma.user.update({
-        where: { id: user.id },
-        data: { favorites: { connect: { id: ev.id } } },
-      });
-    } else {
-      return await this.prisma.user.update({
-        where: { id: user.id },
-        data: { favorites: { disconnect: { id: ev.id } } },
-      });
-    }
   }
 
   async dtoForEvent(ev: EventBase): Promise<EventDto> {

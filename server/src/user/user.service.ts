@@ -5,6 +5,7 @@ import {
   OrganizationSpecialUsage,
   User,
   PrismaClient,
+  EventBase,
 } from '@prisma/client';
 import { ClientService } from 'src/client/client.service';
 import { EventService } from '../event/event.service';
@@ -95,6 +96,22 @@ export class UserService {
       where: { id: user.id },
       data: { username },
     });
+  }
+
+  /** Adds event to user's favorite if isFavorite is true, else removes event
+ * from favorites if it exists */
+  async setFavorite(user: User, ev: EventBase, isFavorite: boolean) {
+    if (isFavorite) {
+      return await this.prisma.user.update({
+        where: { id: user.id },
+        data: { favorites: { connect: { id: ev.id } } },
+      });
+    } else {
+      return await this.prisma.user.update({
+        where: { id: user.id },
+        data: { favorites: { disconnect: { id: ev.id } } },
+      });
+    }
   }
 
   async dtoForUserData(user: User, partial: boolean): Promise<UserDto> {

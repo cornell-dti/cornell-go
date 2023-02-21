@@ -11,10 +11,12 @@ import { CallingUser } from '../auth/calling-user.decorator';
 import { ClientService } from '../client/client.service';
 import { GroupGateway } from '../group/group.gateway';
 import { GroupService } from '../group/group.service';
+import { EventService } from 'src/event/event.service';
 import {
   CloseAccountDto,
   RequestGlobalLeaderDataDto,
   RequestUserDataDto,
+  RequestFavoriteEventDataDto,
   SetAuthToDeviceDto,
   SetAuthToOAuthDto,
   SetUsernameDto,
@@ -31,7 +33,8 @@ export class UserGateway {
     private clientService: ClientService,
     private userService: UserService,
     private groupService: GroupService,
-  ) {}
+    private eventService: EventService,
+  ) { }
 
   private providerToAuthType(provider: string) {
     let type: AuthType = AuthType.NONE;
@@ -69,6 +72,16 @@ export class UserGateway {
     } else {
       await this.userService.emitUpdateUserData(user, false, false, true, user);
     }
+  }
+
+  @SubscribeMessage('setFavorite')
+  async setFavorite(
+    @CallingUser() user: User,
+    @MessageBody() data: RequestFavoriteEventDataDto,
+  ) {
+    const ev = await this.eventService.getEventById(data.eventId);
+    await this.userService.setFavorite(user, ev, data.isFavorite);
+    await this.userService.emitUpdateUserData(user, false, false, true, user);
   }
 
   @SubscribeMessage('setUsername')

@@ -17,7 +17,6 @@ import {
   RequestEventDataDto,
   RequestEventLeaderDataDto,
   UpdateEventDataDto,
-  RequestFavoriteEventDataDto,
 } from './event.dto';
 import { RequestEventTrackerDataDto } from 'src/challenge/challenge.dto';
 import { OrganizationService } from 'src/organization/organization.service';
@@ -28,7 +27,6 @@ export class EventGateway {
   constructor(
     private clientService: ClientService,
     private eventService: EventService,
-    private userService: UserService,
     private orgService: OrganizationService,
   ) { }
 
@@ -104,16 +102,6 @@ export class EventGateway {
     for (const tracker of trackers) {
       await this.eventService.emitUpdateEventTracker(tracker);
     }
-  }
-
-  @SubscribeMessage('setFavorite')
-  async setFavorite(
-    @CallingUser() user: User,
-    @MessageBody() data: RequestFavoriteEventDataDto,
-  ) {
-    const ev = await this.eventService.getEventById(data.eventId);
-    await this.eventService.setFavorite(user, ev, data.isFavorite);
-    await this.userService.emitUpdateUserData(user, false, false, true, user);
   }
 
   @SubscribeMessage('updateEventData')
