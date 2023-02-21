@@ -25,7 +25,7 @@ docker compose up --build
 ### Start the container in the background
 
 ```
-docker compose restart
+docker compose up --build -d
 ```
 
 ### Stop the container
@@ -59,6 +59,27 @@ Open the main.dart file, then click the Play button
 
 cd game
 flutter run --dart-define="API_URL=https://example.com"
+```
+
+### Generate docs
+
+```
+cd server
+npx typedoc
+
+The docs are now viewable at server/docs/index.html
+```
+
+### Reset database or test a new schema
+
+```
+npm run dbreset
+```
+
+### Create a database migration
+
+```
+npm run dbmigrate -- my_migration
 ```
 
 ## Contributors

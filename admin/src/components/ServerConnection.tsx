@@ -6,8 +6,8 @@ import {
   useState,
 } from "react";
 
-import { GoogleLogin  } from "@react-oauth/google";
-import {GoogleOAuthProvider} from '@react-oauth/google';
+import { GoogleLogin } from "@react-oauth/google";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 import { io, Socket } from "socket.io-client";
 import styled from "styled-components";
@@ -87,6 +87,7 @@ export function ServerConnectionProvider(props: { children: ReactNode }) {
 
 const GoogleButtonBox = styled.div`
   margin-top: 16px;
+  margin-bottom: 8px;
   width: 100%;
   font-size: 12px;
   display: flex;
@@ -96,22 +97,14 @@ const GoogleButtonBox = styled.div`
 
 export function AuthenticationGuard(props: { children: ReactNode }) {
   const connection = useContext(ServerConnectionContext);
-  const [loginMessage, setLoginMessage] = useState(
-    "After logging in for the first time, make sure you have requested access from an admin."
-  );
+  const [loginMessage, setLoginMessage] = useState("");
 
-
-  const connect = async (
-    response:any
-  ) => {
+  const connect = async (response: any) => {
     //New package returns key 'clientId'
     if ("clientId" in response) {
-      const state = await connection.connect(
-        response.credential
-      );
-    }else{
+      const state = await connection.connect(response.credential);
+    } else {
       setLoginMessage("Connection error");
-      console.log(response)
     }
   };
 
@@ -120,7 +113,6 @@ export function AuthenticationGuard(props: { children: ReactNode }) {
   }, [connection, setLoginMessage]);
 
   if (connection.connection) {
-    console.log(connection.connection)
     return <>{props.children}</>;
   } else {
     return (
@@ -131,19 +123,20 @@ export function AuthenticationGuard(props: { children: ReactNode }) {
         buttons={[]}
       >
         <GoogleOAuthProvider clientId="757523123677-2nv6haiqnvklhb134cgg5qe8bia4du4q.apps.googleusercontent.com">
-          <GoogleLogin
-          // Call connect on credential response
-          onSuccess={(credentialResponse:any) => {
-            connect(credentialResponse)
-          }}
-          onError={() => {
-            console.log('Login Failed')
-            setLoginMessage("An error occured while signing you in.")
-          }}
-          />
+          <GoogleButtonBox>
+            <GoogleLogin
+              // Call connect on credential response
+              onSuccess={(credentialResponse: any) => {
+                connect(credentialResponse);
+              }}
+              onError={() => {
+                console.log("Login Failed");
+                setLoginMessage("An error occured while signing you in.");
+              }}
+            />
+          </GoogleButtonBox>
         </GoogleOAuthProvider>
         <b>{loginMessage}</b>
-
       </Modal>
     );
   }

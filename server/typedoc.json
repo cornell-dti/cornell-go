@@ -1,0 +1,7 @@
+{
+  // Comments are supported, like tsconfig.json
+  "entryPoints": ["src"],
+  "exclude": ["**/*+(index|.spec|.e2e).ts"],
+  "entryPointStrategy": "expand",
+  "out": "docs"
+}

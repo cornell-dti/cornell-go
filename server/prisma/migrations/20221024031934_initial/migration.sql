@@ -103,17 +103,17 @@ CREATE TABLE "PrevChallenge" (
 );
 
 -- CreateTable
-CREATE TABLE "RestrictionGroup" (
+CREATE TABLE "Organization" (
     "id" TEXT NOT NULL,
     "displayName" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "canEditUsername" BOOLEAN NOT NULL,
 
-    CONSTRAINT "RestrictionGroup_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Organization_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "_EventBaseToRestrictionGroup" (
+CREATE TABLE "_EventBaseToOrganization" (
     "A" TEXT NOT NULL,
     "B" TEXT NOT NULL
 );
@@ -134,10 +134,10 @@ CREATE UNIQUE INDEX "Group_hostId_key" ON "Group"("hostId");
 CREATE UNIQUE INDEX "EventBase_isDefault_key" ON "EventBase"("isDefault");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "_EventBaseToRestrictionGroup_AB_unique" ON "_EventBaseToRestrictionGroup"("A", "B");
+CREATE UNIQUE INDEX "_EventBaseToOrganization_AB_unique" ON "_EventBaseToOrganization"("A", "B");
 
 -- CreateIndex
-CREATE INDEX "_EventBaseToRestrictionGroup_B_index" ON "_EventBaseToRestrictionGroup"("B");
+CREATE INDEX "_EventBaseToOrganization_B_index" ON "_EventBaseToOrganization"("B");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "_participant_AB_unique" ON "_participant"("A", "B");
@@ -149,10 +149,10 @@ CREATE INDEX "_participant_B_index" ON "_participant"("B");
 ALTER TABLE "User" ADD CONSTRAINT "User_groupId_fkey" FOREIGN KEY ("groupId") REFERENCES "Group"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "User" ADD CONSTRAINT "User_restrictedById_fkey" FOREIGN KEY ("restrictedById") REFERENCES "RestrictionGroup"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "User" ADD CONSTRAINT "User_restrictedById_fkey" FOREIGN KEY ("restrictedById") REFERENCES "Organization"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "User" ADD CONSTRAINT "User_generatedById_fkey" FOREIGN KEY ("generatedById") REFERENCES "RestrictionGroup"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "User" ADD CONSTRAINT "User_generatedById_fkey" FOREIGN KEY ("generatedById") REFERENCES "Organization"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Group" ADD CONSTRAINT "Group_hostId_fkey" FOREIGN KEY ("hostId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -188,10 +188,10 @@ ALTER TABLE "PrevChallenge" ADD CONSTRAINT "PrevChallenge_challengeId_fkey" FORE
 ALTER TABLE "PrevChallenge" ADD CONSTRAINT "PrevChallenge_trackerId_fkey" FOREIGN KEY ("trackerId") REFERENCES "EventTracker"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "_EventBaseToRestrictionGroup" ADD CONSTRAINT "_EventBaseToRestrictionGroup_A_fkey" FOREIGN KEY ("A") REFERENCES "EventBase"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "_EventBaseToOrganization" ADD CONSTRAINT "_EventBaseToOrganization_A_fkey" FOREIGN KEY ("A") REFERENCES "EventBase"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "_EventBaseToRestrictionGroup" ADD CONSTRAINT "_EventBaseToRestrictionGroup_B_fkey" FOREIGN KEY ("B") REFERENCES "RestrictionGroup"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "_EventBaseToOrganization" ADD CONSTRAINT "_EventBaseToOrganization_B_fkey" FOREIGN KEY ("B") REFERENCES "Organization"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_participant" ADD CONSTRAINT "_participant_A_fkey" FOREIGN KEY ("A") REFERENCES "PrevChallenge"("id") ON DELETE CASCADE ON UPDATE CASCADE;

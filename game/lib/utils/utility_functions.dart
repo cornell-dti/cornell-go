@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:game/api/game_api.dart';
+import 'package:platform_device_id/platform_device_id.dart';
+import 'dart:io' show Platform; //at the top
 
 Future<void> showAlert(String message, context) async {
   return showDialog<void>(
@@ -27,6 +29,11 @@ Future<void> showAlert(String message, context) async {
       );
     },
   );
+}
+
+Future<String> getDeviceId() async {
+  //Gets unique device ID.
+  return (await PlatformDeviceId.getDeviceId ?? "") + Platform.operatingSystem;
 }
 
 Future<void> showLeaveConfirmationAlert(
@@ -89,15 +96,16 @@ enum Status { error, success, info }
 
 void displayToast(message, Status status) {
   Fluttertoast.showToast(
-      msg: message,
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.BOTTOM,
-      timeInSecForIosWeb: 1,
-      backgroundColor: status == Status.error
-          ? (Colors.red)
-          : (status == Status.success ? (Colors.green) : Colors.yellow),
-      textColor: Colors.white,
-      fontSize: 16.0);
+    msg: message,
+    toastLength: Toast.LENGTH_SHORT,
+    gravity: ToastGravity.BOTTOM,
+    timeInSecForIosWeb: 1,
+    backgroundColor: status == Status.error
+        ? (Colors.red)
+        : (status == Status.success ? (Colors.green) : Colors.yellow),
+    textColor: Colors.white,
+    fontSize: 16.0,
+  );
 }
 
 Color RGBComplement(Color col) {

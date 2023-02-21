@@ -1,9 +1,9 @@
 import { Home } from "./components/Home";
 import { Rewards } from "./components/Rewards";
-import { Admins } from "./components/Admins";
 import { Challenges } from "./components/Challenges";
 import { Events } from "./components/Events";
-import { Restrictions } from "./components/Restrictions";
+import { Organizations } from "./components/Organizations";
+import { ErrorAlert } from "./components/ErrorAlert";
 
 import {
   AppBar,
@@ -21,6 +21,12 @@ import {
   faUnlink,
   faUserShield,
   faLock,
+  faUserGroup,
+  faBuildingUser,
+  faBuildingLock,
+  faBuildingShield,
+  faSitemap,
+  faBuilding,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -29,6 +35,8 @@ import styled from "styled-components";
 import { useContext } from "react";
 import { ServerConnectionContext } from "./components/ServerConnection";
 import { ServerDataContext } from "./components/ServerData";
+import { AlertModal } from "./components/AlertModal";
+import { Groups } from "./components/Groups";
 
 const routes = [
   {
@@ -38,10 +46,10 @@ const routes = [
     name: "Home",
   },
   {
-    path: "/admins",
-    element: <Admins />,
-    icon: faUserShield,
-    name: "Admin Approval",
+    path: "/organizations",
+    element: <Organizations />,
+    icon: faBuilding,
+    name: "Organizations",
   },
   {
     path: "/events",
@@ -62,10 +70,10 @@ const routes = [
     name: "Rewards",
   },
   {
-    path: "/restrictions",
-    element: <Restrictions />,
-    icon: faLock,
-    name: "Restrictions",
+    path: "/groups",
+    element: <Groups />,
+    icon: faUserGroup,
+    name: "Groups",
   },
 ];
 
@@ -120,9 +128,12 @@ export default function App() {
             <SidebarIcon>
               <FontAwesomeIcon icon={faUnlink} />
             </SidebarIcon>
-            Disconnect
+            Log out
           </RedText>
         </SidebarButton>
+        <SidebarText>
+          {data.organizations.get(data.selectedOrg)?.name ?? "No Org. Selected"}
+        </SidebarText>
         <SidebarText>
           {data.events.get(data.selectedEvent)?.name ?? "No Event Selected"}
         </SidebarText>
@@ -134,6 +145,7 @@ export default function App() {
           ))}
         </Routes>
       </Container>
+      <ErrorAlert />
     </AppLayout>
   );
 }

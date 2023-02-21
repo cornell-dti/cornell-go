@@ -20,11 +20,14 @@ class _RewardsWidgetState extends State<RewardsWidget> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(Duration.zero, () {
-      setState(() {
-        loaded = true;
-      });
-    });
+    Future.delayed(
+      Duration.zero,
+      () {
+        setState(() {
+          loaded = true;
+        });
+      },
+    );
   }
 
   @override
@@ -43,10 +46,11 @@ class _RewardsWidgetState extends State<RewardsWidget> {
               padding: const EdgeInsets.only(left: 8.0, right: 8.0),
               child: Column(
                 children: [
-                  Expanded(child: Consumer3<RewardModel, UserModel, EventModel>(
-                    builder:
-                        (context, rewardModel, userModel, eventModel, child) {
-                      return ListView(
+                  Expanded(
+                    child: Consumer3<RewardModel, UserModel, EventModel>(
+                      builder:
+                          (context, rewardModel, userModel, eventModel, child) {
+                        return ListView(
                           shrinkWrap: true,
                           scrollDirection: Axis.vertical,
                           children: rewardModel.rewardByEventId.values
@@ -62,9 +66,11 @@ class _RewardsWidgetState extends State<RewardsWidget> {
                                   "From " + (ev?.name ?? "an Event"),
                                   e.redeemInfo);
                             },
-                          ).toList());
-                    },
-                  ))
+                          ).toList(),
+                        );
+                      },
+                    ),
+                  )
                 ],
               ),
             ),

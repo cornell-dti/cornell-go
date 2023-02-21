@@ -1,5 +1,4 @@
-import { Module } from '@nestjs/common';
-import { AdminModule } from './admin/admin.module';
+import { Module, OnModuleInit, UseFilters } from '@nestjs/common';
 import { AuthModule } from './auth/auth.module';
 import { ChallengeModule } from './challenge/challenge.module';
 import { EventModule } from './event/event.module';
@@ -13,6 +12,8 @@ import { ClientModule } from './client/client.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { RewardModule } from './reward/reward.module';
 import { SessionLogModule } from './session-log/session-log.module';
+import { OrganizationModule } from './organization/organization.module';
+import { OrganizationGateway } from './organization/organization.gateway';
 
 @Module({
   imports: [
@@ -26,12 +27,12 @@ import { SessionLogModule } from './session-log/session-log.module';
     EventModule,
     GroupModule,
     ChallengeModule,
-    AdminModule,
     RewardModule,
     PrismaModule,
     SessionLogModule,
+    OrganizationModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [OrganizationGateway],
 })
 export class AppModule {}

@@ -1,33 +1,45 @@
 import { Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { ClientGateway } from './client.gateway';
-import { InvalidateDataDto } from './invalidate-data.dto';
-import { UpdateChallengeDataDto } from './update-challenge-data.dto';
-import { UpdateEventDataDto } from './update-event-data.dto';
-import { UpdateEventTrackerDataDto } from './update-event-tracker-data.dto';
-import { UpdateGroupDataDto } from './update-group-data.dto';
-import { UpdateLeaderDataDto } from './update-leader-data.dto';
-import { UpdateRewardDataDto } from './update-reward-data.dto';
-import { UpdateUserDataDto } from './update-user-data.dto';
-import { UserRewardedDto } from './user-rewarded.dto';
 
 @Injectable()
 export class ClientService {
   constructor(private gateway: ClientGateway) {}
 
-  private makeCallback<TData>(event: string) {
-    return (user: User, data: TData) => {
-      console.log(`Sent ${event} to user ${user.id}`);
-      this.gateway.server.to(user.id).emit(event, data);
-    };
+  public sendUpdate<TDto>(
+    event: string,
+    resourceId: string,
+    admin: boolean,
+    dto: TDto,
+  ) {
+    this.gateway.server
+      .to((admin ? 'admin/' : 'client/') + resourceId)
+      .emit(event, dto);
   }
 
-  emitUpdateUserData = this.makeCallback<UpdateUserDataDto>('updateUserData');
+  public subscribe(user: User, resourceId: string, admin: boolean) {
+    this.gateway.server
+      .in('client/' + user.id)
+      .socketsJoin((admin ? 'admin/' : 'client/') + resourceId);
+  }
 
-  emitUserRewarded = this.makeCallback<UserRewardedDto>('userRewarded');
+  public unsubscribe(user: User, resourceId: string, admin: boolean) {
+    this.gateway.server
+      .in('client/' + user.id)
+      .socketsLeave((admin ? 'admin/' : 'client/') + resourceId);
+  }
 
-  emitInvalidateData(data: InvalidateDataDto) {
-    this.gateway.server.emit('invalidateData', data);
+  public unsubscribeAll(resourceId: string) {
+    this.gateway.server.socketsLeave([
+      'admin/' + resourceId,
+      'client/' + resourceId,
+    ]);
+  }
+
+  /*
+  async updateUserData(user: User) {
+    this.sendUpdate<ClientUserDto>('updateUserData', user.id, false);
   }
 
   emitUpdateRewardData =
@@ -45,8 +57,5 @@ export class ClientService {
   emitUpdateEventTrackerData = this.makeCallback<UpdateEventTrackerDataDto>(
     'updateEventTrackerData',
   );
-
-  emitUpdateChallengeData = this.makeCallback<UpdateChallengeDataDto>(
-    'updateChallengeData',
-  );
+  */
 }
