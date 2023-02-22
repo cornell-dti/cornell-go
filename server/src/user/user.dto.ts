@@ -54,3 +54,8 @@ export interface UpdateUserDto {
 }
 
 export type eventFilterDto = 'new' | 'saved' | 'finished';
+
+export interface RequestFilteredEventDto {
+  eventId: string;
+  filter: eventFilterDto;
+}

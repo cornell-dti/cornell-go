@@ -20,8 +20,10 @@ import {
   SetAuthToDeviceDto,
   SetAuthToOAuthDto,
   SetUsernameDto,
+  RequestFilteredEventDto,
 } from './user.dto';
 import { UserService } from './user.service';
+import { RequestError } from 'google-auth-library/build/src/transporters';
 
 const replaceAll = require('string.prototype.replaceall');
 replaceAll.shim();
@@ -72,6 +74,16 @@ export class UserGateway {
     } else {
       await this.userService.emitUpdateUserData(user, false, false, true, user);
     }
+  }
+
+  @SubscribeMessage('requestFilteredEvents')
+  async requestFilteredEvents(
+    @CallingUser() user: User,
+    @MessageBody() data: RequestFilteredEventDto,
+  ) {
+    const ev = await this.eventService.getEventById(data.eventId);
+    await this.userService.getFilteredEventIds(user, data.filter);
+    await this.userService.emitUpdateUserData(user, false, false, true, user);
   }
 
   @SubscribeMessage('setFavorite')
