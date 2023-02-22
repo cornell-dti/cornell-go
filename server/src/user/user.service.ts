@@ -12,7 +12,12 @@ import { EventService } from '../event/event.service';
 import { GroupService } from '../group/group.service';
 import { OrganizationService } from '../organization/organization.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { UpdateUserDto, UserAuthTypeDto, UserDto } from './user.dto';
+import {
+  UpdateUserDto,
+  UserAuthTypeDto,
+  UserDto,
+  eventFilterDto,
+} from './user.dto';
 
 @Injectable()
 export class UserService {
@@ -23,7 +28,7 @@ export class UserService {
     private groupsService: GroupService,
     private orgService: OrganizationService,
     private clientService: ClientService,
-  ) {}
+  ) { }
 
   /** Find a user by their authentication token */
   async byAuth(authType: AuthType, authToken: string) {
@@ -110,6 +115,98 @@ export class UserService {
       return await this.prisma.user.update({
         where: { id: user.id },
         data: { favorites: { disconnect: { id: ev.id } } },
+      });
+    }
+  }
+
+  /** Grabs all events that a user can do based on the filter.
+   * Filter = new gives all events that are not started and ongoing, 
+   * with ongoing events listed before not started events.
+   */
+  async getFilteredEventIds(user: User, filter: eventFilterDto) {
+    const joinedUser = await this.prisma.user.findFirstOrThrow({
+      where: { id: user.id },
+      include: {
+        favorites: true,
+        memberOf: true,
+      },
+    });
+
+    if (filter == 'finished') {
+      return await this.prisma.eventBase.findMany({
+        select: { id: true },
+        where: {
+          usedIn: {
+            some: { members: { some: { id: user.id } } },
+          },
+          challenges: {
+            every: {
+              completions: {
+                some: {
+                  participants: {
+                    some: { id: user.id },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+    }
+    else if (filter == 'new') {
+      const ongoingEvent = await this.prisma.eventBase.findMany({
+        select: { id: true },
+        where: {
+          usedIn: {
+            some: { members: { some: { id: user.id } } },
+          },
+          challenges: {
+            some: {
+              completions: {
+                none: {
+                  participants: {
+                    some: { id: user.id },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+      const notStartedEvent = await this.prisma.eventBase.findMany({
+        select: { id: true },
+        where: {
+          usedIn: {
+            some: { members: { some: { id: user.id } } },
+          },
+          challenges: {
+            none: {
+              completions: {
+                some: {
+                  participants: {
+                    some: { id: user.id },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+      // extends ongoingEvent with notStartedEvent 
+      // "Sorts" by having current events appear in the list first
+      return ongoingEvent.push.apply(ongoingEvent, notStartedEvent)
+    }
+    else { // filter == 'saved'
+      return await this.prisma.eventBase.findMany({
+        select: { id: true },
+        where: {
+          usedIn: {
+            some: { members: { some: { id: user.id } } },
+          },
+          userFavorite: {
+            some: { id: user.id }
+          }
+        },
       });
     }
   }

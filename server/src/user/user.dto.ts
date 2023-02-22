@@ -52,3 +52,5 @@ export interface UpdateUserDto {
   user: UserDto | string;
   deleted: boolean;
 }
+
+export type eventFilterDto = 'new' | 'saved' | 'finished';
