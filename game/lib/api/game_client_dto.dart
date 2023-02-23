@@ -29,36 +29,10 @@ class UpdateUserDto {
     user = fields["user"] is String ? fields['user'] : UserDto.fromJson(fields);
     deleted = fields["deleted"];
   }
-  dynamic user = "";
+  UserDto? user = null;
+  String? id = null;
   bool deleted = false;
 }
-
-// class UpdateUserDataDto {
-//   UpdateUserDataDto.fromJson(Map<String, dynamic> fields) {
-//     id = fields["id"];
-//     username = fields["username"];
-//     score = fields["score"];
-//     groupId = fields["groupId"];
-//     rewardIds = fields["rewardIds"].cast<String>();
-//     trackedEventIds = fields["trackedEventIds"].cast<String>();
-//     ignoreIdLists = fields["ignoreIdLists"];
-//     authType = fields["authType"] == "google"
-//         ? UpdateUserDataAuthTypeDto.GOOGLE
-//         : fields["authType"] == "apple"
-//             ? UpdateUserDataAuthTypeDto.APPLE
-//             : UpdateUserDataAuthTypeDto.DEVICE;
-//   }
-
-//   String id = "";
-//   String username = "";
-//   int score = 0;
-//   String groupId = "";
-//   List<String> rewardIds = [];
-//   List<String> trackedEventIds = [];
-//   bool ignoreIdLists = false;
-//   UpdateUserDataAuthTypeDto authType =
-//       UpdateUserDataAuthTypeDto.DEVICE; // device, apple, google
-// }
 
 class UserRewardedDto {
   UserRewardedDto.fromJson(Map<String, dynamic> fields) {
