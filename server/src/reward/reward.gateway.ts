@@ -90,7 +90,6 @@ export class RewardGateway {
       ) {
         return;
       }
-
       const rw = await this.rewardService.upsertRewardFromDto(dto);
       const ev = await this.eventService.getEventById(rw.eventId);
 

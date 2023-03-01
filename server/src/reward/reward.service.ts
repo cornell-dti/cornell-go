@@ -42,6 +42,8 @@ export class RewardService {
       userId: restricted ? undefined : rw.userId ?? undefined,
       redeemInfo: restricted ? undefined : rw.redeemInfo,
       isRedeemed: restricted ? undefined : rw.isRedeemed,
+      isAchievement: rw.isAchievement,
+      points: rw.points,
     };
   }
 
@@ -107,6 +109,8 @@ export class RewardService {
         data: {
           description: reward.description.substring(0, 2048),
           redeemInfo: reward.redeemInfo!.substring(0, 2048),
+          isAchievement: reward.isAchievement,
+          points: reward.points,
         },
       });
     } else {
@@ -117,6 +121,8 @@ export class RewardService {
           description: reward.description.substring(0, 2048),
           redeemInfo: reward.redeemInfo!.substring(0, 2048),
           isRedeemed: false,
+          isAchievement: reward.isAchievement,
+          points: reward.points,
         },
       });
       if (rewardEntity.eventIndex === -10) {

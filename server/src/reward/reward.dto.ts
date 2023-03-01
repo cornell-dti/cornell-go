@@ -11,12 +11,9 @@ export interface RewardDto {
   userId?: string;
   redeemInfo?: string;
   isRedeemed?: boolean;
+  isAchievement: boolean;
+  points: number;
 }
-
-export interface RequestRewardDataDto {
-  rewardIds: string[];
-}
-
 export interface UpdateRewardDataDto {
   reward: RewardDto | string;
   deleted: boolean;

@@ -45,6 +45,10 @@ class GameServerApi {
   void closeAccount() => _invokeWithRefresh("closeAccount", {});
   void setUsername(String newUsername) =>
       _invokeWithRefresh("setUsername", {'newUsername': newUsername});
+  void setMajor(String newMajor) =>
+      _invokeWithRefresh("setMajor", {'newMajor': newMajor});
+  void setGraduationYear(String newYear) =>
+      _invokeWithRefresh("setGraduationYear", {'newYear': newYear});
   void requestUserData() => _invokeWithRefresh("requestUserData", {});
   void requestGroupData() => _invokeWithRefresh("requestGroupData", {});
   void joinGroup(String groupId) =>
