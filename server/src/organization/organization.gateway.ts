@@ -61,14 +61,23 @@ export class OrganizationGateway {
       await this.orgService.removeOrganization(data.organization as string);
       await this.orgService.emitUpdateOrganizationData(org, true);
     } else {
-      const org_data = data.organization as OrganizationDto;
-
-      const org = await this.orgService.upsertOrganizationFromDto(org_data);
-
-      await this.orgService.addAllAdmins(org);
-      if (org_data.manager_email !== '')
-        await this.orgService.addManager(user, org_data.manager_email, org);
+      const org = await this.orgService.upsertOrganizationFromDto(
+        data.organization as OrganizationDto,
+      );
       await this.orgService.emitUpdateOrganizationData(org, false);
     }
+  }
+
+  @SubscribeMessage('addManager')
+  async addManager(
+    @CallingUser() user: User,
+    @MessageBody() data: { email: string; organizationId: string },
+  ) {
+    if (!user.administrator) return;
+
+    await this.orgService.addManager(user, data.email, data.organizationId);
+
+    const org = await this.orgService.getOrganizationById(data.organizationId);
+    await this.orgService.emitUpdateOrganizationData(org, false);
   }
 }

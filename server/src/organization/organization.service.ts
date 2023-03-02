@@ -135,7 +135,6 @@ export class OrganizationService {
       managers: (await org.managers({ select: { id: true } })).map(e => e.id),
       defaultEventId: organization.defaultEventId,
       accessCode: organization.accessCode,
-      manager_email: '',
     };
   }
 
@@ -256,8 +255,12 @@ export class OrganizationService {
   async addManager(
     manager: User,
     potentialManagerEmail: string,
-    org: Organization,
+    organizationId: string,
   ) {
+    const org = await this.prisma.organization.findFirstOrThrow({
+      where: { id: organizationId },
+    });
+
     if ((await this.isManagerOf(manager, org)) || manager.administrator) {
       const potentialManager = await this.prisma.user.findFirstOrThrow({
         where: { email: potentialManagerEmail },
