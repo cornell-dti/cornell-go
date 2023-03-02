@@ -225,8 +225,13 @@ export class EventService {
   }
 
   async getRecommendedEventsForUser(user: User, lat: number, long: number) {
+    // const orgs = await this.prisma.user.findUniqueOrThrow({
+    //   where: { id: user.id },
+    //   include: { memberOf: true },
+    // });
     const evs: EventBase[] = await this.prisma.$queryRaw`
       select * from "EventBase" ev 
+      -- where ev."defaultOf" && ${orgs.memberOf}
       order by ((ev."latitude" - ${lat})^2 + (ev."longitude" - ${long})^2)
       fetch first 4 rows only
     `;
@@ -391,12 +396,35 @@ export class EventService {
     }));
   }
 
+  async updateLongitudeLatitude(eventId: string) {
+    const ev = await this.prisma.eventBase.findFirst({
+      where: { id: eventId },
+      select: { challenges: true },
+    });
+    const firstChalId = ev?.challenges.sort(
+      (a, b) => a.eventIndex - b.eventIndex,
+    )[0].id;
+    const chal = await this.prisma.challenge.findFirst({
+      where: { id: firstChalId },
+      select: { latitude: true, longitude: true },
+    });
+    const updatedEv = await this.prisma.eventBase.update({
+      where: {
+        id: eventId,
+      },
+      data: {
+        longitude: chal?.longitude,
+        latitude: chal?.latitude,
+      },
+    });
+    return updatedEv;
+  }
+
   async upsertEventFromDto(event: EventDto) {
     const firstChal = await this.prisma.challenge.findFirst({
       where: { id: event.challengeIds[0] },
       select: { latitude: true, longitude: true },
     });
-    console.log(firstChal);
 
     const assignData = {
       requiredMembers: event.requiredMembers,
