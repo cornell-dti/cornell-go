@@ -12,6 +12,7 @@ import { GroupService } from '../group/group.service';
 import { OrganizationService } from '../organization/organization.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { UpdateUserDto, UserAuthTypeDto, UserDto } from './user.dto';
+import { UpdateErrorDto } from 'src/client/client.dto';
 
 @Injectable()
 export class UserService {
@@ -139,5 +140,12 @@ export class UserService {
     } else if (admin) {
       this.clientService.sendUpdate('updateUserData', user.id, true, dto);
     }
+  }
+
+  async emitErrorData(user: User, message: string) {
+    const dto: UpdateErrorDto = {
+      message,
+    };
+    this.clientService.sendUpdate('updateErrorData', user.id, false, dto);
   }
 }
