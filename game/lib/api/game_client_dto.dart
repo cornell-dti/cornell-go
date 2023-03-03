@@ -38,33 +38,6 @@ class UpdateUserDto {
   bool deleted = false;
 }
 
-// class UpdateUserDataDto {
-//   UpdateUserDataDto.fromJson(Map<String, dynamic> fields) {
-//     id = fields["id"];
-//     username = fields["username"];
-//     score = fields["score"];
-//     groupId = fields["groupId"];
-//     rewardIds = fields["rewardIds"].cast<String>();
-//     trackedEventIds = fields["trackedEventIds"].cast<String>();
-//     ignoreIdLists = fields["ignoreIdLists"];
-//     authType = fields["authType"] == "google"
-//         ? UpdateUserDataAuthTypeDto.GOOGLE
-//         : fields["authType"] == "apple"
-//             ? UpdateUserDataAuthTypeDto.APPLE
-//             : UpdateUserDataAuthTypeDto.DEVICE;
-//   }
-
-//   String id = "";
-//   String username = "";
-//   int score = 0;
-//   String groupId = "";
-//   List<String> rewardIds = [];
-//   List<String> trackedEventIds = [];
-//   bool ignoreIdLists = false;
-//   UpdateUserDataAuthTypeDto authType =
-//       UpdateUserDataAuthTypeDto.DEVICE; // device, apple, google
-// }
-
 class UserRewardedDto {
   UserRewardedDto.fromJson(Map<String, dynamic> fields) {
     rewardId = fields["rewardId"];
@@ -93,31 +66,48 @@ class InvalidateDataDto {
   bool leaderboardData = false;
 }
 
-class UpdateRewardDataRewardDto {
-  UpdateRewardDataRewardDto.fromJson(Map<String, dynamic> fields) {
-    rewardId = fields["rewardId"];
+class RewardDTO {
+  //Represents a Reward
+  RewardDTO.fromJson(Map<String, dynamic> fields) {
+    id = fields["id"];
     eventId = fields["eventId"];
     description = fields["description"];
+    userId = fields["userId"];
     redeemInfo = fields["redeemInfo"];
     isRedeemed = fields["isRedeemed"];
+    isAchievement = fields["isAchievement"];
+    points = fields["points"];
   }
 
-  String rewardId = "";
+  String id = "";
   String eventId = "";
   String description = "";
+  String userId = "";
   String redeemInfo = "";
   bool isRedeemed = false;
+  bool isAchievement = false;
+  int points = 0;
 }
 
 class UpdateRewardDataDto {
   UpdateRewardDataDto.fromJson(Map<String, dynamic> fields) {
-    rewards = fields["rewards"]
-        .map<UpdateRewardDataRewardDto>(
-            (dynamic reward) => UpdateRewardDataRewardDto.fromJson(reward))
+    reward = fields["reward"] is String ? null : RewardDTO.fromJson(fields);
+    id = fields["reward"] is String ? fields["rewards"] : null;
+    deleted = fields["deleted"];
+  }
+  RewardDTO? reward = null;
+  String? id = "";
+  bool deleted = false;
+}
+
+class RequestRewardDataDto {
+  RequestRewardDataDto.fromJson(Map<String, dynamic> fields) {
+    rewardIds = fields["rewards"]
+        .map<RewardDTO>((dynamic reward) => RewardDTO.fromJson(reward))
         .toList();
   }
 
-  List<UpdateRewardDataRewardDto> rewards = [];
+  List<UpdateRewardDataDto> rewardIds = [];
 }
 
 class UpdateEventDataRewardDto {

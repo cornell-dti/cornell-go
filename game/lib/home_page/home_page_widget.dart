@@ -318,7 +318,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                           rewardModel.rewardByEventId[groupModel.curEventId];
 
                       if (userModel.userData?.rewardIds
-                              .contains(reward?.rewardId ?? "") ??
+                              .contains(reward?.id ?? "") ??
                           false) {
                         _mightShowRewardNotif = false;
                         Future.delayed(Duration.zero, () {
