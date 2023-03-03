@@ -14,6 +14,7 @@ import {
   UpdateOrganizationDataDto,
 } from './organization.dto';
 import { OrganizationService } from './organization.service';
+import { UserService } from 'src/user/user.service';
 
 @WebSocketGateway({ cors: true })
 @UseGuards(UserGuard)
@@ -21,6 +22,7 @@ export class OrganizationGateway {
   constructor(
     private clientService: ClientService,
     private orgService: OrganizationService,
+    private userService: UserService,
   ) {}
 
   @SubscribeMessage('requestOrganizationData')
@@ -79,5 +81,14 @@ export class OrganizationGateway {
 
     const org = await this.orgService.getOrganizationById(data.organizationId);
     await this.orgService.emitUpdateOrganizationData(org, false);
+
+    const manager = await this.userService.byEmail(data.email);
+    await this.userService.emitUpdateUserData(
+      manager,
+      false,
+      false,
+      true,
+      user,
+    );
   }
 }
