@@ -26,6 +26,7 @@ export class GroupGateway {
   constructor(
     private clientService: ClientService,
     private groupService: GroupService,
+    private userService: UserService,
   ) {}
 
   @SubscribeMessage('requestGroupData')
@@ -69,6 +70,8 @@ export class GroupGateway {
     if (await this.groupService.setCurrentEvent(user, data.eventId)) {
       const group = await this.groupService.getGroupForUser(user);
       await this.groupService.emitUpdateGroupData(group, false);
+    } else {
+      await this.userService.emitErrorData(user, 'Error setting current event');
     }
   }
 
@@ -77,7 +80,10 @@ export class GroupGateway {
     @CallingUser() user: User,
     @MessageBody() data: UpdateGroupDataDto,
   ) {
-    if (!user.administrator) return;
+    if (!user.administrator) {
+      await this.userService.emitErrorData(user, 'User is not an admin');
+      return;
+    }
 
     if (data.deleted) {
       await this.groupService.removeGroup(data.group as string);

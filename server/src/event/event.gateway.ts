@@ -19,6 +19,7 @@ import {
 } from './event.dto';
 import { RequestEventTrackerDataDto } from 'src/challenge/challenge.dto';
 import { OrganizationService } from 'src/organization/organization.service';
+import { UserService } from 'src/user/user.service';
 
 @WebSocketGateway({ cors: true })
 @UseGuards(UserGuard)
@@ -26,6 +27,7 @@ export class EventGateway {
   constructor(
     private clientService: ClientService,
     private eventService: EventService,
+    private userService: UserService,
     private orgService: OrganizationService,
   ) {}
 
@@ -76,6 +78,7 @@ export class EventGateway {
     @MessageBody() data: RequestEventLeaderDataDto,
   ) {
     if (!(await this.eventService.isAllowedEvent(user, data.eventId))) {
+      await this.userService.emitErrorData(user, 'Access Denied');
       return;
     }
 
@@ -115,6 +118,7 @@ export class EventGateway {
           user,
         ))
       ) {
+        await this.userService.emitErrorData(user, 'User has no admin rights');
         return;
       }
 
@@ -133,6 +137,7 @@ export class EventGateway {
         )) &&
         !(await this.eventService.hasAdminRights({ id: dto.id }, user))
       ) {
+        await this.userService.emitErrorData(user, 'User has no admin rights');
         return;
       }
 
