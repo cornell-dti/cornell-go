@@ -66,6 +66,7 @@ export class OrganizationGateway {
       const org = await this.orgService.upsertOrganizationFromDto(
         data.organization as OrganizationDto,
       );
+      this.clientService.subscribe(user, org.id, true);
       await this.orgService.emitUpdateOrganizationData(org, false);
     }
   }
