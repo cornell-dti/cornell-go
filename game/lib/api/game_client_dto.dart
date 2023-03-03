@@ -36,10 +36,7 @@ class UpdateUserDto {
   UserDto? user = null;
   String? id = null;
   bool deleted = false;
-
 }
-
-
 
 // class UpdateUserDataDto {
 //   UpdateUserDataDto.fromJson(Map<String, dynamic> fields) {
