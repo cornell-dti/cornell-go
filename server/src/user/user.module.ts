@@ -1,3 +1,4 @@
+import { SessionLogModule } from './../session-log/session-log.module';
 import { forwardRef, Module } from '@nestjs/common';
 import { ClientModule } from 'src/client/client.module';
 import { AuthModule } from '../auth/auth.module';
@@ -11,6 +12,7 @@ import { UserService } from './user.service';
 @Module({
   imports: [
     forwardRef(() => AuthModule),
+    SessionLogModule,
     ClientModule,
     forwardRef(() => GroupModule),
     PrismaModule,

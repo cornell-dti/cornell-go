@@ -19,6 +19,22 @@ enum EventRewardType {
   PERPETUAL
 }
 
+enum SessionLogEvent {
+  JOIN_GROUP //data = groupId
+  LEAVE_GROUP //data = groupId
+  LOGIN_USER //data = userId
+  CREATE_USER //data = userId
+  DELETE_USER //data = userId
+  EDIT_USERNAME //data = userId
+  SELECT_EVENT //data = eventId
+  DELETE_EVENT //data = eventId
+  SET_CHALLENGE //data = challengeId
+  DELETE_CHALLENGE //data = challengeId
+  COMPLETE_CHALLENGE //data = challengeId
+  DELETE_REWARD //data = rewardId
+  DISCONNECT //data = ""
+}
+
 enum OrganizationSpecialUsage {
   ///DEVICE_LOGIN is a device assigned-id that acts as a user login for non-Cornell users.
   DEVICE_LOGIN
@@ -45,6 +61,7 @@ model User {
   managerOf           Organization[]  @relation("manager")
   isRanked            Boolean         @default(true)
   participatedIn      PrevChallenge[] @relation("participant")
+  sessionLogEntries   SessionLogEntry[]
 }
 
 model Group {
@@ -140,4 +157,13 @@ model Organization {
   defaultEvent   EventBase                @relation("defaultOrg", fields: [defaultEventId], references: [id], onDelete: Restrict)
   defaultEventId String
   specialUsage   OrganizationSpecialUsage
+}
+
+model SessionLogEntry {
+  id         String          @id @default(uuid())
+  linkedUser User?           @relation(fields: [userId], references: [id])
+  eventType  SessionLogEvent
+  data       String
+  timestamp  DateTime        @default(now())
+  userId     String?
 }

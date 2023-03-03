@@ -1,3 +1,4 @@
+import { SessionLogService } from './../session-log/session-log.service';
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import {
   EventBase,
@@ -17,6 +18,7 @@ import { GroupDto, UpdateGroupDataDto } from './group.dto';
 @Injectable()
 export class GroupService {
   constructor(
+    private log: SessionLogService,
     private eventService: EventService,
     @Inject(forwardRef(() => UserService))
     private userService: UserService,
@@ -102,6 +104,7 @@ export class GroupService {
           data: { members: { connect: { id: user.id } } },
         });
         user.groupId = newGroup.id;
+        await this.log.logEvent(SessionLogEvent.JOIN_GROUP, oldGroup.id, user.id);
         return await this.fixOrDeleteGroup(oldGroup, tx);
       }
       return oldGroup;
@@ -136,6 +139,7 @@ export class GroupService {
       await this.fixOrDeleteGroup(newGroup, tx);
       user.groupId = newGroup.id;
 
+      await this.log.logEvent(SessionLogEvent.LEAVE_GROUP, oldGroup.id, user.id);
       return oldFixed;
     });
   }
@@ -227,7 +231,7 @@ export class GroupService {
       where: { id: group.id },
       data: { curEventId: eventId },
     });
-
+    await this.log.logEvent(SessionLogEvent.SELECT_EVENT, eventId, actor.id);
     return true;
   }
 

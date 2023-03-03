@@ -1,3 +1,4 @@
+import { SessionLogModule } from './../session-log/session-log.module';
 import { forwardRef, Module } from '@nestjs/common';
 import { ClientModule } from 'src/client/client.module';
 import { EventModule } from 'src/event/event.module';
@@ -18,6 +19,7 @@ import { ChallengeService } from './challenge.service';
     RewardModule,
     ClientModule,
     PrismaModule,
+    SessionLogModule,
   ],
   providers: [ChallengeGateway, ChallengeService],
 })
