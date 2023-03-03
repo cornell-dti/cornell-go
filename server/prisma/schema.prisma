@@ -47,6 +47,8 @@ model User {
   authToken           String
   authType            AuthType
   username            String
+  major               String
+  year                String
   email               String
   hashedRefreshToken  String
   administrator       Boolean
@@ -111,15 +113,17 @@ model EventBase {
 }
 
 model EventReward {
-  id          String    @id @default(uuid())
-  user        User?     @relation(fields: [userId], references: [id])
-  userId      String?
-  event       EventBase @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  eventId     String
-  eventIndex  Int
-  description String
-  redeemInfo  String
-  isRedeemed  Boolean
+  id            String    @id @default(uuid())
+  user          User?     @relation(fields: [userId], references: [id])
+  userId        String?
+  event         EventBase @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId       String
+  eventIndex    Int
+  description   String
+  redeemInfo    String
+  isRedeemed    Boolean
+  isAchievement Boolean
+  points        Int
 }
 
 model EventTracker {

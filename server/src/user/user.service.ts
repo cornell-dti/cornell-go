@@ -44,11 +44,14 @@ export class UserService {
   async register(
     email: string,
     username: string,
+    major: string,
+    year: string,
     lat: number,
     long: number,
     authType: AuthType,
     authToken: string,
   ) {
+    if (username == null) username = email?.split('@')[0];
     const defOrg = await this.orgService.getDefaultOrganization(
       authType == AuthType.GOOGLE
         ? OrganizationSpecialUsage.CORNELL_LOGIN
@@ -66,6 +69,8 @@ export class UserService {
         hostOf: { connect: { id: group.id } },
         memberOf: { connect: { id: defOrg.id } },
         username,
+        major,
+        year,
         email,
         authToken,
         authType,
@@ -101,6 +106,20 @@ export class UserService {
     });
   }
 
+  async setMajor(user: User, major: string) {
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { major },
+    });
+  }
+
+  async setGraduationYear(user: User, year: string) {
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { year },
+    });
+  }
+
   async dtoForUserData(user: User, partial: boolean): Promise<UserDto> {
     const joinedUser = await this.prisma.user.findUniqueOrThrow({
       where: { id: user.id },
@@ -114,6 +133,8 @@ export class UserService {
     return {
       id: joinedUser.id,
       username: joinedUser.username,
+      major: joinedUser.major,
+      year: joinedUser.year,
       score: joinedUser.score,
       groupId: joinedUser.group.friendlyId,
       authType: (
