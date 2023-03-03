@@ -6,6 +6,7 @@ import {
   User,
   OrganizationSpecialUsage,
   PrismaClient,
+  SessionLogEvent,
   Prisma,
 } from '@prisma/client';
 import { ClientService } from 'src/client/client.service';
@@ -107,6 +108,7 @@ export class GroupService {
         await this.log.logEvent(SessionLogEvent.JOIN_GROUP, oldGroup.id, user.id);
         return await this.fixOrDeleteGroup(oldGroup, tx);
       }
+      await this.log.logEvent(SessionLogEvent.JOIN_GROUP, oldGroup.id, user.id);
       return oldGroup;
     });
   }
