@@ -47,9 +47,10 @@ export class ServerApi {
     this.socket.emit("updateOrganizationData", data);
   }
   addManager(email: string, organizationId: string) {
-    this.socket.emit("addManager", [
-      { email: email, organizationId: organizationId },
-    ]);
+    this.socket.emit("addManager", {
+      email: email,
+      organizationId: organizationId,
+    });
   }
 
   onUpdateChallengeData(callback: (data: UpdateChallengeDataDto) => void) {
