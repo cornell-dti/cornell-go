@@ -17,7 +17,7 @@ export class ChallengeService {
     private readonly prisma: PrismaService,
     private eventService: EventService,
     private clientService: ClientService,
-  ) {}
+  ) { }
 
   /** Get challenges with prev challenges for a given user */
   async getChallengesByIdsForUser(
@@ -96,8 +96,9 @@ export class ChallengeService {
       challengeId !== eventTracker.curChallengeId ||
       (groupMembers.length !== curEvent.requiredMembers &&
         curEvent.requiredMembers >= 0)
-    )
+    ) {
       return false;
+    }
 
     const prevChal = await this.prisma.prevChallenge.create({
       data: {

@@ -28,7 +28,7 @@ export class UserService {
     private groupsService: GroupService,
     private orgService: OrganizationService,
     private clientService: ClientService,
-  ) {}
+  ) { }
 
   /** Find a user by their authentication token */
   async byAuth(authType: AuthType, authToken: string) {
@@ -119,11 +119,20 @@ export class UserService {
     }
   }
 
-  /** Grabs all events that a user can do based on the filter.
-   * Filter = new gives all events that are not started and ongoing,
+  /** 
+   * Filter: new gives all ,
    * with ongoing events listed before not started events.
+   * cursorId: 
    */
-  async getFilteredEventIds(user: User, filter: eventFilterDto) {
+
+  /**
+   * Grabs all events from all of user's allowed events based on the filter.
+   * @param user user requesting filtered events
+   * @param filter "saved" returns favorited events, "new" returns events that are not started and ongoing, "finished" returns events where each challenge is completed
+   * @param cursorId id of the last event in the previous page
+   * @returns filtered event id list sorted by ascending id
+   */
+  async getFilteredEventIds(user: User, filter: eventFilterDto, cursorId: string, limit: number) {
     const joinedUser = await this.prisma.user.findFirstOrThrow({
       where: { id: user.id },
       include: {
@@ -132,9 +141,19 @@ export class UserService {
       },
     });
 
+    let filteredEventIds = [{ 'id': '' }];
+
     if (filter == 'finished') {
-      return await this.prisma.eventBase.findMany({
+      filteredEventIds = await this.prisma.eventBase.findMany({
         select: { id: true },
+        orderBy: {
+          id: 'asc',  // must be ordered to use cursor
+        },
+        take: limit,
+        skip: 1, // skips the event with id = cursorId
+        cursor: {
+          id: cursorId,
+        },
         where: {
           usedIn: {
             some: { members: { some: { id: user.id } } },
@@ -153,8 +172,16 @@ export class UserService {
         },
       });
     } else if (filter == 'new') {
-      const ongoingEvent = await this.prisma.eventBase.findMany({
+      filteredEventIds = await this.prisma.eventBase.findMany({
         select: { id: true },
+        orderBy: {
+          id: 'asc',  // must be ordered to use cursor
+        },
+        take: limit,
+        skip: 1, // skips the event with id = cursorId
+        cursor: {
+          id: cursorId,
+        },
         where: {
           usedIn: {
             some: { members: { some: { id: user.id } } },
@@ -172,32 +199,18 @@ export class UserService {
           },
         },
       });
-      const notStartedEvent = await this.prisma.eventBase.findMany({
-        select: { id: true },
-        where: {
-          usedIn: {
-            some: { members: { some: { id: user.id } } },
-          },
-          challenges: {
-            none: {
-              completions: {
-                some: {
-                  participants: {
-                    some: { id: user.id },
-                  },
-                },
-              },
-            },
-          },
-        },
-      });
-      // extends ongoingEvent with notStartedEvent
-      // "Sorts" by having current events appear in the list first
-      return ongoingEvent.push.apply(ongoingEvent, notStartedEvent);
     } else {
       // filter == 'saved'
-      return await this.prisma.eventBase.findMany({
+      filteredEventIds = await this.prisma.eventBase.findMany({
         select: { id: true },
+        orderBy: {
+          id: 'asc',  // must be ordered to use cursor
+        },
+        take: limit,
+        skip: 1, // skips the event with id = cursorId
+        cursor: {
+          id: cursorId,
+        },
         where: {
           usedIn: {
             some: { members: { some: { id: user.id } } },
@@ -208,6 +221,7 @@ export class UserService {
         },
       });
     }
+    return filteredEventIds;
   }
 
   async dtoForUserData(user: User, partial: boolean): Promise<UserDto> {

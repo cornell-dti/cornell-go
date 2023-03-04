@@ -1,5 +1,5 @@
 /** DTO for closeAccount */
-export interface CloseAccountDto {}
+export interface CloseAccountDto { }
 
 /** DTO for setUsername */
 export interface SetUsernameDto {
@@ -56,6 +56,7 @@ export interface UpdateUserDto {
 export type eventFilterDto = 'new' | 'saved' | 'finished';
 
 export interface RequestFilteredEventDto {
-  eventId: string;
   filter: eventFilterDto;
+  cursorId: string;
+  limit: number;
 }
