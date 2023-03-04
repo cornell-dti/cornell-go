@@ -36,7 +36,7 @@ export class UserGateway {
     private userService: UserService,
     private groupService: GroupService,
     private eventService: EventService,
-  ) { }
+  ) {}
 
   private providerToAuthType(provider: string) {
     let type: AuthType = AuthType.NONE;
@@ -81,9 +81,14 @@ export class UserGateway {
     @CallingUser() user: User,
     @MessageBody() data: RequestFilteredEventDto,
   ) {
-    const eventIds = await this.userService.getFilteredEventIds(user, data.filter, data.cursorId, data.limit);
+    const eventIds = await this.userService.getFilteredEventIds(
+      user,
+      data.filter,
+      data.cursorId,
+      data.limit,
+    );
     for (const eventId of eventIds) {
-      const ev = await this.eventService.getEventById(eventId.id)
+      const ev = await this.eventService.getEventById(eventId.id);
       this.clientService.subscribe(user, eventId.id, false);
       await this.eventService.emitUpdateEventData(ev, false, false, user);
     }

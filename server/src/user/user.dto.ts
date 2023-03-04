@@ -1,5 +1,5 @@
 /** DTO for closeAccount */
-export interface CloseAccountDto { }
+export interface CloseAccountDto {}
 
 /** DTO for setUsername */
 export interface SetUsernameDto {

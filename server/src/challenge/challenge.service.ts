@@ -17,7 +17,7 @@ export class ChallengeService {
     private readonly prisma: PrismaService,
     private eventService: EventService,
     private clientService: ClientService,
-  ) { }
+  ) {}
 
   /** Get challenges with prev challenges for a given user */
   async getChallengesByIdsForUser(

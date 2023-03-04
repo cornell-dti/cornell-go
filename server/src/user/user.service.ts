@@ -28,7 +28,7 @@ export class UserService {
     private groupsService: GroupService,
     private orgService: OrganizationService,
     private clientService: ClientService,
-  ) { }
+  ) {}
 
   /** Find a user by their authentication token */
   async byAuth(authType: AuthType, authToken: string) {
@@ -119,10 +119,10 @@ export class UserService {
     }
   }
 
-  /** 
+  /**
    * Filter: new gives all ,
    * with ongoing events listed before not started events.
-   * cursorId: 
+   * cursorId:
    */
 
   /**
@@ -132,7 +132,12 @@ export class UserService {
    * @param cursorId id of the last event in the previous page
    * @returns filtered event id list sorted by ascending id
    */
-  async getFilteredEventIds(user: User, filter: eventFilterDto, cursorId: string, limit: number) {
+  async getFilteredEventIds(
+    user: User,
+    filter: eventFilterDto,
+    cursorId: string,
+    limit: number,
+  ) {
     const joinedUser = await this.prisma.user.findFirstOrThrow({
       where: { id: user.id },
       include: {
@@ -141,13 +146,13 @@ export class UserService {
       },
     });
 
-    let filteredEventIds = [{ 'id': '' }];
+    let filteredEventIds = [{ id: '' }];
 
     if (filter == 'finished') {
       filteredEventIds = await this.prisma.eventBase.findMany({
         select: { id: true },
         orderBy: {
-          id: 'asc',  // must be ordered to use cursor
+          id: 'asc', // must be ordered to use cursor
         },
         take: limit,
         skip: 1, // skips the event with id = cursorId
@@ -175,7 +180,7 @@ export class UserService {
       filteredEventIds = await this.prisma.eventBase.findMany({
         select: { id: true },
         orderBy: {
-          id: 'asc',  // must be ordered to use cursor
+          id: 'asc', // must be ordered to use cursor
         },
         take: limit,
         skip: 1, // skips the event with id = cursorId
@@ -204,7 +209,7 @@ export class UserService {
       filteredEventIds = await this.prisma.eventBase.findMany({
         select: { id: true },
         orderBy: {
-          id: 'asc',  // must be ordered to use cursor
+          id: 'asc', // must be ordered to use cursor
         },
         take: limit,
         skip: 1, // skips the event with id = cursorId
