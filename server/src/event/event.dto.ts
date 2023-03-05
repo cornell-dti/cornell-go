@@ -19,6 +19,7 @@ export interface RequestEventLeaderDataDto {
 export interface RequestRecommendedEventsDto {
   latitude: number;
   longitude: number;
+  count?: number;
 }
 
 export interface EventDto {
@@ -35,8 +36,8 @@ export interface EventDto {
   defaultChallengeId: string;
   minimumScore: number;
   indexable: boolean;
-  longitude: number;
-  latitude: number;
+  firstLongitude: number;
+  firstLatitude: number;
 }
 
 /** DTO for event tracker in updateEventTrackerData */

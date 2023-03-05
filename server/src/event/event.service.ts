@@ -14,7 +14,12 @@ import {
   OrganizationService,
 } from '../organization/organization.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { EventDto, EventTrackerDto, UpdateEventDataDto } from './event.dto';
+import {
+  EventDto,
+  EventTrackerDto,
+  UpdateEventDataDto,
+  RequestRecommendedEventsDto,
+} from './event.dto';
 
 @Injectable()
 export class EventService {
@@ -224,16 +229,19 @@ export class EventService {
     });
   }
 
-  async getRecommendedEventsForUser(user: User, lat: number, long: number) {
-    // const orgs = await this.prisma.user.findUniqueOrThrow({
-    //   where: { id: user.id },
-    //   include: { memberOf: true },
-    // });
+  async getRecommendedEventsForUser(
+    user: User,
+    data: RequestRecommendedEventsDto,
+  ) {
     const evs: EventBase[] = await this.prisma.$queryRaw`
       select * from "EventBase" ev 
-      -- where ev."defaultOf" && ${orgs.memberOf}
-      order by ((ev."latitude" - ${lat})^2 + (ev."longitude" - ${long})^2)
-      fetch first 4 rows only
+      where ev."id" in (select e."A" from "_events" e inner join "_player" p on e."B" = p."A" and ${
+        user.id
+      } = p."B")
+      order by ((ev."firstLatitude" - ${
+        data.latitude
+      })^2 + (ev."firstLongitude" - ${data.longitude})^2)
+      fetch first ${data.count ?? 4} rows only
     `;
     return evs;
   }
@@ -278,8 +286,8 @@ export class EventService {
         .map(({ id }) => id),
       minimumScore: ev.minimumScore,
       defaultChallengeId: ev.defaultChallengeId,
-      latitude: ev.latitude,
-      longitude: ev.longitude,
+      firstLatitude: ev.firstLatitude,
+      firstLongitude: ev.firstLongitude,
     };
   }
 
@@ -413,8 +421,8 @@ export class EventService {
         id: eventId,
       },
       data: {
-        longitude: chal?.longitude,
-        latitude: chal?.latitude,
+        firstLongitude: chal?.longitude,
+        firstLatitude: chal?.latitude,
       },
     });
     return updatedEv;
@@ -437,8 +445,8 @@ export class EventService {
       endTime: new Date(event.endTime),
       indexable: event.indexable,
       minimumScore: event.minimumScore,
-      latitude: firstChal?.latitude ?? 0,
-      longitude: firstChal?.longitude ?? 0,
+      firstLatitude: firstChal?.latitude ?? 0,
+      firstLongitude: firstChal?.longitude ?? 0,
     };
 
     const eventEntity = await this.prisma.eventBase.upsert({

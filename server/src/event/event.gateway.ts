@@ -76,11 +76,7 @@ export class EventGateway {
     @CallingUser() user: User,
     @MessageBody() data: RequestRecommendedEventsDto,
   ) {
-    const evs = await this.eventService.getRecommendedEventsForUser(
-      user,
-      data.latitude,
-      data.longitude,
-    );
+    const evs = await this.eventService.getRecommendedEventsForUser(user, data);
     for (const ev of evs) {
       await this.eventService.emitUpdateEventData(ev, false, false, user);
     }
