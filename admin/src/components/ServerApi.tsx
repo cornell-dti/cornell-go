@@ -6,6 +6,7 @@ import {
 import { UpdateErrorDto } from "../dto/client.dto";
 import { RequestEventDataDto, UpdateEventDataDto } from "../dto/event.dto";
 import { RequestGroupDataDto, UpdateGroupDataDto } from "../dto/group.dto";
+import { RequestUsersDataDto, UpdateUserDataDto } from "../dto/user.dto";
 import {
   RequestOrganizationDataDto,
   UpdateOrganizationDataDto,
@@ -25,6 +26,9 @@ export class ServerApi {
   requestRewardData(data: RequestRewardDataDto) {
     this.socket.emit("requestRewardData", data);
   }
+  requestUsers(data: RequestUsersDataDto) {
+    this.socket.emit("requestUsers", data);
+  }
   requestGroupData(data: RequestGroupDataDto) {
     this.socket.emit("requestGroupData", data);
   }
@@ -39,6 +43,9 @@ export class ServerApi {
   }
   updateRewardData(data: UpdateRewardDataDto) {
     this.socket.emit("updateRewardData", data);
+  }
+  updateUsers(data: UpdateUserDataDto) {
+    this.socket.emit("updateUsers", data);
   }
   updateGroupData(data: UpdateGroupDataDto) {
     this.socket.emit("updateGroupData", data);
@@ -64,6 +71,10 @@ export class ServerApi {
   ) {
     this.socket.removeAllListeners("updateOrganizationData");
     this.socket.on("updateOrganizationData", (data) => callback(data));
+  }
+  onUpdateUserData(callback: (data: UpdateUserDataDto) => void) {
+    this.socket.removeAllListeners("updateUserData");
+    this.socket.on("updateUserData", (data) => callback(data));
   }
   onUpdateGroupData(callback: (data: UpdateGroupDataDto) => void) {
     this.socket.removeAllListeners("updateGroupData");

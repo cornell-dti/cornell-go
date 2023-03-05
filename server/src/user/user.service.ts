@@ -11,7 +11,7 @@ import { EventService } from '../event/event.service';
 import { GroupService } from '../group/group.service';
 import { OrganizationService } from '../organization/organization.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { UpdateUserDto, UserAuthTypeDto, UserDto } from './user.dto';
+import { UpdateUserDataDto, UserAuthTypeDto, UserDto } from './user.dto';
 
 @Injectable()
 export class UserService {
@@ -150,7 +150,7 @@ export class UserService {
     admin?: boolean,
     client?: User,
   ) {
-    const dto: UpdateUserDto = {
+    const dto: UpdateUserDataDto = {
       user: deleted ? user.id : await this.dtoForUserData(user, partial),
       deleted,
     };

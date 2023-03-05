@@ -20,6 +20,7 @@ import {
   SetGraduationYearDto,
   SetMajorDto,
   SetUsernameDto,
+  UpdateUserDataDto,
 } from './user.dto';
 import { UserService } from './user.service';
 import { readFileSync } from 'fs';
@@ -75,6 +76,29 @@ export class UserGateway {
       }
     } else {
       await this.userService.emitUpdateUserData(user, false, false, true, user);
+    }
+  }
+
+  @SubscribeMessage('updateUserData')
+  async updateOrganizationData(
+    @CallingUser() user: User,
+    @MessageBody() data: UpdateUserDataDto,
+  ) {
+    if (!user.administrator) return;
+
+    if (data.deleted) {
+      const user = await this.userService.byId(data.user as string);
+      if (user !== null) {
+        await this.userService.deleteUser(user);
+        await this.userService.emitUpdateUserData(user, true, true);
+      }
+    } else {
+      const user = await this.userService..upsertOrganizationFromDto(
+        data.organization as OrganizationDto,
+      );
+
+      await this.orgService.addAllAdmins(org);
+      await this.orgService.emitUpdateOrganizationData(org, false);
     }
   }
 

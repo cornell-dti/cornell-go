@@ -9,6 +9,7 @@ import {
 import { ChallengeDto } from "../dto/challenge.dto";
 import { UpdateErrorDto } from "../dto/client.dto";
 import { EventDto } from "../dto/event.dto";
+import { UserDto } from "../dto/user.dto";
 import { GroupDto } from "../dto/group.dto";
 import { OrganizationDto } from "../dto/organization.dto";
 import { RewardDto } from "../dto/reward.dto";
@@ -21,6 +22,7 @@ const defaultData = {
   challenges: new Map<string, ChallengeDto>(),
   rewards: new Map<string, RewardDto>(),
   organizations: new Map<string, OrganizationDto>(),
+  users: new Map<string, UserDto>(),
   groups: new Map<string, GroupDto>(),
   selectedEvent: "" as string,
   selectedOrg: "" as string,
@@ -37,6 +39,8 @@ const defaultData = {
   updateOrganization(organization: OrganizationDto) {},
   deleteOrganization(id: string) {},
   deleteError(id: string) {},
+  updateUser(user: UserDto) {},
+  deleteUser(id: string) {},
   updateGroup(event: GroupDto) {},
   deleteGroup(id: string) {},
 };
@@ -97,6 +101,12 @@ export function ServerDataProvider(props: { children: ReactNode }) {
       deleteError(id: string) {
         serverData.errors.delete(id);
         setTimeout(() => setServerData({ ...serverData }), 0);
+      },
+      updateUser(user: UserDto) {
+        sock.updateUsers({ user, deleted: false });
+      },
+      deleteUser(id: string) {
+        sock.updateUsers({ user: id, deleted: true });
       },
       updateGroup(group: GroupDto) {
         sock.updateGroupData({ group, deleted: false });
@@ -178,6 +188,15 @@ export function ServerDataProvider(props: { children: ReactNode }) {
           (data.reward as RewardDto).id,
           data.reward as RewardDto
         );
+      }
+
+      setTimeout(() => setServerData({ ...serverData }), 0);
+    });
+    sock.onUpdateUserData((data) => {
+      if (data.deleted) {
+        serverData.users.delete((data.user as UserDto).id);
+      } else {
+        serverData.users.set((data.user as UserDto).id, data.user as UserDto);
       }
 
       setTimeout(() => setServerData({ ...serverData }), 0);

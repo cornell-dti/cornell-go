@@ -53,7 +53,7 @@ export interface UserDto {
   trackedEventIds?: string[];
 }
 
-export interface UpdateUserDto {
+export interface UpdateUserDataDto {
   user: UserDto | string;
   deleted: boolean;
 }
