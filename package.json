@@ -7,5 +7,11 @@
   "license": "UNLICENSED",
   "scripts": {
     "dbreset": "node ./scripts/dbreset.js"
+  },
+  "dependencies": {
+    "ws": "^8.12.1"
+  },
+  "devDependencies": {
+    "jest": "^29.4.3"
   }
 }
