@@ -11,6 +11,7 @@ import {
   JoinGroupDto,
   LeaveGroupDto,
   RequestGroupDataDto,
+  SendGroupInviteDto,
   SetCurrentEventDto,
   UpdateGroupDataDto,
 } from './group.dto';
@@ -85,5 +86,19 @@ export class GroupGateway {
       const group = await this.groupService.updateGroup(data.group as GroupDto);
       await this.groupService.emitUpdateGroupData(group, false);
     }
+  }
+
+  @SubscribeMessage('sendGroupInvite')
+  async sendGroupInvite(
+    @CallingUser() user: User,
+    @MessageBody() data: SendGroupInviteDto,
+  ) {
+    if (!user.administrator) return;
+    const group = await this.groupService.getGroupForUser(user);
+    await this.groupService.emitGroupInvite(
+      group,
+      data.targetUsername,
+      user,
+    );
   }
 }

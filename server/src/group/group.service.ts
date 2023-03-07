@@ -12,7 +12,7 @@ import { EventService } from 'src/event/event.service';
 import { UserService } from 'src/user/user.service';
 import { OrganizationService } from '../organization/organization.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { GroupDto, UpdateGroupDataDto } from './group.dto';
+import { GroupDto, GroupInviteDto, UpdateGroupDataDto } from './group.dto';
 
 @Injectable()
 export class GroupService {
@@ -303,6 +303,25 @@ export class GroupService {
     } else {
       this.clientService.sendUpdate('updateGroupData', group.id, false, dto);
       this.clientService.sendUpdate('updateGroupData', group.id, true, dto);
+    }
+  }
+
+  async emitGroupInvite(
+    group: Group,
+    username: string,
+    user?: User,
+    admin?: boolean,
+  ) {
+    const dto: GroupInviteDto = {
+      groupId: await (await this.dtoForGroup(group)).friendlyId,
+      username: username,
+    };
+
+    if (user) {
+      this.clientService.sendUpdate('groupInvitation', user.id, !!admin, dto);
+    } else {
+      this.clientService.sendUpdate('groupInvitation', group.id, false, dto);
+      this.clientService.sendUpdate('groupInvitation', group.id, true, dto);
     }
   }
 
