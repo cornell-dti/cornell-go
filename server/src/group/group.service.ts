@@ -105,7 +105,11 @@ export class GroupService {
           data: { members: { connect: { id: user.id } } },
         });
         user.groupId = newGroup.id;
-        await this.log.logEvent(SessionLogEvent.JOIN_GROUP, oldGroup.id, user.id);
+        await this.log.logEvent(
+          SessionLogEvent.JOIN_GROUP,
+          oldGroup.id,
+          user.id,
+        );
         return await this.fixOrDeleteGroup(oldGroup, tx);
       }
       await this.log.logEvent(SessionLogEvent.JOIN_GROUP, oldGroup.id, user.id);
@@ -141,7 +145,11 @@ export class GroupService {
       await this.fixOrDeleteGroup(newGroup, tx);
       user.groupId = newGroup.id;
 
-      await this.log.logEvent(SessionLogEvent.LEAVE_GROUP, oldGroup.id, user.id);
+      await this.log.logEvent(
+        SessionLogEvent.LEAVE_GROUP,
+        oldGroup.id,
+        user.id,
+      );
       return oldFixed;
     });
   }

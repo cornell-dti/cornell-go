@@ -246,7 +246,7 @@ export class ChallengeService {
       challengeId,
       user.id,
     );
-    
+
     return true;
   }
 
