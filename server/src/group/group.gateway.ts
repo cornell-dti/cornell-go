@@ -95,10 +95,6 @@ export class GroupGateway {
   ) {
     if (!user.administrator) return;
     const group = await this.groupService.getGroupForUser(user);
-    await this.groupService.emitGroupInvite(
-      group,
-      data.targetUsername,
-      user,
-    );
+    await this.groupService.emitGroupInvite(group, data.targetUsername, user);
   }
 }
