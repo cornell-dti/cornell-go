@@ -38,12 +38,15 @@ export interface RequestUserDataDto {
   userId?: string;
 }
 
+export interface RequestAllUserDataDto {}
+
 export type UserAuthTypeDto = 'device' | 'apple' | 'google';
 
 /** DTO for updateUserData event */
 export interface UserDto {
   id: string;
   username: string;
+  email: string;
   major: string;
   year: string;
   score: number;

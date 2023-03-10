@@ -6,7 +6,11 @@ import {
 import { UpdateErrorDto } from "../dto/client.dto";
 import { RequestEventDataDto, UpdateEventDataDto } from "../dto/event.dto";
 import { RequestGroupDataDto, UpdateGroupDataDto } from "../dto/group.dto";
-import { RequestUsersDataDto, UpdateUserDataDto } from "../dto/user.dto";
+import {
+  RequestAllUserDataDto,
+  RequestUserDataDto,
+  UpdateUserDataDto,
+} from "../dto/user.dto";
 import {
   RequestOrganizationDataDto,
   UpdateOrganizationDataDto,
@@ -26,8 +30,11 @@ export class ServerApi {
   requestRewardData(data: RequestRewardDataDto) {
     this.socket.emit("requestRewardData", data);
   }
-  requestUsers(data: RequestUsersDataDto) {
-    this.socket.emit("requestUsers", data);
+  requestUserData(data: RequestUserDataDto) {
+    this.socket.emit("requestUserData", data);
+  }
+  requestAllUserData(data: RequestAllUserDataDto) {
+    this.socket.emit("requestAllUserData", data);
   }
   requestGroupData(data: RequestGroupDataDto) {
     this.socket.emit("requestGroupData", data);

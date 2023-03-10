@@ -129,6 +129,7 @@ export function ServerDataProvider(props: { children: ReactNode }) {
 
   useEffect(() => {
     sock.requestOrganizationData({ admin: true });
+    sock.requestAllUserData({});
     sock.requestGroupData({});
   }, [sock]);
 

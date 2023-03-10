@@ -88,6 +88,10 @@ export class UserService {
     return await this.prisma.user.findUnique({ where: { id } });
   }
 
+  async getAllUserData() {
+    return await this.prisma.user.findMany();
+  }
+
   async deleteUser(user: User) {
     await this.prisma.user.delete({ where: { id: user.id } });
     await this.prisma.$transaction(async tx => {
@@ -116,6 +120,18 @@ export class UserService {
     });
   }
 
+  async updateUser(user: UserDto): Promise<User> {
+    return await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        username: user.username,
+        email: user.email,
+        major: user.major,
+        year: user.year,
+      },
+    });
+  }
+
   async dtoForUserData(user: User, partial: boolean): Promise<UserDto> {
     const joinedUser = await this.prisma.user.findUniqueOrThrow({
       where: { id: user.id },
@@ -129,6 +145,7 @@ export class UserService {
     return {
       id: joinedUser.id,
       username: joinedUser.username,
+      email: joinedUser.email,
       major: joinedUser.major,
       year: joinedUser.year,
       score: joinedUser.score,

@@ -13,6 +13,7 @@ import { GroupGateway } from '../group/group.gateway';
 import { GroupService } from '../group/group.service';
 import {
   CloseAccountDto,
+  RequestAllUserDataDto,
   RequestGlobalLeaderDataDto,
   RequestUserDataDto,
   SetAuthToDeviceDto,
@@ -21,6 +22,7 @@ import {
   SetMajorDto,
   SetUsernameDto,
   UpdateUserDataDto,
+  UserDto,
 } from './user.dto';
 import { UserService } from './user.service';
 import { readFileSync } from 'fs';
@@ -57,6 +59,26 @@ export class UserGateway {
     return type;
   }
 
+  @SubscribeMessage('requestAllUserData')
+  async requestAllUserData(
+    @CallingUser() user: User,
+    @MessageBody() data: RequestAllUserDataDto,
+  ) {
+    if (user.administrator) {
+      const users = await this.userService.getAllUserData();
+
+      await users.map(
+        async (us: User) =>
+          await this.userService.emitUpdateUserData(
+            us,
+            false,
+            false,
+            true,
+            user,
+          ),
+      );
+    }
+  }
   @SubscribeMessage('requestUserData')
   async requestUserData(
     @CallingUser() user: User,
@@ -84,7 +106,7 @@ export class UserGateway {
     @CallingUser() user: User,
     @MessageBody() data: UpdateUserDataDto,
   ) {
-    if (!user.administrator) return;
+    if (!user.administrator && user.id !== (data.user as UserDto).id) return;
 
     if (data.deleted) {
       const user = await this.userService.byId(data.user as string);
@@ -93,12 +115,9 @@ export class UserGateway {
         await this.userService.emitUpdateUserData(user, true, true);
       }
     } else {
-      const user = await this.userService..upsertOrganizationFromDto(
-        data.organization as OrganizationDto,
-      );
+      const user = await this.userService.updateUser(data.user as UserDto);
 
-      await this.orgService.addAllAdmins(org);
-      await this.orgService.emitUpdateOrganizationData(org, false);
+      await this.userService.emitUpdateUserData(user, false, true);
     }
   }
 
