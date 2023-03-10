@@ -33,7 +33,8 @@ class UpdateUserDto {
     user = fields["user"] is String ? fields['user'] : UserDto.fromJson(fields);
     deleted = fields["deleted"];
   }
-  dynamic user = "";
+  UserDto? user = null;
+  String? id = null;
   bool deleted = false;
 }
 
