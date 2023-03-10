@@ -218,7 +218,9 @@ export class ChallengeService {
       group.curEventId,
     );
 
-    if (!isChallengeValid) return false;
+    if (!isChallengeValid) {
+      return false;
+    }
 
     const eventTracker: EventTracker =
       await this.eventService.getCurrentEventTrackerForUser(user);
