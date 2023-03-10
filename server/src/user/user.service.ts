@@ -135,7 +135,7 @@ export class UserService {
   async getFilteredEventIds(
     user: User,
     filter: eventFilterDto,
-    cursorId: string,
+    cursorId: string | undefined,
     limit: number,
   ) {
     const joinedUser = await this.prisma.user.findFirstOrThrow({
@@ -155,10 +155,12 @@ export class UserService {
           id: 'asc', // must be ordered to use cursor
         },
         take: limit,
-        skip: 1, // skips the event with id = cursorId
-        cursor: {
-          id: cursorId,
-        },
+        skip: cursorId ? 1 : 0, // skips the event with id = cursorId
+        cursor: cursorId
+          ? {
+              id: cursorId,
+            }
+          : undefined,
         where: {
           usedIn: {
             some: { members: { some: { id: user.id } } },
@@ -183,10 +185,12 @@ export class UserService {
           id: 'asc', // must be ordered to use cursor
         },
         take: limit,
-        skip: 1, // skips the event with id = cursorId
-        cursor: {
-          id: cursorId,
-        },
+        skip: cursorId ? 1 : 0, // skips the event with id = cursorId
+        cursor: cursorId
+          ? {
+              id: cursorId,
+            }
+          : undefined,
         where: {
           usedIn: {
             some: { members: { some: { id: user.id } } },
@@ -212,10 +216,12 @@ export class UserService {
           id: 'asc', // must be ordered to use cursor
         },
         take: limit,
-        skip: 1, // skips the event with id = cursorId
-        cursor: {
-          id: cursorId,
-        },
+        skip: cursorId ? 1 : 0, // skips the event with id = cursorId
+        cursor: cursorId
+          ? {
+              id: cursorId,
+            }
+          : undefined,
         where: {
           usedIn: {
             some: { members: { some: { id: user.id } } },

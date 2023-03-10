@@ -57,6 +57,6 @@ export type eventFilterDto = 'new' | 'saved' | 'finished';
 
 export interface RequestFilteredEventDto {
   filter: eventFilterDto;
-  cursorId: string;
+  cursorId?: string;
   limit: number;
 }
