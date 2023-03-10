@@ -202,6 +202,35 @@ class UpdateLeaderDataDto {
   List<UpdateLeaderDataUserDto> users = [];
 }
 
+// Group DTOS
+class GroupMemberDto {
+  GroupMemberDto.fromJson(Map<String, dynamic> fields) {
+    id = fields["id"];
+    name = fields["name"];
+    points = fields["points"];
+    curChallengeId = fields["curChallengeId"];
+  }
+  String id = "";
+  String name = "";
+  int points = 0;
+  String curChallengeId = "";
+}
+
+class GroupDto {
+  GroupDto.fromJson(Map<String, dynamic> fields) {
+    id = fields["id"];
+    friendlyId = fields["friendlyId"];
+    hostId = fields["hostId"];
+    curEventId = fields["curEventId"];
+    members = fields["members"];
+  }
+  String id = "";
+  String friendlyId = "";
+  String hostId = "";
+  String curEventId = "";
+  List<GroupMemberDto> members = [];
+}
+
 class UpdateGroupDataMemberDto {
   UpdateGroupDataMemberDto.fromJson(Map<String, dynamic> fields) {
     id = fields["id"];
