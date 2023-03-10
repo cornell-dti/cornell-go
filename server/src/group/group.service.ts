@@ -308,7 +308,7 @@ export class GroupService {
     user?: User,
   ) {
     const dto: UpdateGroupDataDto = {
-      group: deleted ? await this.dtoForGroup(group) : group.id,
+      group: deleted ? group.id : await this.dtoForGroup(group),
       deleted,
     };
 
