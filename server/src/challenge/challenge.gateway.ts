@@ -93,7 +93,7 @@ export class ChallengeGateway {
       await this.groupService.emitUpdateGroupData(group, false);
       await this.eventService.emitUpdateEventTracker(tracker);
     } else {
-      await this.userService.emitErrorData(
+      await this.clientService.emitErrorData(
         user,
         'Challenge is not valid (Challenge is not in event)',
       );
@@ -122,7 +122,7 @@ export class ChallengeGateway {
       await this.eventService.emitUpdateEventTracker(tracker);
       await this.userService.emitUpdateUserData(user, false, false, true, user);
     } else {
-      await this.userService.emitErrorData(user, 'Challenge not complete');
+      await this.clientService.emitErrorData(user, 'Challenge not complete');
     }
   }
 
@@ -157,7 +157,10 @@ export class ChallengeGateway {
           user,
         ))
       ) {
-        await this.userService.emitErrorData(user, 'User has no admin rights');
+        await this.clientService.emitErrorData(
+          user,
+          'User has no admin rights',
+        );
         return;
       }
 
@@ -173,7 +176,10 @@ export class ChallengeGateway {
           user,
         ))
       ) {
-        await this.userService.emitErrorData(user, 'User has no admin rights');
+        await this.clientService.emitErrorData(
+          user,
+          'User has no admin rights',
+        );
         return;
       }
 
