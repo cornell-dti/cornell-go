@@ -11,6 +11,7 @@ import { join } from 'path';
 import { ClientModule } from './client/client.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { RewardModule } from './reward/reward.module';
+import { SessionLogModule } from './session-log/session-log.module';
 import { OrganizationModule } from './organization/organization.module';
 import { OrganizationGateway } from './organization/organization.gateway';
 
@@ -28,6 +29,7 @@ import { OrganizationGateway } from './organization/organization.gateway';
     ChallengeModule,
     RewardModule,
     PrismaModule,
+    SessionLogModule,
     OrganizationModule,
   ],
   controllers: [],
