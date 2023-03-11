@@ -80,7 +80,7 @@ export class GroupGateway {
   ) {
     if (!user.administrator) return;
 
-    if (data.deleted) {
+    if (data.delete) {
       await this.groupService.removeGroup(data.group as string);
     } else {
       const group = await this.groupService.updateGroup(data.group as GroupDto);
