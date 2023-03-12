@@ -235,12 +235,12 @@ export class EventService {
   ) {
     const evs: EventBase[] = await this.prisma.$queryRaw`
       select * from "EventBase" ev 
-      where ev."id" in (select e."A" from "_events" e inner join "_player" p on e."B" = p."A" and ${
+      where ev."id" in (select e."A" from "_eventOrgs" e inner join "_player" p on e."B" = p."A" and ${
         user.id
       } = p."B")
-      order by ((ev."firstLatitude" - ${
-        data.latitude
-      })^2 + (ev."firstLongitude" - ${data.longitude})^2)
+      order by ((ev."latitude" - ${data.latitude})^2 + (ev."longitude" - ${
+      data.longitude
+    })^2)
       fetch first ${data.count ?? 4} rows only
     `;
     return evs;
@@ -267,7 +267,7 @@ export class EventService {
       select: { id: true, eventIndex: true },
     });
 
-    const sorted_chals = chals.sort((a, b) => a.eventIndex - b.eventIndex);
+    const sortedChals = chals.sort((a, b) => a.eventIndex - b.eventIndex);
 
     return {
       id: ev.id,
@@ -280,14 +280,14 @@ export class EventService {
       endTime: ev.endTime.toUTCString(),
       requiredMembers: ev.requiredMembers,
       indexable: ev.indexable,
-      challengeIds: sorted_chals.map(c => c.id),
+      challengeIds: sortedChals.map(c => c.id),
       rewardIds: rws
         .sort((a, b) => a.eventIndex - b.eventIndex)
         .map(({ id }) => id),
       minimumScore: ev.minimumScore,
       defaultChallengeId: ev.defaultChallengeId,
-      firstLatitude: ev.firstLatitude,
-      firstLongitude: ev.firstLongitude,
+      latitude: ev.latitude,
+      longitude: ev.longitude,
     };
   }
 
@@ -421,8 +421,8 @@ export class EventService {
         id: eventId,
       },
       data: {
-        firstLongitude: chal?.longitude,
-        firstLatitude: chal?.latitude,
+        longitude: chal?.longitude,
+        latitude: chal?.latitude,
       },
     });
     return updatedEv;
@@ -445,8 +445,8 @@ export class EventService {
       endTime: new Date(event.endTime),
       indexable: event.indexable,
       minimumScore: event.minimumScore,
-      firstLatitude: firstChal?.latitude ?? 0,
-      firstLongitude: firstChal?.longitude ?? 0,
+      latitude: firstChal?.latitude ?? 0,
+      longitude: firstChal?.longitude ?? 0,
     };
 
     const eventEntity = await this.prisma.eventBase.upsert({

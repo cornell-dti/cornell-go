@@ -36,8 +36,8 @@ export interface EventDto {
   defaultChallengeId: string;
   minimumScore: number;
   indexable: boolean;
-  firstLongitude: number;
-  firstLatitude: number;
+  longitude: number;
+  latitude: number;
 }
 
 /** DTO for event tracker in updateEventTrackerData */

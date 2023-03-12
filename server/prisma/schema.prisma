@@ -42,9 +42,9 @@ model User {
   eventTrackers       EventTracker[]
   completedChallenges PrevChallenge[] @relation("owner")
   memberOf            Organization[]  @relation("player")
-  managerOf           Organization[]  @relation("manager")
+  managerOf           Organization[]  @relation("orgManager")
   isRanked            Boolean         @default(true)
-  participatedIn      PrevChallenge[] @relation("participant")
+  participatedIn      PrevChallenge[] @relation("prevChallengeParticipant")
 }
 
 model Group {
@@ -85,14 +85,14 @@ model EventBase {
   minimumScore       Int             @default(1)
   rewards            EventReward[]
   challenges         Challenge[]     @relation("all")
-  usedIn             Organization[]  @relation("events")
+  usedIn             Organization[]  @relation("eventOrgs")
   defaultOf          Organization[]  @relation("defaultOrg")
   defaultChallenge   Challenge       @relation("default", fields: [defaultChallengeId], references: [id])
   defaultChallengeId String          @unique
   trackers           EventTracker[]
   activeGroups       Group[]
-  firstLatitude      Float
-  firstLongitude     Float
+  latitude           Float
+  longitude          Float
 }
 
 model EventReward {
@@ -126,7 +126,7 @@ model PrevChallenge {
   id           Int          @id @default(autoincrement())
   user         User         @relation("owner", fields: [userId], references: [id], onDelete: Cascade)
   userId       String
-  participants User[]       @relation("participant")
+  participants User[]       @relation("prevChallengeParticipant")
   challenge    Challenge    @relation(fields: [challengeId], references: [id], onDelete: Cascade)
   challengeId  String
   tracker      EventTracker @relation(fields: [trackerId], references: [id], onDelete: Cascade)
@@ -139,8 +139,8 @@ model Organization {
   name           String
   accessCode     String
   members        User[]                   @relation("player")
-  managers       User[]                   @relation("manager")
-  events         EventBase[]              @relation("events")
+  managers       User[]                   @relation("orgManager")
+  events         EventBase[]              @relation("eventOrgs")
   defaultEvent   EventBase                @relation("defaultOrg", fields: [defaultEventId], references: [id], onDelete: Restrict)
   defaultEventId String
   specialUsage   OrganizationSpecialUsage
