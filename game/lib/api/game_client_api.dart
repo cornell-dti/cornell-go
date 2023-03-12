@@ -5,9 +5,8 @@ import 'package:socket_io_client/socket_io_client.dart';
 
 class GameClientApi {
   final _updateUserDataController =
-      StreamController<UpdateUserDataDto>.broadcast(sync: true);
-  Stream<UpdateUserDataDto> get updateUserDataStream =>
-      _updateUserDataController.stream;
+      StreamController<UserDto>.broadcast(sync: true);
+  Stream<UserDto> get updateUserDataStream => _updateUserDataController.stream;
 
   final _userRewardedController =
       StreamController<UserRewardedDto>.broadcast(sync: true);
@@ -65,10 +64,8 @@ class GameClientApi {
     sock.onReconnect((data) => _reconnectingController.add(null));
     sock.onReconnecting((data) => _reconnectedController.add(null));
     sock.onDisconnect((data) => disconnectedController.add(null));
-    sock.on(
-        "updateUserData",
-        (data) =>
-            _updateUserDataController.add(UpdateUserDataDto.fromJson(data)));
+    sock.on("updateUserData",
+        (data) => _updateUserDataController.add(UserDto.fromJson(data)));
     sock.on("userRewarded",
         (data) => _userRewardedController.add(UserRewardedDto.fromJson(data)));
     sock.on(
