@@ -24,6 +24,7 @@ import { UserService } from 'src/user/user.service';
 import { EventService } from 'src/event/event.service';
 import { RequestGlobalLeaderDataDto } from 'src/user/user.dto';
 import { RewardService } from 'src/reward/reward.service';
+import { EventDto } from 'src/event/event.dto';
 
 @WebSocketGateway({ cors: true })
 @UseGuards(UserGuard)
@@ -169,10 +170,14 @@ export class ChallengeGateway {
       }
 
       const challenge = await this.challengeService.upsertChallengeFromDto(dto);
-      const ev = await this.eventService.getEventById(challenge.linkedEventId);
 
-      await this.challengeService.emitUpdateChallengeData(challenge, false);
-      await this.eventService.emitUpdateEventData(ev, false);
+      if (challenge.linkedEventId) {
+        const ev = await this.eventService.updateLongitudeLatitude(
+          challenge.linkedEventId,
+        );
+        await this.challengeService.emitUpdateChallengeData(challenge, false);
+        await this.eventService.emitUpdateEventData(ev, false);
+      }
     }
   }
 }

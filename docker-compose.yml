@@ -26,6 +26,8 @@ services:
       - "80:80"
     environment:
       - NO_SSL=true
+      - DEVELOPMENT=true
+      - DATABASE_URL=postgresql://postgres:test@postgres:5432/postgres
     depends_on:
       postgres:
         condition: service_healthy

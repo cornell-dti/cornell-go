@@ -17,6 +17,7 @@ import {
   RequestEventDataDto,
   RequestEventLeaderDataDto,
   UpdateEventDataDto,
+  RequestRecommendedEventsDto,
 } from './event.dto';
 import { RequestEventTrackerDataDto } from 'src/challenge/challenge.dto';
 import { OrganizationService } from 'src/organization/organization.service';
@@ -67,6 +68,17 @@ export class EventGateway {
 
     for (const ev of evs) {
       this.clientService.subscribe(user, ev.id, false);
+      await this.eventService.emitUpdateEventData(ev, false, false, user);
+    }
+  }
+
+  @SubscribeMessage('requestRecommendedEvents')
+  async requestRecommendedEvents(
+    @CallingUser() user: User,
+    @MessageBody() data: RequestRecommendedEventsDto,
+  ) {
+    const evs = await this.eventService.getRecommendedEventsForUser(user, data);
+    for (const ev of evs) {
       await this.eventService.emitUpdateEventData(ev, false, false, user);
     }
   }
