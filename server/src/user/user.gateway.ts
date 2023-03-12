@@ -19,11 +19,18 @@ import {
   RequestFavoriteEventDataDto,
   SetAuthToDeviceDto,
   SetAuthToOAuthDto,
+  SetGraduationYearDto,
+  SetMajorDto,
   SetUsernameDto,
   RequestFilteredEventDto,
 } from './user.dto';
 import { UserService } from './user.service';
 import { RequestError } from 'google-auth-library/build/src/transporters';
+import { readFileSync } from 'fs';
+
+const majors = readFileSync('/app/server/src/user/majors.txt', 'utf8').split(
+  '\n',
+);
 
 const replaceAll = require('string.prototype.replaceall');
 replaceAll.shim();
@@ -127,6 +134,29 @@ export class UserGateway {
 
     const group = await this.groupService.getGroupForUser(user);
     await this.groupService.emitUpdateGroupData(group, false);
+  }
+
+  @SubscribeMessage('setMajor')
+  async setMajor(@CallingUser() user: User, @MessageBody() data: SetMajorDto) {
+    if (majors.includes(data.newMajor)) {
+      await this.userService.setMajor(user, data.newMajor);
+
+      user.major = data.newMajor; // Updated so change here too
+
+      await this.userService.emitUpdateUserData(user, false, true, true);
+    }
+  }
+
+  @SubscribeMessage('setGraduationYear')
+  async setGraduationYear(
+    @CallingUser() user: User,
+    @MessageBody() data: SetGraduationYearDto,
+  ) {
+    await this.userService.setGraduationYear(user, data.newYear);
+
+    user.year = data.newYear; // Updated so change here too
+
+    await this.userService.emitUpdateUserData(user, false, true, true);
   }
 
   @SubscribeMessage('setAuthToDevice')

@@ -1,7 +1,9 @@
+import { SessionLogService } from './../session-log/session-log.service';
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import {
   AuthType,
   Group,
+  SessionLogEvent,
   OrganizationSpecialUsage,
   User,
   PrismaClient,
@@ -22,6 +24,7 @@ import {
 @Injectable()
 export class UserService {
   constructor(
+    private log: SessionLogService,
     private prisma: PrismaService,
     private eventsService: EventService,
     @Inject(forwardRef(() => GroupService))
@@ -47,11 +50,14 @@ export class UserService {
   async register(
     email: string,
     username: string,
+    major: string,
+    year: string,
     lat: number,
     long: number,
     authType: AuthType,
     authToken: string,
   ) {
+    if (username == null) username = email?.split('@')[0];
     const defOrg = await this.orgService.getDefaultOrganization(
       authType == AuthType.GOOGLE
         ? OrganizationSpecialUsage.CORNELL_LOGIN
@@ -69,6 +75,8 @@ export class UserService {
         hostOf: { connect: { id: group.id } },
         memberOf: { connect: { id: defOrg.id } },
         username,
+        major,
+        year,
         email,
         authToken,
         authType,
@@ -81,7 +89,7 @@ export class UserService {
 
     await this.eventsService.createDefaultEventTracker(user, lat, long);
     console.log(`User ${user.id} created!`);
-
+    await this.log.logEvent(SessionLogEvent.CREATE_USER, user.id, user.id);
     return user;
   }
 
@@ -90,6 +98,7 @@ export class UserService {
   }
 
   async deleteUser(user: User) {
+    await this.log.logEvent(SessionLogEvent.DELETE_USER, user.id, user.id);
     await this.prisma.user.delete({ where: { id: user.id } });
     await this.prisma.$transaction(async tx => {
       this.groupsService.fixOrDeleteGroup({ id: user.groupId }, tx);
@@ -234,6 +243,20 @@ export class UserService {
     }
     return filteredEventIds;
   }
+  
+  async setMajor(user: User, major: string) {
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { major },
+    });
+  }
+
+  async setGraduationYear(user: User, year: string) {
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { year },
+    });
+  }
 
   async dtoForUserData(user: User, partial: boolean): Promise<UserDto> {
     const joinedUser = await this.prisma.user.findUniqueOrThrow({
@@ -249,6 +272,8 @@ export class UserService {
     return {
       id: joinedUser.id,
       username: joinedUser.username,
+      major: joinedUser.major,
+      year: joinedUser.year,
       score: joinedUser.score,
       groupId: joinedUser.group.friendlyId,
       authType: (
@@ -279,5 +304,6 @@ export class UserService {
     } else if (admin) {
       this.clientService.sendUpdate('updateUserData', user.id, true, dto);
     }
+    await this.log.logEvent(SessionLogEvent.EDIT_USERNAME, user.id, user.id);
   }
 }
