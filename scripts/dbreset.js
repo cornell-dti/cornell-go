@@ -13,10 +13,10 @@ async function main() {
   chdir("./server");
 
   const oldEnv = readFileSync("./.env", "utf-8");
-  writeFileSync("./.env", "DATABASE_URL=postgresql://postgres:test@localhost:5432/postgres", { encoding: 'utf-8', flag: 'w' });
-  execSync("npx prisma db push");
-  writeFileSync("./.env", oldEnv, { encoding: 'utf-8', flag: 'w' });
-  
+  //writeFileSync("./.env", "DATABASE_URL=postgresql://postgres:test@localhost:5432/postgres", { encoding: 'utf-8', flag: 'w' });
+  execSync("npx prisma db push --force-reset");
+  //writeFileSync("./.env", oldEnv, { encoding: 'utf-8', flag: 'w' });
+
   execSync("docker compose stop");
 }
 
