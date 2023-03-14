@@ -51,6 +51,7 @@ export interface UserDto {
   authType: UserAuthTypeDto;
   rewardIds?: string[];
   trackedEventIds?: string[];
+  favoriteIds?: string[];
 }
 
 export interface UpdateUserDto {
