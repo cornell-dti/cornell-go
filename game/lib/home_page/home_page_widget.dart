@@ -374,7 +374,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
           member.name,
           member.points.toString(),
           member.id == userModel.userData?.id && groupModel.members.length > 1,
-          member.host,
+          member.id == groupModel.group!.hostId,
           member.curChallengeId ==
               trackerModel
                   .trackerByEventId(groupModel.curEventId ?? '')

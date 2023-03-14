@@ -115,7 +115,7 @@ class _EventsWidgetState extends State<EventsWidget>
                               if (groupModel.curEventId == event.id) return;
                               if (groupModel.members.any((element) =>
                                   element.id == userModel.userData?.id &&
-                                  element.host)) {
+                                  element.id == groupModel.group!.hostId)) {
                                 _showConfirmation(
                                     context, event.id, event.name);
                               } else {

@@ -2,10 +2,11 @@ enum UserDataAuthTypeDto { DEVICE, APPLE, GOOGLE }
 
 class UserDto {
   UserDto.fromJson(Map<String, dynamic> fields) {
+    print(fields);
     id = fields["id"];
     username = fields["username"];
-    major = fields["major"];
-    year = fields["year"];
+    major = fields["major"] ?? "NA";
+    year = fields["year"] ?? "NA";
     score = fields["score"];
     groupId = fields["groupId"];
     rewardIds = fields["rewardIds"].cast<String>();
@@ -249,17 +250,18 @@ class UpdateGroupDataMemberDto {
 
 class UpdateGroupDataDto {
   UpdateGroupDataDto.fromJson(Map<String, dynamic> fields) {
-    curEventId = fields["curEventId"];
-    members = fields["members"]
-        .map<UpdateGroupDataMemberDto>(
-            (dynamic member) => UpdateGroupDataMemberDto.fromJson(member))
-        .toList();
-    removeListedMembers = fields["removeListedMembers"];
+    print(fields);
+    if (fields["deleted"]) {
+      groupId = fields["group"];
+      deleted = fields["deleted"];
+    } else {
+      group = GroupDto.fromJson(fields["group"]);
+    }
   }
 
-  String curEventId = "";
-  List<UpdateGroupDataMemberDto> members = [];
-  bool removeListedMembers = false;
+  String groupId = "";
+  GroupDto? group = null;
+  bool deleted = false;
 }
 
 class UpdateEventTrackerDataEventTrackerDto {

@@ -99,9 +99,10 @@ class ApiClient extends ChangeNotifier {
 
   Future<bool> _refreshAccess(bool relog) async {
     if (_refreshToken != null) {
+      print(_refreshUrl);
+
       final refreshResponse =
           await http.post(_refreshUrl, body: {'refreshToken': _refreshToken});
-
       if (refreshResponse.statusCode == 201 && refreshResponse.body != "") {
         final responseBody = jsonDecode(refreshResponse.body);
         _accessToken = responseBody["accessToken"];
@@ -121,13 +122,10 @@ class ApiClient extends ChangeNotifier {
 
   Future<bool> tryRelog() async {
     final token = await _storage.read(key: "refresh_token");
-
     if (token != null) {
       _refreshToken = token;
-
       final access = await _refreshAccess(true);
       authenticated = access;
-
       if (!access) {
         _clientApi.disconnectedController.add(null);
       }
@@ -151,22 +149,22 @@ class ApiClient extends ChangeNotifier {
           body: jsonEncode(<String, String>{
             "idToken": idToken,
             "lat": pos.lat.toString(),
+            "major": "Sample Major",
+            "year": "2023",
+            "username": "hello",
             "long": pos.long.toString(),
             "aud": Platform.isIOS ? "ios" : "android"
           }));
-
+      print(loginResponse.statusCode);
+      print(loginResponse.body);
       if (loginResponse.statusCode == 201 && loginResponse.body != "") {
         final responseBody = jsonDecode(loginResponse.body);
-
         this._accessToken = responseBody["accessToken"];
         this._refreshToken = responseBody["refreshToken"];
-
         await _saveToken();
-
         _createSocket(false);
         return true;
       }
-
       authenticated = false;
       _clientApi.disconnectedController.add(null);
       notifyListeners();
