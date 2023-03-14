@@ -327,3 +327,7 @@ class UpdateChallengeDataDto {
 
   List<UpdateChallengeDataChallengeDto> challenges = [];
 }
+
+class UpdateOrganizationDataDto {
+  UpdateOrganizationDataDto.fromJson(Map<String, dynamic> fields) {}
+}
