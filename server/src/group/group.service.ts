@@ -306,23 +306,12 @@ export class GroupService {
     }
   }
 
-  async emitGroupInvite(
-    group: Group,
-    username: string,
-    user?: User,
-    admin?: boolean,
-  ) {
+  async emitGroupInvite(group: Group, username: string, user: User) {
     const dto: GroupInviteDto = {
       groupId: await (await this.dtoForGroup(group)).friendlyId,
       username: username,
     };
-
-    if (user) {
-      this.clientService.sendUpdate('groupInvitation', user.id, !!admin, dto);
-    } else {
-      this.clientService.sendUpdate('groupInvitation', group.id, false, dto);
-      this.clientService.sendUpdate('groupInvitation', group.id, true, dto);
-    }
+    this.clientService.sendUpdate('groupInvitation', group.id, false, dto);
   }
 
   async updateGroup(group: GroupDto): Promise<Group> {
