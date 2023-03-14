@@ -243,7 +243,7 @@ export class UserService {
     }
     return filteredEventIds;
   }
-  
+
   async setMajor(user: User, major: string) {
     await this.prisma.user.update({
       where: { id: user.id },
