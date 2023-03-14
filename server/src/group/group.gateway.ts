@@ -93,7 +93,6 @@ export class GroupGateway {
     @CallingUser() user: User,
     @MessageBody() data: SendGroupInviteDto,
   ) {
-    if (!user.administrator) return;
     const group = await this.groupService.getGroupForUser(user);
     await this.groupService.emitGroupInvite(group, data.targetUsername, user);
   }
