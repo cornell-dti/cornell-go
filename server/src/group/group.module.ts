@@ -1,3 +1,4 @@
+import { SessionLogModule } from './../session-log/session-log.module';
 import { forwardRef, Module } from '@nestjs/common';
 import { ClientModule } from 'src/client/client.module';
 import { UserModule } from 'src/user/user.module';
@@ -15,6 +16,7 @@ import { GroupService } from './group.service';
     forwardRef(() => UserModule),
     EventModule,
     PrismaModule,
+    SessionLogModule,
     OrganizationModule,
   ],
   providers: [GroupService, GroupGateway],

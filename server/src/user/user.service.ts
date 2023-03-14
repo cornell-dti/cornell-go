@@ -1,7 +1,9 @@
+import { SessionLogService } from './../session-log/session-log.service';
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import {
   AuthType,
   Group,
+  SessionLogEvent,
   OrganizationSpecialUsage,
   User,
   PrismaClient,
@@ -16,6 +18,7 @@ import { UpdateUserDto, UserAuthTypeDto, UserDto } from './user.dto';
 @Injectable()
 export class UserService {
   constructor(
+    private log: SessionLogService,
     private prisma: PrismaService,
     private eventsService: EventService,
     @Inject(forwardRef(() => GroupService))
@@ -80,7 +83,7 @@ export class UserService {
 
     await this.eventsService.createDefaultEventTracker(user, lat, long);
     console.log(`User ${user.id} created!`);
-
+    await this.log.logEvent(SessionLogEvent.CREATE_USER, user.id, user.id);
     return user;
   }
 
@@ -89,6 +92,7 @@ export class UserService {
   }
 
   async deleteUser(user: User) {
+    await this.log.logEvent(SessionLogEvent.DELETE_USER, user.id, user.id);
     await this.prisma.user.delete({ where: { id: user.id } });
     await this.prisma.$transaction(async tx => {
       this.groupsService.fixOrDeleteGroup({ id: user.groupId }, tx);
@@ -160,5 +164,6 @@ export class UserService {
     } else if (admin) {
       this.clientService.sendUpdate('updateUserData', user.id, true, dto);
     }
+    await this.log.logEvent(SessionLogEvent.EDIT_USERNAME, user.id, user.id);
   }
 }
