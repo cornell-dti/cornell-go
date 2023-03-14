@@ -19,6 +19,8 @@ export const defaultEventData = {
   rewardType: EventRewardType.PERPETUAL,
   indexable: false,
   endTime: new Date('2060'),
+  latitude: 42.44755580740012,
+  longitude: -76.48504614830019,
 };
 
 export const defaultChallengeData = {

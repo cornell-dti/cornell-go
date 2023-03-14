@@ -14,7 +14,12 @@ import {
   OrganizationService,
 } from '../organization/organization.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { EventDto, EventTrackerDto, UpdateEventDataDto } from './event.dto';
+import {
+  EventDto,
+  EventTrackerDto,
+  UpdateEventDataDto,
+  RequestRecommendedEventsDto,
+} from './event.dto';
 
 @Injectable()
 export class EventService {
@@ -224,6 +229,23 @@ export class EventService {
     });
   }
 
+  async getRecommendedEventsForUser(
+    user: User,
+    data: RequestRecommendedEventsDto,
+  ) {
+    const evs: EventBase[] = await this.prisma.$queryRaw`
+      select * from "EventBase" ev 
+      where ev."id" in (select e."A" from "_eventOrgs" e inner join "_player" p on e."B" = p."A" and ${
+        user.id
+      } = p."B")
+      order by ((ev."latitude" - ${data.latitude})^2 + (ev."longitude" - ${
+      data.longitude
+    })^2)
+      fetch first ${data.count ?? 4} rows only
+    `;
+    return evs;
+  }
+
   /** Get the top N users by score */
   async getTopPlayers(firstIndex: number, count: number) {
     return await this.prisma.user.findMany({
@@ -237,13 +259,15 @@ export class EventService {
   async dtoForEvent(ev: EventBase): Promise<EventDto> {
     const chals = await this.prisma.challenge.findMany({
       where: { linkedEventId: ev.id },
-      select: { id: true, eventIndex: true },
+      select: { id: true, eventIndex: true, latitude: true, longitude: true },
     });
 
     const rws = await this.prisma.eventReward.findMany({
       where: { eventId: ev.id },
       select: { id: true, eventIndex: true },
     });
+
+    const sortedChals = chals.sort((a, b) => a.eventIndex - b.eventIndex);
 
     return {
       id: ev.id,
@@ -256,14 +280,14 @@ export class EventService {
       endTime: ev.endTime.toUTCString(),
       requiredMembers: ev.requiredMembers,
       indexable: ev.indexable,
-      challengeIds: chals
-        .sort((a, b) => a.eventIndex - b.eventIndex)
-        .map(c => c.id),
+      challengeIds: sortedChals.map(c => c.id),
       rewardIds: rws
         .sort((a, b) => a.eventIndex - b.eventIndex)
         .map(({ id }) => id),
       minimumScore: ev.minimumScore,
       defaultChallengeId: ev.defaultChallengeId,
+      latitude: ev.latitude,
+      longitude: ev.longitude,
     };
   }
 
@@ -380,7 +404,36 @@ export class EventService {
     }));
   }
 
+  async updateLongitudeLatitude(eventId: string) {
+    const ev = await this.prisma.eventBase.findFirst({
+      where: { id: eventId },
+      select: { challenges: true },
+    });
+    const firstChalId = ev?.challenges.sort(
+      (a, b) => a.eventIndex - b.eventIndex,
+    )[0].id;
+    const chal = await this.prisma.challenge.findFirst({
+      where: { id: firstChalId },
+      select: { latitude: true, longitude: true },
+    });
+    const updatedEv = await this.prisma.eventBase.update({
+      where: {
+        id: eventId,
+      },
+      data: {
+        longitude: chal?.longitude,
+        latitude: chal?.latitude,
+      },
+    });
+    return updatedEv;
+  }
+
   async upsertEventFromDto(event: EventDto) {
+    const firstChal = await this.prisma.challenge.findFirst({
+      where: { id: event.challengeIds[0] },
+      select: { latitude: true, longitude: true },
+    });
+
     const assignData = {
       requiredMembers: event.requiredMembers,
       name: event.name.substring(0, 2048),
@@ -392,6 +445,8 @@ export class EventService {
       endTime: new Date(event.endTime),
       indexable: event.indexable,
       minimumScore: event.minimumScore,
+      latitude: firstChal?.latitude ?? 0,
+      longitude: firstChal?.longitude ?? 0,
     };
 
     const eventEntity = await this.prisma.eventBase.upsert({
