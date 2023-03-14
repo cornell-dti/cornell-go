@@ -49,8 +49,8 @@ class GameClientApi {
       _updateChallengeDataController.stream;
 
   final _updateOrganizationDataController =
-      StreamController<UpdateChallengeDataDto>.broadcast(sync: true);
-  Stream<UpdateChallengeDataDto> get updateOrganizationDataStream =>
+      StreamController<UpdateOrganizationDataDto>.broadcast(sync: true);
+  Stream<UpdateOrganizationDataDto> get updateOrganizationDataStream =>
       _updateOrganizationDataController.stream;
 
   final _reconnectedController = StreamController<Null>.broadcast(sync: true);
