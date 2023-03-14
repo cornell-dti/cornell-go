@@ -328,6 +328,36 @@ class UpdateChallengeDataDto {
   List<UpdateChallengeDataChallengeDto> challenges = [];
 }
 
+class OrganizationDto {
+  OrganizationDto.fromJson(Map<String, dynamic> fields) {
+    id = fields["id"];
+    name = fields["name"];
+    accessCode = fields["accessCode"];
+    members = fields["members"];
+    events = fields["events"];
+    defaultEventId = fields["defaultEventId"];
+    members = fields["members"];
+  }
+  String id = "";
+  String name = "";
+  String accessCode = "";
+  List<String> members = [];
+  List<String> events = [];
+  String defaultEventId = "";
+}
+
 class UpdateOrganizationDataDto {
-  UpdateOrganizationDataDto.fromJson(Map<String, dynamic> fields) {}
+  UpdateOrganizationDataDto.fromJson(Map<String, dynamic> fields) {
+    print(fields);
+    if (fields["deleted"]) {
+      organizationId = fields["organization"];
+      deleted = fields["deleted"];
+    } else {
+      organization = OrganizationDto.fromJson(fields["group"]);
+    }
+  }
+
+  String organizationId = "";
+  OrganizationDto? organization = null;
+  bool deleted = false;
 }
