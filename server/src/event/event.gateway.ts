@@ -7,6 +7,7 @@ import {
 import { CallingUser } from '../auth/calling-user.decorator';
 import { ClientService } from '../client/client.service';
 import { EventService } from './event.service';
+import { UserService } from 'src/user/user.service';
 import { UserGuard } from 'src/auth/jwt-auth.guard';
 import { UseGuards } from '@nestjs/common';
 import { EventBase, EventRewardType, User } from '@prisma/client';
