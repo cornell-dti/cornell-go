@@ -47,6 +47,9 @@ export function ServerConnectionProvider(props: { children: ReactNode }) {
             idToken,
             lat: 1,
             long: 1,
+            username: "guest",
+            major: "Computer Science",
+            year: "2025",
             aud: "web",
           });
 
