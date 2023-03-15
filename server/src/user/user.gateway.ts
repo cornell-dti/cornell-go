@@ -23,6 +23,7 @@ import {
   SetUsernameDto,
   UpdateUserDataDto,
   UserDto,
+  BanUserDto,
 } from './user.dto';
 import { UserService } from './user.service';
 import { readFileSync } from 'fs';
@@ -187,6 +188,18 @@ export class UserGateway {
       this.providerToAuthType(data.provider),
       data.authId,
     );
+  }
+
+  @SubscribeMessage('banUser')
+  async banUser(@CallingUser() user: User, @MessageBody() data: BanUserDto) {
+    if (user.administrator) {
+      const user = await this.userService.byId(data.userId);
+      if (!!user) {
+        const us = await this.userService.banUser(user, data.isBanned);
+
+        await this.userService.emitUpdateUserData(us, false, false, true);
+      }
+    }
   }
 
   @SubscribeMessage('closeAccount')

@@ -124,6 +124,15 @@ export class UserService {
     });
   }
 
+  async banUser(user: User, isBanned: boolean): Promise<User> {
+    return await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        isBanned,
+      },
+    });
+  }
+
   async updateUser(user: UserDto): Promise<User> {
     return await this.prisma.user.update({
       where: { id: user.id },
@@ -154,6 +163,7 @@ export class UserService {
       year: joinedUser.year,
       score: joinedUser.score,
       groupId: joinedUser.group.friendlyId,
+      isBanned: joinedUser.isBanned,
       authType: (
         joinedUser.authType as string
       ).toLowerCase() as UserAuthTypeDto,

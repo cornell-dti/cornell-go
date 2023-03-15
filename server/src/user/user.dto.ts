@@ -16,6 +16,10 @@ export interface SetGraduationYearDto {
   newYear: string;
 }
 
+export interface BanUserDto {
+  userId: string;
+  isBanned: boolean;
+}
 /** DTO for setAuthToOAuth */
 export interface SetAuthToOAuthDto {
   provider: 'apple' | 'google';
@@ -50,6 +54,7 @@ export interface UserDto {
   major: string;
   year: string;
   score: number;
+  isBanned: boolean;
   groupId: string;
   authType: UserAuthTypeDto;
   rewardIds?: string[];
