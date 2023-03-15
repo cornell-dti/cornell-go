@@ -103,7 +103,7 @@ export class UserGateway {
   }
 
   @SubscribeMessage('updateUserData')
-  async updateOrganizationData(
+  async updateUserData(
     @CallingUser() user: User,
     @MessageBody() data: UpdateUserDataDto,
   ) {

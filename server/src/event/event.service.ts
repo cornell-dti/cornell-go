@@ -82,6 +82,7 @@ export class EventService {
         isRankedForEvent: true,
         user: {
           isRanked: true,
+          isBanned: false,
         },
       },
       skip: offset,
@@ -249,7 +250,7 @@ export class EventService {
   /** Get the top N users by score */
   async getTopPlayers(firstIndex: number, count: number) {
     return await this.prisma.user.findMany({
-      where: { isRanked: true },
+      where: { isRanked: true, isBanned: false },
       orderBy: { score: 'desc' },
       skip: firstIndex,
       take: count,

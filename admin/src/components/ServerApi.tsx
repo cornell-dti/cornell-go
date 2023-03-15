@@ -51,8 +51,8 @@ export class ServerApi {
   updateRewardData(data: UpdateRewardDataDto) {
     this.socket.emit("updateRewardData", data);
   }
-  updateUsers(data: UpdateUserDataDto) {
-    this.socket.emit("updateUsers", data);
+  updateUserData(data: UpdateUserDataDto) {
+    this.socket.emit("updateUserData", data);
   }
   updateGroupData(data: UpdateGroupDataDto) {
     this.socket.emit("updateGroupData", data);

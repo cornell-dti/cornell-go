@@ -103,10 +103,10 @@ export function ServerDataProvider(props: { children: ReactNode }) {
         setTimeout(() => setServerData({ ...serverData }), 0);
       },
       updateUser(user: UserDto) {
-        sock.updateUsers({ user, deleted: false });
+        sock.updateUserData({ user, deleted: false });
       },
       deleteUser(id: string) {
-        sock.updateUsers({ user: id, deleted: true });
+        sock.updateUserData({ user: id, deleted: true });
       },
       updateGroup(group: GroupDto) {
         sock.updateGroupData({ group, deleted: false });

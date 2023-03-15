@@ -188,6 +188,7 @@ function getColumns(setRowsData: any, serverData: any) {
             style={styles.saveButton}
             onClick={(e) => {
               e.stopPropagation();
+
               let rowsClone = [...tableManager.rowsApi.rows];
               let updatedRowIndex = rowsClone.findIndex(
                 (r) => r.id === data.id
