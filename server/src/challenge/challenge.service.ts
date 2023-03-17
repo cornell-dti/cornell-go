@@ -8,8 +8,8 @@ import {
   SessionLogEvent,
   User,
 } from '@prisma/client';
-import { ClientService } from 'src/client/client.service';
-import { EventService } from 'src/event/event.service';
+import { ClientService } from '../client/client.service';
+import { EventService } from '../event/event.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { ChallengeDto, UpdateChallengeDataDto } from './challenge.dto';
 
