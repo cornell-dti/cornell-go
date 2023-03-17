@@ -9,6 +9,12 @@ class JourneysPage extends StatefulWidget {
 }
 
 class _JourneysPageState extends State<JourneysPage> {
+  final cells = [
+    JourneyCell("journey", "hi", 2, 1),
+    JourneyCell("journey", "hi", 5, 3),
+    JourneyCell("journey", "hi", 4, 1),
+    JourneyCell("journey", "hi", 0, 0),
+  ];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -19,13 +25,14 @@ class _JourneysPageState extends State<JourneysPage> {
             Container(child: Text("search")),
             Container(child: Text("filter/sort")),
             Expanded(
-              child: ListView(
-                children: [
-                  JourneyCell(),
-                  JourneyCell(),
-                  JourneyCell(),
-                  JourneyCell(),
-                ],
+              child: ListView.separated(
+                itemCount: cells.length,
+                itemBuilder: (context, index) {
+                  return cells[index];
+                },
+                separatorBuilder: (context, index) {
+                  return SizedBox(height: 10);
+                },
               ),
             ),
           ],
