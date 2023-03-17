@@ -99,8 +99,6 @@ class ApiClient extends ChangeNotifier {
 
   Future<bool> _refreshAccess(bool relog) async {
     if (_refreshToken != null) {
-      print(_refreshUrl);
-
       final refreshResponse =
           await http.post(_refreshUrl, body: {'refreshToken': _refreshToken});
       if (refreshResponse.statusCode == 201 && refreshResponse.body != "") {
@@ -155,8 +153,6 @@ class ApiClient extends ChangeNotifier {
             "long": pos.long.toString(),
             "aud": Platform.isIOS ? "ios" : "android"
           }));
-      print(loginResponse.statusCode);
-      print(loginResponse.body);
       if (loginResponse.statusCode == 201 && loginResponse.body != "") {
         final responseBody = jsonDecode(loginResponse.body);
         this._accessToken = responseBody["accessToken"];

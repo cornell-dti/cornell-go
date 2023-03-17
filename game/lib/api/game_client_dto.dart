@@ -2,9 +2,9 @@ enum UserDataAuthTypeDto { DEVICE, APPLE, GOOGLE }
 
 class UserDto {
   UserDto.fromJson(Map<String, dynamic> fields) {
-    print(fields);
+    fields = fields["user"];
     id = fields["id"];
-    username = fields["username"];
+    username = fields["username"] ?? "NA";
     major = fields["major"] ?? "NA";
     year = fields["year"] ?? "NA";
     score = fields["score"];
@@ -223,7 +223,9 @@ class GroupDto {
     friendlyId = fields["friendlyId"];
     hostId = fields["hostId"];
     curEventId = fields["curEventId"];
-    members = fields["members"];
+    members = fields["members"]
+        .map<GroupMemberDto>((dynamic member) => GroupMemberDto.fromJson(member))
+        .toList();
   }
   String id = "";
   String friendlyId = "";
@@ -250,7 +252,6 @@ class UpdateGroupDataMemberDto {
 
 class UpdateGroupDataDto {
   UpdateGroupDataDto.fromJson(Map<String, dynamic> fields) {
-    print(fields);
     if (fields["deleted"]) {
       groupId = fields["group"];
       deleted = fields["deleted"];
@@ -262,6 +263,43 @@ class UpdateGroupDataDto {
   String groupId = "";
   GroupDto? group = null;
   bool deleted = false;
+}
+
+//Event DTOs
+
+class EventDto {
+  EventDto.fromJson(Map<String, dynamic> fields){
+ id = fields['id'];
+        requiredMembers = fields['requiredMembers'];
+        name = fields['name'];
+        description = fields['description'];
+        rewardType = fields['rewardType'];
+        endTime = fields['endTime'];
+        rewardIds = List<String>.from(fields['rewardIds'];
+        challengeIds = List<String>.from(fields['challengeIds']);
+        initialOrganizationId = fields['initialOrganizationId']);
+        defaultChallengeId = fields['defaultChallengeId'];
+        minimumScore = fields['minimumScore'];
+        indexable = fields['indexable'];
+        longitude = fields['longitude'];
+        latitude = fields['latitude'];
+  }
+     
+
+  String id = '';
+  int requiredMembers = 0;
+  String name = '';
+  String description = '';
+  String rewardType = '';
+  String endTime = '';
+  List<String> rewardIds = [];
+  List<String> challengeIds = [];
+  String? initialOrganizationId = '';
+  String defaultChallengeId = '';
+  int minimumScore = 0;
+  bool indexable = false;
+  double longitude = 0.0;
+  double latitude = 0.0;
 }
 
 class UpdateEventTrackerDataEventTrackerDto {
@@ -280,15 +318,30 @@ class UpdateEventTrackerDataEventTrackerDto {
   List<String> prevChallengeIds = [];
 }
 
+class EventTrackerDto {
+  String eventId = '';
+  bool isRanked = false;
+  String curChallengeId = '';
+  List<String> prevChallengeIds = [];
+  List<String> prevChallengeDates = [];
+  
+  EventTrackerDto.fromJson(Map<String, dynamic> fields) {
+    eventId = fields['eventId'] ?? '';
+    isRanked = fields['isRanked'] ?? false;
+    curChallengeId = fields['curChallengeId'] ?? '';
+    prevChallengeIds = List<String>.from(fields['prevChallengeIds'] ?? []);
+    prevChallengeDates = List<String>.from(fields['prevChallengeDates'] ?? []);
+  }
+}
+
+
+
 class UpdateEventTrackerDataDto {
   UpdateEventTrackerDataDto.fromJson(Map<String, dynamic> fields) {
-    eventTrackers = fields["eventTrackers"]
-        .map<UpdateEventTrackerDataEventTrackerDto>((dynamic tracker) =>
-            UpdateEventTrackerDataEventTrackerDto.fromJson(tracker))
-        .toList();
+    tracker = EventTrackerDto.fromJson(fields["tracker"]);
   }
 
-  List<UpdateEventTrackerDataEventTrackerDto> eventTrackers = [];
+ EventTrackerDto? tracker = null;
 }
 
 class UpdateChallengeDataChallengeDto {
