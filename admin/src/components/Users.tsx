@@ -196,6 +196,8 @@ function getColumns(setRowsData: any, serverData: any) {
               rowsClone[updatedRowIndex] = data;
 
               setRowsData(rowsClone);
+
+              serverData.users.set(data.id, data as UserDto);
               serverData.updateUser(rowsClone[updatedRowIndex]);
               tableManager.rowEditApi.setEditRowId(null);
             }}
