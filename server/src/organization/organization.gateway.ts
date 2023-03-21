@@ -103,6 +103,6 @@ export class OrganizationGateway {
     const org = await this.orgService.getOrganizationByCode(data.accessCode);
     await this.orgService.emitUpdateOrganizationData(org, false);
 
-    await this.userService.emitUpdateUserData(user, false, false);
+    await this.userService.emitUpdateUserData(user, false, false, true);
   }
 }
