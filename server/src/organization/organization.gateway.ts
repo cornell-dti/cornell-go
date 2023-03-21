@@ -92,4 +92,17 @@ export class OrganizationGateway {
       user,
     );
   }
+
+  @SubscribeMessage('joinOrganization')
+  async joinOrganization(
+    @CallingUser() user: User,
+    @MessageBody() data: { accessCode: string },
+  ) {
+    await this.orgService.joinOrganization(user, data.accessCode);
+
+    const org = await this.orgService.getOrganizationByCode(data.accessCode);
+    await this.orgService.emitUpdateOrganizationData(org, false);
+
+    await this.userService.emitUpdateUserData(user, false, false);
+  }
 }

@@ -108,6 +108,12 @@ export class OrganizationService {
     return await this.prisma.organization.findFirstOrThrow({ where: { id } });
   }
 
+  async getOrganizationByCode(accessCode: string) {
+    return await this.prisma.organization.findFirstOrThrow({
+      where: { accessCode },
+    });
+  }
+
   /** Gets the default event for the org using isDefault flag */
   async getDefaultEvent(
     org: Organization | { id: string },
@@ -283,6 +289,8 @@ export class OrganizationService {
       where: { accessCode: code },
     });
 
+    console.log(org.id);
+    console.log(user.id);
     await this.prisma.organization.update({
       where: { id: org.id },
       data: { members: { connect: { id: user.id } } },
