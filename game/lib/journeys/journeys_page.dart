@@ -10,10 +10,13 @@ class JourneysPage extends StatefulWidget {
 
 class _JourneysPageState extends State<JourneysPage> {
   final cells = [
-    JourneyCell("journey", "hi", 2, 1),
-    JourneyCell("journey", "hi", 5, 3),
-    JourneyCell("journey", "hi", 4, 1),
-    JourneyCell("journey", "hi", 0, 0),
+    JourneyCell("DTI Scavenger Hunt", "Scavenger hunt during All Hands on 2/18",
+        10, 5, false),
+    JourneyCell("DTI Scavenger Hunt", "Scavenger hunt during All Hands on 2/18",
+        10, 0, false),
+    JourneyCell("Cornell Cafés",
+        "Get your coffee fix at these top cafés on campus.", 6, 6, true),
+    JourneyCell("journey", "hi", 0, 0, false),
   ];
   @override
   Widget build(BuildContext context) {
@@ -22,7 +25,27 @@ class _JourneysPageState extends State<JourneysPage> {
         padding: EdgeInsets.all(30),
         child: Column(
           children: [
-            Container(child: Text("search")),
+            Container(
+              height: 30,
+              color: Color.fromARGB(51, 217, 217, 217),
+              child: TextField(
+                decoration: InputDecoration(
+                  prefixIcon: Icon(
+                    Icons.search,
+                    color: Color.fromARGB(204, 0, 0, 0),
+                    size: 12,
+                  ),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(1.0))),
+                  labelText: "Search a challenge name, location, etc...",
+                  labelStyle: TextStyle(
+                    color: Color.fromARGB(76, 0, 0, 0),
+                    fontSize: 12,
+                    fontFamily: 'Lato',
+                  ),
+                ),
+              ),
+            ),
             Container(child: Text("filter/sort")),
             Expanded(
               child: ListView.separated(
