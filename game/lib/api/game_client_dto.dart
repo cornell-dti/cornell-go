@@ -101,16 +101,6 @@ class UpdateRewardDataDto {
   bool deleted = false;
 }
 
-class RequestRewardDataDto {
-  RequestRewardDataDto.fromJson(Map<String, dynamic> fields) {
-    rewardIds = fields["rewards"]
-        .map<RewardDTO>((dynamic reward) => RewardDTO.fromJson(reward))
-        .toList();
-  }
-
-  List<UpdateRewardDataDto> rewardIds = [];
-}
-
 class UpdateEventDataRewardDto {
   UpdateEventDataRewardDto.fromJson(Map<String, dynamic> fields) {
     id = fields["id"];
@@ -176,8 +166,8 @@ class UpdateEventDataDto {
   bool isSearch = false;
 }
 
-class UpdateLeaderDataUserDto {
-  UpdateLeaderDataUserDto.fromJson(Map<String, dynamic> fields) {
+class LeaderDto {
+  LeaderDto.fromJson(Map<String, dynamic> fields) {
     userId = fields["userId"];
     username = fields["username"];
     score = fields["score"];
@@ -193,14 +183,13 @@ class UpdateLeaderDataDto {
     eventId = fields["eventId"];
     offset = fields["offset"];
     users = fields["users"]
-        .map<UpdateLeaderDataUserDto>(
-            (dynamic user) => UpdateLeaderDataUserDto.fromJson(user))
+        .map<LeaderDto>((dynamic user) => LeaderDto.fromJson(user))
         .toList();
   }
 
   String eventId = "";
   int offset = 0;
-  List<UpdateLeaderDataUserDto> users = [];
+  List<LeaderDto> users = [];
 }
 
 // Group DTOS
@@ -224,7 +213,8 @@ class GroupDto {
     hostId = fields["hostId"];
     curEventId = fields["curEventId"];
     members = fields["members"]
-        .map<GroupMemberDto>((dynamic member) => GroupMemberDto.fromJson(member))
+        .map<GroupMemberDto>(
+            (dynamic member) => GroupMemberDto.fromJson(member))
         .toList();
   }
   String id = "";
@@ -268,23 +258,22 @@ class UpdateGroupDataDto {
 //Event DTOs
 
 class EventDto {
-  EventDto.fromJson(Map<String, dynamic> fields){
- id = fields['id'];
-        requiredMembers = fields['requiredMembers'];
-        name = fields['name'];
-        description = fields['description'];
-        rewardType = fields['rewardType'];
-        endTime = fields['endTime'];
-        rewardIds = List<String>.from(fields['rewardIds'];
-        challengeIds = List<String>.from(fields['challengeIds']);
-        initialOrganizationId = fields['initialOrganizationId']);
-        defaultChallengeId = fields['defaultChallengeId'];
-        minimumScore = fields['minimumScore'];
-        indexable = fields['indexable'];
-        longitude = fields['longitude'];
-        latitude = fields['latitude'];
+  EventDto.fromJson(Map<String, dynamic> fields) {
+    id = fields['id'];
+    requiredMembers = fields['requiredMembers'];
+    name = fields['name'];
+    description = fields['description'];
+    rewardType = fields['rewardType'];
+    endTime = fields['endTime'];
+    rewardIds = List<String>.from(fields['rewardIds']);
+    challengeIds = List<String>.from(fields['challengeIds']);
+    initialOrganizationId = fields['initialOrganizationId'];
+    defaultChallengeId = fields['defaultChallengeId'];
+    minimumScore = fields['minimumScore'];
+    indexable = fields['indexable'];
+    longitude = fields['longitude'];
+    latitude = fields['latitude'];
   }
-     
 
   String id = '';
   int requiredMembers = 0;
@@ -324,7 +313,7 @@ class EventTrackerDto {
   String curChallengeId = '';
   List<String> prevChallengeIds = [];
   List<String> prevChallengeDates = [];
-  
+
   EventTrackerDto.fromJson(Map<String, dynamic> fields) {
     eventId = fields['eventId'] ?? '';
     isRanked = fields['isRanked'] ?? false;
@@ -334,18 +323,16 @@ class EventTrackerDto {
   }
 }
 
-
-
 class UpdateEventTrackerDataDto {
   UpdateEventTrackerDataDto.fromJson(Map<String, dynamic> fields) {
     tracker = EventTrackerDto.fromJson(fields["tracker"]);
   }
 
- EventTrackerDto? tracker = null;
+  EventTrackerDto? tracker = null;
 }
 
-class UpdateChallengeDataChallengeDto {
-  UpdateChallengeDataChallengeDto.fromJson(Map<String, dynamic> fields) {
+class ChallengeDto {
+  ChallengeDto.fromJson(Map<String, dynamic> fields) {
     id = fields["id"];
     name = fields["name"];
     description = fields["description"];
@@ -373,12 +360,11 @@ class UpdateChallengeDataChallengeDto {
 class UpdateChallengeDataDto {
   UpdateChallengeDataDto.fromJson(Map<String, dynamic> fields) {
     challenges = fields["challenges"]
-        .map<UpdateChallengeDataChallengeDto>(
-            (dynamic chal) => UpdateChallengeDataChallengeDto.fromJson(chal))
+        .map<ChallengeDto>((dynamic chal) => ChallengeDto.fromJson(chal))
         .toList();
   }
 
-  List<UpdateChallengeDataChallengeDto> challenges = [];
+  List<ChallengeDto> challenges = [];
 }
 
 class OrganizationDto {
