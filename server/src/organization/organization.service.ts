@@ -288,9 +288,6 @@ export class OrganizationService {
     const org = await this.prisma.organization.findFirstOrThrow({
       where: { accessCode: code },
     });
-
-    console.log(org.id);
-    console.log(user.id);
     await this.prisma.organization.update({
       where: { id: org.id },
       data: { members: { connect: { id: user.id } } },
