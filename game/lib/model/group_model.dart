@@ -6,20 +6,23 @@ import 'package:game/api/game_client_dto.dart';
 
 class GroupModel extends ChangeNotifier {
   String? curEventId;
-  List<UpdateGroupDataMemberDto> members = [];
+  List<GroupMemberDto> members = [];
+
+  GroupDto? group = null;
 
   GroupModel(ApiClient client) {
     client.clientApi.updateGroupDataStream.listen((event) {
-      client.serverApi?.setCurrentEvent(event.curEventId);
-      curEventId = event.curEventId;
-      members.removeWhere(
-          (element) => event.members.any((mem) => mem.id == element.id));
-      members.clear();
-      if (!event.removeListedMembers) {
-        members.insertAll(max(members.length - 1, 0), event.members);
+      print(event);
+      if (!(event.group is String)) {
+        group = event.group!;
+        client.serverApi?.setCurrentEvent(event.group!.curEventId);
+        curEventId = event.group!.curEventId;
+        members.removeWhere((element) =>
+            event.group!.members.any((mem) => mem.id == element.id));
+        members.clear();
+        members.sort((mem1, mem2) => mem1.points - mem2.points);
+        notifyListeners();
       }
-      members.sort((mem1, mem2) => mem1.points - mem2.points);
-      notifyListeners();
     });
 
     client.clientApi.connectedStream.listen((event) {

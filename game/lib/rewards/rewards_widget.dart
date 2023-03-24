@@ -56,7 +56,7 @@ class _RewardsWidgetState extends State<RewardsWidget> {
                           children: rewardModel.rewardByEventId.values
                               .where((element) =>
                                   userModel.userData?.rewardIds
-                                      .contains(element.rewardId) ??
+                                      .contains(element.id) ??
                                   false)
                               .map(
                             (e) {
