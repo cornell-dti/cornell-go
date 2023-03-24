@@ -46,9 +46,21 @@ class _JourneysPageState extends State<JourneysPage> {
                 ),
               ),
             ),
-            Container(child: Text("filter/sort")),
+            Container(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {},
+                    child: Text("filter"),
+                  ),
+                ],
+              ),
+            ),
             Expanded(
               child: ListView.separated(
+                padding: const EdgeInsets.all(0),
                 itemCount: cells.length,
                 itemBuilder: (context, index) {
                   return cells[index];
