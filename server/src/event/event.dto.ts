@@ -31,6 +31,7 @@ export interface EventDto {
   endTime: string;
   rewardIds: string[];
   challengeIds: string[];
+  userFavoriteIds?: string[];
   initialOrganizationId?: string;
   defaultChallengeId: string;
   minimumScore: number;
