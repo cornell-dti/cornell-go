@@ -8,6 +8,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { UserService } from '../user/user.service';
 import { JwtPayload } from './jwt-payload';
 import { LoginDto } from './login.dto';
+import { RegisterDto } from '../user/register.dto';
 
 interface IntermediatePayload {
   id: string;
@@ -128,16 +129,17 @@ export class AuthService {
     const isDevWhileDevice =
       process.env.DEVELOPMENT === 'true' || authType !== AuthType.DEVICE;
 
-    if (!user && req.username && req.year && req.major) {
+    if (!user) {
       user = await this.userService.register(
         idToken.email,
-        req.username,
-        req.year,
-        req.major,
         req.lat,
         req.long,
         authType,
         idToken.id,
+        req.username && req.year && req.major ? true : false,
+        req.username,
+        req.year,
+        req.major,
       );
     }
 

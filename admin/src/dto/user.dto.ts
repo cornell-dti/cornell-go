@@ -52,6 +52,7 @@ export interface UserDto {
   rewardIds?: string[];
   trackedEventIds?: string[];
   favoriteIds?: string[];
+  isRegistered: boolean;
 }
 
 export interface UpdateUserDto {

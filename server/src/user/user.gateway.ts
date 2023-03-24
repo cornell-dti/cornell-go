@@ -27,6 +27,7 @@ import {
 import { UserService } from './user.service';
 import { RequestError } from 'google-auth-library/build/src/transporters';
 import { readFileSync } from 'fs';
+import { RegisterDto } from './register.dto';
 
 const majors = readFileSync('/app/server/src/user/majors.txt', 'utf8').split(
   '\n',
@@ -188,5 +189,18 @@ export class UserGateway {
     await this.userService.setAuthType(user, AuthType.NONE, user.authToken);
     await this.userService.deleteUser(user);
     await this.groupService.emitUpdateGroupData(group, false);
+  }
+
+  @SubscribeMessage('finishRegistration')
+  async finishRegisteration(
+    @CallingUser() user: User,
+    @MessageBody() data: RegisterDto,
+  ) {
+    await this.userService.setRegistrationInfo(
+      user,
+      data.username,
+      data.major,
+      data.year,
+    );
   }
 }

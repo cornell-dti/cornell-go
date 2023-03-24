@@ -45,19 +45,27 @@ export class UserService {
       data: { authToken: token, authType: authType },
     });
   }
+  
+  /** Finishes registration with username, major, year */
+  async setRegistrationInfo(user: User, username: string, major: string, year: string) {
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { username:username, major:major, year:year, isRegistered:true},
+    });
+  }
 
   /** Registers a user using a certain authentication scheme */
   async register(
     email: string,
-    username: string,
-    major: string,
-    year: string,
     lat: number,
     long: number,
     authType: AuthType,
     authToken: string,
+    isRegistered: boolean,
+    username?: string,
+    major?: string,
+    year?: string,
   ) {
-    if (username == null) username = email?.split('@')[0];
     const defOrg = await this.orgService.getDefaultOrganization(
       authType == AuthType.GOOGLE
         ? OrganizationSpecialUsage.CORNELL_LOGIN
@@ -67,6 +75,10 @@ export class UserService {
     const group: Group = await this.groupsService.createFromEvent(
       await this.orgService.getDefaultEvent(defOrg),
     );
+
+    username = username??"";
+    major = major??"";
+    year = year??"";
 
     const user: User = await this.prisma.user.create({
       data: {
@@ -84,6 +96,7 @@ export class UserService {
         administrator:
           email === process.env.SUPERUSER || process.env.DEVELOPMENT === 'true',
         isRanked: true,
+        isRegistered,
       },
     });
 

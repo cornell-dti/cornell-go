@@ -65,6 +65,7 @@ model User {
   isRanked            Boolean         @default(true)
   participatedIn      PrevChallenge[] @relation("prevChallengeParticipant")
   sessionLogEntries   SessionLogEntry[]
+  isRegistered        Boolean         @default(false)
 }
 
 model Group {
