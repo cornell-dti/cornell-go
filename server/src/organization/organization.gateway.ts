@@ -14,6 +14,7 @@ import {
   UpdateOrganizationDataDto,
 } from './organization.dto';
 import { OrganizationService } from './organization.service';
+import { UserService } from 'src/user/user.service';
 
 @WebSocketGateway({ cors: true })
 @UseGuards(UserGuard)
@@ -21,6 +22,7 @@ export class OrganizationGateway {
   constructor(
     private clientService: ClientService,
     private orgService: OrganizationService,
+    private userService: UserService,
   ) {}
 
   @SubscribeMessage('requestOrganizationData')
@@ -64,9 +66,43 @@ export class OrganizationGateway {
       const org = await this.orgService.upsertOrganizationFromDto(
         data.organization as OrganizationDto,
       );
-
-      await this.orgService.addAllAdmins(org);
+      this.clientService.subscribe(user, org.id, true);
       await this.orgService.emitUpdateOrganizationData(org, false);
     }
+  }
+
+  @SubscribeMessage('addManager')
+  async addManager(
+    @CallingUser() user: User,
+    @MessageBody() data: { email: string; organizationId: string },
+  ) {
+    if (!user.administrator) return;
+
+    await this.orgService.addManager(user, data.email, data.organizationId);
+
+    const org = await this.orgService.getOrganizationById(data.organizationId);
+    await this.orgService.emitUpdateOrganizationData(org, false);
+
+    const manager = await this.userService.byEmail(data.email);
+    await this.userService.emitUpdateUserData(
+      manager,
+      false,
+      false,
+      true,
+      user,
+    );
+  }
+
+  @SubscribeMessage('joinOrganization')
+  async joinOrganization(
+    @CallingUser() user: User,
+    @MessageBody() data: { accessCode: string },
+  ) {
+    await this.orgService.joinOrganization(user, data.accessCode);
+
+    const org = await this.orgService.getOrganizationByCode(data.accessCode);
+    await this.orgService.emitUpdateOrganizationData(org, false);
+
+    await this.userService.emitUpdateUserData(user, false, false, true);
   }
 }

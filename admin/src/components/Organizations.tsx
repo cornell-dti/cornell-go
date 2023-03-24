@@ -32,6 +32,7 @@ function OrganizationCard(props: {
   onClear: () => void;
   onSetDefault: () => void;
   onSelect: () => void;
+  onAddManager: () => void;
 }) {
   const affirmOfBool = (val: boolean) => (val ? "Yes" : "No");
   const serverData = useContext(ServerDataContext);
@@ -67,6 +68,9 @@ function OrganizationCard(props: {
           <HButton onClick={props.onEdit} float="right">
             EDIT
           </HButton>
+          <HButton onClick={props.onAddManager} float="right">
+            ADD MANAGER
+          </HButton>
         </ListCardButtons>
       </ListCardBox>
     </>
@@ -101,6 +105,7 @@ const emptyDto: OrganizationDto = {
   name: "",
   accessCode: "",
   events: [],
+  managers: [],
   defaultEventId: "",
 };
 
@@ -108,6 +113,7 @@ export function Organizations() {
   const serverData = useContext(ServerDataContext);
   const [isCreateModalOpen, setCreateModalOpen] = useState(false);
   const [isEditModalOpen, setEditModalOpen] = useState(false);
+  const [isAddManagerModalOpen, setAddManagerModalOpen] = useState(false);
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
   const [form, setForm] = useState(() => makeForm());
   const [currentId, setCurrentId] = useState("");
@@ -142,6 +148,19 @@ export function Organizations() {
         }}
         form={form}
       />
+      <EntryModal
+        title="Add Manager"
+        isOpen={isAddManagerModalOpen}
+        entryButtonText="ADD MANAGER"
+        onEntry={() => {
+          serverData.addManager((form[0] as FreeEntryForm).value, currentId);
+          setAddManagerModalOpen(false);
+        }}
+        onCancel={() => {
+          setAddManagerModalOpen(false);
+        }}
+        form={form}
+      />
       <DeleteModal
         objectName={serverData.organizations.get(currentId)?.name ?? ""}
         isOpen={isDeleteModalOpen}
@@ -151,6 +170,7 @@ export function Organizations() {
           setDeleteModalOpen(false);
         }}
       />
+
       <SearchBar
         onCreate={() => {
           setForm(makeForm());
@@ -184,6 +204,21 @@ export function Organizations() {
               setForm(toForm(org));
               setOldDto(org);
               setEditModalOpen(true);
+            }}
+            onAddManager={() => {
+              setCurrentId(org.id);
+              setForm(
+                () =>
+                  [
+                    {
+                      name: "New Manager's Email",
+                      characterLimit: 256,
+                      value: "",
+                    },
+                  ] as EntryForm[]
+              );
+              setOldDto(org);
+              setAddManagerModalOpen(true);
             }}
             onClear={() => {
               setCurrentId(org.id);
