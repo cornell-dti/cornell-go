@@ -79,9 +79,8 @@ class _EventsWidgetState extends State<EventsWidget>
                             0,
                             1000,
                             [
-                              UpdateEventDataEventRewardTypeDto.PERPETUAL,
-                              UpdateEventDataEventRewardTypeDto
-                                  .LIMITED_TIME_EVENT
+                              EventRewardType.PERPETUAL,
+                              EventRewardType.LIMITED_TIME_EVENT
                             ],
                             false,
                             false,
@@ -94,10 +93,10 @@ class _EventsWidgetState extends State<EventsWidget>
                             .getEventById(groupModel.curEventId ?? "");
                         if (curEvent != null) events.add(curEvent);
                       }
-                      for (UpdateEventDataEventDto event in events) {
-                        final reward = event.rewards.length == 0
+                      for (EventDto event in events) {
+                        final reward = event.rewardIds.length == 0
                             ? null
-                            : event.rewards[0].description;
+                            : event.rewardIds[0];
                         final tracker = trackerModel.trackerByEventId(event.id);
                         final format = DateFormat('yyyy-MM-dd');
                         final chal = event.challengeIds.length == 0
@@ -106,9 +105,8 @@ class _EventsWidgetState extends State<EventsWidget>
                                 .getChallengeById(event.challengeIds[0]);
                         final complete = tracker?.prevChallengeIds.length ==
                             event.challengeIds.length;
-                        final timeTillExpire =
-                            event.time?.difference(DateTime.now()) ??
-                                Duration(days: 9999);
+                        final timeTillExpire = DateTime.parse(event.endTime)
+                            .difference(DateTime.now());
                         eventCells.add(
                           GestureDetector(
                             onTap: () {
@@ -140,15 +138,14 @@ class _EventsWidgetState extends State<EventsWidget>
                                     )
                                   : EventCell(
                                       event.name,
-                                      event.time == null || !complete
-                                          ? ""
-                                          : format.format(event.time!),
+                                      format.format(
+                                          DateTime.parse(event.endTime)),
                                       event.description,
                                       complete,
                                       event.id == groupModel.curEventId,
-                                      event.time,
+                                      DateTime.parse(event.endTime),
                                       reward ?? "",
-                                      event.rewards.length,
+                                      event.rewardIds.length,
                                       event.requiredMembers,
                                       chal?.imageUrl ??
                                           "https://a.rgbimg.com/users/b/ba/badk/600/qfOGvbS.jpg",
