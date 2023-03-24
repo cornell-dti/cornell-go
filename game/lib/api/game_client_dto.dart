@@ -223,6 +223,7 @@ class EventDto {
     indexable = fields['indexable'];
     longitude = fields['longitude'];
     latitude = fields['latitude'];
+    userFavoriteIds = fields['userFavoriteIds'];
   }
 
   String id = '';
@@ -232,6 +233,7 @@ class EventDto {
   String rewardType = '';
   String endTime = '';
   List<String> rewardIds = [];
+  List<String>? userFavoriteIds = [];
   List<String> challengeIds = [];
   String? initialOrganizationId = '';
   String defaultChallengeId = '';
