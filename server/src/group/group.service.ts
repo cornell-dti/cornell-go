@@ -321,11 +321,28 @@ export class GroupService {
   }
 
   async emitGroupInvite(group: Group, username: string, user: User) {
+    const targetUser = await this.prisma.user.findFirst({
+      where: { username: username },
+    });
+
     const dto: GroupInviteDto = {
       groupId: await (await this.dtoForGroup(group)).friendlyId,
-      username: username,
+      username: user.username,
     };
-    this.clientService.sendUpdate('groupInvitation', group.id, false, dto);
+
+    if (targetUser) {
+      this.clientService.sendUpdate(
+        'groupInvitation',
+        targetUser.id,
+        false,
+        dto,
+      );
+    } else {
+      this.clientService.emitErrorData(
+        user,
+        'Group Invitation: User not found',
+      );
+    }
   }
 
   async updateGroup(group: GroupDto): Promise<Group> {
