@@ -34,6 +34,7 @@ class JourneyCell extends StatelessWidget {
                         color: Color.fromARGB(255, 71, 71, 71),
                         fontSize: 10,
                         fontFamily: 'Lato',
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ],

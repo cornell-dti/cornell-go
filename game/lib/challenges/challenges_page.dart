@@ -14,13 +14,13 @@ class ChallengesPage extends StatefulWidget {
 class _ChallengesPageState extends State<ChallengesPage> {
   final cells = [
     ChallengeCell("ARTS QUAD", "Statue on the Arts Quad",
-        Image.network('https://picsum.photos/250?image=9')),
+        Image.network('https://picsum.photos/250?image=9'), false),
     ChallengeCell("ARTS QUAD", "Statue on the Arts Quad",
-        Image.network('https://picsum.photos/250?image=9')),
+        Image.network('https://picsum.photos/250?image=9'), true),
     ChallengeCell("ARTS QUAD", "Statue on the Arts Quad",
-        Image.network('https://picsum.photos/250?image=9')),
+        Image.network('https://picsum.photos/250?image=9'), false),
     ChallengeCell("ARTS QUAD", "Statue on the Arts Quad",
-        Image.network('https://picsum.photos/250?image=9')),
+        Image.network('https://picsum.photos/250?image=9'), true),
   ];
   @override
   Widget build(BuildContext context) {
@@ -51,13 +51,30 @@ class _ChallengesPageState extends State<ChallengesPage> {
               ),
             ),
             Container(
+              padding: EdgeInsets.only(top: 10, bottom: 10),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  ElevatedButton(
-                    onPressed: () {},
-                    child: Text("filter"),
+                  Container(
+                    color: Color.fromARGB(76, 217, 217, 217),
+                    child: TextButton.icon(
+                      onPressed: () {},
+                      icon: Icon(
+                        Icons.tune,
+                        color: Color.fromARGB(204, 0, 0, 0),
+                        size: 12,
+                      ),
+                      label: Text(
+                        "filter",
+                        style: TextStyle(
+                          color: Color.fromARGB(204, 0, 0, 0),
+                          fontSize: 12,
+                          fontFamily: 'Lato',
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
