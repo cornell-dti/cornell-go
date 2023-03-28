@@ -60,6 +60,12 @@ export class ServerApi {
   updateOrganizationData(data: UpdateOrganizationDataDto) {
     this.socket.emit("updateOrganizationData", data);
   }
+  addManager(email: string, organizationId: string) {
+    this.socket.emit("addManager", {
+      email: email,
+      organizationId: organizationId,
+    });
+  }
 
   onUpdateChallengeData(callback: (data: UpdateChallengeDataDto) => void) {
     this.socket.removeAllListeners("updateChallengeData");
@@ -82,6 +88,10 @@ export class ServerApi {
   onUpdateUserData(callback: (data: UpdateUserDataDto) => void) {
     this.socket.removeAllListeners("updateUserData");
     this.socket.on("updateUserData", (data) => callback(data));
+  }
+  onAddManager(callback: (email: string) => void) {
+    this.socket.removeAllListeners("addManager");
+    this.socket.on("addManager", (email) => callback(email));
   }
   onUpdateGroupData(callback: (data: UpdateGroupDataDto) => void) {
     this.socket.removeAllListeners("updateGroupData");

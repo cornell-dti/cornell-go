@@ -3,15 +3,14 @@ import 'package:game/api/game_api.dart';
 import 'package:game/api/game_client_dto.dart';
 
 class TrackerModel extends ChangeNotifier {
-  Map<String, UpdateEventTrackerDataEventTrackerDto> _trackers = {};
+  Map<String, EventTrackerDto> _trackers = {};
   ApiClient _client;
 
   TrackerModel(ApiClient client) : _client = client {
     client.clientApi.updateEventTrackerDataStream.listen((event) {
-      if (event.eventTrackers.length == 0) return;
-      event.eventTrackers.forEach((element) {
-        _trackers[element.eventId] = element;
-      });
+      if (event.tracker == null) return;
+      _trackers[event.tracker!.eventId] = event.tracker!;
+
       notifyListeners();
     });
 
@@ -28,7 +27,7 @@ class TrackerModel extends ChangeNotifier {
     });
   }
 
-  UpdateEventTrackerDataEventTrackerDto? trackerByEventId(String eventId) {
+  EventTrackerDto? trackerByEventId(String eventId) {
     if (_trackers.containsKey(eventId)) {
       return _trackers[eventId];
     } else {

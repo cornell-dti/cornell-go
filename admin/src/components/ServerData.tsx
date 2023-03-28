@@ -37,6 +37,7 @@ const defaultData = {
   updateEvent(event: EventDto) {},
   deleteEvent(id: string) {},
   updateOrganization(organization: OrganizationDto) {},
+  addManager(email: string, orgniazationId: string) {},
   deleteOrganization(id: string) {},
   deleteError(id: string) {},
   updateUser(user: UserDto) {},
@@ -119,6 +120,9 @@ export function ServerDataProvider(props: { children: ReactNode }) {
           organization,
           deleted: false,
         });
+      },
+      addManager(email: string, organizationId: string) {
+        sock.addManager(email, organizationId);
       },
       deleteOrganization(id: string) {
         sock.updateOrganizationData({ organization: id, deleted: true });

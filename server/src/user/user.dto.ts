@@ -44,6 +44,12 @@ export interface RequestUserDataDto {
 
 export interface RequestAllUserDataDto {}
 
+/** DTO for requestFavoriteEventData */
+export interface RequestFavoriteEventDataDto {
+  isFavorite: boolean;
+  eventId: string;
+}
+
 export type UserAuthTypeDto = 'device' | 'apple' | 'google';
 
 /** DTO for updateUserData event */
@@ -59,9 +65,18 @@ export interface UserDto {
   authType: UserAuthTypeDto;
   rewardIds?: string[];
   trackedEventIds?: string[];
+  favoriteIds?: string[];
 }
 
 export interface UpdateUserDataDto {
   user: UserDto | string;
   deleted: boolean;
+}
+
+export type eventFilterDto = 'new' | 'saved' | 'finished';
+
+export interface RequestFilteredEventDto {
+  filter: eventFilterDto;
+  cursorId?: string;
+  limit: number;
 }

@@ -67,9 +67,9 @@ class _ChallengesWidgetState extends State<ChallengesWidget> {
                         for (String challengeId in challenges) {
                           final UpdateChallengeDataChallengeDto? challenge =
                               myChallengeModel.getChallengeById(challengeId);
-                          final UpdateEventDataEventDto? event =
+                          final EventDto? event =
                               myEventModel.getEventById(eventId);
-                          final UpdateEventTrackerDataEventTrackerDto? tracker =
+                          final EventTrackerDto? tracker =
                               myTrackerModel.trackerByEventId(eventId);
                           if (challenge != null &&
                               event != null &&
@@ -80,15 +80,14 @@ class _ChallengesWidgetState extends State<ChallengesWidget> {
                                     ?.setCurrentChallenge(challengeId);
                               },
                               child: ChallengeCell(
-                                  challenge.name,
-                                  challenge.completionDate == null
-                                      ? ""
-                                      : format
-                                          .format(challenge.completionDate!),
-                                  challenge.imageUrl,
-                                  tracker.curChallengeId == challengeId,
-                                  challenge.completionDate == null,
-                                  !event.skippingEnabled),
+                                challenge.name,
+                                challenge.completionDate == null
+                                    ? ""
+                                    : format.format(challenge.completionDate!),
+                                challenge.imageUrl,
+                                tracker.curChallengeId == challengeId,
+                                challenge.completionDate == null,
+                              ),
                             ));
                           }
                         }

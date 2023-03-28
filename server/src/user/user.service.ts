@@ -7,13 +7,19 @@ import {
   OrganizationSpecialUsage,
   User,
   PrismaClient,
+  EventBase,
 } from '@prisma/client';
 import { ClientService } from 'src/client/client.service';
 import { EventService } from '../event/event.service';
 import { GroupService } from '../group/group.service';
 import { OrganizationService } from '../organization/organization.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { UpdateUserDataDto, UserAuthTypeDto, UserDto } from './user.dto';
+import {
+  UpdateUserDataDto,
+  UserAuthTypeDto,
+  UserDto,
+  eventFilterDto,
+} from './user.dto';
 
 @Injectable()
 export class UserService {
@@ -91,6 +97,10 @@ export class UserService {
     return await this.prisma.user.findUnique({ where: { id } });
   }
 
+  async byEmail(email: string) {
+    return await this.prisma.user.findFirstOrThrow({ where: { email: email } });
+  }
+
   async getAllUserData() {
     return await this.prisma.user.findMany();
   }
@@ -108,6 +118,138 @@ export class UserService {
       where: { id: user.id },
       data: { username },
     });
+  }
+
+  /** Adds event to user's favorite if isFavorite is true, else removes event
+   * from favorites if it exists */
+  async setFavorite(user: User, ev: EventBase, isFavorite: boolean) {
+    if (isFavorite) {
+      return await this.prisma.user.update({
+        where: { id: user.id },
+        data: { favorites: { connect: { id: ev.id } } },
+      });
+    } else {
+      return await this.prisma.user.update({
+        where: { id: user.id },
+        data: { favorites: { disconnect: { id: ev.id } } },
+      });
+    }
+  }
+
+  /**
+   * Filter: new gives all ,
+   * with ongoing events listed before not started events.
+   * cursorId:
+   */
+
+  /**
+   * Grabs all events from all of user's allowed events based on the filter.
+   * @param user user requesting filtered events
+   * @param filter "saved" returns favorited events, "new" returns events that are not started and ongoing, "finished" returns events where each challenge is completed
+   * @param cursorId id of the last event in the previous page
+   * @returns filtered event id list sorted by ascending id
+   */
+  async getFilteredEventIds(
+    user: User,
+    filter: eventFilterDto,
+    cursorId: string | undefined,
+    limit: number,
+  ) {
+    const joinedUser = await this.prisma.user.findFirstOrThrow({
+      where: { id: user.id },
+      include: {
+        favorites: true,
+        memberOf: true,
+      },
+    });
+
+    let filteredEventIds = [{ id: '' }];
+
+    if (filter == 'finished') {
+      filteredEventIds = await this.prisma.eventBase.findMany({
+        select: { id: true },
+        orderBy: {
+          id: 'asc', // must be ordered to use cursor
+        },
+        take: limit,
+        skip: cursorId ? 1 : 0, // skips the event with id = cursorId
+        cursor: cursorId
+          ? {
+              id: cursorId,
+            }
+          : undefined,
+        where: {
+          usedIn: {
+            some: { members: { some: { id: user.id } } },
+          },
+          challenges: {
+            every: {
+              completions: {
+                some: {
+                  participants: {
+                    some: { id: user.id },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+    } else if (filter == 'new') {
+      filteredEventIds = await this.prisma.eventBase.findMany({
+        select: { id: true },
+        orderBy: {
+          id: 'asc', // must be ordered to use cursor
+        },
+        take: limit,
+        skip: cursorId ? 1 : 0, // skips the event with id = cursorId
+        cursor: cursorId
+          ? {
+              id: cursorId,
+            }
+          : undefined,
+        where: {
+          usedIn: {
+            some: { members: { some: { id: user.id } } },
+          },
+          challenges: {
+            some: {
+              completions: {
+                none: {
+                  participants: {
+                    some: { id: user.id },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+    } else {
+      // filter == 'saved'
+      filteredEventIds = await this.prisma.eventBase.findMany({
+        select: { id: true },
+        orderBy: {
+          id: 'asc', // must be ordered to use cursor
+        },
+        take: limit,
+        skip: cursorId ? 1 : 0, // skips the event with id = cursorId
+        cursor: cursorId
+          ? {
+              id: cursorId,
+            }
+          : undefined,
+        where: {
+          usedIn: {
+            some: { members: { some: { id: user.id } } },
+          },
+          userFavorite: {
+            some: { id: user.id },
+          },
+        },
+      });
+    }
+    return filteredEventIds;
   }
 
   async setMajor(user: User, major: string) {
@@ -151,6 +293,7 @@ export class UserService {
       include: {
         rewards: true,
         eventTrackers: true,
+        favorites: true,
         group: { select: { friendlyId: true } },
       },
     });
@@ -171,6 +314,7 @@ export class UserService {
       trackedEventIds: partial
         ? undefined
         : joinedUser.eventTrackers.map(ev => ev.eventId),
+      favoriteIds: partial ? undefined : joinedUser.favorites.map(ev => ev.id),
     };
   }
 

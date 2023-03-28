@@ -4,7 +4,7 @@ import 'package:game/api/game_client_dto.dart';
 
 class RewardModel extends ChangeNotifier {
   ApiClient _client;
-  Map<String, UpdateRewardDataRewardDto> rewardByEventId = {};
+  Map<String, RewardDTO> rewardByEventId = {};
 
   RewardModel(ApiClient client) : _client = client {
     client.clientApi.updateUserDataStream.listen((event) {
@@ -14,8 +14,11 @@ class RewardModel extends ChangeNotifier {
     });
 
     client.clientApi.updateRewardDataStream.listen((event) {
-      event.rewards
-          .forEach((element) => rewardByEventId[element.eventId] = element);
+      if (event.deleted) {
+        rewardByEventId.removeWhere((key, value) => (key == event.id));
+      } else {
+        rewardByEventId[event.id!] = event.reward!;
+      }
       notifyListeners();
     });
 
@@ -32,8 +35,7 @@ class RewardModel extends ChangeNotifier {
     });
   }
 
-  UpdateRewardDataRewardDto? getRewardByEventId(
-      String eventId, String rewardId) {
+  RewardDTO? getRewardByEventId(String eventId, String rewardId) {
     final reward = rewardByEventId[eventId];
     if (reward != null) {
       return reward;
