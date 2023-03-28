@@ -11,17 +11,21 @@ import { CallingUser } from '../auth/calling-user.decorator';
 import { ClientService } from '../client/client.service';
 import { GroupGateway } from '../group/group.gateway';
 import { GroupService } from '../group/group.service';
+import { EventService } from 'src/event/event.service';
 import {
   CloseAccountDto,
   RequestGlobalLeaderDataDto,
   RequestUserDataDto,
+  RequestFavoriteEventDataDto,
   SetAuthToDeviceDto,
   SetAuthToOAuthDto,
   SetGraduationYearDto,
   SetMajorDto,
   SetUsernameDto,
+  RequestFilteredEventDto,
 } from './user.dto';
 import { UserService } from './user.service';
+import { RequestError } from 'google-auth-library/build/src/transporters';
 import { readFileSync } from 'fs';
 
 const majors = readFileSync('/app/server/src/user/majors.txt', 'utf8').split(
@@ -38,6 +42,7 @@ export class UserGateway {
     private clientService: ClientService,
     private userService: UserService,
     private groupService: GroupService,
+    private eventService: EventService,
   ) {}
 
   private providerToAuthType(provider: string) {
@@ -76,6 +81,34 @@ export class UserGateway {
     } else {
       await this.userService.emitUpdateUserData(user, false, false, true, user);
     }
+  }
+
+  @SubscribeMessage('requestFilteredEvents')
+  async requestFilteredEvents(
+    @CallingUser() user: User,
+    @MessageBody() data: RequestFilteredEventDto,
+  ) {
+    const eventIds = await this.userService.getFilteredEventIds(
+      user,
+      data.filter,
+      data.cursorId,
+      data.limit,
+    );
+    for (const eventId of eventIds) {
+      const ev = await this.eventService.getEventById(eventId.id);
+      this.clientService.subscribe(user, eventId.id, false);
+      await this.eventService.emitUpdateEventData(ev, false, false, user);
+    }
+  }
+
+  @SubscribeMessage('setFavorite')
+  async setFavorite(
+    @CallingUser() user: User,
+    @MessageBody() data: RequestFavoriteEventDataDto,
+  ) {
+    const ev = await this.eventService.getEventById(data.eventId);
+    await this.userService.setFavorite(user, ev, data.isFavorite);
+    await this.userService.emitUpdateUserData(user, false, false, true, user);
   }
 
   @SubscribeMessage('setUsername')

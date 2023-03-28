@@ -7,6 +7,7 @@ import {
 import { CallingUser } from '../auth/calling-user.decorator';
 import { ClientService } from '../client/client.service';
 import { EventService } from './event.service';
+import { UserService } from 'src/user/user.service';
 import { UserGuard } from 'src/auth/jwt-auth.guard';
 import { UseGuards } from '@nestjs/common';
 import { EventBase, EventRewardType, User } from '@prisma/client';
@@ -88,6 +89,7 @@ export class EventGateway {
     @MessageBody() data: RequestEventLeaderDataDto,
   ) {
     if (!(await this.eventService.isAllowedEvent(user, data.eventId))) {
+      await this.clientService.emitErrorData(user, 'Access Denied');
       return;
     }
 
@@ -127,6 +129,10 @@ export class EventGateway {
           user,
         ))
       ) {
+        await this.clientService.emitErrorData(
+          user,
+          'User has no admin rights',
+        );
         return;
       }
 
@@ -145,6 +151,10 @@ export class EventGateway {
         )) &&
         !(await this.eventService.hasAdminRights({ id: dto.id }, user))
       ) {
+        await this.clientService.emitErrorData(
+          user,
+          'User has no admin rights',
+        );
         return;
       }
 

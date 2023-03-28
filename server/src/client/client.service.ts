@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { UpdateErrorDto } from './client.dto';
 import { ClientGateway } from './client.gateway';
 
 @Injectable()
@@ -35,6 +36,13 @@ export class ClientService {
       'admin/' + resourceId,
       'client/' + resourceId,
     ]);
+  }
+
+  async emitErrorData(user: User, message: string) {
+    const dto: UpdateErrorDto = {
+      message,
+    };
+    this.sendUpdate('updateErrorData', user.id, false, dto);
   }
 
   /*

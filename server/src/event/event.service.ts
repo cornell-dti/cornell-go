@@ -443,6 +443,10 @@ export class EventService {
           ? EventRewardType.LIMITED_TIME
           : EventRewardType.PERPETUAL,
       endTime: new Date(event.endTime),
+      // rewards: {set: event.rewardIds.map(id => ({ connect: {id: id} })) },
+      // challengeIds: event.challengeIds,
+      userFavoriteIds: event.userFavoriteIds,
+      // initialOrganizationId: event.initialOrganizationId,
       indexable: event.indexable,
       minimumScore: event.minimumScore,
       latitude: firstChal?.latitude ?? 0,
@@ -464,7 +468,7 @@ export class EventService {
       },
       update: {
         ...assignData,
-        defaultChallengeId: event.defaultChallengeId,
+        // defaultChallengeId: event.defaultChallengeId,
         challenges: {
           set: event.challengeIds
             .map(id => ({ id }))
