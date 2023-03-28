@@ -101,7 +101,6 @@ class ApiClient extends ChangeNotifier {
     if (_refreshToken != null) {
       final refreshResponse =
           await http.post(_refreshUrl, body: {'refreshToken': _refreshToken});
-
       if (refreshResponse.statusCode == 201 && refreshResponse.body != "") {
         final responseBody = jsonDecode(refreshResponse.body);
         _accessToken = responseBody["accessToken"];
@@ -121,13 +120,10 @@ class ApiClient extends ChangeNotifier {
 
   Future<bool> tryRelog() async {
     final token = await _storage.read(key: "refresh_token");
-
     if (token != null) {
       _refreshToken = token;
-
       final access = await _refreshAccess(true);
       authenticated = access;
-
       if (!access) {
         _clientApi.disconnectedController.add(null);
       }
@@ -143,33 +139,33 @@ class ApiClient extends ChangeNotifier {
 
   Future<bool> _connect(String idToken, Uri url) async {
     final pos = await GeoPoint.current();
-
-    final loginResponse = await http.post(url,
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(<String, String>{
-          "idToken": idToken,
-          "lat": pos.lat.toString(),
-          "long": pos.long.toString(),
-          "aud": Platform.isIOS ? "ios" : "android"
-        }));
-
-    if (loginResponse.statusCode == 201 && loginResponse.body != "") {
-      final responseBody = jsonDecode(loginResponse.body);
-
-      this._accessToken = responseBody["accessToken"];
-      this._refreshToken = responseBody["refreshToken"];
-
-      await _saveToken();
-
-      _createSocket(false);
-      return true;
+    if (pos != null) {
+      final loginResponse = await http.post(url,
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(<String, String>{
+            "idToken": idToken,
+            "lat": pos.lat.toString(),
+            "major": "Sample Major",
+            "year": "2023",
+            "username": "hello",
+            "long": pos.long.toString(),
+            "aud": Platform.isIOS ? "ios" : "android"
+          }));
+      if (loginResponse.statusCode == 201 && loginResponse.body != "") {
+        final responseBody = jsonDecode(loginResponse.body);
+        this._accessToken = responseBody["accessToken"];
+        this._refreshToken = responseBody["refreshToken"];
+        await _saveToken();
+        _createSocket(false);
+        return true;
+      }
+      authenticated = false;
+      _clientApi.disconnectedController.add(null);
+      notifyListeners();
+      return false;
     }
-
-    authenticated = false;
-    _clientApi.disconnectedController.add(null);
-    notifyListeners();
     return false;
   }
 
@@ -179,12 +175,10 @@ class ApiClient extends ChangeNotifier {
 
   Future<bool> connectGoogle() async {
     final account = await _googleSignIn.signIn();
-
     if (account != null) {
       final auth = await account.authentication;
       final idToken = auth.idToken!;
-
-      return _connect(idToken, _googleLoginUrl);
+      return await _connect(idToken, _googleLoginUrl);
     }
     authenticated = false;
     _clientApi.disconnectedController.add(null);

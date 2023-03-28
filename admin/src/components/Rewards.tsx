@@ -4,7 +4,13 @@ import { RewardDto } from "../dto/reward.dto";
 import { moveDown, moveUp } from "../ordering";
 import { AlertModal } from "./AlertModal";
 import { DeleteModal } from "./DeleteModal";
-import { EntryForm, EntryModal, FreeEntryForm } from "./EntryModal";
+import {
+  EntryForm,
+  EntryModal,
+  FreeEntryForm,
+  NumberEntryForm,
+  OptionEntryForm,
+} from "./EntryModal";
 import { HButton } from "./HButton";
 import {
   ButtonSizer,
@@ -42,6 +48,9 @@ function RewardCard(props: {
         <br />
         Claiming User Id: <b>{props.reward.userId}</b>
         <br />
+        Is Achievement: <b>{props.reward.isAchievement ? "Yes" : "No"}</b>
+        <br />
+        Points: <b>{props.reward.points}</b>
       </ListCardBody>
       <ListCardButtons>
         <HButton onClick={props.onUp}>UP</HButton>
@@ -61,6 +70,8 @@ function makeForm() {
   return [
     { name: "Description", characterLimit: 2048, value: "" },
     { name: "Redeem Info", characterLimit: 2048, value: "" },
+    { name: "Is Achievment?", options: ["No", "Yes"], value: 0 },
+    { name: "Points", min: -1, max: 999999, value: 0 },
   ] as EntryForm[];
 }
 
@@ -71,6 +82,8 @@ function fromForm(form: EntryForm[], eventId: string, id: string): RewardDto {
     redeemInfo: (form[1] as FreeEntryForm).value,
     eventId,
     userId: "",
+    isAchievement: (form[2] as OptionEntryForm).value === 1,
+    points: (form[3] as NumberEntryForm).value,
   };
 }
 
@@ -78,6 +91,12 @@ function toForm(reward: RewardDto) {
   return [
     { name: "Description", characterLimit: 2048, value: reward.description },
     { name: "Redeem Info", characterLimit: 2048, value: reward.redeemInfo },
+    {
+      name: "Is Achievment?",
+      options: ["No", "Yes"],
+      value: reward.isAchievement ? 1 : 0,
+    },
+    { name: "Points", min: -1, max: 999999, value: reward.points },
   ] as EntryForm[];
 }
 

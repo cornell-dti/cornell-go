@@ -19,6 +19,8 @@ export const defaultEventData = {
   rewardType: EventRewardType.PERPETUAL,
   indexable: false,
   endTime: new Date('2060'),
+  latitude: 42.44755580740012,
+  longitude: -76.48504614830019,
 };
 
 export const defaultChallengeData = {
@@ -108,6 +110,12 @@ export class OrganizationService {
     return await this.prisma.organization.findFirstOrThrow({ where: { id } });
   }
 
+  async getOrganizationByCode(accessCode: string) {
+    return await this.prisma.organization.findFirstOrThrow({
+      where: { accessCode },
+    });
+  }
+
   /** Gets the default event for the org using isDefault flag */
   async getDefaultEvent(
     org: Organization | { id: string },
@@ -132,6 +140,7 @@ export class OrganizationService {
       name: organization.name,
       members: (await org.members({ select: { id: true } })).map(e => e.id),
       events: (await org.events({ select: { id: true } })).map(e => e.id),
+      managers: (await org.managers({ select: { id: true } })).map(e => e.id),
       defaultEventId: organization.defaultEventId,
       accessCode: organization.accessCode,
     };
@@ -249,5 +258,46 @@ export class OrganizationService {
         });
       }
     }
+  }
+
+  async addManager(
+    manager: User,
+    potentialManagerEmail: string,
+    organizationId: string,
+  ) {
+    const org = await this.prisma.organization.findFirstOrThrow({
+      where: { id: organizationId },
+    });
+
+    if ((await this.isManagerOf(manager, org)) || manager.administrator) {
+      const potentialManager = await this.prisma.user.findFirstOrThrow({
+        where: { email: potentialManagerEmail },
+      });
+      await this.prisma.organization.update({
+        where: { id: org.id },
+        data: { managers: { connect: { id: potentialManager.id } } },
+      });
+
+      await this.prisma.user.update({
+        where: { id: potentialManager.id },
+        data: { managerOf: { connect: { id: org.id } } },
+      });
+      console.log('Manager Added');
+    }
+  }
+
+  async joinOrganization(user: User, code: string) {
+    const org = await this.prisma.organization.findFirstOrThrow({
+      where: { accessCode: code },
+    });
+    await this.prisma.organization.update({
+      where: { id: org.id },
+      data: { members: { connect: { id: user.id } } },
+    });
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { memberOf: { connect: { id: org.id } } },
+    });
   }
 }

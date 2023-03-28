@@ -19,6 +19,22 @@ enum EventRewardType {
   PERPETUAL
 }
 
+enum SessionLogEvent {
+  JOIN_GROUP //data = groupId
+  LEAVE_GROUP //data = groupId
+  LOGIN_USER //data = userId
+  CREATE_USER //data = userId
+  DELETE_USER //data = userId
+  EDIT_USERNAME //data = userId
+  SELECT_EVENT //data = eventId
+  DELETE_EVENT //data = eventId
+  SET_CHALLENGE //data = challengeId
+  DELETE_CHALLENGE //data = challengeId
+  COMPLETE_CHALLENGE //data = challengeId
+  DELETE_REWARD //data = rewardId
+  DISCONNECT //data = ""
+}
+
 enum OrganizationSpecialUsage {
   ///DEVICE_LOGIN is a device assigned-id that acts as a user login for non-Cornell users.
   DEVICE_LOGIN
@@ -31,6 +47,8 @@ model User {
   authToken           String
   authType            AuthType
   username            String
+  major               String
+  year                String
   email               String
   hashedRefreshToken  String
   administrator       Boolean
@@ -40,11 +58,13 @@ model User {
   groupId             String
   hostOf              Group?          @relation("host")
   eventTrackers       EventTracker[]
+  favorites           EventBase[]
   completedChallenges PrevChallenge[] @relation("owner")
   memberOf            Organization[]  @relation("player")
-  managerOf           Organization[]  @relation("manager")
+  managerOf           Organization[]  @relation("orgManager")
   isRanked            Boolean         @default(true)
-  participatedIn      PrevChallenge[] @relation("participant")
+  participatedIn      PrevChallenge[] @relation("prevChallengeParticipant")
+  sessionLogEntries   SessionLogEntry[]
 }
 
 model Group {
@@ -85,24 +105,29 @@ model EventBase {
   minimumScore       Int             @default(1)
   rewards            EventReward[]
   challenges         Challenge[]     @relation("all")
-  usedIn             Organization[]  @relation("events")
+  userFavorite       User[]
+  usedIn             Organization[]  @relation("eventOrgs")
   defaultOf          Organization[]  @relation("defaultOrg")
   defaultChallenge   Challenge       @relation("default", fields: [defaultChallengeId], references: [id])
   defaultChallengeId String          @unique
   trackers           EventTracker[]
   activeGroups       Group[]
+  latitude           Float
+  longitude          Float
 }
 
 model EventReward {
-  id          String    @id @default(uuid())
-  user        User?     @relation(fields: [userId], references: [id])
-  userId      String?
-  event       EventBase @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  eventId     String
-  eventIndex  Int
-  description String
-  redeemInfo  String
-  isRedeemed  Boolean
+  id            String    @id @default(uuid())
+  user          User?     @relation(fields: [userId], references: [id])
+  userId        String?
+  event         EventBase @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId       String
+  eventIndex    Int
+  description   String
+  redeemInfo    String
+  isRedeemed    Boolean
+  isAchievement Boolean
+  points        Int
 }
 
 model EventTracker {
@@ -122,7 +147,7 @@ model PrevChallenge {
   id           Int          @id @default(autoincrement())
   user         User         @relation("owner", fields: [userId], references: [id], onDelete: Cascade)
   userId       String
-  participants User[]       @relation("participant")
+  participants User[]       @relation("prevChallengeParticipant")
   challenge    Challenge    @relation(fields: [challengeId], references: [id], onDelete: Cascade)
   challengeId  String
   tracker      EventTracker @relation(fields: [trackerId], references: [id], onDelete: Cascade)
@@ -135,9 +160,18 @@ model Organization {
   name           String
   accessCode     String
   members        User[]                   @relation("player")
-  managers       User[]                   @relation("manager")
-  events         EventBase[]              @relation("events")
+  managers       User[]                   @relation("orgManager")
+  events         EventBase[]              @relation("eventOrgs")
   defaultEvent   EventBase                @relation("defaultOrg", fields: [defaultEventId], references: [id], onDelete: Restrict)
   defaultEventId String
   specialUsage   OrganizationSpecialUsage
+}
+
+model SessionLogEntry {
+  id         String          @id @default(uuid())
+  linkedUser User?           @relation(fields: [userId], references: [id])
+  eventType  SessionLogEvent
+  data       String
+  timestamp  DateTime        @default(now())
+  userId     String?
 }

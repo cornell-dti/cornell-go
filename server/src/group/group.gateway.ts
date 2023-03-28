@@ -19,7 +19,6 @@ import { GroupService } from './group.service';
 import { UserGuard } from 'src/auth/jwt-auth.guard';
 import { UseGuards } from '@nestjs/common';
 import { Group, User } from '@prisma/client';
-import { UserService } from 'src/user/user.service';
 
 @WebSocketGateway({ cors: true })
 @UseGuards(UserGuard)
@@ -70,6 +69,11 @@ export class GroupGateway {
     if (await this.groupService.setCurrentEvent(user, data.eventId)) {
       const group = await this.groupService.getGroupForUser(user);
       await this.groupService.emitUpdateGroupData(group, false);
+    } else {
+      await this.clientService.emitErrorData(
+        user,
+        'Error setting current event',
+      );
     }
   }
 
@@ -78,7 +82,10 @@ export class GroupGateway {
     @CallingUser() user: User,
     @MessageBody() data: UpdateGroupDataDto,
   ) {
-    if (!user.administrator) return;
+    if (!user.administrator) {
+      await this.clientService.emitErrorData(user, 'User is not an admin');
+      return;
+    }
 
     if (data.deleted) {
       await this.groupService.removeGroup(data.group as string);

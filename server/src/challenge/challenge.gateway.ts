@@ -24,6 +24,7 @@ import { UserService } from 'src/user/user.service';
 import { EventService } from 'src/event/event.service';
 import { RequestGlobalLeaderDataDto } from 'src/user/user.dto';
 import { RewardService } from 'src/reward/reward.service';
+import { EventDto } from 'src/event/event.dto';
 
 @WebSocketGateway({ cors: true })
 @UseGuards(UserGuard)
@@ -92,6 +93,11 @@ export class ChallengeGateway {
 
       await this.groupService.emitUpdateGroupData(group, false);
       await this.eventService.emitUpdateEventTracker(tracker);
+    } else {
+      await this.clientService.emitErrorData(
+        user,
+        'Challenge is not valid (Challenge is not in event)',
+      );
     }
   }
 
@@ -116,6 +122,8 @@ export class ChallengeGateway {
       await this.groupService.emitUpdateGroupData(group, false);
       await this.eventService.emitUpdateEventTracker(tracker);
       await this.userService.emitUpdateUserData(user, false, false, true, user);
+    } else {
+      await this.clientService.emitErrorData(user, 'Challenge not complete');
     }
   }
 
@@ -150,6 +158,10 @@ export class ChallengeGateway {
           user,
         ))
       ) {
+        await this.clientService.emitErrorData(
+          user,
+          'User has no admin rights',
+        );
         return;
       }
 
@@ -165,14 +177,22 @@ export class ChallengeGateway {
           user,
         ))
       ) {
+        await this.clientService.emitErrorData(
+          user,
+          'User has no admin rights',
+        );
         return;
       }
 
       const challenge = await this.challengeService.upsertChallengeFromDto(dto);
-      const ev = await this.eventService.getEventById(challenge.linkedEventId);
 
-      await this.challengeService.emitUpdateChallengeData(challenge, false);
-      await this.eventService.emitUpdateEventData(ev, false);
+      if (challenge.linkedEventId) {
+        const ev = await this.eventService.updateLongitudeLatitude(
+          challenge.linkedEventId,
+        );
+        await this.challengeService.emitUpdateChallengeData(challenge, false);
+        await this.eventService.emitUpdateEventData(ev, false);
+      }
     }
   }
 }

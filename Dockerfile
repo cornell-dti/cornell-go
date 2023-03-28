@@ -1,4 +1,4 @@
-FROM node:14.18.1
+FROM node:18.14.0
 
 EXPOSE 80
 
@@ -20,4 +20,5 @@ WORKDIR /app/server
 COPY server .
 RUN npx prisma generate
 RUN npm run build
+RUN if [ ${DEVELOPMENT} != "true" ]; then npx prisma migrate deploy; fi
 ENTRYPOINT ["npm", "run", "start:prod"]

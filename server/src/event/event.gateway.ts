@@ -7,6 +7,7 @@ import {
 import { CallingUser } from '../auth/calling-user.decorator';
 import { ClientService } from '../client/client.service';
 import { EventService } from './event.service';
+import { UserService } from 'src/user/user.service';
 import { UserGuard } from 'src/auth/jwt-auth.guard';
 import { UseGuards } from '@nestjs/common';
 import { EventBase, EventRewardType, User } from '@prisma/client';
@@ -16,6 +17,7 @@ import {
   RequestEventDataDto,
   RequestEventLeaderDataDto,
   UpdateEventDataDto,
+  RequestRecommendedEventsDto,
 } from './event.dto';
 import { RequestEventTrackerDataDto } from 'src/challenge/challenge.dto';
 import { OrganizationService } from 'src/organization/organization.service';
@@ -70,12 +72,24 @@ export class EventGateway {
     }
   }
 
+  @SubscribeMessage('requestRecommendedEvents')
+  async requestRecommendedEvents(
+    @CallingUser() user: User,
+    @MessageBody() data: RequestRecommendedEventsDto,
+  ) {
+    const evs = await this.eventService.getRecommendedEventsForUser(user, data);
+    for (const ev of evs) {
+      await this.eventService.emitUpdateEventData(ev, false, false, user);
+    }
+  }
+
   @SubscribeMessage('requestEventLeaderData')
   async requestEventLeaderData(
     @CallingUser() user: User,
     @MessageBody() data: RequestEventLeaderDataDto,
   ) {
     if (!(await this.eventService.isAllowedEvent(user, data.eventId))) {
+      await this.clientService.emitErrorData(user, 'Access Denied');
       return;
     }
 
@@ -115,6 +129,10 @@ export class EventGateway {
           user,
         ))
       ) {
+        await this.clientService.emitErrorData(
+          user,
+          'User has no admin rights',
+        );
         return;
       }
 
@@ -133,6 +151,10 @@ export class EventGateway {
         )) &&
         !(await this.eventService.hasAdminRights({ id: dto.id }, user))
       ) {
+        await this.clientService.emitErrorData(
+          user,
+          'User has no admin rights',
+        );
         return;
       }
 

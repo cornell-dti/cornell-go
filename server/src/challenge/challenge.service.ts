@@ -1,9 +1,11 @@
+import { SessionLogService } from './../session-log/session-log.service';
 import { Injectable } from '@nestjs/common';
 import {
   Challenge,
   EventBase,
   EventRewardType,
   EventTracker,
+  SessionLogEvent,
   User,
 } from '@prisma/client';
 import { ClientService } from 'src/client/client.service';
@@ -14,6 +16,7 @@ import { ChallengeDto, UpdateChallengeDataDto } from './challenge.dto';
 @Injectable()
 export class ChallengeService {
   constructor(
+    private log: SessionLogService,
     private readonly prisma: PrismaService,
     private eventService: EventService,
     private clientService: ClientService,
@@ -96,8 +99,9 @@ export class ChallengeService {
       challengeId !== eventTracker.curChallengeId ||
       (groupMembers.length !== curEvent.requiredMembers &&
         curEvent.requiredMembers >= 0)
-    )
+    ) {
       return false;
+    }
 
     const prevChal = await this.prisma.prevChallenge.create({
       data: {
@@ -129,6 +133,12 @@ export class ChallengeService {
         completedChallenges: { connect: { id: prevChal.id } },
       },
     });
+
+    await this.log.logEvent(
+      SessionLogEvent.COMPLETE_CHALLENGE,
+      challengeId,
+      user.id,
+    );
 
     return true;
   }
@@ -218,7 +228,9 @@ export class ChallengeService {
       group.curEventId,
     );
 
-    if (!isChallengeValid) return false;
+    if (!isChallengeValid) {
+      return false;
+    }
 
     const eventTracker: EventTracker =
       await this.eventService.getCurrentEventTrackerForUser(user);
@@ -231,6 +243,12 @@ export class ChallengeService {
         curChallengeId: challenge.id,
       },
     });
+
+    await this.log.logEvent(
+      SessionLogEvent.SET_CHALLENGE,
+      challengeId,
+      user.id,
+    );
 
     return true;
   }

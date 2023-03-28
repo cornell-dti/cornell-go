@@ -71,6 +71,10 @@ export class RewardGateway {
           user,
         ))
       ) {
+        await this.clientService.emitErrorData(
+          user,
+          'User has no admin rights',
+        );
         return;
       }
 
@@ -88,9 +92,12 @@ export class RewardGateway {
           user,
         ))
       ) {
+        await this.clientService.emitErrorData(
+          user,
+          'User has no admin rights',
+        );
         return;
       }
-
       const rw = await this.rewardService.upsertRewardFromDto(dto);
       const ev = await this.eventService.getEventById(rw.eventId);
 

@@ -25,11 +25,13 @@ export interface EventDto {
   endTime: string;
   rewardIds: string[];
   challengeIds: string[];
-
+  userFavoriteIds?: string[];
   initialOrganizationId?: string;
   defaultChallengeId: string;
   minimumScore: number;
   indexable: boolean;
+  latitude: number;
+  longitude: number;
 }
 
 /** DTO for event tracker in updateEventTrackerData */

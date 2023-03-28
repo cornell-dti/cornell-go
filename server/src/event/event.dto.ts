@@ -16,6 +16,12 @@ export interface RequestEventLeaderDataDto {
   eventId: string;
 }
 
+export interface RequestRecommendedEventsDto {
+  latitude: number;
+  longitude: number;
+  count?: number;
+}
+
 export interface EventDto {
   id: string;
   requiredMembers: number;
@@ -25,11 +31,13 @@ export interface EventDto {
   endTime: string;
   rewardIds: string[];
   challengeIds: string[];
-
+  userFavoriteIds?: string[];
   initialOrganizationId?: string;
   defaultChallengeId: string;
   minimumScore: number;
   indexable: boolean;
+  longitude: number;
+  latitude: number;
 }
 
 /** DTO for event tracker in updateEventTrackerData */

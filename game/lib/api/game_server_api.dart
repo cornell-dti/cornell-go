@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:game/api/game_client_dto.dart';
 import 'package:socket_io_client/socket_io_client.dart';
 
@@ -45,6 +44,10 @@ class GameServerApi {
   void closeAccount() => _invokeWithRefresh("closeAccount", {});
   void setUsername(String newUsername) =>
       _invokeWithRefresh("setUsername", {'newUsername': newUsername});
+  void setMajor(String newMajor) =>
+      _invokeWithRefresh("setMajor", {'newMajor': newMajor});
+  void setGraduationYear(String newYear) =>
+      _invokeWithRefresh("setGraduationYear", {'newYear': newYear});
   void requestUserData() => _invokeWithRefresh("requestUserData", {});
   void requestGroupData() => _invokeWithRefresh("requestGroupData", {});
   void joinGroup(String groupId) =>
@@ -57,7 +60,7 @@ class GameServerApi {
   void requestAllEventData(
           int offset,
           int count,
-          List<UpdateEventDataEventRewardTypeDto> rewardTypes,
+          List<EventRewardType> rewardTypes,
           bool closestToEnding,
           bool shortestFirst,
           bool skippableOnly) =>
@@ -68,7 +71,7 @@ class GameServerApi {
         "shortestFirst": shortestFirst,
         "skippableOnly": skippableOnly,
         "rewardTypes": rewardTypes
-            .map((e) => e == UpdateEventDataEventRewardTypeDto.PERPETUAL
+            .map((e) => e == EventRewardType.PERPETUAL
                 ? 'perpetual'
                 : 'limited_time_event')
             .toList()
