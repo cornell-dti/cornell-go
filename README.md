@@ -65,9 +65,7 @@ flutter run --dart-define="API_URL=https://example.com"
 
 ```
 cd server
-npx typedoc
-
-The docs are now viewable at server/docs/index.html
+npm run doc
 ```
 
 ### Reset database or test a new schema
