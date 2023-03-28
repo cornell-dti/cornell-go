@@ -7,10 +7,9 @@ class ChallengeCell extends StatefulWidget {
   final String imgPath;
   final bool current;
   final bool notVisited;
-  final bool noSkipping;
 
-  ChallengeCell(this.place, this.date, this.imgPath, this.current,
-      this.notVisited, this.noSkipping);
+  ChallengeCell(
+      this.place, this.date, this.imgPath, this.current, this.notVisited);
 
   @override
   State<StatefulWidget> createState() => ChallengeCellState();
@@ -58,14 +57,10 @@ class ChallengeCellState extends State<ChallengeCell> {
                   children: [
                     Container(
                       decoration: BoxDecoration(
-                          color: this.widget.noSkipping &&
-                                  !this.widget.current &&
-                                  this.widget.notVisited
+                          color: !this.widget.current && this.widget.notVisited
                               ? Colors.black
                               : null,
-                          image: this.widget.noSkipping &&
-                                  !this.widget.current &&
-                                  this.widget.notVisited
+                          image: !this.widget.current && this.widget.notVisited
                               ? null
                               : DecorationImage(
                                   image: CachedNetworkImageProvider(

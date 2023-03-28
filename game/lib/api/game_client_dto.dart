@@ -154,18 +154,6 @@ class UpdateEventDataEventDto {
   List<String> challengeIds = [];
 }
 
-class UpdateEventDataDto {
-  UpdateEventDataDto.fromJson(Map<String, dynamic> fields) {
-    isSearch = fields["isSearch"];
-    events = fields["events"]
-        .map<UpdateEventDataEventDto>(
-            (dynamic event) => UpdateEventDataEventDto.fromJson(event))
-        .toList();
-  }
-  List<UpdateEventDataEventDto> events = [];
-  bool isSearch = false;
-}
-
 class LeaderDto {
   LeaderDto.fromJson(Map<String, dynamic> fields) {
     userId = fields["userId"];
@@ -256,6 +244,10 @@ class UpdateGroupDataDto {
 }
 
 //Event DTOs
+enum EventRewardType {
+  PERPETUAL,
+  LIMITED_TIME_EVENT,
+}
 
 class EventDto {
   EventDto.fromJson(Map<String, dynamic> fields) {
@@ -273,6 +265,7 @@ class EventDto {
     indexable = fields['indexable'];
     longitude = fields['longitude'];
     latitude = fields['latitude'];
+    userFavoriteIds = fields['userFavoriteIds'];
   }
 
   String id = '';
@@ -282,6 +275,7 @@ class EventDto {
   String rewardType = '';
   String endTime = '';
   List<String> rewardIds = [];
+  List<String>? userFavoriteIds = [];
   List<String> challengeIds = [];
   String? initialOrganizationId = '';
   String defaultChallengeId = '';
@@ -289,22 +283,6 @@ class EventDto {
   bool indexable = false;
   double longitude = 0.0;
   double latitude = 0.0;
-}
-
-class UpdateEventTrackerDataEventTrackerDto {
-  UpdateEventTrackerDataEventTrackerDto.fromJson(Map<String, dynamic> fields) {
-    eventId = fields["eventId"];
-    isRanked = fields["isRanked"];
-    cooldownMinimum = DateTime.parse(fields["cooldownMinimum"]);
-    curChallengeId = fields["curChallengeId"];
-    prevChallengeIds = fields["prevChallengeIds"].cast<String>();
-  }
-
-  String eventId = "";
-  bool isRanked = false;
-  DateTime cooldownMinimum = DateTime.now();
-  String curChallengeId = "";
-  List<String> prevChallengeIds = [];
 }
 
 class EventTrackerDto {
@@ -321,6 +299,24 @@ class EventTrackerDto {
     prevChallengeIds = List<String>.from(fields['prevChallengeIds'] ?? []);
     prevChallengeDates = List<String>.from(fields['prevChallengeDates'] ?? []);
   }
+}
+
+class UpdateEventDataDto {
+  UpdateEventDataDto({required this.event, this.deleted = false});
+
+  final dynamic event;
+  final bool deleted;
+
+  Map<String, dynamic> toJson() => {
+        'event': event is String ? event : EventDto.fromJson(event),
+        'deleted': deleted,
+      };
+
+  UpdateEventDataDto.fromJson(Map<String, dynamic> fields)
+      : event = fields['event'] is String
+            ? fields['event']
+            : EventDto.fromJson(fields['event']),
+        deleted = fields['deleted'] ?? false;
 }
 
 class UpdateEventTrackerDataDto {
