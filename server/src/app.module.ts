@@ -24,7 +24,7 @@ import { DevtoolsModule } from '@nestjs/devtools-integration';
     }),
     DevtoolsModule.register({
       port: 8000,
-      http: process.env.DEVELOPMENT !== 'true',
+      http: process.env.DEVELOPMENT === 'true',
     }),
     AuthModule,
     ClientModule,
