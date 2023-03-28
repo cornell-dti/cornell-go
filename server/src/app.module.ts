@@ -14,12 +14,17 @@ import { RewardModule } from './reward/reward.module';
 import { SessionLogModule } from './session-log/session-log.module';
 import { OrganizationModule } from './organization/organization.module';
 import { OrganizationGateway } from './organization/organization.gateway';
+import { DevtoolsModule } from '@nestjs/devtools-integration';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', '..', 'admin', 'build'),
+    }),
+    DevtoolsModule.register({
+      port: 8000,
+      http: process.env.DEVELOPMENT !== 'true',
     }),
     AuthModule,
     ClientModule,
