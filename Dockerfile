@@ -1,6 +1,7 @@
 FROM node:18.14.0
 
 EXPOSE 80
+EXPOSE 8000
 
 RUN npm install -g prettier @nestjs/cli jest rimraf
 
