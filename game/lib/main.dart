@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:game/api/game_api.dart';
-import 'package:game/login/login_page.dart';
 import 'package:game/model/challenge_model.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/group_model.dart';
 import 'package:game/model/reward_model.dart';
 import 'package:game/model/tracker_model.dart';
 import 'package:game/model/user_model.dart';
+import 'package:game/splash_page/splash_page.dart';
 import 'package:game/widget/game_widget.dart';
 import 'package:provider/provider.dart';
 
@@ -69,7 +69,7 @@ class MyApp extends StatelessWidget {
           ],
           supportedLocales: const [Locale('en', '')],
           theme: ThemeData(primarySwatch: Colors.blue),
-          home: LoginWidget(),
+          home: SplashPageWidget(),
         )));
   }
 }
