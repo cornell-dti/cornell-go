@@ -101,61 +101,8 @@ class UpdateRewardDataDto {
   bool deleted = false;
 }
 
-class UpdateEventDataRewardDto {
-  UpdateEventDataRewardDto.fromJson(Map<String, dynamic> fields) {
-    id = fields["id"];
-    description = fields["description"];
-  }
-
-  String id = "";
-  String description = "";
-}
-
-enum UpdateEventDataEventRewardTypeDto {
-  PERPETUAL,
-  LIMITED_TIME_EVENT,
-}
-
-class UpdateEventDataEventDto {
-  UpdateEventDataEventDto.fromJson(Map<String, dynamic> fields) {
-    id = fields["id"];
-    skippingEnabled = fields["skippingEnabled"];
-    name = fields["name"];
-    description = fields["description"];
-    switch (fields["rewardType"]) {
-      case "perpetual":
-        rewardType = UpdateEventDataEventRewardTypeDto.PERPETUAL;
-        break;
-      case "limited_time_event":
-        rewardType = UpdateEventDataEventRewardTypeDto.LIMITED_TIME_EVENT;
-        break;
-    }
-    time = fields["time"] == '' ||
-            rewardType == UpdateEventDataEventRewardTypeDto.PERPETUAL
-        ? null
-        : DateTime.parse(fields["time"]);
-    rewards = fields["rewards"]
-        .map<UpdateEventDataRewardDto>(
-            (dynamic reward) => UpdateEventDataRewardDto.fromJson(reward))
-        .toList();
-    requiredMembers = fields["requiredMembers"];
-    challengeIds = fields["challengeIds"].cast<String>();
-  }
-
-  String id = "";
-  bool skippingEnabled = false;
-  String name = "";
-  String description = "";
-  UpdateEventDataEventRewardTypeDto rewardType =
-      UpdateEventDataEventRewardTypeDto.PERPETUAL;
-  DateTime? time = null;
-  List<UpdateEventDataRewardDto> rewards = [];
-  int requiredMembers = 0;
-  List<String> challengeIds = [];
-}
-
-class LeaderDto {
-  LeaderDto.fromJson(Map<String, dynamic> fields) {
+class UpdateLeaderDataUserDto {
+  UpdateLeaderDataUserDto.fromJson(Map<String, dynamic> fields) {
     userId = fields["userId"];
     username = fields["username"];
     score = fields["score"];
@@ -171,13 +118,14 @@ class UpdateLeaderDataDto {
     eventId = fields["eventId"];
     offset = fields["offset"];
     users = fields["users"]
-        .map<LeaderDto>((dynamic user) => LeaderDto.fromJson(user))
+        .map<UpdateLeaderDataUserDto>(
+            (dynamic user) => UpdateLeaderDataUserDto.fromJson(user))
         .toList();
   }
 
   String eventId = "";
   int offset = 0;
-  List<LeaderDto> users = [];
+  List<UpdateLeaderDataUserDto> users = [];
 }
 
 // Group DTOS
@@ -321,14 +269,14 @@ class UpdateEventDataDto {
 
 class UpdateEventTrackerDataDto {
   UpdateEventTrackerDataDto.fromJson(Map<String, dynamic> fields) {
-    tracker = EventTrackerDto.fromJson(fields["tracker"]);
+    tracker = EventTrackerDto.fromJson(fields);
   }
 
   EventTrackerDto? tracker = null;
 }
 
-class ChallengeDto {
-  ChallengeDto.fromJson(Map<String, dynamic> fields) {
+class UpdateChallengeDataChallengeDto {
+  UpdateChallengeDataChallengeDto.fromJson(Map<String, dynamic> fields) {
     id = fields["id"];
     name = fields["name"];
     description = fields["description"];
@@ -356,11 +304,12 @@ class ChallengeDto {
 class UpdateChallengeDataDto {
   UpdateChallengeDataDto.fromJson(Map<String, dynamic> fields) {
     challenges = fields["challenges"]
-        .map<ChallengeDto>((dynamic chal) => ChallengeDto.fromJson(chal))
+        .map<UpdateChallengeDataChallengeDto>(
+            (dynamic chal) => UpdateChallengeDataChallengeDto.fromJson(chal))
         .toList();
   }
 
-  List<ChallengeDto> challenges = [];
+  List<UpdateChallengeDataChallengeDto> challenges = [];
 }
 
 class OrganizationDto {
