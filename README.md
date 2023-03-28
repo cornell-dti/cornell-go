@@ -82,6 +82,20 @@ npm run dbmigrate -- my_migration
 
 ## Contributors
 
+### SP23
+
+- **Youssef Attia** - Developer
+- **Cathryn Li** - Developer
+- **Nirbhay S Narang** - Developer
+- **Chris Gu** - Developer
+- **Brian La** - Developer
+- **Valerie Wong** - Designer
+- **Hanan Abraha** - Designer
+- **Alisha Lin** - PMM
+- **Nikita Kasumov** - TPM
+- **Jesse Cheng** - APM
+- **Althea Bata** - PM
+
 ### FA22
 
 - **Youssef Attia** - Developer
