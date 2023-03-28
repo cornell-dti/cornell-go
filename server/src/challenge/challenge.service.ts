@@ -200,7 +200,6 @@ export class ChallengeService {
         return unclaimedReward;
       }
     }
-
     return null;
   }
 
@@ -352,7 +351,9 @@ export class ChallengeService {
       },
     });
 
-    if (challenge.defaultOf) return;
+    if (challenge.defaultOf) {
+      return;
+    }
 
     for (const tracker of usedTrackers) {
       this.prisma.eventTracker.update({
