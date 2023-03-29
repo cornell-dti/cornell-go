@@ -2,7 +2,13 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ChallengeService } from './challenge.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { UserService } from '../user/user.service';
-import { AuthType, User, EventBase, EventTracker } from '@prisma/client';
+import {
+  AuthType,
+  User,
+  EventBase,
+  EventTracker,
+  Challenge,
+} from '@prisma/client';
 import { SessionLogService } from '../session-log/session-log.service';
 import { EventService } from '../event/event.service';
 import { ClientService } from '../client/client.service';
@@ -22,6 +28,7 @@ describe('ChallengeService', () => {
   let user: User;
   let tracker: EventTracker;
   let event: EventBase;
+  let organizationService: OrganizationService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -45,6 +52,7 @@ describe('ChallengeService', () => {
     userService = module.get<UserService>(UserService);
     eventService = module.get<EventService>(EventService);
     rewardService = module.get<RewardService>(RewardService);
+    organizationService = module.get<OrganizationService>(OrganizationService);
 
     user = await userService.register(
       'test@gmail.com',
@@ -53,9 +61,13 @@ describe('ChallengeService', () => {
       '2025',
       0,
       0,
-      AuthType.GOOGLE,
+      AuthType.DEVICE,
       'asdf',
     );
+    user = await prisma.user.findFirstOrThrow({
+      where: { id: user.id },
+      include: { memberOf: true },
+    });
     tracker = await eventService.getCurrentEventTrackerForUser(user);
     event = await prisma.eventBase.findUniqueOrThrow({
       where: { id: tracker.eventId },
@@ -69,16 +81,16 @@ describe('ChallengeService', () => {
   });
 
   describe('completeChallenge', () => {
+    let chal: Challenge;
+
     it('should complete the challenge', async () => {
       const score = user.score;
       const trackerScore = tracker.score;
 
-      const chalId = (
-        await prisma.challenge.findFirstOrThrow({
-          where: { id: tracker.curChallengeId },
-        })
-      ).id;
-      await challengeService.completeChallenge(user, chalId);
+      chal = await prisma.challenge.findFirstOrThrow({
+        where: { id: tracker.curChallengeId },
+      });
+      await challengeService.completeChallenge(user, chal.id);
       const score2 = (
         await prisma.user.findFirstOrThrow({
           where: {
@@ -95,12 +107,19 @@ describe('ChallengeService', () => {
       ).score;
       expect(score + 1).toEqual(score2);
     });
+    it('should return true for isChallengeCompletedByUser', async () => {
+      // console.log(
+      //   await challengeService.isChallengeCompletedByUser(user, chal),
+      // );
+      // console.log(chal);
+      expect(
+        await challengeService.isChallengeCompletedByUser(user, chal),
+      ).toEqual(true);
+    });
   });
 
   describe('checkForReward', () => {
-    beforeEach(async () => {});
-
-    it('return reward after completion and return true for isChallengeCompletedByUser', async () => {
+    it('return reward after completion', async () => {
       const user = await userService.register(
         'test@gmail.com',
         'test',
@@ -187,6 +206,7 @@ describe('ChallengeService', () => {
       });
       expect(chal.imageUrl).toEqual('update test');
     });
+
     it('should read challenges from eventbase: getFirstChallengeForEvent, getChallengesByIdsForUser, getChallengeById, nextChallenge ', async () => {
       const firstChal = await prisma.challenge.findFirstOrThrow({
         where: {
@@ -196,7 +216,9 @@ describe('ChallengeService', () => {
       });
       const first = await challengeService.getFirstChallengeForEvent(event);
       expect(first).toEqual(firstChal);
-      const chal = await prisma.challenge.findFirstOrThrow();
+      const chal = await prisma.challenge.findFirstOrThrow({
+        where: { linkedEventId: event.id },
+      });
       const chalsByUser = await challengeService.getChallengesByIdsForUser(
         user,
         false,
@@ -211,20 +233,68 @@ describe('ChallengeService', () => {
         }),
       );
       expect(nextChal.eventIndex).toEqual(1);
+      const evchal = await challengeService.getFirstChallengeForEvent(event);
+      expect(evchal.eventIndex).toEqual(0);
     });
     it('should remove challenge from eventbase: removeChallenge', async () => {
-      const chalID = (
-        await prisma.challenge.findFirstOrThrow({
-          where: { imageUrl: 'url' },
-        })
-      ).id;
+      const chal = await prisma.challenge.findFirstOrThrow({
+        where: { imageUrl: 'url', defaultOf: null },
+      });
 
-      await challengeService.removeChallenge(chalID, user);
-      const chalID2 = (
-        await prisma.challenge.findFirstOrThrow({
-          where: { imageUrl: 'url' },
+      const orgID = (
+        await prisma.eventBase.findFirstOrThrow({
+          where: { id: event.id },
+          include: { usedIn: true },
         })
-      ).id;
+      ).usedIn[0].id;
+      // console.log(orgID);
+
+      await prisma.organization.update({
+        where: { id: orgID },
+        data: { managers: { connect: { id: user.id } } },
+      });
+
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { managerOf: { connect: { id: orgID } } },
+      });
+
+      const manager = await prisma.user.findFirstOrThrow({
+        where: { id: user.id },
+        include: { managerOf: true },
+      });
+
+      // console.log(manager.managerOf);
+
+      // const managers = (
+      //   await prisma.organization.findFirstOrThrow({
+      //     where: { id: orgID },
+      //     include: { managers: true },
+      //   })
+      // ).managers;
+
+      // console.log(managers);
+
+      await challengeService.removeChallenge(chal.id, user);
+      const chalres = await prisma.challenge.findFirst({
+        where: { id: chal.id },
+      });
+
+      expect(chalres).toEqual(undefined);
+    });
+  });
+
+  describe('setCurrentChallenge', () => {
+    it('should set challenge to current', async () => {
+      const secondChal = await prisma.challenge.findFirstOrThrow({
+        where: {
+          eventIndex: 1,
+          linkedEvent: event,
+        },
+      });
+      await challengeService.setCurrentChallenge(user, secondChal.id);
+      const tracker = await eventService.getCurrentEventTrackerForUser(user);
+      expect(tracker.curChallengeId).toEqual(secondChal.id);
     });
   });
 
