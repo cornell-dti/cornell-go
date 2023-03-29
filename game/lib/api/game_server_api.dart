@@ -93,4 +93,7 @@ class GameServerApi {
 
   void completedChallenge(String challengeId) =>
       _invokeWithRefresh("completedChallenge", {"challengeId": challengeId});
+
+  void requestOrganizationDataDto() =>
+      _invokeWithRefresh("requestOrganizationDataDto", {"admin": false});
 }
