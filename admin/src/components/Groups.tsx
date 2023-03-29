@@ -162,7 +162,7 @@ function getColumns(setRowsData: any, serverData: any) {
               );
               rowsClone.splice(deletedRowIndex, 1);
 
-              var newData = Array.from(serverData.groups.values()).map((gr) =>
+              const newData = Array.from(serverData.groups.values()).map((gr) =>
                 toForm(gr)
               );
               newData.forEach((gr) => {
