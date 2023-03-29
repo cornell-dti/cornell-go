@@ -359,19 +359,20 @@ export class ChallengeService {
     }
 
     for (const tracker of usedTrackers) {
-      this.prisma.eventTracker.update({
+      await this.prisma.eventTracker.update({
         where: { id: tracker.id },
         data: { curChallengeId: challenge.linkedEvent!.defaultChallengeId },
       });
     }
 
-    await this.prisma.challenge.deleteMany({
+    const del = await this.prisma.challenge.deleteMany({
       where: {
         id: challengeId,
         linkedEvent: {
-          usedIn: { some: { managers: { some: { id: accessor.id } } } },
+          usedIn: { some: { members: { some: { id: accessor.id } } } },
         },
       },
     });
+    console.log(del);
   }
 }
