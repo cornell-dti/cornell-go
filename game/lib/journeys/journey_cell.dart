@@ -235,61 +235,66 @@ class _JourneyPreviewState extends State<JourneyPreview> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.all(5.0),
-                      child: SizedBox(
-                        height: 25,
-                        width: 60,
-                        child: Align(
-                          alignment: Alignment.topCenter,
-                          child: TextButton(
-                            style: ButtonStyle(
-                                backgroundColor: MaterialStateProperty.all(
-                                    Color.fromARGB(255, 231, 231, 231)),
-                                shape: MaterialStateProperty.all<
-                                        RoundedRectangleBorder>(
-                                    RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(18.0),
-                                        side: BorderSide(
-                                            color: backgroundColor)))),
-                            onPressed: () {},
-                            child: Text(
-                              difficulty[0].toUpperCase() +
-                                  difficulty.substring(1),
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 8,
-                                  color: Color.fromARGB(200, 47, 45, 45)),
+                      padding:
+                          const EdgeInsets.only(left: 5, top: 10.0, right: 5),
+                      child: Stack(children: [
+                        Container(
+                          width: 80,
+                          height: 25,
+                          alignment: Alignment.centerLeft,
+                          child: Container(
+                            decoration: new BoxDecoration(
+                              color: Color.fromARGB(255, 231, 231, 231),
+                              shape: BoxShape.rectangle,
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(16.0)),
                             ),
                           ),
                         ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(5.0),
-                      child: SizedBox(
-                        height: 25,
-                        width: 60,
-                        child: TextButton(
-                          style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all(
-                                  Color.fromARGB(255, 231, 231, 231)),
-                              shape: MaterialStateProperty.all<
-                                      RoundedRectangleBorder>(
-                                  RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(18.0),
-                                      side:
-                                          BorderSide(color: backgroundColor)))),
-                          onPressed: () {},
-                          child: Text(
-                            points.toString() + " points",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 8,
-                                color: Color.fromARGB(199, 40, 40, 40)),
+                        SizedBox(
+                          height: 25,
+                          width: 80,
+                          child: Align(
+                            alignment: Alignment.center,
+                            child: Text(
+                              difficulty[0].toUpperCase() +
+                                  difficulty.substring(1),
+                              style:
+                                  TextStyle(fontSize: 12, color: Colors.black),
+                            ),
                           ),
                         ),
-                      ),
+                      ]),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10.0),
+                      child: Stack(children: [
+                        Container(
+                          width: 80,
+                          height: 25,
+                          alignment: Alignment.centerLeft,
+                          child: Container(
+                            decoration: new BoxDecoration(
+                              color: Color.fromARGB(255, 231, 231, 231),
+                              shape: BoxShape.rectangle,
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(16.0)),
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 25,
+                          width: 80,
+                          child: Align(
+                            alignment: Alignment.center,
+                            child: Text(
+                              points.toString() + " points",
+                              style:
+                                  TextStyle(fontSize: 12, color: Colors.black),
+                            ),
+                          ),
+                        ),
+                      ]),
                     ),
                     Expanded(
                         child: SizedBox(
@@ -310,7 +315,7 @@ class _JourneyPreviewState extends State<JourneyPreview> {
                       style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 25,
-                          color: Color.fromARGB(198, 0, 0, 0))),
+                          color: Colors.black)),
                 ),
               ),
               Padding(
@@ -321,8 +326,8 @@ class _JourneyPreviewState extends State<JourneyPreview> {
                   child: Text(description,
                       style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                          color: Color.fromARGB(199, 0, 0, 0))),
+                          fontSize: 18,
+                          color: Colors.black)),
                 ),
               ),
               Padding(
@@ -332,8 +337,7 @@ class _JourneyPreviewState extends State<JourneyPreview> {
                       "Beat the timer (+ " +
                           challenge_points.toString() +
                           " points)",
-                      style: TextStyle(
-                          fontSize: 15, color: Color.fromARGB(199, 0, 0, 0))),
+                      style: TextStyle(fontSize: 16, color: Colors.black)),
                   Expanded(
                       child: SizedBox(
                           child: Align(
@@ -385,8 +389,7 @@ class _JourneyPreviewState extends State<JourneyPreview> {
                 padding: const EdgeInsets.only(left: 25, right: 25, top: 15),
                 child: Row(children: [
                   Text("Completed",
-                      style: TextStyle(
-                          fontSize: 15, color: Color.fromARGB(199, 0, 0, 0))),
+                      style: TextStyle(fontSize: 17, color: Colors.black)),
                   Expanded(
                     child: SizedBox(
                       child: Align(
@@ -395,9 +398,8 @@ class _JourneyPreviewState extends State<JourneyPreview> {
                             numberCompleted.toString() +
                                 "/" +
                                 locationCount.toString(),
-                            style: TextStyle(
-                                fontSize: 15,
-                                color: Color.fromARGB(199, 0, 0, 0))),
+                            style:
+                                TextStyle(fontSize: 15, color: Colors.black)),
                       ),
                     ),
                   )
@@ -459,8 +461,8 @@ class _JourneyPreviewState extends State<JourneyPreview> {
                           "START EXPLORING →",
                           style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize: 15,
-                              color: Color.fromARGB(198, 0, 0, 0)),
+                              fontSize: 17,
+                              color: Colors.black),
                         ),
                       )),
                 ]),
