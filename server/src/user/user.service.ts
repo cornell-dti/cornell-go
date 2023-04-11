@@ -300,6 +300,7 @@ export class UserService {
       trackedEventIds: partial
         ? undefined
         : joinedUser.eventTrackers.map(ev => ev.eventId),
+      isRegistered: joinedUser.isRegistered,
       favoriteIds: partial ? undefined : joinedUser.favorites.map(ev => ev.id),
     };
   }
