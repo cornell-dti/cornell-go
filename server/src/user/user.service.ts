@@ -45,12 +45,22 @@ export class UserService {
       data: { authToken: token, authType: authType },
     });
   }
-  
+
   /** Finishes registration with username, major, year */
-  async setRegistrationInfo(user: User, username: string, major: string, year: string) {
+  async setRegistrationInfo(
+    user: User,
+    username: string,
+    major: string,
+    year: string,
+  ) {
     await this.prisma.user.update({
       where: { id: user.id },
-      data: { username:username, major:major, year:year, isRegistered:true},
+      data: {
+        username: username,
+        major: major,
+        year: year,
+        isRegistered: true,
+      },
     });
   }
 
@@ -76,9 +86,9 @@ export class UserService {
       await this.orgService.getDefaultEvent(defOrg),
     );
 
-    username = username??"";
-    major = major??"";
-    year = year??"";
+    username = username ?? '';
+    major = major ?? '';
+    year = year ?? '';
 
     const user: User = await this.prisma.user.create({
       data: {
