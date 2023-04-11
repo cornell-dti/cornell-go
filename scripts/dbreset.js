@@ -7,11 +7,11 @@ async function main() {
   try {
     mkdirSync("./postgres-data");
     rmSync("./postgres-data/pgdata", { recursive: true, force: true });
-  } catch {}
+  } catch { }
   execSync("docker compose up -d");
   chdir("./server");
 
-  execSync("npx prisma db push --accept-data-loss");
+  execSync("npx prisma db push --accept-data-loss --force-reset");
 
   execSync("docker compose stop");
 }

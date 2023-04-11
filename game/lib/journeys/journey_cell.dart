@@ -14,7 +14,7 @@ class JourneyCell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Color.fromARGB(51, 217, 217, 217),
+      color: Color.fromARGB(153, 217, 217, 217),
       height: 180.0,
       child: Padding(
         padding: EdgeInsets.all(16.0),
