@@ -57,6 +57,7 @@ class _ChallengesPageState extends State<ChallengesPage> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Container(
+                    padding: EdgeInsets.zero,
                     color: Color.fromARGB(76, 217, 217, 217),
                     child: TextButton.icon(
                       onPressed: () {},
