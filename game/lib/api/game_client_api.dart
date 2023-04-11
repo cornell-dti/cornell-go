@@ -48,6 +48,11 @@ class GameClientApi {
   Stream<UpdateChallengeDataDto> get updateChallengeDataStream =>
       _updateChallengeDataController.stream;
 
+  final _updateOrganizationDataController =
+      StreamController<UpdateOrganizationDataDto>.broadcast(sync: true);
+  Stream<UpdateOrganizationDataDto> get updateOrganizationDataStream =>
+      _updateOrganizationDataController.stream;
+
   final _reconnectedController = StreamController<Null>.broadcast(sync: true);
   Stream<Null> get reconnectedStream => _reconnectedController.stream;
 
@@ -96,6 +101,10 @@ class GameClientApi {
         "updateChallengeData",
         (data) => _updateChallengeDataController
             .add(UpdateChallengeDataDto.fromJson(data)));
+    sock.on(
+        "updateOrganizationData",
+        (data) => _updateOrganizationDataController
+            .add(UpdateOrganizationDataDto.fromJson(data)));
     _connectedController.add(null);
   }
 
