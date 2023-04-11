@@ -97,4 +97,6 @@ class GameServerApi {
   void finishRegistration(String username, String major, String year) =>
       _invokeWithRefresh("finishRegistration",
           {"username": username, "major": major, "year": year});
+  void requestOrganizationDataDto() =>
+      _invokeWithRefresh("requestOrganizationDataDto", {"admin": false});
 }

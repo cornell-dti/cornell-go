@@ -36,3 +36,12 @@ export interface UpdateGroupDataDto {
   group: GroupDto | string;
   deleted: boolean;
 }
+
+export interface GroupInviteDto {
+  groupId: string;
+  username: string;
+}
+
+export interface SendGroupInviteDto {
+  targetUsername: string;
+}
