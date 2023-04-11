@@ -43,6 +43,7 @@ class _JourneyCellState extends State<JourneyCell> {
   final String difficulty;
   final int points;
   final int challenge_points;
+
   _JourneyCellState(
       this.journeyName,
       this.description,
@@ -59,7 +60,7 @@ class _JourneyCellState extends State<JourneyCell> {
       onTap: () async {
         await showDialog(
             context: context,
-            builder: (_) => JourneyPreview(
+            builder: (context) => JourneyPreview(
                 journeyName,
                 description,
                 locationCount,
@@ -153,7 +154,7 @@ class _JourneyCellState extends State<JourneyCell> {
   }
 }
 
-class JourneyPreview extends StatelessWidget {
+class JourneyPreview extends StatefulWidget {
   final int locationCount;
   final String journeyName;
   final String description;
@@ -168,7 +169,47 @@ class JourneyPreview extends StatelessWidget {
   //Temporary image for now. Will have to change later
   final String imgPath = "assets/images/38582.jpg";
 
-  const JourneyPreview(
+  JourneyPreview(
+      this.journeyName,
+      this.description,
+      this.locationCount,
+      this.numberCompleted,
+      this.isCompleted,
+      this.difficulty,
+      this.points,
+      this.challenge_points,
+      {Key? key})
+      : super(key: key);
+
+  @override
+  State<StatefulWidget> createState() => _JourneyPreviewState(
+      journeyName,
+      description,
+      locationCount,
+      numberCompleted,
+      isCompleted,
+      difficulty,
+      points,
+      challenge_points);
+}
+
+class _JourneyPreviewState extends State<JourneyPreview> {
+  final int locationCount;
+  final String journeyName;
+  final String description;
+  final int numberCompleted;
+  final bool isCompleted;
+  final String difficulty;
+  final int points;
+  final int challenge_points;
+  bool _challenge_on = false;
+
+  static Color backgroundColor = Color.fromARGB(255, 217, 214, 213);
+
+  //Temporary image for now. Will have to change later
+  final String imgPath = "assets/images/38582.jpg";
+
+  _JourneyPreviewState(
       this.journeyName,
       this.description,
       this.locationCount,
@@ -181,19 +222,227 @@ class JourneyPreview extends StatelessWidget {
   Widget build(BuildContext context) {
     return Dialog(
       child: Container(
-          height: 300,
+          height: 500,
           child: Column(
             children: [
               Container(
                 decoration: BoxDecoration(
                     image: DecorationImage(
                         image: AssetImage(imgPath), fit: BoxFit.cover)),
-                height: 100,
+                height: 150,
                 alignment: Alignment.topLeft,
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(
+                    Padding(
+                      padding: const EdgeInsets.all(5.0),
+                      child: SizedBox(
+                        height: 25,
+                        width: 60,
+                        child: Align(
+                          alignment: Alignment.topCenter,
+                          child: TextButton(
+                            style: ButtonStyle(
+                                backgroundColor: MaterialStateProperty.all(
+                                    Color.fromARGB(255, 231, 231, 231)),
+                                shape: MaterialStateProperty.all<
+                                        RoundedRectangleBorder>(
+                                    RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(18.0),
+                                        side: BorderSide(
+                                            color: backgroundColor)))),
+                            onPressed: () {},
+                            child: Text(
+                              difficulty[0].toUpperCase() +
+                                  difficulty.substring(1),
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 8,
+                                  color: Color.fromARGB(200, 47, 45, 45)),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(5.0),
+                      child: SizedBox(
+                        height: 25,
+                        width: 60,
+                        child: TextButton(
+                          style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all(
+                                  Color.fromARGB(255, 231, 231, 231)),
+                              shape: MaterialStateProperty.all<
+                                      RoundedRectangleBorder>(
+                                  RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(18.0),
+                                      side:
+                                          BorderSide(color: backgroundColor)))),
+                          onPressed: () {},
+                          child: Text(
+                            points.toString() + " points",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 8,
+                                color: Color.fromARGB(199, 40, 40, 40)),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                        child: SizedBox(
+                            child: Align(
+                      alignment: Alignment.topRight,
+                      child: CloseButton(),
+                    )))
+                  ],
+                ),
+              ),
+              SizedBox(height: 20),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 25.0, vertical: 5),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(journeyName,
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 25,
+                          color: Color.fromARGB(198, 0, 0, 0))),
+                ),
+              ),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 25.0, vertical: 5),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(description,
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                          color: Color.fromARGB(199, 0, 0, 0))),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 25.0, right: 25, top: 15),
+                child: Row(children: [
+                  Text(
+                      "Beat the timer (+ " +
+                          challenge_points.toString() +
+                          " points)",
+                      style: TextStyle(
+                          fontSize: 15, color: Color.fromARGB(199, 0, 0, 0))),
+                  Expanded(
+                      child: SizedBox(
+                          child: Align(
+                    alignment: Alignment.centerRight,
+                    child: Stack(children: [
+                      Container(
+                        width: 40.0,
+                        height: 20.0,
+                        child: Container(
+                          decoration: new BoxDecoration(
+                            color: backgroundColor,
+                            shape: BoxShape.rectangle,
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(16.0)),
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(
+                            left: _challenge_on ? 20.0 : 4.0, top: 2),
+                        child: new Container(
+                          width: 16,
+                          height: 16,
+                          decoration: new BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        width: 40,
+                        height: 20,
+                        child: TextButton(
+                            onPressed: () {
+                              setState(
+                                () {
+                                  _challenge_on = !_challenge_on;
+                                },
+                              );
+                            },
+                            child: Text("")),
+                      ),
+                    ]),
+                  )))
+                ]),
+              ),
+              SizedBox(height: 20),
+              Padding(
+                padding: const EdgeInsets.only(left: 25, right: 25, top: 15),
+                child: Row(children: [
+                  Text("Completed",
+                      style: TextStyle(
+                          fontSize: 15, color: Color.fromARGB(199, 0, 0, 0))),
+                  Expanded(
+                    child: SizedBox(
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                            numberCompleted.toString() +
+                                "/" +
+                                locationCount.toString(),
+                            style: TextStyle(
+                                fontSize: 15,
+                                color: Color.fromARGB(199, 0, 0, 0))),
+                      ),
+                    ),
+                  )
+                ]),
+              ),
+              Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 25, vertical: 5),
+                  child: Stack(children: [
+                    Container(
+                      width: 270,
                       height: 20,
+                      alignment: Alignment.centerLeft,
+                      child: Container(
+                        decoration: new BoxDecoration(
+                          color: backgroundColor,
+                          shape: BoxShape.rectangle,
+                          borderRadius: BorderRadius.all(Radius.circular(16.0)),
+                        ),
+                      ),
+                    ),
+                    Container(
+                      width: (locationCount > 0
+                              ? numberCompleted / locationCount
+                              : 0) *
+                          270,
+                      height: 20,
+                      alignment: Alignment.centerLeft,
+                      child: Container(
+                        decoration: new BoxDecoration(
+                          color: Color.fromARGB(197, 35, 35, 35),
+                          shape: BoxShape.rectangle,
+                          borderRadius: BorderRadius.all(Radius.circular(16.0)),
+                        ),
+                      ),
+                    ),
+                  ])),
+              SizedBox(height: 30),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 25),
+                child: Row(children: [
+                  SizedBox(width: 60),
+                  Container(
+                      height: 50,
+                      width: 200,
                       child: TextButton(
                         style: ButtonStyle(
                             backgroundColor:
@@ -201,19 +450,21 @@ class JourneyPreview extends StatelessWidget {
                             shape: MaterialStateProperty.all<
                                     RoundedRectangleBorder>(
                                 RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(18.0),
+                                    borderRadius: BorderRadius.circular(10.0),
                                     side: BorderSide(color: backgroundColor)))),
-                        onPressed: () {},
-                        child: Text(difficulty),
-                      ),
-                    )
-                  ],
-                ),
-              ),
-              Text(journeyName),
-              Text(description),
-              Row(),
-              Row(),
+                        onPressed: () {
+                          print("Unimplemented. Starting Challenge!");
+                        },
+                        child: Text(
+                          "START EXPLORING →",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                              color: Color.fromARGB(198, 0, 0, 0)),
+                        ),
+                      )),
+                ]),
+              )
             ],
           )),
     );
