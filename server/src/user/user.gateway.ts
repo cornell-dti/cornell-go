@@ -202,5 +202,11 @@ export class UserGateway {
       data.major,
       data.year,
     );
+
+    user.username = data.username;
+    user.major = data.major;
+    user.year = data.year;
+
+    await this.userService.emitUpdateUserData(user, false, true, true);
   }
 }

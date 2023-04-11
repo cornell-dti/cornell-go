@@ -93,4 +93,8 @@ class GameServerApi {
 
   void completedChallenge(String challengeId) =>
       _invokeWithRefresh("completedChallenge", {"challengeId": challengeId});
+
+  void finishRegistration(String username, String major, String year) =>
+      _invokeWithRefresh("finishRegistration",
+          {"username": username, "major": major, "year": year});
 }

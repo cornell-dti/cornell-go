@@ -16,6 +16,7 @@ class UserDto {
         : fields["authType"] == "apple"
             ? UserDataAuthTypeDto.APPLE
             : UserDataAuthTypeDto.DEVICE;
+    isRegistered = fields["isRegistered"];
   }
   String id = "";
   String username = "";
@@ -27,6 +28,7 @@ class UserDto {
   List<String> trackedEventIds = [];
   bool ignoreIdLists = false;
   UserDataAuthTypeDto authType = UserDataAuthTypeDto.DEVICE;
+  bool isRegistered = false;
 }
 
 class UpdateUserDto {
