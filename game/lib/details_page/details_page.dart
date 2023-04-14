@@ -1,3 +1,72 @@
+import 'package:flutter/material.dart';
+import 'package:game/widget/lato_text.dart';
+
+class DetailsPageWidget extends StatefulWidget {
+  DetailsPageWidget({Key? key, required String userType}) : super(key: key);
+  final scaffoldKey = GlobalKey<ScaffoldState>();
+
+  @override
+  _DetailsPageWidgetState createState() => _DetailsPageWidgetState();
+}
+
+class _DetailsPageWidgetState extends State<DetailsPageWidget> {
+  String _year = "2025";
+  String _username = "";
+  String _name = "";
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  final _formKey = GlobalKey<FormState>();
+
+  List<String> _years = ["2025"];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Padding(
+          padding: const EdgeInsets.only(left: 16, right: 16, top: 50),
+          child:
+              // Build a Form widget using the _formKey created above.
+              Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    LatoText("Name", 18, Colors.black, FontWeight.w700),
+                    SizedBox(height: 10),
+                    TextFormField(
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: 'e.g. Jane Doe',
+                      ),
+                      onSaved: (newValue) => setState(() {
+                        _name = newValue!;
+                      }),
+                      // The validator receives the text that the user has entered.
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter some text';
+                        }
+                        return null;
+                      },
+                    ),
+                  ],
+                ),
+                SizedBox(height: 20),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    LatoText("Username", 18, Colors.black, FontWeight.w700),
+                    SizedBox(height: 10),
+                    TextFormField(
+                      onSaved: (newValue) => setState(() {
+                        _username = newValue!;
                       }),
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
