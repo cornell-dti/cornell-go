@@ -10,15 +10,13 @@ class RegisterPageWidget extends StatefulWidget {
 }
 
 class _RegisterPageWidgetState extends State<RegisterPageWidget> {
-
   String _selectedOption = "";
-  
+
   @override
   void initState() {
     super.initState();
-     _selectedOption = "Graduate Student";
+    _selectedOption = "Graduate Student";
   }
-
 
   final List<String> identityOptions = [
     "Undergraduate Student",
@@ -27,13 +25,12 @@ class _RegisterPageWidgetState extends State<RegisterPageWidget> {
     "Alumni"
   ];
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Padding(
-        padding: const EdgeInsets.only(top:50.0),
+        padding: const EdgeInsets.only(top: 50.0),
         child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.start,
@@ -45,7 +42,7 @@ class _RegisterPageWidgetState extends State<RegisterPageWidget> {
                 mainAxisAlignment: MainAxisAlignment.center,
               ),
               Column(
-                children: identityOptions.map((entry) {
+                  children: identityOptions.map((entry) {
                 return Padding(
                   padding: const EdgeInsets.only(top: 20.0),
                   child: ElevatedButton(
@@ -74,6 +71,23 @@ class _RegisterPageWidgetState extends State<RegisterPageWidget> {
                       )),
                 );
               }).toList()),
+              SizedBox(height: 100,),
+              ElevatedButton(
+                style: ButtonStyle(
+                    backgroundColor:
+                        MaterialStatePropertyAll<Color>(Colors.black)),
+                child: Container(width: 255,
+                        height: 53,
+                        child: Align(
+                          alignment: Alignment.center,
+                          child: LatoText(
+                              "Continue",
+                              16.0,
+                            Colors.white,
+                              FontWeight.w600),
+                        )),
+                onPressed: () => {print("continue")},
+              ),
             ]),
       ),
     );
