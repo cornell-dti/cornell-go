@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:game/register_page/register_page.dart';
 import 'package:game/widget/lato_text.dart';
 
 class SplashPageWidget extends StatelessWidget {
@@ -35,7 +36,13 @@ class SplashPageWidget extends StatelessWidget {
                     style: ButtonStyle(
                         backgroundColor:
                             MaterialStatePropertyAll<Color>(Colors.white)),
-                    onPressed: () => {print("pressed")},
+                    onPressed: () => {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => RegisterPageWidget(),
+                            ),
+                          )
+                        },
                     child: Container(
                       width: 255,
                       height: 53,

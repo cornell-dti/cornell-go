@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:game/details_page/details_page.dart';
 import 'package:game/widget/lato_text.dart';
 
 class RegisterPageWidget extends StatefulWidget {
@@ -71,22 +72,30 @@ class _RegisterPageWidgetState extends State<RegisterPageWidget> {
                       )),
                 );
               }).toList()),
-              SizedBox(height: 100,),
+              SizedBox(
+                height: 100,
+              ),
               ElevatedButton(
                 style: ButtonStyle(
                     backgroundColor:
                         MaterialStatePropertyAll<Color>(Colors.black)),
-                child: Container(width: 255,
-                        height: 53,
-                        child: Align(
-                          alignment: Alignment.center,
-                          child: LatoText(
-                              "Continue",
-                              16.0,
-                            Colors.white,
-                              FontWeight.w600),
-                        )),
-                onPressed: () => {print("continue")},
+                child: Container(
+                    width: 255,
+                    height: 53,
+                    child: Align(
+                      alignment: Alignment.center,
+                      child: LatoText(
+                          "Continue", 16.0, Colors.white, FontWeight.w600),
+                    )),
+                onPressed: () => {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => DetailsPageWidget(
+                        userType: _selectedOption,
+                      ),
+                    ),
+                  )
+                },
               ),
             ]),
       ),
