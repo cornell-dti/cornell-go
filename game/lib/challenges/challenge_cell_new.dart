@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class ChallengeCell extends StatelessWidget {
   final String location;
   final String challengeName;
-  final Image thumbnail;
+  final String imgPath;
   final bool isCompleted;
   const ChallengeCell(
-      this.location, this.challengeName, this.thumbnail, this.isCompleted,
+      this.location, this.challengeName, this.imgPath, this.isCompleted,
       {Key? key})
       : super(key: key);
 
@@ -26,7 +24,16 @@ class ChallengeCell extends StatelessWidget {
               padding: const EdgeInsets.only(right: 14),
               child: ClipRRect(
                 borderRadius: BorderRadius.all(Radius.circular(4.6)),
-                child: thumbnail,
+                child: Container(
+                    decoration: BoxDecoration(
+                        image:
+                            // !this.current && this.notVisited
+                            //     ? null
+                            //     :
+                            DecorationImage(
+                                image: CachedNetworkImageProvider(this.imgPath),
+                                fit: BoxFit.cover,
+                                opacity: .5))),
               ),
             ),
             Flexible(

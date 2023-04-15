@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
 import 'challenge_cell_new.dart';
 import 'package:game/journeys/filter_form.dart';
+
+import 'package:game/api/game_api.dart';
+import 'package:game/model/challenge_model.dart';
+import 'package:game/model/event_model.dart';
+import 'package:game/model/group_model.dart';
+import 'package:game/model/tracker_model.dart';
+import 'package:game/api/game_client_dto.dart';
+
+import 'package:game/widget/back_btn.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class ChallengesPage extends StatefulWidget {
   const ChallengesPage({Key? key}) : super(key: key);
@@ -15,13 +23,13 @@ class ChallengesPage extends StatefulWidget {
 class _ChallengesPageState extends State<ChallengesPage> {
   final cells = [
     ChallengeCell("ARTS QUAD", "Statue on the Arts Quad",
-        Image.network('https://picsum.photos/250?image=9'), false),
+        'https://picsum.photos/250?image=9', false),
     ChallengeCell("ARTS QUAD", "Statue on the Arts Quad",
-        Image.network('https://picsum.photos/250?image=9'), true),
+        'https://picsum.photos/250?image=9', true),
     ChallengeCell("ARTS QUAD", "Statue on the Arts Quad",
-        Image.network('https://picsum.photos/250?image=9'), false),
+        'https://picsum.photos/250?image=9', false),
     ChallengeCell("ARTS QUAD", "Statue on the Arts Quad",
-        Image.network('https://picsum.photos/250?image=9'), true),
+        'https://picsum.photos/250?image=9', true),
   ];
 
   void openFilter() {
@@ -37,6 +45,7 @@ class _ChallengesPageState extends State<ChallengesPage> {
 
   @override
   Widget build(BuildContext context) {
+    final format = DateFormat('yyyy-MM-dd');
     return Scaffold(
       body: Padding(
         padding: EdgeInsets.all(30),
@@ -103,18 +112,61 @@ class _ChallengesPageState extends State<ChallengesPage> {
                 ),
               ),
             ),
-            Expanded(
-              child: ListView.separated(
-                padding: const EdgeInsets.all(0),
-                itemCount: cells.length,
-                itemBuilder: (context, index) {
-                  return cells[index];
-                },
-                separatorBuilder: (context, index) {
-                  return SizedBox(height: 10);
-                },
-              ),
-            ),
+            // Expanded(
+            //   child: ListView.separated(
+            //     padding: const EdgeInsets.all(0),
+            //     itemCount: cells.length,
+            //     itemBuilder: (context, index) {
+            //       return cells[index];
+            //     },
+            //     separatorBuilder: (context, index) {
+            //       return SizedBox(height: 10);
+            //     },
+            //   ),
+            // ),
+            Expanded(child: Consumer5<EventModel, ChallengeModel, TrackerModel,
+                    GroupModel, ApiClient>(
+                builder: (context, myEventModel, myChallengeModel,
+                    myTrackerModel, groupModel, apiClient, child) {
+              if (groupModel.curEventId == null) {
+                return ListView();
+              } else {
+                List<Widget> challengeCells = [];
+                final eventId = groupModel.curEventId!;
+                final challenges =
+                    myEventModel.getEventById(eventId)?.challengeIds;
+                if (challenges == null) {
+                  return ListView();
+                } else {
+                  for (String challengeId in challenges) {
+                    final UpdateChallengeDataChallengeDto? challenge =
+                        myChallengeModel.getChallengeById(challengeId);
+                    final EventDto? event = myEventModel.getEventById(eventId);
+                    final EventTrackerDto? tracker =
+                        myTrackerModel.trackerByEventId(eventId);
+                    if (challenge != null && event != null && tracker != null) {
+                      challengeCells.add(GestureDetector(
+                        onTap: () {
+                          apiClient.serverApi?.setCurrentChallenge(challengeId);
+                        },
+                        child: ChallengeCell(
+                          challenge.completionDate == null
+                              ? ""
+                              : format.format(challenge.completionDate!),
+                          challenge.name,
+                          challenge.imageUrl,
+                          challenge.completionDate != null,
+                        ),
+                      ));
+                    }
+                  }
+                }
+                return ListView(
+                    shrinkWrap: true,
+                    scrollDirection: Axis.vertical,
+                    children: challengeCells);
+              }
+            }))
           ],
         ),
       ),
