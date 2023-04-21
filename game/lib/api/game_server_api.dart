@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:game/api/game_client_dto.dart';
 import 'package:socket_io_client/socket_io_client.dart';
 
@@ -61,7 +60,7 @@ class GameServerApi {
   void requestAllEventData(
           int offset,
           int count,
-          List<UpdateEventDataEventRewardTypeDto> rewardTypes,
+          List<EventRewardType> rewardTypes,
           bool closestToEnding,
           bool shortestFirst,
           bool skippableOnly) =>
@@ -72,7 +71,7 @@ class GameServerApi {
         "shortestFirst": shortestFirst,
         "skippableOnly": skippableOnly,
         "rewardTypes": rewardTypes
-            .map((e) => e == UpdateEventDataEventRewardTypeDto.PERPETUAL
+            .map((e) => e == EventRewardType.PERPETUAL
                 ? 'perpetual'
                 : 'limited_time_event')
             .toList()
@@ -94,4 +93,7 @@ class GameServerApi {
 
   void completedChallenge(String challengeId) =>
       _invokeWithRefresh("completedChallenge", {"challengeId": challengeId});
+
+  void requestOrganizationDataDto() =>
+      _invokeWithRefresh("requestOrganizationDataDto", {"admin": false});
 }

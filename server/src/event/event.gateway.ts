@@ -89,6 +89,7 @@ export class EventGateway {
     @MessageBody() data: RequestEventLeaderDataDto,
   ) {
     if (!(await this.eventService.isAllowedEvent(user, data.eventId))) {
+      await this.clientService.emitErrorData(user, 'Access Denied');
       return;
     }
 
@@ -128,6 +129,10 @@ export class EventGateway {
           user,
         ))
       ) {
+        await this.clientService.emitErrorData(
+          user,
+          'User has no admin rights',
+        );
         return;
       }
 
@@ -146,6 +151,10 @@ export class EventGateway {
         )) &&
         !(await this.eventService.hasAdminRights({ id: dto.id }, user))
       ) {
+        await this.clientService.emitErrorData(
+          user,
+          'User has no admin rights',
+        );
         return;
       }
 

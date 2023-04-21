@@ -1,6 +1,7 @@
 FROM node:18.14.0
 
 EXPOSE 80
+EXPOSE 8000
 
 RUN npm install -g prettier @nestjs/cli jest rimraf
 
@@ -21,4 +22,4 @@ COPY server .
 RUN npx prisma generate
 RUN npm run build
 RUN if [ ${DEVELOPMENT} != "true" ]; then npx prisma migrate deploy; fi
-ENTRYPOINT ["npm", "run", "start:prod"]
+ENTRYPOINT if [ ${DEVELOPMENT} != "true" ]; then npm run start:prod; else npm run start; fi

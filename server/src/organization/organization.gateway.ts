@@ -53,7 +53,10 @@ export class OrganizationGateway {
     @CallingUser() user: User,
     @MessageBody() data: UpdateOrganizationDataDto,
   ) {
-    if (!user.administrator) return;
+    if (!user.administrator) {
+      await this.clientService.emitErrorData(user, 'User has no admin rights');
+      return;
+    }
 
     if (data.deleted) {
       const org = await this.orgService.getOrganizationById(
