@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:game/details_page/details_page.dart';
 import 'package:game/widget/lato_text.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class RegisterPageWidget extends StatefulWidget {
-  RegisterPageWidget({Key? key}) : super(key: key);
+  GoogleSignInAccount? user = null;
+  RegisterPageWidget({Key? key, required GoogleSignInAccount? this.user})
+      : super(key: key);
   final scaffoldKey = GlobalKey<ScaffoldState>();
-
   @override
   _RegisterPageWidgetState createState() => _RegisterPageWidgetState();
 }
 
 class _RegisterPageWidgetState extends State<RegisterPageWidget> {
   String _selectedOption = "";
-
   @override
   void initState() {
     super.initState();
@@ -92,6 +93,7 @@ class _RegisterPageWidgetState extends State<RegisterPageWidget> {
                     MaterialPageRoute(
                       builder: (context) => DetailsPageWidget(
                         userType: _selectedOption,
+                        user: widget.user,
                       ),
                     ),
                   )

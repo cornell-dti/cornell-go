@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:game/widget/lato_text.dart';
+import 'package:game/main.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:game/utils/utility_functions.dart';
 
 class DetailsPageWidget extends StatefulWidget {
-  DetailsPageWidget({Key? key, required String userType}) : super(key: key);
+  DetailsPageWidget(
+      {Key? key,
+      required String userType,
+      required GoogleSignInAccount? this.user})
+      : super(key: key);
   final scaffoldKey = GlobalKey<ScaffoldState>();
-
+  String userType = "";
+  GoogleSignInAccount? user = null;
   @override
   _DetailsPageWidgetState createState() => _DetailsPageWidgetState();
 }
@@ -13,6 +20,7 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
   String _year = "2025";
   String _username = "";
   String _name = "";
+  GoogleSignInAccount? user = null;
   @override
   void initState() {
     super.initState();
@@ -28,9 +36,7 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
       backgroundColor: Colors.white,
       body: Padding(
           padding: const EdgeInsets.only(left: 16, right: 16, top: 50),
-          child:
-              // Build a Form widget using the _formKey created above.
-              Form(
+          child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -115,25 +121,39 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
                   ],
                 ),
                 ElevatedButton(
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Processing Data')),
-                        );
+                  onPressed: () async {
+                    if (_formKey.currentState!.validate()) {
+                      final auth = await widget.user?.authentication;
+                      final idToken = auth?.idToken;
+                      final connectionResult = await client.connect(
+                          idToken!,
+                          Uri.parse(API_URL + "/google"),
+                          widget.userType,
+                          _year,
+                          _name);
+
+                      if (connectionResult == null) {
+                        displayToast("An error occurred while signing you up!",
+                            Status.error);
+                      } else {
+                        print("Connection result:");
+                        print(connectionResult!.body);
+                        displayToast("Signed in!", Status.success);
                       }
-                    },
-                    style: ButtonStyle(
-                        backgroundColor:
-                            MaterialStatePropertyAll<Color>(Colors.black)),
-                    child: Container(
-                        width: 255,
-                        height: 53,
-                        child: Align(
-                          alignment: Alignment.center,
-                          child: LatoText(
-                              "Continue", 16.0, Colors.white, FontWeight.w600),
-                        )),
-                  ),
+                    }
+                  },
+                  style: ButtonStyle(
+                      backgroundColor:
+                          MaterialStatePropertyAll<Color>(Colors.black)),
+                  child: Container(
+                      width: 255,
+                      height: 53,
+                      child: Align(
+                        alignment: Alignment.center,
+                        child: LatoText(
+                            "Continue", 16.0, Colors.white, FontWeight.w600),
+                      )),
+                ),
               ],
             ),
           )),

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:provider/provider.dart';
+import 'package:game/api/game_api.dart';
+import 'package:game/utils/utility_functions.dart';
 import 'package:game/register_page/register_page.dart';
-import 'package:game/widget/lato_text.dart';
 
 class SplashPageWidget extends StatelessWidget {
   SplashPageWidget({Key? key}) : super(key: key);
@@ -32,26 +35,39 @@ class SplashPageWidget extends StatelessWidget {
                 LatoText(
                     "Login to CornellGo", 20.0, Colors.black, FontWeight.w600),
                 SizedBox(height: 32.5),
-                ElevatedButton(
-                    style: ButtonStyle(
-                        backgroundColor:
-                            MaterialStatePropertyAll<Color>(Colors.white)),
-                    onPressed: () => {
+                Consumer<ApiClient>(
+                  builder: (context, apiClient, child) {
+                    return ElevatedButton(
+                      style: ButtonStyle(
+                          backgroundColor:
+                              MaterialStatePropertyAll<Color>(Colors.white)),
+                      onPressed: () async {
+                        final GoogleSignInAccount? account =
+                            await apiClient.connectGoogle();
+                        if (account == null) {
+                          displayToast("An error occured while signing you up.",
+                              Status.error);
+                        } else {
                           Navigator.of(context).push(
                             MaterialPageRoute(
-                              builder: (context) => RegisterPageWidget(),
+                              builder: (context) =>
+                                  RegisterPageWidget(user: account),
                             ),
-                          )
-                        },
-                    child: Container(
-                      width: 255,
-                      height: 53,
-                      child: Align(
-                        alignment: Alignment.center,
-                        child: LatoText("Continue with Google", 16.0,
-                            Colors.black, FontWeight.w600),
+                          );
+                        }
+                      },
+                      child: Container(
+                        width: 255,
+                        height: 50,
+                        child: Align(
+                          alignment: Alignment.center,
+                          child: LatoText("Continue with Google", 16.0,
+                              Colors.black, FontWeight.w600),
+                        ),
                       ),
-                    )),
+                    );
+                  },
+                ),
                 SizedBox(height: 16),
                 Row(children: <Widget>[
                   SizedBox(width: 69),
