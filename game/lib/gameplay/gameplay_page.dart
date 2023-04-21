@@ -88,13 +88,15 @@ class _GameplayPageState extends State<GameplayPage> {
                     ),
                     Container(
                       height: 50,
-                      child: Text(
-                        "${distance} mi",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                            fontSize: 25,
-                            fontWeight: FontWeight.w500,
-                            fontFamily: "Inter"),
+                      child: Align(
+                        alignment: Alignment.center,
+                        child: Text(
+                          "${distance} mi",
+                          style: TextStyle(
+                              fontSize: 25,
+                              fontWeight: FontWeight.w500,
+                              fontFamily: "Inter"),
+                        ),
                       ),
                       decoration: BoxDecoration(
                           color: Color.fromARGB(255, 255, 255, 255),
