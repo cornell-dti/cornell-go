@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:game/journeys/journey_cell.dart';
+import 'package:game/journeys/filter_form.dart';
 
 class JourneysPage extends StatefulWidget {
   const JourneysPage({Key? key}) : super(key: key);
@@ -51,11 +52,23 @@ class _JourneysPageState extends State<JourneysPage> {
       3,
     ),
   ];
+
+  void openFilter() {
+    showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        builder: (
+          BuildContext context,
+        ) {
+          return FilterForm();
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
-        padding: EdgeInsets.all(30),
+        padding: EdgeInsets.all(16),
         child: Column(
           children: [
             Container(
@@ -80,15 +93,43 @@ class _JourneysPageState extends State<JourneysPage> {
               ),
             ),
             Container(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  ElevatedButton(
-                    onPressed: () {},
-                    child: Text("filter"),
-                  ),
-                ],
+              child: Padding(
+                padding: const EdgeInsets.only(top: 24.0, bottom: 24.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      height: 30,
+                      child: TextButton.icon(
+                          onPressed: openFilter,
+                          icon: Icon(
+                            Icons.filter_list_rounded,
+                            color: Color.fromARGB(255, 0, 0, 0),
+                            size: 20.0,
+                          ),
+                          style: ButtonStyle(
+                            backgroundColor: MaterialStateProperty.all<Color>(
+                                Color.fromARGB(153, 217, 217, 217)),
+                            padding: MaterialStateProperty.all(
+                              EdgeInsets.only(right: 16.0, left: 16.0),
+                            ),
+                            shape: MaterialStateProperty.all(
+                                RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(3.0),
+                            )),
+                          ),
+                          label: Text(
+                            "Filter By",
+                            style: TextStyle(
+                              color: Color.fromARGB(255, 0, 0, 0),
+                              fontSize: 15,
+                              fontFamily: 'Inter',
+                            ),
+                          )),
+                    ),
+                  ],
+                ),
               ),
             ),
             Expanded(

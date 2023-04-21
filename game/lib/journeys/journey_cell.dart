@@ -90,6 +90,7 @@ class _JourneyCellState extends State<JourneyCell> {
                         style: TextStyle(
                           color: Color.fromARGB(255, 71, 71, 71),
                           fontSize: 10,
+                          fontWeight: FontWeight.w700,
                           fontFamily: 'Lato',
                         ),
                       ),
