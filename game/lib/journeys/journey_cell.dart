@@ -348,7 +348,9 @@ class _JourneyPreviewState extends State<JourneyPreview> {
                         height: 20.0,
                         child: Container(
                           decoration: new BoxDecoration(
-                            color: backgroundColor,
+                            color: _challenge_on
+                                ? Colors.lightBlue
+                                : backgroundColor,
                             shape: BoxShape.rectangle,
                             borderRadius:
                                 BorderRadius.all(Radius.circular(16.0)),
