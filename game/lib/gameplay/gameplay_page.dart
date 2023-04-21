@@ -72,21 +72,42 @@ class _GameplayPageState extends State<GameplayPage> {
                   height: 100,
                   width: 500,
                   decoration: BoxDecoration(
-                      color: Color.fromARGB(255, 238, 238, 238),
-                      borderRadius:
-                          BorderRadius.all(Radius.elliptical(400, 200))),
-                ),
-                Container(
-                  child: Text(
-                    "${distance} mi",
-                    style: TextStyle(
-                        fontSize: 25,
-                        fontWeight: FontWeight.w500,
-                        fontFamily: "Inter"),
+                    color: Color.fromARGB(255, 238, 238, 238),
+                    borderRadius:
+                        BorderRadius.vertical(top: Radius.elliptical(500, 100)),
                   ),
-                  decoration: BoxDecoration(
-                      color: Color.fromARGB(255, 255, 255, 255),
-                      borderRadius: BorderRadius.all(Radius.circular(15))),
+                ),
+                Row(
+                  children: [
+                    Container(
+                      height: 50,
+                      width: 50,
+                      decoration: BoxDecoration(
+                          color: Color.fromARGB(255, 255, 255, 255),
+                          borderRadius: BorderRadius.all(Radius.circular(25))),
+                    ),
+                    Container(
+                      height: 50,
+                      child: Text(
+                        "${distance} mi",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            fontSize: 25,
+                            fontWeight: FontWeight.w500,
+                            fontFamily: "Inter"),
+                      ),
+                      decoration: BoxDecoration(
+                          color: Color.fromARGB(255, 255, 255, 255),
+                          borderRadius: BorderRadius.all(Radius.circular(15))),
+                    ),
+                    Container(
+                      height: 50,
+                      width: 50,
+                      decoration: BoxDecoration(
+                          color: Color.fromARGB(255, 255, 255, 255),
+                          borderRadius: BorderRadius.all(Radius.circular(25))),
+                    ),
+                  ],
                 ),
               ],
             ),
