@@ -29,6 +29,7 @@ class _GameplayPageState extends State<GameplayPage> {
   @override
   final tasks = 6;
   final tasks_completed = 2;
+  final distance = .8;
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
@@ -54,11 +55,41 @@ class _GameplayPageState extends State<GameplayPage> {
             ),
           ),
           Expanded(
-            child: Container(
-                child: Image.network(
-              'https://picsum.photos/250?image=9',
-              fit: BoxFit.fitWidth,
-            )),
+            child: Stack(
+              alignment: Alignment.bottomCenter,
+              children: [
+                Expanded(
+                  child: Container(
+                    height: double.infinity,
+                    width: double.infinity,
+                    child: Image.network(
+                      'https://picsum.photos/500/1500',
+                      fit: BoxFit.fitWidth,
+                    ),
+                  ),
+                ),
+                Container(
+                  height: 100,
+                  width: 500,
+                  decoration: BoxDecoration(
+                      color: Color.fromARGB(255, 238, 238, 238),
+                      borderRadius:
+                          BorderRadius.all(Radius.elliptical(400, 200))),
+                ),
+                Container(
+                  child: Text(
+                    "${distance} mi",
+                    style: TextStyle(
+                        fontSize: 25,
+                        fontWeight: FontWeight.w500,
+                        fontFamily: "Inter"),
+                  ),
+                  decoration: BoxDecoration(
+                      color: Color.fromARGB(255, 255, 255, 255),
+                      borderRadius: BorderRadius.all(Radius.circular(15))),
+                ),
+              ],
+            ),
           ),
         ],
       ),
