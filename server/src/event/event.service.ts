@@ -6,7 +6,7 @@ import {
   EventTracker,
   User,
 } from '@prisma/client';
-import { LeaderDto, UpdateLeaderDataDto } from 'src/challenge/challenge.dto';
+import { LeaderDto, UpdateLeaderDataDto } from '../challenge/challenge.dto';
 import { v4 } from 'uuid';
 import { ClientService } from '../client/client.service';
 import {

@@ -7,10 +7,9 @@ import {
 import { CallingUser } from '../auth/calling-user.decorator';
 import { ClientService } from '../client/client.service';
 import { EventService } from './event.service';
-import { UserService } from 'src/user/user.service';
-import { UserGuard } from 'src/auth/jwt-auth.guard';
+import { UserGuard } from '../auth/jwt-auth.guard';
 import { UseGuards } from '@nestjs/common';
-import { EventBase, EventRewardType, User } from '@prisma/client';
+import { User } from '@prisma/client';
 import {
   EventDto,
   RequestAllEventDataDto,
@@ -19,8 +18,8 @@ import {
   UpdateEventDataDto,
   RequestRecommendedEventsDto,
 } from './event.dto';
-import { RequestEventTrackerDataDto } from 'src/challenge/challenge.dto';
-import { OrganizationService } from 'src/organization/organization.service';
+import { RequestEventTrackerDataDto } from '../challenge/challenge.dto';
+import { OrganizationService } from '../organization/organization.service';
 
 @WebSocketGateway({ cors: true })
 @UseGuards(UserGuard)

@@ -81,13 +81,11 @@ describe('ChallengeService', () => {
   });
 
   describe('completeChallenge', () => {
-    let chal: Challenge;
-
     it('should complete the challenge', async () => {
       const score = user.score;
       const trackerScore = tracker.score;
 
-      chal = await prisma.challenge.findFirstOrThrow({
+      let chal = await prisma.challenge.findFirstOrThrow({
         where: { id: tracker.curChallengeId },
       });
       await challengeService.completeChallenge(user, chal.id);
@@ -106,12 +104,6 @@ describe('ChallengeService', () => {
         })
       ).score;
       expect(score + 1).toEqual(score2);
-    });
-    it('should return true for isChallengeCompletedByUser', async () => {
-      // console.log(
-      //   await challengeService.isChallengeCompletedByUser(user, chal),
-      // );
-      // console.log(chal);
       expect(
         await challengeService.isChallengeCompletedByUser(user, chal),
       ).toEqual(true);
@@ -168,7 +160,7 @@ describe('ChallengeService', () => {
     });
   });
 
-  describe('CRUD', () => {
+  describe('CR', () => {
     it('should add a challenge to eventbase: upsertChallengeFromDto', async () => {
       const chaldto: ChallengeDto = {
         id: '12345',
@@ -187,6 +179,57 @@ describe('ChallengeService', () => {
       });
       expect(findChal.description).toEqual('chal dto');
     });
+
+    it('should read challenges from eventbase: getFirstChallengeForEvent, getChallengesByIdsForUser, getChallengeById, nextChallenge ', async () => {
+      const firstChal = await prisma.challenge.findFirstOrThrow({
+        where: {
+          eventIndex: 0,
+          linkedEvent: event,
+        },
+      });
+      const first = await challengeService.getFirstChallengeForEvent(event);
+      expect(first).toEqual(firstChal);
+      const chal = await prisma.challenge.findFirstOrThrow({
+        where: { linkedEventId: event.id },
+      });
+
+      const chalsByUser = await challengeService.getChallengesByIdsForUser(
+        user,
+        false,
+        [chal.id],
+      );
+      expect(chalsByUser[0]).toEqual(chal);
+      const chalById = await challengeService.getChallengeById(chal.id);
+      expect(chalById).toEqual(chal);
+
+      const secondChalDTO: ChallengeDto = {
+        id: '123',
+        name: 'test',
+        description: 'chal dto',
+        imageUrl: 'update test',
+        lat: 70,
+        long: 70,
+        awardingRadius: 1,
+        closeRadius: 2,
+        containingEventId: event.id,
+      };
+
+      const newChal = await challengeService.upsertChallengeFromDto(
+        secondChalDTO,
+      );
+      // console.log(newChal.eventIndex);
+      const nextChal = await challengeService.nextChallenge(
+        await prisma.challenge.findFirstOrThrow({
+          where: { linkedEventId: event.id, eventIndex: 0 },
+        }),
+      );
+      expect(nextChal.eventIndex).toEqual(1);
+      const evchal = await challengeService.getFirstChallengeForEvent(event);
+      expect(evchal.eventIndex).toEqual(0);
+    });
+  });
+
+  describe('UD', () => {
     it('should update challenge from eventbase: upsertChallengeFromDto', async () => {
       const chalID = (await prisma.challenge.findFirstOrThrow()).id;
       const chaldto: ChallengeDto = {
@@ -206,39 +249,12 @@ describe('ChallengeService', () => {
       });
       expect(chal.imageUrl).toEqual('update test');
     });
+  });
 
-    it('should read challenges from eventbase: getFirstChallengeForEvent, getChallengesByIdsForUser, getChallengeById, nextChallenge ', async () => {
-      const firstChal = await prisma.challenge.findFirstOrThrow({
-        where: {
-          eventIndex: 0,
-          linkedEvent: event,
-        },
-      });
-      const first = await challengeService.getFirstChallengeForEvent(event);
-      expect(first).toEqual(firstChal);
-      const chal = await prisma.challenge.findFirstOrThrow({
-        where: { linkedEventId: event.id },
-      });
-      const chalsByUser = await challengeService.getChallengesByIdsForUser(
-        user,
-        false,
-        [chal.id],
-      );
-      expect(chalsByUser[0]).toEqual(chal);
-      const chalById = await challengeService.getChallengeById(chal.id);
-      expect(chalById).toEqual(chal);
-      const nextChal = await challengeService.nextChallenge(
-        await prisma.challenge.findFirstOrThrow({
-          where: { linkedEventId: event.id, eventIndex: 0 },
-        }),
-      );
-      expect(nextChal.eventIndex).toEqual(1);
-      const evchal = await challengeService.getFirstChallengeForEvent(event);
-      expect(evchal.eventIndex).toEqual(0);
-    });
+  describe('Delete', () => {
     it('should remove challenge from eventbase: removeChallenge', async () => {
       const chal = await prisma.challenge.findFirstOrThrow({
-        where: { imageUrl: 'url', defaultOf: null },
+        where: { linkedEventId: event.id, defaultOf: null },
       });
 
       const orgID = (
@@ -259,10 +275,10 @@ describe('ChallengeService', () => {
         data: { managerOf: { connect: { id: orgID } } },
       });
 
-      const manager = await prisma.user.findFirstOrThrow({
-        where: { id: user.id },
-        include: { managerOf: true },
-      });
+      // const manager = await prisma.user.findFirstOrThrow({
+      //   where: { id: user.id },
+      //   include: { managerOf: true },
+      // });
 
       // console.log(manager.managerOf);
 
@@ -273,14 +289,35 @@ describe('ChallengeService', () => {
       //   })
       // ).managers;
 
-      // console.log(managers);
+      // console.log(managers.find(o => o.id === user.id));
 
-      await challengeService.removeChallenge(chal.id, user);
+      // const c = (
+      //   await prisma.challenge.findFirstOrThrow({
+      //     where: { id: chal.id },
+      //   })
+      // ).linkedEventId;
+
+      // const e = await prisma.eventBase.findFirstOrThrow({
+      //   where: { id: c! },
+      //   include: { usedIn: true },
+      // });
+
+      // const m = await prisma.organization.findFirstOrThrow({
+      //   where: { id: e.usedIn[0].id },
+      //   include: { managers: true },
+      // });
+
+      // console.log(orgID);
+      // console.log(m.id);
+      // console.log(m.managers.find(o => o.id === user.id));
+
+      const removed = await challengeService.removeChallenge(chal.id, user);
+      // console.log('del:', removed);
       const chalres = await prisma.challenge.findFirst({
         where: { id: chal.id },
       });
 
-      expect(chalres).toEqual(undefined);
+      expect(chalres).toEqual(null);
     });
   });
 

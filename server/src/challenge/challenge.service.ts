@@ -369,10 +369,10 @@ export class ChallengeService {
       where: {
         id: challengeId,
         linkedEvent: {
-          usedIn: { some: { members: { some: { id: accessor.id } } } },
+          usedIn: { some: { managers: { some: { id: accessor.id } } } },
         },
       },
     });
-    console.log(del);
+    return del;
   }
 }

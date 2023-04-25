@@ -1,4 +1,4 @@
-import { EventService } from 'src/event/event.service';
+import { EventService } from '../event/event.service';
 import {
   MessageBody,
   SubscribeMessage,
@@ -15,7 +15,7 @@ import {
   UpdateGroupDataDto,
 } from './group.dto';
 import { GroupService } from './group.service';
-import { UserGuard } from 'src/auth/jwt-auth.guard';
+import { UserGuard } from '../auth/jwt-auth.guard';
 import { UseGuards } from '@nestjs/common';
 import { Group, User } from '@prisma/client';
 
