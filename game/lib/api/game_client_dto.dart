@@ -302,13 +302,14 @@ class ChallengeDto {
 class UpdateChallengeDataDto {
   UpdateChallengeDataDto.fromJson(Map<String, dynamic> fields){
     if(fields["challenge"] is String){
-      challenge  = fields["challenge"];
+      challengeId  = fields["challenge"];
     }else{
       challenge = ChallengeDto.fromJson(fields);
     }
     deleted = fields["deleted"] ?? false;
   }
-  dynamic challenge = null;
+  String? challengeId = "";
+  ChallengeDto? challenge = null;
   bool deleted = false;
 }
 
