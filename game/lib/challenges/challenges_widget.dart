@@ -84,7 +84,6 @@ class _ChallengesWidgetState extends State<ChallengesWidget> {
                                 challenge.description,
                                 challenge.imageUrl,
                                 false,
-                                
                               ),
                             ));
                           }

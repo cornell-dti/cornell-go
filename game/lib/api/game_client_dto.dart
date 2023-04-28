@@ -276,7 +276,7 @@ class UpdateEventTrackerDataDto {
 }
 
 class ChallengeDto {
-  ChallengeDto.fromJson(Map<String, dynamic> fields){
+  ChallengeDto.fromJson(Map<String, dynamic> fields) {
     id = fields["id"];
     name = fields["name"];
     description = fields["description"];
@@ -289,7 +289,7 @@ class ChallengeDto {
   }
 
   String id = "";
-  String name ="";
+  String name = "";
   String description = "";
   String imageUrl = "";
   double lat = 0.0;
@@ -300,10 +300,10 @@ class ChallengeDto {
 }
 
 class UpdateChallengeDataDto {
-  UpdateChallengeDataDto.fromJson(Map<String, dynamic> fields){
-    if(fields["challenge"] is String){
-      challengeId  = fields["challenge"];
-    }else{
+  UpdateChallengeDataDto.fromJson(Map<String, dynamic> fields) {
+    if (fields["challenge"] is String) {
+      challengeId = fields["challenge"];
+    } else {
       challenge = ChallengeDto.fromJson(fields);
     }
     deleted = fields["deleted"] ?? false;
@@ -313,12 +313,13 @@ class UpdateChallengeDataDto {
   bool deleted = false;
 }
 
-class RequestChallengeDataDto{
-  RequestChallengeDataDto.fromJson(Map<String, dynamic> fields){
+class RequestChallengeDataDto {
+  RequestChallengeDataDto.fromJson(Map<String, dynamic> fields) {
     challengeIds = fields['challengeIds'];
   }
   List<String> challengeIds = [];
 }
+
 class OrganizationDto {
   OrganizationDto.fromJson(Map<String, dynamic> fields) {
     id = fields["id"];

@@ -8,15 +8,14 @@ class ChallengeModel extends ChangeNotifier {
 
   ChallengeModel(ApiClient client) : _client = client {
     client.clientApi.updateChallengeDataStream.listen((event) {
-      if(event.challengeId!=null){
+      if (event.challengeId != null) {
         //event.challengeId!=null => event to be deleted.
         _challengesById.remove(event.challengeId);
-      }else{
+      } else {
         _challengesById[event.challenge!.id] = event.challenge!;
       }
       notifyListeners();
     });
-
 
     client.clientApi.connectedStream.listen((event) {
       _challengesById.clear();
