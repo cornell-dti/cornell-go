@@ -65,7 +65,6 @@ class _JourneyCellState extends State<JourneyCell> {
                 description,
                 locationCount,
                 numberCompleted,
-                isCompleted,
                 difficulty,
                 points,
                 challenge_points));
@@ -160,7 +159,6 @@ class JourneyPreview extends StatefulWidget {
   final String journeyName;
   final String description;
   final int numberCompleted;
-  final bool isCompleted;
   final String difficulty;
   final int points;
   final int challenge_points;
@@ -170,15 +168,8 @@ class JourneyPreview extends StatefulWidget {
   //Temporary image for now. Will have to change later
   final String imgPath = "assets/images/38582.jpg";
 
-  JourneyPreview(
-      this.journeyName,
-      this.description,
-      this.locationCount,
-      this.numberCompleted,
-      this.isCompleted,
-      this.difficulty,
-      this.points,
-      this.challenge_points,
+  JourneyPreview(this.journeyName, this.description, this.locationCount,
+      this.numberCompleted, this.difficulty, this.points, this.challenge_points,
       {Key? key})
       : super(key: key);
 
@@ -188,7 +179,6 @@ class JourneyPreview extends StatefulWidget {
       description,
       locationCount,
       numberCompleted,
-      isCompleted,
       difficulty,
       points,
       challenge_points);
@@ -199,7 +189,6 @@ class _JourneyPreviewState extends State<JourneyPreview> {
   final String journeyName;
   final String description;
   final int numberCompleted;
-  final bool isCompleted;
   final String difficulty;
   final int points;
   final int challenge_points;
@@ -215,7 +204,6 @@ class _JourneyPreviewState extends State<JourneyPreview> {
       this.description,
       this.locationCount,
       this.numberCompleted,
-      this.isCompleted,
       this.difficulty,
       this.points,
       this.challenge_points);
@@ -237,7 +225,7 @@ class _JourneyPreviewState extends State<JourneyPreview> {
                   children: [
                     Padding(
                       padding:
-                          const EdgeInsets.only(left: 5, top: 10.0, right: 5),
+                          const EdgeInsets.only(left: 5, top: 6.0, right: 5),
                       child: Stack(children: [
                         Container(
                           width: 80,
@@ -268,7 +256,7 @@ class _JourneyPreviewState extends State<JourneyPreview> {
                       ]),
                     ),
                     Padding(
-                      padding: const EdgeInsets.only(top: 10.0),
+                      padding: const EdgeInsets.only(top: 6.0),
                       child: Stack(children: [
                         Container(
                           width: 80,
@@ -300,7 +288,7 @@ class _JourneyPreviewState extends State<JourneyPreview> {
                     Expanded(
                         child: SizedBox(
                             child: Align(
-                      alignment: Alignment.topRight,
+                      alignment: Alignment(1.1, -1.1),
                       child: CloseButton(),
                     )))
                   ],

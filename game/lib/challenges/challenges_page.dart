@@ -13,14 +13,42 @@ class ChallengesPage extends StatefulWidget {
 
 class _ChallengesPageState extends State<ChallengesPage> {
   final cells = [
-    ChallengeCell("ARTS QUAD", "Statue on the Arts Quad",
-        Image.network('https://picsum.photos/250?image=9'), false),
-    ChallengeCell("ARTS QUAD", "Statue on the Arts Quad",
-        Image.network('https://picsum.photos/250?image=9'), true),
-    ChallengeCell("ARTS QUAD", "Statue on the Arts Quad",
-        Image.network('https://picsum.photos/250?image=9'), false),
-    ChallengeCell("ARTS QUAD", "Statue on the Arts Quad",
-        Image.network('https://picsum.photos/250?image=9'), true),
+    ChallengeCell(
+        "ARTS QUAD",
+        "Statue on the Arts Quad",
+        Image.network('https://picsum.photos/250?image=9'),
+        false,
+        "Find this famous statue!",
+        "Normal",
+        15,
+        3),
+    ChallengeCell(
+        "ARTS QUAD",
+        "Statue on the Arts Quad",
+        Image.network('https://picsum.photos/250?image=9'),
+        true,
+        "Find this famous statue!",
+        "Normal",
+        15,
+        3),
+    ChallengeCell(
+        "ARTS QUAD",
+        "Statue on the Arts Quad",
+        Image.network('https://picsum.photos/250?image=9'),
+        false,
+        "Find this famous statue!",
+        "Normal",
+        15,
+        3),
+    ChallengeCell(
+        "ARTS QUAD",
+        "Statue on the Arts Quad",
+        Image.network('https://picsum.photos/250?image=9'),
+        true,
+        "Find this famous statue!",
+        "Normal",
+        15,
+        3),
   ];
   @override
   Widget build(BuildContext context) {
