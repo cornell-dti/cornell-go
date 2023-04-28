@@ -275,43 +275,49 @@ class UpdateEventTrackerDataDto {
   EventTrackerDto? tracker = null;
 }
 
-class UpdateChallengeDataChallengeDto {
-  UpdateChallengeDataChallengeDto.fromJson(Map<String, dynamic> fields) {
+class ChallengeDto {
+  ChallengeDto.fromJson(Map<String, dynamic> fields){
     id = fields["id"];
     name = fields["name"];
     description = fields["description"];
     imageUrl = fields["imageUrl"];
-    lat = fields["lat"].toDouble();
-    long = fields["long"].toDouble();
-    awardingRadius = fields["awardingRadius"].toDouble();
-    closeRadius = fields["closeRadius"].toDouble();
-    completionDate = fields["completionDate"] == ""
-        ? null
-        : DateTime.parse(fields["completionDate"]);
+    lat = fields["lat"];
+    long = fields["long"];
+    awardingRadius = fields["awardingRadius"];
+    closeRadius = fields["closeRadius"];
+    containingEventId = fields["containingEventId"];
   }
 
   String id = "";
-  String name = "";
+  String name ="";
   String description = "";
   String imageUrl = "";
-  double lat = 0;
-  double long = 0;
-  double awardingRadius = 0;
-  double closeRadius = 0;
-  DateTime? completionDate = DateTime.now();
+  double lat = 0.0;
+  double long = 0.0;
+  double awardingRadius = 0.0;
+  double closeRadius = 0.0;
+  String containingEventId = "";
 }
 
 class UpdateChallengeDataDto {
-  UpdateChallengeDataDto.fromJson(Map<String, dynamic> fields) {
-    challenges = fields["challenges"]
-        .map<UpdateChallengeDataChallengeDto>(
-            (dynamic chal) => UpdateChallengeDataChallengeDto.fromJson(chal))
-        .toList();
+  UpdateChallengeDataDto.fromJson(Map<String, dynamic> fields){
+    if(fields["challenge"] is String){
+      challenge  = fields["challenge"];
+    }else{
+      challenge = ChallengeDto.fromJson(fields);
+    }
+    deleted = fields["deleted"] ?? false;
   }
-
-  List<UpdateChallengeDataChallengeDto> challenges = [];
+  dynamic challenge = null;
+  bool deleted = false;
 }
 
+class RequestChallengeDataDto{
+  RequestChallengeDataDto.fromJson(Map<String, dynamic> fields){
+    challengeIds = fields['challengeIds'];
+  }
+  List<String> challengeIds = [];
+}
 class OrganizationDto {
   OrganizationDto.fromJson(Map<String, dynamic> fields) {
     id = fields["id"];
@@ -332,7 +338,6 @@ class OrganizationDto {
 
 class UpdateOrganizationDataDto {
   UpdateOrganizationDataDto.fromJson(Map<String, dynamic> fields) {
-    print(fields);
     if (fields["deleted"]) {
       organizationId = fields["organization"];
       deleted = fields["deleted"];

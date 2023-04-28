@@ -10,6 +10,7 @@ class EventModel extends ChangeNotifier {
   List<EventDto>? searchResults;
 
   EventModel(ApiClient client) : _client = client {
+
     client.clientApi.updateEventDataStream.listen((event) {
       if (!event.event is String) {
         searchResults = event.event;
@@ -24,8 +25,6 @@ class EventModel extends ChangeNotifier {
       if (event.users.length == 0) {
         return;
       }
-      print(event.users.length);
-
       final players = _topPlayers[event.eventId];
       for (int i = event.offset; i < event.users.length; i++) {
         if (i < players!.length) {
