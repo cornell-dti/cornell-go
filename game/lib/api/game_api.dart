@@ -137,7 +137,8 @@ class ApiClient extends ChangeNotifier {
     return false;
   }
 
-  Future<bool> _connect(String idToken, Uri url) async {
+  Future<http.Response?> connect(String idToken, Uri url, String major,
+      String year, String username) async {
     final pos = await GeoPoint.current();
     if (pos != null) {
       final loginResponse = await http.post(url,
@@ -147,43 +148,40 @@ class ApiClient extends ChangeNotifier {
           body: jsonEncode(<String, String>{
             "idToken": idToken,
             "lat": pos.lat.toString(),
-            "major": "Sample Major",
-            "year": "2023",
-            "username": "hello",
+            "major": major,
+            "year": year,
+            "username": username,
             "long": pos.long.toString(),
             "aud": Platform.isIOS ? "ios" : "android"
           }));
+      print(loginResponse.body);
+
       if (loginResponse.statusCode == 201 && loginResponse.body != "") {
         final responseBody = jsonDecode(loginResponse.body);
         this._accessToken = responseBody["accessToken"];
         this._refreshToken = responseBody["refreshToken"];
         await _saveToken();
         _createSocket(false);
-        return true;
+        return loginResponse;
       }
       authenticated = false;
       _clientApi.disconnectedController.add(null);
       notifyListeners();
-      return false;
+
+      print("Failed to connect to server!");
+      return null;
     }
-    return false;
+    print("Failed to get location data!");
+    return null;
   }
 
-  Future<bool> connectId(String id) async {
-    return _connect(id, _deviceLoginUrl);
-  }
+  // Future<bool> connectId(String id) async {
+  //   return _connect(id, _deviceLoginUrl);
+  // }
 
-  Future<bool> connectGoogle() async {
+  Future<GoogleSignInAccount?> connectGoogle() async {
     final account = await _googleSignIn.signIn();
-    if (account != null) {
-      final auth = await account.authentication;
-      final idToken = auth.idToken!;
-      return await _connect(idToken, _googleLoginUrl);
-    }
-    authenticated = false;
-    _clientApi.disconnectedController.add(null);
-    notifyListeners();
-    return false;
+    return account;
   }
 
   Future<void> disconnect() async {

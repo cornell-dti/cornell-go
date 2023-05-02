@@ -12,18 +12,17 @@ import 'package:game/model/group_model.dart';
 import 'package:game/model/reward_model.dart';
 import 'package:game/model/tracker_model.dart';
 import 'package:game/model/user_model.dart';
+import 'package:game/splash_page/splash_page.dart';
 import 'package:game/widget/game_widget.dart';
 import 'package:provider/provider.dart';
 
 import 'dart:io' show Platform;
 
-import 'challenges/challenges_page.dart';
-
 const ENV_URL = String.fromEnvironment('API_URL', defaultValue: "");
 
 final storage = FlutterSecureStorage();
 final LOOPBACK =
-    (Platform.isAndroid ? "http://10.0.2.2:8080" : "http://127.0.0.1:8080");
+    (Platform.isAndroid ? "http://10.0.2.2:8080" : "http://0.0.0.0:8080");
 final API_URL = ENV_URL == "" ? LOOPBACK : ENV_URL;
 
 void main() {
@@ -75,7 +74,7 @@ class MyApp extends StatelessWidget {
           ],
           supportedLocales: const [Locale('en', '')],
           theme: ThemeData(primarySwatch: Colors.blue),
-          home: ChallengesPage(),
+          home: SplashPageWidget(),
         )));
   }
 }
