@@ -139,7 +139,7 @@ class _ChallengesPageState extends State<ChallengesPage> {
                   return ListView();
                 } else {
                   for (String challengeId in challenges) {
-                    final UpdateChallengeDataChallengeDto? challenge =
+                    final ChallengeDto? challenge =
                         myChallengeModel.getChallengeById(challengeId);
                     final EventDto? event = myEventModel.getEventById(eventId);
                     final EventTrackerDto? tracker =
@@ -150,12 +150,11 @@ class _ChallengesPageState extends State<ChallengesPage> {
                           apiClient.serverApi?.setCurrentChallenge(challengeId);
                         },
                         child: ChallengeCell(
-                          challenge.completionDate == null
-                              ? ""
-                              : format.format(challenge.completionDate!),
+                          "Arts Quad",
                           challenge.name,
                           challenge.imageUrl,
-                          challenge.completionDate != null,
+                          false,
+                          // challenge.completionDate != null,
                         ),
                       ));
                     }
