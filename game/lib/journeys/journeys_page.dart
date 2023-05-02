@@ -11,13 +11,46 @@ class JourneysPage extends StatefulWidget {
 
 class _JourneysPageState extends State<JourneysPage> {
   final cells = [
-    JourneyCell("DTI Scavenger Hunt", "Scavenger hunt during All Hands on 2/18",
-        10, 5, false),
-    JourneyCell("DTI Scavenger Hunt", "Scavenger hunt during All Hands on 2/18",
-        10, 0, false),
-    JourneyCell("Cornell Cafés",
-        "Get your coffee fix at these top cafés on campus.", 6, 6, true),
-    JourneyCell("journey", "hi", 0, 0, false),
+    JourneyCell(
+      "DTI Scavenger Hunt",
+      "Scavenger hunt during All Hands on 2/18",
+      10,
+      5,
+      false,
+      "normal",
+      15,
+      3,
+    ),
+    JourneyCell(
+      "DTI Scavenger Hunt",
+      "Scavenger hunt during All Hands on 2/18",
+      10,
+      0,
+      false,
+      "normal",
+      15,
+      3,
+    ),
+    JourneyCell(
+      "Cornell Cafés",
+      "Get your coffee fix at these top cafés on campus.",
+      6,
+      6,
+      true,
+      "normal",
+      15,
+      3,
+    ),
+    JourneyCell(
+      "journey",
+      "hi",
+      0,
+      0,
+      false,
+      "normal",
+      15,
+      3,
+    ),
   ];
 
   void openFilter() {
