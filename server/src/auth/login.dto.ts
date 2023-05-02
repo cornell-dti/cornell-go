@@ -3,7 +3,8 @@ export interface LoginDto {
   lat: number;
   long: number;
   username?: string;
-  major?: string;
   year?: string;
   aud?: 'android' | 'ios' | 'web';
+  userStatus: "Undergraduate Student" | "Graduate Student" |"Faculty/Staff"| "Alumni";
+
 }

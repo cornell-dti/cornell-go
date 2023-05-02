@@ -50,7 +50,7 @@ export type UserAuthTypeDto = 'device' | 'apple' | 'google';
 export interface UserDto {
   id: string;
   username: string;
-  major: string;
+  userStatus: string;
   year: string;
   score: number;
   groupId: string;

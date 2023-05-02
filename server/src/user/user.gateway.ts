@@ -136,16 +136,16 @@ export class UserGateway {
     await this.groupService.emitUpdateGroupData(group, false);
   }
 
-  @SubscribeMessage('setMajor')
-  async setMajor(@CallingUser() user: User, @MessageBody() data: SetMajorDto) {
-    if (majors.includes(data.newMajor)) {
-      await this.userService.setMajor(user, data.newMajor);
+  // @SubscribeMessage('setMajor')
+  // async setMajor(@CallingUser() user: User, @MessageBody() data: SetMajorDto) {
+  //   if (majors.includes(data.newMajor)) {
+  //     await this.userService.setMajor(user, data.newMajor);
 
-      user.major = data.newMajor; // Updated so change here too
+  //     user.major = data.newMajor; // Updated so change here too
 
-      await this.userService.emitUpdateUserData(user, false, true, true);
-    }
-  }
+  //     await this.userService.emitUpdateUserData(user, false, true, true);
+  //   }
+  // }
 
   @SubscribeMessage('setGraduationYear')
   async setGraduationYear(

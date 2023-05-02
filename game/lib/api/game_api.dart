@@ -137,7 +137,7 @@ class ApiClient extends ChangeNotifier {
     return false;
   }
 
-  Future<http.Response?> connect(String idToken, Uri url, String major,
+  Future<http.Response?> connect(String idToken, Uri url, String userStatus,
       String year, String username) async {
     final pos = await GeoPoint.current();
     if (pos != null) {
@@ -148,14 +148,12 @@ class ApiClient extends ChangeNotifier {
           body: jsonEncode(<String, String>{
             "idToken": idToken,
             "lat": pos.lat.toString(),
-            "major": major,
+            "userStatus": userStatus,
             "year": year,
             "username": username,
             "long": pos.long.toString(),
             "aud": Platform.isIOS ? "ios" : "android"
           }));
-      print(loginResponse.body);
-
       if (loginResponse.statusCode == 201 && loginResponse.body != "") {
         final responseBody = jsonDecode(loginResponse.body);
         this._accessToken = responseBody["accessToken"];
