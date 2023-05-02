@@ -19,7 +19,7 @@ const ENV_URL = String.fromEnvironment('API_URL', defaultValue: "");
 
 final storage = FlutterSecureStorage();
 final LOOPBACK =
-    (Platform.isAndroid ? "http://10.0.2.2" : "http://0.0.0.0:8080");
+    (Platform.isAndroid ? "http://10.0.2.2:8080" : "http://0.0.0.0:8080");
 final API_URL = ENV_URL == "" ? LOOPBACK : ENV_URL;
 
 void main() {

@@ -154,6 +154,8 @@ class ApiClient extends ChangeNotifier {
             "long": pos.long.toString(),
             "aud": Platform.isIOS ? "ios" : "android"
           }));
+      print(loginResponse.body);
+
       if (loginResponse.statusCode == 201 && loginResponse.body != "") {
         final responseBody = jsonDecode(loginResponse.body);
         this._accessToken = responseBody["accessToken"];
@@ -165,8 +167,11 @@ class ApiClient extends ChangeNotifier {
       authenticated = false;
       _clientApi.disconnectedController.add(null);
       notifyListeners();
+
+      print("Failed to connect to server!");
       return null;
     }
+    print("Failed to get location data!");
     return null;
   }
 

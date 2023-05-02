@@ -6,19 +6,18 @@ import 'package:game/utils/utility_functions.dart';
 class DetailsPageWidget extends StatefulWidget {
   DetailsPageWidget(
       {Key? key,
-      required String userType,
+      required String this.userType,
       required GoogleSignInAccount? this.user})
       : super(key: key);
   final scaffoldKey = GlobalKey<ScaffoldState>();
-  String userType = "";
-  GoogleSignInAccount? user = null;
+  final String userType;
+  final GoogleSignInAccount? user;
   @override
   _DetailsPageWidgetState createState() => _DetailsPageWidgetState();
 }
 
 class _DetailsPageWidgetState extends State<DetailsPageWidget> {
   String _year = "2025";
-  String _username = "";
   String _name = "";
   GoogleSignInAccount? user = null;
   @override
@@ -51,8 +50,8 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
                         border: OutlineInputBorder(),
                         labelText: 'e.g. Jane Doe',
                       ),
-                      onSaved: (newValue) => setState(() {
-                        _name = newValue!;
+                      onChanged: (newValue) => setState(() {
+                        _name = newValue;
                       }),
                       // The validator receives the text that the user has entered.
                       validator: (value) {
@@ -72,7 +71,7 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
                     SizedBox(height: 10),
                     TextFormField(
                       onSaved: (newValue) => setState(() {
-                        _username = newValue!;
+                        _name = newValue!;
                       }),
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
@@ -96,27 +95,30 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
                     LatoText("Graduation Year (optional)", 18, Colors.black,
                         FontWeight.w700),
                     SizedBox(height: 10),
-                    DropdownButton(
-                      value: _year,
-                      onChanged: (newValue) {
-                        print(newValue);
-                        setState(() {
-                          _year = newValue.toString();
-                        });
-                      },
-                      items: _years.map((year) {
-                        return DropdownMenuItem(
-                          child: Container(
-                              width: 255,
-                              height: 53,
-                              child: Align(
-                                alignment: Alignment.centerLeft,
-                                child: LatoText(
-                                    year, 16.0, Colors.black, FontWeight.w600),
-                              )),
-                          value: year,
-                        );
-                      }).toList(),
+                    SizedBox(
+                       width: 255,
+                      child: DropdownButton(
+                        isExpanded: true,
+                        value: _year,
+                        onChanged: (newValue) {
+                          setState(() {
+                            _year = newValue.toString();
+                          });
+                        },
+                        items: _years.map((year) {
+                          return DropdownMenuItem(
+                            child: Container(
+                                width: 255,
+                                height: 53,
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: LatoText(
+                                      year, 16.0, Colors.black, FontWeight.w600),
+                                )),
+                            value: year,
+                          );
+                        }).toList(),
+                      ),
                     )
                   ],
                 ),
@@ -125,17 +127,15 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
                     if (_formKey.currentState!.validate()) {
                       final auth = await widget.user?.authentication;
                       final idToken = auth?.idToken;
-                      final connectionResult = await client.connect(
-                          idToken!,
-                          Uri.parse(API_URL + "/google"),
-                          widget.userType,
-                          _year,
-                          _name);
+                      final connectionResult = await client.connect(idToken!,
+                          Uri.parse(API_URL + "/google"), this.widget.userType, _year, _name);
+
 
                       if (connectionResult == null) {
                         displayToast("An error occurred while signing you up!",
                             Status.error);
                       } else {
+                        //Connect to home page here.
                         print("Connection result:");
                         print(connectionResult!.body);
                         displayToast("Signed in!", Status.success);
