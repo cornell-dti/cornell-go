@@ -15,7 +15,7 @@ import { GroupService } from '../group/group.service';
 import { OrganizationService } from '../organization/organization.service';
 import { PrismaService } from '../prisma/prisma.service';
 import {
-  UpdateUserDto,
+  UpdateUserDataDto,
   UserAuthTypeDto,
   UserDto,
   eventFilterDto,
@@ -99,6 +99,10 @@ export class UserService {
 
   async byEmail(email: string) {
     return await this.prisma.user.findFirstOrThrow({ where: { email: email } });
+  }
+
+  async getAllUserData() {
+    return await this.prisma.user.findMany();
   }
 
   async deleteUser(user: User) {
@@ -262,6 +266,27 @@ export class UserService {
     });
   }
 
+  async banUser(user: User, isBanned: boolean): Promise<User> {
+    return await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        isBanned,
+      },
+    });
+  }
+
+  async updateUser(user: UserDto): Promise<User> {
+    return await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        username: user.username,
+        email: user.email,
+        major: user.major,
+        year: user.year,
+      },
+    });
+  }
+
   async dtoForUserData(user: User, partial: boolean): Promise<UserDto> {
     const joinedUser = await this.prisma.user.findUniqueOrThrow({
       where: { id: user.id },
@@ -276,10 +301,12 @@ export class UserService {
     return {
       id: joinedUser.id,
       username: joinedUser.username,
+      email: joinedUser.email,
       major: joinedUser.major,
       year: joinedUser.year,
       score: joinedUser.score,
       groupId: joinedUser.group.friendlyId,
+      isBanned: joinedUser.isBanned,
       authType: (
         joinedUser.authType as string
       ).toLowerCase() as UserAuthTypeDto,
@@ -298,7 +325,7 @@ export class UserService {
     admin?: boolean,
     client?: User,
   ) {
-    const dto: UpdateUserDto = {
+    const dto: UpdateUserDataDto = {
       user: deleted ? user.id : await this.dtoForUserData(user, partial),
       deleted,
     };
