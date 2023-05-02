@@ -96,7 +96,7 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
                         FontWeight.w700),
                     SizedBox(height: 10),
                     SizedBox(
-                       width: 255,
+                      width: 255,
                       child: DropdownButton(
                         isExpanded: true,
                         value: _year,
@@ -112,8 +112,8 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
                                 height: 53,
                                 child: Align(
                                   alignment: Alignment.centerLeft,
-                                  child: LatoText(
-                                      year, 16.0, Colors.black, FontWeight.w600),
+                                  child: LatoText(year, 16.0, Colors.black,
+                                      FontWeight.w600),
                                 )),
                             value: year,
                           );
@@ -127,9 +127,12 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
                     if (_formKey.currentState!.validate()) {
                       final auth = await widget.user?.authentication;
                       final idToken = auth?.idToken;
-                      final connectionResult = await client.connect(idToken!,
-                          Uri.parse(API_URL + "/google"), this.widget.userType, _year, _name);
-
+                      final connectionResult = await client.connect(
+                          idToken!,
+                          Uri.parse(API_URL + "/google"),
+                          this.widget.userType,
+                          _year,
+                          _name);
 
                       if (connectionResult == null) {
                         displayToast("An error occurred while signing you up!",
