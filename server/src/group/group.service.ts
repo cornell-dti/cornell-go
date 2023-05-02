@@ -14,7 +14,7 @@ import { EventService } from '../event/event.service';
 import { UserService } from '../user/user.service';
 import { OrganizationService } from '../organization/organization.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { GroupDto, UpdateGroupDataDto } from './group.dto';
+import { GroupDto, GroupInviteDto, UpdateGroupDataDto } from './group.dto';
 
 @Injectable()
 export class GroupService {
@@ -317,6 +317,31 @@ export class GroupService {
     } else {
       this.clientService.sendUpdate('updateGroupData', group.id, false, dto);
       this.clientService.sendUpdate('updateGroupData', group.id, true, dto);
+    }
+  }
+
+  async emitGroupInvite(group: Group, username: string, user: User) {
+    const targetUser = await this.prisma.user.findFirst({
+      where: { username: username },
+    });
+
+    const dto: GroupInviteDto = {
+      groupId: await (await this.dtoForGroup(group)).friendlyId,
+      username: user.username,
+    };
+
+    if (targetUser) {
+      this.clientService.sendUpdate(
+        'groupInvitation',
+        targetUser.id,
+        false,
+        dto,
+      );
+    } else {
+      this.clientService.emitErrorData(
+        user,
+        'Group Invitation: User not found',
+      );
     }
   }
 
