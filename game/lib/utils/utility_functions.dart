@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:game/api/game_api.dart';
 import 'package:platform_device_id/platform_device_id.dart';
+import 'package:google_fonts/google_fonts.dart';
+
 import 'dart:io' show Platform; //at the top
 
 Future<void> showAlert(String message, context) async {
@@ -110,4 +112,11 @@ void displayToast(message, Status status) {
 
 Color RGBComplement(Color col) {
   return Color.fromRGBO(255 - col.red, 255 - col.green, 255 - col.blue, 1);
+}
+
+Text LatoText(String text, double fs, Color color, FontWeight fw) {
+  return Text(text,
+      style: GoogleFonts.lato(
+          textStyle: TextStyle(
+              color: color, fontWeight: FontWeight.bold, fontSize: fs)));
 }
