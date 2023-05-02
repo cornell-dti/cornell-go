@@ -69,7 +69,7 @@ class _ChallengesWidgetState extends State<ChallengesWidget> {
                       } else {
                         print("challenges: " + challenges.toString());
                         for (String challengeId in challenges) {
-                          final UpdateChallengeDataChallengeDto? challenge =
+                          final ChallengeDto? challenge =
                               myChallengeModel.getChallengeById(challengeId);
                           final EventDto? event =
                               myEventModel.getEventById(eventId);
@@ -85,12 +85,9 @@ class _ChallengesWidgetState extends State<ChallengesWidget> {
                               },
                               child: ChallengeCell(
                                 challenge.name,
-                                challenge.completionDate == null
-                                    ? ""
-                                    : format.format(challenge.completionDate!),
+                                challenge.description,
                                 challenge.imageUrl,
-                                tracker.curChallengeId == challengeId,
-                                challenge.completionDate == null,
+                                false,
                               ),
                             ));
                           }
