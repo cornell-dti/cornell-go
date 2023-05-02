@@ -22,4 +22,4 @@ import { UserService } from './user.service';
   providers: [UserService, UserGateway],
   exports: [UserService, UserGateway],
 })
-export class UserModule {}
+export class UserModule { }

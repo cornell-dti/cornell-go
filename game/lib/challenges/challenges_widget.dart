@@ -55,6 +55,8 @@ class _ChallengesWidgetState extends State<ChallengesWidget> {
                       builder: (context, myEventModel, myChallengeModel,
                           myTrackerModel, groupModel, apiClient, child) {
                     if (groupModel.curEventId == null) {
+                      apiClient.connectId("id");
+                      apiClient.serverApi?.requestGroupData();
                       return ListView();
                     } else {
                       List<Widget> challengeCells = [];
@@ -62,8 +64,10 @@ class _ChallengesWidgetState extends State<ChallengesWidget> {
                       final challenges =
                           myEventModel.getEventById(eventId)?.challengeIds;
                       if (challenges == null) {
+                        print("no challenges");
                         return ListView();
                       } else {
+                        print("challenges: " + challenges.toString());
                         for (String challengeId in challenges) {
                           final UpdateChallengeDataChallengeDto? challenge =
                               myChallengeModel.getChallengeById(challengeId);

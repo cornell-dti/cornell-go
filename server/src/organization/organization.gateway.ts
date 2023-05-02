@@ -1,8 +1,9 @@
-import { UseGuards } from '@nestjs/common/decorators';
+import { Inject, UseGuards } from '@nestjs/common/decorators';
 import {
   MessageBody,
   SubscribeMessage,
   WebSocketGateway,
+  WsException,
 } from '@nestjs/websockets';
 import { User } from '@prisma/client';
 import { CallingUser } from 'src/auth/calling-user.decorator';
@@ -14,7 +15,7 @@ import {
   UpdateOrganizationDataDto,
 } from './organization.dto';
 import { OrganizationService } from './organization.service';
-import { UserService } from 'src/user/user.service';
+import { forwardRef } from '@nestjs/common';
 
 @WebSocketGateway({ cors: true })
 @UseGuards(UserGuard)
@@ -22,8 +23,7 @@ export class OrganizationGateway {
   constructor(
     private clientService: ClientService,
     private orgService: OrganizationService,
-    private userService: UserService,
-  ) {}
+  ) { }
 
   @SubscribeMessage('requestOrganizationData')
   async requestOrganizationData(
@@ -86,6 +86,7 @@ export class OrganizationGateway {
     const org = await this.orgService.getOrganizationById(data.organizationId);
     await this.orgService.emitUpdateOrganizationData(org, false);
 
+    /*
     const manager = await this.userService.byEmail(data.email);
     await this.userService.emitUpdateUserData(
       manager,
@@ -93,7 +94,7 @@ export class OrganizationGateway {
       false,
       true,
       user,
-    );
+    );*/
   }
 
   @SubscribeMessage('joinOrganization')
@@ -106,6 +107,6 @@ export class OrganizationGateway {
     const org = await this.orgService.getOrganizationByCode(data.accessCode);
     await this.orgService.emitUpdateOrganizationData(org, false);
 
-    await this.userService.emitUpdateUserData(user, false, false, true);
+    //await this.userService.emitUpdateUserData(user, false, false, true);
   }
 }

@@ -14,7 +14,7 @@ import { RequestRewardDataDto, UpdateRewardDataDto } from "../dto/reward.dto";
 
 //** Web Sockets callback functions are in ./ServerData.tsx*/
 export class ServerApi {
-  constructor(private socket: Socket) {}
+  constructor(private socket: Socket) { }
 
   requestEventData(data: RequestEventDataDto) {
     this.socket.emit("requestEventData", data);

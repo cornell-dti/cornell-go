@@ -317,15 +317,12 @@ class OrganizationDto {
     id = fields["id"];
     name = fields["name"];
     accessCode = fields["accessCode"];
-    members = fields["members"];
     events = fields["events"];
     defaultEventId = fields["defaultEventId"];
-    members = fields["members"];
   }
   String id = "";
   String name = "";
   String accessCode = "";
-  List<String> members = [];
   List<String> events = [];
   String defaultEventId = "";
 }
