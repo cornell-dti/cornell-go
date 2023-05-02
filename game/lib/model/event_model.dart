@@ -24,8 +24,6 @@ class EventModel extends ChangeNotifier {
       if (event.users.length == 0) {
         return;
       }
-      print(event.users.length);
-
       final players = _topPlayers[event.eventId];
       for (int i = event.offset; i < event.users.length; i++) {
         if (i < players!.length) {
