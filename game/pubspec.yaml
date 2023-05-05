@@ -46,6 +46,7 @@ dependencies:
   intl:
   flutter_linkify: ^5.0.2
   platform_device_id: ^1.0.1
+  firebase_analytics: ^10.2.1
 
 flutter_icons:
   android: true
