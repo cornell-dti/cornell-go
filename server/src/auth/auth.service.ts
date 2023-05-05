@@ -142,6 +142,8 @@ export class AuthService {
 
     if (!user) return null;
 
+    if (user.isBanned) return null;
+
     const accessToken = await this.jwtService.signAsync(
       {
         userId: user.id,

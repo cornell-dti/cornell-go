@@ -43,7 +43,7 @@ enum OrganizationSpecialUsage {
 }
 
 model User {
-  id                  String          @id() @default(uuid())
+  id                  String            @id() @default(uuid())
   authToken           String
   authType            AuthType
   username            String
@@ -53,17 +53,18 @@ model User {
   administrator       Boolean
   userStatus          String
   score               Int
+  isBanned            Boolean           @default(false)
   rewards             EventReward[]
-  group               Group           @relation("member", fields: [groupId], references: [id])
+  group               Group             @relation("member", fields: [groupId], references: [id])
   groupId             String
-  hostOf              Group?          @relation("host")
+  hostOf              Group?            @relation("host")
   eventTrackers       EventTracker[]
   favorites           EventBase[]
-  completedChallenges PrevChallenge[] @relation("owner")
-  memberOf            Organization[]  @relation("player")
-  managerOf           Organization[]  @relation("orgManager")
-  isRanked            Boolean         @default(true)
-  participatedIn      PrevChallenge[] @relation("prevChallengeParticipant")
+  completedChallenges PrevChallenge[]   @relation("owner")
+  memberOf            Organization[]    @relation("player")
+  managerOf           Organization[]    @relation("orgManager")
+  isRanked            Boolean           @default(true)
+  participatedIn      PrevChallenge[]   @relation("prevChallengeParticipant")
   sessionLogEntries   SessionLogEntry[]
 }
 
