@@ -137,7 +137,7 @@ class ApiClient extends ChangeNotifier {
     return false;
   }
 
-  Future<http.Response?> connect(String idToken, Uri url, String major,
+  Future<http.Response?> connect(String idToken, Uri url, String userStatus,
       String year, String username) async {
     final pos = await GeoPoint.current();
     if (pos != null) {
@@ -148,7 +148,7 @@ class ApiClient extends ChangeNotifier {
           body: jsonEncode(<String, String>{
             "idToken": idToken,
             "lat": pos.lat.toString(),
-            "major": major,
+            "userStatus": userStatus,
             "year": year,
             "username": username,
             "long": pos.long.toString(),
@@ -174,10 +174,6 @@ class ApiClient extends ChangeNotifier {
     print("Failed to get location data!");
     return null;
   }
-
-  // Future<bool> connectId(String id) async {
-  //   return _connect(id, _deviceLoginUrl);
-  // }
 
   Future<GoogleSignInAccount?> connectGoogle() async {
     final account = await _googleSignIn.signIn();

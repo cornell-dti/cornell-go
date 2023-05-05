@@ -50,12 +50,12 @@ export class UserService {
   async register(
     email: string,
     username: string,
-    major: string,
     year: string,
     lat: number,
     long: number,
     authType: AuthType,
     authToken: string,
+    userStatus: string,
   ) {
     if (username == null) username = email?.split('@')[0];
     const defOrg = await this.orgService.getDefaultOrganization(
@@ -75,10 +75,10 @@ export class UserService {
         hostOf: { connect: { id: group.id } },
         memberOf: { connect: { id: defOrg.id } },
         username,
-        major,
         year,
         email,
         authToken,
+        userStatus,
         authType,
         hashedRefreshToken: '',
         administrator:
@@ -252,12 +252,12 @@ export class UserService {
     return filteredEventIds;
   }
 
-  async setMajor(user: User, major: string) {
-    await this.prisma.user.update({
-      where: { id: user.id },
-      data: { major },
-    });
-  }
+  // async setMajor(user: User, major: string) {
+  //   await this.prisma.user.update({
+  //     where: { id: user.id },
+  //     data: { major },
+  //   });
+  // }
 
   async setGraduationYear(user: User, year: string) {
     await this.prisma.user.update({
@@ -281,7 +281,6 @@ export class UserService {
       data: {
         username: user.username,
         email: user.email,
-        major: user.major,
         year: user.year,
       },
     });
@@ -301,8 +300,8 @@ export class UserService {
     return {
       id: joinedUser.id,
       username: joinedUser.username,
+      userStatus: joinedUser.userStatus,
       email: joinedUser.email,
-      major: joinedUser.major,
       year: joinedUser.year,
       score: joinedUser.score,
       groupId: joinedUser.group.friendlyId,
