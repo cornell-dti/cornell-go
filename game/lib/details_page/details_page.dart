@@ -127,11 +127,12 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
                 ElevatedButton(
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
-
-                      assert(widget.user!=null || widget.idToken !=null);
+                      assert(widget.user != null || widget.idToken != null);
                       final auth = await widget.user?.authentication;
-                      final idToken = widget.user!=null ? auth?.idToken : widget.idToken;
-                      final endpoint_string = API_URL + (widget.user!=null ? "/google" : "/device-login");
+                      final idToken =
+                          widget.user != null ? auth?.idToken : widget.idToken;
+                      final endpoint_string = API_URL +
+                          (widget.user != null ? "/google" : "/device-login");
                       final connectionResult = await client.connect(
                           idToken!,
                           Uri.parse(endpoint_string),
@@ -149,7 +150,6 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
                         displayToast("Signed in!", Status.success);
                       }
                     }
-                      
                   },
                   style: ButtonStyle(
                       backgroundColor:

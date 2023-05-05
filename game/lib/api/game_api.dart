@@ -175,8 +175,6 @@ class ApiClient extends ChangeNotifier {
     return null;
   }
 
-
-
   Future<GoogleSignInAccount?> connectGoogle() async {
     final account = await _googleSignIn.signIn();
     return account;
