@@ -3,6 +3,8 @@ import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
 
+import 'gameplay_map.dart';
+
 List<Widget> generate_progress(tasks, tasks_completed) {
   List<Widget> progress_blocks = [];
   for (var i = 0; i < tasks; i++) {
@@ -111,6 +113,7 @@ class _GameplayPageState extends State<GameplayPage> {
                     ),
                   ],
                 ),
+                GameplayMap(),
               ],
             ),
           ),
