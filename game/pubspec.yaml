@@ -23,6 +23,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   sliding_up_panel: ^2.0.0+1
   velocity_x:
   flutter_blurhash:
@@ -45,6 +47,7 @@ dependencies:
   flutter_linkify: ^5.0.2
   platform_device_id: ^1.0.1
   flutter_map: ^3.1.0
+  latlong2: ^0.8.1
 
 flutter_icons:
   android: true

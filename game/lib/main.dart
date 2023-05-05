@@ -18,6 +18,7 @@ import 'package:provider/provider.dart';
 import 'dart:io' show Platform;
 
 import 'challenges/challenges_page.dart';
+import 'gameplay/gameplay_map.dart';
 
 const ENV_URL = String.fromEnvironment('API_URL', defaultValue: "");
 
@@ -74,7 +75,7 @@ class MyApp extends StatelessWidget {
           ],
           supportedLocales: const [Locale('en', '')],
           theme: ThemeData(primarySwatch: Colors.blue),
-          home: GameplayPage(),
+          home: GameplayMap(),
         )));
   }
 }
