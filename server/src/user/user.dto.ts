@@ -56,8 +56,8 @@ export type UserAuthTypeDto = 'device' | 'apple' | 'google';
 export interface UserDto {
   id: string;
   username: string;
+  userStatus: string;
   email: string;
-  major: string;
   year: string;
   score: number;
   isBanned: boolean;
