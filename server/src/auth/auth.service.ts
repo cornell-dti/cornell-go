@@ -93,7 +93,6 @@ export class AuthService {
     authType: AuthType,
     req: LoginDto,
   ): Promise<[string, string] | null> {
-    
     // if verify success, idToken is a string. If anything is wrong, it is undefined
     let idToken: IntermediatePayload | null = null;
     switch (authType) {
@@ -136,7 +135,7 @@ export class AuthService {
         req.long,
         authType,
         idToken.id,
-        req.userStatus
+        req.userStatus,
       );
     }
 

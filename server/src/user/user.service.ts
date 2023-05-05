@@ -55,7 +55,7 @@ export class UserService {
     long: number,
     authType: AuthType,
     authToken: string,
-    userStatus:string
+    userStatus: string,
   ) {
     if (username == null) username = email?.split('@')[0];
     const defOrg = await this.orgService.getDefaultOrganization(
