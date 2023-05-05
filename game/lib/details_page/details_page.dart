@@ -7,10 +7,12 @@ class DetailsPageWidget extends StatefulWidget {
   DetailsPageWidget(
       {Key? key,
       required String this.userType,
+      required String? this.idToken,
       required GoogleSignInAccount? this.user})
       : super(key: key);
   final scaffoldKey = GlobalKey<ScaffoldState>();
   final String userType;
+  final String? idToken;
   final GoogleSignInAccount? user;
   @override
   _DetailsPageWidgetState createState() => _DetailsPageWidgetState();
@@ -125,11 +127,14 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
                 ElevatedButton(
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
+
+                      assert(widget.user!=null || widget.idToken !=null);
                       final auth = await widget.user?.authentication;
-                      final idToken = auth?.idToken;
+                      final idToken = widget.user!=null ? auth?.idToken : widget.idToken;
+                      final endpoint_string = API_URL + (widget.user!=null ? "/google" : "/device-login");
                       final connectionResult = await client.connect(
                           idToken!,
-                          Uri.parse(API_URL + "/google"),
+                          Uri.parse(endpoint_string),
                           this.widget.userType,
                           _year,
                           _name);
@@ -144,6 +149,7 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
                         displayToast("Signed in!", Status.success);
                       }
                     }
+                      
                   },
                   style: ButtonStyle(
                       backgroundColor:

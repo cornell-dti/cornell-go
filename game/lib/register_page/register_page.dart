@@ -5,7 +5,8 @@ import 'package:google_sign_in/google_sign_in.dart';
 
 class RegisterPageWidget extends StatefulWidget {
   GoogleSignInAccount? user = null;
-  RegisterPageWidget({Key? key, required GoogleSignInAccount? this.user})
+  String? idToken = null;
+  RegisterPageWidget({Key? key, required GoogleSignInAccount? this.user, required String? this.idToken})
       : super(key: key);
   final scaffoldKey = GlobalKey<ScaffoldState>();
   @override
@@ -88,15 +89,18 @@ class _RegisterPageWidgetState extends State<RegisterPageWidget> {
                       child: LatoText(
                           "Continue", 16.0, Colors.white, FontWeight.w600),
                     )),
-                onPressed: () => {
+                onPressed: ()  {
+                  print(widget.user);
+                  print(widget.idToken);
                   Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (context) => DetailsPageWidget(
                         userType: _selectedOption,
                         user: widget.user,
+                        idToken: widget.idToken,
                       ),
                     ),
-                  )
+                  );
                 },
               ),
             ]),

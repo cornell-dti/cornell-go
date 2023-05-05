@@ -5,6 +5,7 @@ import 'package:game/api/game_api.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:game/register_page/register_page.dart';
 
+
 class SplashPageWidget extends StatelessWidget {
   SplashPageWidget({Key? key}) : super(key: key);
   final scaffoldKey = GlobalKey<ScaffoldState>();
@@ -51,7 +52,7 @@ class SplashPageWidget extends StatelessWidget {
                           Navigator.of(context).push(
                             MaterialPageRoute(
                               builder: (context) =>
-                                  RegisterPageWidget(user: account),
+                                  RegisterPageWidget(user: account, idToken: null),
                             ),
                           );
                         }
@@ -83,7 +84,17 @@ class SplashPageWidget extends StatelessWidget {
                     style: ButtonStyle(
                         backgroundColor:
                             MaterialStatePropertyAll<Color>(Colors.white)),
-                    onPressed: () => {print("pressed")},
+                    onPressed:  () async {
+                      final String? id = await getId();
+                      print("GOT ID");
+                      print(id);
+                      Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context)  =>
+                                  RegisterPageWidget(user: null, idToken:id),
+                            ),
+                          );
+                    },
                     child: Container(
                       width: 255,
                       height: 53,
