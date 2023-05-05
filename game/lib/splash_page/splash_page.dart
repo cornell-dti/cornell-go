@@ -50,8 +50,8 @@ class SplashPageWidget extends StatelessWidget {
                         } else {
                           Navigator.of(context).push(
                             MaterialPageRoute(
-                              builder: (context) =>
-                                  RegisterPageWidget(user: account),
+                              builder: (context) => RegisterPageWidget(
+                                  user: account, idToken: null),
                             ),
                           );
                         }
@@ -83,7 +83,17 @@ class SplashPageWidget extends StatelessWidget {
                     style: ButtonStyle(
                         backgroundColor:
                             MaterialStatePropertyAll<Color>(Colors.white)),
-                    onPressed: () => {print("pressed")},
+                    onPressed: () async {
+                      final String? id = await getId();
+                      print("GOT ID");
+                      print(id);
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              RegisterPageWidget(user: null, idToken: id),
+                        ),
+                      );
+                    },
                     child: Container(
                       width: 255,
                       height: 53,
