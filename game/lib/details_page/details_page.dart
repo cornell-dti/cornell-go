@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:game/main.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:game/utils/utility_functions.dart';
+import 'package:game/challenges/challenges_widget.dart';
+import 'package:game/challenges/challenges_widget.dart';
 
 class DetailsPageWidget extends StatefulWidget {
   DetailsPageWidget(
@@ -139,8 +141,17 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
                             Status.error);
                       } else {
                         //Connect to home page here.
+                        Navigator.push(
+                          context,
+                          PageRouteBuilder(
+                            pageBuilder: (c, a1, a2) => ChallengesWidget(),
+                            transitionsBuilder: (c, anim, a2, child) =>
+                                FadeTransition(opacity: anim, child: child),
+                            transitionDuration: Duration(milliseconds: 500),
+                          ),
+                        );
                         print("Connection result:");
-                        print(connectionResult!.body);
+                        print(connectionResult.body);
                         displayToast("Signed in!", Status.success);
                       }
                     }
