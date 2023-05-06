@@ -3,7 +3,7 @@ import 'package:game/main.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:game/challenges/challenges_widget.dart';
-import 'package:game/challenges/challenges_widget.dart';
+import 'package:game/challenges/challenges_page.dart';
 
 class DetailsPageWidget extends StatefulWidget {
   DetailsPageWidget(
@@ -150,7 +150,7 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
                         Navigator.push(
                           context,
                           PageRouteBuilder(
-                            pageBuilder: (c, a1, a2) => ChallengesWidget(),
+                            pageBuilder: (c, a1, a2) => ChallengesPage(),
                             transitionsBuilder: (c, anim, a2, child) =>
                                 FadeTransition(opacity: anim, child: child),
                             transitionDuration: Duration(milliseconds: 500),

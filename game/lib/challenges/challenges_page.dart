@@ -129,15 +129,19 @@ class _ChallengesPageState extends State<ChallengesPage> {
                 builder: (context, myEventModel, myChallengeModel,
                     myTrackerModel, groupModel, apiClient, child) {
               if (groupModel.curEventId == null) {
+                print("no group id");
                 return ListView();
               } else {
                 List<Widget> challengeCells = [];
                 final eventId = groupModel.curEventId!;
+                print("current event id: " + eventId);
                 final challenges =
                     myEventModel.getEventById(eventId)?.challengeIds;
                 if (challenges == null) {
+                  print("no challenges");
                   return ListView();
                 } else {
+                  print("challenges: " + challenges.toString());
                   for (String challengeId in challenges) {
                     final ChallengeDto? challenge =
                         myChallengeModel.getChallengeById(challengeId);

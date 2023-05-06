@@ -7,16 +7,21 @@ class EventModel extends ChangeNotifier {
   Map<String, List<UpdateLeaderDataUserDto>> _topPlayers = {};
 
   ApiClient _client;
-  List<EventDto>? searchResults;
+  List<EventDto>? searchResults = [];
 
   EventModel(ApiClient client) : _client = client {
     client.clientApi.updateEventDataStream.listen((event) {
-      if (!event.event is String) {
-        searchResults = event.event;
+      if (!event.deleted && !event.event is String) {
+        EventDto ev = event.event;
+        searchResults!.add(ev);
+        _events[ev.id] = ev;
+        print("updated _events with " + ev.id);
+      } else {
+        print(event.event);
       }
-      event.event.toList().forEach((element) {
-        _events[element.id] = element;
-      });
+      // event.event.toList().forEach((element) {
+      //   _events[element.id] = element;
+      // });
       notifyListeners();
     });
 
@@ -77,9 +82,11 @@ class EventModel extends ChangeNotifier {
 
   EventDto? getEventById(String id) {
     if (_events.containsKey(id)) {
+      print("getEventId got " + _events[id].toString());
       return _events[id];
     } else {
-      _client.serverApi?.requestEventData([id]);
+      // _client.serverApi?.requestEventData([id]);
+      print("getEventId got null");
       return null;
     }
   }

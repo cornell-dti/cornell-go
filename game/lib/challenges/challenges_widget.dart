@@ -56,7 +56,7 @@ class _ChallengesWidgetState extends State<ChallengesWidget> {
                           myTrackerModel, groupModel, apiClient, child) {
                     if (groupModel.curEventId == null) {
                       // apiClient.connectId("id");
-                      apiClient.serverApi?.requestGroupData();
+                      // apiClient.serverApi?.requestGroupData();
                       return ListView();
                     } else {
                       List<Widget> challengeCells = [];
