@@ -29,7 +29,7 @@ export class EventGateway {
     private clientService: ClientService,
     private eventService: EventService,
     private orgService: OrganizationService,
-  ) { }
+  ) {}
 
   @SubscribeMessage('requestEventData')
   async requestEventData(

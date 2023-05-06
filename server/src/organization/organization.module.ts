@@ -6,12 +6,8 @@ import { OrganizationGateway } from './organization.gateway';
 import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
-  imports: [
-    PrismaModule,
-    ClientModule,
-    forwardRef(() => AuthModule)
-  ],
+  imports: [PrismaModule, ClientModule, forwardRef(() => AuthModule)],
   exports: [OrganizationService],
   providers: [OrganizationService, OrganizationGateway],
 })
-export class OrganizationModule { }
+export class OrganizationModule {}

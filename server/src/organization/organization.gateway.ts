@@ -23,7 +23,7 @@ export class OrganizationGateway {
   constructor(
     private clientService: ClientService,
     private orgService: OrganizationService,
-  ) { }
+  ) {}
 
   @SubscribeMessage('requestOrganizationData')
   async requestOrganizationData(
