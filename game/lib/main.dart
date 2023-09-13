@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:game/api/game_api.dart';
-import 'package:game/challenges/challenges_widget.dart';
-import 'package:game/journeys/journeys_page.dart';
 import 'package:game/login/login_page.dart';
 import 'package:game/model/challenge_model.dart';
 import 'package:game/model/event_model.dart';
@@ -11,17 +9,17 @@ import 'package:game/model/group_model.dart';
 import 'package:game/model/reward_model.dart';
 import 'package:game/model/tracker_model.dart';
 import 'package:game/model/user_model.dart';
+import 'package:game/splash_page/splash_page.dart';
 import 'package:game/widget/game_widget.dart';
 import 'package:provider/provider.dart';
 
 import 'dart:io' show Platform;
 
-import 'challenges/challenges_page.dart';
-
 const ENV_URL = String.fromEnvironment('API_URL', defaultValue: "");
 
 final storage = FlutterSecureStorage();
-final LOOPBACK = (Platform.isAndroid ? "http://10.0.2.2" : "http://127.0.0.1");
+final LOOPBACK =
+    (Platform.isAndroid ? "http://10.0.2.2:8080" : "http://0.0.0.0:8080");
 final API_URL = ENV_URL == "" ? LOOPBACK : ENV_URL;
 
 void main() {
