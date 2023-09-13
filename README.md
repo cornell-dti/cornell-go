@@ -82,6 +82,17 @@ npm run dbmigrate -- my_migration
 
 ## Contributors
 
+### FA23
+
+- **Alisha Lin** - PMM
+- **Nikita Kasumov** - TPM
+- **Jesse Cheng** - PM
+- **Valerie Wong** - Designer
+- **Happy Li** - Designer
+- **Tucker Stanley** - Developer
+- **Chris Gu** - Developer
+- **Brian La** - Developer
+
 ### SP23
 
 - **Youssef Attia** - Developer
