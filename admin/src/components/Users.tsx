@@ -1,9 +1,25 @@
 import { useContext, useEffect, useState } from "react";
+import { UserDto } from "../dto/user.dto";
 import { ServerDataContext } from "./ServerData";
 import GridTable from "@nadavshaar/react-grid-table";
 import userEvent from "@testing-library/user-event";
-import { DeleteModal } from "./DeleteModal";
 
+const EDIT_SVG = (
+  <svg
+    height="16"
+    viewBox="0 0 20 20"
+    width="16"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <g fill="#fff" stroke="#1856bf" transform="translate(2 2)">
+      <path
+        d="m8.24920737-.79402796c1.17157287 0 2.12132033.94974747 2.12132033 2.12132034v13.43502882l-2.12132033 3.5355339-2.08147546-3.495689-.03442539-13.47488064c-.00298547-1.16857977.94191541-2.11832105 2.11049518-2.12130651.00180188-.00000461.00360378-.00000691.00540567-.00000691z"
+        transform="matrix(.70710678 .70710678 -.70710678 .70710678 8.605553 -3.271644)"
+      />
+      <path d="m13.5 4.5 1 1" />
+    </g>
+  </svg>
+);
 const CANCEL_SVG = (
   <svg
     height="20"
@@ -15,6 +31,21 @@ const CANCEL_SVG = (
       <path d="m.5 10.5 10-10" />
       <path d="m10.5 10.5-10-10z" />
     </g>
+  </svg>
+);
+const SAVE_SVG = (
+  <svg
+    height="20"
+    viewBox="0 0 20 20"
+    width="20"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="m.5 5.5 3 3 8.028-8"
+      fill="none"
+      stroke="#4caf50"
+      transform="translate(5 6)"
+    />
   </svg>
 );
 
@@ -69,17 +100,16 @@ const styles = {
   },
 };
 
-function toForm(group: any) {
+function toForm(user: any) {
   return {
-    id: group.id,
-    friendlyId: group.friendlyId,
-    hostId: group.hostId,
-    curEventId: group.curEventId,
+    username: user.username,
+    id: user.id,
+    groupId: user.groupId,
+    email: user.email,
   };
 }
 
 function getColumns(setRowsData: any, serverData: any) {
-  let deleteId: any;
   return [
     {
       id: "checkbox",
@@ -89,27 +119,25 @@ function getColumns(setRowsData: any, serverData: any) {
     },
     {
       id: 1,
+      field: "username",
+      label: "Username",
+    },
+    {
+      id: 2,
       field: "id",
       label: "Id",
       editable: false,
     },
     {
-      id: 2,
-      field: "friendlyId",
-      label: "FriendlyId",
-      editable: false,
-    },
-    {
       id: 3,
-      field: "hostId",
-      label: "HostId",
+      field: "groupId",
+      label: "GroupId",
       editable: false,
     },
     {
       id: 4,
-      field: "curEventId",
-      label: "CurrentEventId",
-      editable: false,
+      field: "email",
+      label: "Email",
     },
     {
       id: "buttons",
@@ -131,10 +159,9 @@ function getColumns(setRowsData: any, serverData: any) {
             onClick={(e) => {
               e.stopPropagation();
               tableManager.rowEditApi.setEditRowId(data.id);
-              deleteId = data.id;
             }}
           >
-            {CANCEL_SVG}
+            {EDIT_SVG}
           </button>
         </div>
       ),
@@ -145,47 +172,48 @@ function getColumns(setRowsData: any, serverData: any) {
         tableManager: any;
         data: any;
       }) => (
-        <div>
-          <DeleteModal
-            objectName={serverData.groups.get(deleteId)?.friendlyId ?? ""}
-            isOpen={tableManager.rowEditApi.editRowId !== null}
-            onClose={() => {
+        <div style={styles.buttonsCellEditorContainer}>
+          <button
+            title="Cancel"
+            style={styles.cancelButton}
+            onClick={(e) => {
+              e.stopPropagation();
               tableManager.rowEditApi.setEditRowId(null);
             }}
-            onDelete={() => {
-              serverData.deleteGroup(deleteId);
-              serverData.groups.delete(data.id);
+          >
+            {CANCEL_SVG}
+          </button>
+          <button
+            title="Save"
+            style={styles.saveButton}
+            onClick={(e) => {
+              e.stopPropagation();
 
               let rowsClone = [...tableManager.rowsApi.rows];
-              let deletedRowIndex = rowsClone.findIndex(
+              let updatedRowIndex = rowsClone.findIndex(
                 (r) => r.id === data.id
               );
-              rowsClone.splice(deletedRowIndex, 1);
-
-              const newData = Array.from(serverData.groups.values()).map((gr) =>
-                toForm(gr)
-              );
-              newData.forEach((gr) => {
-                let index = rowsClone.findIndex((r) => r.id === gr.id);
-
-                if (index === -1) rowsClone.push(gr);
-              });
+              rowsClone[updatedRowIndex] = data;
 
               setRowsData(rowsClone);
 
+              serverData.users.set(data.id, data as UserDto);
+              serverData.updateUser(rowsClone[updatedRowIndex]);
               tableManager.rowEditApi.setEditRowId(null);
             }}
-          />
+          >
+            {SAVE_SVG}
+          </button>
         </div>
       ),
     },
   ];
 }
 
-export function Groups() {
+export function Users() {
   const serverData = useContext(ServerDataContext);
   const [rowsData, setRowsData] = useState(
-    Array.from(serverData.groups.values()).map((gr) => toForm(gr))
+    Array.from(serverData.users.values()).map((us) => toForm(us))
   );
 
   return (

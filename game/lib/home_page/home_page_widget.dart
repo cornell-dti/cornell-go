@@ -47,7 +47,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
     );
     return Scaffold(
         floatingActionButton: navBtn(scaffoldKey, context),
-        drawer: NavBar(),
+        // drawer: NavBar(),
         key: scaffoldKey,
         backgroundColor: const Color(0xFFFFFF),
         body: Consumer5<ApiClient, GameModel, GroupModel, UserModel,
