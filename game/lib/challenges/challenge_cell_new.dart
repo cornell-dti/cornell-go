@@ -197,67 +197,76 @@ class _ChallengePreviewState extends State<ChallengePreview> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Padding(
-                      padding:
-                          const EdgeInsets.only(left: 5, top: 6.0, right: 5),
-                      child: Stack(children: [
-                        Container(
-                          width: 80,
+                        padding: const EdgeInsets.only(
+                            left: 10, top: 10.0, right: 5),
+                        child: Container(
                           height: 25,
                           alignment: Alignment.centerLeft,
                           child: Container(
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: 8, right: 8),
+                              child: Align(
+                                alignment: Alignment.center,
+                                child: Text(
+                                  difficulty[0].toUpperCase() +
+                                      difficulty.substring(1),
+                                  style: TextStyle(
+                                      fontSize: 12, color: Colors.black),
+                                ),
+                              ),
+                            ),
                             decoration: new BoxDecoration(
-                              color: Color.fromARGB(255, 231, 231, 231),
+                              color: Colors.white,
                               shape: BoxShape.rectangle,
                               borderRadius:
                                   BorderRadius.all(Radius.circular(16.0)),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Color.fromARGB(255, 198, 198, 198),
+                                  blurRadius: 2,
+                                  offset: Offset(0, 4), // Shadow position
+                                ),
+                              ],
                             ),
                           ),
-                        ),
-                        SizedBox(
-                          height: 25,
-                          width: 80,
-                          child: Align(
-                            alignment: Alignment.center,
-                            child: Text(
-                              difficulty[0].toUpperCase() +
-                                  difficulty.substring(1),
-                              style:
-                                  TextStyle(fontSize: 12, color: Colors.black),
-                            ),
-                          ),
-                        ),
-                      ]),
-                    ),
+                        )),
                     Padding(
-                      padding: const EdgeInsets.only(top: 6.0),
-                      child: Stack(children: [
-                        Container(
-                          width: 80,
+                        padding: const EdgeInsets.only(left: 4, top: 10.0),
+                        child: Container(
                           height: 25,
                           alignment: Alignment.centerLeft,
                           child: Container(
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: 8, right: 8),
+                              child: Align(
+                                alignment: Alignment.center,
+                                child: Text(
+                                  (points +
+                                              (_challenge_on
+                                                  ? challenge_points
+                                                  : 0))
+                                          .toString() +
+                                      " points",
+                                  style: TextStyle(
+                                      fontSize: 12, color: Colors.black),
+                                ),
+                              ),
+                            ),
                             decoration: new BoxDecoration(
-                              color: Color.fromARGB(255, 231, 231, 231),
+                              color: Colors.white,
                               shape: BoxShape.rectangle,
                               borderRadius:
                                   BorderRadius.all(Radius.circular(16.0)),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Color.fromARGB(255, 198, 198, 198),
+                                  blurRadius: 2,
+                                  offset: Offset(0, 4), // Shadow position
+                                ),
+                              ],
                             ),
                           ),
-                        ),
-                        SizedBox(
-                          height: 25,
-                          width: 80,
-                          child: Align(
-                            alignment: Alignment.center,
-                            child: Text(
-                              points.toString() + " points",
-                              style:
-                                  TextStyle(fontSize: 12, color: Colors.black),
-                            ),
-                          ),
-                        ),
-                      ]),
-                    ),
+                        )),
                     Expanded(
                         child: SizedBox(
                             child: Align(

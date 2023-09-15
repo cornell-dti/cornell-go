@@ -19,7 +19,7 @@ class _ChallengesPageState extends State<ChallengesPage> {
         Image.network('https://picsum.photos/250?image=9'),
         false,
         "Find this famous statue!",
-        "Normal",
+        "Easy",
         15,
         3),
     ChallengeCell(
@@ -37,7 +37,7 @@ class _ChallengesPageState extends State<ChallengesPage> {
         Image.network('https://picsum.photos/250?image=9'),
         false,
         "Find this famous statue!",
-        "Normal",
+        "Hard",
         15,
         3),
     ChallengeCell(
@@ -46,7 +46,7 @@ class _ChallengesPageState extends State<ChallengesPage> {
         Image.network('https://picsum.photos/250?image=9'),
         true,
         "Find this famous statue!",
-        "Normal",
+        "Challenging",
         15,
         3),
   ];
