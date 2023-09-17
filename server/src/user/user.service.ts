@@ -15,7 +15,7 @@ import { GroupService } from '../group/group.service';
 import { OrganizationService } from '../organization/organization.service';
 import { PrismaService } from '../prisma/prisma.service';
 import {
-  UpdateUserDto,
+  UpdateUserDataDto,
   UserAuthTypeDto,
   UserDto,
   eventFilterDto,
@@ -50,12 +50,12 @@ export class UserService {
   async register(
     email: string,
     username: string,
-    major: string,
     year: string,
     lat: number,
     long: number,
     authType: AuthType,
     authToken: string,
+    userStatus: string,
   ) {
     if (username == null) username = email?.split('@')[0];
     const defOrg = await this.orgService.getDefaultOrganization(
@@ -75,10 +75,10 @@ export class UserService {
         hostOf: { connect: { id: group.id } },
         memberOf: { connect: { id: defOrg.id } },
         username,
-        major,
         year,
         email,
         authToken,
+        userStatus,
         authType,
         hashedRefreshToken: '',
         administrator:
@@ -99,6 +99,10 @@ export class UserService {
 
   async byEmail(email: string) {
     return await this.prisma.user.findFirstOrThrow({ where: { email: email } });
+  }
+
+  async getAllUserData() {
+    return await this.prisma.user.findMany();
   }
 
   async deleteUser(user: User) {
@@ -248,17 +252,37 @@ export class UserService {
     return filteredEventIds;
   }
 
-  async setMajor(user: User, major: string) {
-    await this.prisma.user.update({
-      where: { id: user.id },
-      data: { major },
-    });
-  }
+  // async setMajor(user: User, major: string) {
+  //   await this.prisma.user.update({
+  //     where: { id: user.id },
+  //     data: { major },
+  //   });
+  // }
 
   async setGraduationYear(user: User, year: string) {
     await this.prisma.user.update({
       where: { id: user.id },
       data: { year },
+    });
+  }
+
+  async banUser(user: User, isBanned: boolean): Promise<User> {
+    return await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        isBanned,
+      },
+    });
+  }
+
+  async updateUser(user: UserDto): Promise<User> {
+    return await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        username: user.username,
+        email: user.email,
+        year: user.year,
+      },
     });
   }
 
@@ -276,10 +300,12 @@ export class UserService {
     return {
       id: joinedUser.id,
       username: joinedUser.username,
-      major: joinedUser.major,
+      userStatus: joinedUser.userStatus,
+      email: joinedUser.email,
       year: joinedUser.year,
       score: joinedUser.score,
       groupId: joinedUser.group.friendlyId,
+      isBanned: joinedUser.isBanned,
       authType: (
         joinedUser.authType as string
       ).toLowerCase() as UserAuthTypeDto,
@@ -298,7 +324,7 @@ export class UserService {
     admin?: boolean,
     client?: User,
   ) {
-    const dto: UpdateUserDto = {
+    const dto: UpdateUserDataDto = {
       user: deleted ? user.id : await this.dtoForUserData(user, partial),
       deleted,
     };

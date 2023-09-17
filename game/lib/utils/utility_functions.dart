@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:game/api/game_api.dart';
-import 'package:platform_device_id/platform_device_id.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'dart:io' show Platform; //at the top
 
 Future<void> showAlert(String message, context) async {
@@ -31,9 +32,16 @@ Future<void> showAlert(String message, context) async {
   );
 }
 
-Future<String> getDeviceId() async {
-  //Gets unique device ID.
-  return (await PlatformDeviceId.getDeviceId ?? "") + Platform.operatingSystem;
+Future<String?> getId() async {
+  var deviceInfo = DeviceInfoPlugin();
+  if (Platform.isIOS) {
+    // import 'dart:io'
+    var iosDeviceInfo = await deviceInfo.iosInfo;
+    return iosDeviceInfo.identifierForVendor; // unique ID on iOS
+  } else if (Platform.isAndroid) {
+    var androidDeviceInfo = await deviceInfo.androidInfo;
+    return androidDeviceInfo.androidId; // unique ID on Android
+  }
 }
 
 Future<void> showLeaveConfirmationAlert(
@@ -110,4 +118,11 @@ void displayToast(message, Status status) {
 
 Color RGBComplement(Color col) {
   return Color.fromRGBO(255 - col.red, 255 - col.green, 255 - col.blue, 1);
+}
+
+Text LatoText(String text, double fs, Color color, FontWeight fw) {
+  return Text(text,
+      style: GoogleFonts.lato(
+          textStyle: TextStyle(
+              color: color, fontWeight: FontWeight.bold, fontSize: fs)));
 }
