@@ -28,7 +28,7 @@ services:
       NO_SSL: true
       DEVELOPMENT: true
       DATABASE_URL: postgresql://postgres:test@postgres:5432/postgres
-      TESTING_UNIT: ${TESTING_UNIT:-true}
+      TESTING_UNIT: ${TESTING_UNIT:-false}
       TESTING_E2E: ${TESTING_E2E:-false}
     depends_on:
       postgres:
