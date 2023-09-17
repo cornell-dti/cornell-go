@@ -1,4 +1,4 @@
-name: Run server unit tests CI
+name: Run server unit and e2e tests CI
 
 on: pull_request
 
@@ -11,5 +11,7 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: "18"
-      - name: Execute tests
+      - name: Execute unit tests
         run: npm run tests -- unit
+      - name: Execute e2e tests
+        run: npm run tests -- e2e
