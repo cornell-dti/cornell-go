@@ -20,36 +20,51 @@ async function main() {
   }
 
   const testType = process.argv[2].toUpperCase();
-  const saveOldPostgres = existsSync("./postgres-data");
+  process.env[`TESTING_${testType}`] = "true";
 
-  if (existsSync("./postgres-data-saved")) {
-    rmSync("./postgres-data-saved", { recursive: true, force: true });
-  }
+  if (testType === "UNIT") {
+    try {
+      console.log("Stopping postgres database (if running)");
+      execSync(`docker compose stop postgres`);
+      console.log("Executing unit tests");
+      execSync(`docker compose up --no-deps --build server --exit-code-from server`);
+      console.log("Tests ran successfully!");
+    } catch (err) {
+      console.log("Test execution failed!");
+      process.exitCode = 1;
+    }
+  } else if (testType === "E2E") {
+    const saveOldPostgres = existsSync("./postgres-data");
 
-  if (saveOldPostgres) {
-    console.log("Backing up database data");
-    copyFolderSync("./postgres-data", "./postgres-data-saved");
-  }
-
-  try {
-    console.log("Setting up test database");
-    execSync("npm run dbreset", { stdio: ['pipe', 'pipe', 'ignore'] });
-    console.log("Executing tests");
-    process.env[`TESTING_${testType}`] = "true";
-    execSync(`docker compose up --build --no-attach postgres --exit-code-from server`);
-    console.log("Tests ran successfully!");
-  } catch (err) {
-    console.log("Test execution failed!");
-    console.log(err);
-    process.exitCode = 1;
-  } finally {
-    if (saveOldPostgres) {
-      console.log("Restoring database data");
-      rmSync("./postgres-data", { recursive: true, force: true });
-      copyFolderSync("./postgres-data-saved", "./postgres-data");
+    if (existsSync("./postgres-data-saved")) {
       rmSync("./postgres-data-saved", { recursive: true, force: true });
     }
+
+    if (saveOldPostgres) {
+      console.log("Backing up database data");
+      copyFolderSync("./postgres-data", "./postgres-data-saved");
+    }
+
+    try {
+      console.log("Setting up test database");
+      execSync("npm run dbreset");
+      console.log("Executing e2e tests");
+      execSync(`docker compose up --build --no-attach postgres --exit-code-from server`);
+      console.log("Tests ran successfully!");
+    } catch (err) {
+      console.log("Test execution failed!");
+      console.log(err.stdout.toString());
+      process.exitCode = 1;
+    } finally {
+      if (saveOldPostgres) {
+        console.log("Restoring database data");
+        rmSync("./postgres-data", { recursive: true, force: true });
+        copyFolderSync("./postgres-data-saved", "./postgres-data");
+        rmSync("./postgres-data-saved", { recursive: true, force: true });
+      }
+    }
   }
+
   console.log("Finished tests");
 }
 
