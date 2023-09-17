@@ -143,6 +143,7 @@ class _ChallengeCellState extends State<ChallengeCell> {
   }
 }
 
+/** Returns a preview of a challenge given the challenge name, description, difficulty, points, and bonus points for challenge mode */
 class ChallengePreview extends StatefulWidget {
   final String challengeName;
   final String description;
@@ -165,6 +166,7 @@ class ChallengePreview extends StatefulWidget {
       challengeName, description, difficulty, points, challenge_points);
 }
 
+/**Builds a widget based on the current state which is needed for toggleable challenge_on button */
 class _ChallengePreviewState extends State<ChallengePreview> {
   final String challengeName;
   final String description;
@@ -182,17 +184,21 @@ class _ChallengePreviewState extends State<ChallengePreview> {
       this.points, this.challenge_points);
   @override
   Widget build(BuildContext context) {
+    //The dialog
     return Dialog(
+      //Overall Container
       child: Container(
           height: 420,
           child: Column(
             children: [
+              //Image and labels (difficulty and points)
               Container(
                 decoration: BoxDecoration(
                     image: DecorationImage(
                         image: AssetImage(imgPath), fit: BoxFit.cover)),
                 height: 150,
                 alignment: Alignment.topLeft,
+                //labels
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
