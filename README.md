@@ -7,13 +7,14 @@ This repository contains the Flutter mobile app, the React administration app, a
 ### Full project setup
 
 ```
-mkdir postgres-data
 cd ./server
 npm install
 cd ../admin
 npm install
 cd ../game
 flutter pub get
+cd ..
+npm run dbreset
 ```
 
 ### Run project in container

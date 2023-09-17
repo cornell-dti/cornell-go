@@ -27,24 +27,26 @@ async function main() {
   }
 
   if (saveOldPostgres) {
+    console.log("Backing up database data");
     copyFolderSync("./postgres-data", "./postgres-data-saved");
-    console.log("Backed up old db data");
   }
 
   try {
+    console.log("Baselining test database");
     execSync("npm run dbreset");
-    console.log("Set up db for testing");
     process.env[`TESTING_${testType}`] = "true";
     execSync(`docker compose up --build --no-attach postgres`);
   } finally {
     execSync("docker compose stop");
     if (saveOldPostgres) {
+      console.log("Restoring database data");
       rmSync("./postgres-data", { recursive: true, force: true });
       copyFolderSync("./postgres-data-saved", "./postgres-data");
       rmSync("./postgres-data-saved", { recursive: true, force: true });
-      console.log("Restored old db data");
     }
   }
+
+  console.log("Finished tests");
 }
 
 main();
