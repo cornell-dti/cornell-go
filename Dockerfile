@@ -22,4 +22,9 @@ COPY server .
 RUN npx prisma generate
 RUN npm run build
 RUN if [ ${DEVELOPMENT} != "true" ]; then npx prisma migrate deploy; fi
-ENTRYPOINT if [ ${DEVELOPMENT} != "true" ]; then npm run start:prod; else npm run start; fi
+ENTRYPOINT \
+  if [ ${DEVELOPMENT} != "true" ]; then npm run start:prod; \
+  elif [ ${TESTING_UNIT} -eq "true" ]; npm run test; \ 
+  elif [ ${TESTING_E2E} -eq "true" ]; npm run test:e2e; \ 
+  else npm run start; \
+  fi

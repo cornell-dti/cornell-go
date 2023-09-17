@@ -6,6 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "dbreset": "node ./scripts/dbreset.js"
+    "dbreset": "node ./scripts/dbreset.js",
+    "tests": "node ./scripts/tests.js"
   }
 }

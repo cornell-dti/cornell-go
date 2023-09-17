@@ -74,6 +74,12 @@ npm run doc
 npm run dbreset
 ```
 
+### Run unit or integration/end-to-end tests
+
+```
+npm run tests -- <unit | e2e>
+```
+
 ### Create a database migration
 
 ```

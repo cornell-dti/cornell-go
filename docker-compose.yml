@@ -28,6 +28,8 @@ services:
       - NO_SSL=true
       - DEVELOPMENT=true
       - DATABASE_URL=postgresql://postgres:test@postgres:5432/postgres
+      - TESTING_UNIT
+      - TESTING_E2E
     depends_on:
       postgres:
         condition: service_healthy
