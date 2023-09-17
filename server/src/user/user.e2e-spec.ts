@@ -1,9 +1,9 @@
 import * as request from 'supertest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import { UserModule } from './user.module';
 import { UserService } from './user.service';
 import { AuthType } from '@prisma/client';
+import { AppModule } from '../app.module';
 
 describe('UserModule E2E', () => {
   let app: INestApplication;
@@ -11,14 +11,20 @@ describe('UserModule E2E', () => {
 
   beforeAll(async () => {
     moduleRef = await Test.createTestingModule({
-      imports: [UserModule],
+      imports: [AppModule],
     }).compile();
 
     app = moduleRef.createNestApplication();
     await app.init();
   });
 
-  it(`Create and check user`, async () => {
+  it('should successfully find UserService', async () => {
+    const userService = moduleRef.get<UserService>(UserService);
+
+    expect(userService).toBeDefined();
+  });
+
+  it(`should create and check user`, async () => {
     const userService = moduleRef.get<UserService>(UserService);
 
     await userService.register(

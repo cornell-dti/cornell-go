@@ -22,10 +22,11 @@ async function main() {
   const testType = process.argv[2].toUpperCase();
   process.env[`TESTING_${testType}`] = "true";
 
+  console.log("Stopping postgres database (if running)");
+  execSync(`docker compose stop postgres`);
+
   if (testType === "UNIT") {
     try {
-      console.log("Stopping postgres database (if running)");
-      execSync(`docker compose stop postgres`);
       console.log("Executing unit tests");
       execSync(`docker compose up --no-deps --build server --exit-code-from server`);
       console.log("Tests ran successfully!");
@@ -55,9 +56,12 @@ async function main() {
       console.log("Test execution failed!");
       process.exitCode = 1;
     } finally {
+      console.log("Stopping postgres (if running)");
+      execSync(`docker compose stop postgres`);
+      console.log("Deleting test database");
+      rmSync("./postgres-data", { recursive: true, force: true });
       if (saveOldPostgres) {
         console.log("Restoring database data");
-        rmSync("./postgres-data", { recursive: true, force: true });
         copyFolderSync("./postgres-data-saved", "./postgres-data");
         rmSync("./postgres-data-saved", { recursive: true, force: true });
       }
