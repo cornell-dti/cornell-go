@@ -45,8 +45,10 @@ describe('ChallengeService', () => {
         RewardService,
       ],
     }).compile();
+
     const log = console.log;
     console.log = function () {};
+
     challengeService = module.get<ChallengeService>(ChallengeService);
     prisma = module.get<PrismaService>(PrismaService);
     userService = module.get<UserService>(UserService);
@@ -57,18 +59,21 @@ describe('ChallengeService', () => {
     user = await userService.register(
       'test@gmail.com',
       'test',
-      'CS',
       '2025',
       0,
       0,
       AuthType.DEVICE,
       'asdf',
+      'GRADUATE',
     );
+
     user = await prisma.user.findFirstOrThrow({
       where: { id: user.id },
       include: { memberOf: true },
     });
+
     tracker = await eventService.getCurrentEventTrackerForUser(user);
+
     event = await prisma.eventBase.findUniqueOrThrow({
       where: { id: tracker.eventId },
     });
@@ -115,12 +120,12 @@ describe('ChallengeService', () => {
       const user = await userService.register(
         'test@gmail.com',
         'test',
-        'CS',
         '2025',
         0,
         0,
         AuthType.GOOGLE,
         'asdf',
+        'GRADUATE',
       );
       const tracker = await eventService.getCurrentEventTrackerForUser(user);
 

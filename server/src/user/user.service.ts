@@ -7,6 +7,7 @@ import {
   OrganizationSpecialUsage,
   User,
   PrismaClient,
+  EnrollmentType,
   EventBase,
 } from '@prisma/client';
 import { ClientService } from '../client/client.service';
@@ -55,7 +56,7 @@ export class UserService {
     long: number,
     authType: AuthType,
     authToken: string,
-    userStatus: string,
+    enrollmentType: EnrollmentType,
   ) {
     if (username === null) username = email?.split('@')[0];
     const defOrg = await this.orgService.getDefaultOrganization(
@@ -78,7 +79,7 @@ export class UserService {
         year,
         email,
         authToken,
-        userStatus,
+        enrollmentType,
         authType,
         hashedRefreshToken: '',
         administrator:
@@ -300,7 +301,7 @@ export class UserService {
     return {
       id: joinedUser.id,
       username: joinedUser.username,
-      userStatus: joinedUser.userStatus,
+      enrollmentType: joinedUser.enrollmentType,
       email: joinedUser.email,
       year: joinedUser.year,
       score: joinedUser.score,
