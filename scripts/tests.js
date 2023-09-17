@@ -32,12 +32,16 @@ async function main() {
   }
 
   try {
-    console.log("Baselining test database");
-    execSync("npm run dbreset");
+    console.log("Setting up test database");
+    execSync("npm run dbreset", { stdio: ['pipe', 'pipe', 'ignore'] });
+    console.log("Executing tests");
     process.env[`TESTING_${testType}`] = "true";
-    execSync(`docker compose up --build --no-attach postgres`);
+    execSync(`docker compose up --build --no-attach postgres --exit-code-from server`);
+    console.log("Tests ran successfully!");
+  } catch (err) {
+    console.log("Test execution failed!");
+    process.exitCode = 1;
   } finally {
-    execSync("docker compose stop");
     if (saveOldPostgres) {
       console.log("Restoring database data");
       rmSync("./postgres-data", { recursive: true, force: true });
@@ -45,7 +49,6 @@ async function main() {
       rmSync("./postgres-data-saved", { recursive: true, force: true });
     }
   }
-
   console.log("Finished tests");
 }
 

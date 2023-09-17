@@ -5,10 +5,8 @@ import { UserModule } from './user.module';
 import { UserService } from './user.service';
 import { AuthType } from '@prisma/client';
 
-describe('UserService E2E', () => {
+describe('UserModule E2E', () => {
   let app: INestApplication;
-  let catsService = { findAll: () => ['test'] };
-
   let moduleRef: TestingModule;
 
   beforeAll(async () => {
