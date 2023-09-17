@@ -40,6 +40,7 @@ async function main() {
     console.log("Tests ran successfully!");
   } catch (err) {
     console.log("Test execution failed!");
+    console.log(err);
     process.exitCode = 1;
   } finally {
     if (saveOldPostgres) {

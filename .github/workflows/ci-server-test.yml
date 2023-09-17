@@ -1,4 +1,4 @@
-name: Run server unit and e2e tests CI
+name: Run server tests CI
 
 on: pull_request
 
