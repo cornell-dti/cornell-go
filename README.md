@@ -2,7 +2,7 @@
 
 CornellGO! is an interactive scavenger hunt aimed at sparking interest in exploring the historic Cornell campus by leading the player around campus, seeking landmarks while competing with others.
 
-This repository contains the Flutter mobile app, the React administration app, and the NestJS backend. Visit each subfolder for a description of each project's installation.
+This repository contains the Flutter mobile app, the React administration app, and the NestJS backend.
 
 ### Full project setup
 
@@ -69,22 +69,23 @@ cd server
 npm run doc
 ```
 
-### Reset database or test a new schema
-
-```
-npm run dbreset
-```
-
 ### Run unit or integration/end-to-end tests
 
 ```
 npm run tests -- <unit | e2e>
 ```
 
+### Reset database or test a new schema
+
+```
+npm run dbreset
+```
+
 ### Create a database migration
 
 ```
-npm run dbmigrate -- my_migration
+cd server
+npx prisma migrate dev --name my_migration
 ```
 
 ## Contributors
