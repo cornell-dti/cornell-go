@@ -1,5 +1,5 @@
 const { execSync } = require("child_process");
-const { rmSync, mkdirSync, readFileSync, writeFileSync } = require("fs");
+const { rmSync, mkdirSync } = require("fs");
 const { chdir } = require("process");
 
 async function main() {
@@ -14,6 +14,8 @@ async function main() {
   execSync("npx prisma db push --accept-data-loss --force-reset");
 
   execSync("docker compose stop");
+
+  console.log("Successfully reset the database!");
 }
 
 main();

@@ -6,7 +6,7 @@ import {
   OrganizationSpecialUsage,
   User,
 } from '@prisma/client';
-import { ClientService } from 'src/client/client.service';
+import { ClientService } from '../client/client.service';
 import { v4 } from 'uuid';
 import { PrismaService } from '../prisma/prisma.service';
 import { OrganizationDto, UpdateOrganizationDataDto } from './organization.dto';

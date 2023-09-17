@@ -23,7 +23,7 @@ describe('UserService E2E', () => {
   it(`Create and check user`, async () => {
     const userService = moduleRef.get<UserService>(UserService);
 
-    userService.register(
+    await userService.register(
       'test@example.com',
       'test',
       '2024',
