@@ -9,7 +9,7 @@ import {
   PrismaClient,
   EventBase,
 } from '@prisma/client';
-import { ClientService } from 'src/client/client.service';
+import { ClientService } from '../client/client.service';
 import { EventService } from '../event/event.service';
 import { GroupService } from '../group/group.service';
 import { OrganizationService } from '../organization/organization.service';

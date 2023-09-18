@@ -9,9 +9,9 @@ import {
   SessionLogEvent,
   Prisma,
 } from '@prisma/client';
-import { ClientService } from 'src/client/client.service';
-import { EventService } from 'src/event/event.service';
-import { UserService } from 'src/user/user.service';
+import { ClientService } from '../client/client.service';
+import { EventService } from '../event/event.service';
+import { UserService } from '../user/user.service';
 import { OrganizationService } from '../organization/organization.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { GroupDto, GroupInviteDto, UpdateGroupDataDto } from './group.dto';
