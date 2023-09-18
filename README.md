@@ -58,7 +58,8 @@ npm run doc
 ### Run unit or integration/end-to-end tests
 
 ```
-npm run tests -- <unit | e2e>
+npm run tests:unit
+npm run tests:e2e
 ```
 
 ### Reset database or test a new schema

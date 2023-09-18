@@ -12,6 +12,6 @@ jobs:
         with:
           node-version: "18"
       - name: Execute unit tests
-        run: npm run tests -- unit
+        run: npm run tests:unit
       - name: Execute e2e tests
-        run: npm run tests -- e2e
+        run: npm run tests:e2e
