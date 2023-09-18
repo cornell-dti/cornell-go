@@ -40,10 +40,7 @@ export class OrganizationService {
   constructor(
     private prisma: PrismaService,
     private clientService: ClientService,
-  ) {
-    this.getDefaultOrganization(OrganizationSpecialUsage.CORNELL_LOGIN);
-    this.getDefaultOrganization(OrganizationSpecialUsage.DEVICE_LOGIN);
-  }
+  ) {}
 
   async makeDefaultEvent() {
     const chal = await this.prisma.challenge.create({
