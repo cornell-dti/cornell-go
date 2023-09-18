@@ -7,6 +7,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "dbreset": "node ./scripts/dbreset.js",
-    "tests": "node ./scripts/tests.js"
+    "tests": "node ./scripts/tests.js",
+    "setup": "node ./scripts/setup.js"
   }
 }

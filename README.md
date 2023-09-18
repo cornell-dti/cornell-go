@@ -7,14 +7,8 @@ This repository contains the Flutter mobile app, the React administration app, a
 ### Full project setup
 
 ```
-cd ./server
-npm install
-cd ../admin
-npm install
-cd ../game
-flutter pub get
-cd ..
-npm run dbreset
+Make sure Node.js, Flutter, and Docker are installed!
+npm run setup
 ```
 
 ### Run project in container
@@ -35,14 +29,6 @@ docker compose up --build -d
 Press Control + C
 *OR* (if done in the background)
 docker compose stop
-```
-
-### Delete container artifacts
-
-```
-docker compose down
-rm -rf ./postgres-data
-mkdir postgres-data
 ```
 
 ### Start the frontend (for debugging)

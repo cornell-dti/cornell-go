@@ -22,7 +22,7 @@ async function main() {
   const testType = process.argv[2].toUpperCase();
   process.env[`TESTING_${testType}`] = "true";
 
-  console.log("Stopping postgres database (if running)");
+  console.log("Stopping postgres (if running)");
   execSync(`docker compose stop postgres`);
 
   if (testType === "UNIT") {
