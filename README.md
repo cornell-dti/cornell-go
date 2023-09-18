@@ -2,18 +2,13 @@
 
 CornellGO! is an interactive scavenger hunt aimed at sparking interest in exploring the historic Cornell campus by leading the player around campus, seeking landmarks while competing with others.
 
-This repository contains the Flutter mobile app, the React administration app, and the NestJS backend. Visit each subfolder for a description of each project's installation.
+This repository contains the Flutter mobile app, the React administration app, and the NestJS backend.
 
 ### Full project setup
 
 ```
-mkdir postgres-data
-cd ./server
-npm install
-cd ../admin
-npm install
-cd ../game
-flutter pub get
+Make sure Node.js, Flutter, and Docker are installed!
+npm run setup
 ```
 
 ### Run project in container
@@ -34,14 +29,6 @@ docker compose up --build -d
 Press Control + C
 *OR* (if done in the background)
 docker compose stop
-```
-
-### Delete container artifacts
-
-```
-docker compose down
-rm -rf ./postgres-data
-mkdir postgres-data
 ```
 
 ### Start the frontend (for debugging)
@@ -68,6 +55,13 @@ cd server
 npm run doc
 ```
 
+### Run unit or integration/end-to-end tests
+
+```
+npm run tests:unit
+npm run tests:e2e
+```
+
 ### Reset database or test a new schema
 
 ```
@@ -77,7 +71,8 @@ npm run dbreset
 ### Create a database migration
 
 ```
-npm run dbmigrate -- my_migration
+cd server
+npx prisma migrate dev --name my_migration
 ```
 
 ## Contributors

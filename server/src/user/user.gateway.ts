@@ -6,12 +6,12 @@ import {
 } from '@nestjs/websockets';
 import { AuthType, User } from '@prisma/client';
 import { CensorSensor } from 'censor-sensor';
-import { UserGuard } from 'src/auth/jwt-auth.guard';
+import { UserGuard } from '../auth/jwt-auth.guard';
 import { CallingUser } from '../auth/calling-user.decorator';
 import { ClientService } from '../client/client.service';
 import { GroupGateway } from '../group/group.gateway';
 import { GroupService } from '../group/group.service';
-import { EventService } from 'src/event/event.service';
+import { EventService } from '../event/event.service';
 import {
   CloseAccountDto,
   RequestAllUserDataDto,
@@ -29,7 +29,6 @@ import {
   BanUserDto,
 } from './user.dto';
 import { UserService } from './user.service';
-import { RequestError } from 'google-auth-library/build/src/transporters';
 import { readFileSync } from 'fs';
 
 const majors = readFileSync('/app/server/src/user/majors.txt', 'utf8').split(

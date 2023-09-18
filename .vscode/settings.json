@@ -1,4 +1,5 @@
 {
+  "typescript.preferences.importModuleSpecifier": "relative",
   "githubPullRequests.ignoredPullRequestBranches": [
     "master"
   ]

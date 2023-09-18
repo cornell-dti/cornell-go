@@ -89,6 +89,9 @@
     "collectCoverageFrom": [
       "**/*.(t|j)s"
     ],
+    "testPathIgnorePatterns": [
+      ".*\\.e2e-spec\\.ts$"
+    ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
   }
