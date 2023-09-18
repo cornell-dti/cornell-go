@@ -58,12 +58,14 @@ async function main() {
     } finally {
       console.log("Stopping postgres (if running)");
       execSync(`docker compose stop postgres`);
-      console.log("Deleting test database");
-      rmSync("./postgres-data", { recursive: true, force: true });
       if (saveOldPostgres) {
+        console.log("Deleting test database");
+        rmSync("./postgres-data", { recursive: true, force: true });
         console.log("Restoring database data");
         copyFolderSync("./postgres-data-saved", "./postgres-data");
         rmSync("./postgres-data-saved", { recursive: true, force: true });
+      } else {
+        console.log("Leaving test database on disk");
       }
     }
   }
