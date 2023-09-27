@@ -6,7 +6,7 @@ import {
   OrganizationSpecialUsage,
   User,
 } from '@prisma/client';
-import { ClientService } from 'src/client/client.service';
+import { ClientService } from '../client/client.service';
 import { v4 } from 'uuid';
 import { PrismaService } from '../prisma/prisma.service';
 import { OrganizationDto, UpdateOrganizationDataDto } from './organization.dto';
@@ -40,10 +40,7 @@ export class OrganizationService {
   constructor(
     private prisma: PrismaService,
     private clientService: ClientService,
-  ) {
-    this.getDefaultOrganization(OrganizationSpecialUsage.CORNELL_LOGIN);
-    this.getDefaultOrganization(OrganizationSpecialUsage.DEVICE_LOGIN);
-  }
+  ) {}
 
   async makeDefaultEvent() {
     const chal = await this.prisma.challenge.create({
