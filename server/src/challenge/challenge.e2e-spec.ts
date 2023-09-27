@@ -177,7 +177,7 @@ describe('ChallengeModule E2E', () => {
     });
   });
 
-  describe('CR', () => {
+  describe('Create and read functions', () => {
     it('should add a challenge to eventbase: upsertChallengeFromDto', async () => {
       const chaldto: ChallengeDto = {
         id: '12345',
@@ -231,10 +231,7 @@ describe('ChallengeModule E2E', () => {
         containingEventId: event.id,
       };
 
-      const newChal = await challengeService.upsertChallengeFromDto(
-        secondChalDTO,
-      );
-      // console.log(newChal.eventIndex);
+      await challengeService.upsertChallengeFromDto(secondChalDTO);
       const nextChal = await challengeService.nextChallenge(
         await prisma.challenge.findFirstOrThrow({
           where: { linkedEventId: event.id, eventIndex: 0 },
@@ -246,7 +243,7 @@ describe('ChallengeModule E2E', () => {
     });
   });
 
-  describe('UD', () => {
+  describe('Update functions', () => {
     it('should update challenge from eventbase: upsertChallengeFromDto', async () => {
       const chalID = (await prisma.challenge.findFirstOrThrow()).id;
       const chaldto: ChallengeDto = {
@@ -268,7 +265,7 @@ describe('ChallengeModule E2E', () => {
     });
   });
 
-  describe('Delete', () => {
+  describe('Delete functions', () => {
     it('should remove challenge from eventbase: removeChallenge', async () => {
       const chal = await prisma.challenge.findFirstOrThrow({
         where: { linkedEventId: event.id, defaultOf: null },
@@ -280,7 +277,6 @@ describe('ChallengeModule E2E', () => {
           include: { usedIn: true },
         })
       ).usedIn[0].id;
-      // console.log(orgID);
 
       await prisma.organization.update({
         where: { id: orgID },
@@ -292,44 +288,7 @@ describe('ChallengeModule E2E', () => {
         data: { managerOf: { connect: { id: orgID } } },
       });
 
-      // const manager = await prisma.user.findFirstOrThrow({
-      //   where: { id: user.id },
-      //   include: { managerOf: true },
-      // });
-
-      // console.log(manager.managerOf);
-
-      // const managers = (
-      //   await prisma.organization.findFirstOrThrow({
-      //     where: { id: orgID },
-      //     include: { managers: true },
-      //   })
-      // ).managers;
-
-      // console.log(managers.find(o => o.id === user.id));
-
-      // const c = (
-      //   await prisma.challenge.findFirstOrThrow({
-      //     where: { id: chal.id },
-      //   })
-      // ).linkedEventId;
-
-      // const e = await prisma.eventBase.findFirstOrThrow({
-      //   where: { id: c! },
-      //   include: { usedIn: true },
-      // });
-
-      // const m = await prisma.organization.findFirstOrThrow({
-      //   where: { id: e.usedIn[0].id },
-      //   include: { managers: true },
-      // });
-
-      // console.log(orgID);
-      // console.log(m.id);
-      // console.log(m.managers.find(o => o.id === user.id));
-
-      const removed = await challengeService.removeChallenge(chal.id, user);
-      // console.log('del:', removed);
+      await challengeService.removeChallenge(chal.id, user);
       const chalres = await prisma.challenge.findFirst({
         where: { id: chal.id },
       });
