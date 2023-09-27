@@ -340,15 +340,15 @@ describe('ChallengeModule E2E', () => {
 
   describe('setCurrentChallenge', () => {
     it('should set challenge to current', async () => {
-      const secondChal = await prisma.challenge.findFirstOrThrow({
+      const chal = await prisma.challenge.findFirstOrThrow({
         where: {
-          eventIndex: 1,
           linkedEvent: event,
         },
       });
-      await challengeService.setCurrentChallenge(user, secondChal.id);
+
+      await challengeService.setCurrentChallenge(user, chal.id);
       const tracker = await eventService.getCurrentEventTrackerForUser(user);
-      expect(tracker.curChallengeId).toEqual(secondChal.id);
+      expect(tracker.curChallengeId).toEqual(chal.id);
     });
   });
 
