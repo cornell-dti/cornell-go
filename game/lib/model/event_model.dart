@@ -3,20 +3,18 @@ import 'package:game/api/game_api.dart';
 import 'package:game/api/game_client_dto.dart';
 
 class EventModel extends ChangeNotifier {
-  Map<String, UpdateEventDataEventDto> _events = {};
+  Map<String, EventDto> _events = {};
   Map<String, List<UpdateLeaderDataUserDto>> _topPlayers = {};
 
   ApiClient _client;
-  List<UpdateEventDataEventDto>? searchResults;
+  List<EventDto>? searchResults;
 
   EventModel(ApiClient client) : _client = client {
     client.clientApi.updateEventDataStream.listen((event) {
-      if (event.isSearch) {
-        searchResults = event.events;
-        print(event.events.length);
+      if (!event.event is String) {
+        searchResults = event.event;
       }
-      event.events.forEach((element) {
-        print(element.name);
+      event.event.toList().forEach((element) {
         _events[element.id] = element;
       });
       notifyListeners();
@@ -26,8 +24,6 @@ class EventModel extends ChangeNotifier {
       if (event.users.length == 0) {
         return;
       }
-      print(event.users.length);
-
       final players = _topPlayers[event.eventId];
       for (int i = event.offset; i < event.users.length; i++) {
         if (i < players!.length) {
@@ -79,7 +75,7 @@ class EventModel extends ChangeNotifier {
     return topPlayers ?? [];
   }
 
-  UpdateEventDataEventDto? getEventById(String id) {
+  EventDto? getEventById(String id) {
     if (_events.containsKey(id)) {
       return _events[id];
     } else {
@@ -88,13 +84,8 @@ class EventModel extends ChangeNotifier {
     }
   }
 
-  void searchEvents(
-      int offset,
-      int count,
-      List<UpdateEventDataEventRewardTypeDto> rewardTypes,
-      bool closestToEnding,
-      bool shortestFirst,
-      bool skippableOnly) {
+  void searchEvents(int offset, int count, List<EventRewardType> rewardTypes,
+      bool closestToEnding, bool shortestFirst, bool skippableOnly) {
     searchResults = null;
     _client.serverApi?.requestAllEventData(offset, count, rewardTypes,
         closestToEnding, shortestFirst, skippableOnly);

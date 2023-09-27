@@ -16,6 +16,10 @@ export interface SetGraduationYearDto {
   newYear: string;
 }
 
+export interface BanUserDto {
+  userId: string;
+  isBanned: boolean;
+}
 /** DTO for setAuthToOAuth */
 export interface SetAuthToOAuthDto {
   provider: 'apple' | 'google';
@@ -38,22 +42,41 @@ export interface RequestUserDataDto {
   userId?: string;
 }
 
+export interface RequestAllUserDataDto {}
+
+/** DTO for requestFavoriteEventData */
+export interface RequestFavoriteEventDataDto {
+  isFavorite: boolean;
+  eventId: string;
+}
+
 export type UserAuthTypeDto = 'device' | 'apple' | 'google';
 
 /** DTO for updateUserData event */
 export interface UserDto {
   id: string;
   username: string;
-  major: string;
+  userStatus: string;
+  email: string;
   year: string;
   score: number;
+  isBanned: boolean;
   groupId: string;
   authType: UserAuthTypeDto;
   rewardIds?: string[];
   trackedEventIds?: string[];
+  favoriteIds?: string[];
 }
 
-export interface UpdateUserDto {
+export interface UpdateUserDataDto {
   user: UserDto | string;
   deleted: boolean;
+}
+
+export type eventFilterDto = 'new' | 'saved' | 'finished';
+
+export interface RequestFilteredEventDto {
+  filter: eventFilterDto;
+  cursorId?: string;
+  limit: number;
 }

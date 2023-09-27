@@ -7,6 +7,11 @@ import { UpdateErrorDto } from "../dto/client.dto";
 import { RequestEventDataDto, UpdateEventDataDto } from "../dto/event.dto";
 import { RequestGroupDataDto, UpdateGroupDataDto } from "../dto/group.dto";
 import {
+  RequestAllUserDataDto,
+  RequestUserDataDto,
+  UpdateUserDataDto,
+} from "../dto/user.dto";
+import {
   RequestOrganizationDataDto,
   UpdateOrganizationDataDto,
 } from "../dto/organization.dto";
@@ -25,6 +30,12 @@ export class ServerApi {
   requestRewardData(data: RequestRewardDataDto) {
     this.socket.emit("requestRewardData", data);
   }
+  requestUserData(data: RequestUserDataDto) {
+    this.socket.emit("requestUserData", data);
+  }
+  requestAllUserData(data: RequestAllUserDataDto) {
+    this.socket.emit("requestAllUserData", data);
+  }
   requestGroupData(data: RequestGroupDataDto) {
     this.socket.emit("requestGroupData", data);
   }
@@ -40,11 +51,20 @@ export class ServerApi {
   updateRewardData(data: UpdateRewardDataDto) {
     this.socket.emit("updateRewardData", data);
   }
+  updateUserData(data: UpdateUserDataDto) {
+    this.socket.emit("updateUserData", data);
+  }
   updateGroupData(data: UpdateGroupDataDto) {
     this.socket.emit("updateGroupData", data);
   }
   updateOrganizationData(data: UpdateOrganizationDataDto) {
     this.socket.emit("updateOrganizationData", data);
+  }
+  addManager(email: string, organizationId: string) {
+    this.socket.emit("addManager", {
+      email: email,
+      organizationId: organizationId,
+    });
   }
 
   onUpdateChallengeData(callback: (data: UpdateChallengeDataDto) => void) {
@@ -64,6 +84,14 @@ export class ServerApi {
   ) {
     this.socket.removeAllListeners("updateOrganizationData");
     this.socket.on("updateOrganizationData", (data) => callback(data));
+  }
+  onUpdateUserData(callback: (data: UpdateUserDataDto) => void) {
+    this.socket.removeAllListeners("updateUserData");
+    this.socket.on("updateUserData", (data) => callback(data));
+  }
+  onAddManager(callback: (email: string) => void) {
+    this.socket.removeAllListeners("addManager");
+    this.socket.on("addManager", (email) => callback(email));
   }
   onUpdateGroupData(callback: (data: UpdateGroupDataDto) => void) {
     this.socket.removeAllListeners("updateGroupData");

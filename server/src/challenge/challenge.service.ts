@@ -99,8 +99,9 @@ export class ChallengeService {
       challengeId !== eventTracker.curChallengeId ||
       (groupMembers.length !== curEvent.requiredMembers &&
         curEvent.requiredMembers >= 0)
-    )
+    ) {
       return false;
+    }
 
     const prevChal = await this.prisma.prevChallenge.create({
       data: {
@@ -227,7 +228,9 @@ export class ChallengeService {
       group.curEventId,
     );
 
-    if (!isChallengeValid) return false;
+    if (!isChallengeValid) {
+      return false;
+    }
 
     const eventTracker: EventTracker =
       await this.eventService.getCurrentEventTrackerForUser(user);

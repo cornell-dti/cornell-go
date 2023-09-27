@@ -82,6 +82,7 @@ export class EventService {
         isRankedForEvent: true,
         user: {
           isRanked: true,
+          isBanned: false,
         },
       },
       skip: offset,
@@ -249,7 +250,7 @@ export class EventService {
   /** Get the top N users by score */
   async getTopPlayers(firstIndex: number, count: number) {
     return await this.prisma.user.findMany({
-      where: { isRanked: true },
+      where: { isRanked: true, isBanned: false },
       orderBy: { score: 'desc' },
       skip: firstIndex,
       take: count,
@@ -443,6 +444,10 @@ export class EventService {
           ? EventRewardType.LIMITED_TIME
           : EventRewardType.PERPETUAL,
       endTime: new Date(event.endTime),
+      // rewards: {set: event.rewardIds.map(id => ({ connect: {id: id} })) },
+      // challengeIds: event.challengeIds,
+      userFavoriteIds: event.userFavoriteIds,
+      // initialOrganizationId: event.initialOrganizationId,
       indexable: event.indexable,
       minimumScore: event.minimumScore,
       latitude: firstChal?.latitude ?? 0,
@@ -464,7 +469,7 @@ export class EventService {
       },
       update: {
         ...assignData,
-        defaultChallengeId: event.defaultChallengeId,
+        // defaultChallengeId: event.defaultChallengeId,
         challenges: {
           set: event.challengeIds
             .map(id => ({ id }))

@@ -47,7 +47,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
     );
     return Scaffold(
         floatingActionButton: navBtn(scaffoldKey, context),
-        drawer: NavBar(),
+        // drawer: NavBar(),
         key: scaffoldKey,
         backgroundColor: const Color(0xFFFFFF),
         body: Consumer5<ApiClient, GameModel, GroupModel, UserModel,
@@ -318,7 +318,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                           rewardModel.rewardByEventId[groupModel.curEventId];
 
                       if (userModel.userData?.rewardIds
-                              .contains(reward?.rewardId ?? "") ??
+                              .contains(reward?.id ?? "") ??
                           false) {
                         _mightShowRewardNotif = false;
                         Future.delayed(Duration.zero, () {
@@ -374,7 +374,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
           member.name,
           member.points.toString(),
           member.id == userModel.userData?.id && groupModel.members.length > 1,
-          member.host,
+          member.id == groupModel.group!.hostId,
           member.curChallengeId ==
               trackerModel
                   .trackerByEventId(groupModel.curEventId ?? '')

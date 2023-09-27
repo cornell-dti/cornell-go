@@ -38,6 +38,8 @@ export interface RequestUserDataDto {
   userId?: string;
 }
 
+export interface RequestAllUserDataDto {}
+
 export type UserAuthTypeDto = "device" | "apple" | "google";
 
 /** DTO for updateUserData event */
@@ -51,9 +53,10 @@ export interface UserDto {
   authType: UserAuthTypeDto;
   rewardIds?: string[];
   trackedEventIds?: string[];
+  favoriteIds?: string[];
 }
 
-export interface UpdateUserDto {
+export interface UpdateUserDataDto {
   user: UserDto | string;
   deleted: boolean;
 }

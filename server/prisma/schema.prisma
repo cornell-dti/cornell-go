@@ -43,26 +43,28 @@ enum OrganizationSpecialUsage {
 }
 
 model User {
-  id                  String          @id() @default(uuid())
+  id                  String            @id() @default(uuid())
   authToken           String
   authType            AuthType
   username            String
-  major               String
   year                String
   email               String
   hashedRefreshToken  String
   administrator       Boolean
+  userStatus          String
   score               Int
+  isBanned            Boolean           @default(false)
   rewards             EventReward[]
-  group               Group           @relation("member", fields: [groupId], references: [id])
+  group               Group             @relation("member", fields: [groupId], references: [id])
   groupId             String
-  hostOf              Group?          @relation("host")
+  hostOf              Group?            @relation("host")
   eventTrackers       EventTracker[]
-  completedChallenges PrevChallenge[] @relation("owner")
-  memberOf            Organization[]  @relation("player")
-  managerOf           Organization[]  @relation("orgManager")
-  isRanked            Boolean         @default(true)
-  participatedIn      PrevChallenge[] @relation("prevChallengeParticipant")
+  favorites           EventBase[]
+  completedChallenges PrevChallenge[]   @relation("owner")
+  memberOf            Organization[]    @relation("player")
+  managerOf           Organization[]    @relation("orgManager")
+  isRanked            Boolean           @default(true)
+  participatedIn      PrevChallenge[]   @relation("prevChallengeParticipant")
   sessionLogEntries   SessionLogEntry[]
 }
 
@@ -104,6 +106,7 @@ model EventBase {
   minimumScore       Int             @default(1)
   rewards            EventReward[]
   challenges         Challenge[]     @relation("all")
+  userFavorite       User[]
   usedIn             Organization[]  @relation("eventOrgs")
   defaultOf          Organization[]  @relation("defaultOrg")
   defaultChallenge   Challenge       @relation("default", fields: [defaultChallengeId], references: [id])
