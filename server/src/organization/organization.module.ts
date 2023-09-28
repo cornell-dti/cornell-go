@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { ClientModule } from 'src/client/client.module';
-import { PrismaModule } from 'src/prisma/prisma.module';
+import { ClientModule } from '../client/client.module';
+import { PrismaModule } from '../prisma/prisma.module';
 import { OrganizationService } from './organization.service';
 
 @Module({

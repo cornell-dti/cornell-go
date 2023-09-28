@@ -1,8 +1,8 @@
 import { SessionLogModule } from './../session-log/session-log.module';
 import { forwardRef, Module } from '@nestjs/common';
-import { ClientModule } from 'src/client/client.module';
-import { EventModule } from 'src/event/event.module';
-import { RewardModule } from 'src/reward/reward.module';
+import { ClientModule } from '../client/client.module';
+import { EventModule } from '../event/event.module';
+import { RewardModule } from '../reward/reward.module';
 import { AuthModule } from '../auth/auth.module';
 import { GroupModule } from '../group/group.module';
 import { PrismaModule } from '../prisma/prisma.module';

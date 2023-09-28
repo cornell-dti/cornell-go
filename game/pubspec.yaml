@@ -48,6 +48,7 @@ dependencies:
   platform_device_id: ^1.0.1
   flutter_map: ^3.1.0
   latlong2: ^0.8.1
+  device_info_plus: ^3.2.3
 
 flutter_icons:
   android: true

@@ -5,10 +5,10 @@ import {
   WebSocketGateway,
 } from '@nestjs/websockets';
 import { User } from '@prisma/client';
-import { UserGuard } from 'src/auth/jwt-auth.guard';
-import { EventGateway } from 'src/event/event.gateway';
-import { GroupGateway } from 'src/group/group.gateway';
-import { UserGateway } from 'src/user/user.gateway';
+import { UserGuard } from '../auth/jwt-auth.guard';
+import { EventGateway } from '../event/event.gateway';
+import { GroupGateway } from '../group/group.gateway';
+import { UserGateway } from '../user/user.gateway';
 import { CallingUser } from '../auth/calling-user.decorator';
 import { ClientService } from '../client/client.service';
 import { ChallengeService } from './challenge.service';
@@ -19,12 +19,12 @@ import {
   SetCurrentChallengeDto,
   UpdateChallengeDataDto,
 } from './challenge.dto';
-import { GroupService } from 'src/group/group.service';
-import { UserService } from 'src/user/user.service';
-import { EventService } from 'src/event/event.service';
-import { RequestGlobalLeaderDataDto } from 'src/user/user.dto';
-import { RewardService } from 'src/reward/reward.service';
-import { EventDto } from 'src/event/event.dto';
+import { GroupService } from '../group/group.service';
+import { UserService } from '../user/user.service';
+import { EventService } from '../event/event.service';
+import { RequestGlobalLeaderDataDto } from '../user/user.dto';
+import { RewardService } from '../reward/reward.service';
+import { EventDto } from '../event/event.dto';
 
 @WebSocketGateway({ cors: true })
 @UseGuards(UserGuard)

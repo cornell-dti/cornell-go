@@ -154,6 +154,7 @@ function getColumns(setRowsData: any, serverData: any) {
             }}
             onDelete={() => {
               serverData.deleteGroup(deleteId);
+              serverData.groups.delete(data.id);
 
               let rowsClone = [...tableManager.rowsApi.rows];
               let deletedRowIndex = rowsClone.findIndex(
@@ -161,18 +162,16 @@ function getColumns(setRowsData: any, serverData: any) {
               );
               rowsClone.splice(deletedRowIndex, 1);
 
-              setTimeout(() => {
-                var newData = Array.from(serverData.groups.values()).map((gr) =>
-                  toForm(gr)
-                );
-                newData.forEach((gr) => {
-                  let index = rowsClone.findIndex((r) => r.id === gr.id);
+              const newData = Array.from(serverData.groups.values()).map((gr) =>
+                toForm(gr)
+              );
+              newData.forEach((gr) => {
+                let index = rowsClone.findIndex((r) => r.id === gr.id);
 
-                  if (index === -1) rowsClone.push(gr);
-                });
+                if (index === -1) rowsClone.push(gr);
+              });
 
-                setRowsData(rowsClone);
-              }, 500);
+              setRowsData(rowsClone);
 
               tableManager.rowEditApi.setEditRowId(null);
             }}

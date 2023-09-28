@@ -1,7 +1,7 @@
 import { SessionLogModule } from './../session-log/session-log.module';
 import { forwardRef, Module } from '@nestjs/common';
-import { ClientModule } from 'src/client/client.module';
-import { UserModule } from 'src/user/user.module';
+import { ClientModule } from '../client/client.module';
+import { UserModule } from '../user/user.module';
 import { AuthModule } from '../auth/auth.module';
 import { EventModule } from '../event/event.module';
 import { OrganizationModule } from '../organization/organization.module';
