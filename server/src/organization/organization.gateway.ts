@@ -5,16 +5,16 @@ import {
   WebSocketGateway,
 } from '@nestjs/websockets';
 import { User } from '@prisma/client';
-import { CallingUser } from 'src/auth/calling-user.decorator';
-import { UserGuard } from 'src/auth/jwt-auth.guard';
-import { ClientService } from 'src/client/client.service';
+import { CallingUser } from '../auth/calling-user.decorator';
+import { UserGuard } from '../auth/jwt-auth.guard';
+import { ClientService } from '../client/client.service';
 import {
   OrganizationDto,
   RequestOrganizationDataDto,
   UpdateOrganizationDataDto,
 } from './organization.dto';
 import { OrganizationService } from './organization.service';
-import { UserService } from 'src/user/user.service';
+import { UserService } from '../user/user.service';
 
 @WebSocketGateway({ cors: true })
 @UseGuards(UserGuard)

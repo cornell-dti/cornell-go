@@ -5,8 +5,8 @@ import {
   WebSocketGateway,
 } from '@nestjs/websockets';
 import { User } from '@prisma/client';
-import { UserGuard } from 'src/auth/jwt-auth.guard';
-import { EventService } from 'src/event/event.service';
+import { UserGuard } from '../auth/jwt-auth.guard';
+import { EventService } from '../event/event.service';
 import { CallingUser } from '../auth/calling-user.decorator';
 import { ClientService } from '../client/client.service';
 import {

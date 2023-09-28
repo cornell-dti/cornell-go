@@ -2,6 +2,10 @@ import { Test } from '@nestjs/testing';
 import { EventService } from '../event/event.service';
 import { GroupService } from '../group/group.service';
 import { UserService } from './user.service';
+import { PrismaService } from '../prisma/prisma.service';
+import { OrganizationService } from '../organization/organization.service';
+import { ClientService } from '../client/client.service';
+import { SessionLogService } from '../session-log/session-log.service';
 
 describe('UserService', () => {
   let service: UserService;
@@ -17,6 +21,22 @@ describe('UserService', () => {
         {
           useValue: null,
           provide: GroupService,
+        },
+        {
+          useValue: null,
+          provide: PrismaService,
+        },
+        {
+          useValue: null,
+          provide: OrganizationService,
+        },
+        {
+          useValue: null,
+          provide: ClientService,
+        },
+        {
+          useValue: null,
+          provide: SessionLogService,
         },
       ],
     }).compile();
