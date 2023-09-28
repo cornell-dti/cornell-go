@@ -8,7 +8,7 @@ class JourneyCell extends StatefulWidget {
   final bool isCompleted;
   final String difficulty;
   final int points;
-  final int challenge_points;
+  final int challengePoints;
 
   const JourneyCell(
       this.journeyName,
@@ -18,7 +18,7 @@ class JourneyCell extends StatefulWidget {
       this.isCompleted,
       this.difficulty,
       this.points,
-      this.challenge_points,
+      this.challengePoints,
       {Key? key})
       : super(key: key);
 
@@ -31,7 +31,7 @@ class JourneyCell extends StatefulWidget {
       isCompleted,
       difficulty,
       points,
-      challenge_points);
+      challengePoints);
 }
 
 class _JourneyCellState extends State<JourneyCell> {
@@ -42,7 +42,7 @@ class _JourneyCellState extends State<JourneyCell> {
   final bool isCompleted;
   final String difficulty;
   final int points;
-  final int challenge_points;
+  final int challengePoints;
 
   _JourneyCellState(
       this.journeyName,
@@ -52,7 +52,7 @@ class _JourneyCellState extends State<JourneyCell> {
       this.isCompleted,
       this.difficulty,
       this.points,
-      this.challenge_points);
+      this.challengePoints);
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +67,7 @@ class _JourneyCellState extends State<JourneyCell> {
                 numberCompleted,
                 difficulty,
                 points,
-                challenge_points));
+                challengePoints));
       },
       child: Container(
         color: Color.fromARGB(51, 217, 217, 217),
@@ -161,7 +161,7 @@ class JourneyPreview extends StatefulWidget {
   final int numberCompleted;
   final String difficulty;
   final int points;
-  final int challenge_points;
+  final int challengePoints;
 
   static Color backgroundColor = Color.fromARGB(255, 217, 214, 213);
 
@@ -169,7 +169,7 @@ class JourneyPreview extends StatefulWidget {
   final String imgPath = "assets/images/38582.jpg";
 
   JourneyPreview(this.journeyName, this.description, this.locationCount,
-      this.numberCompleted, this.difficulty, this.points, this.challenge_points,
+      this.numberCompleted, this.difficulty, this.points, this.challengePoints,
       {Key? key})
       : super(key: key);
 
@@ -181,7 +181,7 @@ class JourneyPreview extends StatefulWidget {
       numberCompleted,
       difficulty,
       points,
-      challenge_points);
+      challengePoints);
 }
 
 class _JourneyPreviewState extends State<JourneyPreview> {
@@ -191,22 +191,16 @@ class _JourneyPreviewState extends State<JourneyPreview> {
   final int numberCompleted;
   final String difficulty;
   final int points;
-  final int challenge_points;
-  bool _challenge_on = false;
+  final int challengePoints;
+  bool _challengeOn = false;
 
   static Color backgroundColor = Color.fromARGB(255, 217, 214, 213);
 
   //Temporary image for now. Will have to change later
   final String imgPath = "assets/images/38582.jpg";
 
-  _JourneyPreviewState(
-      this.journeyName,
-      this.description,
-      this.locationCount,
-      this.numberCompleted,
-      this.difficulty,
-      this.points,
-      this.challenge_points);
+  _JourneyPreviewState(this.journeyName, this.description, this.locationCount,
+      this.numberCompleted, this.difficulty, this.points, this.challengePoints);
   @override
   Widget build(BuildContext context) {
     return Dialog(
@@ -324,7 +318,7 @@ class _JourneyPreviewState extends State<JourneyPreview> {
                 child: Row(children: [
                   Text(
                       "Beat the timer (+ " +
-                          challenge_points.toString() +
+                          challengePoints.toString() +
                           " points)",
                       style: TextStyle(fontSize: 16, color: Colors.black)),
                   Expanded(
@@ -337,7 +331,7 @@ class _JourneyPreviewState extends State<JourneyPreview> {
                         height: 20.0,
                         child: Container(
                           decoration: new BoxDecoration(
-                            color: _challenge_on
+                            color: _challengeOn
                                 ? Colors.lightBlue
                                 : backgroundColor,
                             shape: BoxShape.rectangle,
@@ -348,7 +342,7 @@ class _JourneyPreviewState extends State<JourneyPreview> {
                       ),
                       Padding(
                         padding: EdgeInsets.only(
-                            left: _challenge_on ? 20.0 : 4.0, top: 2),
+                            left: _challengeOn ? 20.0 : 4.0, top: 2),
                         child: new Container(
                           width: 16,
                           height: 16,
@@ -365,7 +359,7 @@ class _JourneyPreviewState extends State<JourneyPreview> {
                             onPressed: () {
                               setState(
                                 () {
-                                  _challenge_on = !_challenge_on;
+                                  _challengeOn = !_challengeOn;
                                 },
                               );
                             },
