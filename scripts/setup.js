@@ -31,7 +31,7 @@ async function main() {
   chdir("..");
   execSync("npm run dbreset");
   console.log("Verifying docker compose setup (this may take a while)");
-  execSync("npm run tests -- e2e");
+  execSync("npm run tests:e2e");
   console.log("Setup successful!");
 }
 

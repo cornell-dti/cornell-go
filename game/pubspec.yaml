@@ -26,7 +26,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   sliding_up_panel: ^2.0.0+1
-  velocity_x: ^3.3.0
+  velocity_x: ^4.1.1
   flutter_blurhash:
   cached_network_image: ^3.1.0
   google_fonts: 2.2.0
