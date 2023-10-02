@@ -259,7 +259,11 @@ export class UserService {
   //     data: { major },
   //   });
   // }
-
+  /**
+   * Updates a user's graduation year.
+   * @param user user requesting the change in graduation year
+   * @param year the new graduation year. 
+   */
   async setGraduationYear(user: User, year: string) {
     await this.prisma.user.update({
       where: { id: user.id },
@@ -267,6 +271,12 @@ export class UserService {
     });
   }
 
+  /**
+   * Ban a user based on their user id.
+   * @param user the user who will be banned.
+   * @param isBanned a boolean which represents the user's banned status
+   * @returns A promise containing the new user if successful. 
+   */
   async banUser(user: User, isBanned: boolean): Promise<User> {
     return await this.prisma.user.update({
       where: { id: user.id },
@@ -276,6 +286,11 @@ export class UserService {
     });
   }
 
+  /**
+   * Update a User's username, email, or year.
+   * @param user User requiring an update.
+   * @returns The new user after the update is made
+   */
   async updateUser(user: UserDto): Promise<User> {
     return await this.prisma.user.update({
       where: { id: user.id },

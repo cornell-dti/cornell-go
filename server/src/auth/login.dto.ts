@@ -1,3 +1,7 @@
+/**
+ * LoginDto defines a user's login status and stores a user's basic information
+ * such as idToken, lat, long, username, year, aud, and enrollmentType.
+ */
 export interface LoginDto {
   idToken: string;
   lat: number;
