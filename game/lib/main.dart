@@ -70,14 +70,14 @@ class MyApp extends StatelessWidget {
         child: GameWidget(
             child: MaterialApp(
           title: 'CornellGO!',
-          loscalizationsDelegates: [
+          localizationsDelegates: [
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
           supportedLocales: const [Locale('en', '')],
           theme: ThemeData(primarySwatch: Colors.blue),
-          home: GameplayMap(),
+          home: GameplayPage(),
         )));
   }
 }
