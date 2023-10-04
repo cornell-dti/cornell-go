@@ -16,6 +16,8 @@ import 'package:provider/provider.dart';
 
 import 'dart:io' show Platform;
 
+import 'challenges/challenges_page.dart';
+
 const ENV_URL = String.fromEnvironment('API_URL', defaultValue: "");
 
 final storage = FlutterSecureStorage();
