@@ -61,7 +61,7 @@ model User {
   eventTrackers       EventTracker[]
   favorites           EventBase[]
   completedChallenges PrevChallenge[]   @relation("owner")
-  memberOf            Organization[]    @relation("player")
+  memberOf            Organization[]    @relation("orgToUser")
   managerOf           Organization[]    @relation("orgManager")
   isRanked            Boolean           @default(true)
   participatedIn      PrevChallenge[]   @relation("prevChallengeParticipant")
@@ -160,7 +160,7 @@ model Organization {
   id             String                   @id @default(uuid())
   name           String
   accessCode     String
-  members        User[]                   @relation("player")
+  members        User[]                   @relation("orgToUser")
   managers       User[]                   @relation("orgManager")
   events         EventBase[]              @relation("eventOrgs")
   defaultEvent   EventBase                @relation("defaultOrg", fields: [defaultEventId], references: [id], onDelete: Restrict)

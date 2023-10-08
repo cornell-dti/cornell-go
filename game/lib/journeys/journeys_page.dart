@@ -145,9 +145,9 @@ class _JourneysPageState extends State<JourneysPage> {
               ),
             ),
             Expanded(child: Consumer5<EventModel, GroupModel, TrackerModel,
-                        ChallengeModel, UserModel>(
-                    builder: (context, myEventModel, groupModel, trackerModel,
-                        challengeModel, userModel, child) {
+                    ChallengeModel, UserModel>(
+                builder: (context, myEventModel, groupModel, trackerModel,
+                    challengeModel, userModel, child) {
               List<Widget> eventCells = [];
               if (myEventModel.searchResults == null) {
                 myEventModel.searchEvents(
@@ -221,18 +221,17 @@ class _JourneysPageState extends State<JourneysPage> {
                   ),
                 );
               }
-            })
-                // ListView.separated(
-                //   padding: const EdgeInsets.all(0),
-                //   itemCount: cells.length,
-                //   itemBuilder: (context, index) {
-                //     return cells[index];
-                //   },
-                //   separatorBuilder: (context, index) {
-                //     return SizedBox(height: 10);
-                //   },
-                // ),
-                ),
+              return ListView.separated(
+                padding: const EdgeInsets.all(0),
+                itemCount: eventCells.length,
+                itemBuilder: (context, index) {
+                  return eventCells[index];
+                },
+                separatorBuilder: (context, index) {
+                  return SizedBox(height: 10);
+                },
+              );
+            })),
           ],
         ),
       ),

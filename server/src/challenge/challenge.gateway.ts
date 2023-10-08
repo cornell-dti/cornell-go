@@ -38,6 +38,12 @@ export class ChallengeGateway {
     private rewardService: RewardService,
   ) {}
 
+  /**
+   * Subscribes and emits the information of the requested challenges
+   *
+   * @param user the calling user
+   * @param data array of challengeIds to return
+   */
   @SubscribeMessage('requestChallengeData')
   async requestChallengeData(
     @CallingUser() user: User,
