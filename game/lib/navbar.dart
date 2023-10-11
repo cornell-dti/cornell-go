@@ -4,7 +4,7 @@ import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:game/gameplay/gameplay_page.dart';
 import 'package:game/journeys/journeys_page.dart';
-import '../assets/icons/'
+import 'package:flutter_svg/flutter_svg.dart';
 
 class BottomNavBar extends StatefulWidget {
   const BottomNavBar({Key? key}) : super(key: key);
@@ -39,22 +39,31 @@ class _BottomNavBarState extends State<BottomNavBar> {
         child: _widgetOptions.elementAt(_selectedIndex),
       ),
       bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
+        items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
+            icon: SvgPicture.asset("assets/icons/home.svg",
+                colorFilter: ColorFilter.mode(Colors.grey, BlendMode.srcIn)),
+            activeIcon: SvgPicture.asset("assets/icons/home.svg",
+                colorFilter: ColorFilter.mode(Colors.black, BlendMode.srcIn)),
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.business),
-            label: 'Business',
+            icon: SvgPicture.asset("assets/icons/leaderboard.svg",
+                colorFilter: ColorFilter.mode(Colors.grey, BlendMode.srcIn)),
+            activeIcon: SvgPicture.asset("assets/icons/leaderboard.svg",
+                colorFilter: ColorFilter.mode(Colors.black, BlendMode.srcIn)),
+            label: 'Leaderboard',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.school),
-            label: 'School',
+            icon: SvgPicture.asset("assets/icons/profilehead.svg",
+                colorFilter: ColorFilter.mode(Colors.grey, BlendMode.srcIn)),
+            activeIcon: SvgPicture.asset("assets/icons/profilehead.svg",
+                colorFilter: ColorFilter.mode(Colors.black, BlendMode.srcIn)),
+            label: 'Profile',
           ),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: Colors.amber[800],
+        selectedItemColor: Colors.black,
         onTap: _onItemTapped,
       ),
     );
