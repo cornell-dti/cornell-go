@@ -20,7 +20,6 @@ describe('UserModule E2E', () => {
 
   it('should successfully find UserService', async () => {
     const userService = moduleRef.get<UserService>(UserService);
-
     expect(userService).toBeDefined();
   });
 
@@ -35,7 +34,7 @@ describe('UserModule E2E', () => {
       1,
       AuthType.DEVICE,
       'abcd',
-      'Undergraduate',
+      'UNDERGRADUATE',
     );
 
     const user = await userService.byAuth(AuthType.DEVICE, 'abcd');
@@ -43,6 +42,71 @@ describe('UserModule E2E', () => {
     expect(user).toBeDefined();
     expect(user?.username).toEqual('test');
   });
+
+  it(`should properly delete user`, async () => {
+    const userService = moduleRef.get<UserService>(UserService)
+
+    await userService.register(
+      'test@example.com',
+      'test',
+      '2024',
+      1,
+      1,
+      AuthType.DEVICE,
+      'abcdef',
+      'UNDERGRADUATE',
+    );
+
+    const user = await userService.byAuth(AuthType.DEVICE, 'abcdef');
+    expect(user).toBeDefined();
+    await userService.deleteUser(user!)
+    expect(user).toBeNull
+  })
+
+  it(`Checking whether setUsername properly updates a user's username`, async () => {
+    const userService = moduleRef.get<UserService>(UserService)
+    await userService.register(
+      'test@example.com',
+      'test',
+      '2024',
+      1,
+      1,
+      AuthType.DEVICE,
+      'abcdef',
+      'UNDERGRADUATE',
+    );
+    const user = await userService.byAuth(AuthType.DEVICE, 'abcdef')
+    userService.setUsername(user!, "newUser")
+    expect(user?.username).toEqual("newUser")
+  })
+
+  it(``, async () => {
+    const userService = moduleRef.get<UserService>(UserService)
+    await userService.register(
+      'test@example.com',
+      'test',
+      '2024',
+      1,
+      1,
+      AuthType.DEVICE,
+      'abcdef',
+      'UNDERGRADUATE',
+    );
+    let users = userService.getAllUserData()
+    expect((await users).length).toEqual(1)
+    await userService.register(
+      'test2@gmail.com',
+      'test2',
+      '2025',
+      1,
+      1,
+      AuthType.DEVICE,
+      'hello',
+      'GRADUATE',
+    );
+    users = userService.getAllUserData()
+    expect((await users).length).toEqual(1)
+  })
 
   afterAll(async () => {
     await app.close();
