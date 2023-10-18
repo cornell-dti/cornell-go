@@ -27,8 +27,8 @@ describe('UserModule E2E', () => {
     const userService = moduleRef.get<UserService>(UserService);
 
     await userService.register(
-      'test@example.com',
-      'test',
+      'test1@example.com',
+      'test1',
       '2024',
       1,
       1,
@@ -40,34 +40,34 @@ describe('UserModule E2E', () => {
     const user = await userService.byAuth(AuthType.DEVICE, 'abcd');
 
     expect(user).toBeDefined();
-    expect(user?.username).toEqual('test');
+    expect(user?.username).toEqual('test1');
   });
 
   it(`should properly delete user`, async () => {
-    const userService = moduleRef.get<UserService>(UserService)
+    const userService = moduleRef.get<UserService>(UserService);
 
     await userService.register(
-      'test@example.com',
-      'test',
+      'test2@example.com',
+      'test2',
       '2024',
       1,
       1,
       AuthType.DEVICE,
-      'abcdef',
+      'abcde',
       'UNDERGRADUATE',
     );
 
-    const user = await userService.byAuth(AuthType.DEVICE, 'abcdef');
+    const user = await userService.byAuth(AuthType.DEVICE, 'abcde');
     expect(user).toBeDefined();
-    await userService.deleteUser(user!)
-    expect(user).toBeNull
-  })
+    await userService.deleteUser(user!);
+    expect(user).toBeNull;
+  });
 
   it(`Checking whether setUsername properly updates a user's username`, async () => {
-    const userService = moduleRef.get<UserService>(UserService)
+    const userService = moduleRef.get<UserService>(UserService);
     await userService.register(
-      'test@example.com',
-      'test',
+      'test3@example.com',
+      'test3',
       '2024',
       1,
       1,
@@ -75,38 +75,39 @@ describe('UserModule E2E', () => {
       'abcdef',
       'UNDERGRADUATE',
     );
-    const user = await userService.byAuth(AuthType.DEVICE, 'abcdef')
-    userService.setUsername(user!, "newUser")
-    expect(user?.username).toEqual("newUser")
-  })
+    let user = await userService.byAuth(AuthType.DEVICE, 'abcdef');
+    await userService.setUsername(user!, 'newUser');
+    user = await userService.byAuth(AuthType.DEVICE, 'abcdef');
+    expect(user?.username).toEqual('newUser');
+  });
 
-  it(``, async () => {
-    const userService = moduleRef.get<UserService>(UserService)
+  it(`Checks the size of all the user data`, async () => {
+    const userService = moduleRef.get<UserService>(UserService);
     await userService.register(
-      'test@example.com',
-      'test',
+      'test4@example.com',
+      'test4',
       '2024',
       1,
       1,
       AuthType.DEVICE,
-      'abcdef',
+      'abcdefg',
       'UNDERGRADUATE',
     );
-    let users = userService.getAllUserData()
-    expect((await users).length).toEqual(1)
+    let users = await userService.getAllUserData();
+    expect((await users).length).toEqual(3);
     await userService.register(
-      'test2@gmail.com',
-      'test2',
+      'test5@gmail.com',
+      'test5',
       '2025',
       1,
       1,
       AuthType.DEVICE,
-      'hello',
+      'abcdefgh',
       'GRADUATE',
     );
-    users = userService.getAllUserData()
-    expect((await users).length).toEqual(1)
-  })
+    users = await userService.getAllUserData();
+    expect((await users).length).toEqual(4);
+  });
 
   afterAll(async () => {
     await app.close();

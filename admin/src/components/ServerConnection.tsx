@@ -51,7 +51,7 @@ export function ServerConnectionProvider(props: { children: ReactNode }) {
             major: "Computer Science",
             year: "2025",
             aud: "web",
-            enrollmentType: "UNDERGRADUATE"
+            enrollmentType: "UNDERGRADUATE",
           });
 
           if (!loginResponse) {
