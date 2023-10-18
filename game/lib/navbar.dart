@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:game/gameplay/gameplay_page.dart';
+import 'package:game/global_leaderboard/global_leaderboard_widget.dart';
 import 'package:game/journeys/journeys_page.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -18,8 +16,11 @@ class _BottomNavBarState extends State<BottomNavBar> {
   static const TextStyle optionStyle =
       TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
   static const List<Widget> _widgetOptions = <Widget>[
-    GameplayPage(),
     JourneysPage(),
+    Text(
+      'Leaderboard',
+      style: optionStyle,
+    ),
     Text(
       'Profile',
       style: optionStyle,
