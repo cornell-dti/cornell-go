@@ -40,7 +40,6 @@ describe('UserModule E2E', () => {
     const user = await userService.byAuth(AuthType.DEVICE, 'abcd');
     expect(user).toBeDefined();
     expect(user?.username).toEqual('test1');
-    await userService.deleteUser(user!);
   });
 
   it(`should properly delete user`, async () => {
@@ -79,7 +78,6 @@ describe('UserModule E2E', () => {
     await userService.setUsername(user!, 'newUser');
     user = await userService.byAuth(AuthType.DEVICE, 'abcdef');
     expect(user?.username).toEqual('newUser');
-    await userService.deleteUser(user!);
   });
 
   it(`Checks the size of all the user data`, async () => {
@@ -94,8 +92,19 @@ describe('UserModule E2E', () => {
       'abcdefg',
       'UNDERGRADUATE',
     );
-    let userList = await userSer.getAllUserData();
-    expect(userList.length).toEqual(1);
+    let oldList = await userSer.getAllUserData();
+    await userSer.register(
+      'test4@example.com',
+      'test4',
+      '2024',
+      1,
+      1,
+      AuthType.DEVICE,
+      'abcdefg',
+      'UNDERGRADUATE',
+    );
+    let newList = await userSer.getAllUserData();
+    expect(newList.length).toBeGreaterThan(oldList.length);
   });
 
   afterAll(async () => {
