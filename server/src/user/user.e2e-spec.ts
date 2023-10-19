@@ -18,6 +18,34 @@ describe('UserModule E2E', () => {
     await app.init();
   });
 
+  it(`Checks the size of all the user data`, async () => {
+    const userService = moduleRef.get<UserService>(UserService);
+    await userService.register(
+      'test4@example.com',
+      'test4',
+      '2024',
+      1,
+      1,
+      AuthType.DEVICE,
+      'abcdefg',
+      'UNDERGRADUATE',
+    );
+    let users = await userService.getAllUserData();
+    expect((await users).length).toEqual(1);
+    await userService.register(
+      'test5@gmail.com',
+      'test5',
+      '2025',
+      1,
+      1,
+      AuthType.DEVICE,
+      'abcdefgh',
+      'GRADUATE',
+    );
+    users = await userService.getAllUserData();
+    expect((await users).length).toEqual(2);
+  });
+
   it('should successfully find UserService', async () => {
     const userService = moduleRef.get<UserService>(UserService);
     expect(userService).toBeDefined();
@@ -79,34 +107,6 @@ describe('UserModule E2E', () => {
     await userService.setUsername(user!, 'newUser');
     user = await userService.byAuth(AuthType.DEVICE, 'abcdef');
     expect(user?.username).toEqual('newUser');
-  });
-
-  it(`Checks the size of all the user data`, async () => {
-    const userService = moduleRef.get<UserService>(UserService);
-    await userService.register(
-      'test4@example.com',
-      'test4',
-      '2024',
-      1,
-      1,
-      AuthType.DEVICE,
-      'abcdefg',
-      'UNDERGRADUATE',
-    );
-    let users = await userService.getAllUserData();
-    expect((await users).length).toEqual(3);
-    await userService.register(
-      'test5@gmail.com',
-      'test5',
-      '2025',
-      1,
-      1,
-      AuthType.DEVICE,
-      'abcdefgh',
-      'GRADUATE',
-    );
-    users = await userService.getAllUserData();
-    expect((await users).length).toEqual(4);
   });
 
   afterAll(async () => {
