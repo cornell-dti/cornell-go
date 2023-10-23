@@ -32,7 +32,7 @@ import { UserService } from './user.service';
 import { readFileSync } from 'fs';
 import { OrganizationService } from '../organization/organization.service';
 
-const majors = readFileSync('/app/server/src/user/majors.txt', 'utf8').split(
+const majors = readFileSync('./src/user/majors.txt', 'utf8').split(
   '\n',
 );
 

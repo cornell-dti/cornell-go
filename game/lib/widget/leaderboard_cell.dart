@@ -1,66 +1,92 @@
 import 'package:flutter/material.dart';
 import 'package:game/utils/utility_functions.dart';
 
+/**
+ * Widget that represents each individual leaderboard entry
+ * @param name: name of the user
+ * @param position: the place that the user is in overall
+ * @param points: the number of points the user has
+ * @param isUser: whether the cell is the current user and should be hilighted
+ */
 Widget leaderBoardCell(
     context, String name, int position, int points, bool isUser) {
-  Color Carnelian = Color(0xFFB31B1B);
+  //Creating the styles to use for the position, name, and points
   var posStyle = TextStyle(
-      fontWeight: FontWeight.bold,
-      fontSize: 40,
-      color: (isUser) ? Carnelian : Colors.white);
+    fontFamily: 'Inter',
+    fontSize: 23,
+    fontWeight: FontWeight.w500,
+    height: 1.42,
+    letterSpacing: 0.0,
+    color: Colors.black,
+  );
   var nameStyle = TextStyle(
-      fontWeight: (isUser) ? FontWeight.w900 : FontWeight.w800,
-      fontSize: 22,
-      color: Colors.white);
+    fontFamily: 'Inter',
+    fontSize: 14,
+    fontWeight: FontWeight.w500,
+    height: 1.5,
+    letterSpacing: 0,
+    color: Colors.black,
+  );
   var pointStyle = TextStyle(
-      fontWeight: FontWeight.normal,
-      fontSize: 18,
-      color: (isUser) ? Carnelian : Colors.white,
-      fontStyle: FontStyle.italic);
+    fontFamily: 'Inter',
+    fontSize: 11,
+    fontWeight: FontWeight.w400,
+    height: 1.5455,
+    letterSpacing: 0,
+    color: Colors.black,
+  );
+
   return Padding(
-    padding: const EdgeInsets.all(8.0),
-    child: Container(
-      decoration:
-          BoxDecoration(border: Border(bottom: BorderSide(color: Colors.grey))),
-      width: MediaQuery.of(context).size.width,
-      child: Row(
-        children: [
-          Row(
-            children: [
-              Container(
-                child: Row(
-                  children: [
-                    Text(position.toString(), style: posStyle),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 12.0),
-                      child: Container(
-                        width: 30,
-                        height: 30,
-                        decoration: BoxDecoration(
-                            color: constructColorFromUserName(name),
-                            borderRadius: BorderRadius.circular(15)),
-                      ),
-                    )
-                  ],
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    padding: const EdgeInsets.all(8.74),
+    child: ClipRRect(
+      borderRadius: BorderRadius.circular(10.0),
+      child: Container(
+        decoration: BoxDecoration(
+          color: (isUser) ? Color.fromARGB(255, 169, 149, 122) : Colors.white,
+          border: Border(bottom: BorderSide(color: Colors.grey)),
+        ),
+        width: 283.05,
+        height: 51.47,
+        child: Row(
+          children: [
+            Row(
+              children: [
+                Container(
+                  child: Row(
+                    children: [
+                      Text(position.toString(),
+                          style: posStyle, textAlign: TextAlign.center),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 12.0),
+                        child: Container(
+                          width: 30,
+                          height: 30,
+                          decoration: BoxDecoration(
+                              color: constructColorFromUserName(name),
+                              borderRadius: BorderRadius.circular(15)),
+                        ),
+                      )
+                    ],
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 16.0),
-                child: Container(
-                  child: Text(name, style: nameStyle),
+                Padding(
+                  padding: const EdgeInsets.only(left: 16.0),
+                  child: Container(
+                    child: Text(name, style: nameStyle),
+                  ),
                 ),
-              ),
-            ],
-          ),
-          Container(
-            child: Text(
-              points.toString(),
-              style: pointStyle,
+              ],
             ),
-          )
-        ],
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            Container(
+              child: Text(
+                points.toString(),
+                style: pointStyle,
+              ),
+            )
+          ],
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        ),
       ),
     ),
   );
