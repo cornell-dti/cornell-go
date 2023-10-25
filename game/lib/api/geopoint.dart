@@ -22,12 +22,13 @@ class GeoPoint {
       // Location services are not enabled don't continue
       // accessing the position and request users of the
       // App to enable the location services.
+      print('location disabled');
       return Future.error('Location services are disabled.');
     }
 
     if (_isRequestingLocationPermissions || _isRequestingLocation) {
       //To handle the case where a request is already occuring.
-
+      print('request occuring');
       return null;
     }
 
