@@ -49,7 +49,7 @@ PODS:
     - GoogleUtilities/UserDefaults (~> 7.4)
     - PromisesObjC (~> 1.2)
   - Flutter (1.0.0)
-  - flutter_secure_storage (3.3.1):
+  - flutter_secure_storage (6.0.0):
     - Flutter
   - fluttertoast (0.0.2):
     - Flutter
@@ -135,7 +135,7 @@ DEPENDENCIES:
   - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
   - geolocator_apple (from `.symlinks/plugins/geolocator_apple/ios`)
   - google_sign_in_ios (from `.symlinks/plugins/google_sign_in_ios/ios`)
-  - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/ios`)
+  - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
   - platform_device_id (from `.symlinks/plugins/platform_device_id/ios`)
   - sqflite (from `.symlinks/plugins/sqflite/ios`)
@@ -176,7 +176,7 @@ EXTERNAL SOURCES:
   google_sign_in_ios:
     :path: ".symlinks/plugins/google_sign_in_ios/ios"
   path_provider_foundation:
-    :path: ".symlinks/plugins/path_provider_foundation/ios"
+    :path: ".symlinks/plugins/path_provider_foundation/darwin"
   permission_handler_apple:
     :path: ".symlinks/plugins/permission_handler_apple/ios"
   platform_device_id:
@@ -189,17 +189,17 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   AppAuth: 8fca6b5563a5baef2c04bee27538025e4ceb2add
   device_info: d7d233b645a32c40dfdc212de5cf646ca482f175
-  device_info_plus: e5c5da33f982a436e103237c0c85f9031142abed
+  device_info_plus: c6fb39579d0f423935b0c9ce7ee2f44b71b9fce6
   Firebase: 817b9171d0d51dccc458b94a5e8edff6b1dd323d
   FirebaseAnalytics: 456f2c51599870a15ded4548d1f1f7b2cabf65a7
   FirebaseCore: a6dba751680d7033b9d3831e1cfc95ead0605118
   FirebaseCoreDiagnostics: 7e873baabcfaa9512f538554ae4fa0817aaafbdb
   FirebaseInstallations: b69db7680870dbac17bba7a51fc0b5c4b365baa7
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
-  flutter_secure_storage: 7953c38a04c3fdbb00571bcd87d8e3b5ceb9daec
-  fluttertoast: 16fbe6039d06a763f3533670197d01fc73459037
+  flutter_secure_storage: 23fc622d89d073675f2eaa109381aefbcf5a49be
+  fluttertoast: fafc4fa4d01a6a9e4f772ecd190ffa525e9e2d9c
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
-  geolocator_apple: b741765c55dc21950e3e106e8b3584e55cf81ce5
+  geolocator_apple: cc556e6844d508c95df1e87e3ea6fa4e58c50401
   google_sign_in_ios: 1256ff9d941db546373826966720b0c24804bcdd
   GoogleAppMeasurement: de70802583dedceb0bca18172b345307e8f410b8
   GoogleDataTransport: 85fd18ff3019bb85d3f2c551d04c481dedf71fc9
@@ -216,6 +216,6 @@ SPEC CHECKSUMS:
   Toast: 91b396c56ee72a5790816f40d3a94dd357abc196
   url_launcher_ios: 68d46cc9766d0c41dbdc884310529557e3cd7a86
 
-PODFILE CHECKSUM: 57f68fe6d817d960553d5e1503ffe45226b9c455
+PODFILE CHECKSUM: c37bfc8cb18efcbef5c7f6de4c2a788a4c114955
 
 COCOAPODS: 1.12.0
