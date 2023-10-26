@@ -3,8 +3,7 @@ import { ClientModule } from '../client/client.module';
 import { PrismaModule } from '../prisma/prisma.module';
 import { OrganizationService } from './organization.service';
 import { OrganizationGateway } from './organization.gateway';
-import { AuthModule } from 'src/auth/auth.module';
-import { UserModule } from '../user/user.module';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [PrismaModule, ClientModule, forwardRef(() => AuthModule)],
