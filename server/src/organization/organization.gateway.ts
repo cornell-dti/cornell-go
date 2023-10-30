@@ -23,6 +23,11 @@ export class OrganizationGateway {
     private orgService: OrganizationService,
   ) {}
 
+  /**
+   * Requests organization based on RequestOrganizationDataDto. Subscribes and emits the requested information
+   * @param user The calling user
+   * @param data The data to be requested
+   */
   @SubscribeMessage('requestOrganizationData')
   async requestOrganizationData(
     @CallingUser() user: User,
@@ -46,6 +51,12 @@ export class OrganizationGateway {
     }
   }
 
+  /**
+   * Updates organization based on UpdateOrganizationDataDto. Subscribes and emits data
+   * @param user The calling user
+   * @param data The data to be updated
+   * @returns Emits update organization
+   */
   @SubscribeMessage('updateOrganizationData')
   async updateOrganizationData(
     @CallingUser() user: User,
