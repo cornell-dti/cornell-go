@@ -5,6 +5,7 @@ import { UserService } from './user.service';
 import { GroupService } from '../group/group.service';
 import { EventService } from '../event/event.service';
 import { AuthService } from '../auth/auth.service';
+import { OrganizationService } from '../organization/organization.service';
 
 describe('UserGateway', () => {
   let gateway: UserGateway;
@@ -32,6 +33,10 @@ describe('UserGateway', () => {
         {
           useValue: null,
           provide: AuthService,
+        },
+        {
+          useValue: null,
+          provide: OrganizationService,
         },
       ],
     }).compile();
