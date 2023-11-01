@@ -12,10 +12,10 @@ Widget backBtn(scaffoldKey, context, text) {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          PlayAnimation<double>(
+          PlayAnimationBuilder<double>(
             tween: Tween(begin: 0, end: toFit),
             duration: const Duration(milliseconds: 400),
-            builder: (context, child, value) {
+            builder: (child, value, _) {
               return Positioned(
                 left: 10,
                 child: Container(
