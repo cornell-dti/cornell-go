@@ -8,6 +8,7 @@ import 'package:game/widget/leaderboard_cell.dart';
 import 'package:game/widget/podium_cell.dart';
 import 'package:game/widget/leaderboard_user_cell.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 /**
  * This widget defines the leaderboard page. 
@@ -18,6 +19,21 @@ class GlobalLeaderboardWidget extends StatefulWidget {
   @override
   _GlobalLeaderboardWidgetState createState() =>
       _GlobalLeaderboardWidgetState();
+}
+
+class PodiumWidget extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+        child: Container(
+      width: 328,
+      height: 112,
+      child: SvgPicture.asset(
+        'assets/images/podium.svg',
+        semanticsLabel: 'Podium',
+      ),
+    ));
+  }
 }
 
 /**
@@ -132,9 +148,9 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
       letterSpacing: 0.0,
     );
     return Scaffold(
-      key: scaffoldKey,
-      backgroundColor: Color(0xFFE95755),
-      body: Padding(
+        key: scaffoldKey,
+        backgroundColor: Color(0xFFE95755),
+        body: Padding(
           padding: const EdgeInsets.only(top: 0),
           child: Column(
             children: [
@@ -160,10 +176,13 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
                           child: podiumCell(context, "test3", 1, 190, false)),
                     ],
                   )),
+              Padding(
+                  padding: const EdgeInsets.only(left: 30, right: 30, top: 25),
+                  child: PodiumWidget()),
               Expanded(
                 child: Padding(
                   padding:
-                      const EdgeInsets.only(left: 8.0, right: 8.0, top: 25),
+                      const EdgeInsets.only(left: 8.0, right: 8.0, top: 10),
                   child: Consumer3<GroupModel, EventModel, UserModel>(
                     builder: (context, myGroupModel, myEventModel, myUserModel,
                         child) {
@@ -187,7 +206,6 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
                         Container(
                           width: 345.0,
                           height: 446.0,
-                          margin: EdgeInsets.only(left: 24.0),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.only(
@@ -236,7 +254,7 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
                 ),
               )
             ],
-          )),
-    );
+          ),
+        ));
   }
 }

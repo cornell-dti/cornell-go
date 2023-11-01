@@ -29,11 +29,11 @@ Widget podiumCell(context, String name, int position, int points, bool isUser) {
 
   return Column(children: [
     Container(
-      width: 30,
-      height: 30,
+      width: 49.128,
+      height: 49.128,
       decoration: BoxDecoration(
           color: constructColorFromUserName(name),
-          borderRadius: BorderRadius.circular(15)),
+          borderRadius: BorderRadius.circular(49.128)),
     ),
     Text(name, style: nameStyle, textAlign: TextAlign.center),
     Text(points.toString() + " points",
