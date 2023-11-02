@@ -30,6 +30,7 @@ import {
 } from './user.dto';
 import { UserService } from './user.service';
 import { readFileSync } from 'fs';
+import { OrganizationService } from '../organization/organization.service';
 
 const majors = readFileSync('./src/user/majors.txt', 'utf8').split('\n');
 
@@ -44,6 +45,7 @@ export class UserGateway {
     private userService: UserService,
     private groupService: GroupService,
     private eventService: EventService,
+    private orgService: OrganizationService,
   ) {}
 
   private providerToAuthType(provider: string) {
@@ -230,6 +232,41 @@ export class UserGateway {
         await this.userService.emitUpdateUserData(us, false, false, true);
       }
     }
+  }
+
+  @SubscribeMessage('addManager')
+  async addManager(
+    @CallingUser() user: User,
+    @MessageBody() data: { email: string; organizationId: string },
+  ) {
+    if (!user.administrator) return;
+
+    await this.orgService.addManager(user, data.email, data.organizationId);
+
+    const org = await this.orgService.getOrganizationById(data.organizationId);
+    await this.orgService.emitUpdateOrganizationData(org, false);
+
+    const manager = await this.userService.byEmail(data.email);
+    await this.userService.emitUpdateUserData(
+      manager,
+      false,
+      false,
+      true,
+      user,
+    );
+  }
+
+  @SubscribeMessage('joinOrganization')
+  async joinOrganization(
+    @CallingUser() user: User,
+    @MessageBody() data: { accessCode: string },
+  ) {
+    await this.orgService.joinOrganization(user, data.accessCode);
+
+    const org = await this.orgService.getOrganizationByCode(data.accessCode);
+    await this.orgService.emitUpdateOrganizationData(org, false);
+
+    await this.userService.emitUpdateUserData(user, false, false, true);
   }
 
   @SubscribeMessage('closeAccount')
