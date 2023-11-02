@@ -43,10 +43,9 @@ Widget leaderBoardCell(
       child: Container(
         decoration: BoxDecoration(
           color: (isUser) ? Color.fromARGB(255, 169, 149, 122) : Colors.white,
-          border: Border(bottom: BorderSide(color: Colors.grey)),
         ),
-        width: 283.05,
-        height: 51.47,
+        width: 266,
+        height: 34,
         child: Row(
           children: [
             Row(

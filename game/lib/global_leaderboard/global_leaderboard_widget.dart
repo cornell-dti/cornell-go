@@ -212,10 +212,18 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
                               children: [
                                 for (UpdateLeaderDataUserDto user in list)
                                   Padding(
-                                    padding:
-                                        const EdgeInsets.only(bottom: 16.0),
+                                    padding: const EdgeInsets.only(
+                                        left: 30.95,
+                                        right: 30.95,
+                                        bottom: 16.0),
                                     child: Container(
                                       decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.only(
+                                          topLeft: Radius.circular(10.0),
+                                          topRight: Radius.circular(10.0),
+                                          bottomLeft: Radius.circular(10.0),
+                                          bottomRight: Radius.circular(10.0),
+                                        ),
                                         color: Colors.white,
                                         boxShadow: [
                                           BoxShadow(
