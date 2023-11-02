@@ -182,7 +182,7 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
               Expanded(
                 child: Padding(
                   padding:
-                      const EdgeInsets.only(left: 8.0, right: 8.0, top: 10),
+                      const EdgeInsets.only(left: 8.0, right: 8.0, top: 10.0),
                   child: Consumer3<GroupModel, EventModel, UserModel>(
                     builder: (context, myGroupModel, myEventModel, myUserModel,
                         child) {
@@ -192,37 +192,28 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
                       //     myEventModel.getTopPlayersForEvent('', 1000);
                       final List<UpdateLeaderDataUserDto> list = sampleUsers;
                       list.sort((a, b) => b.score.compareTo(a.score));
-                      return Column(children: [
-                        for (int i = 0; i < list.length; i++)
-                          if (myUserModel.userData?.id != null &&
-                              myUserModel.userData!.id ==
-                                  list.elementAt(i).userId)
-                            leaderBoardUserCell(
-                                context,
-                                list.elementAt(i).username,
-                                i + 1,
-                                list.length,
-                                list.elementAt(i).score),
-                        Container(
-                          width: 345.0,
-                          height: 446.0,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(10.0),
-                              topRight: Radius.circular(10.0),
-                            ),
+                      return Container(
+                        width: 345.0,
+                        height: 446.0,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(10.0),
+                            topRight: Radius.circular(10.0),
                           ),
-                          child: Container(
-                            width: 283.05,
-                            height: 432.0,
+                        ),
+                        child: Container(
+                          width: 283.05,
+                          height: 432.0,
+                          child: Expanded(
                             child: ListView(
                               shrinkWrap: true,
                               scrollDirection: Axis.vertical,
                               children: [
                                 for (UpdateLeaderDataUserDto user in list)
                                   Padding(
-                                    padding: const EdgeInsets.only(bottom: 0.0),
+                                    padding:
+                                        const EdgeInsets.only(bottom: 16.0),
                                     child: Container(
                                       decoration: BoxDecoration(
                                         color: Colors.white,
@@ -248,7 +239,7 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
                             ),
                           ),
                         ),
-                      ]);
+                      );
                     },
                   ),
                 ),
