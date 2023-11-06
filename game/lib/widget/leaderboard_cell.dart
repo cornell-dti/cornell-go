@@ -36,57 +36,58 @@ Widget leaderBoardCell(
     color: Colors.black,
   );
 
-  return Padding(
-    padding: const EdgeInsets.all(8.74),
-    child: ClipRRect(
-      borderRadius: BorderRadius.circular(10.0),
-      child: Container(
-        decoration: BoxDecoration(
-          color: (isUser) ? Color.fromARGB(255, 169, 149, 122) : Colors.white,
-        ),
-        width: 266,
-        height: 34,
-        child: Row(
-          children: [
-            Row(
-              children: [
-                Container(
-                  child: Row(
-                    children: [
-                      Text(position.toString(),
-                          style: posStyle, textAlign: TextAlign.center),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 12.0),
-                        child: Container(
-                          width: 30,
-                          height: 30,
-                          decoration: BoxDecoration(
-                              color: constructColorFromUserName(name),
-                              borderRadius: BorderRadius.circular(15)),
-                        ),
-                      )
-                    ],
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 16.0),
-                  child: Container(
-                    child: Text(name, style: nameStyle),
-                  ),
-                ),
-              ],
-            ),
-            Container(
-              child: Text(
-                points.toString(),
-                style: pointStyle,
-              ),
-            )
-          ],
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        ),
+  return Container(
+      decoration: BoxDecoration(
+        color: (isUser) ? Color.fromARGB(255, 251, 227, 195) : Colors.white,
+        borderRadius: BorderRadius.circular(10.0),
       ),
-    ),
-  );
+      child: Padding(
+        padding: const EdgeInsets.all(8.74),
+        child: ClipRRect(
+          child: Container(
+            width: 266,
+            height: 34,
+            child: Row(
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      child: Row(
+                        children: [
+                          Text(position.toString(),
+                              style: posStyle, textAlign: TextAlign.center),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 12.0),
+                            child: Container(
+                              width: 30,
+                              height: 30,
+                              decoration: BoxDecoration(
+                                  color: constructColorFromUserName(name),
+                                  borderRadius: BorderRadius.circular(15)),
+                            ),
+                          )
+                        ],
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 16.0),
+                      child: Container(
+                        child: Text(name, style: nameStyle),
+                      ),
+                    ),
+                  ],
+                ),
+                Container(
+                  child: Text(
+                    points.toString() + " points",
+                    style: pointStyle,
+                  ),
+                )
+              ],
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            ),
+          ),
+        ),
+      ));
 }

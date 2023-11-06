@@ -4,6 +4,7 @@ import 'package:game/model/event_model.dart';
 import 'package:game/model/group_model.dart';
 import 'package:game/model/user_model.dart';
 import 'package:game/widget/back_btn.dart';
+import 'package:game/global_leaderboard/podium_widgets.dart';
 import 'package:game/widget/leaderboard_cell.dart';
 import 'package:game/widget/podium_cell.dart';
 import 'package:game/widget/leaderboard_user_cell.dart';
@@ -14,26 +15,11 @@ import 'package:flutter_svg/flutter_svg.dart';
  * This widget defines the leaderboard page. 
  */
 class GlobalLeaderboardWidget extends StatefulWidget {
-  GlobalLeaderboardWidget({Key? key}) : super(key: key);
+  const GlobalLeaderboardWidget({Key? key}) : super(key: key);
 
   @override
   _GlobalLeaderboardWidgetState createState() =>
       _GlobalLeaderboardWidgetState();
-}
-
-class PodiumWidget extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-        child: Container(
-      width: 328,
-      height: 112,
-      child: SvgPicture.asset(
-        'assets/images/podium.svg',
-        semanticsLabel: 'Podium',
-      ),
-    ));
-  }
 }
 
 /**
@@ -120,7 +106,6 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
       "score": 75,
     }),
   ];
-
   String currentUserId = "user1";
 
   UserDto sampleUserData = UserDto.fromJson({
@@ -156,33 +141,48 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
             children: [
               Container(
                 height: 29.0,
-                margin: EdgeInsets.only(top: 46.0),
+                margin: EdgeInsets.only(top: 51.0, left: 25),
                 child: Text(
                   "Leaderboard",
                   style: leaderboardStyle,
-                  textAlign: TextAlign.center,
                 ),
               ),
-              Padding(
-                  padding:
-                      const EdgeInsets.only(left: 130.0, right: 17.0, top: 25),
-                  child: Row(
+              Container(
+                width: 328,
+                height: 213,
+                margin: EdgeInsets.only(top: 24, left: 25),
+                child: Row(children: [
+                  Column(
                     children: [
-                      Container(
-                          child: podiumCell(context, "test1", 1, 300, false)),
-                      Container(
-                          child: podiumCell(context, "test2", 2, 200, false)),
-                      Container(
-                          child: podiumCell(context, "test3", 1, 190, false)),
+                      SizedBox(height: 26),
+                      podiumCell(context, "test2", 2, 200, false),
+                      SizedBox(height: 12),
+                      SecondPodium()
                     ],
-                  )),
-              Padding(
-                  padding: const EdgeInsets.only(left: 30, right: 30, top: 25),
-                  child: PodiumWidget()),
+                  ),
+                  SizedBox(width: 5),
+                  Column(
+                    children: [
+                      podiumCell(context, "test1", 1, 300, false),
+                      SizedBox(height: 12),
+                      FirstPodium()
+                    ],
+                  ),
+                  SizedBox(width: 5),
+                  Column(
+                    children: [
+                      SizedBox(height: 53),
+                      podiumCell(context, "test3", 1, 190, false),
+                      SizedBox(height: 12),
+                      ThirdPodium()
+                    ],
+                  ),
+                ]),
+              ),
               Expanded(
                 child: Padding(
                   padding:
-                      const EdgeInsets.only(left: 8.0, right: 8.0, top: 10.0),
+                      const EdgeInsets.only(left: 33.0, right: 8.0, top: 1.0),
                   child: Consumer3<GroupModel, EventModel, UserModel>(
                     builder: (context, myGroupModel, myEventModel, myUserModel,
                         child) {
