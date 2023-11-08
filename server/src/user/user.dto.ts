@@ -56,7 +56,7 @@ export type UserAuthTypeDto = 'device' | 'apple' | 'google';
 export interface UserDto {
   id: string;
   username: string;
-  userStatus: string;
+  enrollmentType: 'UNDERGRADUATE' | 'GRADUATE' | 'FACULTY' | 'ALUMNI';
   email: string;
   year: string;
   score: number;

@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
 import 'package:game/details_page/details_page.dart';
 import 'package:game/widget/lato_text.dart';
@@ -30,6 +32,13 @@ class _RegisterPageWidgetState extends State<RegisterPageWidget> {
     "Faculty/Staff",
     "Alumni"
   ];
+
+  Map<String, String> map1 = {
+    "Undergraduate Student": "UNDERGRADUATE",
+    "Graduate Student": "GRADUATE",
+    "Faculty/Staff": "FACULTY",
+    "Alumni": "ALUMNI"
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -98,7 +107,7 @@ class _RegisterPageWidgetState extends State<RegisterPageWidget> {
                   Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (context) => DetailsPageWidget(
-                        userType: _selectedOption,
+                        userType: map1[_selectedOption]!,
                         user: widget.user,
                         idToken: widget.idToken,
                       ),
