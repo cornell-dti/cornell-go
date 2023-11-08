@@ -7,6 +7,7 @@ import {
   OrganizationSpecialUsage,
   User,
   PrismaClient,
+  EnrollmentType,
   EventBase,
 } from '@prisma/client';
 import { ClientService } from '../client/client.service';
@@ -55,7 +56,7 @@ export class UserService {
     long: number,
     authType: AuthType,
     authToken: string,
-    userStatus: string,
+    enrollmentType: EnrollmentType,
   ) {
     if (username == null) username = email?.split('@')[0];
     const defOrg = await this.orgService.getDefaultOrganization(
@@ -78,7 +79,7 @@ export class UserService {
         year,
         email,
         authToken,
-        userStatus,
+        enrollmentType,
         authType,
         hashedRefreshToken: '',
         administrator:
@@ -109,7 +110,7 @@ export class UserService {
     await this.log.logEvent(SessionLogEvent.DELETE_USER, user.id, user.id);
     await this.prisma.user.delete({ where: { id: user.id } });
     await this.prisma.$transaction(async tx => {
-      this.groupsService.fixOrDeleteGroup({ id: user.groupId }, tx);
+      await this.groupsService.fixOrDeleteGroup({ id: user.groupId }, tx);
     });
   }
 
@@ -258,7 +259,11 @@ export class UserService {
   //     data: { major },
   //   });
   // }
-
+  /**
+   * Updates a user's graduation year.
+   * @param user user requesting the change in graduation year
+   * @param year the new graduation year.
+   */
   async setGraduationYear(user: User, year: string) {
     await this.prisma.user.update({
       where: { id: user.id },
@@ -266,6 +271,12 @@ export class UserService {
     });
   }
 
+  /**
+   * Ban a user based on their user id.
+   * @param user the user who will be banned.
+   * @param isBanned a boolean which represents the user's banned status
+   * @returns A promise containing the new user if successful.
+   */
   async banUser(user: User, isBanned: boolean): Promise<User> {
     return await this.prisma.user.update({
       where: { id: user.id },
@@ -275,6 +286,11 @@ export class UserService {
     });
   }
 
+  /**
+   * Update a User's username, email, or year.
+   * @param user User requiring an update.
+   * @returns The new user after the update is made
+   */
   async updateUser(user: UserDto): Promise<User> {
     return await this.prisma.user.update({
       where: { id: user.id },
@@ -300,7 +316,7 @@ export class UserService {
     return {
       id: joinedUser.id,
       username: joinedUser.username,
-      userStatus: joinedUser.userStatus,
+      enrollmentType: joinedUser.enrollmentType,
       email: joinedUser.email,
       year: joinedUser.year,
       score: joinedUser.score,

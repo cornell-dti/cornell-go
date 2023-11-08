@@ -135,7 +135,7 @@ export class AuthService {
         req.long,
         authType,
         idToken.id,
-        req.userStatus,
+        req.enrollmentType,
       );
     }
 
