@@ -77,7 +77,7 @@ class MyApp extends StatelessWidget {
             GlobalCupertinoLocalizations.delegate,
           ],
           supportedLocales: const [Locale('en', '')],
-          theme: ThemeData(fontFamily: 'Poppins', fontWe primarySwatch: Colors.blue),
+          theme: ThemeData(fontFamily: 'Poppins', primarySwatch: Colors.blue),
           home: BottomNavBar(),
         )));
   }
