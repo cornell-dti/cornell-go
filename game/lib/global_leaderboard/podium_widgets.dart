@@ -72,7 +72,7 @@ class ThirdPodiumYellow extends StatelessWidget {
     return Center(
         child: Container(
       width: 106,
-      height: 59,
+      height: 62,
       child: SvgPicture.asset(
         'assets/icons/yellow3podium.svg',
         semanticsLabel: '3rd Yellow Podium',
@@ -87,7 +87,7 @@ class ThirdPodiumRed extends StatelessWidget {
     return Center(
         child: Container(
       width: 106,
-      height: 59,
+      height: 62,
       child: SvgPicture.asset(
         'assets/icons/red3podium.svg',
         semanticsLabel: '3rd Red Podium',

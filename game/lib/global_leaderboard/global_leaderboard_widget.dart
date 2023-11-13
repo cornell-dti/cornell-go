@@ -108,7 +108,7 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
   //Thhis user represents the users status. This is mock data for now.
   UserDto sampleUserData = UserDto.fromJson({
     "user": {
-      "id": "user10",
+      "id": "user6",
       "username": "example_username",
       "major": "Computer Science",
       "year": "Senior",
@@ -155,7 +155,7 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
               ),
               //Podium Container
               Container(
-                width: 325,
+                width: 328,
                 height: 213,
                 margin: EdgeInsets.only(top: 24, left: 25),
                 child: Row(children: [
@@ -187,10 +187,10 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
                           : FirstPodiumRed(),
                     ],
                   ),
-                  SizedBox(width: 2),
+                  SizedBox(width: 5),
                   Column(
                     children: [
-                      SizedBox(height: 53),
+                      SizedBox(height: 50),
                       podiumList.length > 2
                           ? podiumCell(context, podiumList[2].username,
                               podiumList[2].score)
