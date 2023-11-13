@@ -6,11 +6,9 @@ import 'package:game/utils/utility_functions.dart';
  * a different representation than the other users in the leaderboard because
  * they are on the podium.
  * @param name: the name of the user
- * @param position: the position the user ranked overall
  * @param points: the number of points the user has scored
- * @param isUser: whether the active user is the current podium cell
  */
-Widget podiumCell(context, String name, int position, int points, bool isUser) {
+Widget podiumCell(context, String name, int points) {
   // var nameStyle = TextStyle(
   //   fontFamily: 'Inter',
   //   fontSize: 11.0,
@@ -42,7 +40,7 @@ Widget podiumCell(context, String name, int position, int points, bool isUser) {
   //   height: 17.0 / 11.0,
   //   letterSpacing: 0.0,
   // );
-
+  if (name.length > 13) name = name.substring(0, 10) + "...";
   return Container(
       width: 78,
       height: 88.824,

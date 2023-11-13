@@ -107,10 +107,9 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
     }),
   ];
   String currentUserId = "user1";
-
   UserDto sampleUserData = UserDto.fromJson({
     "user": {
-      "id": "user13",
+      "id": "user10",
       "username": "example_username",
       "major": "Computer Science",
       "year": "Senior",
@@ -132,6 +131,10 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
       height: 29.0 / 24.0,
       letterSpacing: 0.0,
     );
+    final List<UpdateLeaderDataUserDto> list = sampleUsers;
+    list.sort((a, b) => b.score.compareTo(a.score));
+    List<UpdateLeaderDataUserDto> podiumList = list.sublist(0, 3);
+    list.removeRange(0, 3);
     return Scaffold(
         key: scaffoldKey,
         backgroundColor: Color(0xFFE95755),
@@ -148,33 +151,42 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
                 ),
               ),
               Container(
-                width: 328,
+                width: 325,
                 height: 213,
                 margin: EdgeInsets.only(top: 24, left: 25),
                 child: Row(children: [
                   Column(
                     children: [
                       SizedBox(height: 26),
-                      podiumCell(context, "test2", 2, 200, false),
+                      podiumCell(
+                          context, podiumList[0].username, podiumList[0].score),
                       SizedBox(height: 12),
-                      SecondPodium()
+                      (podiumList[0].userId == sampleUserData.id)
+                          ? SecondPodiumYellow()
+                          : SecondPodiumRed(),
                     ],
                   ),
                   SizedBox(width: 5),
                   Column(
                     children: [
-                      podiumCell(context, "test1", 1, 300, false),
+                      podiumCell(
+                          context, podiumList[1].username, podiumList[1].score),
                       SizedBox(height: 12),
-                      FirstPodium()
+                      (podiumList[1].userId == sampleUserData.id)
+                          ? FirstPodiumYellow()
+                          : FirstPodiumRed(),
                     ],
                   ),
-                  SizedBox(width: 5),
+                  SizedBox(width: 2),
                   Column(
                     children: [
                       SizedBox(height: 53),
-                      podiumCell(context, "test3", 1, 190, false),
+                      podiumCell(
+                          context, podiumList[2].username, podiumList[2].score),
                       SizedBox(height: 12),
-                      ThirdPodium()
+                      (podiumList[2].userId == sampleUserData.id)
+                          ? ThirdPodiumYellow()
+                          : ThirdPodiumRed(),
                     ],
                   ),
                 ]),
@@ -188,9 +200,9 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
                         child) {
                       int position = 4;
                       //if (myGroupModel.curEventId == null) return ListView();
-                      // final List<UpdateLeaderDataUserDto> list =
-                      //     myEventModel.getTopPlayersForEvent('', 1000);
-                      final List<UpdateLeaderDataUserDto> list = sampleUsers;
+                      final List<UpdateLeaderDataUserDto> list =
+                          myEventModel.getTopPlayersForEvent('', 1000);
+                      //final List<UpdateLeaderDataUserDto> list = sampleUsers;
                       list.sort((a, b) => b.score.compareTo(a.score));
                       return Container(
                         width: 345.0,
