@@ -161,6 +161,7 @@ class _JourneysPageState extends State<JourneysPage> {
                     false,
                     false);
               }
+              print("search results: " + myEventModel.searchResults.toString());
               final events = myEventModel.searchResults ?? [];
               if (!events
                   .any((element) => element.id == groupModel.curEventId)) {
