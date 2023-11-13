@@ -3,13 +3,10 @@ import 'package:game/api/game_client_dto.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/group_model.dart';
 import 'package:game/model/user_model.dart';
-import 'package:game/widget/back_btn.dart';
 import 'package:game/global_leaderboard/podium_widgets.dart';
 import 'package:game/widget/leaderboard_cell.dart';
 import 'package:game/widget/podium_cell.dart';
-import 'package:game/widget/leaderboard_user_cell.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 /**
  * This widget defines the leaderboard page. 
@@ -29,6 +26,7 @@ class GlobalLeaderboardWidget extends StatefulWidget {
 class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
+  //SampleUsers is mock leaderboard data since the users fetch is not working properly.
   List<UpdateLeaderDataUserDto> sampleUsers = [
     UpdateLeaderDataUserDto.fromJson({
       "userId": "user1",
@@ -106,7 +104,8 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
       "score": 75,
     }),
   ];
-  String currentUserId = "user1";
+
+  //Thhis user represents the users status. This is mock data for now.
   UserDto sampleUserData = UserDto.fromJson({
     "user": {
       "id": "user10",
@@ -131,10 +130,13 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
       height: 29.0 / 24.0,
       letterSpacing: 0.0,
     );
+    //Loading in the lists and then creating podiumList of top 3
     final List<UpdateLeaderDataUserDto> list = sampleUsers;
     list.sort((a, b) => b.score.compareTo(a.score));
-    List<UpdateLeaderDataUserDto> podiumList = list.sublist(0, 3);
-    list.removeRange(0, 3);
+    List<UpdateLeaderDataUserDto> podiumList =
+        list.sublist(0, list.length >= 3 ? 3 : list.length);
+    list.removeRange(0, list.length >= 3 ? 3 : list.length);
+
     return Scaffold(
         key: scaffoldKey,
         backgroundColor: Color(0xFFE95755),
@@ -142,6 +144,7 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
           padding: const EdgeInsets.only(top: 0),
           child: Column(
             children: [
+              //Title Container
               Container(
                 height: 29.0,
                 margin: EdgeInsets.only(top: 51.0, left: 25),
@@ -150,6 +153,7 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
                   style: leaderboardStyle,
                 ),
               ),
+              //Podium Container
               Container(
                 width: 325,
                 height: 213,
@@ -158,10 +162,13 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
                   Column(
                     children: [
                       SizedBox(height: 26),
-                      podiumCell(
-                          context, podiumList[0].username, podiumList[0].score),
+                      podiumList.length > 1
+                          ? podiumCell(context, podiumList[1].username,
+                              podiumList[1].score)
+                          : podiumCell(context, "", 0),
                       SizedBox(height: 12),
-                      (podiumList[0].userId == sampleUserData.id)
+                      (podiumList.length > 1 &&
+                              podiumList[1].userId == sampleUserData.id)
                           ? SecondPodiumYellow()
                           : SecondPodiumRed(),
                     ],
@@ -169,10 +176,13 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
                   SizedBox(width: 5),
                   Column(
                     children: [
-                      podiumCell(
-                          context, podiumList[1].username, podiumList[1].score),
+                      podiumList.length > 0
+                          ? podiumCell(context, podiumList[0].username,
+                              podiumList[0].score)
+                          : podiumCell(context, "", 0),
                       SizedBox(height: 12),
-                      (podiumList[1].userId == sampleUserData.id)
+                      (podiumList.length > 0 &&
+                              podiumList[0].userId == sampleUserData.id)
                           ? FirstPodiumYellow()
                           : FirstPodiumRed(),
                     ],
@@ -181,16 +191,20 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
                   Column(
                     children: [
                       SizedBox(height: 53),
-                      podiumCell(
-                          context, podiumList[2].username, podiumList[2].score),
+                      podiumList.length > 2
+                          ? podiumCell(context, podiumList[2].username,
+                              podiumList[2].score)
+                          : podiumCell(context, "", 0),
                       SizedBox(height: 12),
-                      (podiumList[2].userId == sampleUserData.id)
+                      (podiumList.length > 2 &&
+                              podiumList[2].userId == sampleUserData.id)
                           ? ThirdPodiumYellow()
                           : ThirdPodiumRed(),
                     ],
                   ),
                 ]),
               ),
+              //Leaderboard Container
               Expanded(
                 child: Padding(
                   padding:
@@ -199,10 +213,10 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
                     builder: (context, myGroupModel, myEventModel, myUserModel,
                         child) {
                       int position = 4;
-                      //if (myGroupModel.curEventId == null) return ListView();
-                      final List<UpdateLeaderDataUserDto> list =
-                          myEventModel.getTopPlayersForEvent('', 1000);
-                      //final List<UpdateLeaderDataUserDto> list = sampleUsers;
+                      // Use this line below to retrieve actual data
+                      // final List<UpdateLeaderDataUserDto> list =
+                      //     myEventModel.getTopPlayersForEvent('', 1000);
+                      final List<UpdateLeaderDataUserDto> list = sampleUsers;
                       list.sort((a, b) => b.score.compareTo(a.score));
                       return Container(
                         width: 345.0,

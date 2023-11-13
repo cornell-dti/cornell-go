@@ -1,21 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-class PodiumWidget extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-        child: Container(
-      width: 328,
-      height: 112,
-      child: SvgPicture.asset(
-        'assets/images/podium.svg',
-        semanticsLabel: 'Podium',
-      ),
-    ));
-  }
-}
-
+/**
+ * This file contains the 6 possible podium widgets to appear in the leaderboard 
+ * page. For each podium position (1,2,3) there is a red and yellow widget,
+ * which is yellow if that is the user's current spot and red otherwise.
+ */
 class FirstPodiumRed extends StatelessWidget {
   @override
   Widget build(BuildContext context) {

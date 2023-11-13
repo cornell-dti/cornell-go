@@ -9,37 +9,24 @@ import 'package:game/utils/utility_functions.dart';
  * @param points: the number of points the user has scored
  */
 Widget podiumCell(context, String name, int points) {
-  // var nameStyle = TextStyle(
-  //   fontFamily: 'Inter',
-  //   fontSize: 11.0,
-  //   fontWeight: FontWeight.w500,
-  //   height: 17.0 / 11.0,
-  //   letterSpacing: 0.0,
-  // );
   var nameStyle = TextStyle(
-    color: Color(0xFF000000), // Color(0xFF000000) represents the color #000
+    color: Color(0xFF000000),
     fontFamily: 'Inter',
-    fontSize: 11.392, // Font size in logical pixels
+    fontSize: 11.392,
     fontStyle: FontStyle.normal,
     fontWeight: FontWeight.w500,
-    height: 1.5, // Corresponds to a line height of 150%
+    height: 1.5,
   );
 
   var pointStyle = TextStyle(
-    color: Color(0xFF000000), // Color(0xFF000000) represents the color #000
+    color: Color(0xFF000000),
     fontFamily: 'Inter',
-    fontSize: 11.392, // Font size in logical pixels
+    fontSize: 11.392,
     fontStyle: FontStyle.normal,
     fontWeight: FontWeight.w400,
-    height: 1.5, // Corresponds to a line height of 150%
+    height: 1.5,
   );
-  // var pointStyle = TextStyle(
-  //   fontFamily: 'Inter',
-  //   fontSize: 11.0,
-  //   fontWeight: FontWeight.w400,
-  //   height: 17.0 / 11.0,
-  //   letterSpacing: 0.0,
-  // );
+
   if (name.length > 13) name = name.substring(0, 10) + "...";
   return Container(
       width: 78,
