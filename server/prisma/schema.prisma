@@ -26,6 +26,24 @@ enum EnrollmentType {
   ALUMNI
 }
 
+enum LocationType {
+  EngQuad
+  ArtsQuad
+  AgQuad
+  NorthCampus
+  WestCampus
+  Collegetown
+  IthacaCommons
+  Any
+}
+
+enum AchievementType {
+  TotalPoints
+  TotalChallenges
+  TotalJourneys
+  TotalChallengesOrJourneys
+}
+
 enum SessionLogEvent {
   JOIN_GROUP //data = groupId
   LEAVE_GROUP //data = groupId
@@ -182,4 +200,24 @@ model SessionLogEntry {
   data       String
   timestamp  DateTime        @default(now())
   userId     String?
+}
+
+model Achievement {
+  id                      String   @id @default(uuid())
+  requiredPoints          Int
+  name                    String
+  description             String
+  imageUrl                String
+  event                   Boolean
+  locationType            String
+  achievementType         String
+  associatedOrganizations String[]
+}
+
+model AchievementTracker {
+  id                    String    @id @default(uuid())
+  associatedUser        String
+  progress              Int
+  associatedAchievement String
+  dateComplete          DateTime?
 }
