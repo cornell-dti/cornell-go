@@ -197,7 +197,7 @@ SPEC CHECKSUMS:
   FirebaseInstallations: b69db7680870dbac17bba7a51fc0b5c4b365baa7
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
   flutter_secure_storage: 23fc622d89d073675f2eaa109381aefbcf5a49be
-  fluttertoast: fafc4fa4d01a6a9e4f772ecd190ffa525e9e2d9c
+  fluttertoast: 31b00dabfa7fb7bacd9e7dbee580d7a2ff4bf265
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
   geolocator_apple: cc556e6844d508c95df1e87e3ea6fa4e58c50401
   google_sign_in_ios: 1256ff9d941db546373826966720b0c24804bcdd
@@ -218,4 +218,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: c37bfc8cb18efcbef5c7f6de4c2a788a4c114955
 
-COCOAPODS: 1.12.0
+COCOAPODS: 1.13.0
