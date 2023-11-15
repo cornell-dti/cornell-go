@@ -27,7 +27,7 @@ Widget podiumCell(context, String name, int points) {
     height: 1.5,
   );
 
-  if (name.length > 13) name = name.substring(0, 10) + "...";
+  if (name.length > 7) name = name.substring(0, 7) + "...";
   return Container(
       width: 78,
       height: 88.824,
