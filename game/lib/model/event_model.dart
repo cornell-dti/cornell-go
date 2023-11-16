@@ -7,16 +7,19 @@ class EventModel extends ChangeNotifier {
   Map<String, List<UpdateLeaderDataUserDto>> _topPlayers = {};
 
   ApiClient _client;
-  List<EventDto>? searchResults;
+  List<EventDto> searchResults = [];
 
   EventModel(ApiClient client) : _client = client {
     client.clientApi.updateEventDataStream.listen((event) {
-      if (!event.event is String) {
-        searchResults = event.event;
+      print("event detected in event_model");
+      if (!(event.event is String)) {
+        print("event added");
+        searchResults.add(event.event);
       }
-      event.event.toList().forEach((element) {
-        _events[element.id] = element;
-      });
+      _events[event.event.id] = event.event;
+      // event.event.toList().forEach((element) {
+      //   _events[element.id] = element;
+      // });
       notifyListeners();
     });
 
@@ -38,14 +41,14 @@ class EventModel extends ChangeNotifier {
     client.clientApi.connectedStream.listen((event) {
       _events.clear();
       _topPlayers.clear();
-      searchResults = null;
+      searchResults = [];
       notifyListeners();
     });
 
     client.clientApi.invalidateDataStream.listen((event) {
       if (event.userEventData || event.winnerRewardData) {
         _events.clear();
-        searchResults = null;
+        searchResults = [];
       }
       if (event.leaderboardData) {
         _topPlayers.clear();
@@ -86,7 +89,7 @@ class EventModel extends ChangeNotifier {
 
   void searchEvents(int offset, int count, List<EventRewardType> rewardTypes,
       bool closestToEnding, bool shortestFirst, bool skippableOnly) {
-    searchResults = null;
+    searchResults = [];
     _client.serverApi?.requestAllEventData(offset, count, rewardTypes,
         closestToEnding, shortestFirst, skippableOnly);
   }

@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:game/api/game_api.dart';
+import 'package:game/api/game_client_dto.dart';
+import 'package:game/events/event_cell.dart';
 import 'package:game/journeys/journey_cell.dart';
 import 'package:game/journeys/filter_form.dart';
+import 'package:game/model/challenge_model.dart';
+import 'package:game/model/event_model.dart';
+import 'package:game/model/group_model.dart';
+import 'package:game/model/tracker_model.dart';
+import 'package:game/model/user_model.dart';
+import 'package:game/utils/utility_functions.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-
-import '../api/game_api.dart';
-import '../api/game_client_dto.dart';
-import '../events/event_cell.dart';
-import '../model/challenge_model.dart';
-import '../model/event_model.dart';
-import '../model/group_model.dart';
-import '../model/tracker_model.dart';
-import '../model/user_model.dart';
-import '../utils/utility_functions.dart';
 
 class JourneysPage extends StatefulWidget {
   const JourneysPage({Key? key}) : super(key: key);
@@ -144,12 +143,25 @@ class _JourneysPageState extends State<JourneysPage> {
                 ),
               ),
             ),
+            // Expanded(
+            //   child: ListView.separated(
+            //     padding: const EdgeInsets.all(0),
+            //     itemCount: cells.length,
+            //     itemBuilder: (context, index) {
+            //       return cells[index];
+            //     },
+            //     separatorBuilder: (context, index) {
+            //       return SizedBox(height: 10);
+            //     },
+            //   ),
+            // ),
             Expanded(child: Consumer5<EventModel, GroupModel, TrackerModel,
                     ChallengeModel, UserModel>(
                 builder: (context, myEventModel, groupModel, trackerModel,
                     challengeModel, userModel, child) {
               List<Widget> eventCells = [];
-              if (myEventModel.searchResults == null) {
+              if (myEventModel.searchResults.length == 0) {
+                print("length is 0, searching for more events");
                 myEventModel.searchEvents(
                     0,
                     1000,
@@ -170,6 +182,7 @@ class _JourneysPageState extends State<JourneysPage> {
                 if (curEvent != null) events.add(curEvent);
               }
               for (EventDto event in events) {
+                print(event);
                 final reward =
                     event.rewardIds.length == 0 ? null : event.rewardIds[0];
                 final tracker = trackerModel.trackerByEventId(event.id);
@@ -179,8 +192,11 @@ class _JourneysPageState extends State<JourneysPage> {
                     : challengeModel.getChallengeById(event.challengeIds[0]);
                 final complete = tracker?.prevChallengeIds.length ==
                     event.challengeIds.length;
-                final timeTillExpire =
-                    DateTime.parse(event.endTime).difference(DateTime.now());
+                print("printing event.endTime in journeyspage");
+                print(event.endTime);
+                print(DateTime.now());
+                final timeTillExpire = Duration(days: 2);
+                // DateTime.parse(event.endTime).difference(DateTime.now());
                 eventCells.add(
                   GestureDetector(
                     onTap: () {
@@ -207,11 +223,13 @@ class _JourneysPageState extends State<JourneysPage> {
                             )
                           : EventCell(
                               event.name,
-                              format.format(DateTime.parse(event.endTime)),
+                              event.endTime,
+                              // format.format(DateTime.parse(event.endTime)),
                               event.description,
                               complete,
                               event.id == groupModel.curEventId,
-                              DateTime.parse(event.endTime),
+                              DateTime.now(),
+                              // DateTime.parse(event.endTime),
                               reward ?? "",
                               event.rewardIds.length,
                               event.requiredMembers,
@@ -222,6 +240,8 @@ class _JourneysPageState extends State<JourneysPage> {
                   ),
                 );
               }
+              print("event cell length");
+              print(eventCells.length);
               return ListView.separated(
                 padding: const EdgeInsets.all(0),
                 itemCount: eventCells.length,
@@ -232,7 +252,7 @@ class _JourneysPageState extends State<JourneysPage> {
                   return SizedBox(height: 10);
                 },
               );
-            })),
+            }))
           ],
         ),
       ),

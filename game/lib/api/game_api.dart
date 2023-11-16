@@ -154,7 +154,6 @@ class ApiClient extends ChangeNotifier {
           "long": "0",
           "aud": Platform.isIOS ? "ios" : "android"
         }));
-    print(loginResponse.body);
 
     if (loginResponse.statusCode == 201 && loginResponse.body != "") {
       final responseBody = jsonDecode(loginResponse.body);
