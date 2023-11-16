@@ -12,7 +12,9 @@ class EventModel extends ChangeNotifier {
   EventModel(ApiClient client) : _client = client {
     client.clientApi.updateEventDataStream.listen((event) {
       if (!(event.event is String)) {
-        searchResults.add(event.event);
+        if (!_events.containsKey(event.event.id)) {
+          searchResults.add(event.event);
+        }
       }
       _events[event.event.id] = event.event;
       notifyListeners();
