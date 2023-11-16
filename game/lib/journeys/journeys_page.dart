@@ -161,7 +161,6 @@ class _JourneysPageState extends State<JourneysPage> {
                     challengeModel, userModel, child) {
               List<Widget> eventCells = [];
               if (myEventModel.searchResults.length == 0) {
-                print("length is 0, searching for more events");
                 myEventModel.searchEvents(
                     0,
                     1000,
@@ -173,7 +172,6 @@ class _JourneysPageState extends State<JourneysPage> {
                     false,
                     false);
               }
-              print("search results: " + myEventModel.searchResults.toString());
               final events = myEventModel.searchResults ?? [];
               if (!events
                   .any((element) => element.id == groupModel.curEventId)) {
@@ -182,19 +180,9 @@ class _JourneysPageState extends State<JourneysPage> {
                 if (curEvent != null) events.add(curEvent);
               }
               for (EventDto event in events) {
-                print(event);
-                final reward =
-                    event.rewardIds.length == 0 ? null : event.rewardIds[0];
                 final tracker = trackerModel.trackerByEventId(event.id);
-                final format = DateFormat('yyyy-MM-dd');
-                final chal = event.challengeIds.length == 0
-                    ? null
-                    : challengeModel.getChallengeById(event.challengeIds[0]);
                 final complete = tracker?.prevChallengeIds.length ==
                     event.challengeIds.length;
-                print("printing event.endTime in journeyspage");
-                print(event.endTime);
-                print(DateTime.now());
                 final timeTillExpire = Duration(days: 2);
                 // DateTime.parse(event.endTime).difference(DateTime.now());
                 eventCells.add(
@@ -221,27 +209,13 @@ class _JourneysPageState extends State<JourneysPage> {
                                 return Container();
                               },
                             )
-                          : EventCell(
-                              event.name,
-                              event.endTime,
-                              // format.format(DateTime.parse(event.endTime)),
-                              event.description,
-                              complete,
-                              event.id == groupModel.curEventId,
-                              DateTime.now(),
-                              // DateTime.parse(event.endTime),
-                              reward ?? "",
-                              event.rewardIds.length,
-                              event.requiredMembers,
-                              chal?.imageUrl ??
-                                  "https://a.rgbimg.com/users/b/ba/badk/600/qfOGvbS.jpg",
-                            ),
+                          //Backend is not formatted correctly for journeys
+                          : JourneyCell(event.name, event.description, 4, 3,
+                              complete, "Normal", event.minimumScore, 0),
                     ),
                   ),
                 );
               }
-              print("event cell length");
-              print(eventCells.length);
               return ListView.separated(
                 padding: const EdgeInsets.all(0),
                 itemCount: eventCells.length,

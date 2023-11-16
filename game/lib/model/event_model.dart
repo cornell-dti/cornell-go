@@ -11,15 +11,10 @@ class EventModel extends ChangeNotifier {
 
   EventModel(ApiClient client) : _client = client {
     client.clientApi.updateEventDataStream.listen((event) {
-      print("event detected in event_model");
       if (!(event.event is String)) {
-        print("event added");
         searchResults.add(event.event);
       }
       _events[event.event.id] = event.event;
-      // event.event.toList().forEach((element) {
-      //   _events[element.id] = element;
-      // });
       notifyListeners();
     });
 
