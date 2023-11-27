@@ -123,13 +123,13 @@ class _JourneysPageState extends State<JourneysPage> {
                 if (curEvent != null) events.add(curEvent);
               }
               for (EventDto event in events) {
-                final tracker = trackerModel.trackerByEventId(event.id);
-                final complete = tracker?.prevChallengeIds.length ==
+                var tracker = trackerModel.trackerByEventId(event.id);
+                var complete = tracker?.prevChallengeIds.length ==
                     event.challengeIds.length;
-                final locationCount = event.challengeIds.length;
-                final numberCompleted = tracker?.prevChallengeIds.length;
-                final difficulty = event.difficulty;
-                final timeTillExpire = Duration(days: 2);
+                var locationCount = event.challengeIds.length;
+                var numberCompleted = tracker?.prevChallengeIds.length;
+                var difficulty = event.difficulty;
+                const timeTillExpire = Duration(days: 2);
                 eventCells.add(
                   GestureDetector(
                     onTap: () {
@@ -161,7 +161,7 @@ class _JourneysPageState extends State<JourneysPage> {
                               locationCount,
                               numberCompleted!,
                               complete,
-                              "Normal",
+                              difficulty,
                               event.minimumScore,
                               0),
                     ),
