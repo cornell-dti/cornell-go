@@ -1,18 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:game/api/game_api.dart';
+import 'package:game/api/game_client_dto.dart';
 import 'package:game/journeys/journey_cell.dart';
 import 'package:game/journeys/filter_form.dart';
-import 'package:intl/intl.dart';
+import 'package:game/model/challenge_model.dart';
+import 'package:game/model/event_model.dart';
+import 'package:game/model/group_model.dart';
+import 'package:game/model/tracker_model.dart';
+import 'package:game/model/user_model.dart';
+import 'package:game/utils/utility_functions.dart';
 import 'package:provider/provider.dart';
-
-import '../api/game_api.dart';
-import '../api/game_client_dto.dart';
-import '../events/event_cell.dart';
-import '../model/challenge_model.dart';
-import '../model/event_model.dart';
-import '../model/group_model.dart';
-import '../model/tracker_model.dart';
-import '../model/user_model.dart';
-import '../utils/utility_functions.dart';
 
 class JourneysPage extends StatefulWidget {
   const JourneysPage({Key? key}) : super(key: key);
@@ -22,49 +19,6 @@ class JourneysPage extends StatefulWidget {
 }
 
 class _JourneysPageState extends State<JourneysPage> {
-  final cells = [
-    JourneyCell(
-      "DTI Scavenger Hunt",
-      "Scavenger hunt during All Hands on 2/18",
-      10,
-      5,
-      false,
-      "normal",
-      15,
-      3,
-    ),
-    JourneyCell(
-      "DTI Scavenger Hunt",
-      "Scavenger hunt during All Hands on 2/18",
-      10,
-      0,
-      false,
-      "normal",
-      15,
-      3,
-    ),
-    JourneyCell(
-      "Cornell Cafés",
-      "Get your coffee fix at these top cafés on campus.",
-      6,
-      6,
-      true,
-      "normal",
-      15,
-      3,
-    ),
-    JourneyCell(
-      "journey",
-      "hi",
-      0,
-      0,
-      false,
-      "normal",
-      15,
-      3,
-    ),
-  ];
-
   void openFilter() {
     showModalBottomSheet(
         context: context,
@@ -145,9 +99,9 @@ class _JourneysPageState extends State<JourneysPage> {
               ),
             ),
             Expanded(child: Consumer5<EventModel, GroupModel, TrackerModel,
-                        ChallengeModel, UserModel>(
-                    builder: (context, myEventModel, groupModel, trackerModel,
-                        challengeModel, userModel, child) {
+                    ChallengeModel, UserModel>(
+                builder: (context, myEventModel, groupModel, trackerModel,
+                    challengeModel, userModel, child) {
               List<Widget> eventCells = [];
               if (myEventModel.searchResults.length == 0) {
                 myEventModel.searchEvents(
@@ -161,7 +115,7 @@ class _JourneysPageState extends State<JourneysPage> {
                     false,
                     false);
               }
-              final events = myEventModel.searchResults ?? [];
+              final events = myEventModel.searchResults;
               if (!events
                   .any((element) => element.id == groupModel.curEventId)) {
                 final curEvent =
@@ -169,17 +123,13 @@ class _JourneysPageState extends State<JourneysPage> {
                 if (curEvent != null) events.add(curEvent);
               }
               for (EventDto event in events) {
-                final reward =
-                    event.rewardIds.length == 0 ? null : event.rewardIds[0];
                 final tracker = trackerModel.trackerByEventId(event.id);
-                final format = DateFormat('yyyy-MM-dd');
-                final chal = event.challengeIds.length == 0
-                    ? null
-                    : challengeModel.getChallengeById(event.challengeIds[0]);
                 final complete = tracker?.prevChallengeIds.length ==
                     event.challengeIds.length;
-                final timeTillExpire =
-                    DateTime.parse(event.endTime).difference(DateTime.now());
+                final locationCount = event.challengeIds.length;
+                final numberCompleted = tracker?.prevChallengeIds.length;
+                final difficulty = event.difficulty;
+                final timeTillExpire = Duration(days: 2);
                 eventCells.add(
                   GestureDetector(
                     onTap: () {
@@ -204,35 +154,31 @@ class _JourneysPageState extends State<JourneysPage> {
                                 return Container();
                               },
                             )
-                          : EventCell(
+                          //Backend is not formatted correctly for journeys
+                          : JourneyCell(
                               event.name,
-                              format.format(DateTime.parse(event.endTime)),
                               event.description,
+                              locationCount,
+                              numberCompleted!,
                               complete,
-                              event.id == groupModel.curEventId,
-                              DateTime.parse(event.endTime),
-                              reward ?? "",
-                              event.rewardIds.length,
-                              event.requiredMembers,
-                              chal?.imageUrl ??
-                                  "https://a.rgbimg.com/users/b/ba/badk/600/qfOGvbS.jpg",
-                            ),
+                              "Normal",
+                              event.minimumScore,
+                              0),
                     ),
                   ),
                 );
               }
-            })
-                // ListView.separated(
-                //   padding: const EdgeInsets.all(0),
-                //   itemCount: cells.length,
-                //   itemBuilder: (context, index) {
-                //     return cells[index];
-                //   },
-                //   separatorBuilder: (context, index) {
-                //     return SizedBox(height: 10);
-                //   },
-                // ),
-                ),
+              return ListView.separated(
+                padding: const EdgeInsets.all(0),
+                itemCount: eventCells.length,
+                itemBuilder: (context, index) {
+                  return eventCells[index];
+                },
+                separatorBuilder: (context, index) {
+                  return SizedBox(height: 10);
+                },
+              );
+            }))
           ],
         ),
       ),
