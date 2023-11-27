@@ -4,7 +4,6 @@ import 'package:game/api/game_client_dto.dart';
 import 'package:game/events/event_cell.dart';
 import 'package:game/journeys/journey_cell.dart';
 import 'package:game/journeys/filter_form.dart';
-import 'package:game/model/challenge_model.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/group_model.dart';
 import 'package:game/model/tracker_model.dart';
@@ -32,6 +31,48 @@ class _JourneysPageState extends State<JourneysPage> {
         });
   }
 
+  final cells = [
+    JourneyCell(
+      "DTI Scavenger Hunt",
+      "Scavenger hunt during All Hands on 2/18",
+      10,
+      5,
+      false,
+      "normal",
+      15,
+      3,
+    ),
+    JourneyCell(
+      "DTI Scavenger Hunt",
+      "Scavenger hunt during All Hands on 2/18",
+      10,
+      0,
+      false,
+      "normal",
+      15,
+      3,
+    ),
+    JourneyCell(
+      "Cornell Cafés",
+      "Get your coffee fix at these top cafés on campus.",
+      6,
+      6,
+      true,
+      "normal",
+      15,
+      3,
+    ),
+    JourneyCell(
+      "journey",
+      "hi",
+      0,
+      0,
+      false,
+      "normal",
+      15,
+      3,
+    ),
+  ];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -100,10 +141,10 @@ class _JourneysPageState extends State<JourneysPage> {
                 ),
               ),
             ),
-            Expanded(child: Consumer5<EventModel, GroupModel, TrackerModel,
-                    ChallengeModel, UserModel>(
-                builder: (context, myEventModel, groupModel, trackerModel,
-                    challengeModel, userModel, child) {
+            Expanded(child:
+                Consumer4<EventModel, GroupModel, TrackerModel, UserModel>(
+                    builder: (context, myEventModel, groupModel, trackerModel,
+                        userModel, child) {
               List<Widget> eventCells = [];
               if (myEventModel.searchResults.length == 0) {
                 myEventModel.searchEvents(
@@ -163,7 +204,7 @@ class _JourneysPageState extends State<JourneysPage> {
                               locationCount,
                               numberCompleted!,
                               complete,
-                              "Normal",
+                              difficulty,
                               event.minimumScore,
                               0),
                     ),
@@ -172,9 +213,9 @@ class _JourneysPageState extends State<JourneysPage> {
               }
               return ListView.separated(
                 padding: const EdgeInsets.all(0),
-                itemCount: eventCells.length,
+                itemCount: cells.length,
                 itemBuilder: (context, index) {
-                  return eventCells[index];
+                  return cells[index];
                 },
                 separatorBuilder: (context, index) {
                   return SizedBox(height: 10);
