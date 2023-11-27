@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:game/api/game_api.dart';
-import 'package:game/api/game_client_dto.dart';
-import 'package:game/events/event_cell.dart';
 import 'package:game/journeys/journey_cell.dart';
 import 'package:game/journeys/filter_form.dart';
-import 'package:game/model/event_model.dart';
-import 'package:game/model/group_model.dart';
-import 'package:game/model/tracker_model.dart';
-import 'package:game/model/user_model.dart';
-import 'package:game/utils/utility_functions.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+
+import '../api/game_api.dart';
+import '../api/game_client_dto.dart';
+import '../events/event_cell.dart';
+import '../model/challenge_model.dart';
+import '../model/event_model.dart';
+import '../model/group_model.dart';
+import '../model/tracker_model.dart';
+import '../model/user_model.dart';
+import '../utils/utility_functions.dart';
 
 class JourneysPage extends StatefulWidget {
   const JourneysPage({Key? key}) : super(key: key);
@@ -20,17 +22,6 @@ class JourneysPage extends StatefulWidget {
 }
 
 class _JourneysPageState extends State<JourneysPage> {
-  void openFilter() {
-    showModalBottomSheet(
-        context: context,
-        isScrollControlled: true,
-        builder: (
-          BuildContext context,
-        ) {
-          return FilterForm();
-        });
-  }
-
   final cells = [
     JourneyCell(
       "DTI Scavenger Hunt",
@@ -73,6 +64,18 @@ class _JourneysPageState extends State<JourneysPage> {
       3,
     ),
   ];
+
+  void openFilter() {
+    showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        builder: (
+          BuildContext context,
+        ) {
+          return FilterForm();
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -141,87 +144,95 @@ class _JourneysPageState extends State<JourneysPage> {
                 ),
               ),
             ),
-            Expanded(
-                child:
-                    // Consumer4<EventModel, GroupModel, TrackerModel, UserModel>(
-                    //     builder: (context, myEventModel, groupModel, trackerModel,
-                    //         userModel, child) {
-                    // List<Widget> eventCells = [];
-                    // if (myEventModel.searchResults.length == 0) {
-                    //   myEventModel.searchEvents(
-                    //       0,
-                    //       1000,
-                    //       [
-                    //         EventRewardType.PERPETUAL,
-                    //         EventRewardType.LIMITED_TIME_EVENT
-                    //       ],
-                    //       false,
-                    //       false,
-                    //       false);
-                    // }
-                    // final events = myEventModel.searchResults;
-                    // if (!events
-                    //     .any((element) => element.id == groupModel.curEventId)) {
-                    //   final curEvent =
-                    //       myEventModel.getEventById(groupModel.curEventId ?? "");
-                    //   if (curEvent != null) events.add(curEvent);
-                    // }
-                    // for (EventDto event in events) {
-                    //   final tracker = trackerModel.trackerByEventId(event.id);
-                    //   final complete = tracker?.prevChallengeIds.length ==
-                    //       event.challengeIds.length;
-                    //   final locationCount = event.challengeIds.length;
-                    //   final numberCompleted = tracker?.prevChallengeIds.length;
-                    //   final difficulty = event.difficulty;
-                    //   final timeTillExpire = Duration(days: 2);
-                    // eventCells.add(
-                    //   GestureDetector(
-                    //     onTap: () {
-                    //       if (groupModel.curEventId == event.id) return;
-                    //       if (groupModel.members.any((element) =>
-                    //           element.id == userModel.userData?.id &&
-                    //           element.id == groupModel.group!.hostId)) {
-                    //         // _showConfirmation(context, event.id, event.name);
-                    //       } else {
-                    //         showAlert("Ask the group leader to change the event.",
-                    //             context);
-                    //       }
-                    //     },
-                    //     child: StreamBuilder(
-                    //       stream: Stream.fromFuture(Future.delayed(timeTillExpire)),
-                    //       builder: (stream, value) => timeTillExpire.isNegative
-                    //           ? Consumer<ApiClient>(
-                    //               builder: (context, apiClient, child) {
-                    //                 if (event.id == groupModel.curEventId) {
-                    //                   apiClient.serverApi?.setCurrentEvent("");
-                    //                 }
-                    //                 return Container();
-                    //               },
-                    //             )
-                    //           //Backend is not formatted correctly for journeys
-                    //           : JourneyCell(
-                    //               event.name,
-                    //               event.description,
-                    //               locationCount,
-                    //               numberCompleted!,
-                    //               complete,
-                    //               difficulty,
-                    //               event.minimumScore,
-                    //               0),
-                    //     ),
-                    //   ),
-                    // );
-                    // }
-                    ListView.separated(
-              padding: const EdgeInsets.all(0),
-              itemCount: cells.length,
-              itemBuilder: (context, index) {
-                return cells[index];
-              },
-              separatorBuilder: (context, index) {
-                return SizedBox(height: 10);
-              },
-            ))
+            Expanded(child: Consumer5<EventModel, GroupModel, TrackerModel,
+                        ChallengeModel, UserModel>(
+                    builder: (context, myEventModel, groupModel, trackerModel,
+                        challengeModel, userModel, child) {
+              List<Widget> eventCells = [];
+              if (myEventModel.searchResults.length == 0) {
+                myEventModel.searchEvents(
+                    0,
+                    1000,
+                    [
+                      EventRewardType.PERPETUAL,
+                      EventRewardType.LIMITED_TIME_EVENT
+                    ],
+                    false,
+                    false,
+                    false);
+              }
+              final events = myEventModel.searchResults ?? [];
+              if (!events
+                  .any((element) => element.id == groupModel.curEventId)) {
+                final curEvent =
+                    myEventModel.getEventById(groupModel.curEventId ?? "");
+                if (curEvent != null) events.add(curEvent);
+              }
+              for (EventDto event in events) {
+                final reward =
+                    event.rewardIds.length == 0 ? null : event.rewardIds[0];
+                final tracker = trackerModel.trackerByEventId(event.id);
+                final format = DateFormat('yyyy-MM-dd');
+                final chal = event.challengeIds.length == 0
+                    ? null
+                    : challengeModel.getChallengeById(event.challengeIds[0]);
+                final complete = tracker?.prevChallengeIds.length ==
+                    event.challengeIds.length;
+                final timeTillExpire =
+                    DateTime.parse(event.endTime).difference(DateTime.now());
+                eventCells.add(
+                  GestureDetector(
+                    onTap: () {
+                      if (groupModel.curEventId == event.id) return;
+                      if (groupModel.members.any((element) =>
+                          element.id == userModel.userData?.id &&
+                          element.id == groupModel.group!.hostId)) {
+                        // _showConfirmation(context, event.id, event.name);
+                      } else {
+                        showAlert("Ask the group leader to change the event.",
+                            context);
+                      }
+                    },
+                    child: StreamBuilder(
+                      stream: Stream.fromFuture(Future.delayed(timeTillExpire)),
+                      builder: (stream, value) => timeTillExpire.isNegative
+                          ? Consumer<ApiClient>(
+                              builder: (context, apiClient, child) {
+                                if (event.id == groupModel.curEventId) {
+                                  apiClient.serverApi?.setCurrentEvent("");
+                                }
+                                return Container();
+                              },
+                            )
+                          : EventCell(
+                              event.name,
+                              format.format(DateTime.parse(event.endTime)),
+                              event.description,
+                              complete,
+                              event.id == groupModel.curEventId,
+                              DateTime.parse(event.endTime),
+                              reward ?? "",
+                              event.rewardIds.length,
+                              event.requiredMembers,
+                              chal?.imageUrl ??
+                                  "https://a.rgbimg.com/users/b/ba/badk/600/qfOGvbS.jpg",
+                            ),
+                    ),
+                  ),
+                );
+              }
+            })
+                // ListView.separated(
+                //   padding: const EdgeInsets.all(0),
+                //   itemCount: cells.length,
+                //   itemBuilder: (context, index) {
+                //     return cells[index];
+                //   },
+                //   separatorBuilder: (context, index) {
+                //     return SizedBox(height: 10);
+                //   },
+                // ),
+                ),
           ],
         ),
       ),
