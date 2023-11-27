@@ -141,87 +141,87 @@ class _JourneysPageState extends State<JourneysPage> {
                 ),
               ),
             ),
-            Expanded(child:
-                Consumer4<EventModel, GroupModel, TrackerModel, UserModel>(
-                    builder: (context, myEventModel, groupModel, trackerModel,
-                        userModel, child) {
-              // List<Widget> eventCells = [];
-              // if (myEventModel.searchResults.length == 0) {
-              //   myEventModel.searchEvents(
-              //       0,
-              //       1000,
-              //       [
-              //         EventRewardType.PERPETUAL,
-              //         EventRewardType.LIMITED_TIME_EVENT
-              //       ],
-              //       false,
-              //       false,
-              //       false);
-              // }
-              // final events = myEventModel.searchResults;
-              // if (!events
-              //     .any((element) => element.id == groupModel.curEventId)) {
-              //   final curEvent =
-              //       myEventModel.getEventById(groupModel.curEventId ?? "");
-              //   if (curEvent != null) events.add(curEvent);
-              // }
-              // for (EventDto event in events) {
-              //   final tracker = trackerModel.trackerByEventId(event.id);
-              //   final complete = tracker?.prevChallengeIds.length ==
-              //       event.challengeIds.length;
-              //   final locationCount = event.challengeIds.length;
-              //   final numberCompleted = tracker?.prevChallengeIds.length;
-              //   final difficulty = event.difficulty;
-              //   final timeTillExpire = Duration(days: 2);
-              // eventCells.add(
-              //   GestureDetector(
-              //     onTap: () {
-              //       if (groupModel.curEventId == event.id) return;
-              //       if (groupModel.members.any((element) =>
-              //           element.id == userModel.userData?.id &&
-              //           element.id == groupModel.group!.hostId)) {
-              //         // _showConfirmation(context, event.id, event.name);
-              //       } else {
-              //         showAlert("Ask the group leader to change the event.",
-              //             context);
-              //       }
-              //     },
-              //     child: StreamBuilder(
-              //       stream: Stream.fromFuture(Future.delayed(timeTillExpire)),
-              //       builder: (stream, value) => timeTillExpire.isNegative
-              //           ? Consumer<ApiClient>(
-              //               builder: (context, apiClient, child) {
-              //                 if (event.id == groupModel.curEventId) {
-              //                   apiClient.serverApi?.setCurrentEvent("");
-              //                 }
-              //                 return Container();
-              //               },
-              //             )
-              //           //Backend is not formatted correctly for journeys
-              //           : JourneyCell(
-              //               event.name,
-              //               event.description,
-              //               locationCount,
-              //               numberCompleted!,
-              //               complete,
-              //               difficulty,
-              //               event.minimumScore,
-              //               0),
-              //     ),
-              //   ),
-              // );
-              // }
-              return ListView.separated(
-                padding: const EdgeInsets.all(0),
-                itemCount: cells.length,
-                itemBuilder: (context, index) {
-                  return cells[index];
-                },
-                separatorBuilder: (context, index) {
-                  return SizedBox(height: 10);
-                },
-              );
-            }))
+            Expanded(
+                child:
+                    // Consumer4<EventModel, GroupModel, TrackerModel, UserModel>(
+                    //     builder: (context, myEventModel, groupModel, trackerModel,
+                    //         userModel, child) {
+                    // List<Widget> eventCells = [];
+                    // if (myEventModel.searchResults.length == 0) {
+                    //   myEventModel.searchEvents(
+                    //       0,
+                    //       1000,
+                    //       [
+                    //         EventRewardType.PERPETUAL,
+                    //         EventRewardType.LIMITED_TIME_EVENT
+                    //       ],
+                    //       false,
+                    //       false,
+                    //       false);
+                    // }
+                    // final events = myEventModel.searchResults;
+                    // if (!events
+                    //     .any((element) => element.id == groupModel.curEventId)) {
+                    //   final curEvent =
+                    //       myEventModel.getEventById(groupModel.curEventId ?? "");
+                    //   if (curEvent != null) events.add(curEvent);
+                    // }
+                    // for (EventDto event in events) {
+                    //   final tracker = trackerModel.trackerByEventId(event.id);
+                    //   final complete = tracker?.prevChallengeIds.length ==
+                    //       event.challengeIds.length;
+                    //   final locationCount = event.challengeIds.length;
+                    //   final numberCompleted = tracker?.prevChallengeIds.length;
+                    //   final difficulty = event.difficulty;
+                    //   final timeTillExpire = Duration(days: 2);
+                    // eventCells.add(
+                    //   GestureDetector(
+                    //     onTap: () {
+                    //       if (groupModel.curEventId == event.id) return;
+                    //       if (groupModel.members.any((element) =>
+                    //           element.id == userModel.userData?.id &&
+                    //           element.id == groupModel.group!.hostId)) {
+                    //         // _showConfirmation(context, event.id, event.name);
+                    //       } else {
+                    //         showAlert("Ask the group leader to change the event.",
+                    //             context);
+                    //       }
+                    //     },
+                    //     child: StreamBuilder(
+                    //       stream: Stream.fromFuture(Future.delayed(timeTillExpire)),
+                    //       builder: (stream, value) => timeTillExpire.isNegative
+                    //           ? Consumer<ApiClient>(
+                    //               builder: (context, apiClient, child) {
+                    //                 if (event.id == groupModel.curEventId) {
+                    //                   apiClient.serverApi?.setCurrentEvent("");
+                    //                 }
+                    //                 return Container();
+                    //               },
+                    //             )
+                    //           //Backend is not formatted correctly for journeys
+                    //           : JourneyCell(
+                    //               event.name,
+                    //               event.description,
+                    //               locationCount,
+                    //               numberCompleted!,
+                    //               complete,
+                    //               difficulty,
+                    //               event.minimumScore,
+                    //               0),
+                    //     ),
+                    //   ),
+                    // );
+                    // }
+                    ListView.separated(
+              padding: const EdgeInsets.all(0),
+              itemCount: cells.length,
+              itemBuilder: (context, index) {
+                return cells[index];
+              },
+              separatorBuilder: (context, index) {
+                return SizedBox(height: 10);
+              },
+            ))
           ],
         ),
       ),
