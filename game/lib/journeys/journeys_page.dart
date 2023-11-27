@@ -21,49 +21,6 @@ class JourneysPage extends StatefulWidget {
 }
 
 class _JourneysPageState extends State<JourneysPage> {
-  final cells = [
-    JourneyCell(
-      "DTI Scavenger Hunt",
-      "Scavenger hunt during All Hands on 2/18",
-      10,
-      5,
-      false,
-      "normal",
-      15,
-      3,
-    ),
-    JourneyCell(
-      "DTI Scavenger Hunt",
-      "Scavenger hunt during All Hands on 2/18",
-      10,
-      0,
-      false,
-      "normal",
-      15,
-      3,
-    ),
-    JourneyCell(
-      "Cornell Cafés",
-      "Get your coffee fix at these top cafés on campus.",
-      6,
-      6,
-      true,
-      "normal",
-      15,
-      3,
-    ),
-    JourneyCell(
-      "journey",
-      "hi",
-      0,
-      0,
-      false,
-      "normal",
-      15,
-      3,
-    ),
-  ];
-
   void openFilter() {
     showModalBottomSheet(
         context: context,
@@ -143,18 +100,6 @@ class _JourneysPageState extends State<JourneysPage> {
                 ),
               ),
             ),
-            // Expanded(
-            //   child: ListView.separated(
-            //     padding: const EdgeInsets.all(0),
-            //     itemCount: cells.length,
-            //     itemBuilder: (context, index) {
-            //       return cells[index];
-            //     },
-            //     separatorBuilder: (context, index) {
-            //       return SizedBox(height: 10);
-            //     },
-            //   ),
-            // ),
             Expanded(child: Consumer5<EventModel, GroupModel, TrackerModel,
                     ChallengeModel, UserModel>(
                 builder: (context, myEventModel, groupModel, trackerModel,
@@ -172,7 +117,7 @@ class _JourneysPageState extends State<JourneysPage> {
                     false,
                     false);
               }
-              final events = myEventModel.searchResults ?? [];
+              final events = myEventModel.searchResults;
               if (!events
                   .any((element) => element.id == groupModel.curEventId)) {
                 final curEvent =
@@ -183,8 +128,10 @@ class _JourneysPageState extends State<JourneysPage> {
                 final tracker = trackerModel.trackerByEventId(event.id);
                 final complete = tracker?.prevChallengeIds.length ==
                     event.challengeIds.length;
+                final locationCount = event.challengeIds.length;
+                final numberCompleted = tracker?.prevChallengeIds.length;
+                final difficulty = event.difficulty;
                 final timeTillExpire = Duration(days: 2);
-                // DateTime.parse(event.endTime).difference(DateTime.now());
                 eventCells.add(
                   GestureDetector(
                     onTap: () {
@@ -210,8 +157,15 @@ class _JourneysPageState extends State<JourneysPage> {
                               },
                             )
                           //Backend is not formatted correctly for journeys
-                          : JourneyCell(event.name, event.description, 4, 3,
-                              complete, "Normal", event.minimumScore, 0),
+                          : JourneyCell(
+                              event.name,
+                              event.description,
+                              locationCount,
+                              numberCompleted!,
+                              complete,
+                              "Normal",
+                              event.minimumScore,
+                              0),
                     ),
                   ),
                 );

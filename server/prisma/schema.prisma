@@ -26,6 +26,12 @@ enum EnrollmentType {
   ALUMNI
 }
 
+enum DifficultyMode {
+  EASY
+  NORMAL
+  HARD
+}
+
 enum SessionLogEvent {
   JOIN_GROUP //data = groupId
   LEAVE_GROUP //data = groupId
@@ -111,6 +117,7 @@ model EventBase {
   indexable          Boolean
   endTime            DateTime
   minimumScore       Int             @default(1)
+  difficulty         DifficultyMode
   rewards            EventReward[]
   challenges         Challenge[]     @relation("all")
   userFavorite       User[]

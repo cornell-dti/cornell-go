@@ -210,6 +210,7 @@ class EventDto {
     initialOrganizationId = fields['initialOrganizationId'];
     defaultChallengeId = fields['defaultChallengeId'];
     minimumScore = fields['minimumScore'];
+    difficulty = fields['difficulty'];
     indexable = fields['indexable'];
     longitude = fields['longitude'];
     latitude = fields['latitude'];
@@ -228,6 +229,7 @@ class EventDto {
   String? initialOrganizationId = '';
   String defaultChallengeId = '';
   int minimumScore = 0;
+  String difficulty = '';
   bool indexable = false;
   double longitude = 0.0;
   double latitude = 0.0;

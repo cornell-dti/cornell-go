@@ -40,6 +40,13 @@ function EventCard(props: {
   const rewardingMethod =
     props.event.rewardType === "limited_time" ? "Limited" : "Unlimited";
 
+  const difficultyMode =
+    props.event.difficulty === "Easy"
+      ? "Easy"
+      : props.event.difficulty === "Normal"
+      ? "Normal"
+      : "Hard";
+
   const affirmOfBool = (val: boolean) => (val ? "Yes" : "No");
 
   return (
@@ -64,6 +71,7 @@ function EventCard(props: {
           Required Players: <b>{requiredText}</b> <br />
           Rewarding Method: <b>{rewardingMethod}</b> <br />
           Minimum Rewarding Score: <b>{props.event.minimumScore}</b> <br />
+          Difficulty: <b>{difficultyMode}</b> <br />
           Challenge Count: <b>{props.event.challengeIds.length}</b> <br />
           Reward Count: <b>{props.event.rewardIds.length}</b> <br />
           Publicly Visible: <b>{affirmOfBool(props.event.indexable)}</b> <br />
@@ -95,12 +103,18 @@ function makeForm() {
       value: 0,
     },
     { name: "Minimum Score for Reward", value: 1, min: 1, max: 999999 },
+    {
+      name: "Difficulty",
+      options: ["Easy", "Normal", "Hard"],
+      value: 1,
+    },
     { name: "Publicly Visible", options: ["No", "Yes"], value: 0 },
     { name: "Available Until", date: new Date("2050") },
   ] as EntryForm[];
 }
 
 function fromForm(form: EntryForm[], id: string): EventDto {
+  const difficulties = ["Easy", "Normal", "Hard"];
   return {
     id,
     requiredMembers: (form[2] as NumberEntryForm).value,
@@ -114,6 +128,12 @@ function fromForm(form: EntryForm[], id: string): EventDto {
     challengeIds: [],
     defaultChallengeId: "",
     minimumScore: (form[4] as NumberEntryForm).value,
+    difficulty:
+      (form[3] as OptionEntryForm).value === 0
+        ? "Easy"
+        : (form[3] as OptionEntryForm).value === 1
+        ? "Normal"
+        : "Hard",
     latitude: 0,
     longitude: 0,
   };
@@ -139,6 +159,11 @@ function toForm(event: EventDto) {
       value: event.minimumScore,
       min: 1,
       max: 999999,
+    },
+    {
+      name: "Difficulty",
+      options: ["Easy", "Normal", "Hard"],
+      value: event.difficulty,
     },
     {
       name: "Publicly Visible",

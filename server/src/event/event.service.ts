@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import {
   Challenge,
+  DifficultyMode,
   EventBase,
   EventRewardType,
   EventTracker,
@@ -286,6 +287,12 @@ export class EventService {
         .sort((a, b) => a.eventIndex - b.eventIndex)
         .map(({ id }) => id),
       minimumScore: ev.minimumScore,
+      difficulty:
+        ev.difficulty === DifficultyMode.EASY
+          ? 'Easy'
+          : ev.difficulty === DifficultyMode.NORMAL
+          ? 'Normal'
+          : 'Hard',
       defaultChallengeId: ev.defaultChallengeId,
       latitude: ev.latitude,
       longitude: ev.longitude,
@@ -450,6 +457,12 @@ export class EventService {
       // initialOrganizationId: event.initialOrganizationId,
       indexable: event.indexable,
       minimumScore: event.minimumScore,
+      difficulty:
+        event.difficulty === 'Easy'
+          ? DifficultyMode.EASY
+          : event.difficulty === 'Normal'
+          ? DifficultyMode.NORMAL
+          : DifficultyMode.HARD,
       latitude: firstChal?.latitude ?? 0,
       longitude: firstChal?.longitude ?? 0,
     };
