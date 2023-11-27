@@ -173,43 +173,43 @@ class _JourneysPageState extends State<JourneysPage> {
                 final numberCompleted = tracker?.prevChallengeIds.length;
                 final difficulty = event.difficulty;
                 final timeTillExpire = Duration(days: 2);
-                eventCells.add(
-                  GestureDetector(
-                    onTap: () {
-                      if (groupModel.curEventId == event.id) return;
-                      if (groupModel.members.any((element) =>
-                          element.id == userModel.userData?.id &&
-                          element.id == groupModel.group!.hostId)) {
-                        // _showConfirmation(context, event.id, event.name);
-                      } else {
-                        showAlert("Ask the group leader to change the event.",
-                            context);
-                      }
-                    },
-                    child: StreamBuilder(
-                      stream: Stream.fromFuture(Future.delayed(timeTillExpire)),
-                      builder: (stream, value) => timeTillExpire.isNegative
-                          ? Consumer<ApiClient>(
-                              builder: (context, apiClient, child) {
-                                if (event.id == groupModel.curEventId) {
-                                  apiClient.serverApi?.setCurrentEvent("");
-                                }
-                                return Container();
-                              },
-                            )
-                          //Backend is not formatted correctly for journeys
-                          : JourneyCell(
-                              event.name,
-                              event.description,
-                              locationCount,
-                              numberCompleted!,
-                              complete,
-                              difficulty,
-                              event.minimumScore,
-                              0),
-                    ),
-                  ),
-                );
+                // eventCells.add(
+                //   GestureDetector(
+                //     onTap: () {
+                //       if (groupModel.curEventId == event.id) return;
+                //       if (groupModel.members.any((element) =>
+                //           element.id == userModel.userData?.id &&
+                //           element.id == groupModel.group!.hostId)) {
+                //         // _showConfirmation(context, event.id, event.name);
+                //       } else {
+                //         showAlert("Ask the group leader to change the event.",
+                //             context);
+                //       }
+                //     },
+                //     child: StreamBuilder(
+                //       stream: Stream.fromFuture(Future.delayed(timeTillExpire)),
+                //       builder: (stream, value) => timeTillExpire.isNegative
+                //           ? Consumer<ApiClient>(
+                //               builder: (context, apiClient, child) {
+                //                 if (event.id == groupModel.curEventId) {
+                //                   apiClient.serverApi?.setCurrentEvent("");
+                //                 }
+                //                 return Container();
+                //               },
+                //             )
+                //           //Backend is not formatted correctly for journeys
+                //           : JourneyCell(
+                //               event.name,
+                //               event.description,
+                //               locationCount,
+                //               numberCompleted!,
+                //               complete,
+                //               difficulty,
+                //               event.minimumScore,
+                //               0),
+                //     ),
+                //   ),
+                // );
               }
               return ListView.separated(
                 padding: const EdgeInsets.all(0),
