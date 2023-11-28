@@ -159,7 +159,7 @@ class _JourneysPageState extends State<JourneysPage> {
                               event.name,
                               event.description,
                               locationCount,
-                              numberCompleted!,
+                              numberCompleted ?? 0,
                               complete,
                               difficulty,
                               event.minimumScore,

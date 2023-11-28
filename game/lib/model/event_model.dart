@@ -14,7 +14,6 @@ class EventModel extends ChangeNotifier {
       if (!(event.event is String)) {
         if (!_events.containsKey(event.event.id)) {
           searchResults.add(event.event);
-          print(searchResults);
         }
       }
       _events[event.event.id] = event.event;

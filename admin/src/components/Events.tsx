@@ -114,7 +114,6 @@ function makeForm() {
 }
 
 function fromForm(form: EntryForm[], id: string): EventDto {
-  const difficulties = ["Easy", "Normal", "Hard"];
   return {
     id,
     requiredMembers: (form[2] as NumberEntryForm).value,
@@ -123,15 +122,15 @@ function fromForm(form: EntryForm[], id: string): EventDto {
     name: (form[0] as FreeEntryForm).value,
     description: (form[1] as FreeEntryForm).value,
     indexable: (form[5] as OptionEntryForm).value === 1,
-    endTime: (form[6] as DateEntryForm).date.toUTCString(),
+    endTime: (form[7] as DateEntryForm).date.toUTCString(),
     rewardIds: [],
     challengeIds: [],
     defaultChallengeId: "",
     minimumScore: (form[4] as NumberEntryForm).value,
     difficulty:
-      (form[3] as OptionEntryForm).value === 0
+      (form[5] as OptionEntryForm).value === 0
         ? "Easy"
-        : (form[3] as OptionEntryForm).value === 1
+        : (form[5] as OptionEntryForm).value === 1
         ? "Normal"
         : "Hard",
     latitude: 0,
@@ -163,7 +162,12 @@ function toForm(event: EventDto) {
     {
       name: "Difficulty",
       options: ["Easy", "Normal", "Hard"],
-      value: event.difficulty,
+      value:
+        event.difficulty === "Easy"
+          ? 0
+          : event.difficulty === "Normal"
+          ? "Normal"
+          : "Hard",
     },
     {
       name: "Publicly Visible",
