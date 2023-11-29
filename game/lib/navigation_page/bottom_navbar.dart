@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:game/global_leaderboard/global_leaderboard_widget.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'homeNavBar.dart';
+import 'home_navbar.dart';
 
 class BottomNavBar extends StatefulWidget {
   const BottomNavBar({Key? key}) : super(key: key);
