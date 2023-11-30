@@ -19,6 +19,13 @@ enum EventRewardType {
   PERPETUAL
 }
 
+enum EnrollmentType {
+  UNDERGRADUATE
+  GRADUATE
+  FACULTY
+  ALUMNI
+}
+
 enum SessionLogEvent {
   JOIN_GROUP //data = groupId
   LEAVE_GROUP //data = groupId
@@ -51,7 +58,7 @@ model User {
   email               String
   hashedRefreshToken  String
   administrator       Boolean
-  userStatus          String
+  enrollmentType      EnrollmentType
   score               Int
   isBanned            Boolean           @default(false)
   rewards             EventReward[]

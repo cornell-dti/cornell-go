@@ -15,7 +15,7 @@ import isDev from "../development";
 import { postRequest } from "../post";
 import { Modal } from "./Modal";
 
-const serverUrl = isDev() ? "http://localhost" : "";
+const serverUrl = isDev() ? "http://localhost:8080" : "";
 
 export const ServerConnectionContext = createContext<{
   connection?: Socket;
@@ -51,6 +51,7 @@ export function ServerConnectionProvider(props: { children: ReactNode }) {
             major: "Computer Science",
             year: "2025",
             aud: "web",
+            enrollmentType: "UNDERGRADUATE",
           });
 
           if (!loginResponse) {
