@@ -25,7 +25,6 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  flutter_svg: ^2.0.5
   sliding_up_panel: ^2.0.0+1
   velocity_x:
   flutter_blurhash:
@@ -50,6 +49,7 @@ dependencies:
   flutter_map: ^6.0.1
   latlong2: ^0.9.0
   device_info_plus: ^9.1.0
+  flutter_svg: ^2.0.8
 
 flutter_icons:
   android: true
