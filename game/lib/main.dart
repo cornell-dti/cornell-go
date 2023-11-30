@@ -4,6 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/challenges/challenges_widget.dart';
 import 'package:game/gameplay/gameplay_page.dart';
+import 'package:game/global_leaderboard/global_leaderboard_widget.dart';
 import 'package:game/journeys/journeys_page.dart';
 import 'package:game/login/login_page.dart';
 import 'package:game/model/challenge_model.dart';
@@ -78,7 +79,7 @@ class MyApp extends StatelessWidget {
           ],
           supportedLocales: const [Locale('en', '')],
           theme: ThemeData(primarySwatch: Colors.blue),
-          home: BottomNavBar(),
+          home: SplashPageWidget(),
         )));
   }
 }
