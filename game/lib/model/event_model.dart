@@ -15,8 +15,12 @@ class EventModel extends ChangeNotifier {
         if (!_events.containsKey(event.event.id)) {
           searchResults.add(event.event);
         }
+        _events[event.event.id] = event.event;
+      } else if (event.event is String && event.deleted) {
+        _events.remove(event.event);
+        searchResults.removeWhere((element) => element.id == event.event);
       }
-      _events[event.event.id] = event.event;
+
       notifyListeners();
     });
 

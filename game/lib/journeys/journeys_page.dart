@@ -98,10 +98,10 @@ class _JourneysPageState extends State<JourneysPage> {
                 ),
               ),
             ),
-            Expanded(child: Consumer5<EventModel, GroupModel, TrackerModel,
-                    ChallengeModel, UserModel>(
-                builder: (context, myEventModel, groupModel, trackerModel,
-                    challengeModel, userModel, child) {
+            Expanded(child:
+                Consumer4<EventModel, GroupModel, TrackerModel, UserModel>(
+                    builder: (context, myEventModel, groupModel, trackerModel,
+                        userModel, child) {
               List<Widget> eventCells = [];
               if (myEventModel.searchResults.length == 0) {
                 myEventModel.searchEvents(
@@ -154,7 +154,6 @@ class _JourneysPageState extends State<JourneysPage> {
                                 return Container();
                               },
                             )
-                          //Backend is not formatted correctly for journeys
                           : JourneyCell(
                               event.name,
                               event.description,

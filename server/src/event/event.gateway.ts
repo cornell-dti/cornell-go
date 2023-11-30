@@ -172,6 +172,7 @@ export class EventGateway {
       }
 
       const ev = await this.eventService.upsertEventFromDto(
+        user,
         data.event as EventDto,
       );
 
