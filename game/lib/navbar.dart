@@ -17,10 +17,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
       TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
   static const List<Widget> _widgetOptions = <Widget>[
     JourneysPage(),
-    Text(
-      'Leaderboard',
-      style: optionStyle,
-    ),
+    GlobalLeaderboardWidget(),
     Text(
       'Profile',
       style: optionStyle,
