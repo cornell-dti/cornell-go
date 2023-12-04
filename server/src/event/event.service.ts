@@ -153,6 +153,12 @@ export class EventService {
     return progress;
   }
 
+  /**
+   *
+   * @param user calling User
+   * @param event event to create Tracker for
+   * @returns the created eventTracker
+   */
   async createEventTracker(user: User, event: EventBase) {
     const existing = await this.prisma.eventTracker.findFirst({
       where: { userId: user.id, eventId: event.id },
