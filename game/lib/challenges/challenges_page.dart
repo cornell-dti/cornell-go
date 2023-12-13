@@ -107,41 +107,28 @@ class _ChallengesPageState extends State<ChallengesPage> {
                 var complete = tracker?.prevChallengeIds.length ==
                     event.challengeIds.length;
                 const timeTillExpire = Duration(days: 2);
+                if (event.challengeIds.length > 1) continue;
                 eventCells.add(
-                  GestureDetector(
-                    onTap: () {
-                      if (groupModel.curEventId == event.id) return;
-                      if (groupModel.members.any((element) =>
-                          element.id == userModel.userData?.id &&
-                          element.id == groupModel.group!.hostId)) {
-                        // _showConfirmation(context, event.id, event.name);
-                      } else {
-                        showAlert("Ask the group leader to change the event.",
-                            context);
-                      }
-                    },
-                    child: StreamBuilder(
-                      stream: Stream.fromFuture(Future.delayed(timeTillExpire)),
-                      builder: (stream, value) => timeTillExpire.isNegative
-                          ? Consumer<ApiClient>(
-                              builder: (context, apiClient, child) {
-                                if (event.id == groupModel.curEventId) {
-                                  apiClient.serverApi?.setCurrentEvent("");
-                                }
-                                return Container();
-                              },
-                            )
-                          : ChallengeCell(
-                              "location",
-                              event.name,
-                              Image(
-                                  image: AssetImage("assets/images/38582.jpg")),
-                              complete,
-                              event.description,
-                              "normal",
-                              event.minimumScore,
-                              0),
-                    ),
+                  StreamBuilder(
+                    stream: Stream.fromFuture(Future.delayed(timeTillExpire)),
+                    builder: (stream, value) => timeTillExpire.isNegative
+                        ? Consumer<ApiClient>(
+                            builder: (context, apiClient, child) {
+                              if (event.id == groupModel.curEventId) {
+                                apiClient.serverApi?.setCurrentEvent("");
+                              }
+                              return Container();
+                            },
+                          )
+                        : ChallengeCell(
+                            "location",
+                            event.name,
+                            Image(image: AssetImage("assets/images/38582.jpg")),
+                            complete,
+                            event.description,
+                            "normal",
+                            event.minimumScore,
+                            0),
                   ),
                 );
               }

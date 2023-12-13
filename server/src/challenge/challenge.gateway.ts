@@ -127,6 +127,13 @@ export class ChallengeGateway {
     }
   }
 
+  /**
+   *
+   * @param user The calling user
+   * @param data The specific leaderboard data to request. Consists of the offset and how many entries to return
+   *
+   * Emits the leaderboard data for the user to receive
+   */
   @SubscribeMessage('requestGlobalLeaderData')
   async requestGlobalLeaderData(
     @CallingUser() user: User,
@@ -140,6 +147,12 @@ export class ChallengeGateway {
     );
   }
 
+  /**
+   *
+   * @param user The calling user
+   * @param data The data of the updated challenge
+   * @returns Nothing. The updated challenge is emitted to the user to receive.
+   */
   @SubscribeMessage('updateChallengeData')
   async updateChallengeData(
     @CallingUser() user: User,
