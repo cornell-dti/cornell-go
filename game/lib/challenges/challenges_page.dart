@@ -2,6 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
+import 'package:game/api/game_api.dart';
+import 'package:game/api/game_client_dto.dart';
+import 'package:game/model/event_model.dart';
+import 'package:game/model/group_model.dart';
+import 'package:game/model/tracker_model.dart';
+import 'package:game/model/user_model.dart';
+import 'package:game/utils/utility_functions.dart';
+import 'package:provider/provider.dart';
 import 'challenge_cell_new.dart';
 
 class ChallengesPage extends StatefulWidget {
@@ -12,44 +20,6 @@ class ChallengesPage extends StatefulWidget {
 }
 
 class _ChallengesPageState extends State<ChallengesPage> {
-  final cells = [
-    ChallengeCell(
-        "ARTS QUAD",
-        "Statue on the Arts Quad",
-        Image.network('https://picsum.photos/250?image=9'),
-        false,
-        "Find this famous statue!",
-        "Easy",
-        15,
-        3),
-    ChallengeCell(
-        "ARTS QUAD",
-        "Statue on the Arts Quad",
-        Image.network('https://picsum.photos/250?image=9'),
-        true,
-        "Find this famous statue!",
-        "Normal",
-        15,
-        3),
-    ChallengeCell(
-        "ARTS QUAD",
-        "Statue on the Arts Quad",
-        Image.network('https://picsum.photos/250?image=9'),
-        false,
-        "Find this famous statue!",
-        "Hard",
-        15,
-        3),
-    ChallengeCell(
-        "ARTS QUAD",
-        "Statue on the Arts Quad",
-        Image.network('https://picsum.photos/250?image=9'),
-        true,
-        "Find this famous statue!",
-        "Challenging",
-        15,
-        3),
-  ];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -108,18 +78,84 @@ class _ChallengesPageState extends State<ChallengesPage> {
                 ],
               ),
             ),
-            Expanded(
-              child: ListView.separated(
+            Expanded(child:
+                Consumer4<EventModel, GroupModel, TrackerModel, UserModel>(
+                    builder: (context, myEventModel, groupModel, trackerModel,
+                        userModel, child) {
+              List<Widget> eventCells = [];
+              if (myEventModel.searchResults!.length == 0) {
+                myEventModel.searchEvents(
+                    0,
+                    1000,
+                    [
+                      EventRewardType.PERPETUAL,
+                      EventRewardType.LIMITED_TIME_EVENT
+                    ],
+                    false,
+                    false,
+                    false);
+              }
+              final events = myEventModel.searchResults;
+              if (!events!
+                  .any((element) => element.id == groupModel.curEventId)) {
+                final curEvent =
+                    myEventModel.getEventById(groupModel.curEventId ?? "");
+                if (curEvent != null) events.add(curEvent);
+              }
+              for (EventDto event in events) {
+                var tracker = trackerModel.trackerByEventId(event.id);
+                var complete = tracker?.prevChallengeIds.length ==
+                    event.challengeIds.length;
+                const timeTillExpire = Duration(days: 2);
+                eventCells.add(
+                  GestureDetector(
+                    onTap: () {
+                      if (groupModel.curEventId == event.id) return;
+                      if (groupModel.members.any((element) =>
+                          element.id == userModel.userData?.id &&
+                          element.id == groupModel.group!.hostId)) {
+                        // _showConfirmation(context, event.id, event.name);
+                      } else {
+                        showAlert("Ask the group leader to change the event.",
+                            context);
+                      }
+                    },
+                    child: StreamBuilder(
+                      stream: Stream.fromFuture(Future.delayed(timeTillExpire)),
+                      builder: (stream, value) => timeTillExpire.isNegative
+                          ? Consumer<ApiClient>(
+                              builder: (context, apiClient, child) {
+                                if (event.id == groupModel.curEventId) {
+                                  apiClient.serverApi?.setCurrentEvent("");
+                                }
+                                return Container();
+                              },
+                            )
+                          : ChallengeCell(
+                              "location",
+                              event.name,
+                              Image(
+                                  image: AssetImage("assets/images/38582.jpg")),
+                              complete,
+                              event.description,
+                              "normal",
+                              event.minimumScore,
+                              0),
+                    ),
+                  ),
+                );
+              }
+              return ListView.separated(
                 padding: const EdgeInsets.all(0),
-                itemCount: cells.length,
+                itemCount: eventCells.length,
                 itemBuilder: (context, index) {
-                  return cells[index];
+                  return eventCells[index];
                 },
                 separatorBuilder: (context, index) {
                   return SizedBox(height: 10);
                 },
-              ),
-            ),
+              );
+            }))
           ],
         ),
       ),
