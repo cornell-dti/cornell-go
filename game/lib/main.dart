@@ -16,7 +16,8 @@ import 'package:game/model/user_model.dart';
 import 'package:game/splash_page/splash_page.dart';
 import 'package:game/widget/game_widget.dart';
 import 'package:provider/provider.dart';
-import 'navbar.dart';
+import 'package:game/navigation_page/bottom_navbar.dart';
+import 'package:game/color_palette.dart';
 
 import 'dart:io' show Platform;
 
@@ -78,7 +79,8 @@ class MyApp extends StatelessWidget {
             GlobalCupertinoLocalizations.delegate,
           ],
           supportedLocales: const [Locale('en', '')],
-          theme: ThemeData(primarySwatch: Colors.blue),
+          theme: ThemeData(
+              fontFamily: 'Poppins', primarySwatch: ColorPalette.BigRed),
           home: SplashPageWidget(),
         )));
   }
