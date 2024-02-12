@@ -94,10 +94,20 @@ export class UserService {
     return user;
   }
 
+  /**
+   *
+   * @param id Get user by id
+   * @returns The user
+   */
   async byId(id: string) {
     return await this.prisma.user.findUnique({ where: { id } });
   }
 
+  /**
+   *
+   * @param email Get user by email
+   * @returns The user
+   */
   async byEmail(email: string) {
     return await this.prisma.user.findFirstOrThrow({ where: { email: email } });
   }

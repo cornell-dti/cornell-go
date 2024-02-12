@@ -13,6 +13,7 @@ import 'package:game/model/group_model.dart';
 import 'package:game/model/reward_model.dart';
 import 'package:game/model/tracker_model.dart';
 import 'package:game/model/user_model.dart';
+import 'package:game/profile/profile_page.dart';
 import 'package:game/splash_page/splash_page.dart';
 import 'package:game/widget/game_widget.dart';
 import 'package:provider/provider.dart';
@@ -81,7 +82,7 @@ class MyApp extends StatelessWidget {
           supportedLocales: const [Locale('en', '')],
           theme: ThemeData(
               fontFamily: 'Poppins', primarySwatch: ColorPalette.BigRed),
-          home: SplashPageWidget(),
+          home: ProfilePage(),
         )));
   }
 }
