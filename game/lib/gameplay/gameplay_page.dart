@@ -6,6 +6,7 @@ import 'package:velocity_x/velocity_x.dart';
 
 import 'gameplay_map.dart';
 
+// Returns widget that fills based on tasks and tasks_completed.
 List<Widget> generate_progress(tasks, tasks_completed) {
   List<Widget> progress_blocks = [];
   for (var i = 0; i < tasks; i++) {
@@ -37,6 +38,7 @@ class _GameplayPageState extends State<GameplayPage> {
     return Scaffold(
       body: Column(
         children: [
+          //SafeArea to avoid notch overlap
           SafeArea(
               child: Container(
             padding: EdgeInsets.all(32.0),
@@ -55,6 +57,7 @@ class _GameplayPageState extends State<GameplayPage> {
             child: Stack(
               alignment: Alignment.bottomCenter,
               children: [
+                //Event Picture and google map
                 Expanded(
                   child: Stack(alignment: Alignment.topRight, children: [
                     Container(
