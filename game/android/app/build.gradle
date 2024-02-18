@@ -35,7 +35,7 @@ apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
     compileSdkVersion 34
-    namespace 'com.cornellgo.CornellGO'
+    // namespace 'com.cornellgo.CornellGO'
 
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
