@@ -4,6 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/challenges/challenges_widget.dart';
 import 'package:game/gameplay/gameplay_page.dart';
+import 'package:game/gameplay/gameplay_map.dart';
 import 'package:game/global_leaderboard/global_leaderboard_widget.dart';
 import 'package:game/journeys/journeys_page.dart';
 import 'package:game/login/login_page.dart';
@@ -83,8 +84,8 @@ class MyApp extends StatelessWidget {
           theme: ThemeData(
               fontFamily: 'Poppins', primarySwatch: ColorPalette.BigRed),
           // home: SplashPageWidget(),
-          home: HomePageWidget(),
-          // home: GameplayMap(),
+          // home: HomePageWidget(),
+          home: GameplayMap(),
         )));
   }
 }
