@@ -10,5 +10,11 @@
     "tests:unit": "node ./scripts/tests.js unit",
     "tests:e2e": "node ./scripts/tests.js e2e",
     "setup": "node ./scripts/setup.js"
+  },
+  "devDependencies": {
+    "prisma": "^5.9.1"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.9.1"
   }
 }

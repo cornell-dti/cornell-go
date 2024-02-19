@@ -5,6 +5,7 @@ import 'package:flutter/src/foundation/key.dart';
 // import 'package:latlong2/latlong.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+// import 'package:permission_handler/permission_handler.dart';
 
 class GameplayMap extends StatefulWidget {
   const GameplayMap({Key? key}) : super(key: key);
@@ -26,10 +27,14 @@ class _GameplayMapState extends State<GameplayMap> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: ThemeData(
+        useMaterial3: true,
+        colorSchemeSeed: Colors.green[700],
+      ),
       home: Scaffold(
         appBar: AppBar(
           title: const Text('Maps Sample App'),
-          backgroundColor: Colors.green[700],
+          elevation: 2,
         ),
         body: GoogleMap(
           onMapCreated: _onMapCreated,
@@ -37,16 +42,16 @@ class _GameplayMapState extends State<GameplayMap> {
             target: _center,
             zoom: 11.0,
           ),
-          markers: {
-            const Marker(
-              markerId: const MarkerId("Sydney"),
-              position: LatLng(-33.86, 151.20),
-              infoWindow: InfoWindow(
-                title: "Sydney",
-                snippet: "Capital of New South Wales",
-              ),
-            ),
-          },
+          // markers: {
+          //   const Marker(
+          //     markerId: const MarkerId("Sydney"),
+          //     position: LatLng(-33.86, 151.20),
+          //     infoWindow: InfoWindow(
+          //       title: "Sydney",
+          //       snippet: "Capital of New South Wales",
+          //     ),
+          //   ),
+          // },
         ),
       ),
     );

@@ -6,9 +6,9 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.google.gms:google-services:4.3.10'
+        classpath 'com.google.gms:google-services:4.3.14'
         classpath 'com.android.tools.build:gradle:8.1.1'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.10"
         classpath("com.google.android.libraries.mapsplatform.secrets-gradle-plugin:secrets-gradle-plugin:2.0.1")
     }
 }
@@ -16,7 +16,18 @@ buildscript {
 allprojects {
     repositories {
         google()
-        jcenter()
+        mavenCentral()
+    }
+    subprojects {
+        afterEvaluate { project ->
+        if (project.hasProperty('android')) {
+            project.android {
+                if (namespace == null) {
+                    namespace 'com.cornellgo.CornellGO'
+                }
+            }
+        }
+    }
     }
 }
 
