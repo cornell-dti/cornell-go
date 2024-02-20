@@ -103,7 +103,7 @@ class _JourneysPageState extends State<JourneysPage> {
                     builder: (context, myEventModel, groupModel, trackerModel,
                         userModel, child) {
               List<Widget> eventCells = [];
-              if (myEventModel.searchResults.length == 0) {
+              if (myEventModel.searchResults == null) {
                 myEventModel.searchEvents(
                     0,
                     1000,
@@ -115,7 +115,7 @@ class _JourneysPageState extends State<JourneysPage> {
                     false,
                     false);
               }
-              final events = myEventModel.searchResults;
+              final events = myEventModel.searchResults!;
               if (!events
                   .any((element) => element.id == groupModel.curEventId)) {
                 final curEvent =
@@ -124,10 +124,9 @@ class _JourneysPageState extends State<JourneysPage> {
               }
               for (EventDto event in events) {
                 var tracker = trackerModel.trackerByEventId(event.id);
-                var complete = tracker?.prevChallengeIds.length ==
-                    event.challengeIds.length;
+                var numberCompleted = tracker?.prevChallengeIds.length ?? 0;
+                var complete = (numberCompleted == event.challengeIds.length);
                 var locationCount = event.challengeIds.length;
-                var numberCompleted = tracker?.prevChallengeIds.length;
                 var difficulty = event.difficulty;
                 const timeTillExpire = Duration(days: 2);
                 eventCells.add(

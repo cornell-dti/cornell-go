@@ -436,7 +436,7 @@ export class EventService {
     return updatedEv;
   }
 
-  async upsertEventFromDto(user: User, event: EventDto) {
+  async upsertEventFromDto(event: EventDto) {
     const firstChal = await this.prisma.challenge.findFirst({
       where: { id: event.challengeIds[0] },
       select: { latitude: true, longitude: true },
@@ -498,8 +498,6 @@ export class EventService {
       where: { id: eventEntity.id },
       data: { challenges: { connect: { id: eventEntity.defaultChallengeId } } },
     });
-
-    await this.createEventTracker(user, eventEntity2);
 
     let eventIndexChal = 0;
     for (const id of event.challengeIds) {
