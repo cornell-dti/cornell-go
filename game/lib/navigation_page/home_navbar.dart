@@ -2,6 +2,7 @@ import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:flutter/material.dart';
 import 'package:game/gameplay/gameplay_page.dart';
+import 'package:game/gameplay/gameplay_map.dart';
 import 'package:game/journeys/journeys_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -47,7 +48,7 @@ class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
         controller: _tabController,
         children: const <Widget>[
           Center(
-            child: GameplayPage(),
+            child: GameplayMap(),
           ),
           Center(
             child: JourneysPage(),
