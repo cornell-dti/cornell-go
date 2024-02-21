@@ -75,7 +75,7 @@ class _RewardWidgetState extends State<RewardWidget> {
                       ),
                       style: TextButton.styleFrom(
                         backgroundColor: Colors.red,
-                        iconColor: Colors.black,
+                        foregroundColor: Colors.black,
                       ),
                     ),
                   ),

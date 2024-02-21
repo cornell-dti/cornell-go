@@ -37,7 +37,7 @@ class GeoPoint {
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied) {
-          return Future.error('Location permissions are denied');
+          return Future.error('Location services are disabled.');
         }
       }
       if (permission == LocationPermission.deniedForever) {
