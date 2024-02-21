@@ -13,6 +13,7 @@ class _JourneysPageState extends State<JourneysPage> {
   final cells = [
     JourneyCell(
       "DTI Scavenger Hunt",
+      Image.network('https://picsum.photos/250?image=9'),
       "Scavenger hunt during All Hands on 2/18",
       10,
       5,
@@ -23,6 +24,7 @@ class _JourneysPageState extends State<JourneysPage> {
     ),
     JourneyCell(
       "DTI Scavenger Hunt",
+      Image.network('https://picsum.photos/250?image=9'),
       "Scavenger hunt during All Hands on 2/18",
       10,
       0,
@@ -33,6 +35,7 @@ class _JourneysPageState extends State<JourneysPage> {
     ),
     JourneyCell(
       "Cornell Cafés",
+      Image.network('https://picsum.photos/250?image=9'),
       "Get your coffee fix at these top cafés on campus.",
       6,
       6,
@@ -43,6 +46,7 @@ class _JourneysPageState extends State<JourneysPage> {
     ),
     JourneyCell(
       "journey",
+      Image.network('https://picsum.photos/250?image=9'),
       "hi",
       0,
       0,
@@ -111,6 +115,7 @@ class _JourneysPageState extends State<JourneysPage> {
                           style: ButtonStyle(
                             backgroundColor: MaterialStateProperty.all<Color>(
                                 Color.fromARGB(153, 217, 217, 217)),
+                                
                             padding: MaterialStateProperty.all(
                               EdgeInsets.only(right: 16.0, left: 16.0),
                             ),
