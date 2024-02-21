@@ -19,6 +19,10 @@ import 'package:provider/provider.dart';
 import 'package:game/navigation_page/bottom_navbar.dart';
 import 'package:game/color_palette.dart';
 
+import 'dart:async';
+import 'package:google_maps_flutter_android/google_maps_flutter_android.dart';
+import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platform_interface.dart';
+
 import 'dart:io' show Platform;
 
 import 'challenges/challenges_page.dart';
@@ -33,7 +37,37 @@ final API_URL = ENV_URL == "" ? LOOPBACK : ENV_URL;
 
 void main() {
   print(API_URL);
+  final GoogleMapsFlutterPlatform platform = GoogleMapsFlutterPlatform.instance;
+  // Default to Hybrid Composition for the example.
+  (platform as GoogleMapsFlutterAndroid).useAndroidViewSurface = true;
+  initializeMapRenderer();
   runApp(MyApp());
+}
+
+Completer<AndroidMapRenderer?>? _initializedRendererCompleter;
+
+/// Initializes map renderer to the `latest` renderer type.
+///
+/// The renderer must be requested before creating GoogleMap instances,
+/// as the renderer can be initialized only once per application context.
+Future<AndroidMapRenderer?> initializeMapRenderer() async {
+  if (_initializedRendererCompleter != null) {
+    return _initializedRendererCompleter!.future;
+  }
+
+  final Completer<AndroidMapRenderer?> completer =
+      Completer<AndroidMapRenderer?>();
+  _initializedRendererCompleter = completer;
+
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final GoogleMapsFlutterPlatform platform = GoogleMapsFlutterPlatform.instance;
+  unawaited((platform as GoogleMapsFlutterAndroid)
+      .initializeWithRenderer(AndroidMapRenderer.latest)
+      .then((AndroidMapRenderer initializedRenderer) =>
+          completer.complete(initializedRenderer)));
+
+  return completer.future;
 }
 
 final client = ApiClient(storage, API_URL);

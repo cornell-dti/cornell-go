@@ -28,3 +28,48 @@ subprojects {
 tasks.register("clean", Delete) {
     delete rootProject.buildDir
 }
+
+// For upgrading to Gradle 8.1.1
+
+// buildscript {
+//     ext.kotlin_version = '1.8.10'
+//     repositories {
+//         google()
+//         mavenCentral()
+//     }
+
+//     dependencies {
+//         classpath 'com.google.gms:google-services:4.3.14'
+//         classpath 'com.android.tools.build:gradle:8.1.1'
+//         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.10"
+//         classpath("com.google.android.libraries.mapsplatform.secrets-gradle-plugin:secrets-gradle-plugin:2.0.1")
+//     }
+// }
+
+// allprojects {
+//     repositories {
+//         google()
+//         mavenCentral()
+//     }
+//     subprojects {
+//         afterEvaluate { project ->
+//         if (project.hasProperty('android')) {
+//             project.android {
+//                 if (namespace == null) {
+//                     namespace 'com.cornellgo.CornellGO'
+//                 }
+//             }
+//         }
+//     }
+//     }
+// }
+
+// rootProject.buildDir = '../build'
+// subprojects {
+//     project.buildDir = "${rootProject.buildDir}/${project.name}"
+//     project.evaluationDependsOn(':app')
+// }
+
+// tasks.register("clean", Delete) {
+//     delete rootProject.buildDir
+// }
