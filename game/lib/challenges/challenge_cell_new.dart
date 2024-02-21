@@ -69,7 +69,10 @@ class _ChallengeCellState extends State<ChallengeCellNew> {
                 difficulty, points, challenge_points, previewType.challenge));
       },
       child: Container(
-        color: Color.fromARGB(51, 217, 217, 217),
+        decoration: BoxDecoration(
+          color: Color.fromARGB(51, 217, 217, 217),
+          borderRadius: BorderRadius.circular(15),
+        ),
         height: 135.0,
         child: Padding(
           padding: EdgeInsets.all(16.0),
@@ -90,14 +93,15 @@ class _ChallengeCellState extends State<ChallengeCellNew> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        Icon(Icons.location_on, size: 20, color: Colors.purple),
+                        Icon(Icons.location_on,
+                            size: 20, color: Color.fromARGB(255, 131, 90, 124)),
                         // SizedBox(width: 50),
                         Text(
                           location,
                           style: TextStyle(
-                            color: Colors.purple,
-                            fontSize: 10,
-                            fontFamily: 'Lato',
+                            color: Color.fromARGB(255, 131, 90, 124),
+                            fontSize: 14,
+                            fontFamily: 'Poppins',
                           ),
                         ),
                       ],
@@ -110,7 +114,7 @@ class _ChallengeCellState extends State<ChallengeCellNew> {
                       style: TextStyle(
                         color: Color.fromARGB(204, 0, 0, 0),
                         fontSize: 16.5,
-                        fontFamily: 'Lato',
+                        fontFamily: 'Poppins',
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -121,10 +125,10 @@ class _ChallengeCellState extends State<ChallengeCellNew> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Container(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 5),
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 10, vertical: 2),
                           decoration: BoxDecoration(
-                            color: Color.fromARGB(76, 217, 217, 217),
+                            color: Color.fromARGB(255, 249, 237, 218),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
@@ -132,17 +136,20 @@ class _ChallengeCellState extends State<ChallengeCellNew> {
                             style: TextStyle(
                               color: Color.fromARGB(204, 0, 0, 0),
                               fontSize: 12,
-                              fontFamily: 'Lato',
+                              fontFamily: 'Poppins',
                               fontWeight: FontWeight.w600,
                             ),
                           ),
                         ),
                         SizedBox(width: 10), // Add spacing between buttons
                         Container(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 5),
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 10, vertical: 2),
                           decoration: BoxDecoration(
-                            color: Colors.purple,
+                            border: Border.all(
+                              color: Color.fromARGB(255, 255, 199, 55),
+                            ),
+                            color: Color.fromARGB(255, 189, 135, 31),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
@@ -150,16 +157,16 @@ class _ChallengeCellState extends State<ChallengeCellNew> {
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 12,
-                              fontFamily: 'Lato',
+                              fontFamily: 'Poppins',
                               fontWeight: FontWeight.w600,
                             ),
                           ),
                         ),
                       ],
                     ),
-                    SizedBox(
-                      height: 4,
-                    ),
+                    // SizedBox(
+                    //   height: 4,
+                    // ),
                   ],
                 ),
               )
