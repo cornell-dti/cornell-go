@@ -77,16 +77,6 @@ class _HomePageWidgetState extends State<HomePageWidget> {
 
                 _controllerCenter.play();
                 apiClient.serverApi?.completedChallenge(doneState.challengeId);
-                Navigator.push(
-                  context,
-                  PageRouteBuilder(
-                    pageBuilder: (c, a1, a2) =>
-                        RewardWidget(homePageState: doneState),
-                    transitionsBuilder: (c, anim, a2, child) =>
-                        FadeTransition(opacity: anim, child: child),
-                    transitionDuration: Duration(milliseconds: 500),
-                  ),
-                );
               }
             });
             return Stack(children: [
