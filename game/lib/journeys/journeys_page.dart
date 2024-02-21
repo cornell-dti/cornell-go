@@ -115,7 +115,7 @@ class _JourneysPageState extends State<JourneysPage> {
                     false,
                     false);
               }
-              final events = myEventModel.searchResults!;
+              final events = myEventModel.searchResults ?? [];
               if (!events
                   .any((element) => element.id == groupModel.curEventId)) {
                 final curEvent =
@@ -157,7 +157,7 @@ class _JourneysPageState extends State<JourneysPage> {
                               event.name,
                               event.description,
                               locationCount,
-                              numberCompleted ?? 0,
+                              numberCompleted,
                               complete,
                               difficulty,
                               event.minimumScore,
