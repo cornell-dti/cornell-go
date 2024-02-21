@@ -37,7 +37,7 @@ dependencies:
   socket_io_client: ^2.0.0-beta.4-nullsafety.0
   provider: ^6.0.5
   flutter_secure_storage: ^9.0.0
-  geolocator: ^10.1.0
+  geolocator: ^11.0.0
   http: ^1.1.0
   flutter_signin_button: ^2.0.0
   permission_handler: ^11.0.1
