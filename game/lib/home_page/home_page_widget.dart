@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:game/model/reward_model.dart';
 import 'package:game/model/tracker_model.dart';
-import 'package:game/rewarded/rewarded_page.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:velocity_x/velocity_x.dart';
