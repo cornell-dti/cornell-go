@@ -9,8 +9,8 @@ import 'package:game/api/game_client_dto.dart';
 import 'package:game/widget/back_btn.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-
-import 'challenge_cell.dart';
+// import 'challenge_cell.dart';
+import "challenge_cell_new.dart";
 
 class ChallengesWidget extends StatefulWidget {
   ChallengesWidget({Key? key}) : super(key: key);
@@ -35,6 +35,45 @@ class _ChallengesWidgetState extends State<ChallengesWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final cells = [
+      ChallengeCellNew(
+          "ARTS QUAD",
+          "Statue on the Arts Quad",
+          Image.network('https://picsum.photos/250?image=9'),
+          false,
+          "Find this famous statue!",
+          "Easy",
+          15,
+          3),
+      ChallengeCellNew(
+          "ARTS QUAD",
+          "Statue on the Arts Quad",
+          Image.network('https://picsum.photos/250?image=9'),
+          true,
+          "Find this famous statue!",
+          "Normal",
+          15,
+          3),
+      ChallengeCellNew(
+          "ARTS QUAD",
+          "Statue on the Arts Quad",
+          Image.network('https://picsum.photos/250?image=9'),
+          false,
+          "Find this famous statue!",
+          "Hard",
+          15,
+          3),
+      ChallengeCellNew(
+          "ARTS QUAD",
+          "Statue on the Arts Quad",
+          Image.network('https://picsum.photos/250?image=9'),
+          true,
+          "Find this famous statue!",
+          "Challenging",
+          15,
+          3),
+    ];
+
     final format = DateFormat('yyyy-MM-dd');
     return Scaffold(
       key: scaffoldKey,
@@ -57,7 +96,7 @@ class _ChallengesWidgetState extends State<ChallengesWidget> {
                     if (groupModel.curEventId == null) {
                       return ListView();
                     } else {
-                      List<Widget> challengeCells = [];
+                      List<Widget> challengeCells = cells;
                       final eventId = groupModel.curEventId!;
                       final challenges =
                           myEventModel.getEventById(eventId)?.challengeIds;
@@ -79,11 +118,15 @@ class _ChallengesWidgetState extends State<ChallengesWidget> {
                                 apiClient.serverApi
                                     ?.setCurrentChallenge(challengeId);
                               },
-                              child: ChallengeCell(
+                              child: ChallengeCellNew(
+                                "placeholder for loc",
                                 challenge.name,
-                                challenge.description,
-                                challenge.imageUrl,
+                                Image.network(challenge.imageUrl),
                                 false,
+                                challenge.description,
+                                "placeholder for difficulty",
+                                3,
+                                3,
                               ),
                             ));
                           }

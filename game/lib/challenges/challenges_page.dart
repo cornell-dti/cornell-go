@@ -13,7 +13,7 @@ class ChallengesPage extends StatefulWidget {
 
 class _ChallengesPageState extends State<ChallengesPage> {
   final cells = [
-    ChallengeCell(
+    ChallengeCellNew(
         "ARTS QUAD",
         "Statue on the Arts Quad",
         Image.network('https://picsum.photos/250?image=9'),
@@ -22,7 +22,7 @@ class _ChallengesPageState extends State<ChallengesPage> {
         "Easy",
         15,
         3),
-    ChallengeCell(
+    ChallengeCellNew(
         "ARTS QUAD",
         "Statue on the Arts Quad",
         Image.network('https://picsum.photos/250?image=9'),
@@ -31,7 +31,7 @@ class _ChallengesPageState extends State<ChallengesPage> {
         "Normal",
         15,
         3),
-    ChallengeCell(
+    ChallengeCellNew(
         "ARTS QUAD",
         "Statue on the Arts Quad",
         Image.network('https://picsum.photos/250?image=9'),
@@ -40,7 +40,7 @@ class _ChallengesPageState extends State<ChallengesPage> {
         "Hard",
         15,
         3),
-    ChallengeCell(
+    ChallengeCellNew(
         "ARTS QUAD",
         "Statue on the Arts Quad",
         Image.network('https://picsum.photos/250?image=9'),

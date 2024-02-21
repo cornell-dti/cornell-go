@@ -81,7 +81,7 @@ class MyApp extends StatelessWidget {
           supportedLocales: const [Locale('en', '')],
           theme: ThemeData(
               fontFamily: 'Poppins', primarySwatch: ColorPalette.BigRed),
-          home: SplashPageWidget(),
+          home: ChallengesPage(),
         )));
   }
 }

@@ -4,7 +4,7 @@ import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:game/preview/preview.dart';
 
-class ChallengeCell extends StatefulWidget {
+class ChallengeCellNew extends StatefulWidget {
   final String location;
   final String challengeName;
   final Image thumbnail;
@@ -14,7 +14,7 @@ class ChallengeCell extends StatefulWidget {
   final int points;
   final int challenge_points;
 
-  const ChallengeCell(
+  const ChallengeCellNew(
       this.location,
       this.challengeName,
       this.thumbnail,
@@ -39,7 +39,7 @@ class ChallengeCell extends StatefulWidget {
       );
 }
 
-class _ChallengeCellState extends State<ChallengeCell> {
+class _ChallengeCellState extends State<ChallengeCellNew> {
   final String location;
   final String challengeName;
   final Image thumbnail;
@@ -62,84 +62,111 @@ class _ChallengeCellState extends State<ChallengeCell> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-        onTap: () async {
-          await showDialog(
-              context: context,
-              builder: (context) => Preview(challengeName, description,
-                  difficulty, points, challenge_points, previewType.challenge));
-        },
-        child: Container(
-          color: Color.fromARGB(51, 217, 217, 217),
-          height: 85.0,
-          child: Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Row(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(right: 14),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.all(Radius.circular(4.6)),
-                    child: thumbnail,
-                  ),
+      onTap: () async {
+        await showDialog(
+            context: context,
+            builder: (context) => Preview(challengeName, description,
+                difficulty, points, challenge_points, previewType.challenge));
+      },
+      child: Container(
+        color: Color.fromARGB(51, 217, 217, 217),
+        height: 135.0,
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(right: 14),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.all(Radius.circular(4.6)),
+                  child: thumbnail,
                 ),
-                Flexible(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Flexible(
-                        child: Row(
-                          children: [
-                            Container(
+              ),
+              Flexible(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Icon(Icons.location_on, size: 20, color: Colors.purple),
+                        // SizedBox(width: 50),
+                        Text(
+                          location,
+                          style: TextStyle(
+                            color: Colors.purple,
+                            fontSize: 10,
+                            fontFamily: 'Lato',
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(
+                      height: 4,
+                    ),
+                    Text(
+                      challengeName,
+                      style: TextStyle(
+                        color: Color.fromARGB(204, 0, 0, 0),
+                        fontSize: 16.5,
+                        fontFamily: 'Lato',
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    SizedBox(
+                      height: 4,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 5),
+                          decoration: BoxDecoration(
+                            color: Color.fromARGB(76, 217, 217, 217),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            difficulty,
+                            style: TextStyle(
                               color: Color.fromARGB(204, 0, 0, 0),
-                              child: Text(
-                                location,
-                                style: TextStyle(
-                                  color: Color.fromARGB(230, 255, 255, 255),
-                                  fontSize: 8,
-                                  fontFamily: 'Lato',
-                                ),
-                              ),
+                              fontSize: 12,
+                              fontFamily: 'Lato',
+                              fontWeight: FontWeight.w600,
                             ),
-                            if (isCompleted) ...[
-                              Expanded(
-                                child: Row(
-                                  children: [
-                                    Spacer(),
-                                    Text(
-                                      "COMPLETED",
-                                      style: TextStyle(
-                                        color: Color.fromARGB(255, 71, 71, 71),
-                                        fontSize: 10,
-                                        fontFamily: 'Lato',
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ],
+                          ),
                         ),
-                      ),
-                      SizedBox(
-                        height: 4,
-                      ),
-                      Text(
-                        challengeName,
-                        style: TextStyle(
-                          color: Color.fromARGB(204, 0, 0, 0),
-                          fontSize: 16.5,
-                          fontFamily: 'Lato',
-                          fontWeight: FontWeight.w600,
+                        SizedBox(width: 10), // Add spacing between buttons
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 5),
+                          decoration: BoxDecoration(
+                            color: Colors.purple,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            challenge_points.toString() + "PTS",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontFamily: 'Lato',
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                )
-              ],
-            ),
+                      ],
+                    ),
+                    SizedBox(
+                      height: 4,
+                    ),
+                  ],
+                ),
+              )
+            ],
           ),
-        ));
+        ),
+      ),
+    );
   }
 }
