@@ -1,11 +1,10 @@
-import 'package:flutter/src/widgets/placeholder.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/foundation/key.dart';
 // import 'package:flutter_map/flutter_map.dart';
 // import 'package:latlong2/latlong.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 // import 'package:permission_handler/permission_handler.dart';
+import 'package:google_maps_flutter_android/google_maps_flutter_android.dart';
+import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platform_interface.dart';
 
 class GameplayMap extends StatefulWidget {
   const GameplayMap({Key? key}) : super(key: key);
@@ -15,12 +14,21 @@ class GameplayMap extends StatefulWidget {
 }
 
 class _GameplayMapState extends State<GameplayMap> {
+  AndroidMapRenderer mapRenderer = AndroidMapRenderer.platformDefault;
+
   // final mapController = MapController();
   late GoogleMapController mapController;
 
   final LatLng _center = const LatLng(-33.86, 151.20);
 
-  void _onMapCreated(GoogleMapController controller) {
+  Future<void> _onMapCreated(GoogleMapController controller) async {
+    final GoogleMapsFlutterPlatform mapsImplementation =
+        GoogleMapsFlutterPlatform.instance;
+    if (mapsImplementation is GoogleMapsFlutterAndroid) {
+      WidgetsFlutterBinding.ensureInitialized();
+      mapRenderer = await mapsImplementation
+          .initializeWithRenderer(AndroidMapRenderer.latest);
+    }
     mapController = controller;
   }
 
