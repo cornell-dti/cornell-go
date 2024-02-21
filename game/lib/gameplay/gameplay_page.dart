@@ -3,11 +3,12 @@ import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:velocity_x/velocity_x.dart';
-
+import 'package:game/model/challenge_model.dart';
 import 'gameplay_map.dart';
+import 'package:provider/provider.dart';
 
 // Returns widget that fills based on tasks and tasks_completed.
-List<Widget> generate_progress(tasks, tasks_completed) {
+List<Widget> progressBar(int tasks, int tasks_completed) {
   List<Widget> progress_blocks = [];
   for (var i = 0; i < tasks; i++) {
     if (i < tasks_completed) {
@@ -34,25 +35,30 @@ class _GameplayPageState extends State<GameplayPage> {
   final tasks = 6;
   final tasks_completed = 2;
   final distance = .8;
+
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
         children: [
           //SafeArea to avoid notch overlap
-          SafeArea(
-              child: Container(
-            padding: EdgeInsets.all(32.0),
-            height: 120,
-            child: Center(
-              child: Text(
-                "Find the Location of this cafe on the arts quad",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 20,
+          SafeArea(child:
+              Consumer<ChallengeModel>(builder: (context, challengeModel, _) {
+            var challenge = challengeModel.getChallengeById("123");
+            print(challenge);
+            return Container(
+              padding: EdgeInsets.all(32.0),
+              height: 120,
+              child: Center(
+                child: Text(
+                  "Find the Location of this cafe on the arts quad",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 20,
+                  ),
                 ),
               ),
-            ),
-          )),
+            );
+          })),
           Expanded(
             child: Stack(
               alignment: Alignment.bottomCenter,
@@ -106,10 +112,13 @@ class _GameplayPageState extends State<GameplayPage> {
                 Container(
                   padding: EdgeInsets.all(10),
                   margin: EdgeInsets.only(bottom: 75),
-                  child: Text(
-                    "${distance} miles away",
-                    style: TextStyle(fontSize: 21, color: Color(0xFFED5656)),
-                  ),
+                  child: Consumer<ChallengeModel>(
+                      builder: (context, challengeModel, _) {
+                    return Text(
+                      "${distance} miles away",
+                      style: TextStyle(fontSize: 21, color: Color(0xFFED5656)),
+                    );
+                  }),
                   decoration: BoxDecoration(
                     color: Color.fromARGB(255, 255, 255, 255),
                     borderRadius: BorderRadius.all(Radius.circular(10)),
@@ -126,7 +135,7 @@ class _GameplayPageState extends State<GameplayPage> {
                 Container(
                     height: 20,
                     child: Row(
-                      children: generate_progress(tasks, tasks_completed),
+                      children: progressBar(tasks, tasks_completed),
                     )),
               ],
             ),
