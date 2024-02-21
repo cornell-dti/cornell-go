@@ -18,6 +18,10 @@ class EventModel extends ChangeNotifier {
           } else {
             searchResults = [event.event];
           }
+        } else {
+          searchResults![searchResults!
+                  .indexWhere((element) => element.id == event.event.id)] =
+              event.event;
         }
         _events[event.event.id] = event.event;
       } else if (event.event is String && event.deleted) {

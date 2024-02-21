@@ -154,6 +154,7 @@ class _JourneysPageState extends State<JourneysPage> {
                               },
                             )
                           : JourneyCell(
+                              key: UniqueKey(),
                               event.name,
                               event.description,
                               locationCount,

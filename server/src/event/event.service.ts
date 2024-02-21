@@ -494,10 +494,18 @@ export class EventService {
       },
     });
 
-    const eventEntity2 = await this.prisma.eventBase.update({
-      where: { id: eventEntity.id },
-      data: { challenges: { connect: { id: eventEntity.defaultChallengeId } } },
-    });
+    // TODO: figure out why this next line is needed
+    const affectedUsers = (
+      await this.prisma.organization.findFirstOrThrow({
+        where: { events: { some: { id: eventEntity.id } } },
+        select: { members: true },
+      })
+    ).members;
+
+    for (const user of affectedUsers) {
+      await this.clientService.subscribe(user, eventEntity.id, false);
+      await this.emitUpdateEventData(eventEntity, false, false, user);
+    }
 
     let eventIndexChal = 0;
     for (const id of event.challengeIds) {
@@ -523,7 +531,7 @@ export class EventService {
       ++eventIndexReward;
     }
 
-    return eventEntity2;
+    return eventEntity;
   }
 
   async removeEvent(eventId: string, accessor: User) {
