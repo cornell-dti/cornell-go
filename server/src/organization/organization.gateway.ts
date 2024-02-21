@@ -21,7 +21,7 @@ export class OrganizationGateway {
   constructor(
     private clientService: ClientService,
     private orgService: OrganizationService,
-  ) {}
+  ) { }
 
   /**
    * Requests organization based on RequestOrganizationDataDto. Subscribes and emits the requested information

@@ -4,6 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/challenges/challenges_widget.dart';
 import 'package:game/gameplay/gameplay_page.dart';
+import 'package:game/gameplay/gameplay_map.dart';
 import 'package:game/global_leaderboard/global_leaderboard_widget.dart';
 import 'package:game/journeys/journeys_page.dart';
 import 'package:game/login/login_page.dart';
@@ -14,10 +15,15 @@ import 'package:game/model/reward_model.dart';
 import 'package:game/model/tracker_model.dart';
 import 'package:game/model/user_model.dart';
 import 'package:game/splash_page/splash_page.dart';
+import 'package:game/home_page/home_page_widget.dart';
 import 'package:game/widget/game_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:game/navigation_page/bottom_navbar.dart';
 import 'package:game/color_palette.dart';
+
+import 'dart:async';
+import 'package:google_maps_flutter_android/google_maps_flutter_android.dart';
+import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platform_interface.dart';
 
 import 'dart:io' show Platform;
 
@@ -33,7 +39,37 @@ final API_URL = ENV_URL == "" ? LOOPBACK : ENV_URL;
 
 void main() {
   print(API_URL);
+  final GoogleMapsFlutterPlatform platform = GoogleMapsFlutterPlatform.instance;
+  // Default to Hybrid Composition for the example.
+  (platform as GoogleMapsFlutterAndroid).useAndroidViewSurface = true;
+  initializeMapRenderer();
   runApp(MyApp());
+}
+
+Completer<AndroidMapRenderer?>? _initializedRendererCompleter;
+
+/// Initializes map renderer to the `latest` renderer type.
+///
+/// The renderer must be requested before creating GoogleMap instances,
+/// as the renderer can be initialized only once per application context.
+Future<AndroidMapRenderer?> initializeMapRenderer() async {
+  if (_initializedRendererCompleter != null) {
+    return _initializedRendererCompleter!.future;
+  }
+
+  final Completer<AndroidMapRenderer?> completer =
+      Completer<AndroidMapRenderer?>();
+  _initializedRendererCompleter = completer;
+
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final GoogleMapsFlutterPlatform platform = GoogleMapsFlutterPlatform.instance;
+  unawaited((platform as GoogleMapsFlutterAndroid)
+      .initializeWithRenderer(AndroidMapRenderer.latest)
+      .then((AndroidMapRenderer initializedRenderer) =>
+          completer.complete(initializedRenderer)));
+
+  return completer.future;
 }
 
 final client = ApiClient(storage, API_URL);
@@ -81,7 +117,9 @@ class MyApp extends StatelessWidget {
           supportedLocales: const [Locale('en', '')],
           theme: ThemeData(
               fontFamily: 'Poppins', primarySwatch: ColorPalette.BigRed),
-          home: SplashPageWidget(),
+          // home: SplashPageWidget(),
+          // home: HomePageWidget(),
+          home: GameplayMap(),
         )));
   }
 }
