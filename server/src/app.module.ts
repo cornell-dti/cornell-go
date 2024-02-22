@@ -13,6 +13,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { SessionLogModule } from './session-log/session-log.module';
 import { OrganizationModule } from './organization/organization.module';
 import { AchievementModule } from './achievement/achievement.module';
+import { ClaimModule } from './claim/claim.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { AchievementModule } from './achievement/achievement.module';
     PrismaModule,
     SessionLogModule,
     OrganizationModule,
+    ClaimModule,
   ],
   controllers: [],
   providers: [],
