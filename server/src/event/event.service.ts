@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import {
   Challenge,
   EventBase,
-  EventRewardType,
+  TimeLimitationType,
   EventTracker,
   User,
 } from '@prisma/client';
@@ -263,30 +263,21 @@ export class EventService {
       select: { id: true, eventIndex: true, latitude: true, longitude: true },
     });
 
-    const rws = await this.prisma.eventReward.findMany({
-      where: { eventId: ev.id },
-      select: { id: true, eventIndex: true },
-    });
-
     const sortedChals = chals.sort((a, b) => a.eventIndex - b.eventIndex);
 
     return {
       id: ev.id,
       name: ev.name,
       description: ev.description,
-      rewardType:
-        ev.rewardType == EventRewardType.LIMITED_TIME
+      timeLimitation:
+        ev.timeLimitation == TimeLimitationType.LIMITED_TIME
           ? 'LIMITED_TIME'
           : 'PERPETUAL',
       endTime: ev.endTime.toUTCString(),
       requiredMembers: ev.requiredMembers,
       indexable: ev.indexable,
       challengeIds: sortedChals.map(c => c.id),
-      rewardIds: rws
-        .sort((a, b) => a.eventIndex - b.eventIndex)
-        .map(({ id }) => id),
       minimumScore: ev.minimumScore,
-      defaultChallengeId: ev.defaultChallengeId,
       latitude: ev.latitude,
       longitude: ev.longitude,
     };
@@ -439,12 +430,11 @@ export class EventService {
       requiredMembers: event.requiredMembers,
       name: event.name.substring(0, 2048),
       description: event.description.substring(0, 2048),
-      rewardType:
-        event.rewardType === 'LIMITED_TIME'
-          ? EventRewardType.LIMITED_TIME
-          : EventRewardType.PERPETUAL,
+      timeLimitation:
+        event.timeLimitation === 'LIMITED_TIME'
+          ? TimeLimitationType.LIMITED_TIME
+          : TimeLimitationType.PERPETUAL,
       endTime: new Date(event.endTime),
-      // rewards: {set: event.rewardIds.map(id => ({ connect: {id: id} })) },
       // challengeIds: event.challengeIds,
       userFavoriteIds: event.userFavoriteIds,
       // initialOrganizationId: event.initialOrganizationId,
@@ -461,29 +451,13 @@ export class EventService {
         usedIn: {
           connect: { id: event.initialOrganizationId ?? '' },
         },
-        defaultChallenge: {
-          create: {
-            ...defaultChallengeData,
-          },
-        },
       },
       update: {
         ...assignData,
-        // defaultChallengeId: event.defaultChallengeId,
         challenges: {
-          set: event.challengeIds
-            .map(id => ({ id }))
-            .concat({ id: event.defaultChallengeId }),
-        },
-        rewards: {
-          set: event.rewardIds.map(id => ({ id })),
+          set: event.challengeIds.map(id => ({ id })),
         },
       },
-    });
-
-    const eventEntity2 = await this.prisma.eventBase.update({
-      where: { id: eventEntity.id },
-      data: { challenges: { connect: { id: eventEntity.defaultChallengeId } } },
     });
 
     let eventIndexChal = 0;
@@ -498,19 +472,7 @@ export class EventService {
       ++eventIndexChal;
     }
 
-    let eventIndexReward = 0;
-    for (const id of event.rewardIds) {
-      await this.prisma.eventReward.update({
-        where: { id },
-        data: {
-          eventIndex: eventIndexReward,
-        },
-      });
-
-      ++eventIndexReward;
-    }
-
-    return eventEntity2;
+    return eventEntity;
   }
 
   async removeEvent(eventId: string, accessor: User) {

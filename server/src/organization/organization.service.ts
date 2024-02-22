@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import {
   EventBase,
-  EventRewardType,
   Organization,
+  TimeLimitationType,
   OrganizationSpecialUsage,
   User,
 } from '@prisma/client';
@@ -16,7 +16,7 @@ export const defaultEventData = {
   description: 'Default Event',
   requiredMembers: 1,
   minimumScore: 1,
-  rewardType: EventRewardType.PERPETUAL,
+  timeLimitation: TimeLimitationType.PERPETUAL,
   indexable: false,
   endTime: new Date('2060'),
   latitude: 42.44755580740012,
@@ -52,7 +52,6 @@ export class OrganizationService {
     const ev = await this.prisma.eventBase.create({
       data: {
         ...defaultEventData,
-        defaultChallengeId: chal.id,
         challenges: { connect: { id: chal.id } },
       },
     });
@@ -60,18 +59,23 @@ export class OrganizationService {
     return ev;
   }
 
+  async getDefaultEvent(org: Organization): Promise<EventBase> {
+    return await this.prisma.eventBase.findFirstOrThrow({
+      where: { usedIn: { some: { id: org.id } } },
+    });
+  }
+
   /** Returns (and creates if does not exist) the default organization for
    * this usage */
   async getDefaultOrganization(
     usage: OrganizationSpecialUsage,
-  ): Promise<Organization & { defaultEvent: EventBase }> {
+  ): Promise<Organization> {
     if (usage === OrganizationSpecialUsage.NONE) {
       throw 'Default impossible for NONE';
     }
 
     let defaultOrg = await this.prisma.organization.findFirst({
       where: { specialUsage: usage },
-      include: { defaultEvent: true },
     });
 
     if (defaultOrg === null) {
@@ -84,11 +88,9 @@ export class OrganizationService {
               ? 'Cornell Organization'
               : 'Everyone Organization',
           specialUsage: usage,
-          defaultEventId: ev.id,
           accessCode: this.genAccessCode(),
           events: { connect: { id: ev.id } },
         },
-        include: { defaultEvent: true },
       });
     }
 
@@ -113,18 +115,6 @@ export class OrganizationService {
     });
   }
 
-  /** Gets the default event for the org using isDefault flag */
-  async getDefaultEvent(
-    org: Organization | { id: string },
-  ): Promise<EventBase> {
-    return (
-      await this.prisma.organization.findFirstOrThrow({
-        where: { id: org.id },
-        include: { defaultEvent: true },
-      })
-    ).defaultEvent;
-  }
-
   async dtoForOrganization(
     organization: Organization,
   ): Promise<OrganizationDto> {
@@ -138,7 +128,6 @@ export class OrganizationService {
       members: (await org.members({ select: { id: true } })).map(e => e.id),
       events: (await org.events({ select: { id: true } })).map(e => e.id),
       managers: (await org.managers({ select: { id: true } })).map(e => e.id),
-      defaultEventId: organization.defaultEventId,
       accessCode: organization.accessCode,
     };
   }
@@ -205,9 +194,6 @@ export class OrganizationService {
         events: {
           connect: organization.events.map(id => ({ id })),
         },
-        defaultEvent: {
-          connect: { id: exists ? '' : (await this.makeDefaultEvent()).id },
-        },
         specialUsage: 'NONE',
       },
       update: {
@@ -215,9 +201,7 @@ export class OrganizationService {
           set: organization.members.map(id => ({ id })),
         },
         events: {
-          set: organization.events
-            .map(id => ({ id }))
-            .concat({ id: organization.defaultEventId }),
+          set: organization.events.map(id => ({ id })),
         },
       },
     });

@@ -43,16 +43,14 @@ class EventModel extends ChangeNotifier {
     });
 
     client.clientApi.invalidateDataStream.listen((event) {
-      if (event.userEventData || event.winnerRewardData) {
+      if (event.userEventData) {
         _events.clear();
         searchResults = null;
       }
       if (event.leaderboardData) {
         _topPlayers.clear();
       }
-      if (event.leaderboardData ||
-          event.userEventData ||
-          event.winnerRewardData) {
+      if (event.leaderboardData || event.userEventData) {
         notifyListeners();
       }
     });
@@ -84,10 +82,15 @@ class EventModel extends ChangeNotifier {
     }
   }
 
-  void searchEvents(int offset, int count, List<EventRewardType> rewardTypes,
-      bool closestToEnding, bool shortestFirst, bool skippableOnly) {
+  void searchEvents(
+      int offset,
+      int count,
+      List<TimeLimitationType> timeLimitations,
+      bool closestToEnding,
+      bool shortestFirst,
+      bool skippableOnly) {
     searchResults = null;
-    _client.serverApi?.requestAllEventData(offset, count, rewardTypes,
+    _client.serverApi?.requestAllEventData(offset, count, timeLimitations,
         closestToEnding, shortestFirst, skippableOnly);
   }
 }

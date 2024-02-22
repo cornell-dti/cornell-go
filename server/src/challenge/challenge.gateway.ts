@@ -23,7 +23,6 @@ import { GroupService } from '../group/group.service';
 import { UserService } from '../user/user.service';
 import { EventService } from '../event/event.service';
 import { RequestGlobalLeaderDataDto } from '../user/user.dto';
-import { RewardService } from '../reward/reward.service';
 import { EventDto } from '../event/event.dto';
 
 @WebSocketGateway({ cors: true })
@@ -35,7 +34,6 @@ export class ChallengeGateway {
     private userService: UserService,
     private groupService: GroupService,
     private eventService: EventService,
-    private rewardService: RewardService,
   ) {}
 
   @SubscribeMessage('requestChallengeData')
@@ -111,13 +109,6 @@ export class ChallengeGateway {
       const tracker = await this.eventService.getCurrentEventTrackerForUser(
         user,
       );
-
-      const rw = await this.challengeService.checkForReward(tracker);
-      if (rw) {
-        const ev = await this.eventService.getEventById(rw.eventId);
-        await this.eventService.emitUpdateEventData(ev, false);
-        await this.rewardService.emitUpdateRewardData(rw, false, true, user);
-      }
 
       await this.groupService.emitUpdateGroupData(group, false);
       await this.eventService.emitUpdateEventTracker(tracker);

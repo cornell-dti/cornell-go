@@ -35,9 +35,6 @@ class GameServerApi {
     _socket.emit(ev, data);
   }
 
-  void requestRewardData(List<String> rewardIds) =>
-      _invokeWithRefresh("requestRewardData", {'rewardIds': rewardIds});
-
   void requestGlobalLeaderData(int offset, int count) => _invokeWithRefresh(
       "requestGlobalLeaderData", {'offset': offset, 'count': count});
 
@@ -60,7 +57,7 @@ class GameServerApi {
   void requestAllEventData(
           int offset,
           int count,
-          List<EventRewardType> rewardTypes,
+          List<TimeLimitationType> timeLimitations,
           bool closestToEnding,
           bool shortestFirst,
           bool skippableOnly) =>
@@ -70,10 +67,10 @@ class GameServerApi {
         "closestToEnding": closestToEnding,
         "shortestFirst": shortestFirst,
         "skippableOnly": skippableOnly,
-        "rewardTypes": rewardTypes
-            .map((e) => e == EventRewardType.PERPETUAL
+        "timeLimitations": timeLimitations
+            .map((e) => e == TimeLimitationType.PERPETUAL
                 ? 'PERPETUAL'
-                : 'LIMITED_TIME_event')
+                : 'LIMITED_TIME')
             .toList()
       });
 

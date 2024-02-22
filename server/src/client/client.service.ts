@@ -44,26 +44,4 @@ export class ClientService {
     };
     this.sendUpdate('updateErrorData', user.id, false, dto);
   }
-
-  /*
-  async updateUserData(user: User) {
-    this.sendUpdate<ClientUserDto>('updateUserData', user.id, false);
-  }
-
-  emitUpdateRewardData =
-    this.makeCallback<UpdateRewardDataDto>('updateRewardData');
-
-  emitUpdateEventData =
-    this.makeCallback<UpdateEventDataDto>('updateEventData');
-
-  emitUpdateLeaderData =
-    this.makeCallback<UpdateLeaderDataDto>('updateLeaderData');
-
-  emitUpdateGroupData =
-    this.makeCallback<UpdateGroupDataDto>('updateGroupData');
-
-  emitUpdateEventTrackerData = this.makeCallback<UpdateEventTrackerDataDto>(
-    'updateEventTrackerData',
-  );
-  */
 }

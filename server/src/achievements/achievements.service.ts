@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { EventReward, PrismaClient, User } from '@prisma/client';
+import { PrismaClient, User } from '@prisma/client';
 import { ClientService } from '../client/client.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { AchievementDto, AchievementTrackerDto } from './achievement.dto';

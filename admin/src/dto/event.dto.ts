@@ -21,13 +21,11 @@ export interface EventDto {
   requiredMembers: number;
   name: string;
   description: string;
-  rewardType: "LIMITED_TIME" | "PERPETUAL";
+  timeLimitation: "LIMITED_TIME" | "PERPETUAL";
   endTime: string;
-  rewardIds: string[];
   challengeIds: string[];
   userFavoriteIds?: string[];
   initialOrganizationId?: string;
-  defaultChallengeId: string;
   minimumScore: number;
   indexable: boolean;
   latitude: number;

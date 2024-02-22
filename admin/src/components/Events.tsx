@@ -30,15 +30,14 @@ function EventCard(props: {
   onSelect: () => void;
   onEdit: () => void;
   onDelete: () => void;
-  onSetDefault: () => void;
 }) {
   const requiredText =
     props.event.requiredMembers < 0
       ? "Any Amount"
       : props.event.requiredMembers;
 
-  const rewardingMethod =
-    props.event.rewardType === "LIMITED_TIME" ? "Limited" : "Unlimited";
+  const timeLimitation =
+    props.event.timeLimitation === "LIMITED_TIME" ? "Limited" : "Unlimited";
 
   const affirmOfBool = (val: boolean) => (val ? "Yes" : "No");
 
@@ -62,16 +61,13 @@ function EventCard(props: {
           </b>{" "}
           <br />
           Required Players: <b>{requiredText}</b> <br />
-          Rewarding Method: <b>{rewardingMethod}</b> <br />
-          Minimum Rewarding Score: <b>{props.event.minimumScore}</b> <br />
+          Time Limitation: <b>{timeLimitation}</b> <br />
           Challenge Count: <b>{props.event.challengeIds.length}</b> <br />
-          Reward Count: <b>{props.event.rewardIds.length}</b> <br />
           Publicly Visible: <b>{affirmOfBool(props.event.indexable)}</b> <br />
           Latitude: <b>{props.event.latitude}</b>, Longitude:{" "}
           <b>{props.event.longitude}</b> <br />
         </ListCardBody>
         <ListCardButtons>
-          <HButton onClick={props.onSetDefault}>SET DEFAULT</HButton>
           <HButton onClick={props.onDelete} float="right">
             DELETE
           </HButton>
@@ -90,11 +86,10 @@ function makeForm() {
     { name: "Description", characterLimit: 2048, value: "" },
     { name: "Required Members", value: -1, min: -1, max: 99 },
     {
-      name: "Reward Type",
+      name: "Time Limitation",
       options: ["Unlimited", "Limited"],
       value: 0,
     },
-    { name: "Minimum Score for Reward", value: 1, min: 1, max: 999999 },
     { name: "Publicly Visible", options: ["No", "Yes"], value: 0 },
     { name: "Available Until", date: new Date("2050") },
   ] as EntryForm[];
@@ -104,15 +99,13 @@ function fromForm(form: EntryForm[], id: string): EventDto {
   return {
     id,
     requiredMembers: (form[2] as NumberEntryForm).value,
-    rewardType:
+    timeLimitation:
       (form[3] as OptionEntryForm).value === 0 ? "PERPETUAL" : "LIMITED_TIME",
     name: (form[0] as FreeEntryForm).value,
     description: (form[1] as FreeEntryForm).value,
     indexable: (form[5] as OptionEntryForm).value === 1,
     endTime: (form[6] as DateEntryForm).date.toUTCString(),
-    rewardIds: [],
     challengeIds: [],
-    defaultChallengeId: "",
     minimumScore: (form[4] as NumberEntryForm).value,
     latitude: 0,
     longitude: 0,
@@ -130,15 +123,9 @@ function toForm(event: EventDto) {
       max: 99,
     },
     {
-      name: "Reward Type",
+      name: "Time Limitation",
       options: ["Unlimited", "Limited"],
-      value: event.rewardType === "PERPETUAL" ? 0 : 1,
-    },
-    {
-      name: "Minimum Score for Reward",
-      value: event.minimumScore,
-      min: 1,
-      max: 999999,
+      value: event.timeLimitation === "PERPETUAL" ? 0 : 1,
     },
     {
       name: "Publicly Visible",
@@ -188,13 +175,10 @@ export function Events() {
         isOpen={isEditModalOpen}
         entryButtonText="EDIT"
         onEntry={() => {
-          const { challengeIds, rewardIds, defaultChallengeId } =
-            serverData.events.get(currentId)!;
+          const { challengeIds } = serverData.events.get(currentId)!;
           serverData.updateEvent({
             ...fromForm(form, currentId),
-            defaultChallengeId,
             challengeIds,
-            rewardIds,
           });
           setEditModalOpen(false);
         }}
@@ -252,15 +236,6 @@ export function Events() {
             onDelete={() => {
               setCurrentId(ev.id);
               setDeleteModalOpen(true);
-            }}
-            onSetDefault={() => {
-              if (serverData.selectedOrg !== "") {
-                const org = serverData.organizations.get(
-                  serverData.selectedOrg
-                )!;
-                org.defaultEventId = ev.id;
-                serverData.updateOrganization(org);
-              }
             }}
             onEdit={() => {
               setCurrentId(ev.id);

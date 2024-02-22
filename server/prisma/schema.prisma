@@ -14,7 +14,7 @@ enum AuthType {
   NONE
 }
 
-enum EventRewardType {
+enum TimeLimitationType {
   LIMITED_TIME
   PERPETUAL
 }
@@ -56,7 +56,6 @@ enum SessionLogEvent {
   SET_CHALLENGE //data = challengeId
   DELETE_CHALLENGE //data = challengeId
   COMPLETE_CHALLENGE //data = challengeId
-  DELETE_REWARD //data = rewardId
   DISCONNECT //data = ""
 }
 
@@ -116,29 +115,25 @@ model Challenge {
   closeRadius    Float
   completions    PrevChallenge[]
   activeTrackers EventTracker[]
-  defaultOf      EventBase?      @relation("default")
 }
 
 model EventBase {
-  id                 String          @id @default(uuid())
-  requiredMembers    Int
-  name               String
-  description        String
-  rewardType         EventRewardType
-  indexable          Boolean
-  endTime            DateTime
-  minimumScore       Int             @default(1)
-  challenges         Challenge[]     @relation("all")
-  userFavorite       User[]
-  usedIn             Organization[]  @relation("eventOrgs")
-  defaultOf          Organization[]  @relation("defaultOrg")
-  defaultChallenge   Challenge       @relation("default", fields: [defaultChallengeId], references: [id])
-  defaultChallengeId String          @unique
-  trackers           EventTracker[]
-  activeGroups       Group[]
-  latitude           Float
-  longitude          Float
-  achievements       Achievement[]
+  id              String             @id @default(uuid())
+  requiredMembers Int
+  name            String
+  description     String
+  timeLimitation  TimeLimitationType
+  indexable       Boolean
+  endTime         DateTime
+  minimumScore    Int                @default(1)
+  challenges      Challenge[]        @relation("all")
+  userFavorite    User[]
+  usedIn          Organization[]     @relation("eventOrgs")
+  trackers        EventTracker[]
+  activeGroups    Group[]
+  latitude        Float
+  longitude       Float
+  achievements    Achievement[]
 }
 
 model EventTracker {
@@ -167,15 +162,13 @@ model PrevChallenge {
 }
 
 model Organization {
-  id             String                   @id @default(uuid())
-  name           String
-  accessCode     String
-  members        User[]                   @relation("player")
-  managers       User[]                   @relation("orgManager")
-  events         EventBase[]              @relation("eventOrgs")
-  defaultEvent   EventBase                @relation("defaultOrg", fields: [defaultEventId], references: [id], onDelete: Restrict)
-  defaultEventId String
-  specialUsage   OrganizationSpecialUsage
+  id           String                   @id @default(uuid())
+  name         String
+  accessCode   String
+  members      User[]                   @relation("player")
+  managers     User[]                   @relation("orgManager")
+  events       EventBase[]              @relation("eventOrgs")
+  specialUsage OrganizationSpecialUsage
 }
 
 model SessionLogEntry {

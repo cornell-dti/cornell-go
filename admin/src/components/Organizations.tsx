@@ -30,7 +30,6 @@ function OrganizationCard(props: {
   onEdit: () => void;
   onDelete: () => void;
   onClear: () => void;
-  onSetDefault: () => void;
   onSelect: () => void;
   onAddManager: () => void;
 }) {
@@ -51,8 +50,6 @@ function OrganizationCard(props: {
         <ListCardBody>
           Id: <b>{props.organization.id}</b>
           <br />
-          Default Event Id: <b>{props.organization.defaultEventId}</b>
-          <br />
           Access Code: <b>{props.organization.accessCode.toUpperCase()}</b>
           <br />
           User Count: <b>{props.organization.members.length}</b>
@@ -61,7 +58,6 @@ function OrganizationCard(props: {
         <ListCardButtons>
           {/*<HButton onClick={props.onAdd}>ADD EVENT</HButton>*/}
           {/*<HButton onClick={props.onClear}>CLEAR</HButton>*/}
-          <HButton onClick={props.onSetDefault}>&nbsp;</HButton>
           <HButton onClick={props.onDelete} float="right">
             DELETE
           </HButton>
@@ -106,7 +102,6 @@ const emptyDto: OrganizationDto = {
   accessCode: "",
   events: [],
   managers: [],
-  defaultEventId: "",
 };
 
 export function Organizations() {
@@ -224,13 +219,6 @@ export function Organizations() {
               setCurrentId(org.id);
               org.events = [];
               serverData.updateOrganization(org);
-            }}
-            onSetDefault={() => {
-              setCurrentId(org.id);
-              if (serverData.selectedEvent !== "") {
-                org.defaultEventId = serverData.selectedEvent;
-                serverData.updateOrganization(org);
-              }
             }}
             onSelect={() => {
               serverData.selectOrg(org.id);

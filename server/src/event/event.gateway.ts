@@ -10,7 +10,7 @@ import { EventService } from './event.service';
 import { UserService } from '../user/user.service';
 import { UserGuard } from '../auth/jwt-auth.guard';
 import { UseGuards } from '@nestjs/common';
-import { EventBase, EventRewardType, User } from '@prisma/client';
+import { EventBase, TimeLimitationType, User } from '@prisma/client';
 import {
   EventDto,
   RequestAllEventDataDto,
