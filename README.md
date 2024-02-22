@@ -77,6 +77,19 @@ npx prisma migrate dev --name my_migration
 
 ## Contributors
 
+### SP24
+
+- **Chris Gu** - Developer
+- **Jasmine Li** - Developer
+- **Nitya Pakala** - Developer
+- **Brian La** - Developer
+- **Happy Li** - Designer
+- **James Spokes** - Designer
+- **Janet Luo** - PMM
+- **Nikita Kasumov** - TPM
+- **Cathryn Li** - TPM
+- **Jesse Cheng** - PM
+
 ### FA23
 
 - **Tucker Stanley** - Developer
