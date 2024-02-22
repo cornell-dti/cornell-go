@@ -56,16 +56,12 @@ function OrganizationCard(props: {
           <br />
         </ListCardBody>
         <ListCardButtons>
-          {/*<HButton onClick={props.onAdd}>ADD EVENT</HButton>*/}
-          {/*<HButton onClick={props.onClear}>CLEAR</HButton>*/}
+          <HButton onClick={props.onAddManager}>ADD MANAGER</HButton>
           <HButton onClick={props.onDelete} float="right">
             DELETE
           </HButton>
           <HButton onClick={props.onEdit} float="right">
             EDIT
-          </HButton>
-          <HButton onClick={props.onAddManager} float="right">
-            ADD MANAGER
           </HButton>
         </ListCardButtons>
       </ListCardBox>
