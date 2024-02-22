@@ -299,13 +299,4 @@ export class OrganizationService {
       data: { memberOf: { connect: { id: org.id } } },
     });
   }
-
-  async getMembers(org: Organization) {
-    const organization = await this.prisma.organization.findFirstOrThrow({
-      where: { id: org.id },
-      include: { members: true },
-    });
-
-    return organization.members;
-  }
 }

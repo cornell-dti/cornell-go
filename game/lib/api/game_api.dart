@@ -147,11 +147,11 @@ class ApiClient extends ChangeNotifier {
         },
         body: jsonEncode(<String, String>{
           "idToken": idToken,
-          "lat": "0",
+          "lat": pos?.lat.toString() ?? "0",
           "enrollmentType": enrollmentType,
           "year": year,
           "username": username,
-          "long": "0",
+          "long": pos?.long.toString() ?? "0",
           "aud": Platform.isIOS ? "ios" : "android"
         }));
 

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/api/game_client_dto.dart';
@@ -128,42 +130,32 @@ class _JourneysPageState extends State<JourneysPage> {
                 var complete = (numberCompleted == event.challengeIds.length);
                 var locationCount = event.challengeIds.length;
                 var difficulty = event.difficulty;
-                const timeTillExpire = Duration(days: 2);
+                DateTime now = DateTime.now();
+                DateTime endtime = HttpDate.parse(event.endTime);
+
+                Duration timeTillExpire = endtime.difference(now);
                 eventCells.add(
-                  GestureDetector(
-                    onTap: () {
-                      if (groupModel.curEventId == event.id) return;
-                      if (groupModel.members.any((element) =>
-                          element.id == userModel.userData?.id &&
-                          element.id == groupModel.group!.hostId)) {
-                        // _showConfirmation(context, event.id, event.name);
-                      } else {
-                        showAlert("Ask the group leader to change the event.",
-                            context);
-                      }
-                    },
-                    child: StreamBuilder(
-                      stream: Stream.fromFuture(Future.delayed(timeTillExpire)),
-                      builder: (stream, value) => timeTillExpire.isNegative
-                          ? Consumer<ApiClient>(
-                              builder: (context, apiClient, child) {
-                                if (event.id == groupModel.curEventId) {
-                                  apiClient.serverApi?.setCurrentEvent("");
-                                }
-                                return Container();
-                              },
-                            )
-                          : JourneyCell(
-                              key: UniqueKey(),
-                              event.name,
-                              event.description,
-                              locationCount,
-                              numberCompleted,
-                              complete,
-                              difficulty,
-                              event.minimumScore,
-                              0),
-                    ),
+                  StreamBuilder(
+                    stream: Stream.fromFuture(Future.delayed(timeTillExpire)),
+                    builder: (stream, value) => timeTillExpire.isNegative
+                        ? Consumer<ApiClient>(
+                            builder: (context, apiClient, child) {
+                              if (event.id == groupModel.curEventId) {
+                                apiClient.serverApi?.setCurrentEvent("");
+                              }
+                              return Container();
+                            },
+                          )
+                        : JourneyCell(
+                            key: UniqueKey(),
+                            event.name,
+                            event.description,
+                            locationCount,
+                            numberCompleted,
+                            complete,
+                            difficulty,
+                            event.minimumScore,
+                            0),
                   ),
                 );
               }
