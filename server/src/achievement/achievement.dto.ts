@@ -1,19 +1,19 @@
 export enum LocationType {
-  EngQuad = 'EngQuad',
-  ArtsQuad = 'ArtsQuad',
-  AgQuad = 'AgQuad',
-  NorthCampus = 'NorthCampus',
-  WestCampus = 'WestCampus',
-  Collegetown = 'Collegetown',
+  EngQuad = 'ENG_QUAD',
+  ArtsQuad = 'ARTS_QUAD',
+  AgQuad = 'AG_QUAD',
+  NorthCampus = 'NORTH_CAMPUS',
+  WestCampus = 'WEST_CAMPUS',
+  Collegetown = 'COLLEGETOWN',
   IthacaCommons = 'IthacaCommons',
   Any = 'Any',
 }
 
 export enum AchievementType {
-  TotalPoints = 'TotalPoints',
-  TotalChallenges = 'TotalChallenges',
-  TotalJourneys = 'TotalJourneys',
-  TotalChallengesOrJourneys = 'TotalChallengesOrJourneys',
+  TotalPoints = 'TOTAL_POINTS',
+  TotalChallenges = 'TOTAL_CHALLENGES',
+  TotalJourneys = 'TOTAL_JOURNEYS',
+  TotalChallengesOrJourneys = 'TOTAL_CHALLENGES_OR_JOURNEYS',
 }
 
 export interface AchievementDto {

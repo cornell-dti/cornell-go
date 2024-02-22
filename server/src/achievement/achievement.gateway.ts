@@ -10,7 +10,7 @@ import { EventService } from '../event/event.service';
 import { CallingUser } from '../auth/calling-user.decorator';
 import { ClientService } from '../client/client.service';
 import { AchievementDto, AchievementTrackerDto } from './achievement.dto';
-import { AchievementService } from './achievements.service';
+import { AchievementService } from './achievement.service';
 
 @WebSocketGateway({ cors: true })
 @UseGuards(UserGuard)

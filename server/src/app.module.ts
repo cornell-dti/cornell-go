@@ -12,6 +12,7 @@ import { ClientModule } from './client/client.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { SessionLogModule } from './session-log/session-log.module';
 import { OrganizationModule } from './organization/organization.module';
+import { AchievementModule } from './achievement/achievement.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { OrganizationModule } from './organization/organization.module';
     ClientModule,
     UserModule,
     EventModule,
+    AchievementModule,
     GroupModule,
     ChallengeModule,
     PrismaModule,
