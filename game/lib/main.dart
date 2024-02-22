@@ -27,9 +27,6 @@ import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platf
 
 import 'dart:io' show Platform;
 
-import 'challenges/challenges_page.dart';
-import 'gameplay/gameplay_map.dart';
-
 const ENV_URL = String.fromEnvironment('API_URL', defaultValue: "");
 
 final storage = FlutterSecureStorage();

@@ -1,9 +1,6 @@
 import 'dart:async';
 import 'dart:io' show Platform;
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:geolocator_apple/geolocator_apple.dart';
-import 'package:geolocator_android/geolocator_android.dart';
 
 class GeoPoint {
   static bool didMakeRequest = false;
