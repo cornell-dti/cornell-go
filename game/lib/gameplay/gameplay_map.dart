@@ -5,8 +5,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 // import 'package:permission_handler/permission_handler.dart';
 import 'package:google_maps_flutter_android/google_maps_flutter_android.dart';
 import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platform_interface.dart';
-import 'package:location/location.dart';
-// import 'package:game/api/location_api.dart';
+import 'package:game/api/geopoint.dart';
+import 'package:geolocator/geolocator.dart';
 import 'dart:async';
 
 class GameplayMap extends StatefulWidget {
@@ -17,47 +17,72 @@ class GameplayMap extends StatefulWidget {
 }
 
 class _GameplayMapState extends State<GameplayMap> {
-  AndroidMapRenderer mapRenderer = AndroidMapRenderer.platformDefault;
+  // AndroidMapRenderer mapRenderer = AndroidMapRenderer.platformDefault;
 
   // final mapController = MapController();
-  late Completer<GoogleMapController> mapController = Completer();
+  late Completer<GoogleMapController> mapCompleter = Completer();
 
   final LatLng _center = const LatLng(-33.86, 151.20);
+  // final LatLng _center = const LatLng(40.00, -70.00);
 
   Future<void> _onMapCreated(GoogleMapController controller) async {
-    mapController.complete(controller);
-    final GoogleMapsFlutterPlatform mapsImplementation =
-        GoogleMapsFlutterPlatform.instance;
-    if (mapsImplementation is GoogleMapsFlutterAndroid) {
-      WidgetsFlutterBinding.ensureInitialized();
-      mapRenderer = await mapsImplementation
-          .initializeWithRenderer(AndroidMapRenderer.latest);
-    }
+    mapCompleter.complete(controller);
   }
 
-  LocationData? currentLocation;
+  // LocationData? currentLocation;
+  GeoPoint? currentLocation;
 
   void getCurrentLocation() async {
-    Location location = Location();
+    // GeoPoint location = GeoPoint(_center.latitude, _center.longitude);
+    // final GoogleMapsFlutterPlatform mapsImplementation =
+    //     GoogleMapsFlutterPlatform.instance;
+    // if (mapsImplementation is GoogleMapsFlutterAndroid) {
+    //   WidgetsFlutterBinding.ensureInitialized();
+    //   mapRenderer = await mapsImplementation
+    //       .initializeWithRenderer(AndroidMapRenderer.latest);
+    // }
 
-    GoogleMapController googleMapController = await mapController.future;
-    // location.getCurrentLocation().then(
-    //   (location) {
-    //     currentLocation = location;
-    //   },
-    // );
+    GoogleMapController googleMapController = await mapCompleter.future;
+    GeoPoint.current().then(
+      (location) {
+        currentLocation = location;
+      },
+    );
 
-    location.onLocationChanged.listen((newLoc) {
-      currentLocation = newLoc;
+    StreamSubscription<Position> positionStream = Geolocator.getPositionStream(
+            locationSettings: GeoPoint.getLocationSettings())
+        .listen((Position? newPos) {
+      print(newPos == null
+          ? 'Unknown'
+          : '${newPos.latitude.toString()}, ${newPos.longitude.toString()}');
+      currentLocation =
+          newPos == null ? null : GeoPoint(newPos.latitude, newPos.longitude);
+
+      // googleMapController.animateCamera(
+      //   CameraUpdate.newCameraPosition(
+      //     CameraPosition(
+      //       zoom: 21,
+      //       target: newPos == null
+      //           ? _center
+      //           : LatLng(newPos.latitude, newPos.longitude),
+      //     ),
+      //   ),
+      // );
+    });
+
+    positionStream.onData((newPos) {
+      print('${newPos.latitude.toString()}, ${newPos.longitude.toString()}');
+      currentLocation = GeoPoint(newPos.latitude, newPos.longitude);
 
       googleMapController.animateCamera(
         CameraUpdate.newCameraPosition(
           CameraPosition(
-            zoom: 13.5,
-            target: LatLng(newLoc.latitude!, newLoc.longitude!),
+            zoom: 16.5,
+            target: LatLng(newPos.latitude, newPos.longitude),
           ),
         ),
       );
+      setState(() {});
     });
   }
 
@@ -79,28 +104,23 @@ class _GameplayMapState extends State<GameplayMap> {
           title: const Text('Maps Sample App'),
           elevation: 2,
         ),
-        body: currentLocation == null
-            ? const Center(child: Text("Loading"))
-            : GoogleMap(
-                onMapCreated: _onMapCreated,
-                initialCameraPosition: CameraPosition(
-                  target: LatLng(
-                      currentLocation!.latitude!, currentLocation!.longitude!),
-                  zoom: 11.0,
-                ),
-                markers: {
-                  Marker(
-                    markerId: const MarkerId("currentLocation"),
-                    position: _center,
-                    // position: LatLng(currentLocation!.latitude!,
-                    // currentLocation!.longitude!),
-                    infoWindow: InfoWindow(
-                      title: "Your Location",
-                      snippet: "",
-                    ),
-                  ),
-                },
-              ),
+        body: GoogleMap(
+          onMapCreated: _onMapCreated,
+          initialCameraPosition: CameraPosition(
+            target: currentLocation == null
+                ? _center
+                : LatLng(currentLocation!.lat, currentLocation!.lat),
+            zoom: 11.0,
+          ),
+          markers: {
+            Marker(
+              markerId: const MarkerId("currentLocation"),
+              position: currentLocation == null
+                  ? _center
+                  : LatLng(currentLocation!.lat, currentLocation!.long),
+            ),
+          },
+        ),
       ),
     );
     // return FlutterMap(
