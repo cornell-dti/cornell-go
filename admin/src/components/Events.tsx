@@ -68,9 +68,7 @@ function EventCard(props: {
           <b>{props.event.longitude}</b> <br />
         </ListCardBody>
         <ListCardButtons>
-          <HButton onClick={props.onDelete} float="right">
-            DELETE
-          </HButton>
+          <HButton onClick={props.onDelete}>DELETE</HButton>
           <HButton onClick={props.onEdit} float="right">
             EDIT
           </HButton>
