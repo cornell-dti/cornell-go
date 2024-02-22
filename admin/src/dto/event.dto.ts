@@ -21,7 +21,7 @@ export interface EventDto {
   requiredMembers: number;
   name: string;
   description: string;
-  rewardType: "limited_time" | "perpetual";
+  rewardType: "LIMITED_TIME" | "PERPETUAL";
   endTime: string;
   rewardIds: string[];
   challengeIds: string[];

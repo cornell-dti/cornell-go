@@ -276,8 +276,8 @@ export class EventService {
       description: ev.description,
       rewardType:
         ev.rewardType == EventRewardType.LIMITED_TIME
-          ? 'limited_time'
-          : 'perpetual',
+          ? 'LIMITED_TIME'
+          : 'PERPETUAL',
       endTime: ev.endTime.toUTCString(),
       requiredMembers: ev.requiredMembers,
       indexable: ev.indexable,
@@ -440,7 +440,7 @@ export class EventService {
       name: event.name.substring(0, 2048),
       description: event.description.substring(0, 2048),
       rewardType:
-        event.rewardType === 'limited_time'
+        event.rewardType === 'LIMITED_TIME'
           ? EventRewardType.LIMITED_TIME
           : EventRewardType.PERPETUAL,
       endTime: new Date(event.endTime),

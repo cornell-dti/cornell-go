@@ -17,19 +17,20 @@ export enum AchievementType {
 }
 
 export interface AchievementDto {
+  id: string;
+  eventId: string;
   requiredPoints: number;
   name: string;
   description: string;
   imageUrl: string;
-  event?: boolean;
   locationType: LocationType;
   achievementType: AchievementType;
-  associatedOrganizations: string[]; 
+  organizationIds: string[];
 }
 
 export interface AchievementTrackerDto {
-  associatedUser: string; 
+  userId: string;
   progress: number;
-  associatedAchievement: AchievementDto; 
-  dateComplete?: Date;
+  achievementId: string;
+  dateComplete?: string;
 }

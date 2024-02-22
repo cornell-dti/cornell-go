@@ -9,16 +9,11 @@ import { UserGuard } from '../auth/jwt-auth.guard';
 import { EventService } from '../event/event.service';
 import { CallingUser } from '../auth/calling-user.decorator';
 import { ClientService } from '../client/client.service';
-import {
-  AchievementDto,
-  AchievementTrackerDto
-} from './achievements.dto';
+import { AchievementDto, AchievementTrackerDto } from './achievement.dto';
 import { AchievementService } from './achievements.service';
 
 @WebSocketGateway({ cors: true })
 @UseGuards(UserGuard)
 export class AchievementGateway {
-  constructor(
-    private achievementService: AchievementService,
-  ) {}
+  constructor(private achievementService: AchievementService) {}
 }

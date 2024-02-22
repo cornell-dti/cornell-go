@@ -38,7 +38,7 @@ function EventCard(props: {
       : props.event.requiredMembers;
 
   const rewardingMethod =
-    props.event.rewardType === "limited_time" ? "Limited" : "Unlimited";
+    props.event.rewardType === "LIMITED_TIME" ? "Limited" : "Unlimited";
 
   const affirmOfBool = (val: boolean) => (val ? "Yes" : "No");
 
@@ -105,7 +105,7 @@ function fromForm(form: EntryForm[], id: string): EventDto {
     id,
     requiredMembers: (form[2] as NumberEntryForm).value,
     rewardType:
-      (form[3] as OptionEntryForm).value === 0 ? "perpetual" : "limited_time",
+      (form[3] as OptionEntryForm).value === 0 ? "PERPETUAL" : "LIMITED_TIME",
     name: (form[0] as FreeEntryForm).value,
     description: (form[1] as FreeEntryForm).value,
     indexable: (form[5] as OptionEntryForm).value === 1,
@@ -132,7 +132,7 @@ function toForm(event: EventDto) {
     {
       name: "Reward Type",
       options: ["Unlimited", "Limited"],
-      value: event.rewardType === "perpetual" ? 0 : 1,
+      value: event.rewardType === "PERPETUAL" ? 0 : 1,
     },
     {
       name: "Minimum Score for Reward",

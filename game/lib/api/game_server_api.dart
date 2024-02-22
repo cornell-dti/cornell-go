@@ -72,8 +72,8 @@ class GameServerApi {
         "skippableOnly": skippableOnly,
         "rewardTypes": rewardTypes
             .map((e) => e == EventRewardType.PERPETUAL
-                ? 'perpetual'
-                : 'limited_time_event')
+                ? 'PERPETUAL'
+                : 'LIMITED_TIME_event')
             .toList()
       });
 
