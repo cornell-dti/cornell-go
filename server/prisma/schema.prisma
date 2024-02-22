@@ -66,29 +66,48 @@ enum OrganizationSpecialUsage {
   NONE
 }
 
+enum ClaimType {
+  MANAGE
+  READ_WRITE
+  READ_ONLY
+  DENY
+}
+
+enum ClaimedResourceType {
+  ORGANIZATION
+  EVENT
+  CHALLENGE
+  USER
+  GROUP
+  ACHIEVEMENT
+}
+
 model User {
-  id                  String            @id() @default(uuid())
-  authToken           String
-  authType            AuthType
-  username            String
-  year                String
-  email               String
-  hashedRefreshToken  String
-  administrator       Boolean
-  enrollmentType      EnrollmentType
-  score               Int
-  isBanned            Boolean           @default(false)
-  group               Group             @relation("member", fields: [groupId], references: [id])
-  groupId             String
-  hostOf              Group?            @relation("host")
-  eventTrackers       EventTracker[]
-  favorites           EventBase[]
-  completedChallenges PrevChallenge[]   @relation("owner")
-  memberOf            Organization[]    @relation("player")
-  managerOf           Organization[]    @relation("orgManager")
-  isRanked            Boolean           @default(true)
-  participatedIn      PrevChallenge[]   @relation("prevChallengeParticipant")
-  sessionLogEntries   SessionLogEntry[]
+  id                   String               @id() @default(uuid())
+  authToken            String
+  authType             AuthType
+  username             String
+  year                 String
+  email                String
+  hashedRefreshToken   String
+  administrator        Boolean
+  enrollmentType       EnrollmentType
+  score                Int
+  isBanned             Boolean              @default(false)
+  group                Group                @relation("member", fields: [groupId], references: [id])
+  groupId              String
+  hostOf               Group?               @relation("host")
+  eventTrackers        EventTracker[]
+  favorites            EventBase[]
+  completedChallenges  PrevChallenge[]      @relation("owner")
+  memberOf             Organization[]       @relation("player")
+  managerOf            Organization[]       @relation("orgManager")
+  isRanked             Boolean              @default(true)
+  participatedIn       PrevChallenge[]      @relation("prevChallengeParticipant")
+  sessionLogEntries    SessionLogEntry[]
+  acheievementTrackers AchievementTracker[]
+  claims               AuthClaim[]          @relation("claimant")
+  issued               AuthClaim[]          @relation("issuer")
 }
 
 model Group {
@@ -194,10 +213,24 @@ model Achievement {
 }
 
 model AchievementTracker {
-  id             String      @id @default(uuid())
-  associatedUser String
-  progress       Int
-  achievement    Achievement @relation(fields: [achievementId], references: [id])
-  dateComplete   DateTime?
-  achievementId  String
+  id            String      @id @default(uuid())
+  user          User        @relation(fields: [userId], references: [id])
+  progress      Int
+  achievement   Achievement @relation(fields: [achievementId], references: [id])
+  dateComplete  DateTime?
+  achievementId String
+  userId        String
+}
+
+model AuthClaim {
+  id           String               @id @default(uuid())
+  claimType    ClaimType
+  issuedDate   DateTime
+  user         User?                @relation("claimant", fields: [userId], references: [id])
+  userId       String?
+  issuer       User?                @relation("issuer", fields: [issuerId], references: [id])
+  issuerId     String?
+  resourceType ClaimedResourceType?
+  resourceId   String?
+  propertyName String?
 }
