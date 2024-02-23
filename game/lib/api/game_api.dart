@@ -140,36 +140,36 @@ class ApiClient extends ChangeNotifier {
   Future<http.Response?> connect(String idToken, Uri url, String enrollmentType,
       String year, String username) async {
     final pos = await GeoPoint.current();
-    // if (pos != null) {
-    final loginResponse = await http.post(url,
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(<String, String>{
-          "idToken": idToken,
-          "lat": pos?.lat.toString() ?? "0",
-          "enrollmentType": enrollmentType,
-          "year": year,
-          "username": username,
-          "long": pos?.long.toString() ?? "0",
-          "aud": Platform.isIOS ? "ios" : "android"
-        }));
+    if (pos != null) {
+      final loginResponse = await http.post(url,
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(<String, String>{
+            "idToken": idToken,
+            "lat": pos?.lat.toString() ?? "0",
+            "enrollmentType": enrollmentType,
+            "year": year,
+            "username": username,
+            "long": pos?.long.toString() ?? "0",
+            "aud": Platform.isIOS ? "ios" : "android"
+          }));
 
-    if (loginResponse.statusCode == 201 && loginResponse.body != "") {
-      final responseBody = jsonDecode(loginResponse.body);
-      this._accessToken = responseBody["accessToken"];
-      this._refreshToken = responseBody["refreshToken"];
-      await _saveToken();
-      _createSocket(false);
-      return loginResponse;
+      if (loginResponse.statusCode == 201 && loginResponse.body != "") {
+        final responseBody = jsonDecode(loginResponse.body);
+        this._accessToken = responseBody["accessToken"];
+        this._refreshToken = responseBody["refreshToken"];
+        await _saveToken();
+        _createSocket(false);
+        return loginResponse;
+      }
+      authenticated = false;
+      _clientApi.disconnectedController.add(null);
+      notifyListeners();
+
+      print("Failed to connect to server!");
+      return null;
     }
-    authenticated = false;
-    _clientApi.disconnectedController.add(null);
-    notifyListeners();
-
-    print("Failed to connect to server!");
-    return null;
-    // }
     print("Failed to get location data!");
     return null;
   }
