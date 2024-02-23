@@ -278,7 +278,6 @@ export class EventService {
       requiredMembers: ev.requiredMembers,
       indexable: ev.indexable,
       challengeIds: sortedChals.map(c => c.id),
-      minimumScore: ev.minimumScore,
       difficulty:
         ev.difficulty === DifficultyMode.EASY
           ? 'Easy'
@@ -446,7 +445,6 @@ export class EventService {
       userFavoriteIds: event.userFavoriteIds,
       // initialOrganizationId: event.initialOrganizationId,
       indexable: event.indexable,
-      minimumScore: event.minimumScore,
       difficulty:
         event.difficulty === 'Easy'
           ? DifficultyMode.EASY

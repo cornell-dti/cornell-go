@@ -32,7 +32,6 @@ export interface EventDto {
   challengeIds: string[];
   userFavoriteIds?: string[];
   initialOrganizationId?: string;
-  minimumScore: number;
   difficulty: 'Easy' | 'Normal' | 'Hard';
   indexable: boolean;
   longitude: number;

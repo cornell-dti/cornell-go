@@ -139,6 +139,7 @@ model EventBase {
   latitude        Float
   longitude       Float
   achievements    Achievement[]
+  difficulty      DifficultyMode
 }
 
 model EventTracker {
