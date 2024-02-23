@@ -13,5 +13,36 @@ export class ClaimService {
     resourceType: ClaimedResourceType | null,
     resources: string[] | null,
     propertyNames: string[] | null,
-  ) {}
+  ): Promise<boolean> {
+    return false;
+  }
+
+  async checkClaims(
+    claimType: ClaimType,
+    user: User | null,
+    resourceType: ClaimedResourceType | null,
+    resources: string[] | null,
+    propertyNames: string[] | null,
+  ): Promise<boolean> {
+    return false;
+  }
+
+  async filterAllowedIds(
+    claimType: ClaimType,
+    user: User,
+    resourceType: ClaimedResourceType,
+    resources: string[],
+    propertyNames: string[] | null,
+  ): Promise<string[]> {
+    return [];
+  }
+
+  async deleteDisabledProperties(
+    claimType: ClaimType,
+    user: User,
+    resourceType: ClaimedResourceType,
+    resources: any[],
+    resourceIds: string[],
+    propertyNames: string[] | null,
+  ): Promise<void> {}
 }
