@@ -44,6 +44,12 @@ enum AchievementType {
   TOTAL_CHALLENGES_OR_JOURNEYS
 }
 
+enum DifficultyMode {
+  EASY
+  NORMAL
+  HARD
+}
+
 enum SessionLogEvent {
   JOIN_GROUP //data = groupId
   LEAVE_GROUP //data = groupId
@@ -91,32 +97,33 @@ enum PermissionGroupAuditLogType {
 }
 
 model User {
-  id                   String                    @id() @default(uuid())
-  authToken            String
-  authType             AuthType
-  username             String
-  year                 String
-  email                String
-  hashedRefreshToken   String
-  administrator        Boolean
-  enrollmentType       EnrollmentType
-  score                Int
-  group                Group                     @relation("member", fields: [groupId], references: [id])
-  groupId              String
-  hostOf               Group?                    @relation("host")
-  eventTrackers        EventTracker[]
-  favorites            EventBase[]
-  completedChallenges  PrevChallenge[]           @relation("owner")
-  memberOf             Organization[]            @relation("player")
-  managerOf            Organization[]            @relation("orgManager")
-  isRanked             Boolean                   @default(true)
-  participatedIn       PrevChallenge[]           @relation("prevChallengeParticipant")
-  sessionLogEntries    SessionLogEntry[]
-  acheievementTrackers AchievementTracker[]
-  defaultPermGroup     PermissionGroup           @relation("defaultPerms", fields: [defaultPermGroupId], references: [id])
-  defaultPermGroupId   String
-  permGroups           PermissionGroup[]         @relation("permMember")
-  permAuditActor       PermissionGroupAuditLog[]
+  id                  String                    @id() @default(uuid())
+  authToken           String
+  authType            AuthType
+  username            String
+  year                String
+  email               String
+  hashedRefreshToken  String
+  administrator       Boolean
+  enrollmentType      EnrollmentType
+  score               Int
+  isBanned            Boolean                   @default(false)
+  group               Group                     @relation("member", fields: [groupId], references: [id])
+  groupId             String
+  hostOf              Group?                    @relation("host")
+  eventTrackers       EventTracker[]
+  favorites           EventBase[]
+  completedChallenges PrevChallenge[]           @relation("owner")
+  memberOf            Organization[]            @relation("orgToUser")
+  managerOf           Organization[]            @relation("orgManager")
+  isRanked            Boolean                   @default(true)
+  participatedIn      PrevChallenge[]           @relation("prevChallengeParticipant")
+  sessionLogEntries   SessionLogEntry[]
+  defaultPermGroup    PermissionGroup           @relation("defaultPerms", fields: [defaultPermGroupId], references: [id])
+  defaultPermGroupId  String
+  permGroups          PermissionGroup[]         @relation("permMember")
+  permAuditActor      PermissionGroupAuditLog[]
+  achievementTrackers AchievementTracker[]
 }
 
 model Group {
@@ -153,7 +160,6 @@ model EventBase {
   timeLimitation  TimeLimitationType
   indexable       Boolean
   endTime         DateTime
-  minimumScore    Int                @default(1)
   challenges      Challenge[]        @relation("all")
   userFavorite    User[]
   usedIn          Organization[]     @relation("eventOrgs")
@@ -162,6 +168,7 @@ model EventBase {
   latitude        Float
   longitude       Float
   achievements    Achievement[]
+  difficulty      DifficultyMode
 }
 
 model EventTracker {
@@ -193,7 +200,7 @@ model Organization {
   id           String                   @id @default(uuid())
   name         String
   accessCode   String
-  members      User[]                   @relation("player")
+  members      User[]                   @relation("orgToUser")
   managers     User[]                   @relation("orgManager")
   events       EventBase[]              @relation("eventOrgs")
   specialUsage OrganizationSpecialUsage

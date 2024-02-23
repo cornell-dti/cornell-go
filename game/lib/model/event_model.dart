@@ -11,12 +11,24 @@ class EventModel extends ChangeNotifier {
 
   EventModel(ApiClient client) : _client = client {
     client.clientApi.updateEventDataStream.listen((event) {
-      if (!event.event is String) {
-        searchResults = event.event;
+      if (!event.deleted) {
+        //initialize searchResults if null
+        searchResults = searchResults ?? [];
+        //add or update event
+        if (!_events.containsKey(event.event.id)) {
+          searchResults!.add(event.event);
+        } else {
+          var index = searchResults!
+              .indexWhere((element) => element.id == event.event.id);
+          searchResults![index] = event.event;
+        }
+        _events[event.event.id] = event.event;
+      } else {
+        //delete event
+        _events.remove(event.event);
+        searchResults?.removeWhere((element) => element.id == event.event);
       }
-      event.event.toList().forEach((element) {
-        _events[element.id] = element;
-      });
+
       notifyListeners();
     });
 
