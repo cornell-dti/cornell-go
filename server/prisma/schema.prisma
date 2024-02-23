@@ -73,7 +73,7 @@ enum OrganizationSpecialUsage {
 }
 
 model User {
-  id                  String            @id() @default(uuid())
+  id                  String               @id() @default(uuid())
   authToken           String
   authType            AuthType
   username            String
@@ -83,18 +83,19 @@ model User {
   administrator       Boolean
   enrollmentType      EnrollmentType
   score               Int
-  isBanned            Boolean           @default(false)
-  group               Group             @relation("member", fields: [groupId], references: [id])
+  isBanned            Boolean              @default(false)
+  group               Group                @relation("member", fields: [groupId], references: [id])
   groupId             String
-  hostOf              Group?            @relation("host")
+  hostOf              Group?               @relation("host")
   eventTrackers       EventTracker[]
   favorites           EventBase[]
-  completedChallenges PrevChallenge[]   @relation("owner")
-  memberOf            Organization[]    @relation("orgToUser")
-  managerOf           Organization[]    @relation("orgManager")
-  isRanked            Boolean           @default(true)
-  participatedIn      PrevChallenge[]   @relation("prevChallengeParticipant")
+  completedChallenges PrevChallenge[]      @relation("owner")
+  memberOf            Organization[]       @relation("orgToUser")
+  managerOf           Organization[]       @relation("orgManager")
+  isRanked            Boolean              @default(true)
+  participatedIn      PrevChallenge[]      @relation("prevChallengeParticipant")
   sessionLogEntries   SessionLogEntry[]
+  achievementTrackers AchievementTracker[]
 }
 
 model Group {
@@ -200,10 +201,11 @@ model Achievement {
 }
 
 model AchievementTracker {
-  id             String      @id @default(uuid())
-  associatedUser String
-  progress       Int
-  achievement    Achievement @relation(fields: [achievementId], references: [id])
-  dateComplete   DateTime?
-  achievementId  String
+  id            String      @id @default(uuid())
+  user          User        @relation(fields: [userId], references: [id])
+  progress      Int
+  achievement   Achievement @relation(fields: [achievementId], references: [id])
+  dateComplete  DateTime?
+  achievementId String
+  userId        String
 }
