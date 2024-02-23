@@ -66,14 +66,14 @@ enum OrganizationSpecialUsage {
   NONE
 }
 
-enum ClaimType {
+enum PermissionType {
   MANAGE
   READ_WRITE
   READ_ONLY
-  DENY
+  DENY_ALL
 }
 
-enum ClaimedResourceType {
+enum RestrictedResourceType {
   ORGANIZATION
   EVENT
   CHALLENGE
@@ -82,8 +82,16 @@ enum ClaimedResourceType {
   ACHIEVEMENT
 }
 
+enum PermissionGroupAuditLogType {
+  CREATED
+  GRANTED_TO
+  NEW_PERMISSION
+  DELETE_PERMISSION
+  REVOKED_FROM
+}
+
 model User {
-  id                   String               @id() @default(uuid())
+  id                   String                    @id() @default(uuid())
   authToken            String
   authType             AuthType
   username             String
@@ -93,21 +101,22 @@ model User {
   administrator        Boolean
   enrollmentType       EnrollmentType
   score                Int
-  isBanned             Boolean              @default(false)
-  group                Group                @relation("member", fields: [groupId], references: [id])
+  group                Group                     @relation("member", fields: [groupId], references: [id])
   groupId              String
-  hostOf               Group?               @relation("host")
+  hostOf               Group?                    @relation("host")
   eventTrackers        EventTracker[]
   favorites            EventBase[]
-  completedChallenges  PrevChallenge[]      @relation("owner")
-  memberOf             Organization[]       @relation("player")
-  managerOf            Organization[]       @relation("orgManager")
-  isRanked             Boolean              @default(true)
-  participatedIn       PrevChallenge[]      @relation("prevChallengeParticipant")
+  completedChallenges  PrevChallenge[]           @relation("owner")
+  memberOf             Organization[]            @relation("player")
+  managerOf            Organization[]            @relation("orgManager")
+  isRanked             Boolean                   @default(true)
+  participatedIn       PrevChallenge[]           @relation("prevChallengeParticipant")
   sessionLogEntries    SessionLogEntry[]
   acheievementTrackers AchievementTracker[]
-  claims               AuthClaim[]          @relation("claimant")
-  issued               AuthClaim[]          @relation("issuer")
+  defaultPermGroup     PermissionGroup           @relation("defaultPerms", fields: [defaultPermGroupId], references: [id])
+  defaultPermGroupId   String
+  permGroups           PermissionGroup[]         @relation("permMember")
+  permAuditActor       PermissionGroupAuditLog[]
 }
 
 model Group {
@@ -222,15 +231,32 @@ model AchievementTracker {
   userId        String
 }
 
-model AuthClaim {
-  id           String               @id @default(uuid())
-  claimType    ClaimType
-  issuedDate   DateTime
-  user         User?                @relation("claimant", fields: [userId], references: [id])
-  userId       String?
-  issuer       User?                @relation("issuer", fields: [issuerId], references: [id])
-  issuerId     String?
-  resourceType ClaimedResourceType?
-  resourceId   String?
-  propertyName String?
+model Permission {
+  id                String                  @id @default(uuid())
+  permissionType    PermissionType
+  resourceType      RestrictedResourceType?
+  resourceId        String?
+  propertyName      String?
+  permissionGroup   PermissionGroup         @relation(fields: [permissionGroupId], references: [id])
+  permissionGroupId String
+}
+
+model PermissionGroupAuditLog {
+  id                String                      @id @default(uuid())
+  auditType         PermissionGroupAuditLogType
+  timeCreated       DateTime
+  actor             User                        @relation(fields: [actorId], references: [id])
+  actorId           String
+  relatedId         String
+  permissionGroup   PermissionGroup             @relation(fields: [permissionGroupId], references: [id])
+  permissionGroupId String
+}
+
+model PermissionGroup {
+  id          String                    @id @default(uuid())
+  description String
+  defaultFor  User[]                    @relation("defaultPerms")
+  members     User[]                    @relation("permMember")
+  permissions Permission[]
+  auditLog    PermissionGroupAuditLog[]
 }
