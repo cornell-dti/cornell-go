@@ -33,6 +33,7 @@ export interface EventDto {
   userFavoriteIds?: string[];
   initialOrganizationId?: string;
   minimumScore: number;
+  difficulty: 'Easy' | 'Normal' | 'Hard';
   indexable: boolean;
   longitude: number;
   latitude: number;

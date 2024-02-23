@@ -44,6 +44,12 @@ enum AchievementType {
   TOTAL_CHALLENGES_OR_JOURNEYS
 }
 
+enum DifficultyMode {
+  EASY
+  NORMAL
+  HARD
+}
+
 enum SessionLogEvent {
   JOIN_GROUP //data = groupId
   LEAVE_GROUP //data = groupId
@@ -84,7 +90,7 @@ model User {
   eventTrackers       EventTracker[]
   favorites           EventBase[]
   completedChallenges PrevChallenge[]   @relation("owner")
-  memberOf            Organization[]    @relation("player")
+  memberOf            Organization[]    @relation("orgToUser")
   managerOf           Organization[]    @relation("orgManager")
   isRanked            Boolean           @default(true)
   participatedIn      PrevChallenge[]   @relation("prevChallengeParticipant")
@@ -125,7 +131,6 @@ model EventBase {
   timeLimitation  TimeLimitationType
   indexable       Boolean
   endTime         DateTime
-  minimumScore    Int                @default(1)
   challenges      Challenge[]        @relation("all")
   userFavorite    User[]
   usedIn          Organization[]     @relation("eventOrgs")
@@ -165,7 +170,7 @@ model Organization {
   id           String                   @id @default(uuid())
   name         String
   accessCode   String
-  members      User[]                   @relation("player")
+  members      User[]                   @relation("orgToUser")
   managers     User[]                   @relation("orgManager")
   events       EventBase[]              @relation("eventOrgs")
   specialUsage OrganizationSpecialUsage

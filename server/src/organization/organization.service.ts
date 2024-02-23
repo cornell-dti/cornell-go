@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import {
   EventBase,
   Organization,
+  DifficultyMode,
   TimeLimitationType,
   OrganizationSpecialUsage,
   User,
@@ -15,7 +16,7 @@ export const defaultEventData = {
   name: 'Default Event',
   description: 'Default Event',
   requiredMembers: 1,
-  minimumScore: 1,
+  difficulty: DifficultyMode.NORMAL,
   timeLimitation: TimeLimitationType.PERPETUAL,
   indexable: false,
   endTime: new Date('2060'),
