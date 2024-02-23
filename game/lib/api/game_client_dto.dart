@@ -210,6 +210,7 @@ class EventDto {
     initialOrganizationId = fields['initialOrganizationId'];
     defaultChallengeId = fields['defaultChallengeId'];
     minimumScore = fields['minimumScore'];
+    difficulty = fields['difficulty'];
     indexable = fields['indexable'];
     longitude = fields['longitude'];
     latitude = fields['latitude'];
@@ -228,6 +229,7 @@ class EventDto {
   String? initialOrganizationId = '';
   String defaultChallengeId = '';
   int minimumScore = 0;
+  String difficulty = '';
   bool indexable = false;
   double longitude = 0.0;
   double latitude = 0.0;
@@ -281,10 +283,10 @@ class ChallengeDto {
     name = fields["name"];
     description = fields["description"];
     imageUrl = fields["imageUrl"];
-    lat = fields["lat"];
-    long = fields["long"];
-    awardingRadius = fields["awardingRadius"];
-    closeRadius = fields["closeRadius"];
+    lat = fields["lat"].toDouble();
+    long = fields["long"].toDouble();
+    awardingRadius = fields["awardingRadius"].toDouble();
+    closeRadius = fields["closeRadius"].toDouble();
     containingEventId = fields["containingEventId"];
   }
 
@@ -304,7 +306,7 @@ class UpdateChallengeDataDto {
     if (fields["challenge"] is String) {
       challengeId = fields["challenge"];
     } else {
-      challenge = ChallengeDto.fromJson(fields);
+      challenge = ChallengeDto.fromJson(fields["challenge"]);
     }
     deleted = fields["deleted"] ?? false;
   }

@@ -147,14 +147,13 @@ class ApiClient extends ChangeNotifier {
           },
           body: jsonEncode(<String, String>{
             "idToken": idToken,
-            "lat": pos.lat.toString(),
+            "lat": pos?.lat.toString() ?? "0",
             "enrollmentType": enrollmentType,
             "year": year,
             "username": username,
-            "long": pos.long.toString(),
+            "long": pos?.long.toString() ?? "0",
             "aud": Platform.isIOS ? "ios" : "android"
           }));
-      print(loginResponse.body);
 
       if (loginResponse.statusCode == 201 && loginResponse.body != "") {
         final responseBody = jsonDecode(loginResponse.body);
