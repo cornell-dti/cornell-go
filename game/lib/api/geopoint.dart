@@ -75,7 +75,7 @@ class GeoPoint {
           //when going to the background
           foregroundNotificationConfig: const ForegroundNotificationConfig(
             notificationText:
-                "Example app will continue to receive your location even when you aren't using it",
+                "CornellGO will continue to receive your location even when you aren't using it",
             notificationTitle: "Running in Background",
             enableWakeLock: true,
           ));

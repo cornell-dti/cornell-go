@@ -1,8 +1,5 @@
-// import 'package:flutter_map/flutter_map.dart';
-// import 'package:latlong2/latlong.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-// import 'package:permission_handler/permission_handler.dart';
 import 'package:game/api/geopoint.dart';
 import 'package:geolocator/geolocator.dart';
 import 'dart:async';
@@ -15,31 +12,20 @@ class GameplayMap extends StatefulWidget {
 }
 
 class _GameplayMapState extends State<GameplayMap> {
-  // AndroidMapRenderer mapRenderer = AndroidMapRenderer.platformDefault;
-
-  // final mapController = MapController();
   late Completer<GoogleMapController> mapCompleter = Completer();
 
-  final LatLng _center = const LatLng(-33.86, 151.20);
-  // final LatLng _center = const LatLng(40.00, -70.00);
+  // User is by default centered around some location on Cornell's campus.
+  // User should only be at these coords briefly before map is moved to user's
+  // current location.
+  final LatLng _center = const LatLng(40.00, -70.00);
 
   Future<void> _onMapCreated(GoogleMapController controller) async {
     mapCompleter.complete(controller);
   }
 
-  // LocationData? currentLocation;
   GeoPoint? currentLocation;
 
   void getCurrentLocation() async {
-    // GeoPoint location = GeoPoint(_center.latitude, _center.longitude);
-    // final GoogleMapsFlutterPlatform mapsImplementation =
-    //     GoogleMapsFlutterPlatform.instance;
-    // if (mapsImplementation is GoogleMapsFlutterAndroid) {
-    //   WidgetsFlutterBinding.ensureInitialized();
-    //   mapRenderer = await mapsImplementation
-    //       .initializeWithRenderer(AndroidMapRenderer.latest);
-    // }
-
     GoogleMapController googleMapController = await mapCompleter.future;
     GeoPoint.current().then(
       (location) {
@@ -50,28 +36,21 @@ class _GameplayMapState extends State<GameplayMap> {
     StreamSubscription<Position> positionStream = Geolocator.getPositionStream(
             locationSettings: GeoPoint.getLocationSettings())
         .listen((Position? newPos) {
-      print(newPos == null
-          ? 'Unknown'
-          : '${newPos.latitude.toString()}, ${newPos.longitude.toString()}');
+      // prints user coordinates - useful for debugging
+      // print(newPos == null
+      //     ? 'Unknown'
+      //     : '${newPos.latitude.toString()}, ${newPos.longitude.toString()}');
+
       currentLocation =
           newPos == null ? null : GeoPoint(newPos.latitude, newPos.longitude);
-
-      // googleMapController.animateCamera(
-      //   CameraUpdate.newCameraPosition(
-      //     CameraPosition(
-      //       zoom: 21,
-      //       target: newPos == null
-      //           ? _center
-      //           : LatLng(newPos.latitude, newPos.longitude),
-      //     ),
-      //   ),
-      // );
     });
 
     positionStream.onData((newPos) {
       print('${newPos.latitude.toString()}, ${newPos.longitude.toString()}');
       currentLocation = GeoPoint(newPos.latitude, newPos.longitude);
 
+      // upon new user location data, moves map camera to be centered around
+      // new position and sets zoom.
       googleMapController.animateCamera(
         CameraUpdate.newCameraPosition(
           CameraPosition(
@@ -121,17 +100,5 @@ class _GameplayMapState extends State<GameplayMap> {
         ),
       ),
     );
-    // return FlutterMap(
-    //   options: MapOptions(
-    //     center: LatLng(51.509364, -0.128928),
-    //     zoom: 9.2,
-    //   ),
-    //   children: [
-    //     TileLayer(
-    //       urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-    //       userAgentPackageName: 'dev.fleaflet.flutter_map.example',
-    //     ),
-    //   ],
-    // );
   }
 }
