@@ -29,6 +29,7 @@ export interface EventDto {
   initialOrganizationId?: string;
   defaultChallengeId: string;
   minimumScore: number;
+  difficulty: "Easy" | "Normal" | "Hard";
   indexable: boolean;
   latitude: number;
   longitude: number;

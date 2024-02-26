@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import {
   EventBase,
   EventRewardType,
+  DifficultyMode,
   Organization,
   OrganizationSpecialUsage,
   User,
@@ -16,6 +17,7 @@ export const defaultEventData = {
   description: 'Default Event',
   requiredMembers: 1,
   minimumScore: 1,
+  difficulty: DifficultyMode.NORMAL,
   rewardType: EventRewardType.PERPETUAL,
   indexable: false,
   endTime: new Date('2060'),

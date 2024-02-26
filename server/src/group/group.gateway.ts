@@ -61,6 +61,12 @@ export class GroupGateway {
     await this.groupService.updateGroupMembers(user, oldGroup);
   }
 
+  /**
+   * Sets the current event of the user to the event of data. If event can not be properlly joined, an error is emitted instead of the user's group.
+   *
+   * @param user The Calling user
+   * @param data EventId of the event to set
+   */
   @SubscribeMessage('setCurrentEvent')
   async setCurrentEvent(
     @CallingUser() user: User,
