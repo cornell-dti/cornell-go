@@ -83,7 +83,7 @@ npx prisma migrate dev --name my_migration
 - **Jasmine Li** - Developer
 - **Nitya Pakala** - Developer
 - **Brian La** - Developer
-- **Temi Adeboawle** - Developer
+- **Temi Adebowale** - Developer
 - **Happy Li** - Designer
 - **James Spokes** - Designer
 - **Janet Luo** - PMM
