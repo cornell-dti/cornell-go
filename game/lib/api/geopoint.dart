@@ -6,16 +6,23 @@ class GeoPoint {
   static bool didMakeRequest = false;
   double _lat = 0;
   double _long = 0;
+  double _heading = 0;
 
   double get lat => _lat;
   double get long => _long;
+  double get heading => _heading;
 
   static bool _isRequestingLocationPermissions = false;
   static bool _isRequestingLocation = false;
 
-  GeoPoint(double lat, double long) {
+  GeoPoint(
+    double lat,
+    double long,
+    double heading,
+  ) {
     _lat = lat;
     _long = long;
+    _heading = heading;
   }
 
   static Future<GeoPoint?> current() async {
@@ -48,7 +55,7 @@ class GeoPoint {
             'Location permissions are permanently denied, we cannot request permissions.');
       }
       final pos = await Geolocator.getCurrentPosition();
-      return GeoPoint(pos.latitude, pos.longitude);
+      return GeoPoint(pos.latitude, pos.longitude, pos.heading);
     } catch (e) {
       return Future.error(e.toString());
     }
