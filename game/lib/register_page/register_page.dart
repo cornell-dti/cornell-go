@@ -1,4 +1,3 @@
-import 'dart:collection';
 
 import 'package:flutter/material.dart';
 import 'package:game/details_page/details_page.dart';

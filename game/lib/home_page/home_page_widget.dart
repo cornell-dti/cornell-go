@@ -7,7 +7,6 @@ import 'package:game/rewarded/rewarded_page.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:velocity_x/velocity_x.dart';
-import 'package:game/widget/nav_bar.dart';
 import 'package:game/widget/nav_btn.dart';
 import 'package:provider/provider.dart';
 import 'package:game/api/game_api.dart';
@@ -54,7 +53,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
             TrackerModel>(
           builder: (context, apiClient, gameModel, groupModel, userModel,
               trackerModel, child) {
-            WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
+            WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
               if (gameModel.withinCompletionRadius) {
                 final tracker =
                     trackerModel.trackerByEventId(groupModel.curEventId ?? "")!;

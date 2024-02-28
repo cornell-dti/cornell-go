@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:game/profile_page/completed_cell.dart';
-import 'package:game/profile_page/achievement_cell.dart';
-import 'package:provider/provider.dart';
 
 /**
  * This widget defines the leaderboard page. 

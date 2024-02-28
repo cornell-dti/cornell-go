@@ -62,7 +62,7 @@ class _EventCellState extends State<EventCell> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance?.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       setState(() {
         visible = true;
       });

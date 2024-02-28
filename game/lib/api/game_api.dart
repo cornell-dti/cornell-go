@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:game/api/game_client_api.dart';
 import 'package:game/api/game_server_api.dart';
-import 'package:game/api/geopoint.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
@@ -139,19 +138,19 @@ class ApiClient extends ChangeNotifier {
 
   Future<http.Response?> connect(String idToken, Uri url, String enrollmentType,
       String year, String username) async {
-    final pos = await GeoPoint.current();
-    if (pos != null) {
+    //final pos = await GeoPoint.current();
+    if (true) {
       final loginResponse = await http.post(url,
           headers: <String, String>{
             'Content-Type': 'application/json; charset=UTF-8',
           },
           body: jsonEncode(<String, String>{
             "idToken": idToken,
-            "lat": pos.lat.toString(),
+            "lat": "0",
             "enrollmentType": enrollmentType,
             "year": year,
             "username": username,
-            "long": pos.long.toString(),
+            "long": "0",
             "aud": Platform.isIOS ? "ios" : "android"
           }));
       print(loginResponse.body);

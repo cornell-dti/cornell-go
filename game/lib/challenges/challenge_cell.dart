@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 
 class ChallengeCell extends StatefulWidget {
   final String place;
@@ -26,7 +25,7 @@ class ChallengeCellState extends State<ChallengeCell> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance?.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       setState(() {
         visible = true;
       });
