@@ -118,7 +118,7 @@ PODS:
   - platform_device_id (0.0.1):
     - Flutter
   - PromisesObjC (2.3.1)
-  - sqflite (0.0.2):
+  - sqflite (0.0.3):
     - Flutter
     - FlutterMacOS
   - Toast (4.1.0)
