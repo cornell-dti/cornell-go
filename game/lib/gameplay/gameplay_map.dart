@@ -38,6 +38,9 @@ class _GameplayMapState extends State<GameplayMap> {
   GeoPoint targetLocation = GeoPoint(42.4475, -76.4879, 0);
   double arrivalRadius = 10.0;
 
+  // whether the picture is expanded over the map
+  bool isExpanded = false;
+
   Future<void> _onMapCreated(GoogleMapController controller) async {
     mapCompleter.complete(controller);
   }
@@ -195,29 +198,91 @@ class _GameplayMapState extends State<GameplayMap> {
               },
             ),
           ),
-          floatingActionButton: Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.end,
+          floatingActionButton: Stack(
+            alignment: AlignmentDirectional.topEnd,
             children: [
-              Padding(
-                padding: EdgeInsets.all(8.0),
-                child: FloatingActionButton.extended(
-                  onPressed: recenterCamera,
-                  label: Icon(Icons.lightbulb,
-                      color: Color.fromARGB(255, 223, 84, 84)),
-                  backgroundColor: Color.fromARGB(255, 255, 255, 255),
-                  shape: CircleBorder(),
-                ),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.only(bottom: 8.0),
+                    child: FloatingActionButton.extended(
+                      onPressed: recenterCamera,
+                      label: Icon(Icons.lightbulb,
+                          color: Color.fromARGB(255, 223, 84, 84)),
+                      backgroundColor: Color.fromARGB(255, 255, 255, 255),
+                      shape: CircleBorder(),
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(bottom: 8.0),
+                    child: FloatingActionButton.extended(
+                      onPressed: recenterCamera,
+                      label: Icon(Icons.location_on,
+                          color: Color.fromARGB(255, 223, 84, 84)),
+                      backgroundColor: Color.fromARGB(255, 255, 255, 255),
+                      shape: CircleBorder(),
+                    ),
+                  ),
+                ],
               ),
               Padding(
-                padding: EdgeInsets.all(8.0),
-                child: FloatingActionButton.extended(
-                  onPressed: recenterCamera,
-                  label: Icon(Icons.location_on,
-                      color: Color.fromARGB(255, 223, 84, 84)),
-                  backgroundColor: Color.fromARGB(255, 255, 255, 255),
-                  shape: CircleBorder(),
-                ),
+                padding: EdgeInsets.only(left: 24.0, top: 40.0),
+                child: isExpanded
+                    ? Container(
+                        width: MediaQuery.of(context).size.width * 0.9,
+                        height: MediaQuery.of(context).size.height * 0.9,
+                        alignment: Alignment.topCenter,
+                        child: Stack(
+                          alignment: Alignment.topRight,
+                          children: [
+                            Image.asset('assets/images/main-bg.jpeg'),
+                            Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: FloatingActionButton(
+                                onPressed: () {
+                                  setState(() {
+                                    isExpanded = false;
+                                  });
+                                },
+                                child: Icon(Icons.close,
+                                    color: Color.fromARGB(255, 223, 84, 84)),
+                                backgroundColor:
+                                    Color.fromARGB(255, 255, 255, 255),
+                                shape: CircleBorder(),
+                              ),
+                            )
+                          ],
+                        ),
+                      )
+                    : GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            isExpanded = true;
+                          });
+                        },
+                        child: Stack(
+                          alignment: Alignment.topRight,
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: Image.asset(
+                                'assets/images/main-bg.jpeg',
+                                fit: BoxFit.cover,
+                                width: 100,
+                                height: 120,
+                              ),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.all(4.0),
+                              child: Icon(Icons.circle,
+                                  size: 50,
+                                  color: Color.fromARGB(255, 255, 255, 255)),
+                            ),
+                          ],
+                        ),
+                      ),
               ),
             ],
           )),
