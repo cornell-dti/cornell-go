@@ -77,6 +77,7 @@ class _ChallengeCellState extends State<ChallengeCellNew> {
         child: Padding(
           padding: EdgeInsets.all(16.0),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
                 padding: const EdgeInsets.only(right: 14),
@@ -85,7 +86,7 @@ class _ChallengeCellState extends State<ChallengeCellNew> {
                   child: thumbnail,
                 ),
               ),
-              Flexible(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -95,7 +96,7 @@ class _ChallengeCellState extends State<ChallengeCellNew> {
                       children: [
                         Icon(Icons.location_on,
                             size: 20, color: Color.fromARGB(255, 131, 90, 124)),
-                        // SizedBox(width: 50),
+                        // SizedBox(width: 4),
                         Text(
                           location,
                           style: TextStyle(
@@ -135,7 +136,7 @@ class _ChallengeCellState extends State<ChallengeCellNew> {
                             difficulty,
                             style: TextStyle(
                               color: Color.fromARGB(204, 0, 0, 0),
-                              fontSize: 12,
+                              fontSize: 14,
                               fontFamily: 'Poppins',
                               fontWeight: FontWeight.w600,
                             ),
@@ -156,7 +157,7 @@ class _ChallengeCellState extends State<ChallengeCellNew> {
                             challenge_points.toString() + "PTS",
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 12,
+                              fontSize: 14,
                               fontFamily: 'Poppins',
                               fontWeight: FontWeight.w600,
                             ),
