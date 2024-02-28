@@ -142,7 +142,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 completedCell("Cornell Cafes", locationImage, "Journeys",
                     "January 19, 2023", "Arts Quad", "Easy", 120),
-                completedCell("Cornell Cafes", locationImage, "Journey",
+                completedCell("Cornell Cafes", locationImage, "Journeys",
                     "January 19, 2023", "Arts Quad", "Easy", 120),
               ],
             ),

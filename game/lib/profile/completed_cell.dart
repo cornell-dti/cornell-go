@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:game/utils/utility_functions.dart';
 
 /**
@@ -85,14 +86,20 @@ Widget completedCell(String name, String picture, String type, String date,
                               borderRadius: BorderRadius.circular(
                                   15.0), // Set border radius
                             ),
-                            child: Center(
-                              child: Text(
-                                location,
-                                style: TextStyle(
-                                  color: Colors.purple,
-                                  fontSize: 10,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                SvgPicture.asset(
+                                  'assets/icons/flag.svg',
                                 ),
-                              ),
+                                Text(
+                                  location,
+                                  style: TextStyle(
+                                    color: Colors.purple,
+                                    fontSize: 10,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                           Container(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:game/utils/utility_functions.dart';
 
 /**
@@ -93,6 +94,10 @@ Widget achievementCell(
                         ),
                       ),
                     ]),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 8.0),
+                      child: SvgPicture.asset("assets/icons/location.svg"),
+                    ),
                     Padding(
                       padding: const EdgeInsets.only(left: 8.0),
                       child: Text(
