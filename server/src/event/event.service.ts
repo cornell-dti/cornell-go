@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import {
   Challenge,
+  DifficultyMode,
   EventBase,
   EventRewardType,
   EventTracker,
@@ -292,6 +293,12 @@ export class EventService {
         .sort((a, b) => a.eventIndex - b.eventIndex)
         .map(({ id }) => id),
       minimumScore: ev.minimumScore,
+      difficulty:
+        ev.difficulty === DifficultyMode.EASY
+          ? 'Easy'
+          : ev.difficulty === DifficultyMode.NORMAL
+          ? 'Normal'
+          : 'Hard',
       defaultChallengeId: ev.defaultChallengeId,
       latitude: ev.latitude,
       longitude: ev.longitude,
@@ -456,6 +463,12 @@ export class EventService {
       // initialOrganizationId: event.initialOrganizationId,
       indexable: event.indexable,
       minimumScore: event.minimumScore,
+      difficulty:
+        event.difficulty === 'Easy'
+          ? DifficultyMode.EASY
+          : event.difficulty === 'Normal'
+          ? DifficultyMode.NORMAL
+          : DifficultyMode.HARD,
       latitude: firstChal?.latitude ?? 0,
       longitude: firstChal?.longitude ?? 0,
     };
@@ -487,10 +500,23 @@ export class EventService {
       },
     });
 
+    // Connect to default challenge
     const eventEntity2 = await this.prisma.eventBase.update({
       where: { id: eventEntity.id },
       data: { challenges: { connect: { id: eventEntity.defaultChallengeId } } },
     });
+
+    const affectedUsers = (
+      await this.prisma.organization.findFirstOrThrow({
+        where: { events: { some: { id: eventEntity2.id } } },
+        select: { members: true },
+      })
+    ).members;
+
+    for (const user of affectedUsers) {
+      await this.clientService.subscribe(user, eventEntity.id, false);
+      await this.emitUpdateEventData(eventEntity, false, false, user);
+    }
 
     let eventIndexChal = 0;
     for (const id of event.challengeIds) {

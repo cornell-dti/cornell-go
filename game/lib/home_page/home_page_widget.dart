@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:game/model/reward_model.dart';
 import 'package:game/model/tracker_model.dart';
-import 'package:game/rewarded/rewarded_page.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:velocity_x/velocity_x.dart';
@@ -77,16 +76,6 @@ class _HomePageWidgetState extends State<HomePageWidget> {
 
                 _controllerCenter.play();
                 apiClient.serverApi?.completedChallenge(doneState.challengeId);
-                Navigator.push(
-                  context,
-                  PageRouteBuilder(
-                    pageBuilder: (c, a1, a2) =>
-                        RewardWidget(homePageState: doneState),
-                    transitionsBuilder: (c, anim, a2, child) =>
-                        FadeTransition(opacity: anim, child: child),
-                    transitionDuration: Duration(milliseconds: 500),
-                  ),
-                );
               }
             });
             return Stack(children: [
