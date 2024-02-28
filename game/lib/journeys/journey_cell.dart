@@ -79,10 +79,20 @@ class _JourneyCellState extends State<JourneyCell> {
       },
       child: Container(
         decoration: BoxDecoration(
+            color: Colors.white,
             border: Border.all(
               color: Color.fromARGB(255, 255, 255, 255),
             ),
-            borderRadius: BorderRadius.all(Radius.circular(20))),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.5),
+              spreadRadius: 1,
+              blurRadius: 2,
+              offset: Offset(0, 2),
+            ),
+          ],
+        ),
         height: 236.0,
         width: 345,
         child: Padding(
@@ -92,13 +102,14 @@ class _JourneyCellState extends State<JourneyCell> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                  padding: const EdgeInsets.only(right: 2),
+                  padding: const EdgeInsets.only(right: 2, top: 8),
                   child: Container(
-                      width: MediaQuery.of(context).size.width,
+                      width: double.infinity,
+                      // width: MediaQuery.of(context).size.width,
                       height: 113,
                       decoration: BoxDecoration(
                         image: DecorationImage(
-                          fit: BoxFit.fitWidth,
+                          fit: BoxFit.cover,
                           image:
                               NetworkImage("https://picsum.photos/250?image=9"),
                         ),
@@ -159,7 +170,8 @@ class _JourneyCellState extends State<JourneyCell> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      Icon(Icons.tour, size: 15, color: Color.fromARGB(255, 131, 90, 124)),
+                      Icon(Icons.tour,
+                          size: 15, color: Color.fromARGB(255, 131, 90, 124)),
                       Text(
                         "location",
                         style: TextStyle(
@@ -188,25 +200,25 @@ class _JourneyCellState extends State<JourneyCell> {
                       ),
                       SizedBox(width: 10), // Add spacing between buttons
                       Container(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: Color.fromARGB(255, 255, 199, 55),
-                            ),
-                            color: Color.fromARGB(255, 189, 135, 31),
-                            borderRadius: BorderRadius.circular(20),
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: Color.fromARGB(255, 255, 199, 55),
                           ),
-                          child: Text(
-                            challengePoints.toString() + "PTS",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w600,
-                            ),
+                          color: Color.fromARGB(255, 189, 135, 31),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          challengePoints.toString() + "PTS",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
+                      ),
                     ],
                   )),
               Container(
@@ -249,8 +261,8 @@ class _JourneyCellState extends State<JourneyCell> {
                             widthFactor: (locationCount > 0
                                 ? numberCompleted / locationCount
                                 : 0),
-                            child:
-                                Container(color: Color.fromARGB(191, 237, 86, 86)),
+                            child: Container(
+                                color: Color.fromARGB(191, 237, 86, 86)),
                           ),
                         ),
                       ),
@@ -259,7 +271,8 @@ class _JourneyCellState extends State<JourneyCell> {
                     Container(
                       width: 50,
                       child: Row(children: [
-                        Icon(Icons.location_on, size: 10, color: Color.fromARGB(255, 131, 90, 124)),
+                        Icon(Icons.location_on,
+                            size: 16, color: Color.fromARGB(255, 131, 90, 124)),
                         Text(
                           numberCompleted.toString() + "/_",
                           style: TextStyle(
