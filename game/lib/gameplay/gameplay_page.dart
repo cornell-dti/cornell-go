@@ -43,14 +43,16 @@ class _GameplayPageState extends State<GameplayPage> {
           //SafeArea to avoid notch overlap
           SafeArea(child:
               Consumer<ChallengeModel>(builder: (context, challengeModel, _) {
-            var challenge = challengeModel.getChallengeById("123");
+            //ChallengeId is placeholder for testing
+            var challenge = challengeModel
+                .getChallengeById("c2f1a64d-a798-4a08-a403-e7b5cd13b584");
             print(challenge);
             return Container(
               padding: EdgeInsets.all(32.0),
               height: 120,
               child: Center(
                 child: Text(
-                  "Find the Location of this cafe on the arts quad",
+                  "Find the Location of ${challenge?.description ?? ""}",
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 20,
@@ -64,42 +66,39 @@ class _GameplayPageState extends State<GameplayPage> {
               alignment: Alignment.bottomCenter,
               children: [
                 //Event Picture and google map
-                Expanded(
-                  child: Stack(alignment: Alignment.topRight, children: [
-                    Container(
-                      height: double.infinity,
-                      width: double.infinity,
-                      //Change to challenge picture
-                      child: Image.network(
-                        'https://picsum.photos/500/1500',
-                        fit: BoxFit.fitWidth,
-                      ),
+                Stack(alignment: Alignment.topRight, children: [
+                  Container(
+                    height: double.infinity,
+                    width: double.infinity,
+                    //Change to challenge picture
+                    child: Image.network(
+                      'https://picsum.photos/500/1500',
+                      fit: BoxFit.fitWidth,
                     ),
-                    Container(
-                      height: 100,
-                      width: 100,
-                      padding: EdgeInsets.all(10),
-                      margin: EdgeInsets.only(top: 15, right: 15),
-                      child: Text(
-                        "MAP",
-                        style:
-                            TextStyle(fontSize: 21, color: Color(0xFFED5656)),
-                      ),
-                      decoration: BoxDecoration(
-                        color: Color.fromARGB(255, 255, 255, 255),
-                        borderRadius: BorderRadius.all(Radius.circular(10)),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.5),
-                            spreadRadius: 1,
-                            blurRadius: 1,
-                            offset: Offset(0, 3), // shadow direction: bottom
-                          ),
-                        ],
-                      ),
+                  ),
+                  Container(
+                    height: 100,
+                    width: 100,
+                    padding: EdgeInsets.all(10),
+                    margin: EdgeInsets.only(top: 15, right: 15),
+                    child: Text(
+                      "MAP",
+                      style: TextStyle(fontSize: 21, color: Color(0xFFED5656)),
                     ),
-                  ]),
-                ),
+                    decoration: BoxDecoration(
+                      color: Color.fromARGB(255, 255, 255, 255),
+                      borderRadius: BorderRadius.all(Radius.circular(10)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.5),
+                          spreadRadius: 1,
+                          blurRadius: 1,
+                          offset: Offset(0, 3), // shadow direction: bottom
+                        ),
+                      ],
+                    ),
+                  ),
+                ]),
                 Container(
                   height: 100,
                   width: 500,
@@ -112,13 +111,10 @@ class _GameplayPageState extends State<GameplayPage> {
                 Container(
                   padding: EdgeInsets.all(10),
                   margin: EdgeInsets.only(bottom: 75),
-                  child: Consumer<ChallengeModel>(
-                      builder: (context, challengeModel, _) {
-                    return Text(
-                      "${distance} miles away",
-                      style: TextStyle(fontSize: 21, color: Color(0xFFED5656)),
-                    );
-                  }),
+                  child: Text(
+                    "${distance} miles away",
+                    style: TextStyle(fontSize: 21, color: Color(0xFFED5656)),
+                  ),
                   decoration: BoxDecoration(
                     color: Color.fromARGB(255, 255, 255, 255),
                     borderRadius: BorderRadius.all(Radius.circular(10)),
