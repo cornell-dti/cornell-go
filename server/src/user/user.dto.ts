@@ -63,7 +63,6 @@ export interface UserDto {
   isBanned: boolean;
   groupId: string;
   authType: UserAuthTypeDto;
-  rewardIds?: string[];
   trackedEventIds?: string[];
   favoriteIds?: string[];
 }

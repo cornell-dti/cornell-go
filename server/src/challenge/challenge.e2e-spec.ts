@@ -18,8 +18,6 @@ import { ClientService } from '../client/client.service';
 import { GroupService } from '../group/group.service';
 import { OrganizationService } from '../organization/organization.service';
 import { ClientModule } from '../client/client.module';
-import { RewardDto } from '../reward/reward.dto';
-import { RewardService } from '../reward/reward.service';
 import { ChallengeDto } from './challenge.dto';
 
 describe('ChallengeModule E2E', () => {
@@ -29,7 +27,6 @@ describe('ChallengeModule E2E', () => {
   let prisma: PrismaService;
   let userService: UserService;
   let eventService: EventService;
-  let rewardService: RewardService;
   let user: User;
   let tracker: EventTracker;
   let event: EventBase;
@@ -53,7 +50,6 @@ describe('ChallengeModule E2E', () => {
         ClientService,
         GroupService,
         OrganizationService,
-        RewardService,
       ],
     }).compile();
 
@@ -64,7 +60,6 @@ describe('ChallengeModule E2E', () => {
     prisma = module.get<PrismaService>(PrismaService);
     userService = module.get<UserService>(UserService);
     eventService = module.get<EventService>(EventService);
-    rewardService = module.get<RewardService>(RewardService);
     organizationService = module.get<OrganizationService>(OrganizationService);
 
     user = await userService.register(
@@ -124,56 +119,6 @@ describe('ChallengeModule E2E', () => {
       expect(
         await challengeService.isChallengeCompletedByUser(user, chal),
       ).toEqual(true);
-    });
-  });
-
-  describe('checkForReward', () => {
-    it('return reward after completion', async () => {
-      const user = await userService.register(
-        'test@gmail.com',
-        'test',
-        '2025',
-        0,
-        0,
-        AuthType.GOOGLE,
-        'asdf',
-        'GRADUATE',
-      );
-      const tracker = await eventService.getCurrentEventTrackerForUser(user);
-
-      const reward = await challengeService.checkForReward(tracker);
-      expect(reward).toEqual(null);
-
-      const chal = await prisma.challenge.findFirstOrThrow({
-        where: { id: tracker.curChallengeId },
-      });
-      await challengeService.completeChallenge(user, chal.id);
-
-      const tracker2 = await prisma.eventTracker.findFirstOrThrow({
-        where: {
-          id: tracker.id,
-        },
-      });
-
-      //create new reward for default event
-      const findreward = await prisma.eventReward.findFirst({
-        where: { eventId: tracker.eventId },
-      });
-      if (findreward == null) {
-        const rewardTemplate: RewardDto = {
-          id: 'abc1',
-          eventId: tracker.eventId,
-          description: 'test reward',
-          redeemInfo: 'ask nikita he will give u a bajillion v bucks',
-          isRedeemed: false,
-          isAchievement: true,
-          points: 100,
-        };
-
-        await rewardService.upsertRewardFromDto(rewardTemplate);
-      }
-      const reward3 = await challengeService.checkForReward(tracker2);
-      expect(reward3?.userId).toEqual(tracker2.userId);
     });
   });
 
@@ -268,7 +213,7 @@ describe('ChallengeModule E2E', () => {
   describe('Delete functions', () => {
     it('should remove challenge from eventbase: removeChallenge', async () => {
       const chal = await prisma.challenge.findFirstOrThrow({
-        where: { linkedEventId: event.id, defaultOf: null },
+        where: { linkedEventId: event.id },
       });
 
       const orgID = (
