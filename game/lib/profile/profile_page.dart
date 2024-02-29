@@ -81,32 +81,30 @@ class _ProfilePageState extends State<ProfilePage> {
                   padding: const EdgeInsets.only(bottom: 8.0),
                   child: Text("@Hanan Abraha"),
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(
-                        left: 20.0,
-                      ),
-                      child: Text("Achievements",
+                Padding(
+                  padding: const EdgeInsets.only(left: 20, right: 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text("Achievements",
                           style: TextStyle(
                               fontSize: 20, fontWeight: FontWeight.bold)),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        // Handle button press, e.g., navigate to details page
-                        print('View Details button pressed');
-                      },
-                      child: Text(
-                        'View Details →',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 16.0,
+                      TextButton(
+                        onPressed: () {
+                          // Handle button press, e.g., navigate to details page
+                          print('View Details button pressed');
+                        },
+                        child: Text(
+                          'View Details →',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 16.0,
+                          ),
                         ),
-                      ),
-                    )
-                  ],
+                      )
+                    ],
+                  ),
                 ),
                 achievementCell("Complete three challenges on the Arts quad", 4,
                     6, locationImage),
@@ -115,30 +113,30 @@ class _ProfilePageState extends State<ProfilePage> {
                     4,
                     6,
                     locationImage),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 20.0),
-                      child: Text("Completed",
+                Padding(
+                  padding: const EdgeInsets.only(left: 20, right: 20.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text("Completed",
                           style: TextStyle(
                               fontSize: 20, fontWeight: FontWeight.bold)),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        // Handle button press, e.g., navigate to details page
-                        print('View Details button pressed');
-                      },
-                      child: Text(
-                        'View More →',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 16.0,
+                      TextButton(
+                        onPressed: () {
+                          // Handle button press, e.g., navigate to details page
+                          print('View Details button pressed');
+                        },
+                        child: Text(
+                          'View More →',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 16.0,
+                          ),
                         ),
-                      ),
-                    )
-                  ],
+                      )
+                    ],
+                  ),
                 ),
                 completedCell("Cornell Cafes", locationImage, "Journeys",
                     "January 19, 2023", "Arts Quad", "Easy", 120),
