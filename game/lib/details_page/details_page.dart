@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:game/home_page/home_page_widget.dart';
 import 'package:game/journeys/journeys_page.dart';
 import 'package:game/main.dart';
 import 'package:game/navigation_page/bottom_navbar.dart';
@@ -149,7 +148,7 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
                       } else {
                         //Connect to home page here.
                         print("Connection result:");
-                        print(connectionResult!.body);
+                        print(connectionResult.body);
                         displayToast("Signed in!", Status.success);
                         Navigator.push(
                             context,
