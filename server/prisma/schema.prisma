@@ -121,7 +121,7 @@ model User {
   sessionLogEntries   SessionLogEntry[]
   defaultPermGroup    PermissionGroup           @relation("defaultPerms", fields: [defaultPermGroupId], references: [id])
   defaultPermGroupId  String
-  permGroups          PermissionGroup[]         @relation("permMember")
+  permGroups          PermissionGroup[]         @relation("permMembers")
   permAuditActor      PermissionGroupAuditLog[]
   achievementTrackers AchievementTracker[]
 }
@@ -263,7 +263,7 @@ model PermissionGroup {
   id          String                    @id @default(uuid())
   description String
   defaultFor  User[]                    @relation("defaultPerms")
-  members     User[]                    @relation("permMember")
+  members     User[]                    @relation("permMembers")
   permissions Permission[]
   auditLog    PermissionGroupAuditLog[]
 }
