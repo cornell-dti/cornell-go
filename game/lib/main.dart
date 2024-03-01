@@ -1,6 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_config/flutter_config.dart';
+
+// imports for google maps
+import 'dart:io' show Platform;
+import 'dart:async';
+import 'package:google_maps_flutter_android/google_maps_flutter_android.dart';
+import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platform_interface.dart';
+
+// api and widget imports
 import 'package:game/api/game_api.dart';
 import 'package:game/challenges/challenges_widget.dart';
 import 'package:game/gameplay/gameplay_page.dart';
@@ -21,12 +30,6 @@ import 'package:provider/provider.dart';
 import 'package:game/navigation_page/bottom_navbar.dart';
 import 'package:game/color_palette.dart';
 
-import 'dart:async';
-import 'package:google_maps_flutter_android/google_maps_flutter_android.dart';
-import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platform_interface.dart';
-
-import 'dart:io' show Platform;
-
 const ENV_URL = String.fromEnvironment('API_URL', defaultValue: "");
 
 final storage = FlutterSecureStorage();
@@ -34,12 +37,16 @@ final LOOPBACK =
     (Platform.isAndroid ? "http://10.0.2.2:8080" : "http://0.0.0.0:8080");
 final API_URL = ENV_URL == "" ? LOOPBACK : ENV_URL;
 
-void main() {
+void main() async {
   print(API_URL);
   final GoogleMapsFlutterPlatform platform = GoogleMapsFlutterPlatform.instance;
-  // Default to Hybrid Composition for the example.
+  // should only apply to Android - needs to be tested for iOS
   (platform as GoogleMapsFlutterAndroid).useAndroidViewSurface = true;
   initializeMapRenderer();
+  // load environment variables
+  WidgetsFlutterBinding.ensureInitialized(); // Required by FlutterConfig
+  await FlutterConfig.loadEnvVariables();
+
   runApp(MyApp());
 }
 
@@ -114,9 +121,9 @@ class MyApp extends StatelessWidget {
           supportedLocales: const [Locale('en', '')],
           theme: ThemeData(
               fontFamily: 'Poppins', primarySwatch: ColorPalette.BigRed),
-          home: SplashPageWidget(),
+          // home: SplashPageWidget(),
           // home: HomePageWidget(),
-          // home: GameplayMap(),
+          home: GameplayMap(),
         )));
   }
 }
