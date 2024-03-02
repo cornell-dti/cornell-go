@@ -19,9 +19,9 @@ RUN npm run build
 
 WORKDIR /app/server
 COPY server .
+RUN chmod +x ./start.sh
 RUN npx prisma generate
 RUN npm run build
 RUN if [ ${DEVELOPMENT} != "true" ]; then npx prisma migrate deploy; fi
 
-USER root
 ENTRYPOINT ./start.sh
