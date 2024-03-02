@@ -23,4 +23,5 @@ RUN npx prisma generate
 RUN npm run build
 RUN if [ ${DEVELOPMENT} != "true" ]; then npx prisma migrate deploy; fi
 
+USER root
 ENTRYPOINT ./start.sh
