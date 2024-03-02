@@ -23,6 +23,12 @@ docker compose up --build
 docker compose up --build -d
 ```
 
+### Inspect your database data
+
+```
+npx prisma studio
+```
+
 ### Stop the container
 
 ```
