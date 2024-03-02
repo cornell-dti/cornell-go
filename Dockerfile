@@ -1,4 +1,4 @@
-FROM node:20
+FROM node:18
 
 EXPOSE 80
 EXPOSE 8000
