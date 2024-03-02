@@ -22,6 +22,6 @@ COPY server .
 RUN chmod +x ./start.sh
 RUN npx prisma generate
 RUN npm run build
-RUN if [ $DEVELOPMENT = "false" ]; then npx prisma migrate deploy; fi
+RUN npx prisma migrate deploy; exit 0
 
 ENTRYPOINT ./start.sh
