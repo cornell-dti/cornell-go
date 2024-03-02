@@ -21,9 +21,10 @@ import {
   UpdateUserDataDto,
   UserAuthTypeDto,
   UserDto,
-  eventFilterDto,
+  UserPartialDto,
 } from './user.dto';
 import { PermissionService } from '../permission/permission.service';
+import { CensorSensor } from 'censor-sensor';
 
 @Injectable()
 export class UserService {
@@ -177,122 +178,6 @@ export class UserService {
   }
 
   /**
-   * Filter: new gives all ,
-   * with ongoing events listed before not started events.
-   * cursorId:
-   */
-
-  /**
-   * Grabs all events from all of user's allowed events based on the filter.
-   * @param user user requesting filtered events
-   * @param filter "saved" returns favorited events, "new" returns events that are not started and ongoing, "finished" returns events where each challenge is completed
-   * @param cursorId id of the last event in the previous page
-   * @returns filtered event id list sorted by ascending id
-   */
-  async getFilteredEventIds(
-    user: User,
-    filter: eventFilterDto,
-    cursorId: string | undefined,
-    limit: number,
-  ) {
-    const joinedUser = await this.prisma.user.findFirstOrThrow({
-      where: { id: user.id },
-      include: {
-        favorites: true,
-        memberOf: true,
-      },
-    });
-
-    let filteredEventIds = [{ id: '' }];
-
-    if (filter == 'finished') {
-      filteredEventIds = await this.prisma.eventBase.findMany({
-        select: { id: true },
-        orderBy: {
-          id: 'asc', // must be ordered to use cursor
-        },
-        take: limit,
-        skip: cursorId ? 1 : 0, // skips the event with id = cursorId
-        cursor: cursorId
-          ? {
-              id: cursorId,
-            }
-          : undefined,
-        where: {
-          usedIn: {
-            some: { members: { some: { id: user.id } } },
-          },
-          challenges: {
-            every: {
-              completions: {
-                some: {
-                  participants: {
-                    some: { id: user.id },
-                  },
-                },
-              },
-            },
-          },
-        },
-      });
-    } else if (filter == 'new') {
-      filteredEventIds = await this.prisma.eventBase.findMany({
-        select: { id: true },
-        orderBy: {
-          id: 'asc', // must be ordered to use cursor
-        },
-        take: limit,
-        skip: cursorId ? 1 : 0, // skips the event with id = cursorId
-        cursor: cursorId
-          ? {
-              id: cursorId,
-            }
-          : undefined,
-        where: {
-          usedIn: {
-            some: { members: { some: { id: user.id } } },
-          },
-          challenges: {
-            some: {
-              completions: {
-                none: {
-                  participants: {
-                    some: { id: user.id },
-                  },
-                },
-              },
-            },
-          },
-        },
-      });
-    } else {
-      // filter == 'saved'
-      filteredEventIds = await this.prisma.eventBase.findMany({
-        select: { id: true },
-        orderBy: {
-          id: 'asc', // must be ordered to use cursor
-        },
-        take: limit,
-        skip: cursorId ? 1 : 0, // skips the event with id = cursorId
-        cursor: cursorId
-          ? {
-              id: cursorId,
-            }
-          : undefined,
-        where: {
-          usedIn: {
-            some: { members: { some: { id: user.id } } },
-          },
-          userFavorite: {
-            some: { id: user.id },
-          },
-        },
-      });
-    }
-    return filteredEventIds;
-  }
-
-  /**
    * Ban a user based on their user id.
    * @param user the user who will be banned.
    * @param isBanned a boolean which represents the user's banned status
@@ -312,9 +197,19 @@ export class UserService {
    * @param user User requiring an update.
    * @returns The new user after the update is made
    */
-  async updateUser(accessor: User, user: UserDto): Promise<User> {
+  async updateUser(accessor: User, user: UserPartialDto): Promise<User> {
     const data = {
-      username: user.username,
+      username: user.username
+        ? new CensorSensor()
+            .cleanProfanityIsh(
+              user.username
+                .substring(0, 128)
+                .replaceAll(/[^_A-z0-9]/g, ' ')
+                .replaceAll('_', ' '),
+            )
+            .replaceAll('*', '_')
+            .replaceAll(' ', '_')
+        : undefined,
       email: user.email,
       year: user.year,
     };
@@ -333,11 +228,7 @@ export class UserService {
     });
   }
 
-  async dtoForUserData(
-    accessor: User | null,
-    user: User,
-    partial: boolean,
-  ): Promise<UserDto> {
+  async dtoForUserData(user: User, partial: boolean): Promise<UserDto> {
     const joinedUser = await this.prisma.user.findUniqueOrThrow({
       where: { id: user.id },
       include: {
@@ -367,35 +258,29 @@ export class UserService {
         : joinedUser.favorites.map((ev: EventBase) => ev.id),
     };
 
-    await this.permService.deleteForbiddenProperties(
-      accessor,
-      PermissionType.READ_ONLY,
-      RestrictedResourceType.USER,
-      [dto],
-      [user.id],
-    );
-
     return dto;
   }
 
   async emitUpdateUserData(
-    receiver: User | null,
     user: User,
     deleted: boolean,
     partial: boolean,
+    receiver?: User,
   ) {
     const dto: UpdateUserDataDto = {
       user: deleted
-        ? user.id
-        : await this.dtoForUserData(receiver, user, partial),
+        ? { id: user.id }
+        : await this.dtoForUserData(user, partial),
       deleted,
     };
 
-    if (receiver) {
-      this.clientService.sendUpdate('updateUserData', receiver.id, false, dto);
-    } else {
-      this.clientService.sendUpdate('updateUserData', user.id, false, dto);
-    }
+    await this.permService.sendUpdateProtected(
+      'updateUserData',
+      user.id,
+      RestrictedResourceType.USER,
+      dto,
+      receiver,
+    );
 
     await this.log.logEvent(SessionLogEvent.EDIT_USERNAME, user.id, user.id);
   }

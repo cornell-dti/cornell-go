@@ -11,7 +11,7 @@ import { Socket } from 'socket.io';
 import { Handshake } from 'socket.io/dist/socket';
 import { AuthService } from './auth.service';
 
-function tokenOfHandshake(handshake: Handshake) {
+export function tokenOfHandshake(handshake: Handshake) {
   return (
     (handshake.auth['token'] as string | undefined) ??
     (process.env.DEVELOPMENT !== 'false' &&

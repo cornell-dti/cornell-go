@@ -72,13 +72,8 @@ export class UserGateway {
 
       await Promise.all(
         users.map(
-          async (curUser: User) =>
-            await this.userService.emitUpdateUserData(
-              user,
-              curUser,
-              false,
-              false,
-            ),
+          async (cur: User) =>
+            await this.userService.emitUpdateUserData(cur, false, false, user),
         ),
       );
     }
@@ -92,10 +87,11 @@ export class UserGateway {
       const queried = await this.userService.byId(data.userId);
 
       if (queried) {
-        await this.userService.emitUpdateUserData(user, queried, false, true);
+        await this.userService.emitUpdateUserData(queried, false, true, user);
       }
+      this.clientService.subscribe(user, data.userId);
     } else {
-      await this.userService.emitUpdateUserData(user, user, false, true);
+      await this.userService.emitUpdateUserData(user, false, true, user);
     }
   }
 
@@ -105,36 +101,15 @@ export class UserGateway {
     @MessageBody() data: UpdateUserDataDto,
   ) {
     if (data.deleted) {
-      const user = await this.userService.byId(data.user as string);
+      const user = await this.userService.byId(data.user.id);
       if (user) {
         await this.userService.deleteUser(user);
-        await this.userService.emitUpdateUserData(user, user, true, true);
+        await this.userService.emitUpdateUserData(user, false, true);
       }
     } else {
-      const updatedUser = await this.userService.updateUser(
-        user,
-        data.user as UserDto,
-      );
+      const updatedUser = await this.userService.updateUser(user, data.user);
 
-      await this.userService.emitUpdateUserData(null, updatedUser, false, true);
-    }
-  }
-
-  @SubscribeMessage('requestFilteredEvents')
-  async requestFilteredEvents(
-    @CallingUser() user: User,
-    @MessageBody() data: RequestFilteredEventDto,
-  ) {
-    const eventIds = await this.userService.getFilteredEventIds(
-      user,
-      data.filter,
-      data.cursorId,
-      data.limit,
-    );
-    for (const eventId of eventIds) {
-      const ev = await this.eventService.getEventById(eventId.id);
-      this.clientService.subscribe(user, eventId.id, false);
-      await this.eventService.emitUpdateEventData(ev, false, false, user);
+      await this.userService.emitUpdateUserData(updatedUser, false, true);
     }
   }
 
@@ -145,55 +120,7 @@ export class UserGateway {
   ) {
     const ev = await this.eventService.getEventById(data.eventId);
     await this.userService.setFavorite(user, ev, data.isFavorite);
-    await this.userService.emitUpdateUserData(user, user, false, true);
-  }
-
-  @SubscribeMessage('setUsername')
-  async setUsername(
-    @CallingUser() user: User,
-    @MessageBody() data: SetUsernameDto,
-  ) {
-    const username = new CensorSensor()
-      .cleanProfanityIsh(
-        data.newUsername
-          .substring(0, 128)
-          .replaceAll(/[^_A-z0-9]/g, ' ')
-          .replaceAll('_', ' '),
-      )
-      .replaceAll('*', '_')
-      .replaceAll(' ', '_');
-
-    await this.userService.setUsername(user, username);
-
-    user.username = username; // Updated so change here too
-
-    await this.userService.emitUpdateUserData(null, false, true, true);
-
-    const group = await this.groupService.getGroupForUser(user);
-    await this.groupService.emitUpdateGroupData(group, false);
-  }
-
-  // @SubscribeMessage('setMajor')
-  // async setMajor(@CallingUser() user: User, @MessageBody() data: SetMajorDto) {
-  //   if (majors.includes(data.newMajor)) {
-  //     await this.userService.setMajor(user, data.newMajor);
-
-  //     user.major = data.newMajor; // Updated so change here too
-
-  //     await this.userService.emitUpdateUserData(user, false, true, true);
-  //   }
-  // }
-
-  @SubscribeMessage('setGraduationYear')
-  async setGraduationYear(
-    @CallingUser() user: User,
-    @MessageBody() data: SetGraduationYearDto,
-  ) {
-    await this.userService.setGraduationYear(user, data.newYear);
-
-    user.year = data.newYear; // Updated so change here too
-
-    await this.userService.emitUpdateUserData(user, false, true, true);
+    await this.userService.emitUpdateUserData(user, false, true);
   }
 
   @SubscribeMessage('setAuthToDevice')
@@ -221,9 +148,9 @@ export class UserGateway {
     if (user.administrator) {
       const user = await this.userService.byId(data.userId);
       if (!!user) {
-        const us = await this.userService.banUser(user, data.isBanned);
+        const updatedUser = await this.userService.banUser(user, data.isBanned);
 
-        await this.userService.emitUpdateUserData(us, false, false, true);
+        await this.userService.emitUpdateUserData(updatedUser, false, true);
       }
     }
   }
@@ -241,13 +168,7 @@ export class UserGateway {
     await this.orgService.emitUpdateOrganizationData(org, false);
 
     const manager = await this.userService.byEmail(data.email);
-    await this.userService.emitUpdateUserData(
-      manager,
-      false,
-      false,
-      true,
-      user,
-    );
+    await this.userService.emitUpdateUserData(manager, false, true);
   }
 
   @SubscribeMessage('joinOrganization')
@@ -260,7 +181,7 @@ export class UserGateway {
     const org = await this.orgService.getOrganizationByCode(data.accessCode);
     await this.orgService.emitUpdateOrganizationData(org, false);
 
-    await this.userService.emitUpdateUserData(user, false, false, true);
+    await this.userService.emitUpdateUserData(user, false, true);
   }
 
   @SubscribeMessage('closeAccount')

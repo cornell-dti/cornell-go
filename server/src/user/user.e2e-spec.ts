@@ -62,24 +62,6 @@ describe('UserModule E2E', () => {
     expect(user).toBeNull;
   });
 
-  it(`Checking whether setUsername properly updates a user's username`, async () => {
-    const userService = moduleRef.get<UserService>(UserService);
-    await userService.register(
-      'test3@example.com',
-      'test3',
-      '2024',
-      1,
-      1,
-      AuthType.DEVICE,
-      'abcdef',
-      'UNDERGRADUATE',
-    );
-    let user = await userService.byAuth(AuthType.DEVICE, 'abcdef');
-    await userService.setUsername(user!, 'newUser');
-    user = await userService.byAuth(AuthType.DEVICE, 'abcdef');
-    expect(user?.username).toEqual('newUser');
-  });
-
   it(`Checks the size of all the user data`, async () => {
     const userSer = moduleRef.get<UserService>(UserService);
     await userSer.register(

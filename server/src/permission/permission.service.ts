@@ -7,6 +7,8 @@ import {
   PermissionGroupAuditLogType,
 } from '@prisma/client';
 import { PermissionDto } from './permission.dto';
+import { AuthService } from '../auth/auth.service';
+import { ClientService } from '../client/client.service';
 
 export interface PermissionDeniedInfo {
   message: string;
@@ -16,7 +18,11 @@ export type PermissionCheckResult = null | PermissionDeniedInfo;
 
 @Injectable()
 export class PermissionService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private authService: AuthService,
+    private clientService: ClientService,
+  ) {}
 
   async createPermissionGroup(
     creator: User | null,
@@ -161,4 +167,12 @@ export class PermissionService {
     resources: any[],
     resourceIds: string[],
   ): Promise<void> {}
+
+  async sendUpdateProtected(
+    eventName: string,
+    resourceId: string,
+    resourceType: RestrictedResourceType,
+    dto: any,
+    receiver: User | undefined,
+  ) {}
 }

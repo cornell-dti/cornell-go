@@ -194,6 +194,19 @@ export class AuthService {
     }
   }
 
+  async userIdByToken(token: string): Promise<string | null> {
+    try {
+      const decodedPayload = await this.jwtService.verifyAsync<JwtPayload>(
+        token,
+        this.accessOptions,
+      );
+      return decodedPayload.userId;
+    } catch (e) {
+      console.log(e);
+      return null;
+    }
+  }
+
   async userByToken(token: string): Promise<User | null> {
     try {
       const decodedPayload = await this.jwtService.verifyAsync<JwtPayload>(
