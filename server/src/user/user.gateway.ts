@@ -21,9 +21,7 @@ import {
   SetAuthToDeviceDto,
   SetAuthToOAuthDto,
   SetGraduationYearDto,
-  SetMajorDto,
   SetUsernameDto,
-  RequestFilteredEventDto,
   UpdateUserDataDto,
   UserDto,
   BanUserDto,
@@ -72,15 +70,16 @@ export class UserGateway {
     if (user.administrator) {
       const users = await this.userService.getAllUserData();
 
-      await users.map(
-        async (us: User) =>
-          await this.userService.emitUpdateUserData(
-            us,
-            false,
-            false,
-            true,
-            user,
-          ),
+      await Promise.all(
+        users.map(
+          async (curUser: User) =>
+            await this.userService.emitUpdateUserData(
+              user,
+              curUser,
+              false,
+              false,
+            ),
+        ),
       );
     }
   }
@@ -89,20 +88,14 @@ export class UserGateway {
     @CallingUser() user: User,
     @MessageBody() data: RequestUserDataDto,
   ) {
-    if (user.administrator && data.userId) {
+    if (data.userId) {
       const queried = await this.userService.byId(data.userId);
 
       if (queried) {
-        await this.userService.emitUpdateUserData(
-          queried,
-          false,
-          false,
-          true,
-          user,
-        );
+        await this.userService.emitUpdateUserData(user, queried, false, true);
       }
     } else {
-      await this.userService.emitUpdateUserData(user, false, false, true, user);
+      await this.userService.emitUpdateUserData(user, user, false, true);
     }
   }
 
@@ -111,18 +104,19 @@ export class UserGateway {
     @CallingUser() user: User,
     @MessageBody() data: UpdateUserDataDto,
   ) {
-    if (!user.administrator && user.id !== (data.user as UserDto).id) return;
-
     if (data.deleted) {
       const user = await this.userService.byId(data.user as string);
-      if (user !== null) {
+      if (user) {
         await this.userService.deleteUser(user);
-        await this.userService.emitUpdateUserData(user, true, true);
+        await this.userService.emitUpdateUserData(user, user, true, true);
       }
     } else {
-      const user = await this.userService.updateUser(data.user as UserDto);
+      const updatedUser = await this.userService.updateUser(
+        user,
+        data.user as UserDto,
+      );
 
-      await this.userService.emitUpdateUserData(user, false, true);
+      await this.userService.emitUpdateUserData(null, updatedUser, false, true);
     }
   }
 
@@ -151,7 +145,7 @@ export class UserGateway {
   ) {
     const ev = await this.eventService.getEventById(data.eventId);
     await this.userService.setFavorite(user, ev, data.isFavorite);
-    await this.userService.emitUpdateUserData(user, false, false, true, user);
+    await this.userService.emitUpdateUserData(user, user, false, true);
   }
 
   @SubscribeMessage('setUsername')
@@ -173,7 +167,7 @@ export class UserGateway {
 
     user.username = username; // Updated so change here too
 
-    await this.userService.emitUpdateUserData(user, false, true, true);
+    await this.userService.emitUpdateUserData(null, false, true, true);
 
     const group = await this.groupService.getGroupForUser(user);
     await this.groupService.emitUpdateGroupData(group, false);

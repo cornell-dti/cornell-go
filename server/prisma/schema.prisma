@@ -251,12 +251,12 @@ model Permission {
 model PermissionGroupAuditLog {
   id                String                      @id @default(uuid())
   auditType         PermissionGroupAuditLogType
-  timeCreated       DateTime
-  actor             User                        @relation(fields: [actorId], references: [id])
-  actorId           String
-  relatedId         String
   permissionGroup   PermissionGroup             @relation(fields: [permissionGroupId], references: [id])
   permissionGroupId String
+  timestamp         DateTime                    @default(now())
+  actor             User?                       @relation(fields: [actorId], references: [id])
+  actorId           String?
+  relatedId         String?
 }
 
 model PermissionGroup {

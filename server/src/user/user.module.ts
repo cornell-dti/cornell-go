@@ -8,6 +8,7 @@ import { OrganizationModule } from '../organization/organization.module';
 import { PrismaModule } from '../prisma/prisma.module';
 import { UserGateway } from './user.gateway';
 import { UserService } from './user.service';
+import { PermissionModule } from '../permission/permission.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { UserService } from './user.service';
     PrismaModule,
     EventModule,
     OrganizationModule,
+    PermissionModule,
   ],
   providers: [UserService, UserGateway],
   exports: [UserService, UserGateway],

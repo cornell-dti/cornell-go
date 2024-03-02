@@ -9,6 +9,8 @@ import {
   PrismaClient,
   EnrollmentType,
   EventBase,
+  PermissionType,
+  RestrictedResourceType,
 } from '@prisma/client';
 import { ClientService } from '../client/client.service';
 import { EventService } from '../event/event.service';
@@ -21,6 +23,7 @@ import {
   UserDto,
   eventFilterDto,
 } from './user.dto';
+import { PermissionService } from '../permission/permission.service';
 
 @Injectable()
 export class UserService {
@@ -32,6 +35,7 @@ export class UserService {
     private groupsService: GroupService,
     private orgService: OrganizationService,
     private clientService: ClientService,
+    private permService: PermissionService,
   ) {}
 
   /** Find a user by their authentication token */
@@ -59,17 +63,23 @@ export class UserService {
     enrollmentType: EnrollmentType,
   ) {
     if (username == null) username = email?.split('@')[0];
+
     const defOrg = await this.orgService.getDefaultOrganization(
       authType == AuthType.GOOGLE
         ? OrganizationSpecialUsage.CORNELL_LOGIN
         : OrganizationSpecialUsage.DEVICE_LOGIN,
     );
 
-    const group: Group = await this.groupsService.createFromEvent(
+    const group = await this.groupsService.createFromEvent(
       await this.orgService.getDefaultEvent(defOrg),
     );
 
-    const user: User = await this.prisma.user.create({
+    const permGroupId = await this.permService.createPermissionGroup(
+      null,
+      'Default permission group for user',
+    );
+
+    const user = await this.prisma.user.create({
       data: {
         score: 0,
         group: { connect: { id: group.id } },
@@ -85,12 +95,48 @@ export class UserService {
         administrator:
           email === process.env.SUPERUSER || process.env.DEVELOPMENT === 'true',
         isRanked: true,
+        defaultPermGroup: { connect: { id: permGroupId } },
       },
     });
+
+    // grant access to self
+    await this.permService.modifyPermissionGroup(
+      permGroupId,
+      PermissionType.READ_ONLY,
+      null,
+      user,
+      RestrictedResourceType.USER,
+      [user.id],
+      null,
+    );
+
+    await this.permService.modifyPermissionGroup(
+      permGroupId,
+      PermissionType.READ_WRITE,
+      null,
+      user,
+      RestrictedResourceType.USER,
+      [user.id],
+      ['username', 'enrollmentType', 'email', 'year'],
+    );
+
+    // grant access to group
+    await this.permService.modifyPermissionGroup(
+      permGroupId,
+      PermissionType.READ_WRITE,
+      null,
+      user,
+      RestrictedResourceType.GROUP,
+      [user.groupId],
+      ['members', 'curEventId'],
+    );
+
+    // TODO: GRANT ACCESS TO ORGANIZATION
 
     await this.eventsService.createDefaultEventTracker(user, lat, long);
     console.log(`User ${user.id} created!`);
     await this.log.logEvent(SessionLogEvent.CREATE_USER, user.id, user.id);
+
     return user;
   }
 
@@ -111,13 +157,6 @@ export class UserService {
     await this.prisma.user.delete({ where: { id: user.id } });
     await this.prisma.$transaction(async tx => {
       await this.groupsService.fixOrDeleteGroup({ id: user.groupId }, tx);
-    });
-  }
-
-  async setUsername(user: User, username: string) {
-    await this.prisma.user.update({
-      where: { id: user.id },
-      data: { username },
     });
   }
 
@@ -253,24 +292,6 @@ export class UserService {
     return filteredEventIds;
   }
 
-  // async setMajor(user: User, major: string) {
-  //   await this.prisma.user.update({
-  //     where: { id: user.id },
-  //     data: { major },
-  //   });
-  // }
-  /**
-   * Updates a user's graduation year.
-   * @param user user requesting the change in graduation year
-   * @param year the new graduation year.
-   */
-  async setGraduationYear(user: User, year: string) {
-    await this.prisma.user.update({
-      where: { id: user.id },
-      data: { year },
-    });
-  }
-
   /**
    * Ban a user based on their user id.
    * @param user the user who will be banned.
@@ -291,18 +312,32 @@ export class UserService {
    * @param user User requiring an update.
    * @returns The new user after the update is made
    */
-  async updateUser(user: UserDto): Promise<User> {
+  async updateUser(accessor: User, user: UserDto): Promise<User> {
+    const data = {
+      username: user.username,
+      email: user.email,
+      year: user.year,
+    };
+
+    await this.permService.deleteForbiddenProperties(
+      accessor,
+      PermissionType.READ_WRITE,
+      RestrictedResourceType.USER,
+      [data],
+      [user.id],
+    );
+
     return await this.prisma.user.update({
       where: { id: user.id },
-      data: {
-        username: user.username,
-        email: user.email,
-        year: user.year,
-      },
+      data,
     });
   }
 
-  async dtoForUserData(user: User, partial: boolean): Promise<UserDto> {
+  async dtoForUserData(
+    accessor: User | null,
+    user: User,
+    partial: boolean,
+  ): Promise<UserDto> {
     const joinedUser = await this.prisma.user.findUniqueOrThrow({
       where: { id: user.id },
       include: {
@@ -312,7 +347,7 @@ export class UserService {
       },
     });
 
-    return {
+    const dto: UserDto = {
       id: joinedUser.id,
       username: joinedUser.username,
       enrollmentType: joinedUser.enrollmentType,
@@ -331,25 +366,37 @@ export class UserService {
         ? undefined
         : joinedUser.favorites.map((ev: EventBase) => ev.id),
     };
+
+    await this.permService.deleteForbiddenProperties(
+      accessor,
+      PermissionType.READ_ONLY,
+      RestrictedResourceType.USER,
+      [dto],
+      [user.id],
+    );
+
+    return dto;
   }
 
   async emitUpdateUserData(
+    receiver: User | null,
     user: User,
     deleted: boolean,
     partial: boolean,
-    admin?: boolean,
-    client?: User,
   ) {
     const dto: UpdateUserDataDto = {
-      user: deleted ? user.id : await this.dtoForUserData(user, partial),
+      user: deleted
+        ? user.id
+        : await this.dtoForUserData(receiver, user, partial),
       deleted,
     };
 
-    if (client && admin) {
-      this.clientService.sendUpdate('updateUserData', client.id, false, dto);
-    } else if (admin) {
-      this.clientService.sendUpdate('updateUserData', user.id, true, dto);
+    if (receiver) {
+      this.clientService.sendUpdate('updateUserData', receiver.id, false, dto);
+    } else {
+      this.clientService.sendUpdate('updateUserData', user.id, false, dto);
     }
+
     await this.log.logEvent(SessionLogEvent.EDIT_USERNAME, user.id, user.id);
   }
 }

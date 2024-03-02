@@ -67,15 +67,9 @@ export interface UserDto {
   favoriteIds?: string[];
 }
 
+export type UserPartialDto = { id: string } & Partial<UserDto>;
+
 export interface UpdateUserDataDto {
-  user: UserDto | string;
+  user: UserPartialDto;
   deleted: boolean;
-}
-
-export type eventFilterDto = 'new' | 'saved' | 'finished';
-
-export interface RequestFilteredEventDto {
-  filter: eventFilterDto;
-  cursorId?: string;
-  limit: number;
 }
