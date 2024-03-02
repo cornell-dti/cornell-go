@@ -3,8 +3,8 @@ import { AuthModule } from '../auth/auth.module';
 import { ClientModule } from '../client/client.module';
 import { EventModule } from '../event/event.module';
 import { PrismaModule } from '../prisma/prisma.module';
-import { RewardGateway } from './reward.gateway';
-import { RewardService } from './reward.service';
+import { AchievementGateway } from './achievement.gateway';
+import { AchievementService } from './achievement.service';
 
 @Module({
   imports: [
@@ -13,7 +13,7 @@ import { RewardService } from './reward.service';
     EventModule,
     PrismaModule,
   ],
-  exports: [RewardService],
-  providers: [RewardGateway, RewardService],
+  exports: [AchievementService],
+  providers: [AchievementGateway, AchievementService],
 })
-export class RewardModule {}
+export class AchievementModule {}

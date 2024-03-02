@@ -110,8 +110,8 @@ class _JourneysPageState extends State<JourneysPage> {
                     0,
                     1000,
                     [
-                      EventRewardType.PERPETUAL,
-                      EventRewardType.LIMITED_TIME_EVENT
+                      TimeLimitationType.PERPETUAL,
+                      TimeLimitationType.LIMITED_TIME
                     ],
                     false,
                     false,

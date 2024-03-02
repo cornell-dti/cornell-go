@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import {
   Challenge,
   EventBase,
-  EventRewardType,
+  TimeLimitationType,
   EventTracker,
   SessionLogEvent,
   User,
@@ -141,68 +141,6 @@ export class ChallengeService {
     );
 
     return true;
-  }
-
-  /** Check if the current event can return rewards */
-  async checkForReward(eventTracker: EventTracker) {
-    const eventBase = await this.prisma.eventBase.findUniqueOrThrow({
-      where: { id: eventTracker.eventId },
-    });
-
-    if (
-      //If user has not completed enough challenges:
-      eventTracker.score < eventBase.minimumScore ||
-      //If user has a reward for this event:
-      (await this.prisma.eventReward.count({
-        where: {
-          userId: eventTracker.userId,
-          eventId: eventTracker.eventId,
-        },
-      })) > 0 ||
-      //If event has expired:
-      eventBase.endTime < new Date()
-    ) {
-      return null;
-    }
-
-    if (eventBase.rewardType === EventRewardType.PERPETUAL) {
-      const rewardTemplate = await this.prisma.eventReward.findFirst({
-        where: { eventId: eventBase.id },
-      });
-
-      if (rewardTemplate !== null) {
-        const rw = await this.prisma.eventReward.create({
-          data: {
-            ...rewardTemplate,
-            userId: eventTracker.userId,
-            isRedeemed: false,
-            id: undefined,
-          },
-        });
-
-        return rw;
-      }
-    } else if (eventBase.rewardType === EventRewardType.LIMITED_TIME) {
-      const unclaimedReward = await this.prisma.eventReward.findFirst({
-        where: {
-          user: null,
-          event: eventBase,
-        },
-      });
-
-      if (unclaimedReward !== null) {
-        await this.prisma.eventReward.update({
-          where: { id: unclaimedReward.id },
-          data: {
-            userId: eventTracker.userId,
-          },
-        });
-
-        return unclaimedReward;
-      }
-    }
-
-    return null;
   }
 
   async getUserCompletionDate(user: User, challenge: Challenge) {
@@ -344,7 +282,6 @@ export class ChallengeService {
     const challenge = await this.prisma.challenge.findFirstOrThrow({
       where: { id: challengeId },
       include: {
-        defaultOf: true,
         linkedEvent: { include: { challenges: true } },
       },
     });
@@ -355,12 +292,19 @@ export class ChallengeService {
       },
     });
 
-    if (challenge.defaultOf) return;
+    const replacementChal = await this.prisma.challenge.findFirstOrThrow({
+      where: { linkedEventId: challenge.linkedEventId },
+      select: { id: true },
+    });
 
     for (const tracker of usedTrackers) {
-      this.prisma.eventTracker.update({
+      await this.prisma.eventTracker.update({
         where: { id: tracker.id },
-        data: { curChallengeId: challenge.linkedEvent!.defaultChallengeId },
+        data: {
+          curChallenge: {
+            connect: { id: replacementChal.id },
+          },
+        },
       });
     }
 
