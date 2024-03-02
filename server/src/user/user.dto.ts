@@ -1,21 +1,6 @@
 /** DTO for closeAccount */
 export interface CloseAccountDto {}
 
-/** DTO for setUsername */
-export interface SetUsernameDto {
-  newUsername: string;
-}
-
-/** DTO for setMajor */
-export interface SetMajorDto {
-  newMajor: string;
-}
-
-/** DTO for setGraduationYear */
-export interface SetGraduationYearDto {
-  newYear: string;
-}
-
 export interface BanUserDto {
   userId: string;
   isBanned: boolean;
@@ -55,21 +40,19 @@ export type UserAuthTypeDto = 'device' | 'apple' | 'google';
 /** DTO for updateUserData event */
 export interface UserDto {
   id: string;
-  username: string;
-  enrollmentType: 'UNDERGRADUATE' | 'GRADUATE' | 'FACULTY' | 'ALUMNI';
-  email: string;
-  year: string;
-  score: number;
-  isBanned: boolean;
-  groupId: string;
-  authType: UserAuthTypeDto;
+  username?: string;
+  enrollmentType?: 'UNDERGRADUATE' | 'GRADUATE' | 'FACULTY' | 'ALUMNI';
+  email?: string;
+  year?: string;
+  score?: number;
+  isBanned?: boolean;
+  groupId?: string;
+  authType?: UserAuthTypeDto;
   trackedEventIds?: string[];
   favoriteIds?: string[];
 }
 
-export type UserPartialDto = { id: string } & Partial<UserDto>;
-
 export interface UpdateUserDataDto {
-  user: UserPartialDto;
+  user: UserDto;
   deleted: boolean;
 }

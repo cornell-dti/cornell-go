@@ -17,12 +17,7 @@ import { EventService } from '../event/event.service';
 import { GroupService } from '../group/group.service';
 import { OrganizationService } from '../organization/organization.service';
 import { PrismaService } from '../prisma/prisma.service';
-import {
-  UpdateUserDataDto,
-  UserAuthTypeDto,
-  UserDto,
-  UserPartialDto,
-} from './user.dto';
+import { UpdateUserDataDto, UserAuthTypeDto, UserDto } from './user.dto';
 import { PermissionService } from '../permission/permission.service';
 import { CensorSensor } from 'censor-sensor';
 
@@ -197,7 +192,7 @@ export class UserService {
    * @param user User requiring an update.
    * @returns The new user after the update is made
    */
-  async updateUser(accessor: User, user: UserPartialDto): Promise<User> {
+  async updateUser(accessor: User, user: UserDto): Promise<User> {
     const data = {
       username: user.username
         ? new CensorSensor()

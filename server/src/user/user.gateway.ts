@@ -20,8 +20,6 @@ import {
   RequestFavoriteEventDataDto,
   SetAuthToDeviceDto,
   SetAuthToOAuthDto,
-  SetGraduationYearDto,
-  SetUsernameDto,
   UpdateUserDataDto,
   UserDto,
   BanUserDto,
