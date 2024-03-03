@@ -23,18 +23,19 @@ docker compose up --build
 docker compose up --build -d
 ```
 
-### Inspect your database data
-
-```
-npx prisma studio
-```
-
 ### Stop the container
 
 ```
 Press Control + C
 *OR* (if done in the background)
 docker compose stop
+```
+
+### Inspect your database data
+
+```
+cd server
+npx prisma studio
 ```
 
 ### Start the frontend (for debugging)
