@@ -1,5 +1,7 @@
 #!/bin/bash
 
+npx prisma migrate deploy || true
+
 if [ $DEVELOPMENT = "false" ]; then 
   npm run start:prod; 
 elif [ $TESTING_UNIT = "true" ]; then 

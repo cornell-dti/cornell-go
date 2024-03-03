@@ -22,6 +22,5 @@ COPY server .
 RUN chmod +x ./start.sh
 RUN npx prisma generate
 RUN npm run build
-RUN npx prisma migrate deploy; exit 0
 
 ENTRYPOINT ./start.sh
