@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 npx prisma migrate deploy || true
 
