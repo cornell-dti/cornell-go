@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
+/** ChallengeCell is deprecated and can be removed. */
 class ChallengeCell extends StatefulWidget {
   final String place;
   final String description;

@@ -12,6 +12,7 @@ class ChallengesPage extends StatefulWidget {
 }
 
 class _ChallengesPageState extends State<ChallengesPage> {
+  /* Dummy code, to be replaced */
   final cells = [
     ChallengeCellNew(
         "ARTS QUAD",

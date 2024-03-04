@@ -4,6 +4,8 @@ import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:game/preview/preview.dart';
 
+/** ChallengeCellNew is a challenge cell that replaces ChallengeCell. All instances
+ * that use challenge cell should call ChallengeCellNew. */
 class ChallengeCellNew extends StatefulWidget {
   final String location;
   final String challengeName;
