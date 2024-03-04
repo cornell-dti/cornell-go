@@ -6,7 +6,11 @@ import {
   PermissionType,
   PermissionGroupAuditLogType,
 } from '@prisma/client';
-import { PermissionDto } from './permission.dto';
+import {
+  PermissionDto,
+  PermissionTypeDto,
+  RestrictedResourceDto,
+} from './permission.dto';
 import { AuthService } from '../auth/auth.service';
 import { ClientService } from '../client/client.service';
 
@@ -112,22 +116,112 @@ export class PermissionService {
     return null;
   }
 
-  async aggregatePermissions(permGroupId: string): Promise<PermissionDto[]> {
-    return [];
-  }
-
-  async getPermissionGroupUsers(permGroupId: string): Promise<string[]> {
-    return [];
-  }
-
-  async modifyPermissionGroup(
+  async aggregatePermissions(
+    accessor: User | null,
     permGroupId: string,
-    permissionType: PermissionType,
+  ): Promise<PermissionDto[]> {
+    if (
+      await this.checkFullPermissionGroup(
+        accessor,
+        PermissionType.MANAGE,
+        permGroupId,
+      )
+    ) {
+      return [];
+    }
+
+    const allResources = await this.prisma.permission.findMany({
+      where: { resourceId: null, propertyName: null },
+      distinct: ['permissionType', 'resourceType'],
+    });
+
+    const someResources = await this.prisma.permission.findMany({
+      where: { resourceId: { not: null }, propertyName: null },
+      orderBy: { permissionType: 'desc', resourceType: 'desc' },
+    });
+
+    const partialResources = await this.prisma.permission.findMany({
+      where: { propertyName: { not: null } },
+      orderBy: {
+        permissionType: 'desc',
+        resourceType: 'desc',
+        propertyName: 'desc',
+      },
+    });
+
+    const finalArr: PermissionDto[] = [
+      ...allResources.map(perm => ({
+        resourceType: perm.resourceType as RestrictedResourceDto,
+        permissionType: perm.permissionType as PermissionTypeDto,
+      })),
+      ...someResources.reduce((acc, perm) => {
+        const prevDto = acc.at(-1);
+
+        // aggregate all (permType, resType) into one using array
+        // comes sorted from DB so no need for a hash map
+        if (
+          !prevDto ||
+          prevDto.permissionType != perm.permissionType ||
+          prevDto.resourceType != perm.resourceType
+        ) {
+          acc.push({
+            resourceType: perm.resourceType as RestrictedResourceDto,
+            permissionType: perm.permissionType as PermissionTypeDto,
+            resourceIds: [perm.resourceId as string],
+          });
+        } else {
+          prevDto.resourceIds!.push(perm.id);
+        }
+
+        return acc;
+      }, [] as PermissionDto[]),
+      ...partialResources.reduce((acc, perm) => {
+        // TODO: complete this function
+        
+        const prevDto = acc.at(-1);
+
+        if (
+          !prevDto ||
+          prevDto.permissionType != perm.permissionType ||
+          prevDto.resourceType != perm.resourceType
+        ) {
+          acc.push({
+            resourceType: perm.resourceType as RestrictedResourceDto,
+            permissionType: perm.permissionType as PermissionTypeDto,
+            resourceIds: [perm.resourceId as string],
+          });
+        } else {
+          prevDto.resourceIds!.push(perm.id);
+        }
+
+        return acc;
+      }, [] as PermissionDto[]),
+    ];
+
+    return finalArr;
+  }
+
+  async getPermissionGroupUsers(
+    accessor: User | null,
+    permGroupId: string,
+  ): Promise<string[]> {
+    if (
+      await this.checkFullPermissionGroup(
+        accessor,
+        PermissionType.MANAGE,
+        permGroupId,
+      )
+    ) {
+      return [];
+    }
+
+    return [];
+  }
+
+  async modifyPermissions(
+    permGroupId: string | null,
     authority: User | null,
-    user: User | null,
-    resourceType: RestrictedResourceType | null,
-    resources: string[] | null,
-    propertyNames: string[] | null,
+    permissions: PermissionDto[], // this may need to be something else to decouple DTOs from business logic
   ): Promise<PermissionCheckResult> {
     return { message: 'not implemented' };
   }

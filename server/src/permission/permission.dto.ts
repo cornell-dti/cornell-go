@@ -15,6 +15,6 @@ export type PermissionTypeDto =
 export interface PermissionDto {
   resourceType: RestrictedResourceDto;
   permissionType: PermissionTypeDto;
-  resourceIds: string[];
-  propertyNames: string[];
+  resourceIds?: string[];
+  propertyNames?: string[];
 }

@@ -96,36 +96,25 @@ export class UserService {
     });
 
     // grant access to self
-    await this.permService.modifyPermissionGroup(
-      permGroupId,
-      PermissionType.READ_ONLY,
-      null,
-      user,
-      RestrictedResourceType.USER,
-      [user.id],
-      null,
-    );
-
-    await this.permService.modifyPermissionGroup(
-      permGroupId,
-      PermissionType.READ_WRITE,
-      null,
-      user,
-      RestrictedResourceType.USER,
-      [user.id],
-      ['username', 'enrollmentType', 'email', 'year'],
-    );
-
-    // grant access to group
-    await this.permService.modifyPermissionGroup(
-      permGroupId,
-      PermissionType.READ_WRITE,
-      null,
-      user,
-      RestrictedResourceType.GROUP,
-      [user.groupId],
-      ['members', 'curEventId'],
-    );
+    await this.permService.modifyPermissions(permGroupId, null, [
+      {
+        resourceType: 'USER',
+        permissionType: 'READ_ONLY',
+        resourceIds: [user.id],
+      },
+      {
+        resourceType: 'USER',
+        permissionType: 'READ_WRITE',
+        resourceIds: [user.id],
+        propertyNames: ['username', 'enrollmentType', 'email', 'year'],
+      },
+      {
+        resourceType: 'GROUP',
+        permissionType: 'READ_WRITE',
+        resourceIds: [user.groupId],
+        propertyNames: ['members', 'curEventId'],
+      },
+    ]);
 
     // TODO: GRANT ACCESS TO ORGANIZATION
 
