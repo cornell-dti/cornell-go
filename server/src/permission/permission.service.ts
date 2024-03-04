@@ -177,7 +177,7 @@ export class PermissionService {
       }, [] as PermissionDto[]),
       ...partialResources.reduce((acc, perm) => {
         // TODO: complete this function
-        
+
         const prevDto = acc.at(-1);
 
         if (
@@ -267,6 +267,6 @@ export class PermissionService {
     resourceId: string,
     resourceType: RestrictedResourceType,
     dto: any,
-    receiver: User | undefined,
+    receiver?: User,
   ) {}
 }
