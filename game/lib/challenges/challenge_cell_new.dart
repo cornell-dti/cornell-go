@@ -95,7 +95,6 @@ class _ChallengeCellState extends State<ChallengeCellNew> {
                       children: [
                         Icon(Icons.location_on,
                             size: 20, color: Color.fromARGB(255, 131, 90, 124)),
-                        // SizedBox(width: 50),
                         Text(
                           location,
                           style: TextStyle(
@@ -141,7 +140,7 @@ class _ChallengeCellState extends State<ChallengeCellNew> {
                             ),
                           ),
                         ),
-                        SizedBox(width: 10), // Add spacing between buttons
+                        SizedBox(width: 10),
                         Container(
                           padding:
                               EdgeInsets.symmetric(horizontal: 10, vertical: 2),
@@ -164,9 +163,6 @@ class _ChallengeCellState extends State<ChallengeCellNew> {
                         ),
                       ],
                     ),
-                    // SizedBox(
-                    //   height: 4,
-                    // ),
                   ],
                 ),
               )

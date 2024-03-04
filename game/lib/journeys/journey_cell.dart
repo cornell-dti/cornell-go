@@ -103,14 +103,6 @@ class _JourneyCellState extends State<JourneyCell> {
                               NetworkImage("https://picsum.photos/250?image=9"),
                         ),
                       )
-                      // alignment:
-                      // child: [
-                      //   ClipRRect(
-                      //     borderRadius: BorderRadius.all(Radius.circular(4.6)),
-                      //     child: thumbnail,
-                      //   ),
-                      // ]
-
                       )),
               if (isCompleted)
                 Flexible(
@@ -119,37 +111,37 @@ class _JourneyCellState extends State<JourneyCell> {
                       mainAxisAlignment: MainAxisAlignment.end,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Text(
-                        //   "COMPLETED",
-                        //   style: TextStyle(
-                        //     color: Color.fromARGB(255, 71, 71, 71),
-                        //     fontSize: 10,
-                        //     fontWeight: FontWeight.w700,
-                        //     fontFamily: 'Lato',
-                        //   ),
-                        // ),
-                        // Column(
-                        //   children: [
-                        //     FractionallySizedBox(
-                        //       alignment: Alignment.topLeft,
-                        //       widthFactor: (locationCount > 0
-                        //           ? numberCompleted / locationCount
-                        //           : 0),
-                        //       child: Container(
-                        //           color: Color.fromARGB(255, 0, 0, 0)),
-                        //     ),
-                        //     Icon(Icons.location_on,
-                        //         size: 20, color: Colors.purple),
-                        //     Text(
-                        //       numberCompleted.toString(),
-                        //       style: TextStyle(
-                        //         color: Color.fromARGB(179, 0, 0, 0),
-                        //         fontSize: 12,
-                        //         fontFamily: 'Lato',
-                        //       ),
-                        //     ),
-                        //   ],
-                        // ),
+                        Text(
+                          "COMPLETED",
+                          style: TextStyle(
+                            color: Color.fromARGB(255, 71, 71, 71),
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            fontFamily: 'Lato',
+                          ),
+                        ),
+                        Column(
+                          children: [
+                            FractionallySizedBox(
+                              alignment: Alignment.topLeft,
+                              widthFactor: (locationCount > 0
+                                  ? numberCompleted / locationCount
+                                  : 0),
+                              child: Container(
+                                  color: Color.fromARGB(255, 0, 0, 0)),
+                            ),
+                            Icon(Icons.location_on,
+                                size: 20, color: Colors.purple),
+                            Text(
+                              numberCompleted.toString(),
+                              style: TextStyle(
+                                color: Color.fromARGB(179, 0, 0, 0),
+                                fontSize: 12,
+                                fontFamily: 'Lato',
+                              ),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   ),
@@ -186,7 +178,7 @@ class _JourneyCellState extends State<JourneyCell> {
                           ),
                         ),
                       ),
-                      SizedBox(width: 10), // Add spacing between buttons
+                      SizedBox(width: 10),
                       Container(
                           padding:
                               EdgeInsets.symmetric(horizontal: 10, vertical: 2),
@@ -242,7 +234,6 @@ class _JourneyCellState extends State<JourneyCell> {
                         child: Container(
                           height: 20.0,
                           width: 10.0,
-                          // width: double.infinity,
                           color: Color.fromARGB(255, 255, 255, 255),
                           child: FractionallySizedBox(
                             alignment: Alignment.topLeft,
@@ -270,17 +261,6 @@ class _JourneyCellState extends State<JourneyCell> {
                         ),
                       ]),
                     )
-                    // Container(
-                    //   height: 3,
-                    //   child: Text(
-                    //     numberCompleted.toString(),
-                    //     style: TextStyle(
-                    //       color: Color.fromARGB(255, 0, 0, 0),
-                    //       fontSize: 18,
-                    //       fontFamily: 'Lato',
-                    //     ),
-                    //   ),
-                    // ),
                   ],
                 ),
               ),
