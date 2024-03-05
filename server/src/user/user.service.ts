@@ -306,7 +306,6 @@ export class UserService {
     const joinedUser = await this.prisma.user.findUniqueOrThrow({
       where: { id: user.id },
       include: {
-        rewards: true,
         eventTrackers: true,
         favorites: true,
         group: { select: { friendlyId: true } },
@@ -325,11 +324,12 @@ export class UserService {
       authType: (
         joinedUser.authType as string
       ).toLowerCase() as UserAuthTypeDto,
-      rewardIds: partial ? undefined : joinedUser.rewards.map(rw => rw.id),
       trackedEventIds: partial
         ? undefined
         : joinedUser.eventTrackers.map(ev => ev.eventId),
-      favoriteIds: partial ? undefined : joinedUser.favorites.map(ev => ev.id),
+      favoriteIds: partial
+        ? undefined
+        : joinedUser.favorites.map((ev: EventBase) => ev.id),
     };
   }
 

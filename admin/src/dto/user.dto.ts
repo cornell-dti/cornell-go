@@ -51,7 +51,6 @@ export interface UserDto {
   score: number;
   groupId: string;
   authType: UserAuthTypeDto;
-  rewardIds?: string[];
   trackedEventIds?: string[];
   favoriteIds?: string[];
 }

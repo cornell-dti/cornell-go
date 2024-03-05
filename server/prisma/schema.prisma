@@ -14,7 +14,7 @@ enum AuthType {
   NONE
 }
 
-enum EventRewardType {
+enum TimeLimitationType {
   LIMITED_TIME
   PERPETUAL
 }
@@ -24,6 +24,24 @@ enum EnrollmentType {
   GRADUATE
   FACULTY
   ALUMNI
+}
+
+enum LocationType {
+  ENG_QUAD
+  ARTS_QUAD
+  AG_QUAD
+  NORTH_CAMPUS
+  WEST_CAMPUS
+  COLLEGETOWN
+  ITHACA_COMMONS
+  ANY
+}
+
+enum AchievementType {
+  TOTAL_POINTS
+  TOTAL_CHALLENGES
+  TOTAL_JOURNEYS
+  TOTAL_CHALLENGES_OR_JOURNEYS
 }
 
 enum DifficultyMode {
@@ -44,7 +62,6 @@ enum SessionLogEvent {
   SET_CHALLENGE //data = challengeId
   DELETE_CHALLENGE //data = challengeId
   COMPLETE_CHALLENGE //data = challengeId
-  DELETE_REWARD //data = rewardId
   DISCONNECT //data = ""
 }
 
@@ -56,7 +73,7 @@ enum OrganizationSpecialUsage {
 }
 
 model User {
-  id                  String            @id() @default(uuid())
+  id                  String               @id() @default(uuid())
   authToken           String
   authType            AuthType
   username            String
@@ -66,19 +83,19 @@ model User {
   administrator       Boolean
   enrollmentType      EnrollmentType
   score               Int
-  isBanned            Boolean           @default(false)
-  rewards             EventReward[]
-  group               Group             @relation("member", fields: [groupId], references: [id])
+  isBanned            Boolean              @default(false)
+  group               Group                @relation("member", fields: [groupId], references: [id])
   groupId             String
-  hostOf              Group?            @relation("host")
+  hostOf              Group?               @relation("host")
   eventTrackers       EventTracker[]
   favorites           EventBase[]
-  completedChallenges PrevChallenge[]   @relation("owner")
-  memberOf            Organization[]    @relation("orgToUser")
-  managerOf           Organization[]    @relation("orgManager")
-  isRanked            Boolean           @default(true)
-  participatedIn      PrevChallenge[]   @relation("prevChallengeParticipant")
+  completedChallenges PrevChallenge[]      @relation("owner")
+  memberOf            Organization[]       @relation("orgToUser")
+  managerOf           Organization[]       @relation("orgManager")
+  isRanked            Boolean              @default(true)
+  participatedIn      PrevChallenge[]      @relation("prevChallengeParticipant")
   sessionLogEntries   SessionLogEntry[]
+  achievementTrackers AchievementTracker[]
 }
 
 model Group {
@@ -105,44 +122,25 @@ model Challenge {
   closeRadius    Float
   completions    PrevChallenge[]
   activeTrackers EventTracker[]
-  defaultOf      EventBase?      @relation("default")
 }
 
 model EventBase {
-  id                 String          @id @default(uuid())
-  requiredMembers    Int
-  name               String
-  description        String
-  rewardType         EventRewardType
-  indexable          Boolean
-  endTime            DateTime
-  minimumScore       Int             @default(1)
-  difficulty         DifficultyMode
-  rewards            EventReward[]
-  challenges         Challenge[]     @relation("all")
-  userFavorite       User[]
-  usedIn             Organization[]  @relation("eventOrgs")
-  defaultOf          Organization[]  @relation("defaultOrg")
-  defaultChallenge   Challenge       @relation("default", fields: [defaultChallengeId], references: [id])
-  defaultChallengeId String          @unique
-  trackers           EventTracker[]
-  activeGroups       Group[]
-  latitude           Float
-  longitude          Float
-}
-
-model EventReward {
-  id            String    @id @default(uuid())
-  user          User?     @relation(fields: [userId], references: [id])
-  userId        String?
-  event         EventBase @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  eventId       String
-  eventIndex    Int
-  description   String
-  redeemInfo    String
-  isRedeemed    Boolean
-  isAchievement Boolean
-  points        Int
+  id              String             @id @default(uuid())
+  requiredMembers Int
+  name            String
+  description     String
+  timeLimitation  TimeLimitationType
+  indexable       Boolean
+  endTime         DateTime
+  challenges      Challenge[]        @relation("all")
+  userFavorite    User[]
+  usedIn          Organization[]     @relation("eventOrgs")
+  trackers        EventTracker[]
+  activeGroups    Group[]
+  latitude        Float
+  longitude       Float
+  achievements    Achievement[]
+  difficulty      DifficultyMode
 }
 
 model EventTracker {
@@ -171,15 +169,13 @@ model PrevChallenge {
 }
 
 model Organization {
-  id             String                   @id @default(uuid())
-  name           String
-  accessCode     String
-  members        User[]                   @relation("orgToUser")
-  managers       User[]                   @relation("orgManager")
-  events         EventBase[]              @relation("eventOrgs")
-  defaultEvent   EventBase                @relation("defaultOrg", fields: [defaultEventId], references: [id], onDelete: Restrict)
-  defaultEventId String
-  specialUsage   OrganizationSpecialUsage
+  id           String                   @id @default(uuid())
+  name         String
+  accessCode   String
+  members      User[]                   @relation("orgToUser")
+  managers     User[]                   @relation("orgManager")
+  events       EventBase[]              @relation("eventOrgs")
+  specialUsage OrganizationSpecialUsage
 }
 
 model SessionLogEntry {
@@ -189,4 +185,27 @@ model SessionLogEntry {
   data       String
   timestamp  DateTime        @default(now())
   userId     String?
+}
+
+model Achievement {
+  id              String               @id @default(uuid())
+  requiredPoints  Int
+  name            String
+  description     String
+  imageUrl        String
+  linkedEvent     EventBase?           @relation(fields: [linkedEventId], references: [id])
+  linkedEventId   String?
+  locationType    LocationType
+  achievementType AchievementType
+  trackers        AchievementTracker[]
+}
+
+model AchievementTracker {
+  id            String      @id @default(uuid())
+  user          User        @relation(fields: [userId], references: [id])
+  progress      Int
+  achievement   Achievement @relation(fields: [achievementId], references: [id])
+  dateComplete  DateTime?
+  achievementId String
+  userId        String
 }
