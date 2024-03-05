@@ -7,6 +7,7 @@ import 'package:game/gameplay/gameplay_page.dart';
 import 'package:game/global_leaderboard/global_leaderboard_widget.dart';
 import 'package:game/journeys/journeys_page.dart';
 import 'package:game/login/login_page.dart';
+import 'package:game/gameplay/camera_page.dart';
 import 'package:game/model/challenge_model.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/group_model.dart';
@@ -81,7 +82,8 @@ class MyApp extends StatelessWidget {
           supportedLocales: const [Locale('en', '')],
           theme: ThemeData(
               fontFamily: 'Poppins', primarySwatch: ColorPalette.BigRed),
-          home: SplashPageWidget(),
+          // home: SplashPageWidget(),
+          home: CameraPage(),
         )));
   }
 }

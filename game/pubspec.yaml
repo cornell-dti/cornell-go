@@ -50,6 +50,9 @@ dependencies:
   latlong2: ^0.9.0
   device_info_plus: ^9.1.0
   flutter_svg: ^2.0.8
+  path_provider: ^2.0.9
+  path: ^1.8.0
+  camera: ^0.9.4+18
 
 flutter_icons:
   android: true
