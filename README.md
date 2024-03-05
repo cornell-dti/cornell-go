@@ -11,6 +11,11 @@ Make sure Node.js, Flutter, and Docker are installed!
 npm run setup
 ```
 
+### API Keys for Flutter
+```
+To access the Google Maps in the CornellGo app, you need two Google Maps API Keys. One is for Android and one is for iOS. Ask a TPM for the .env file with the keys and the instructions to add it into the app.
+```
+
 ### Run project in container
 
 ```
@@ -29,6 +34,13 @@ docker compose up --build -d
 Press Control + C
 *OR* (if done in the background)
 docker compose stop
+```
+
+### Inspect your database data
+
+```
+cd server
+npx prisma studio
 ```
 
 ### Start the frontend (for debugging)
