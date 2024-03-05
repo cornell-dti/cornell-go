@@ -31,6 +31,13 @@ Press Control + C
 docker compose stop
 ```
 
+### Inspect your database data
+
+```
+cd server
+npx prisma studio
+```
+
 ### Start the frontend (for debugging)
 
 ```

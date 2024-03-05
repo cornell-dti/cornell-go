@@ -9,7 +9,6 @@ class UserDto {
     year = fields["year"] ?? "NA";
     score = fields["score"];
     groupId = fields["groupId"];
-    rewardIds = fields["rewardIds"].cast<String>();
     trackedEventIds = fields["trackedEventIds"].cast<String>();
     authType = fields["authType"] == "google"
         ? UserDataAuthTypeDto.GOOGLE
@@ -23,7 +22,6 @@ class UserDto {
   String year = "";
   int score = 0;
   String groupId = "";
-  List<String> rewardIds = [];
   List<String> trackedEventIds = [];
   bool ignoreIdLists = false;
   UserDataAuthTypeDto authType = UserDataAuthTypeDto.DEVICE;
@@ -39,66 +37,18 @@ class UpdateUserDto {
   bool deleted = false;
 }
 
-class UserRewardedDto {
-  UserRewardedDto.fromJson(Map<String, dynamic> fields) {
-    rewardId = fields["rewardId"];
-    rewardDescription = fields["rewardDescription"];
-  }
-
-  String rewardId = "";
-  String rewardDescription = "";
-}
-
 class InvalidateDataDto {
   InvalidateDataDto.fromJson(Map<String, dynamic> fields) {
-    userRewardData = fields["userRewardData"];
-    winnerRewardData = fields["winnerRewardData"];
     userEventData = fields["userEventData"];
     groupData = fields["groupData"];
     challengeData = fields["challengeData"];
     leaderboardData = fields["leaderboardData"];
   }
 
-  bool userRewardData = false;
-  bool winnerRewardData = false;
   bool userEventData = false;
   bool groupData = false;
   bool challengeData = false;
   bool leaderboardData = false;
-}
-
-class RewardDTO {
-  //Represents a Reward
-  RewardDTO.fromJson(Map<String, dynamic> fields) {
-    id = fields["id"];
-    eventId = fields["eventId"];
-    description = fields["description"];
-    userId = fields["userId"];
-    redeemInfo = fields["redeemInfo"];
-    isRedeemed = fields["isRedeemed"];
-    isAchievement = fields["isAchievement"];
-    points = fields["points"];
-  }
-
-  String id = "";
-  String eventId = "";
-  String description = "";
-  String userId = "";
-  String redeemInfo = "";
-  bool isRedeemed = false;
-  bool isAchievement = false;
-  int points = 0;
-}
-
-class UpdateRewardDataDto {
-  UpdateRewardDataDto.fromJson(Map<String, dynamic> fields) {
-    reward = fields["reward"] is String ? null : RewardDTO.fromJson(fields);
-    id = fields["reward"] is String ? fields["rewards"] : null;
-    deleted = fields["deleted"];
-  }
-  RewardDTO? reward = null;
-  String? id = "";
-  bool deleted = false;
 }
 
 class UpdateLeaderDataUserDto {
@@ -192,9 +142,9 @@ class UpdateGroupDataDto {
 }
 
 //Event DTOs
-enum EventRewardType {
+enum TimeLimitationType {
   PERPETUAL,
-  LIMITED_TIME_EVENT,
+  LIMITED_TIME,
 }
 
 class EventDto {
@@ -203,12 +153,10 @@ class EventDto {
     requiredMembers = fields['requiredMembers'];
     name = fields['name'];
     description = fields['description'];
-    rewardType = fields['rewardType'];
+    timeLimitation = fields['timeLimitation'];
     endTime = fields['endTime'];
-    rewardIds = List<String>.from(fields['rewardIds']);
     challengeIds = List<String>.from(fields['challengeIds']);
     initialOrganizationId = fields['initialOrganizationId'];
-    defaultChallengeId = fields['defaultChallengeId'];
     minimumScore = fields['minimumScore'];
     difficulty = fields['difficulty'];
     indexable = fields['indexable'];
@@ -221,13 +169,11 @@ class EventDto {
   int requiredMembers = 0;
   String name = '';
   String description = '';
-  String rewardType = '';
+  String timeLimitation = '';
   String endTime = '';
-  List<String> rewardIds = [];
   List<String>? userFavoriteIds = [];
   List<String> challengeIds = [];
   String? initialOrganizationId = '';
-  String defaultChallengeId = '';
   int minimumScore = 0;
   String difficulty = '';
   bool indexable = false;
@@ -329,7 +275,6 @@ class OrganizationDto {
     accessCode = fields["accessCode"];
     members = fields["members"];
     events = fields["events"];
-    defaultEventId = fields["defaultEventId"];
     members = fields["members"];
   }
   String id = "";
@@ -337,7 +282,6 @@ class OrganizationDto {
   String accessCode = "";
   List<String> members = [];
   List<String> events = [];
-  String defaultEventId = "";
 }
 
 class UpdateOrganizationDataDto {
