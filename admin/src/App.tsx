@@ -1,5 +1,4 @@
 import { Home } from "./components/Home";
-import { Rewards } from "./components/Rewards";
 import { Challenges } from "./components/Challenges";
 import { Events } from "./components/Events";
 import { Organizations } from "./components/Organizations";
@@ -64,12 +63,6 @@ const routes = [
     element: <Challenges />,
     icon: faLocationDot,
     name: "Challenges",
-  },
-  {
-    path: "/rewards",
-    element: <Rewards />,
-    icon: faTrophy,
-    name: "Rewards",
   },
   {
     path: "/users",

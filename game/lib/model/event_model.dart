@@ -11,12 +11,24 @@ class EventModel extends ChangeNotifier {
 
   EventModel(ApiClient client) : _client = client {
     client.clientApi.updateEventDataStream.listen((event) {
-      if (!event.event is String) {
-        searchResults = event.event;
+      if (!event.deleted) {
+        //initialize searchResults if null
+        searchResults = searchResults ?? [];
+        //add or update event
+        if (!_events.containsKey(event.event.id)) {
+          searchResults!.add(event.event);
+        } else {
+          var index = searchResults!
+              .indexWhere((element) => element.id == event.event.id);
+          searchResults![index] = event.event;
+        }
+        _events[event.event.id] = event.event;
+      } else {
+        //delete event
+        _events.remove(event.event);
+        searchResults?.removeWhere((element) => element.id == event.event);
       }
-      event.event.toList().forEach((element) {
-        _events[element.id] = element;
-      });
+
       notifyListeners();
     });
 
@@ -43,16 +55,14 @@ class EventModel extends ChangeNotifier {
     });
 
     client.clientApi.invalidateDataStream.listen((event) {
-      if (event.userEventData || event.winnerRewardData) {
+      if (event.userEventData) {
         _events.clear();
         searchResults = null;
       }
       if (event.leaderboardData) {
         _topPlayers.clear();
       }
-      if (event.leaderboardData ||
-          event.userEventData ||
-          event.winnerRewardData) {
+      if (event.leaderboardData || event.userEventData) {
         notifyListeners();
       }
     });
@@ -84,10 +94,15 @@ class EventModel extends ChangeNotifier {
     }
   }
 
-  void searchEvents(int offset, int count, List<EventRewardType> rewardTypes,
-      bool closestToEnding, bool shortestFirst, bool skippableOnly) {
+  void searchEvents(
+      int offset,
+      int count,
+      List<TimeLimitationType> timeLimitations,
+      bool closestToEnding,
+      bool shortestFirst,
+      bool skippableOnly) {
     searchResults = null;
-    _client.serverApi?.requestAllEventData(offset, count, rewardTypes,
+    _client.serverApi?.requestAllEventData(offset, count, timeLimitations,
         closestToEnding, shortestFirst, skippableOnly);
   }
 }

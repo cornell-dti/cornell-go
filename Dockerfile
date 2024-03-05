@@ -1,4 +1,4 @@
-FROM node
+FROM node:20
 
 EXPOSE 80
 EXPOSE 8000
@@ -19,12 +19,8 @@ RUN npm run build
 
 WORKDIR /app/server
 COPY server .
+RUN chmod +x ./start.sh
 RUN npx prisma generate
 RUN npm run build
-RUN if [ ${DEVELOPMENT} != "true" ]; then npx prisma migrate deploy; fi
-ENTRYPOINT \
-  if [ ${DEVELOPMENT} != "true" ]; then npm run start:prod; \
-  elif [ ${TESTING_UNIT} = "true" ]; then npm run test; \ 
-  elif [ ${TESTING_E2E} = "true" ]; then npm run test:e2e; \ 
-  else npm run start; \
-  fi
+
+ENTRYPOINT ./start.sh

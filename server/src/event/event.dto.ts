@@ -27,14 +27,12 @@ export interface EventDto {
   requiredMembers: number;
   name: string;
   description: string;
-  rewardType: 'limited_time' | 'perpetual';
+  timeLimitation: 'LIMITED_TIME' | 'PERPETUAL';
   endTime: string;
-  rewardIds: string[];
   challengeIds: string[];
   userFavoriteIds?: string[];
   initialOrganizationId?: string;
-  defaultChallengeId: string;
-  minimumScore: number;
+  difficulty: 'Easy' | 'Normal' | 'Hard';
   indexable: boolean;
   longitude: number;
   latitude: number;
