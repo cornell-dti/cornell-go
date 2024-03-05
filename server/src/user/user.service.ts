@@ -94,10 +94,20 @@ export class UserService {
     return user;
   }
 
+  /**
+   *
+   * @param id Get user by id
+   * @returns The user
+   */
   async byId(id: string) {
     return await this.prisma.user.findUnique({ where: { id } });
   }
 
+  /**
+   *
+   * @param email Get user by email
+   * @returns The user
+   */
   async byEmail(email: string) {
     return await this.prisma.user.findFirstOrThrow({ where: { email: email } });
   }
@@ -333,6 +343,14 @@ export class UserService {
     };
   }
 
+  /**
+   *
+   * @param user User to emit
+   * @param deleted True if user was deleted
+   * @param partial True if partial data is updated
+   * @param admin True if admin
+   * @param client The User requesting the information
+   */
   async emitUpdateUserData(
     user: User,
     deleted: boolean,
