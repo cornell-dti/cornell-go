@@ -8,6 +8,8 @@ import 'package:game/model/event_model.dart';
 import 'package:game/model/group_model.dart';
 import 'package:game/model/tracker_model.dart';
 import 'package:game/model/user_model.dart';
+import 'package:game/profile/profile_page.dart';
+import 'package:game/splash_page/splash_page.dart';
 import 'package:game/widget/game_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:game/color_palette.dart';
