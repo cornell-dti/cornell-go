@@ -7,22 +7,6 @@ import 'package:game/model/challenge_model.dart';
 import 'gameplay_map.dart';
 import 'package:provider/provider.dart';
 
-// Returns widget that fills based on tasks and tasks_completed.
-List<Widget> progressBar(int tasks, int tasks_completed) {
-  List<Widget> progress_blocks = [];
-  for (var i = 0; i < tasks; i++) {
-    if (i < tasks_completed) {
-      progress_blocks.add(Expanded(
-          child: Container(height: 20, color: Color.fromARGB(204, 0, 0, 0))));
-    } else {
-      progress_blocks.add(Expanded(
-          child: Container(
-              height: 20, color: Color.fromARGB(204, 217, 217, 217))));
-    }
-  }
-  return progress_blocks;
-}
-
 class GameplayPage extends StatefulWidget {
   const GameplayPage({Key? key}) : super(key: key);
 
@@ -32,8 +16,6 @@ class GameplayPage extends StatefulWidget {
 
 class _GameplayPageState extends State<GameplayPage> {
   @override
-  final tasks = 6;
-  final tasks_completed = 2;
   final distance = .8;
 
   Widget build(BuildContext context) {
@@ -45,21 +27,96 @@ class _GameplayPageState extends State<GameplayPage> {
               Consumer<ChallengeModel>(builder: (context, challengeModel, _) {
             //ChallengeId is placeholder for testing
             var challenge = challengeModel
-                .getChallengeById("c2f1a64d-a798-4a08-a403-e7b5cd13b584");
+                .getChallengeById("132a905c-404b-43ac-81a0-2a15554d6b53");
             print(challenge);
             return Container(
-              padding: EdgeInsets.all(32.0),
-              height: 120,
-              child: Center(
-                child: Text(
-                  "Find the Location of ${challenge?.description ?? ""}",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 20,
-                  ),
+                padding: EdgeInsets.only(
+                  left: 32,
+                  right: 32,
                 ),
-              ),
-            );
+                child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            TextButton(
+                              onPressed: () {
+                                // Left button action
+                              },
+                              child: Text('Leave Game',
+                                  style: TextStyle(
+                                      fontSize: 14, color: Color(0xFF835A7C))),
+                            ),
+                            Container(
+                              decoration: const BoxDecoration(
+                                color: Color(0xFFF1F1F1),
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(15.0),
+                                ),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 4.0, horizontal: 8.0),
+                              child: const Text('Challenge',
+                                  style: TextStyle(
+                                      fontSize: 14, color: Color(0xFFA4A4A4))),
+                            ),
+                          ]),
+                      Container(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "Find the Location of ${challenge?.description ?? ""}",
+                          textAlign: TextAlign.left,
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      Container(
+                          margin: EdgeInsets.only(top: 15),
+                          child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text('Arts Quad',
+                                    style: TextStyle(
+                                        fontSize: 12,
+                                        color: Color(0xFF835A7C))),
+                                Container(
+                                  decoration: const BoxDecoration(
+                                    color: Color(0xFFF9EDDA),
+                                    borderRadius: BorderRadius.all(
+                                      Radius.circular(15.0),
+                                    ),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 4.0, horizontal: 8.0),
+                                  child: const Text('Easy',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                      )),
+                                ),
+                                Container(
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                        color: Color(0xFFFFC737), width: 3),
+                                    color: Color(0xFFBD871F),
+                                    borderRadius: BorderRadius.all(
+                                      Radius.circular(15.0),
+                                    ),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 4.0, horizontal: 8.0),
+                                  child: Text('100 pts',
+                                      style: TextStyle(
+                                          fontSize: 12,
+                                          color: Color(0xFFF1F1F1))),
+                                ),
+                                Text('0.0 Miles Away',
+                                    style: TextStyle(
+                                        fontSize: 12,
+                                        color: Color(0xFF58B171))),
+                              ]))
+                    ]));
           })),
           Expanded(
             child: Stack(
@@ -100,39 +157,56 @@ class _GameplayPageState extends State<GameplayPage> {
                   ),
                 ]),
                 Container(
-                  height: 100,
-                  width: 500,
-                  decoration: BoxDecoration(
-                    color: Color.fromARGB(255, 255, 255, 255),
-                    borderRadius:
-                        BorderRadius.vertical(top: Radius.elliptical(500, 100)),
-                  ),
-                ),
-                Container(
-                  padding: EdgeInsets.all(10),
-                  margin: EdgeInsets.only(bottom: 75),
-                  child: Text(
-                    "${distance} miles away",
-                    style: TextStyle(fontSize: 21, color: Color(0xFFED5656)),
-                  ),
-                  decoration: BoxDecoration(
-                    color: Color.fromARGB(255, 255, 255, 255),
-                    borderRadius: BorderRadius.all(Radius.circular(10)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
-                        spreadRadius: 1,
-                        blurRadius: 1,
-                        offset: Offset(0, 3), // shadow direction: bottom
+                  margin: EdgeInsets.only(bottom: 70),
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(10), // button's shape
                       ),
-                    ],
+                    ),
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return Dialog(
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10)),
+                              elevation: 16, //arbitrary large number
+                              child: Container(
+                                  padding: EdgeInsets.all(20),
+                                  child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Container(
+                                            margin: EdgeInsets.only(top: 5),
+                                            child: Text(
+                                              "Nearly There!",
+                                              style: TextStyle(
+                                                  fontSize: 25,
+                                                  fontWeight: FontWeight.bold),
+                                            )),
+                                        Container(
+                                            margin: EdgeInsets.only(bottom: 10),
+                                            child: Text(
+                                                "Use a hint if needed, you are close!")),
+                                        Center(
+                                            child: ElevatedButton(
+                                                onPressed: () => Navigator.pop(
+                                                    context, false),
+                                                child: Text("Keep Trying")))
+                                      ])));
+                        },
+                      );
+                    },
+                    child: Text(
+                      "I've Arrived!",
+                      style: TextStyle(fontSize: 21, color: Color(0xFFFFFFFF)),
+                    ),
                   ),
-                ),
-                Container(
-                    height: 20,
-                    child: Row(
-                      children: progressBar(tasks, tasks_completed),
-                    )),
+                )
               ],
             ),
           ),

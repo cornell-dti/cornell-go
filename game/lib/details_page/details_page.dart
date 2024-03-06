@@ -154,7 +154,7 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => JourneysPage()));
+                                builder: (context) => BottomNavBar()));
                       }
                     }
                   },
