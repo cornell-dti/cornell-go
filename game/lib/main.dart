@@ -39,7 +39,7 @@ void main() async {
   print(API_URL);
   final GoogleMapsFlutterPlatform platform = GoogleMapsFlutterPlatform.instance;
   // should only apply to Android - needs to be tested for iOS
-  if (mapsImplementation is GoogleMapsFlutterAndroid) {
+  if (platform is GoogleMapsFlutterAndroid) {
       (platform as GoogleMapsFlutterAndroid).useAndroidViewSurface = true;
       initializeMapRenderer();
   }
