@@ -39,8 +39,10 @@ void main() async {
   print(API_URL);
   final GoogleMapsFlutterPlatform platform = GoogleMapsFlutterPlatform.instance;
   // should only apply to Android - needs to be tested for iOS
-  (platform as GoogleMapsFlutterAndroid).useAndroidViewSurface = true;
-  initializeMapRenderer();
+  if (mapsImplementation is GoogleMapsFlutterAndroid) {
+      (platform as GoogleMapsFlutterAndroid).useAndroidViewSurface = true;
+      initializeMapRenderer();
+  }
   // load environment variables
   WidgetsFlutterBinding.ensureInitialized(); // Required by FlutterConfig
   await FlutterConfig.loadEnvVariables();
