@@ -20,6 +20,7 @@ export interface EventDto {
   id: string;
   requiredMembers: number;
   name: string;
+  // thumbnail: string; // should be of type Image
   description: string;
   timeLimitation: "LIMITED_TIME" | "PERPETUAL";
   endTime: string;

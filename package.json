@@ -10,5 +10,8 @@
     "tests:unit": "node ./scripts/tests.js unit",
     "tests:e2e": "node ./scripts/tests.js e2e",
     "setup": "node ./scripts/setup.js"
+  },
+  "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11"
   }
 }
