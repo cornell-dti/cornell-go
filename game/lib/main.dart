@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:game/api/game_api.dart';
-import 'package:game/challenges/challenges_widget.dart';
 import 'package:game/gameplay/gameplay_page.dart';
 import 'package:game/global_leaderboard/global_leaderboard_widget.dart';
 import 'package:game/journeys/journeys_page.dart';
