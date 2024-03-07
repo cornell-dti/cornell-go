@@ -178,13 +178,12 @@ class _JourneysPageState extends State<JourneysPage> {
                       if (index == eventCells.length) {
                         // Footer widget
                         return Padding(
-                            padding:
-                                const EdgeInsets.only(top: 50.0, bottom: 50.0),
+                            padding: const EdgeInsets.only(bottom: 50.0),
                             child: Center(
-                              child: Image.network(
-                                "https://picsum.photos/250?image=9", // Replace with CGo logo
-                                width: 100,
-                                height: 100,
+                              child: Image(
+                                image: AssetImage('assets/images/go-logo.png'),
+                                width: 200,
+                                height: 200,
                               ),
                             ));
                       }
