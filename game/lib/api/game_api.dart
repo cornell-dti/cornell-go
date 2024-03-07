@@ -150,7 +150,7 @@ class ApiClient extends ChangeNotifier {
             "enrollmentType": enrollmentType,
             "year": year,
             "username": username,
-            "long": pos?.long.toString() ?? "0",
+            "long": pos?.long.toString(),
             "aud": Platform.isIOS ? "ios" : "android"
           }));
 
