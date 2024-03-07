@@ -9,9 +9,9 @@ import 'package:game/login/login_page.dart';
 import 'package:game/model/challenge_model.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/group_model.dart';
-import 'package:game/model/reward_model.dart';
 import 'package:game/model/tracker_model.dart';
 import 'package:game/model/user_model.dart';
+import 'package:game/profile/profile_page.dart';
 import 'package:game/splash_page/splash_page.dart';
 import 'package:game/widget/game_widget.dart';
 import 'package:provider/provider.dart';
@@ -46,10 +46,6 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider.value(value: client),
           ChangeNotifierProvider(
             create: (_) => UserModel(client),
-            lazy: false,
-          ),
-          ChangeNotifierProvider(
-            create: (_) => RewardModel(client),
             lazy: false,
           ),
           ChangeNotifierProvider(

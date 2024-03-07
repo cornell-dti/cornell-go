@@ -15,7 +15,6 @@ import {
   RequestOrganizationDataDto,
   UpdateOrganizationDataDto,
 } from "../dto/organization.dto";
-import { RequestRewardDataDto, UpdateRewardDataDto } from "../dto/reward.dto";
 
 //** Web Sockets callback functions are in ./ServerData.tsx*/
 export class ServerApi {
@@ -26,9 +25,6 @@ export class ServerApi {
   }
   requestChallengeData(data: RequestChallengeDataDto) {
     this.socket.emit("requestChallengeData", data);
-  }
-  requestRewardData(data: RequestRewardDataDto) {
-    this.socket.emit("requestRewardData", data);
   }
   requestUserData(data: RequestUserDataDto) {
     this.socket.emit("requestUserData", data);
@@ -47,9 +43,6 @@ export class ServerApi {
   }
   updateChallengeData(data: UpdateChallengeDataDto) {
     this.socket.emit("updateChallengeData", data);
-  }
-  updateRewardData(data: UpdateRewardDataDto) {
-    this.socket.emit("updateRewardData", data);
   }
   updateUserData(data: UpdateUserDataDto) {
     this.socket.emit("updateUserData", data);
@@ -74,10 +67,6 @@ export class ServerApi {
   onUpdateEventData(callback: (data: UpdateEventDataDto) => void) {
     this.socket.removeAllListeners("updateEventData");
     this.socket.on("updateEventData", (data) => callback(data));
-  }
-  onUpdateRewardData(callback: (data: UpdateRewardDataDto) => void) {
-    this.socket.removeAllListeners("updateRewardData");
-    this.socket.on("updateRewardData", (data) => callback(data));
   }
   onUpdateOrganizationData(
     callback: (data: UpdateOrganizationDataDto) => void

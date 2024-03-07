@@ -1,6 +1,17 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:game/api/game_api.dart';
+import 'package:game/api/game_client_dto.dart';
 import 'package:game/journeys/journey_cell.dart';
 import 'package:game/journeys/filter_form.dart';
+import 'package:game/model/challenge_model.dart';
+import 'package:game/model/event_model.dart';
+import 'package:game/model/group_model.dart';
+import 'package:game/model/tracker_model.dart';
+import 'package:game/model/user_model.dart';
+import 'package:game/utils/utility_functions.dart';
+import 'package:provider/provider.dart';
 
 class JourneysPage extends StatefulWidget {
   const JourneysPage({Key? key}) : super(key: key);
@@ -10,54 +21,6 @@ class JourneysPage extends StatefulWidget {
 }
 
 class _JourneysPageState extends State<JourneysPage> {
-  /* Dummy code, to be replaced */
-  final cells = [
-    JourneyCell(
-      "DTI Scavenger Hunt",
-      Image.network('https://picsum.photos/250?image=9'),
-      "Scavenger hunt during All Hands on 2/18",
-      10,
-      5,
-      false,
-      "normal",
-      15,
-      3,
-    ),
-    JourneyCell(
-      "DTI Scavenger Hunt",
-      Image.network('https://picsum.photos/250?image=9'),
-      "Scavenger hunt during All Hands on 2/18",
-      10,
-      0,
-      false,
-      "normal",
-      15,
-      3,
-    ),
-    JourneyCell(
-      "Cornell Cafés",
-      Image.network('https://picsum.photos/250?image=9'),
-      "Get your coffee fix at these top cafés on campus.",
-      6,
-      6,
-      true,
-      "normal",
-      15,
-      3,
-    ),
-    JourneyCell(
-      "journey",
-      Image.network('https://picsum.photos/250?image=9'),
-      "hi",
-      0,
-      0,
-      false,
-      "normal",
-      15,
-      3,
-    ),
-  ];
-
   void openFilter() {
     showModalBottomSheet(
         context: context,
@@ -79,16 +42,6 @@ class _JourneysPageState extends State<JourneysPage> {
           color: Color.fromARGB(255, 255, 248, 241), // Background color
         ),
         child: Center(
-          // child: Stack(
-          //   children: [
-          //     Center(
-          //       // Small, centered image
-          //       child: Image.network(
-          //         "https://picsum.photos/250?image=9", // Replace with CGo logo
-          //         width: 100,
-          //         height: 100,
-          //       ),
-          //     ),
           child: Padding(
             padding: EdgeInsets.all(16),
             child: Column(
@@ -155,17 +108,73 @@ class _JourneysPageState extends State<JourneysPage> {
                     ),
                   ),
                 ),
-                Expanded(
-                  child: ListView.separated(
-                    // child: ListView.separated(
-                    padding: const EdgeInsets.symmetric(horizontal: 3),
-                    itemCount: cells.length + 1,
-                    // itemBuilder: (context, index) {
-                    //   return cells[index];
-                    // },
+                Expanded(child:
+                    Consumer4<EventModel, GroupModel, TrackerModel, UserModel>(
+                        builder: (context, myEventModel, groupModel,
+                            trackerModel, userModel, child) {
+                  List<Widget> eventCells = [];
+                  if (myEventModel.searchResults == null) {
+                    myEventModel.searchEvents(
+                        0,
+                        1000,
+                        [
+                          TimeLimitationType.PERPETUAL,
+                          TimeLimitationType.LIMITED_TIME
+                        ],
+                        false,
+                        false,
+                        false);
+                  }
+                  final events = myEventModel.searchResults ?? [];
+                  if (!events
+                      .any((element) => element.id == groupModel.curEventId)) {
+                    final curEvent =
+                        myEventModel.getEventById(groupModel.curEventId ?? "");
+                    if (curEvent != null) events.add(curEvent);
+                  }
+                  for (EventDto event in events) {
+                    var tracker = trackerModel.trackerByEventId(event.id);
+                    var numberCompleted = tracker?.prevChallengeIds.length ?? 0;
+                    var complete =
+                        (numberCompleted == event.challengeIds.length);
+                    var locationCount = event.challengeIds.length;
+                    var difficulty = event.difficulty;
+                    DateTime now = DateTime.now();
+                    DateTime endtime = HttpDate.parse(event.endTime);
 
+                    Duration timeTillExpire = endtime.difference(now);
+                    eventCells.add(
+                      StreamBuilder(
+                        stream:
+                            Stream.fromFuture(Future.delayed(timeTillExpire)),
+                        builder: (stream, value) => timeTillExpire.isNegative
+                            ? Consumer<ApiClient>(
+                                builder: (context, apiClient, child) {
+                                  if (event.id == groupModel.curEventId) {
+                                    apiClient.serverApi?.setCurrentEvent("");
+                                  }
+                                  return Container();
+                                },
+                              )
+                            : JourneyCell(
+                                key: UniqueKey(),
+                                event.name,
+                                Image.network("https://picsum.photos/250?image=9"), // dummy data for now; should pass in thumbnail parameter
+                                event.description,
+                                locationCount,
+                                numberCompleted,
+                                complete,
+                                difficulty,
+                                event.minimumScore,
+                                0),
+                      ),
+                    );
+                  }
+                  return ListView.separated(
+                    padding: const EdgeInsets.symmetric(horizontal: 3),
+                    itemCount: eventCells.length + 1,
                     itemBuilder: (context, index) {
-                      if (index == cells.length) {
+                      if (index == eventCells.length) {
                         // Footer widget
                         return Padding(
                             padding:
@@ -178,14 +187,14 @@ class _JourneysPageState extends State<JourneysPage> {
                               ),
                             ));
                       }
-                      return cells[index];
+                      return eventCells[index];
                     },
                     physics: BouncingScrollPhysics(),
                     separatorBuilder: (context, index) {
                       return SizedBox(height: 10);
                     },
-                  ),
-                ),
+                  );
+                }))
               ],
             ),
           ),

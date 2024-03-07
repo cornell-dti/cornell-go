@@ -10,7 +10,7 @@ import { EventService } from './event.service';
 import { UserService } from '../user/user.service';
 import { UserGuard } from '../auth/jwt-auth.guard';
 import { UseGuards } from '@nestjs/common';
-import { EventBase, EventRewardType, User } from '@prisma/client';
+import { EventBase, TimeLimitationType, User } from '@prisma/client';
 import {
   EventDto,
   RequestAllEventDataDto,
@@ -31,6 +31,12 @@ export class EventGateway {
     private orgService: OrganizationService,
   ) {}
 
+  /**
+   * Subscribes to and emits all events that have an id within data.eventIds
+   *
+   * @param user The calling user
+   * @param data An array of event ids whose info should be emitted
+   */
   @SubscribeMessage('requestEventData')
   async requestEventData(
     @CallingUser() user: User,
@@ -59,6 +65,13 @@ export class EventGateway {
     }
   }
 
+  /**
+   * Emits all found events and has the user subscribe to each event.
+   * 
+   * @param user The calling user
+   * @param data Includes data such as offset, count, rewardTypes,
+        closestToEnding, shortestFirst, and skippable. OnlySee game_server_api.dart for more details.
+   */
   @SubscribeMessage('requestAllEventData')
   async requestAllEventData(
     @CallingUser() user: User,

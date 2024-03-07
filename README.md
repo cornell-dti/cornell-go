@@ -31,6 +31,13 @@ Press Control + C
 docker compose stop
 ```
 
+### Inspect your database data
+
+```
+cd server
+npx prisma studio
+```
+
 ### Start the frontend (for debugging)
 
 ```
@@ -83,12 +90,14 @@ npx prisma migrate dev --name my_migration
 - **Jasmine Li** - Developer
 - **Nitya Pakala** - Developer
 - **Brian La** - Developer
+- **Temi Adebowale** - Developer
 - **Happy Li** - Designer
 - **James Spokes** - Designer
 - **Janet Luo** - PMM
 - **Nikita Kasumov** - TPM
 - **Cathryn Li** - TPM
 - **Jesse Cheng** - PM
+- **Joshua Park** - APM
 
 ### FA23
 

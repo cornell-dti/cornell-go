@@ -5,7 +5,6 @@ import { ChallengeService } from './challenge.service';
 import { UserService } from '../user/user.service';
 import { GroupService } from '../group/group.service';
 import { EventService } from '../event/event.service';
-import { RewardService } from '../reward/reward.service';
 import { AuthService } from '../auth/auth.service';
 
 describe('ChallengeGateway', () => {
@@ -34,10 +33,6 @@ describe('ChallengeGateway', () => {
         {
           useValue: null,
           provide: EventService,
-        },
-        {
-          useValue: null,
-          provide: RewardService,
         },
         {
           useValue: null,
