@@ -20,9 +20,9 @@ class Preview extends StatefulWidget {
 
 // newly added parameters; need to implement higher up in hierarchy
   // final int
-  //     totalDistance; 
+  //     totalDistance;
   // final String
-  //     location; 
+  //     location;
 
   static Color backgroundColor = Color.fromARGB(255, 217, 214, 213);
   static Color purpleColor = Color.fromARGB(255, 131, 90, 124);
@@ -53,7 +53,7 @@ class Preview extends StatefulWidget {
       // need to figure out newly added parameters; commented out for now
       // totalDistance,
       // location
-      ); 
+      );
 }
 
 class MyFlutterApp {
@@ -77,9 +77,9 @@ class _PreviewState extends State<Preview> {
   final previewType type;
   // newly added parameter; need to implement higher up in hierarchy
   // final int
-  //     totalDistance; 
+  //     totalDistance;
   // final String
-  //     location; 
+  //     location;
   bool _challenge_on = false;
 
   static Color backgroundRed = Color.fromARGB(255, 237, 86, 86);
@@ -93,18 +93,18 @@ class _PreviewState extends State<Preview> {
   final String imgPath = "assets/images/38582.jpg";
 
   _PreviewState(
-    this.challengeName,
-    this.description,
-    this.difficulty,
-    this.points,
-    this.challenge_points,
-    this.type,
-    this.locationCount,
-    this.numberCompleted
-    // newly added; commented out for now
-    // this.totalDistance, 
-    // this.location
-  );
+      this.challengeName,
+      this.description,
+      this.difficulty,
+      this.points,
+      this.challenge_points,
+      this.type,
+      this.locationCount,
+      this.numberCompleted
+      // newly added; commented out for now
+      // this.totalDistance,
+      // this.location
+      );
   @override
   Widget build(BuildContext context) {
     //The popup box
@@ -168,14 +168,15 @@ class _PreviewState extends State<Preview> {
                         child: Row(children: [
                           Icon(Icons.tour,
                               size: 24, color: Preview.purpleColor),
-                          Text("Location placeholder", // should call new parameter; replace later
+                          Text(
+                              "Location placeholder", // should call new parameter; replace later
                               style: TextStyle(
                                   fontSize: 20, color: Preview.purpleColor)),
                           SizedBox(width: 10),
                           Icon(Icons.directions_walk,
                               size: 24, color: Preview.greyColor),
                           Text(
-                               "25" + // should call new parameter; replace later
+                              "25" + // should call new parameter; replace later
                                   "mi",
                               style: TextStyle(
                                   fontSize: 20, color: Preview.greyColor))

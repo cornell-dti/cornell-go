@@ -159,7 +159,8 @@ class _JourneysPageState extends State<JourneysPage> {
                             : JourneyCell(
                                 key: UniqueKey(),
                                 event.name,
-                                Image.network("https://picsum.photos/250?image=9"), // dummy data for now; should pass in thumbnail parameter
+                                Image.network(
+                                    "https://picsum.photos/250?image=9"), // dummy data for now; should pass in thumbnail parameter
                                 event.description,
                                 locationCount,
                                 numberCompleted,

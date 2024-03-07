@@ -51,17 +51,17 @@ class _JourneyCellState extends State<JourneyCell> {
   // final int totalDistance;
 
   _JourneyCellState(
-      this.journeyName,
-      this.thumbnail,
-      this.description,
-      this.locationCount,
-      this.numberCompleted,
-      this.isCompleted,
-      this.difficulty,
-      this.points,
-      this.challengePoints,
-      // this.totalDistance
-      );
+    this.journeyName,
+    this.thumbnail,
+    this.description,
+    this.locationCount,
+    this.numberCompleted,
+    this.isCompleted,
+    this.difficulty,
+    this.points,
+    this.challengePoints,
+    // this.totalDistance
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -76,16 +76,10 @@ class _JourneyCellState extends State<JourneyCell> {
               builder: (
                 BuildContext context,
               ) =>
-                  Preview(
-                    journeyName,
-                    description,
-                    difficulty,
-                    points,
-                    challengePoints,
-                    previewType.journey,
-                    locationCount: locationCount,
-                    numberCompleted: numberCompleted
-                  ));
+                  Preview(journeyName, description, difficulty, points,
+                      challengePoints, previewType.journey,
+                      locationCount: locationCount,
+                      numberCompleted: numberCompleted));
           // await showDialog(
           //     context: context,
           //     builder: (context) => Preview(
@@ -130,7 +124,9 @@ class _JourneyCellState extends State<JourneyCell> {
                     // width: MediaQuery.of(context).size.width,
                     height: 113,
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+                      borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(20),
+                          topRight: Radius.circular(20)),
                       image: DecorationImage(
                         fit: BoxFit.fill,
                         image:
@@ -274,42 +270,39 @@ class _JourneyCellState extends State<JourneyCell> {
                 ),
                 Padding(
                   padding: const EdgeInsets.only(top: 9),
-                  child: 
-                  Row(
+                  child: Row(
                     children: [
-
-
                       Stack(children: [
-                                Container(
-                                  width: 260,
-                                  height: 20,
-                                  alignment: Alignment.centerLeft,
-                                  child: Container(
-                                    decoration: new BoxDecoration(
-                                      color: Color.fromARGB(255, 241, 241, 241),
-                                      shape: BoxShape.rectangle,
-                                      borderRadius: BorderRadius.all(
-                                          Radius.circular(16.0)),
-                                    ),
-                                  ),
-                                ),
-                                Container(
-                                  width: (locationCount > 0
-                                          ? numberCompleted / locationCount
-                                          : 0) *
-                                      260,
-                                  height: 20,
-                                  alignment: Alignment.centerLeft,
-                                  child: Container(
-                                    decoration: new BoxDecoration(
-                                      color: Color.fromARGB(191, 237, 86, 86),
-                                      shape: BoxShape.rectangle,
-                                      borderRadius: BorderRadius.all(
-                                          Radius.circular(16.0)),
-                                    ),
-                                  ),
-                                ),
-                              ]),
+                        Container(
+                          width: 260,
+                          height: 20,
+                          alignment: Alignment.centerLeft,
+                          child: Container(
+                            decoration: new BoxDecoration(
+                              color: Color.fromARGB(255, 241, 241, 241),
+                              shape: BoxShape.rectangle,
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(16.0)),
+                            ),
+                          ),
+                        ),
+                        Container(
+                          width: (locationCount > 0
+                                  ? numberCompleted / locationCount
+                                  : 0) *
+                              260,
+                          height: 20,
+                          alignment: Alignment.centerLeft,
+                          child: Container(
+                            decoration: new BoxDecoration(
+                              color: Color.fromARGB(191, 237, 86, 86),
+                              shape: BoxShape.rectangle,
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(16.0)),
+                            ),
+                          ),
+                        ),
+                      ]),
                       // Container(
                       //   width: 260,
                       //   child: ClipRRect(

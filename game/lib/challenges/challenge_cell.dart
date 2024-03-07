@@ -30,15 +30,14 @@ class ChallengeCell extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() => _ChallengeCellState(
-        location,
-        challengeName,
-        thumbnail,
-        isCompleted,
-        description,
-        difficulty,
-        points,
-        challenge_points
-      );
+      location,
+      challengeName,
+      thumbnail,
+      isCompleted,
+      description,
+      difficulty,
+      points,
+      challenge_points);
 }
 
 class _ChallengeCellState extends State<ChallengeCell> {
@@ -51,21 +50,20 @@ class _ChallengeCellState extends State<ChallengeCell> {
   final int points;
   final int challenge_points;
   // newly added field
-  // final int totalDistance; 
-
+  // final int totalDistance;
 
   _ChallengeCellState(
-      this.location,
-      this.challengeName,
-      this.thumbnail,
-      this.isCompleted,
-      this.description,
-      this.difficulty,
-      this.points,
-      this.challenge_points,
-      // newly added field
-      // this.totalDistance
-      );
+    this.location,
+    this.challengeName,
+    this.thumbnail,
+    this.isCompleted,
+    this.description,
+    this.difficulty,
+    this.points,
+    this.challenge_points,
+    // newly added field
+    // this.totalDistance
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -78,7 +76,7 @@ class _ChallengeCellState extends State<ChallengeCell> {
             context: context,
             isScrollControlled: true,
             builder: (context) => Preview(challengeName, description,
-                difficulty, points, challenge_points, previewType.challenge)); 
+                difficulty, points, challenge_points, previewType.challenge));
       },
       child: Container(
         decoration: BoxDecoration(
