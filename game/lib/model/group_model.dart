@@ -1,4 +1,3 @@
-
 import 'package:flutter/foundation.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/api/game_client_dto.dart';

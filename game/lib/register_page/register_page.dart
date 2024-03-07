@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:game/details_page/details_page.dart';
 import 'package:game/widget/lato_text.dart';
