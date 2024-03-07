@@ -10,6 +10,7 @@ class JourneysPage extends StatefulWidget {
 }
 
 class _JourneysPageState extends State<JourneysPage> {
+  /* Dummy code, to be replaced */
   final cells = [
     JourneyCell(
       "DTI Scavenger Hunt",
