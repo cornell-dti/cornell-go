@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
@@ -53,19 +54,39 @@ class SettingsPage extends StatelessWidget {
                             style: TextStyle(fontFamily: 'Poppins'),
                           ))),
                   Divider(height: 1),
-                  Container(
-                      height: 60,
+                  LayoutBuilder(builder:
+                      (BuildContext context, BoxConstraints constraints) {
+                    return Container(
                       decoration: BoxDecoration(
                         color: Colors.white,
                       ),
-                      child: ListTile(
-                          leading: SvgPicture.asset(
-                            'assets/icons/bell.svg',
-                          ),
-                          title: Text(
-                            'Notifications',
-                            style: TextStyle(fontFamily: 'Poppins'),
-                          ))),
+                      child: TextButton(
+                        onPressed: () {},
+                        style: TextButton.styleFrom(
+                            padding: EdgeInsets.only(left: 20.0),
+                            alignment: Alignment.centerLeft,
+                            fixedSize: Size(constraints.maxWidth, 60)),
+                        child: Row(
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.only(right: 20.0),
+                              child: SvgPicture.asset(
+                                'assets/icons/bell.svg',
+                              ),
+                            ),
+                            Text(
+                              'Notifications',
+                              textAlign: TextAlign.left,
+                              style: TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: 16,
+                                  color: Colors.black),
+                            )
+                          ],
+                        ),
+                      ),
+                    );
+                  }),
                   Divider(height: 1),
                   Container(
                       height: 60,
