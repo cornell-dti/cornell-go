@@ -94,10 +94,20 @@ export class UserService {
     return user;
   }
 
+  /**
+   *
+   * @param id Get user by id
+   * @returns The user
+   */
   async byId(id: string) {
     return await this.prisma.user.findUnique({ where: { id } });
   }
 
+  /**
+   *
+   * @param email Get user by email
+   * @returns The user
+   */
   async byEmail(email: string) {
     return await this.prisma.user.findFirstOrThrow({ where: { email: email } });
   }
@@ -306,7 +316,6 @@ export class UserService {
     const joinedUser = await this.prisma.user.findUniqueOrThrow({
       where: { id: user.id },
       include: {
-        rewards: true,
         eventTrackers: true,
         favorites: true,
         group: { select: { friendlyId: true } },
@@ -325,14 +334,23 @@ export class UserService {
       authType: (
         joinedUser.authType as string
       ).toLowerCase() as UserAuthTypeDto,
-      rewardIds: partial ? undefined : joinedUser.rewards.map(rw => rw.id),
       trackedEventIds: partial
         ? undefined
         : joinedUser.eventTrackers.map(ev => ev.eventId),
-      favoriteIds: partial ? undefined : joinedUser.favorites.map(ev => ev.id),
+      favoriteIds: partial
+        ? undefined
+        : joinedUser.favorites.map((ev: EventBase) => ev.id),
     };
   }
 
+  /**
+   *
+   * @param user User to emit
+   * @param deleted True if user was deleted
+   * @param partial True if partial data is updated
+   * @param admin True if admin
+   * @param client The User requesting the information
+   */
   async emitUpdateUserData(
     user: User,
     deleted: boolean,

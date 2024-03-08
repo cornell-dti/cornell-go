@@ -12,7 +12,6 @@ import { EventDto } from "../dto/event.dto";
 import { UserDto } from "../dto/user.dto";
 import { GroupDto } from "../dto/group.dto";
 import { OrganizationDto } from "../dto/organization.dto";
-import { RewardDto } from "../dto/reward.dto";
 import { ServerApi } from "./ServerApi";
 import { ServerConnectionContext } from "./ServerConnection";
 
@@ -20,7 +19,6 @@ import { ServerConnectionContext } from "./ServerConnection";
 const defaultData = {
   events: new Map<string, EventDto>(),
   challenges: new Map<string, ChallengeDto>(),
-  rewards: new Map<string, RewardDto>(),
   organizations: new Map<string, OrganizationDto>(),
   users: new Map<string, UserDto>(),
   groups: new Map<string, GroupDto>(),
@@ -30,8 +28,6 @@ const defaultData = {
   selectEvent(id: string) {},
   selectOrg(id: string) {},
   setAdminStatus(id: string, granted: boolean) {},
-  updateReward(reward: RewardDto) {},
-  deleteReward(id: string) {},
   updateChallenge(challenge: ChallengeDto) {},
   deleteChallenge(id: string) {},
   updateEvent(event: EventDto) {},
@@ -65,9 +61,6 @@ export function ServerDataProvider(props: { children: ReactNode }) {
         sock.requestChallengeData({
           challengeIds: serverData.events.get(id)?.challengeIds ?? [],
         });
-        sock.requestRewardData({
-          rewardIds: serverData.events.get(id)?.rewardIds ?? [],
-        });
       },
       selectOrg(id: string) {
         setServerData({ ...serverData, selectedOrg: id, selectedEvent: "" });
@@ -80,12 +73,6 @@ export function ServerDataProvider(props: { children: ReactNode }) {
         sock.requestEventData({
           eventIds: serverData.organizations.get(id)?.events ?? [],
         });
-      },
-      updateReward(reward: RewardDto) {
-        sock.updateRewardData({ reward, deleted: false });
-      },
-      deleteReward(id: string) {
-        sock.updateRewardData({ reward: id, deleted: true });
       },
       updateChallenge(challenge: ChallengeDto) {
         sock.updateChallengeData({ challenge, deleted: false });
@@ -150,18 +137,9 @@ export function ServerDataProvider(props: { children: ReactNode }) {
           serverData.events.get((data.event as EventDto).id)?.challengeIds ??
           [];
 
-        const oldRewards =
-          serverData.events.get((data.event as EventDto).id)?.rewardIds ?? [];
-
         sock.requestChallengeData({
           challengeIds: (data.event as EventDto).challengeIds.filter(
             (chal) => !(chal in oldChallenges)
-          ),
-        });
-
-        sock.requestRewardData({
-          rewardIds: (data.event as EventDto).rewardIds.filter(
-            (rw) => !(rw in oldRewards)
           ),
         });
 
@@ -180,18 +158,6 @@ export function ServerDataProvider(props: { children: ReactNode }) {
         serverData.challenges.set(
           (data.challenge as ChallengeDto).id,
           data.challenge as ChallengeDto
-        );
-      }
-
-      setTimeout(() => setServerData({ ...serverData }), 0);
-    });
-    sock.onUpdateRewardData((data) => {
-      if (data.deleted) {
-        serverData.rewards.delete(data.reward as string);
-      } else {
-        serverData.rewards.set(
-          (data.reward as RewardDto).id,
-          data.reward as RewardDto
         );
       }
 
