@@ -29,15 +29,15 @@ class SettingsPage extends StatelessWidget {
           ),
           actions: [],
         ),
-        body: Center(
-          child: SizedBox(
-            width: 375,
-            child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  SizedBox(height: 20),
-                  Container(
-                      height: 60,
+        body: Center(child: LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            return SizedBox(
+              width: constraints.maxWidth * 0.9,
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SizedBox(height: 20),
+                    Container(
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.only(
@@ -45,18 +45,34 @@ class SettingsPage extends StatelessWidget {
                           topLeft: Radius.circular(10),
                         ),
                       ),
-                      child: ListTile(
-                          leading: SvgPicture.asset(
-                            'assets/icons/head.svg',
-                          ),
-                          title: Text(
-                            'Edit Profile',
-                            style: TextStyle(fontFamily: 'Poppins'),
-                          ))),
-                  Divider(height: 1),
-                  LayoutBuilder(builder:
-                      (BuildContext context, BoxConstraints constraints) {
-                    return Container(
+                      child: TextButton(
+                        onPressed: () {},
+                        style: TextButton.styleFrom(
+                            padding: EdgeInsets.only(left: 20.0),
+                            alignment: Alignment.centerLeft,
+                            fixedSize: Size(constraints.maxWidth, 60)),
+                        child: Row(
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.only(right: 20.0),
+                              child: SvgPicture.asset(
+                                'assets/icons/head.svg',
+                              ),
+                            ),
+                            Text(
+                              'Edit Profile',
+                              textAlign: TextAlign.left,
+                              style: TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: 16,
+                                  color: Colors.black),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                    Divider(height: 1),
+                    Container(
                       decoration: BoxDecoration(
                         color: Colors.white,
                       ),
@@ -85,11 +101,9 @@ class SettingsPage extends StatelessWidget {
                           ],
                         ),
                       ),
-                    );
-                  }),
-                  Divider(height: 1),
-                  Container(
-                      height: 60,
+                    ),
+                    Divider(height: 1),
+                    Container(
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.only(
@@ -97,38 +111,74 @@ class SettingsPage extends StatelessWidget {
                           bottomRight: Radius.circular(10),
                         ),
                       ),
-                      child: ListTile(
-                          leading: SvgPicture.asset(
-                            'assets/icons/feedback.svg',
-                          ),
-                          title: Text(
-                            'Feedback',
-                            style: TextStyle(fontFamily: 'Poppins'),
-                          ))),
-                  SizedBox(height: 20),
-                  Container(
-                      height: 60,
+                      child: TextButton(
+                        onPressed: () {},
+                        style: TextButton.styleFrom(
+                            padding: EdgeInsets.only(left: 20.0),
+                            alignment: Alignment.centerLeft,
+                            fixedSize: Size(constraints.maxWidth, 60)),
+                        child: Row(
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.only(right: 20.0),
+                              child: SvgPicture.asset(
+                                'assets/icons/feedback.svg',
+                              ),
+                            ),
+                            Text(
+                              'Feedback',
+                              textAlign: TextAlign.left,
+                              style: TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: 16,
+                                  color: Colors.black),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    Container(
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.all(
                           Radius.circular(10),
                         ),
                       ),
-                      child: ListTile(
-                          leading: SvgPicture.asset(
-                            'assets/icons/logout.svg',
-                          ),
-                          title: Text(
-                            'Logout',
-                            style: TextStyle(fontFamily: 'Poppins'),
-                          ))),
-                  Spacer(),
-                  Padding(
-                      padding: EdgeInsets.only(bottom: 120),
-                      child: Image(
-                          image: AssetImage('assets/images/go-logo.png'))),
-                ]),
-          ),
-        ));
+                      child: TextButton(
+                        onPressed: () {},
+                        style: TextButton.styleFrom(
+                            padding: EdgeInsets.only(left: 20.0),
+                            alignment: Alignment.centerLeft,
+                            fixedSize: Size(constraints.maxWidth, 60)),
+                        child: Row(
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.only(right: 20.0),
+                              child: SvgPicture.asset(
+                                'assets/icons/logout.svg',
+                              ),
+                            ),
+                            Text(
+                              'Logout',
+                              textAlign: TextAlign.left,
+                              style: TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: 16,
+                                  color: Colors.black),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                    Spacer(),
+                    Padding(
+                        padding: EdgeInsets.only(bottom: 120),
+                        child: Image(
+                            image: AssetImage('assets/images/go-logo.png'))),
+                  ]),
+            );
+          },
+        )));
   }
 }
