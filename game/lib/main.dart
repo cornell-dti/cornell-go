@@ -5,7 +5,6 @@ import 'package:game/api/game_api.dart';
 import 'package:game/gameplay/gameplay_page.dart';
 import 'package:game/global_leaderboard/global_leaderboard_widget.dart';
 import 'package:game/journeys/journeys_page.dart';
-import 'package:game/login/login_page.dart';
 import 'package:game/model/challenge_model.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/group_model.dart';
@@ -15,13 +14,9 @@ import 'package:game/profile/profile_page.dart';
 import 'package:game/splash_page/splash_page.dart';
 import 'package:game/widget/game_widget.dart';
 import 'package:provider/provider.dart';
-import 'package:game/navigation_page/bottom_navbar.dart';
 import 'package:game/color_palette.dart';
 
 import 'dart:io' show Platform;
-
-import 'challenges/challenges_page.dart';
-import 'gameplay/gameplay_map.dart';
 
 const ENV_URL = String.fromEnvironment('API_URL', defaultValue: "");
 

@@ -42,6 +42,7 @@ Future<String?> getId() async {
     var androidDeviceInfo = await deviceInfo.androidInfo;
     return androidDeviceInfo.id; // unique ID on Android
   }
+  return null;
 }
 
 Future<void> showLeaveConfirmationAlert(

@@ -51,6 +51,7 @@ class _ChallengesPageState extends State<ChallengesPage> {
         15,
         3),
   ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
