@@ -160,6 +160,9 @@ class _GameplayPageState extends State<GameplayPage> {
                   margin: EdgeInsets.only(bottom: 70),
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
+                      backgroundColor: Color.fromARGB(255, 237, 86, 86),
+                      padding: EdgeInsets.only(
+                          right: 15, left: 15, top: 10, bottom: 10),
                       shape: RoundedRectangleBorder(
                         borderRadius:
                             BorderRadius.circular(10), // button's shape
