@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:game/gameplay/gameplay_page.dart';
 import 'package:game/journeys/journeys_page.dart';
 import 'package:game/challenges/challenges_page.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class HomeNavBar extends StatefulWidget {
   const HomeNavBar({super.key});
