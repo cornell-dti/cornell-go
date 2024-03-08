@@ -206,7 +206,7 @@ class _GameplayMapState extends State<GameplayMap> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Padding(
-                    padding: EdgeInsets.only(bottom: 8.0),
+                    padding: EdgeInsets.only(bottom: 15.0),
                     child: FloatingActionButton.extended(
                       onPressed: recenterCamera,
                       label: Icon(Icons.lightbulb,
@@ -216,7 +216,7 @@ class _GameplayMapState extends State<GameplayMap> {
                     ),
                   ),
                   Padding(
-                    padding: EdgeInsets.only(bottom: 8.0),
+                    padding: EdgeInsets.only(bottom: 150.0),
                     child: FloatingActionButton.extended(
                       onPressed: recenterCamera,
                       label: Icon(Icons.location_on,
