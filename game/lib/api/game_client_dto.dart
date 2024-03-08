@@ -157,7 +157,6 @@ class EventDto {
     endTime = fields['endTime'];
     challengeIds = List<String>.from(fields['challengeIds']);
     initialOrganizationId = fields['initialOrganizationId'];
-    minimumScore = fields['minimumScore'];
     difficulty = fields['difficulty'];
     indexable = fields['indexable'];
     longitude = fields['longitude'];
