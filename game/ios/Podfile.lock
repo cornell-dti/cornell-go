@@ -60,7 +60,8 @@ PODS:
     - Flutter
   - google_sign_in_ios (0.0.1):
     - Flutter
-    - GoogleSignIn (~> 6.2)
+    - FlutterMacOS
+    - GoogleSignIn (~> 7.0)
   - GoogleAppMeasurement (10.21.0):
     - GoogleAppMeasurement/AdIdSupport (= 10.21.0)
     - GoogleUtilities/AppDelegateSwizzler (~> 7.11)
@@ -203,7 +204,7 @@ SPEC CHECKSUMS:
   FirebaseCore: 74f647ad9739ea75112ce6c3b3b91f5488ce1122
   FirebaseCoreInternal: 43c1788eaeee9d1b97caaa751af567ce11010d00
   FirebaseInstallations: 390ea1d10a4d02b20c965cbfd527ee9b3b412acb
-  Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
+  Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   flutter_secure_storage: 23fc622d89d073675f2eaa109381aefbcf5a49be
   fluttertoast: 31b00dabfa7fb7bacd9e7dbee580d7a2ff4bf265
   FMDB: aa44149f6fb634b1ac54f64f47064bb0d0c5a032
