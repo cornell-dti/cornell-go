@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:game/profile/achievement_cell.dart';
 import 'package:game/profile/completed_cell.dart';
+import 'package:game/profile/settings_page.dart';
 import 'package:game/settings/settings.dart';
 
 /**
@@ -36,25 +37,26 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                       ),
                       Align(
-                          alignment: Alignment.bottomCenter,
-                          child: Container(
-                            height: 30,
-                            width: 100,
-                            padding: EdgeInsets.all(5.0),
-                            decoration: BoxDecoration(
-                              color: Color.fromARGB(255, 246, 228, 201),
-                              borderRadius: BorderRadius.circular(15.0),
-                            ),
-                            child: Center(
-                              child: Text(
-                                '246 points',
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.w500,
-                                ),
+                        alignment: Alignment.bottomCenter,
+                        child: Container(
+                          height: 30,
+                          width: 100,
+                          padding: EdgeInsets.all(5.0),
+                          decoration: BoxDecoration(
+                            color: Color.fromARGB(255, 246, 228, 201),
+                            borderRadius: BorderRadius.circular(15.0),
+                          ),
+                          child: Center(
+                            child: Text(
+                              '246 points',
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
-                          )),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -72,7 +74,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => SettingsWidget()));
+                                builder: (context) => SettingsPage()));
                       }),
                 ),
               ),
