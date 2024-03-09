@@ -47,6 +47,9 @@ export class ChallengeGateway {
     @CallingUser() user: User,
     @MessageBody() data: RequestChallengeDataDto,
   ) {
+    console.log('TRYING TO RETREIVE CHALLENGE DATA');
+    console.log(data);
+
     const adminChallenges =
       await this.challengeService.getChallengesByIdsForUser(
         user,
@@ -57,9 +60,12 @@ export class ChallengeGateway {
     const basicChallenges =
       await this.challengeService.getChallengesByIdsForUser(
         user,
-        true,
+        false,
         data.challengeIds,
       );
+
+    console.log('admin', adminChallenges);
+    console.log('basic', basicChallenges);
 
     for (const chal of adminChallenges) {
       this.clientService.subscribe(user, chal.id, true);

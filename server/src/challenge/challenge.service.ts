@@ -203,6 +203,7 @@ export class ChallengeService {
     };
 
     if (client) {
+      console.log('client');
       this.clientService.sendUpdate<UpdateChallengeDataDto>(
         'updateChallengeData',
         client.id,
@@ -210,6 +211,7 @@ export class ChallengeService {
         dto,
       );
     } else {
+      console.log('not client');
       this.clientService.sendUpdate<UpdateChallengeDataDto>(
         'updateChallengeData',
         challenge.id,
