@@ -116,18 +116,93 @@ class _ChallengesPageState extends State<ChallengesPage> {
                     ],
                   ),
                 ),
-                Expanded(
-                  child: ListView.separated(
-                    padding: const EdgeInsets.all(0),
-                    itemCount: cells.length,
+                Expanded(child:
+                    Consumer4<EventModel, GroupModel, TrackerModel, UserModel>(
+                        builder: (context, myEventModel, groupModel,
+                            trackerModel, userModel, child) {
+                  List<Widget> eventCells = [];
+                  if (myEventModel.searchResults == null) {
+                    myEventModel.searchEvents(
+                        0,
+                        1000,
+                        [
+                          TimeLimitationType.PERPETUAL,
+                          TimeLimitationType.LIMITED_TIME
+                        ],
+                        false,
+                        false,
+                        false);
+                  }
+                  final events = myEventModel.searchResults ?? [];
+                  if (!events
+                      .any((element) => element.id == groupModel.curEventId)) {
+                    final curEvent =
+                        myEventModel.getEventById(groupModel.curEventId ?? "");
+                    if (curEvent != null) events.add(curEvent);
+                  }
+                  for (EventDto event in events) {
+                    var tracker = trackerModel.trackerByEventId(event.id);
+                    var numberCompleted = tracker?.prevChallengeIds.length ?? 0;
+                    var complete =
+                        (numberCompleted == event.challengeIds.length);
+                    var locationCount = event.challengeIds.length;
+                    var difficulty = event.difficulty;
+                    DateTime now = DateTime.now();
+                    DateTime endtime = HttpDate.parse(event.endTime);
+
+                    Duration timeTillExpire = endtime.difference(now);
+                    eventCells.add(
+                      StreamBuilder(
+                        stream:
+                            Stream.fromFuture(Future.delayed(timeTillExpire)),
+                        builder: (stream, value) => timeTillExpire.isNegative
+                            ? Consumer<ApiClient>(
+                                builder: (context, apiClient, child) {
+                                  if (event.id == groupModel.curEventId) {
+                                    apiClient.serverApi?.setCurrentEvent("");
+                                  }
+                                  return Container();
+                                },
+                              )
+                            : ChallengeCell(
+                                key: UniqueKey(),
+                                event.name,
+                                Image.network(
+                                    "https://picsum.photos/250?image=9"), // dummy data for now; should pass in thumbnail parameter
+                                event.description,
+                                locationCount,
+                                numberCompleted,
+                                complete,
+                                difficulty,
+                                event.minimumScore,
+                                0),
+                      ),
+                    );
+                  }
+                  return ListView.separated(
+                    padding: const EdgeInsets.symmetric(horizontal: 3),
+                    itemCount: eventCells.length + 1,
                     itemBuilder: (context, index) {
-                      return cells[index];
+                      if (index == eventCells.length) {
+                        // Footer widget
+                        return Padding(
+                            padding: const EdgeInsets.only(bottom: 50.0),
+                            child: Center(
+                              child: Image(
+                                image: AssetImage('assets/images/go-logo.png'),
+                                width: 200,
+                                height: 200,
+                              ),
+                            ));
+                      }
+                      return eventCells[index];
                     },
+                    physics: BouncingScrollPhysics(),
                     separatorBuilder: (context, index) {
                       return SizedBox(height: 10);
                     },
-                  ),
-                ),
+                  );
+                }))
               ],
             ),
           )),
