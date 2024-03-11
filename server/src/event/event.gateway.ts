@@ -13,11 +13,11 @@ import { UseGuards } from '@nestjs/common';
 import { EventBase, TimeLimitationType, User } from '@prisma/client';
 import {
   EventDto,
-  RequestAllEventDataDto,
+  SearchEventsDto,
   RequestEventDataDto,
   RequestEventLeaderDataDto,
   UpdateEventDataDto,
-  RequestRecommendedEventsDto,
+  EventSearchResultsDto,
 } from './event.dto';
 import { RequestEventTrackerDataDto } from '../challenge/challenge.dto';
 import { OrganizationService } from '../organization/organization.service';
@@ -72,28 +72,21 @@ export class EventGateway {
    * @param data Includes data such as offset, count, rewardTypes,
         closestToEnding, shortestFirst, and skippable. OnlySee game_server_api.dart for more details.
    */
-  @SubscribeMessage('requestAllEventData')
-  async requestAllEventData(
+  @SubscribeMessage('searchEvents')
+  async searchEvents(
     @CallingUser() user: User,
-    @MessageBody() data: RequestAllEventDataDto,
+    @MessageBody() data: SearchEventsDto,
   ) {
-    const evs = await this.eventService.getEventsForUser(user);
+    const evIds = await this.eventService.getEventIdsForUser(user, data);
 
-    for (const ev of evs) {
-      this.clientService.subscribe(user, ev.id, false);
-      await this.eventService.emitUpdateEventData(ev, false, false, user);
-    }
-  }
+    const results: EventSearchResultsDto = {
+      searchId: data.searchId,
+      offset: data.offset,
+      count: data.count,
+      eventIds: evIds,
+    };
 
-  @SubscribeMessage('requestRecommendedEvents')
-  async requestRecommendedEvents(
-    @CallingUser() user: User,
-    @MessageBody() data: RequestRecommendedEventsDto,
-  ) {
-    const evs = await this.eventService.getRecommendedEventsForUser(user, data);
-    for (const ev of evs) {
-      await this.eventService.emitUpdateEventData(ev, false, false, user);
-    }
+    await this.eventService.emitEventSearchResults(user, results);
   }
 
   @SubscribeMessage('requestEventLeaderData')

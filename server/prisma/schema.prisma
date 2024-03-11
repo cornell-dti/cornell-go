@@ -34,7 +34,16 @@ enum LocationType {
   WEST_CAMPUS
   COLLEGETOWN
   ITHACA_COMMONS
-  ANY
+  OTHER
+}
+
+enum EventCategoryType {
+  FOOD
+  NATURE
+  HISTORICAL
+  CAFE
+  DININGHALL
+  DORM
 }
 
 enum AchievementType {
@@ -137,10 +146,10 @@ model EventBase {
   usedIn          Organization[]     @relation("eventOrgs")
   trackers        EventTracker[]
   activeGroups    Group[]
-  latitude        Float
-  longitude       Float
   achievements    Achievement[]
   difficulty      DifficultyMode
+  category        EventCategoryType
+  location        LocationType
 }
 
 model EventTracker {

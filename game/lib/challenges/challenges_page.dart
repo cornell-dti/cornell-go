@@ -20,7 +20,7 @@ class _ChallengesPageState extends State<ChallengesPage> {
         Image.network('https://picsum.photos/250?image=9'),
         false,
         "Find this famous statue!",
-        "Easy",
+        "EASY",
         15,
         3),
     ChallengeCell(

@@ -6,6 +6,8 @@ import {
   TimeLimitationType,
   EventTracker,
   User,
+  EventCategoryType,
+  LocationType,
 } from '@prisma/client';
 import { LeaderDto, UpdateLeaderDataDto } from '../challenge/challenge.dto';
 import { v4 } from 'uuid';
@@ -19,7 +21,12 @@ import {
   EventDto,
   EventTrackerDto,
   UpdateEventDataDto,
-  RequestRecommendedEventsDto,
+  TimeLimitationDto,
+  EventDifficultyDto,
+  EventLocationDto,
+  EventCategoryDto,
+  EventSearchResultsDto,
+  SearchEventsDto,
 } from './event.dto';
 
 @Injectable()
@@ -231,27 +238,20 @@ export class EventService {
     return evTracker;
   }
 
-  async getEventsForUser(user: User) {
-    return await this.prisma.eventBase.findMany({
-      where: { usedIn: { some: { members: { some: { id: user.id } } } } },
-    });
-  }
-
-  async getRecommendedEventsForUser(
-    user: User,
-    data: RequestRecommendedEventsDto,
-  ) {
-    const evs: EventBase[] = await this.prisma.$queryRaw`
-      select * from "EventBase" ev 
-      where ev."id" in (select e."A" from "_eventOrgs" e inner join "_player" p on e."B" = p."A" and ${
-        user.id
-      } = p."B")
-      order by ((ev."latitude" - ${data.latitude})^2 + (ev."longitude" - ${
-      data.longitude
-    })^2)
-      fetch first ${data.count ?? 4} rows only
-    `;
-    return evs;
+  async getEventIdsForUser(user: User, criteria: SearchEventsDto) {
+    return (
+      await this.prisma.eventBase.findMany({
+        where: {
+          usedIn: { some: { members: { some: { id: user.id } } } },
+          category: criteria.categories && { in: criteria.categories },
+          location: criteria.locations && { in: criteria.locations },
+          difficulty: criteria.difficulties && { in: criteria.difficulties },
+        },
+        skip: criteria.offset,
+        take: criteria.count,
+        select: { id: true },
+      })
+    ).map(({ id }) => id);
   }
 
   /** Get the top N users by score */
@@ -276,22 +276,14 @@ export class EventService {
       id: ev.id,
       name: ev.name,
       description: ev.description,
-      timeLimitation:
-        ev.timeLimitation == TimeLimitationType.LIMITED_TIME
-          ? 'LIMITED_TIME'
-          : 'PERPETUAL',
+      timeLimitation: ev.timeLimitation as TimeLimitationDto,
       endTime: ev.endTime.toUTCString(),
       requiredMembers: ev.requiredMembers,
       indexable: ev.indexable,
       challengeIds: sortedChals.map(c => c.id),
-      difficulty:
-        ev.difficulty === DifficultyMode.EASY
-          ? 'Easy'
-          : ev.difficulty === DifficultyMode.NORMAL
-          ? 'Normal'
-          : 'Hard',
-      latitude: ev.latitude,
-      longitude: ev.longitude,
+      difficulty: ev.difficulty as EventDifficultyDto,
+      location: ev.location as EventLocationDto,
+      category: ev.category as EventCategoryDto,
     };
   }
 
@@ -319,6 +311,15 @@ export class EventService {
       tracker.userId,
       false,
       dto,
+    );
+  }
+
+  async emitEventSearchResults(receiver: User, results: EventSearchResultsDto) {
+    this.clientService.sendUpdate(
+      'updateEventSearchResults',
+      receiver.id,
+      false,
+      results,
     );
   }
 
@@ -408,30 +409,6 @@ export class EventService {
     }));
   }
 
-  async updateLongitudeLatitude(eventId: string) {
-    const ev = await this.prisma.eventBase.findFirst({
-      where: { id: eventId },
-      select: { challenges: true },
-    });
-    const firstChalId = ev?.challenges.sort(
-      (a, b) => a.eventIndex - b.eventIndex,
-    )[0].id;
-    const chal = await this.prisma.challenge.findFirst({
-      where: { id: firstChalId },
-      select: { latitude: true, longitude: true },
-    });
-    const updatedEv = await this.prisma.eventBase.update({
-      where: {
-        id: eventId,
-      },
-      data: {
-        longitude: chal?.longitude,
-        latitude: chal?.latitude,
-      },
-    });
-    return updatedEv;
-  }
-
   async upsertEventFromDto(event: EventDto) {
     const firstChal = await this.prisma.challenge.findFirst({
       where: { id: event.challengeIds[0] },
@@ -442,31 +419,21 @@ export class EventService {
       requiredMembers: event.requiredMembers,
       name: event.name.substring(0, 2048),
       description: event.description.substring(0, 2048),
-      timeLimitation:
-        event.timeLimitation === 'LIMITED_TIME'
-          ? TimeLimitationType.LIMITED_TIME
-          : TimeLimitationType.PERPETUAL,
+      timeLimitation: event.timeLimitation as TimeLimitationType,
       endTime: new Date(event.endTime),
-      // challengeIds: event.challengeIds,
       userFavoriteIds: event.userFavoriteIds,
-      // initialOrganizationId: event.initialOrganizationId,
       indexable: event.indexable,
-      difficulty:
-        event.difficulty === 'Easy'
-          ? DifficultyMode.EASY
-          : event.difficulty === 'Normal'
-          ? DifficultyMode.NORMAL
-          : DifficultyMode.HARD,
-      latitude: firstChal?.latitude ?? 0,
-      longitude: firstChal?.longitude ?? 0,
+      difficulty: event.difficulty as DifficultyMode,
+      category: event.category as EventCategoryType,
+      location: event.location as LocationType,
     };
 
     const eventEntity = await this.prisma.eventBase.upsert({
       where: { id: event.id },
       create: {
         ...assignData,
-        usedIn: {
-          connect: { id: event.initialOrganizationId ?? '' },
+        usedIn: new String(event.initialOrganizationId) && {
+          connect: { id: event.initialOrganizationId },
         },
       },
       update: {

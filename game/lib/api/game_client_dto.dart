@@ -1,3 +1,5 @@
+import 'dart:io';
+
 enum UserDataAuthTypeDto { DEVICE, APPLE, GOOGLE }
 
 class UserDto {
@@ -147,6 +149,21 @@ enum TimeLimitationType {
   LIMITED_TIME,
 }
 
+enum EventDifficulty { EASY, NORMAL, HARD }
+
+enum EventLocation {
+  ENG_QUAD,
+  ARTS_QUAD,
+  AG_QUAD,
+  NORTH_CAMPUS,
+  WEST_CAMPUS,
+  COLLEGETOWN,
+  ITHACA_COMMONS,
+  OTHER
+}
+
+enum EventCategory { FOOD, NATURE, HISTORICAL, CAFE, DININGHALL, DORM }
+
 class EventDto {
   EventDto.fromJson(Map<String, dynamic> fields) {
     id = fields['id'];
@@ -154,30 +171,19 @@ class EventDto {
     name = fields['name'];
     description = fields['description'];
     timeLimitation = fields['timeLimitation'];
-    endTime = fields['endTime'];
+    endTime = HttpDate.parse(fields['endTime']);
     challengeIds = List<String>.from(fields['challengeIds']);
-    initialOrganizationId = fields['initialOrganizationId'];
     difficulty = fields['difficulty'];
-    indexable = fields['indexable'];
-    longitude = fields['longitude'];
-    latitude = fields['latitude'];
-    userFavoriteIds = fields['userFavoriteIds'];
   }
 
-  String id = '';
-  int requiredMembers = 0;
-  String name = '';
-  String description = '';
-  String timeLimitation = '';
-  String endTime = '';
-  List<String>? userFavoriteIds = [];
-  List<String> challengeIds = [];
-  String? initialOrganizationId = '';
-  int minimumScore = 0;
-  String difficulty = '';
-  bool indexable = false;
-  double longitude = 0.0;
-  double latitude = 0.0;
+  String id;
+  int requiredMembers;
+  String name;
+  String description;
+  TimeLimitationType timeLimitation;
+  DateTime endTime;
+  List<String> challengeIds;
+  EventDifficulty difficulty;
 }
 
 class EventTrackerDto {

@@ -10,7 +10,6 @@ class JourneyCell extends StatefulWidget {
   final bool isCompleted;
   final String difficulty;
   final int points;
-  final int challengePoints;
 
   const JourneyCell(
       this.journeyName,
@@ -21,7 +20,6 @@ class JourneyCell extends StatefulWidget {
       this.isCompleted,
       this.difficulty,
       this.points,
-      this.challengePoints,
       {Key? key})
       : super(key: key);
 
@@ -34,8 +32,7 @@ class JourneyCell extends StatefulWidget {
       numberCompleted,
       isCompleted,
       difficulty,
-      points,
-      challengePoints);
+      points);
 }
 
 class _JourneyCellState extends State<JourneyCell> {
@@ -47,7 +44,6 @@ class _JourneyCellState extends State<JourneyCell> {
   final bool isCompleted;
   final String difficulty;
   final int points;
-  final int challengePoints;
   // final int totalDistance;
 
   _JourneyCellState(
@@ -59,7 +55,6 @@ class _JourneyCellState extends State<JourneyCell> {
     this.isCompleted,
     this.difficulty,
     this.points,
-    this.challengePoints,
     // this.totalDistance
   );
 
@@ -67,81 +62,52 @@ class _JourneyCellState extends State<JourneyCell> {
   Widget build(BuildContext context) {
     return GestureDetector(
         onTap: () async {
-          await showModalBottomSheet(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(10.0)),
-              ),
+          await showDialog(
               context: context,
-              isScrollControlled: true,
-              builder: (
-                BuildContext context,
-              ) =>
-                  Preview(journeyName, description, difficulty, points,
-                      challengePoints, previewType.journey,
-                      locationCount: locationCount,
-                      numberCompleted: numberCompleted));
-          // await showDialog(
-          //     context: context,
-          //     builder: (context) => Preview(
-          //           journeyName,
-          //           description,
-          //           difficulty,
-          //           points,
-          //           challengePoints,
-          //           previewType.journey,
-          //           locationCount: locationCount,
-          //           numberCompleted: numberCompleted,
-          //         ));
+              builder: (context) => Preview(
+                    journeyName,
+                    description,
+                    difficulty,
+                    points,
+                    PreviewType.journey,
+                    locationCount: locationCount,
+                    numberCompleted: numberCompleted,
+                  ));
         },
         child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(
-              color: Color.fromARGB(255, 255, 255, 255),
-            ),
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.5),
-                spreadRadius: 1,
-                blurRadius: 2,
-                offset: Offset(0, 2),
-              ),
-            ],
-          ),
-          height: 236.0,
-          width: 345,
+          color: Color.fromARGB(51, 217, 217, 217),
+          height: 180.0,
           child: Padding(
-            padding: EdgeInsets.all(3.0),
+            padding: EdgeInsets.all(16.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.end,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Padding(
-                //     padding: const EdgeInsets.only(right: 2),
-                Container(
-                    width: double.infinity,
-                    // width: MediaQuery.of(context).size.width,
-                    height: 113,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(20),
-                          topRight: Radius.circular(20)),
-                      image: DecorationImage(
-                        fit: BoxFit.fill,
-                        image:
-                            NetworkImage("https://picsum.photos/250?image=9"),
-                      ),
-                    )
-                    // alignment:
-                    // child: [
-                    //   ClipRRect(
-                    //     borderRadius: BorderRadius.all(Radius.circular(4.6)),
-                    //     child: thumbnail,
-                    //   ),
-                    // ]
+                if (isCompleted)
+                  Expanded(
+                      child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                        Text(
+                          "COMPLETED",
+                          style: TextStyle(
+                            color: Color.fromARGB(255, 71, 71, 71),
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            fontFamily: 'Lato',
+                          ),
+                        ),
+                      ])
+                      // alignment:
+                      // child: [
+                      //   ClipRRect(
+                      //     borderRadius: BorderRadius.all(Radius.circular(4.6)),
+                      //     child: thumbnail,
+                      //   ),
+                      // ]
 
-                    ),
+                      ),
                 if (isCompleted)
                   Flexible(
                     child: Expanded(
@@ -232,7 +198,7 @@ class _JourneyCellState extends State<JourneyCell> {
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
-                            challengePoints.toString() + "PTS",
+                            points.toString() + "PTS",
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 14,

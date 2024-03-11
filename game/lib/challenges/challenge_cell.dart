@@ -30,14 +30,14 @@ class ChallengeCell extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() => _ChallengeCellState(
-      location,
-      challengeName,
-      thumbnail,
-      isCompleted,
-      description,
-      difficulty,
-      points,
-      challenge_points);
+        location,
+        challengeName,
+        thumbnail,
+        isCompleted,
+        description,
+        difficulty,
+        points,
+      );
 }
 
 class _ChallengeCellState extends State<ChallengeCell> {
@@ -48,7 +48,6 @@ class _ChallengeCellState extends State<ChallengeCell> {
   final String description;
   final String difficulty;
   final int points;
-  final int challenge_points;
   // newly added field
   // final int totalDistance;
 
@@ -60,7 +59,6 @@ class _ChallengeCellState extends State<ChallengeCell> {
     this.description,
     this.difficulty,
     this.points,
-    this.challenge_points,
     // newly added field
     // this.totalDistance
   );
@@ -76,7 +74,7 @@ class _ChallengeCellState extends State<ChallengeCell> {
             context: context,
             isScrollControlled: true,
             builder: (context) => Preview(challengeName, description,
-                difficulty, points, challenge_points, previewType.challenge));
+                difficulty, points, PreviewType.challenge));
       },
       child: Container(
         decoration: BoxDecoration(
@@ -170,7 +168,7 @@ class _ChallengeCellState extends State<ChallengeCell> {
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
-                            challenge_points.toString() + "PTS",
+                            points.toString() + "PTS",
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 14,

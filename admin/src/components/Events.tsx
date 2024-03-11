@@ -40,8 +40,8 @@ function EventCard(props: {
     props.event.timeLimitation === "LIMITED_TIME" ? "Limited" : "Unlimited";
 
   const difficultyMode =
-    props.event.difficulty === "Easy"
-      ? "Easy"
+    props.event.difficulty === "EASY"
+      ? "EASY"
       : props.event.difficulty === "Normal"
       ? "Normal"
       : "Hard";
@@ -98,7 +98,7 @@ function makeForm() {
     },
     {
       name: "Difficulty",
-      options: ["Easy", "Normal", "Hard"],
+      options: ["EASY", "Normal", "Hard"],
       value: 1,
     },
     { name: "Publicly Visible", options: ["No", "Yes"], value: 0 },
@@ -119,7 +119,7 @@ function fromForm(form: EntryForm[], id: string): EventDto {
     challengeIds: [],
     difficulty:
       (form[4] as OptionEntryForm).value === 0
-        ? "Easy"
+        ? "EASY"
         : (form[4] as OptionEntryForm).value === 1
         ? "Normal"
         : "Hard",
@@ -145,9 +145,9 @@ function toForm(event: EventDto) {
     },
     {
       name: "Difficulty",
-      options: ["Easy", "Normal", "Hard"],
+      options: ["EASY", "Normal", "Hard"],
       value:
-        event.difficulty === "Easy"
+        event.difficulty === "EASY"
           ? 0
           : event.difficulty === "Normal"
           ? "Normal"

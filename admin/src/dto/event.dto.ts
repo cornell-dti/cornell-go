@@ -1,5 +1,5 @@
-/** DTO for requestAllEventData */
-export interface RequestAllEventDataDto {
+/** DTO for searchEvents */
+export interface SearchEventsDto {
   offset: number;
   count: number;
 }
@@ -27,7 +27,7 @@ export interface EventDto {
   challengeIds: string[];
   userFavoriteIds?: string[];
   initialOrganizationId?: string;
-  difficulty: "Easy" | "Normal" | "Hard";
+  difficulty: "EASY" | "Normal" | "Hard";
   indexable: boolean;
   latitude: number;
   longitude: number;
