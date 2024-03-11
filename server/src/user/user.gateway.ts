@@ -31,6 +31,7 @@ import {
 import { UserService } from './user.service';
 import { readFileSync } from 'fs';
 import { OrganizationService } from '../organization/organization.service';
+import { PoliciesGuard } from '../casl/policy.guard';
 
 const majors = readFileSync('./src/user/majors.txt', 'utf8').split('\n');
 
@@ -38,7 +39,7 @@ const replaceAll = require('string.prototype.replaceall');
 replaceAll.shim();
 
 @WebSocketGateway({ cors: true })
-@UseGuards(UserGuard)
+@UseGuards(UserGuard, PoliciesGuard)
 export class UserGateway {
   constructor(
     private clientService: ClientService,

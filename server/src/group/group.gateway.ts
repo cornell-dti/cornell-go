@@ -19,9 +19,10 @@ import { GroupService } from './group.service';
 import { UserGuard } from '../auth/jwt-auth.guard';
 import { UseGuards } from '@nestjs/common';
 import { Group, User } from '@prisma/client';
+import { PoliciesGuard } from '../casl/policy.guard';
 
 @WebSocketGateway({ cors: true })
-@UseGuards(UserGuard)
+@UseGuards(UserGuard, PoliciesGuard)
 export class GroupGateway {
   constructor(
     private clientService: ClientService,

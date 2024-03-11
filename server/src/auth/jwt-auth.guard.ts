@@ -10,6 +10,7 @@ import {
 import { Socket } from 'socket.io';
 import { Handshake } from 'socket.io/dist/socket';
 import { AuthService } from './auth.service';
+import { WsData } from './ws-data';
 
 function tokenOfHandshake(handshake: Handshake) {
   return (
@@ -31,7 +32,7 @@ export class UserGuard implements CanActivate {
 
     const user = await this.authService.userByToken(token);
     if (user) {
-      context.switchToWs().getData()._authenticatedUserEntity = user;
+      context.switchToWs().getData<WsData>()._authenticatedUserEntity = user;
     } else {
       return false;
     }

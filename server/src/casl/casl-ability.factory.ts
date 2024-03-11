@@ -1,4 +1,4 @@
-import { Action } from '../action.enum';
+import { Action } from './action.enum';
 import {
   AbilityBuilder,
   AbilityClass,

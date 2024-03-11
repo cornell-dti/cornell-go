@@ -24,9 +24,10 @@ import { UserService } from '../user/user.service';
 import { EventService } from '../event/event.service';
 import { RequestGlobalLeaderDataDto } from '../user/user.dto';
 import { EventDto } from '../event/event.dto';
+import { PoliciesGuard } from '../casl/policy.guard';
 
 @WebSocketGateway({ cors: true })
-@UseGuards(UserGuard)
+@UseGuards(UserGuard, PoliciesGuard)
 export class ChallengeGateway {
   constructor(
     private clientService: ClientService,

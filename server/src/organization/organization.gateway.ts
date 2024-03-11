@@ -14,9 +14,10 @@ import {
   UpdateOrganizationDataDto,
 } from './organization.dto';
 import { OrganizationService } from './organization.service';
+import { PoliciesGuard } from '../casl/policy.guard';
 
 @WebSocketGateway({ cors: true })
-@UseGuards(UserGuard)
+@UseGuards(UserGuard, PoliciesGuard)
 export class OrganizationGateway {
   constructor(
     private clientService: ClientService,
