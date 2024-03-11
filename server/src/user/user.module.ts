@@ -8,10 +8,13 @@ import { OrganizationModule } from '../organization/organization.module';
 import { PrismaModule } from '../prisma/prisma.module';
 import { UserGateway } from './user.gateway';
 import { UserService } from './user.service';
+import { CaslModule } from '../casl/casl.module';
 
 @Module({
   imports: [
     forwardRef(() => AuthModule),
+    forwardRef(() => CaslModule),
+
     SessionLogModule,
     ClientModule,
     forwardRef(() => GroupModule),

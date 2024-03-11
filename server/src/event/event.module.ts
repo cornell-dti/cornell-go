@@ -6,10 +6,12 @@ import { OrganizationModule } from '../organization/organization.module';
 import { PrismaModule } from '../prisma/prisma.module';
 import { EventGateway } from './event.gateway';
 import { EventService } from './event.service';
+import { CaslModule } from '../casl/casl.module';
 
 @Module({
   imports: [
     forwardRef(() => AuthModule),
+    forwardRef(() => CaslModule),
     ClientModule,
     PrismaModule,
     OrganizationModule,

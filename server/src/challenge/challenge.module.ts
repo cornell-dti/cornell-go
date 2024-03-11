@@ -8,10 +8,12 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { UserModule } from '../user/user.module';
 import { ChallengeGateway } from './challenge.gateway';
 import { ChallengeService } from './challenge.service';
+import { CaslModule } from '../casl/casl.module';
 
 @Module({
   imports: [
     forwardRef(() => AuthModule),
+    forwardRef(() => CaslModule),
     EventModule,
     GroupModule,
     UserModule,
