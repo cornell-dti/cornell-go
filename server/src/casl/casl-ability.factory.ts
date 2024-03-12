@@ -86,6 +86,10 @@ export class CaslAbilityFactory {
       },
     );
 
+    can(Action.Read, 'User', ['username'], {
+      groupId: user.groupId,
+    });
+
     can(Action.Read, 'Achievement');
 
     can(Action.Read, 'AchievementTracker', undefined, { userId: user.id });
@@ -102,6 +106,7 @@ export class CaslAbilityFactory {
 
     can(Action.Read, 'EventBase', undefined, {
       usedIn: { some: { members: { some: { id: user.id } } } },
+      indexable: true,
     });
 
     can(Action.Manage, 'EventBase', undefined, {

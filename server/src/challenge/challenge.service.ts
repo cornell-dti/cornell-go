@@ -12,6 +12,10 @@ import { ClientService } from '../client/client.service';
 import { EventService } from '../event/event.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { ChallengeDto, UpdateChallengeDataDto } from './challenge.dto';
+import { AppAbility, CaslAbilityFactory } from '../casl/casl-ability.factory';
+import { accessibleBy } from '@casl/prisma';
+import { Action } from '../casl/action.enum';
+import { subject } from '@casl/ability';
 
 @Injectable()
 export class ChallengeService {
@@ -20,31 +24,27 @@ export class ChallengeService {
     private readonly prisma: PrismaService,
     private eventService: EventService,
     private clientService: ClientService,
+    private abilityFactory: CaslAbilityFactory,
   ) {}
 
   /** Get challenges with prev challenges for a given user */
-  async getChallengesByIdsForUser(
-    user: User,
-    admin: boolean,
+  async getChallengesByIdsForAbility(
+    ability: AppAbility,
     ids: string[],
   ): Promise<Challenge[]> {
     return await this.prisma.challenge.findMany({
       where: {
-        id: { in: ids },
-        linkedEvent: {
-          usedIn: {
-            some: admin
-              ? { managers: { some: { id: user.id } } }
-              : { members: { some: { id: user.id } } },
-          },
-        },
+        AND: [
+          { id: { in: ids } },
+          accessibleBy(ability, Action.Read).Challenge,
+        ],
       },
     });
   }
 
   /** Get a challenge by its id */
   async getChallengeById(id: string) {
-    return await this.prisma.challenge.findFirstOrThrow({ where: { id } });
+    return await this.prisma.challenge.findFirst({ where: { id } });
   }
 
   /** Is challenge completed by user */
@@ -159,8 +159,6 @@ export class ChallengeService {
       include: { curEvent: true, members: true },
     });
 
-    const event = group.curEvent;
-
     const isChallengeValid = await this.eventService.isChallengeInEvent(
       challengeId,
       group.curEventId,
@@ -174,6 +172,8 @@ export class ChallengeService {
       await this.eventService.getCurrentEventTrackerForUser(user);
 
     const challenge = await this.getChallengeById(challengeId);
+
+    if (!challenge) return false;
 
     await this.prisma.eventTracker.update({
       where: { id: eventTracker.id },
@@ -197,7 +197,9 @@ export class ChallengeService {
     target?: User,
   ) {
     const dto: UpdateChallengeDataDto = {
-      challenge: deleted ? challenge.id : await this.dtoForChallenge(challenge),
+      challenge: deleted
+        ? { id: challenge.id }
+        : await this.dtoForChallenge(challenge),
       deleted,
     };
 
@@ -223,25 +225,35 @@ export class ChallengeService {
     };
   }
 
-  async upsertChallengeFromDto(challenge: ChallengeDto): Promise<Challenge> {
-    const assignData = {
-      name: challenge.name.substring(0, 2048),
-      description: challenge.description.substring(0, 2048),
-      imageUrl: challenge.imageUrl.substring(0, 2048),
-      latitude: challenge.lat,
-      longitude: challenge.long,
-      awardingRadius: challenge.awardingRadius,
-      closeRadius: challenge.closeRadius,
-    };
+  async upsertChallengeFromDto(
+    ability: AppAbility,
+    challenge: ChallengeDto,
+  ): Promise<Challenge> {
+    const assignData = await this.abilityFactory.filterInaccessible(
+      {
+        name: challenge.name?.substring(0, 2048),
+        description: challenge.description?.substring(0, 2048),
+        imageUrl: challenge.imageUrl?.substring(0, 2048),
+        latitude: challenge.lat,
+        longitude: challenge.long,
+        awardingRadius: challenge.awardingRadius,
+        closeRadius: challenge.closeRadius,
+      },
+      'Challenge',
+      ability,
+      Action.Update,
+    );
 
     const challengeEntity = await this.prisma.challenge.upsert({
       where: { id: challenge.id },
       update: assignData,
-      create: {
-        ...assignData,
-        eventIndex: -10,
-        linkedEventId: challenge.containingEventId,
-      },
+      create: ability.can(Action.Create, 'Challenge')
+        ? {
+            ...assignData,
+            eventIndex: -10,
+            linkedEventId: challenge.containingEventId,
+          }
+        : undefined,
     });
 
     if (challengeEntity.eventIndex === -10) {
@@ -261,13 +273,20 @@ export class ChallengeService {
     return challengeEntity;
   }
 
-  async removeChallenge(challengeId: string, accessor: User) {
-    const challenge = await this.prisma.challenge.findFirstOrThrow({
-      where: { id: challengeId },
+  async removeChallenge(ability: AppAbility, challengeId: string) {
+    const challenge = await this.prisma.challenge.findFirst({
+      where: {
+        AND: [
+          { id: challengeId },
+          accessibleBy(ability, Action.Delete).Challenge,
+        ],
+      },
       include: {
         linkedEvent: { include: { challenges: true } },
       },
     });
+
+    if (!challenge) return;
 
     const usedTrackers = await this.prisma.eventTracker.findMany({
       where: {
@@ -294,9 +313,6 @@ export class ChallengeService {
     await this.prisma.challenge.deleteMany({
       where: {
         id: challengeId,
-        linkedEvent: {
-          usedIn: { some: { managers: { some: { id: accessor.id } } } },
-        },
       },
     });
   }

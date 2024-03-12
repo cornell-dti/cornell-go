@@ -6,7 +6,7 @@ export interface RequestAllEventDataDto {
 
 /** DTO for requestEventData */
 export interface RequestEventDataDto {
-  events: string[];
+  events?: string[];
 }
 
 /** DTO for requestEventLeaderData */
@@ -24,27 +24,27 @@ export interface RequestRecommendedEventsDto {
 
 export interface EventDto {
   id: string;
-  requiredMembers: number;
-  name: string;
-  description: string;
-  timeLimitation: 'LIMITED_TIME' | 'PERPETUAL';
-  endTime: string;
-  challenges: string[];
+  requiredMembers?: number;
+  name?: string;
+  description?: string;
+  timeLimitation?: 'LIMITED_TIME' | 'PERPETUAL';
+  endTime?: string;
+  challenges?: string[];
   userFavorites?: string[];
   initialOrganizationId?: string;
-  difficulty: 'Easy' | 'Normal' | 'Hard';
-  indexable: boolean;
-  longitude: number;
-  latitude: number;
+  difficulty?: 'Easy' | 'Normal' | 'Hard';
+  indexable?: boolean;
+  longitude?: number;
+  latitude?: number;
 }
 
 /** DTO for event tracker in updateEventTrackerData */
 export interface EventTrackerDto {
   eventId: string;
-  isRanked: boolean;
-  curChallengeId: string;
-  prevChallenges: string[];
-  prevChallengeDates: string[];
+  isRanked?: boolean;
+  curChallengeId?: string;
+  prevChallenges?: string[];
+  prevChallengeDates?: string[];
 }
 
 /** DTO for updateEventTrackerData */
@@ -53,6 +53,6 @@ export interface UpdateEventTrackerDataDto {
 }
 
 export interface UpdateEventDataDto {
-  event: EventDto | string;
+  event: EventDto;
   deleted: boolean;
 }

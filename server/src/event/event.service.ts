@@ -21,6 +21,10 @@ import {
   UpdateEventDataDto,
   RequestRecommendedEventsDto,
 } from './event.dto';
+import { AppAbility, CaslAbilityFactory } from '../casl/casl-ability.factory';
+import { accessibleBy } from '@casl/prisma';
+import { Action } from '../casl/action.enum';
+import { subject } from '@casl/ability';
 
 @Injectable()
 export class EventService {
@@ -28,51 +32,25 @@ export class EventService {
     private clientService: ClientService,
     private orgService: OrganizationService,
     private readonly prisma: PrismaService,
+    private abilityFactory: CaslAbilityFactory,
   ) {}
 
   /** Get event by id */
   async getEventById(id: string | null) {
     if (!id) throw 'Found null event id! Possible null linked event.';
-    return await this.prisma.eventBase.findUniqueOrThrow({ where: { id } });
-  }
-
-  /** Get event with orgs */
-  async getEventWithOrgs(id: string) {
-    return await this.prisma.eventBase.findUniqueOrThrow({
-      where: { id },
-      include: { usedIn: true },
-    });
+    return await this.prisma.eventBase.findUnique({ where: { id } });
   }
 
   /** Get events by ids */
-  async getEventsByIdsForUser(
-    ids: string[],
-    admin: boolean,
-    user: User,
+  async getEventsByIdsForAbility(
+    ability: AppAbility,
+    ids?: string[],
   ): Promise<EventBase[]> {
     return await this.prisma.eventBase.findMany({
       where: {
-        id: { in: ids },
-        indexable: admin ? undefined : true,
-        usedIn: {
-          some: admin
-            ? { managers: { some: { id: user.id } } }
-            : { members: { some: { id: user.id } } },
-        },
+        AND: [{ id: { in: ids } }, accessibleBy(ability).EventBase],
       },
     });
-  }
-
-  /** Checks if a user is allowed to see an event */
-  async isAllowedEvent(user: User, eventId: string) {
-    return (
-      (await this.prisma.organization.count({
-        where: {
-          members: { some: { id: user.id } },
-          events: { some: { id: eventId } },
-        },
-      })) > 0
-    );
   }
 
   /** Get top players for event */
@@ -231,12 +209,6 @@ export class EventService {
     return evTracker;
   }
 
-  async getEventsForUser(user: User) {
-    return await this.prisma.eventBase.findMany({
-      where: { usedIn: { some: { members: { some: { id: user.id } } } } },
-    });
-  }
-
   async getRecommendedEventsForUser(
     user: User,
     data: RequestRecommendedEventsDto,
@@ -324,7 +296,7 @@ export class EventService {
 
   async emitUpdateEventData(ev: EventBase, deleted: boolean, target?: User) {
     const dto: UpdateEventDataDto = {
-      event: deleted ? ev.id : await this.dtoForEvent(ev),
+      event: deleted ? { id: ev.id } : await this.dtoForEvent(ev),
       deleted,
     };
 
@@ -374,90 +346,57 @@ export class EventService {
     await this.clientService.sendProtected('updateLeaderData', target.id, dto);
   }
 
-  async hasAdminRights(
-    ev: EventBase | { id: string },
-    user: User | { id: string },
-  ) {
-    return !!(await this.prisma.organization.findFirst({
-      select: { id: true },
-      where: {
-        events: { some: { id: ev.id } },
-        managers: { some: { id: user.id } },
+  async upsertEventFromDto(ability: AppAbility, event: EventDto) {
+    const assignData = await this.abilityFactory.filterInaccessible(
+      {
+        requiredMembers: event.requiredMembers,
+        name: event.name?.substring(0, 2048),
+        description: event.description?.substring(0, 2048),
+        timeLimitation:
+          event.timeLimitation === 'LIMITED_TIME'
+            ? TimeLimitationType.LIMITED_TIME
+            : TimeLimitationType.PERPETUAL,
+        endTime: event.endTime && new Date(event.endTime),
+        userFavorites: event.userFavorites,
+        indexable: event.indexable,
+        difficulty:
+          event.difficulty === 'Easy'
+            ? DifficultyMode.EASY
+            : event.difficulty === 'Normal'
+            ? DifficultyMode.NORMAL
+            : DifficultyMode.HARD,
       },
-    }));
-  }
-
-  async updateLongitudeLatitude(eventId: string) {
-    const ev = await this.prisma.eventBase.findFirst({
-      where: { id: eventId },
-      select: { challenges: true },
-    });
-    const firstChalId = ev?.challenges.sort(
-      (a, b) => a.eventIndex - b.eventIndex,
-    )[0].id;
-    const chal = await this.prisma.challenge.findFirst({
-      where: { id: firstChalId },
-      select: { latitude: true, longitude: true },
-    });
-    const updatedEv = await this.prisma.eventBase.update({
-      where: {
-        id: eventId,
-      },
-      data: {
-        longitude: chal?.longitude,
-        latitude: chal?.latitude,
-      },
-    });
-    return updatedEv;
-  }
-
-  async upsertEventFromDto(event: EventDto) {
-    const firstChal = await this.prisma.challenge.findFirst({
-      where: { id: event.challenges[0] },
-      select: { latitude: true, longitude: true },
-    });
-
-    const assignData = {
-      requiredMembers: event.requiredMembers,
-      name: event.name.substring(0, 2048),
-      description: event.description.substring(0, 2048),
-      timeLimitation:
-        event.timeLimitation === 'LIMITED_TIME'
-          ? TimeLimitationType.LIMITED_TIME
-          : TimeLimitationType.PERPETUAL,
-      endTime: new Date(event.endTime),
-      // challenges: event.challenges,
-      userFavorites: event.userFavorites,
-      // initialOrganizationId: event.initialOrganizationId,
-      indexable: event.indexable,
-      difficulty:
-        event.difficulty === 'Easy'
-          ? DifficultyMode.EASY
-          : event.difficulty === 'Normal'
-          ? DifficultyMode.NORMAL
-          : DifficultyMode.HARD,
-      latitude: firstChal?.latitude ?? 0,
-      longitude: firstChal?.longitude ?? 0,
-    };
+      'EventBase',
+      ability,
+      Action.Update,
+    );
 
     const eventEntity = await this.prisma.eventBase.upsert({
       where: { id: event.id },
-      create: {
-        ...assignData,
-        usedIn: {
-          connect: { id: event.initialOrganizationId ?? '' },
-        },
-      },
+      create: ability.can(Action.Create, 'EventBase')
+        ? {
+            ...assignData,
+            usedIn: {
+              connect: { id: event.initialOrganizationId ?? '' },
+            },
+          }
+        : undefined,
       update: {
         ...assignData,
-        challenges: {
-          set: event.challenges.map(id => ({ id })),
-        },
+        challenges: ability.can(
+          Action.Update,
+          subject('EventBase', { id: event.id, ...assignData }),
+          'challenges',
+        )
+          ? {
+              set: event.challenges?.map(id => ({ id })),
+            }
+          : undefined,
       },
     });
 
     let eventIndexChal = 0;
-    for (const id of event.challenges) {
+    for (const id of event?.challenges ?? []) {
       await this.prisma.challenge.update({
         where: { id },
         data: {
