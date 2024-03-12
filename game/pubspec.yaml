@@ -50,6 +50,11 @@ dependencies:
   latlong2: ^0.9.0
   device_info_plus: ^9.1.0
   flutter_svg: ^2.0.8
+  google_maps_flutter: ^2.5.3
+  google_maps_flutter_android: ^2.4.2
+  google_maps_flutter_platform_interface: ^2.4.3
+  location: ^5.0.0
+  flutter_config: ^2.0.2
 
 flutter_icons:
   android: true

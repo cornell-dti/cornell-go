@@ -99,9 +99,9 @@ class _GameWidgetState extends State<GameWidget> {
                       curChallenge != null &&
                       requiredSizeMet) {
                     final chalLoc =
-                        GeoPoint(curChallenge.lat, curChallenge.long);
-                    final location = GeoPoint(
-                        snapshot.data!.latitude, snapshot.data!.longitude);
+                        GeoPoint(curChallenge.lat, curChallenge.long, 0);
+                    final location = GeoPoint(snapshot.data!.latitude,
+                        snapshot.data!.longitude, snapshot.data!.heading);
                     final distance = location.distanceTo(chalLoc);
 
                     gameModel.walkingTime =
