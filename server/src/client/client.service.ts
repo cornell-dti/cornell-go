@@ -3,8 +3,15 @@ import { User } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { UpdateErrorDto } from './client.dto';
 import { ClientGateway } from './client.gateway';
-import { CaslAbilityFactory } from '../casl/casl-ability.factory';
+import {
+  AppAbility,
+  CaslAbilityFactory,
+  SubjectTypes,
+} from '../casl/casl-ability.factory';
 import { tokenOfHandshake } from '../auth/jwt-auth.guard';
+import { PermittedFieldsOptions, permittedFieldsOf } from '@casl/ability/extra';
+import { Action } from '../casl/action.enum';
+import { ExtractSubjectType } from '@casl/ability';
 
 @Injectable()
 export class ClientService {
@@ -42,15 +49,19 @@ export class ClientService {
     this.sendProtected('updateErrorData', user.id, dto);
   }
 
-  async sendProtected<TDto, TResource>(
+  async sendProtected<TDto extends {}>(
     event: string,
     target: string,
     dto: TDto,
-    dtoSubject?: string,
+    dtoSubject?: ExtractSubjectType<SubjectTypes>,
   ) {
     if (!dtoSubject) {
       this.gateway.server.to(target).emit(event, dto);
     } else {
+      const fieldList = Object.keys(dto);
+      const options: PermittedFieldsOptions<AppAbility> = {
+        fieldsFrom: rule => rule.fields || fieldList,
+      };
       const socks = await this.gateway.server.in(target).fetchSockets();
 
       const tokens = socks
@@ -61,9 +72,34 @@ export class ClientService {
         where: { id: { in: tokens } },
       });
 
-      const separatedDtos = new Map<string[], Partial<TDto>>();
+      // Map from sorted list of properties to a list of user ids
+      const separatedDtos = new Map<string[], string[]>();
 
-      this.abilityFactory.createForUser();
+      for (const user of users) {
+        const ability = this.abilityFactory.createForUser(user);
+        const permittedFields = permittedFieldsOf(
+          ability,
+          Action.Read,
+          dtoSubject,
+          options,
+        ).sort();
+
+        let userList = separatedDtos.get(permittedFields);
+        if (!userList) {
+          userList = [];
+          separatedDtos.set(permittedFields, userList);
+        }
+
+        userList.push(user.id);
+      }
+
+      for (const [fields, users] of separatedDtos) {
+        const partialDto = Object.fromEntries(
+          Object.entries(dto).filter(([k, v]) => fields.includes(k)),
+        );
+
+        this.gateway.server.to(users).emit(event, partialDto);
+      }
     }
   }
 }

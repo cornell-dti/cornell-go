@@ -19,7 +19,7 @@ import {
   User,
 } from '@prisma/client';
 
-type SubjectTypes = {
+export type SubjectTypes = {
   User: User;
   Group: Group;
   Organization: Organization;
