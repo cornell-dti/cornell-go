@@ -62,14 +62,17 @@ export class ClientService {
       const options: PermittedFieldsOptions<AppAbility> = {
         fieldsFrom: rule => rule.fields || fieldList,
       };
+      // Get list of targeted sockets
       const socks = await this.gateway.server.in(target).fetchSockets();
 
+      // Find auth tokens of all targeted users
       const tokens = socks
         .map(sock => tokenOfHandshake(sock.handshake))
         .filter(token => token) as string[];
 
+      // Find all targeted users
       const users = await this.prisma.user.findMany({
-        where: { id: { in: tokens } },
+        where: { authToken: { in: tokens } },
       });
 
       // Map from sorted list of properties to a list of user ids
@@ -84,6 +87,7 @@ export class ClientService {
           options,
         ).sort();
 
+        // Add user to this batch (which contains exactly these properties)
         let userList = separatedDtos.get(permittedFields);
         if (!userList) {
           userList = [];
@@ -93,6 +97,7 @@ export class ClientService {
         userList.push(user.id);
       }
 
+      // Process all batches and send out DTO
       for (const [fields, users] of separatedDtos) {
         const partialDto = Object.fromEntries(
           Object.entries(dto).filter(([k, v]) => fields.includes(k)),
