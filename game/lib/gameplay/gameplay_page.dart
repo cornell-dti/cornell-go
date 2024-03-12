@@ -122,40 +122,31 @@ class _GameplayPageState extends State<GameplayPage> {
             child: Stack(
               alignment: Alignment.bottomCenter,
               children: [
-                //Event Picture and google map
-                Stack(alignment: Alignment.topRight, children: [
-                  Container(
-                    height: double.infinity,
-                    width: double.infinity,
-                    //Change to challenge picture
-                    child: Image.network(
-                      'https://picsum.photos/500/1500',
-                      fit: BoxFit.fitWidth,
-                    ),
-                  ),
-                  Container(
-                    height: 100,
-                    width: 100,
-                    padding: EdgeInsets.all(10),
-                    margin: EdgeInsets.only(top: 15, right: 15),
-                    child: Text(
-                      "MAP",
-                      style: TextStyle(fontSize: 21, color: Color(0xFFED5656)),
-                    ),
-                    decoration: BoxDecoration(
-                      color: Color.fromARGB(255, 255, 255, 255),
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.5),
-                          spreadRadius: 1,
-                          blurRadius: 1,
-                          offset: Offset(0, 3), // shadow direction: bottom
-                        ),
-                      ],
-                    ),
-                  ),
-                ]),
+                Padding(
+                    padding: EdgeInsets.only(top: 20), child: GameplayMap()),
+                //   //Event Picture
+                //     Container(
+                //       height: 100,
+                //       width: 100,
+                //       padding: EdgeInsets.all(10),
+                //       margin: EdgeInsets.only(top: 15, right: 15),
+                //       child: Text(
+                //         "MAP",
+                //         style: TextStyle(fontSize: 21, color: Color(0xFFED5656)),
+                //       ),
+                //       decoration: BoxDecoration(
+                //         color: Color.fromARGB(255, 255, 255, 255),
+                //         borderRadius: BorderRadius.all(Radius.circular(10)),
+                //         boxShadow: [
+                //           BoxShadow(
+                //             color: Colors.grey.withOpacity(0.5),
+                //             spreadRadius: 1,
+                //             blurRadius: 1,
+                //             offset: Offset(0, 3), // shadow direction: bottom
+                //           ),
+                //         ],
+                //       ),
+                //     ),
                 Container(
                   margin: EdgeInsets.only(bottom: 70),
                   child: ElevatedButton(
