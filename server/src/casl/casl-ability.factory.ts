@@ -99,17 +99,33 @@ export class CaslAbilityFactory {
       members: { some: { id: user.id } },
     });
 
+    can(Action.Update, 'Group', undefined, {
+      hostId: user.id,
+    });
+
     can(Action.Read, 'Organization', undefined, {
       members: { some: { id: user.id } },
     });
 
+    // These come from DTO
     cannot(Action.Read, 'Organization', ['members', 'managers']);
 
     can(Action.Manage, 'Organization', undefined, {
       managers: { some: { id: user.id } },
     });
 
-    can(Action.Read, '');
+    can(Action.Read, 'PrevChallenge', undefined, {
+      OR: [
+        { userId: user.id },
+        {
+          challenge: {
+            linkedEvent: {
+              usedIn: { some: { managers: { some: { id: user.id } } } },
+            },
+          },
+        },
+      ],
+    });
 
     return build();
   }
