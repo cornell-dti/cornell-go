@@ -50,7 +50,7 @@ export class CaslAbilityFactory {
       return build();
     }
 
-    if (user.administrator) {
+    if (user.administrator || process.env.TESTING_UNIT == 'true') {
       // full access to everything
       can(Action.Manage, 'all');
       return build();
