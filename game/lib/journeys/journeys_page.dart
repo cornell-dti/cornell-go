@@ -134,10 +134,9 @@ class _JourneysPageState extends State<JourneysPage> {
                   }
                   for (EventDto event in events) {
                     var tracker = trackerModel.trackerByEventId(event.id);
-                    var numberCompleted = tracker?.prevChallengeIds.length ?? 0;
-                    var complete =
-                        (numberCompleted == event.challengeIds.length);
-                    var locationCount = event.challengeIds.length;
+                    var numberCompleted = tracker?.prevChallenges.length ?? 0;
+                    var complete = (numberCompleted == event.challenges.length);
+                    var locationCount = event.challenges.length;
                     var difficulty = event.difficulty;
                     DateTime now = DateTime.now();
                     DateTime endtime = HttpDate.parse(event.endTime);

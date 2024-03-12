@@ -41,7 +41,7 @@ export class ChallengeGateway {
    * Subscribes and emits the information of the requested challenges
    *
    * @param user the calling user
-   * @param data array of challengeIds to return
+   * @param data array of challenges to return
    */
   @SubscribeMessage('requestChallengeData')
   async requestChallengeData(
@@ -52,14 +52,14 @@ export class ChallengeGateway {
       await this.challengeService.getChallengesByIdsForUser(
         user,
         true,
-        data.challengeIds,
+        data.challenges,
       );
 
     const basicChallenges =
       await this.challengeService.getChallengesByIdsForUser(
         user,
         true,
-        data.challengeIds,
+        data.challenges,
       );
 
     for (const chal of adminChallenges) {

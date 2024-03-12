@@ -219,7 +219,7 @@ export class GroupService {
         return;
       }
       // Uses getAllowedEvents helper method
-      const eventIdIntersect = await this.getAllowedEventIds(group);
+      const eventIdIntersect = await this.getAllowedEvents(group);
 
       if (eventIdIntersect === null || !eventIdIntersect?.includes(eventId))
         return false;
@@ -246,7 +246,7 @@ export class GroupService {
   }
 
   /**  Finds all allowed events for group based on user's orgs */
-  async getAllowedEventIds(group: Group) {
+  async getAllowedEvents(group: Group) {
     const users = await this.prisma.user.findMany({
       where: { groupId: group.id },
       select: { memberOf: { include: { events: true } } },

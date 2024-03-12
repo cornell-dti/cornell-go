@@ -9,7 +9,7 @@ class UserDto {
     year = fields["year"] ?? "NA";
     score = fields["score"];
     groupId = fields["groupId"];
-    trackedEventIds = fields["trackedEventIds"].cast<String>();
+    trackedEvents = fields["trackedEvents"].cast<String>();
     authType = fields["authType"] == "google"
         ? UserDataAuthTypeDto.GOOGLE
         : fields["authType"] == "apple"
@@ -22,7 +22,7 @@ class UserDto {
   String year = "";
   int score = 0;
   String groupId = "";
-  List<String> trackedEventIds = [];
+  List<String> trackedEvents = [];
   bool ignoreIdLists = false;
   UserDataAuthTypeDto authType = UserDataAuthTypeDto.DEVICE;
 }
@@ -155,13 +155,13 @@ class EventDto {
     description = fields['description'];
     timeLimitation = fields['timeLimitation'];
     endTime = fields['endTime'];
-    challengeIds = List<String>.from(fields['challengeIds']);
+    challenges = List<String>.from(fields['challenges']);
     initialOrganizationId = fields['initialOrganizationId'];
     difficulty = fields['difficulty'];
     indexable = fields['indexable'];
     longitude = fields['longitude'];
     latitude = fields['latitude'];
-    userFavoriteIds = fields['userFavoriteIds'];
+    userFavorites = fields['userFavorites'];
   }
 
   String id = '';
@@ -170,8 +170,8 @@ class EventDto {
   String description = '';
   String timeLimitation = '';
   String endTime = '';
-  List<String>? userFavoriteIds = [];
-  List<String> challengeIds = [];
+  List<String>? userFavorites = [];
+  List<String> challenges = [];
   String? initialOrganizationId = '';
   int minimumScore = 0;
   String difficulty = '';
@@ -184,14 +184,14 @@ class EventTrackerDto {
   String eventId = '';
   bool isRanked = false;
   String curChallengeId = '';
-  List<String> prevChallengeIds = [];
+  List<String> prevChallenges = [];
   List<String> prevChallengeDates = [];
 
   EventTrackerDto.fromJson(Map<String, dynamic> fields) {
     eventId = fields['eventId'] ?? '';
     isRanked = fields['isRanked'] ?? false;
     curChallengeId = fields['curChallengeId'] ?? '';
-    prevChallengeIds = List<String>.from(fields['prevChallengeIds'] ?? []);
+    prevChallenges = List<String>.from(fields['prevChallenges'] ?? []);
     prevChallengeDates = List<String>.from(fields['prevChallengeDates'] ?? []);
   }
 }
@@ -262,9 +262,9 @@ class UpdateChallengeDataDto {
 
 class RequestChallengeDataDto {
   RequestChallengeDataDto.fromJson(Map<String, dynamic> fields) {
-    challengeIds = fields['challengeIds'];
+    challenges = fields['challenges'];
   }
-  List<String> challengeIds = [];
+  List<String> challenges = [];
 }
 
 class OrganizationDto {

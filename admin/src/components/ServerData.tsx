@@ -59,19 +59,19 @@ export function ServerDataProvider(props: { children: ReactNode }) {
       selectEvent(id: string) {
         setServerData({ ...serverData, selectedEvent: id });
         sock.requestChallengeData({
-          challengeIds: serverData.events.get(id)?.challengeIds ?? [],
+          challenges: serverData.events.get(id)?.challenges ?? [],
         });
       },
       selectOrg(id: string) {
         setServerData({ ...serverData, selectedOrg: id, selectedEvent: "" });
         sock.requestEventData({
-          eventIds: serverData.organizations.get(id)?.events ?? [],
+          events: serverData.organizations.get(id)?.events ?? [],
         });
       },
       selectOrganization(id: string) {
         setServerData({ ...serverData, selectedOrg: id, selectedEvent: "" });
         sock.requestEventData({
-          eventIds: serverData.organizations.get(id)?.events ?? [],
+          events: serverData.organizations.get(id)?.events ?? [],
         });
       },
       updateChallenge(challenge: ChallengeDto) {
@@ -134,11 +134,10 @@ export function ServerDataProvider(props: { children: ReactNode }) {
         }
       } else {
         const oldChallenges =
-          serverData.events.get((data.event as EventDto).id)?.challengeIds ??
-          [];
+          serverData.events.get((data.event as EventDto).id)?.challenges ?? [];
 
         sock.requestChallengeData({
-          challengeIds: (data.event as EventDto).challengeIds.filter(
+          challenges: (data.event as EventDto).challenges.filter(
             (chal) => !(chal in oldChallenges)
           ),
         });
@@ -194,7 +193,7 @@ export function ServerDataProvider(props: { children: ReactNode }) {
           )?.events ?? [];
 
         sock.requestEventData({
-          eventIds: (data.organization as OrganizationDto).events.filter(
+          events: (data.organization as OrganizationDto).events.filter(
             (ev) => !(ev in oldEvents)
           ),
         });

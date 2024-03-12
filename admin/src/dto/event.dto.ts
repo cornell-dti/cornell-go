@@ -6,7 +6,7 @@ export interface RequestAllEventDataDto {
 
 /** DTO for requestEventData */
 export interface RequestEventDataDto {
-  eventIds: string[];
+  events: string[];
 }
 
 /** DTO for requestEventLeaderData */
@@ -24,8 +24,8 @@ export interface EventDto {
   description: string;
   timeLimitation: "LIMITED_TIME" | "PERPETUAL";
   endTime: string;
-  challengeIds: string[];
-  userFavoriteIds?: string[];
+  challenges: string[];
+  userFavorites?: string[];
   initialOrganizationId?: string;
   difficulty: "Easy" | "Normal" | "Hard";
   indexable: boolean;
@@ -38,7 +38,7 @@ export interface EventTrackerDto {
   eventId: string;
   isRanked: boolean;
   curChallengeId: string;
-  prevChallengeIds: string[];
+  prevChallenges: string[];
   prevChallengeDates: string[];
 }
 

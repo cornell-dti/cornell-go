@@ -69,7 +69,7 @@ function EventCard(props: {
           <br />
           Required Players: <b>{requiredText}</b> <br />
           Time Limitation: <b>{timeLimitation}</b> <br />
-          Challenge Count: <b>{props.event.challengeIds.length}</b> <br />
+          Challenge Count: <b>{props.event.challenges.length}</b> <br />
           Difficulty: <b>{difficultyMode}</b> <br />
           Publicly Visible: <b>{affirmOfBool(props.event.indexable)}</b> <br />
           Latitude: <b>{props.event.latitude}</b>, Longitude:{" "}
@@ -116,7 +116,7 @@ function fromForm(form: EntryForm[], id: string): EventDto {
     description: (form[1] as FreeEntryForm).value,
     indexable: (form[5] as OptionEntryForm).value === 1,
     endTime: (form[6] as DateEntryForm).date.toUTCString(),
-    challengeIds: [],
+    challenges: [],
     difficulty:
       (form[4] as OptionEntryForm).value === 0
         ? "Easy"
@@ -201,10 +201,10 @@ export function Events() {
         isOpen={isEditModalOpen}
         entryButtonText="EDIT"
         onEntry={() => {
-          const { challengeIds } = serverData.events.get(currentId)!;
+          const { challenges } = serverData.events.get(currentId)!;
           serverData.updateEvent({
             ...fromForm(form, currentId),
-            challengeIds,
+            challenges,
           });
           setEditModalOpen(false);
         }}

@@ -17,7 +17,7 @@ export interface ChallengeDto {
 
 /** DTO for requestChallengeData */
 export interface RequestChallengeDataDto {
-  challengeIds: string[];
+  challenges: string[];
 }
 
 export interface UpdateChallengeDataDto {
@@ -27,7 +27,7 @@ export interface UpdateChallengeDataDto {
 
 /** DTO for requestEventTrackerData */
 export interface RequestEventTrackerDataDto {
-  trackedEventIds: string[];
+  trackedEvents: string[];
 }
 
 /** DTO for setCurrentChallenge */

@@ -33,7 +33,7 @@ export class EventGateway {
   ) {}
 
   /**
-   * Subscribes to and emits all events that have an id within data.eventIds
+   * Subscribes to and emits all events that have an id within data.events
    *
    * @param user The calling user
    * @param data An array of event ids whose info should be emitted
@@ -44,13 +44,13 @@ export class EventGateway {
     @MessageBody() data: RequestEventDataDto,
   ) {
     const basic = await this.eventService.getEventsByIdsForUser(
-      data.eventIds,
+      data.events,
       false,
       user,
     );
 
     const admin = await this.eventService.getEventsByIdsForUser(
-      data.eventIds,
+      data.events,
       true,
       user,
     );
@@ -123,7 +123,7 @@ export class EventGateway {
   ) {
     const trackers = await this.eventService.getEventTrackersByEventId(
       user,
-      data.trackedEventIds,
+      data.trackedEvents,
     );
 
     for (const tracker of trackers) {

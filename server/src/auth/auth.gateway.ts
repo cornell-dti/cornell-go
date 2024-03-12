@@ -15,7 +15,7 @@ export class AuthGateway implements OnGatewayConnection {
     const user = await this.authService.userByToken(token);
     if (user) {
       client.join(['client/' + user.id, 'admin/' + user.id]);
-      for (const id of await this.authService.getManagedOrgIds(user)) {
+      for (const id of await this.authService.getManagedOrgs(user)) {
         client.join(id);
       }
     } else {

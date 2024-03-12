@@ -132,13 +132,13 @@ export class UserGateway {
     @CallingUser() user: User,
     @MessageBody() data: RequestFilteredEventDto,
   ) {
-    const eventIds = await this.userService.getFilteredEventIds(
+    const events = await this.userService.getFilteredEvents(
       user,
       data.filter,
       data.cursorId,
       data.limit,
     );
-    for (const eventId of eventIds) {
+    for (const eventId of events) {
       const ev = await this.eventService.getEventById(eventId.id);
       this.clientService.subscribe(user, eventId.id, false);
       await this.eventService.emitUpdateEventData(ev, false, false, user);

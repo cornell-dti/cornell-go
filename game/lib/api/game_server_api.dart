@@ -52,8 +52,8 @@ class GameServerApi {
   void leaveGroup() => _invokeWithRefresh("leaveGroup", {});
   void setCurrentEvent(String eventId) =>
       _invokeWithRefresh("setCurrentEvent", {"eventId": eventId});
-  void requestEventData(List<String> eventIds) =>
-      _invokeWithRefresh("requestEventData", {"eventIds": eventIds});
+  void requestEventData(List<String> events) =>
+      _invokeWithRefresh("requestEventData", {"events": events});
   void requestAllEventData(
           int offset,
           int count,
@@ -78,12 +78,12 @@ class GameServerApi {
       _invokeWithRefresh("requestEventLeaderData",
           {"offset": offset, "count": count, "eventId": eventId});
 
-  void requestEventTrackerData(List<String> trackedEventIds) =>
+  void requestEventTrackerData(List<String> trackedEvents) =>
       _invokeWithRefresh(
-          "requestEventTrackerData", {"trackedEventIds": trackedEventIds});
+          "requestEventTrackerData", {"trackedEvents": trackedEvents});
 
-  void requestChallengeData(List<String> challengeIds) => _invokeWithRefresh(
-      "requestChallengeData", {"challengeIds": challengeIds});
+  void requestChallengeData(List<String> challenges) =>
+      _invokeWithRefresh("requestChallengeData", {"challenges": challenges});
 
   void setCurrentChallenge(String challengeId) =>
       _invokeWithRefresh("setCurrentChallenge", {"challengeId": challengeId});

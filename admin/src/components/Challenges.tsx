@@ -196,12 +196,12 @@ export function Challenges() {
       {serverData.selectedEvent === "" ? (
         <CenterText>Select an event to view challenges</CenterText>
       ) : serverData.events.get(serverData.selectedEvent) ? (
-        serverData.events.get(serverData.selectedEvent)?.challengeIds.length ===
+        serverData.events.get(serverData.selectedEvent)?.challenges.length ===
           0 && <CenterText>No challenges in event</CenterText>
       ) : (
         <CenterText>Error getting challenges</CenterText>
       )}
-      {selectedEvent?.challengeIds
+      {selectedEvent?.challenges
         .filter((chalId) => serverData.challenges.get(chalId))
         .map((chalId) => serverData.challenges.get(chalId)!)
         .sort((a, b) =>
@@ -218,17 +218,17 @@ export function Challenges() {
             challenge={chal}
             onUp={() => {
               if (query !== "") return;
-              selectedEvent.challengeIds = moveUp(
-                selectedEvent.challengeIds,
-                selectedEvent.challengeIds.findIndex((id) => id === chal.id)
+              selectedEvent.challenges = moveUp(
+                selectedEvent.challenges,
+                selectedEvent.challenges.findIndex((id) => id === chal.id)
               );
               serverData.updateEvent(selectedEvent);
             }}
             onDown={() => {
               if (query !== "") return;
-              selectedEvent.challengeIds = moveDown(
-                selectedEvent.challengeIds,
-                selectedEvent.challengeIds.findIndex((id) => id === chal.id)
+              selectedEvent.challenges = moveDown(
+                selectedEvent.challenges,
+                selectedEvent.challenges.findIndex((id) => id === chal.id)
               );
               serverData.updateEvent(selectedEvent);
             }}

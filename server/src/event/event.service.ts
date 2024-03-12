@@ -190,11 +190,11 @@ export class EventService {
   }
 
   /** Get a player's event trackers by event id */
-  async getEventTrackersByEventId(user: User, eventIds: string[]) {
+  async getEventTrackersByEventId(user: User, events: string[]) {
     return await this.prisma.eventTracker.findMany({
       where: {
         userId: user.id,
-        eventId: { in: eventIds },
+        eventId: { in: events },
       },
       include: {
         completedChallenges: {
@@ -283,7 +283,7 @@ export class EventService {
       endTime: ev.endTime.toUTCString(),
       requiredMembers: ev.requiredMembers,
       indexable: ev.indexable,
-      challengeIds: sortedChals.map(c => c.id),
+      challenges: sortedChals.map(c => c.id),
       difficulty:
         ev.difficulty === DifficultyMode.EASY
           ? 'Easy'
@@ -305,7 +305,7 @@ export class EventService {
       eventId: tracker.eventId,
       isRanked: tracker.isRankedForEvent,
       curChallengeId: tracker.curChallengeId,
-      prevChallengeIds: completedChallenges.map(pc => pc.id),
+      prevChallenges: completedChallenges.map(pc => pc.id),
       prevChallengeDates: completedChallenges.map(pc =>
         pc.completions[0].timestamp.toUTCString(),
       ),
@@ -434,7 +434,7 @@ export class EventService {
 
   async upsertEventFromDto(event: EventDto) {
     const firstChal = await this.prisma.challenge.findFirst({
-      where: { id: event.challengeIds[0] },
+      where: { id: event.challenges[0] },
       select: { latitude: true, longitude: true },
     });
 
@@ -447,8 +447,8 @@ export class EventService {
           ? TimeLimitationType.LIMITED_TIME
           : TimeLimitationType.PERPETUAL,
       endTime: new Date(event.endTime),
-      // challengeIds: event.challengeIds,
-      userFavoriteIds: event.userFavoriteIds,
+      // challenges: event.challenges,
+      userFavorites: event.userFavorites,
       // initialOrganizationId: event.initialOrganizationId,
       indexable: event.indexable,
       difficulty:
@@ -472,13 +472,13 @@ export class EventService {
       update: {
         ...assignData,
         challenges: {
-          set: event.challengeIds.map(id => ({ id })),
+          set: event.challenges.map(id => ({ id })),
         },
       },
     });
 
     let eventIndexChal = 0;
-    for (const id of event.challengeIds) {
+    for (const id of event.challenges) {
       await this.prisma.challenge.update({
         where: { id },
         data: {

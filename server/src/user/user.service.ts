@@ -160,7 +160,7 @@ export class UserService {
    * @param cursorId id of the last event in the previous page
    * @returns filtered event id list sorted by ascending id
    */
-  async getFilteredEventIds(
+  async getFilteredEvents(
     user: User,
     filter: eventFilterDto,
     cursorId: string | undefined,
@@ -174,10 +174,10 @@ export class UserService {
       },
     });
 
-    let filteredEventIds = [{ id: '' }];
+    let filteredEvents = [{ id: '' }];
 
     if (filter == 'finished') {
-      filteredEventIds = await this.prisma.eventBase.findMany({
+      filteredEvents = await this.prisma.eventBase.findMany({
         select: { id: true },
         orderBy: {
           id: 'asc', // must be ordered to use cursor
@@ -207,7 +207,7 @@ export class UserService {
         },
       });
     } else if (filter == 'new') {
-      filteredEventIds = await this.prisma.eventBase.findMany({
+      filteredEvents = await this.prisma.eventBase.findMany({
         select: { id: true },
         orderBy: {
           id: 'asc', // must be ordered to use cursor
@@ -238,7 +238,7 @@ export class UserService {
       });
     } else {
       // filter == 'saved'
-      filteredEventIds = await this.prisma.eventBase.findMany({
+      filteredEvents = await this.prisma.eventBase.findMany({
         select: { id: true },
         orderBy: {
           id: 'asc', // must be ordered to use cursor
@@ -260,7 +260,7 @@ export class UserService {
         },
       });
     }
-    return filteredEventIds;
+    return filteredEvents;
   }
 
   // async setMajor(user: User, major: string) {
@@ -334,10 +334,10 @@ export class UserService {
       authType: (
         joinedUser.authType as string
       ).toLowerCase() as UserAuthTypeDto,
-      trackedEventIds: partial
+      trackedEvents: partial
         ? undefined
         : joinedUser.eventTrackers.map(ev => ev.eventId),
-      favoriteIds: partial
+      favorites: partial
         ? undefined
         : joinedUser.favorites.map((ev: EventBase) => ev.id),
     };

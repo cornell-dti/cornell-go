@@ -114,7 +114,7 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
       "year": "Senior",
       "score": 100,
       "groupId": "group123",
-      "trackedEventIds": ["event1", "event2"],
+      "trackedEvents": ["event1", "event2"],
       "authType": "google"
     }
   });
