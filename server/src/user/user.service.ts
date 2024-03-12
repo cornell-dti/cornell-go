@@ -21,6 +21,10 @@ import {
   eventFilterDto,
 } from './user.dto';
 import { CensorSensor } from 'censor-sensor';
+import { AppAbility, CaslAbilityFactory } from '../casl/casl-ability.factory';
+import { Action } from '../casl/action.enum';
+import { subject } from '@casl/ability';
+import { accessibleBy } from '@casl/prisma';
 
 @Injectable()
 export class UserService {
@@ -32,6 +36,7 @@ export class UserService {
     private groupsService: GroupService,
     private orgService: OrganizationService,
     private clientService: ClientService,
+    private abilityFactory: CaslAbilityFactory,
   ) {}
 
   /** Find a user by their authentication token */
@@ -116,7 +121,11 @@ export class UserService {
     return await this.prisma.user.findMany();
   }
 
-  async deleteUser(user: User) {
+  async deleteUser(ability: AppAbility, user: User) {
+    if (ability.cannot(Action.Delete, subject('User', user))) {
+      return;
+    }
+
     await this.log.logEvent(SessionLogEvent.DELETE_USER, user.id, user.id);
     await this.prisma.user.delete({ where: { id: user.id } });
     await this.prisma.$transaction(async tx => {
@@ -301,24 +310,37 @@ export class UserService {
    * @param user User requiring an update.
    * @returns The new user after the update is made
    */
-  async updateUser(user: UserDto): Promise<User> {
-    const username = new CensorSensor()
-      .cleanProfanityIsh(
-        user.username
-          .substring(0, 128)
-          .replaceAll(/[^_A-z0-9]/g, ' ')
-          .replaceAll('_', ' '),
-      )
-      .replaceAll('*', '_')
-      .replaceAll(' ', '_');
+  async updateUser(ability: AppAbility, user: UserDto): Promise<User> {
+    const username = user.username
+      ? new CensorSensor()
+          .cleanProfanityIsh(
+            user.username
+              ?.substring(0, 128)
+              ?.replaceAll(/[^_A-z0-9]/g, ' ')
+              ?.replaceAll('_', ' '),
+          )
+          .replaceAll('*', '_')
+          .replaceAll(' ', '_')
+      : undefined;
 
-    return await this.prisma.user.update({
-      where: { id: user.id },
-      data: {
+    const userObj = await this.prisma.user.findFirstOrThrow({
+      where: { id: user.id, ...accessibleBy(ability, Action.Update).User },
+    });
+
+    const assignData = await this.abilityFactory.filterInaccessible(
+      {
         username: username,
         email: user.email,
         year: user.year,
       },
+      'User',
+      ability,
+      Action.Update,
+    );
+
+    return await this.prisma.user.update({
+      where: { id: userObj.id },
+      data: assignData,
     });
   }
 
@@ -368,7 +390,9 @@ export class UserService {
     target?: User,
   ) {
     const dto: UpdateUserDataDto = {
-      user: deleted ? user.id : await this.dtoForUserData(user, partial),
+      user: deleted
+        ? { id: user.id }
+        : await this.dtoForUserData(user, partial),
       deleted,
     };
 

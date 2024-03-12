@@ -147,13 +147,15 @@ export class EventGateway {
       }
 
       const ev = await this.eventService.upsertEventFromDto(
-        data.event as EventDto,
+        ability,
+        data.event,
       );
 
       const org = await this.orgService.getOrganizationById(
         data.event.initialOrganizationId!,
       );
 
+      this.clientService.subscribe(user, ev.id);
       await this.orgService.emitUpdateOrganizationData(org, false);
       await this.eventService.emitUpdateEventData(ev, false);
     }

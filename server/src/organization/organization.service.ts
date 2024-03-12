@@ -12,6 +12,9 @@ import { v4 } from 'uuid';
 import { PrismaService } from '../prisma/prisma.service';
 import { OrganizationDto, UpdateOrganizationDataDto } from './organization.dto';
 import { AppAbility, CaslAbilityFactory } from '../casl/casl-ability.factory';
+import { Action } from '../casl/action.enum';
+import { subject } from '@casl/ability';
+import { accessibleBy } from '@casl/prisma';
 
 export const defaultEventData = {
   name: 'Default Event',
@@ -142,7 +145,7 @@ export class OrganizationService {
   ) {
     const dto: UpdateOrganizationDataDto = {
       organization: deleted
-        ? organization.id
+        ? { id: organization.id }
         : await this.dtoForOrganization(organization),
       deleted,
     };
@@ -160,33 +163,42 @@ export class OrganizationService {
   }
 
   /** Update/insert a organization group */
-  async upsertOrganizationFromDto(organization: OrganizationDto) {
-    const exists =
-      (await this.prisma.organization.count({
-        where: { id: organization.id },
-      })) > 0;
+  async upsertOrganizationFromDto(
+    ability: AppAbility,
+    organization: OrganizationDto,
+  ) {
+    const org = await this.prisma.organization.findFirst({
+      where: { id: organization.id },
+    });
 
     return await this.prisma.organization.upsert({
       where: { id: organization.id },
-      create: {
-        name: organization.name,
-        accessCode: Math.floor(Math.random() * 0xffffff).toString(16),
-        members: {
-          connect: organization.members.map(id => ({ id })),
-        },
-        events: {
-          connect: organization.events.map(id => ({ id })),
-        },
-        specialUsage: 'NONE',
-      },
-      update: {
-        members: {
-          set: organization.members.map(id => ({ id })),
-        },
-        events: {
-          set: organization.events.map(id => ({ id })),
-        },
-      },
+      create: ability.can(Action.Create, 'Organization')
+        ? {
+            name: organization.name ?? 'New organization',
+            accessCode: Math.floor(Math.random() * 0xffffff).toString(16),
+            members: {
+              connect: organization.members?.map(id => ({ id })),
+            },
+            events: {
+              connect: organization.events?.map(id => ({ id })),
+            },
+            specialUsage: 'NONE',
+          }
+        : ({} as Organization),
+      update:
+        org &&
+        ability.can(Action.Update, subject('Organization', org), 'members') &&
+        ability.can(Action.Update, subject('Organization', org), 'events')
+          ? {
+              members: {
+                set: organization.members?.map(id => ({ id })),
+              },
+              events: {
+                set: organization.events?.map(id => ({ id })),
+              },
+            }
+          : {},
     });
   }
 
@@ -200,9 +212,11 @@ export class OrganizationService {
     }
   }
 
-  async removeOrganization(id: string) {
-    await this.prisma.organization.delete({
-      where: { id },
+  async removeOrganization(ability: AppAbility, id: string) {
+    await this.prisma.organization.deleteMany({
+      where: {
+        AND: [{ id }, accessibleBy(ability, Action.Delete).Organization],
+      },
     });
   }
 
@@ -225,7 +239,11 @@ export class OrganizationService {
     }
   }
 
-  async addManager(potentialManagerEmail: string, organizationId: string) {
+  async addManager(
+    ability: AppAbility,
+    potentialManagerEmail: string,
+    organizationId: string,
+  ) {
     const org = await this.prisma.organization.findFirstOrThrow({
       where: { id: organizationId },
     });
@@ -235,8 +253,14 @@ export class OrganizationService {
     });
 
     await this.prisma.organization.update({
-      where: { id: org.id },
-      data: { managers: { connect: { id: potentialManager.id } } },
+      where: {
+        ...accessibleBy(ability, Action.Manage).Organization,
+        id: org.id,
+      },
+      data: {
+        managers: { connect: { id: potentialManager.id } },
+        members: { connect: { id: potentialManager.id } },
+      },
     });
 
     await this.prisma.user.update({
@@ -251,6 +275,7 @@ export class OrganizationService {
     const org = await this.prisma.organization.findFirstOrThrow({
       where: { accessCode: code },
     });
+
     await this.prisma.organization.update({
       where: { id: org.id },
       data: { members: { connect: { id: user.id } } },

@@ -113,20 +113,18 @@ export class UserGateway {
 
   @SubscribeMessage('updateUserData')
   async updateUserData(
+    @UserAbility() ability: AppAbility,
     @CallingUser() user: User,
     @MessageBody() data: UpdateUserDataDto,
   ) {
-    if (!user.administrator && user.id !== (data.user as UserDto).id) return;
-
     if (data.deleted) {
-      const user = await this.userService.byId(data.user as string);
-      if (user !== null) {
-        await this.userService.deleteUser(user);
+      const user = await this.userService.byId(data.user.id);
+      if (user) {
+        await this.userService.deleteUser(ability, user);
         await this.userService.emitUpdateUserData(user, true, true);
       }
     } else {
-      const user = await this.userService.updateUser(data.user as UserDto);
-
+      const user = await this.userService.updateUser(ability, data.user);
       await this.userService.emitUpdateUserData(user, false, true);
     }
   }
@@ -142,20 +140,11 @@ export class UserGateway {
       data.cursorId,
       data.limit,
     );
+
     for (const eventId of events) {
       const ev = await this.eventService.getEventById(eventId.id);
-      await this.eventService.emitUpdateEventData(ev, false, user);
+      await this.eventService.emitUpdateEventData(ev!, false, user);
     }
-  }
-
-  @SubscribeMessage('setFavorite')
-  async setFavorite(
-    @CallingUser() user: User,
-    @MessageBody() data: RequestFavoriteEventDataDto,
-  ) {
-    const ev = await this.eventService.getEventById(data.eventId);
-    await this.userService.setFavorite(user, ev, data.isFavorite);
-    await this.userService.emitUpdateUserData(user, false, false);
   }
 
   @SubscribeMessage('setAuthToDevice')
@@ -205,7 +194,7 @@ export class UserGateway {
       return;
     }
 
-    await this.orgService.addManager(data.email, data.organizationId);
+    await this.orgService.addManager(ability, data.email, data.organizationId);
 
     const manager = await this.userService.byEmail(data.email);
     await this.clientService.subscribe(manager, org.id);
@@ -227,12 +216,13 @@ export class UserGateway {
 
   @SubscribeMessage('closeAccount')
   async closeAccount(
+    @UserAbility() ability: AppAbility,
     @CallingUser() user: User,
     @MessageBody() data: CloseAccountDto,
   ) {
     const group = await this.groupService.getGroupForUser(user);
     await this.userService.setAuthType(user, AuthType.NONE, user.authToken);
-    await this.userService.deleteUser(user);
+    await this.userService.deleteUser(ability, user);
     await this.groupService.emitUpdateGroupData(group, false);
   }
 }

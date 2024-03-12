@@ -136,7 +136,9 @@ export class ChallengeGateway {
     }
 
     if (data.deleted && challenge) {
-      const ev = await this.eventService.getEventById(challenge.linkedEventId);
+      const ev = (await this.eventService.getEventById(
+        challenge.linkedEventId,
+      ))!;
       await this.challengeService.removeChallenge(ability, challenge.id);
 
       await this.challengeService.emitUpdateChallengeData(challenge, true);
@@ -148,9 +150,10 @@ export class ChallengeGateway {
       );
 
       if (challenge.linkedEventId) {
-        const ev = await this.eventService.updateLongitudeLatitude(
+        const ev = (await this.eventService.getEventById(
           challenge.linkedEventId,
-        );
+        ))!;
+        await this.clientService.subscribe(user, challenge.id);
         await this.challengeService.emitUpdateChallengeData(challenge, false);
         await this.eventService.emitUpdateEventData(ev, false);
       }

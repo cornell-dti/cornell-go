@@ -55,20 +55,20 @@ export type UserAuthTypeDto = 'device' | 'apple' | 'google';
 /** DTO for updateUserData event */
 export interface UserDto {
   id: string;
-  username: string;
-  enrollmentType: 'UNDERGRADUATE' | 'GRADUATE' | 'FACULTY' | 'ALUMNI';
-  email: string;
-  year: string;
-  score: number;
-  isBanned: boolean;
-  groupId: string;
-  authType: UserAuthTypeDto;
+  username?: string;
+  enrollmentType?: 'UNDERGRADUATE' | 'GRADUATE' | 'FACULTY' | 'ALUMNI';
+  email?: string;
+  year?: string;
+  score?: number;
+  isBanned?: boolean;
+  groupId?: string;
+  authType?: UserAuthTypeDto;
   trackedEvents?: string[];
   favorites?: string[];
 }
 
 export interface UpdateUserDataDto {
-  user: UserDto | string;
+  user: UserDto;
   deleted: boolean;
 }
 
