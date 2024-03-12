@@ -6,7 +6,6 @@ import {
   SessionLogEvent,
   OrganizationSpecialUsage,
   User,
-  PrismaClient,
   EnrollmentType,
   EventBase,
 } from '@prisma/client';
@@ -21,6 +20,7 @@ import {
   UserDto,
   eventFilterDto,
 } from './user.dto';
+import { CensorSensor } from 'censor-sensor';
 
 @Injectable()
 export class UserService {
@@ -302,10 +302,20 @@ export class UserService {
    * @returns The new user after the update is made
    */
   async updateUser(user: UserDto): Promise<User> {
+    const username = new CensorSensor()
+      .cleanProfanityIsh(
+        user.username
+          .substring(0, 128)
+          .replaceAll(/[^_A-z0-9]/g, ' ')
+          .replaceAll('_', ' '),
+      )
+      .replaceAll('*', '_')
+      .replaceAll(' ', '_');
+
     return await this.prisma.user.update({
       where: { id: user.id },
       data: {
-        username: user.username,
+        username: username,
         email: user.email,
         year: user.year,
       },
@@ -355,19 +365,18 @@ export class UserService {
     user: User,
     deleted: boolean,
     partial: boolean,
-    admin?: boolean,
-    client?: User,
+    target?: User,
   ) {
     const dto: UpdateUserDataDto = {
       user: deleted ? user.id : await this.dtoForUserData(user, partial),
       deleted,
     };
 
-    if (client && admin) {
-      this.clientService.sendUpdate('updateUserData', client.id, false, dto);
-    } else if (admin) {
-      this.clientService.sendUpdate('updateUserData', user.id, true, dto);
-    }
-    await this.log.logEvent(SessionLogEvent.EDIT_USERNAME, user.id, user.id);
+    await this.clientService.sendProtected(
+      'updateUserData',
+      target?.id ?? user.id,
+      dto,
+      'User',
+    );
   }
 }

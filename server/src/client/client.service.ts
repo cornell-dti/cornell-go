@@ -12,6 +12,7 @@ import { tokenOfHandshake } from '../auth/jwt-auth.guard';
 import { PermittedFieldsOptions, permittedFieldsOf } from '@casl/ability/extra';
 import { Action } from '../casl/action.enum';
 import { ExtractSubjectType } from '@casl/ability';
+import { Subjects } from '@casl/prisma';
 
 @Injectable()
 export class ClientService {
@@ -21,20 +22,11 @@ export class ClientService {
     private prisma: PrismaService,
   ) {}
 
-  public sendUpdate<TDto>(
-    event: string,
-    resourceId: string,
-    admin: boolean,
-    dto: TDto,
-  ) {
-    this.gateway.server.to(resourceId).emit(event, dto);
-  }
-
-  public subscribe(user: User, resourceId: string, admin: boolean) {
+  public subscribe(user: User, resourceId: string) {
     this.gateway.server.in(user.id).socketsJoin(resourceId);
   }
 
-  public unsubscribe(user: User, resourceId: string, admin: boolean) {
+  public unsubscribe(user: User, resourceId: string) {
     this.gateway.server.in(user.id).socketsLeave(resourceId);
   }
 
@@ -46,15 +38,17 @@ export class ClientService {
     const dto: UpdateErrorDto = {
       message,
     };
-    this.sendProtected('updateErrorData', user.id, dto);
+    await this.sendProtected('updateErrorData', user.id, dto);
   }
 
   async sendProtected<TDto extends {}>(
     event: string,
     target: string,
     dto: TDto,
-    dtoSubject?: ExtractSubjectType<SubjectTypes>,
+    dtoSubject?: Subjects<SubjectTypes>,
   ) {
+    this.gateway.server.in(target).socketsJoin(target);
+
     if (!dtoSubject) {
       this.gateway.server.to(target).emit(event, dto);
     } else {

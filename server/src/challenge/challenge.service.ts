@@ -194,36 +194,19 @@ export class ChallengeService {
   async emitUpdateChallengeData(
     challenge: Challenge,
     deleted: boolean,
-    admin?: boolean,
-    client?: User,
+    target?: User,
   ) {
     const dto: UpdateChallengeDataDto = {
       challenge: deleted ? challenge.id : await this.dtoForChallenge(challenge),
       deleted,
     };
 
-    if (client) {
-      this.clientService.sendUpdate<UpdateChallengeDataDto>(
-        'updateChallengeData',
-        client.id,
-        !!admin,
-        dto,
-      );
-    } else {
-      this.clientService.sendUpdate<UpdateChallengeDataDto>(
-        'updateChallengeData',
-        challenge.id,
-        false,
-        dto,
-      );
-
-      this.clientService.sendUpdate<UpdateChallengeDataDto>(
-        'updateChallengeData',
-        challenge.id,
-        true,
-        dto,
-      );
-    }
+    await this.clientService.sendProtected(
+      'updateChallengeData',
+      target?.id ?? challenge.id,
+      dto,
+      'Challenge',
+    );
   }
 
   async dtoForChallenge(ch: Challenge): Promise<ChallengeDto> {

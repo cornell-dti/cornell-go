@@ -1,9 +1,6 @@
+import { PermittedFieldsOptions, permittedFieldsOf } from '@casl/ability/extra';
 import { Action } from './action.enum';
-import {
-  AbilityBuilder,
-  PureAbility,
-  createAliasResolver,
-} from '@casl/ability';
+import { AbilityBuilder, ExtractSubjectType, PureAbility } from '@casl/ability';
 import { PrismaQuery, Subjects, createPrismaAbility } from '@casl/prisma';
 import { Injectable } from '@nestjs/common';
 import {
@@ -39,6 +36,26 @@ export type AppAbility = PureAbility<
 
 @Injectable()
 export class CaslAbilityFactory {
+  async filterInaccessible(
+    data: any,
+    subject: Subjects<SubjectTypes>,
+    ability: AppAbility,
+    action: Action,
+  ) {
+    const fieldList = Object.keys(data);
+    const options: PermittedFieldsOptions<AppAbility> = {
+      fieldsFrom: rule => rule.fields || fieldList,
+    };
+
+    const permitted = permittedFieldsOf(ability, action, subject, options);
+    const newObj: any = {};
+    for (const permittedField of permitted) {
+      newObj[permittedField] = data[permittedField];
+    }
+
+    return newObj;
+  }
+
   createForUser(user: User) {
     const { can, cannot, build } = new AbilityBuilder<AppAbility>(
       createPrismaAbility,
@@ -60,9 +77,14 @@ export class CaslAbilityFactory {
       id: user.id,
     });
 
-    can(Action.Read, 'User', ['email', 'groupId', 'id', 'score'], {
-      id: user.id,
-    });
+    can(
+      Action.Read,
+      'User',
+      ['email', 'groupId', 'id', 'score', 'trackedEvents', 'favorites'],
+      {
+        id: user.id,
+      },
+    );
 
     can(Action.Read, 'Achievement');
 

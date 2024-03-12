@@ -312,56 +312,35 @@ export class EventService {
     };
   }
 
-  async emitUpdateEventTracker(tracker: EventTracker) {
+  async emitUpdateEventTracker(tracker: EventTracker, target?: User) {
     const dto = await this.dtoForEventTracker(tracker);
-    this.clientService.sendUpdate(
+    await this.clientService.sendProtected(
       'updateEventTrackerData',
-      tracker.userId,
-      false,
+      target?.id ?? tracker.id,
       dto,
+      'EventTracker',
     );
   }
 
-  async emitUpdateEventData(
-    ev: EventBase,
-    deleted: boolean,
-    admin?: boolean,
-    client?: User,
-  ) {
+  async emitUpdateEventData(ev: EventBase, deleted: boolean, target?: User) {
     const dto: UpdateEventDataDto = {
       event: deleted ? ev.id : await this.dtoForEvent(ev),
       deleted,
     };
 
-    if (client) {
-      this.clientService.sendUpdate<UpdateEventDataDto>(
-        'updateEventData',
-        client.id,
-        !!admin,
-        dto,
-      );
-    } else {
-      this.clientService.sendUpdate<UpdateEventDataDto>(
-        'updateEventData',
-        ev.id,
-        false,
-        dto,
-      );
-
-      this.clientService.sendUpdate<UpdateEventDataDto>(
-        'updateEventData',
-        ev.id,
-        true,
-        dto,
-      );
-    }
+    await this.clientService.sendProtected(
+      'updateEventData',
+      target?.id ?? ev.id,
+      dto,
+      'EventBase',
+    );
   }
 
   async emitUpdateLeaderData(
     offset: number,
     count: number,
     event: EventBase | null,
-    client: User,
+    target: User,
   ) {
     let leaderData: LeaderDto[] = [];
     if (event) {
@@ -392,7 +371,7 @@ export class EventService {
       users: leaderData,
     };
 
-    this.clientService.sendUpdate('updateLeaderData', client.id, false, dto);
+    await this.clientService.sendProtected('updateLeaderData', target.id, dto);
   }
 
   async hasAdminRights(

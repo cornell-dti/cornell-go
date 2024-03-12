@@ -11,6 +11,7 @@ import { ClientService } from '../client/client.service';
 import { v4 } from 'uuid';
 import { PrismaService } from '../prisma/prisma.service';
 import { OrganizationDto, UpdateOrganizationDataDto } from './organization.dto';
+import { AppAbility, CaslAbilityFactory } from '../casl/casl-ability.factory';
 
 export const defaultEventData = {
   name: 'Default Event',
@@ -41,6 +42,7 @@ export class OrganizationService {
   constructor(
     private prisma: PrismaService,
     private clientService: ClientService,
+    private abilityFactory: CaslAbilityFactory,
   ) {}
 
   async makeDefaultEvent() {
@@ -136,8 +138,7 @@ export class OrganizationService {
   async emitUpdateOrganizationData(
     organization: Organization,
     deleted: boolean,
-    admin?: boolean,
-    user?: User,
+    target?: User,
   ) {
     const dto: UpdateOrganizationDataDto = {
       organization: deleted
@@ -146,31 +147,12 @@ export class OrganizationService {
       deleted,
     };
 
-    // Only admin data for now
-    if (user) {
-      await this.clientService.sendUpdate(
-        'updateOrganizationData',
-        user.id,
-        true,
-        dto,
-      );
-    } else {
-      await this.clientService.sendUpdate(
-        'updateOrganizationData',
-        organization.id,
-        true,
-        dto,
-      );
-    }
-  }
-
-  async isManagerOf(
-    org: Organization | { id: string },
-    user: User | { id: string },
-  ) {
-    return !!(await this.prisma.organization.findFirst({
-      where: { id: org.id, managers: { some: { id: user.id } } },
-    }));
+    await this.clientService.sendProtected(
+      'updateOrganizationData',
+      target?.id ?? organization.id,
+      dto,
+      'Organization',
+    );
   }
 
   private genAccessCode() {
@@ -214,7 +196,7 @@ export class OrganizationService {
     });
 
     for (const user of users) {
-      this.clientService.subscribe(user, org.id, true);
+      this.clientService.subscribe(user, org.id);
     }
   }
 
@@ -236,36 +218,33 @@ export class OrganizationService {
           where: { id: potentialAdmin.id },
           data: {
             managerOf: { connect: { id } },
+            memberOf: { connect: { id } },
           },
         });
       }
     }
   }
 
-  async addManager(
-    manager: User,
-    potentialManagerEmail: string,
-    organizationId: string,
-  ) {
+  async addManager(potentialManagerEmail: string, organizationId: string) {
     const org = await this.prisma.organization.findFirstOrThrow({
       where: { id: organizationId },
     });
 
-    if ((await this.isManagerOf(manager, org)) || manager.administrator) {
-      const potentialManager = await this.prisma.user.findFirstOrThrow({
-        where: { email: potentialManagerEmail },
-      });
-      await this.prisma.organization.update({
-        where: { id: org.id },
-        data: { managers: { connect: { id: potentialManager.id } } },
-      });
+    const potentialManager = await this.prisma.user.findFirstOrThrow({
+      where: { email: potentialManagerEmail },
+    });
 
-      await this.prisma.user.update({
-        where: { id: potentialManager.id },
-        data: { managerOf: { connect: { id: org.id } } },
-      });
-      console.log('Manager Added');
-    }
+    await this.prisma.organization.update({
+      where: { id: org.id },
+      data: { managers: { connect: { id: potentialManager.id } } },
+    });
+
+    await this.prisma.user.update({
+      where: { id: potentialManager.id },
+      data: { managerOf: { connect: { id: org.id } } },
+    });
+
+    console.log('Manager Added');
   }
 
   async joinOrganization(user: User, code: string) {
