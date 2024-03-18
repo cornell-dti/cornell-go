@@ -10,7 +10,7 @@ import { CaslModule } from '../casl/casl.module';
 @Module({
   imports: [
     forwardRef(() => AuthModule),
-    forwardRef(() => CaslModule),
+    CaslModule,
     ClientModule,
     EventModule,
     PrismaModule,

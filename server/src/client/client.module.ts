@@ -5,7 +5,7 @@ import { ClientService } from './client.service';
 import { CaslModule } from '../casl/casl.module';
 
 @Module({
-  imports: [PrismaModule, forwardRef(() => CaslModule)],
+  imports: [PrismaModule, CaslModule],
   providers: [ClientGateway, ClientService],
   exports: [ClientGateway, ClientService],
 })

@@ -167,7 +167,7 @@ export class UserService {
       : undefined;
 
     const userObj = await this.prisma.user.findFirstOrThrow({
-      where: { id: user.id, ...accessibleBy(ability, Action.Update).User },
+      where: { AND: [accessibleBy(ability, Action.Update).User, {id: user.id}] },
     });
 
     const assignData = await this.abilityFactory.filterInaccessible(

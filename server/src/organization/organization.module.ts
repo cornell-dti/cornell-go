@@ -11,7 +11,7 @@ import { CaslModule } from '../casl/casl.module';
     PrismaModule,
     ClientModule,
     forwardRef(() => AuthModule),
-    forwardRef(() => CaslModule),
+    CaslModule,
   ],
   exports: [OrganizationService, OrganizationGateway],
   providers: [OrganizationService, OrganizationGateway],

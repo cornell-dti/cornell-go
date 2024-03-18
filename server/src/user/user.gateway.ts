@@ -129,24 +129,6 @@ export class UserGateway {
     }
   }
 
-  @SubscribeMessage('requestFilteredEvents')
-  async requestFilteredEvents(
-    @CallingUser() user: User,
-    @MessageBody() data: RequestFilteredEventDto,
-  ) {
-    const events = await this.userService.getFilteredEvents(
-      user,
-      data.filter,
-      data.cursorId,
-      data.limit,
-    );
-
-    for (const eventId of events) {
-      const ev = await this.eventService.getEventById(eventId.id);
-      await this.eventService.emitUpdateEventData(ev!, false, user);
-    }
-  }
-
   @SubscribeMessage('setAuthToDevice')
   async setAuthToDevice(
     @CallingUser() user: User,

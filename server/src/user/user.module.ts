@@ -13,7 +13,7 @@ import { CaslModule } from '../casl/casl.module';
 @Module({
   imports: [
     forwardRef(() => AuthModule),
-    forwardRef(() => CaslModule),
+    CaslModule,
     SessionLogModule,
     ClientModule,
     forwardRef(() => GroupModule),

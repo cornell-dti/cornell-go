@@ -26,6 +26,6 @@ import { AuthGateway } from './auth.gateway';
     RefreshAccessController,
   ],
   providers: [AuthService, UserGuard, AuthGateway],
-  exports: [AuthService],
+  exports: [AuthService, UserGuard],
 })
 export class AuthModule {}
