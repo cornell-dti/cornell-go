@@ -14,8 +14,8 @@ Widget achievementCell(
   return Padding(
     padding: const EdgeInsets.all(8.0),
     child: Container(
-        width: 380,
-        height: 100,
+        width: 345,
+        height: 88,
         decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(10.0),
@@ -29,8 +29,7 @@ Widget achievementCell(
         child: Row(
           children: [
             Padding(
-              padding: const EdgeInsets.only(
-                  left: 18.0, top: 15, bottom: 15, right: 15),
+              padding: const EdgeInsets.all(10),
               child: ClipRRect(
                   borderRadius: BorderRadius.circular(20),
                   child: Image(
@@ -49,7 +48,7 @@ Widget achievementCell(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Container(
-                        width: 250,
+                        width: 215,
                         child: Text(
                           name,
                           overflow: TextOverflow.ellipsis,
@@ -66,8 +65,8 @@ Widget achievementCell(
                   children: [
                     Stack(children: [
                       Container(
-                        width: 200,
-                        height: 20,
+                        width: 170,
+                        height: 13,
                         alignment: Alignment.centerLeft,
                         child: Container(
                           decoration: new BoxDecoration(
@@ -81,8 +80,8 @@ Widget achievementCell(
                       Container(
                         width:
                             (totalTasks > 0 ? tasksFinished / totalTasks : 0) *
-                                200,
-                        height: 20,
+                                170,
+                        height: 13,
                         alignment: Alignment.centerLeft,
                         child: Container(
                           decoration: new BoxDecoration(

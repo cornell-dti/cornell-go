@@ -23,6 +23,7 @@
     "test:e2e": "jest --runInBand --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@casl/ability": "^6.7.0",
     "@nestjs/common": "^9.3.12",
     "@nestjs/config": "^2.3.1",
     "@nestjs/core": "^9.3.12",

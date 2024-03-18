@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:game/global_leaderboard/global_leaderboard_widget.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:game/profile/profile_page.dart';
 import 'home_navbar.dart';
 
 class BottomNavBar extends StatefulWidget {
@@ -17,10 +18,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
   static const List<Widget> _widgetOptions = <Widget>[
     HomeNavBar(),
     GlobalLeaderboardWidget(),
-    Text(
-      'Profile',
-      style: optionStyle,
-    ),
+    ProfilePage(),
   ];
 
   void _onItemTapped(int index) {
