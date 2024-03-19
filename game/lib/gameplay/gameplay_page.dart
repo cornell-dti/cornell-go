@@ -18,9 +18,6 @@ class GameplayPage extends StatefulWidget {
   final String challengeId;
 
   const GameplayPage({Key? key, required this.challengeId}) : super(key: key);
-  final String challengeId;
-
-  const GameplayPage({Key? key, required this.challengeId}) : super(key: key);
 
   @override
   State<GameplayPage> createState() => _GameplayPageState();
