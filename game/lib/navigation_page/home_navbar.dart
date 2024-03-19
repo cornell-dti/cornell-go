@@ -46,7 +46,10 @@ class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
         controller: _tabController,
         children: const <Widget>[
           Center(
-            child: ChallengesPage(),
+            //child: ChallengesPage(),
+            child: GameplayPage(
+              eventId: "1e5b7d13-f13d-4245-b3ce-d7619006a5ed",
+            ),
           ),
           Center(
             child: JourneysPage(),

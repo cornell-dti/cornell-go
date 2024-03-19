@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
+import 'package:game/model/event_model.dart';
+import 'package:game/model/tracker_model.dart';
 import 'package:velocity_x/velocity_x.dart';
 import 'package:game/api/geopoint.dart';
 import 'package:geolocator/geolocator.dart';
@@ -15,9 +17,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:async';
 
 class GameplayPage extends StatefulWidget {
-  final String challengeId;
+  final String eventId;
 
-  const GameplayPage({Key? key, required this.challengeId}) : super(key: key);
+  const GameplayPage({Key? key, required this.eventId}) : super(key: key);
 
   @override
   State<GameplayPage> createState() => _GameplayPageState();
@@ -70,8 +72,11 @@ class _GameplayPageState extends State<GameplayPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ChallengeModel>(builder: (context, challengeModel, _) {
-      var challenge = challengeModel.getChallengeById(widget.challengeId);
+    return Consumer3<ChallengeModel, EventModel, TrackerModel>(
+        builder: (context, challengeModel, eventModel, trackerModel, _) {
+      var event = eventModel.getEventById(widget.eventId);
+      var tracker = trackerModel.trackerByEventId(widget.eventId);
+      var challenge = challengeModel.getChallengeById(tracker!.curChallengeId);
       if (challenge == null) {
         return Scaffold(
           body: Text("No challenge data"),
