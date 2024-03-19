@@ -1,7 +1,17 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
+import 'package:game/api/game_api.dart';
+import 'package:game/api/game_client_dto.dart';
+import 'package:game/model/challenge_model.dart';
+import 'package:game/model/event_model.dart';
+import 'package:game/model/group_model.dart';
+import 'package:game/model/tracker_model.dart';
+import 'package:game/model/user_model.dart';
+import 'package:provider/provider.dart';
 import 'challenge_cell.dart';
 
 class ChallengesPage extends StatefulWidget {
@@ -116,10 +126,10 @@ class _ChallengesPageState extends State<ChallengesPage> {
                     ],
                   ),
                 ),
-                Expanded(child:
-                    Consumer4<EventModel, GroupModel, TrackerModel, UserModel>(
-                        builder: (context, myEventModel, groupModel,
-                            trackerModel, userModel, child) {
+                Expanded(child: Consumer4<EventModel, GroupModel, TrackerModel,
+                        ChallengeModel>(
+                    builder: (context, myEventModel, groupModel, trackerModel,
+                        challengeModel, child) {
                   List<Widget> eventCells = [];
                   if (myEventModel.searchResults == null) {
                     myEventModel.searchEvents(
@@ -151,6 +161,11 @@ class _ChallengesPageState extends State<ChallengesPage> {
                     DateTime endtime = HttpDate.parse(event.endTime);
 
                     Duration timeTillExpire = endtime.difference(now);
+                    if (locationCount != 1) continue;
+                    var challenge =
+                        challengeModel.getChallengeById(event.challengeIds[0]);
+
+                    if (challenge == null) continue;
                     eventCells.add(
                       StreamBuilder(
                         stream:
@@ -166,15 +181,14 @@ class _ChallengesPageState extends State<ChallengesPage> {
                               )
                             : ChallengeCell(
                                 key: UniqueKey(),
-                                event.name,
+                                "location",
+                                challenge.name,
                                 Image.network(
-                                    "https://picsum.photos/250?image=9"), // dummy data for now; should pass in thumbnail parameter
-                                event.description,
-                                locationCount,
-                                numberCompleted,
+                                    "https://picsum.photos/250?image=9"),
                                 complete,
+                                challenge.description,
                                 difficulty,
-                                event.minimumScore,
+                                1,
                                 0),
                       ),
                     );

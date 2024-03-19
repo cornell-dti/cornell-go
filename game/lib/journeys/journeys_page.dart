@@ -108,10 +108,10 @@ class _JourneysPageState extends State<JourneysPage> {
                     ),
                   ),
                 ),
-                Expanded(child:
-                    Consumer4<EventModel, GroupModel, TrackerModel, UserModel>(
-                        builder: (context, myEventModel, groupModel,
-                            trackerModel, userModel, child) {
+                Expanded(child: Consumer4<EventModel, GroupModel, TrackerModel,
+                        ChallengeModel>(
+                    builder: (context, myEventModel, groupModel, trackerModel,
+                        challengeModel, child) {
                   List<Widget> eventCells = [];
                   if (myEventModel.searchResults == null) {
                     myEventModel.searchEvents(
@@ -138,6 +138,8 @@ class _JourneysPageState extends State<JourneysPage> {
                     var complete =
                         (numberCompleted == event.challengeIds.length);
                     var locationCount = event.challengeIds.length;
+
+                    if (locationCount < 2) continue;
                     var difficulty = event.difficulty;
                     DateTime now = DateTime.now();
                     DateTime endtime = HttpDate.parse(event.endTime);

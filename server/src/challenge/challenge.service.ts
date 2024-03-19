@@ -230,6 +230,7 @@ export class ChallengeService {
     return {
       id: ch.id,
       name: ch.name,
+      location: ch.location as string,
       description: ch.description,
       imageUrl: ch.imageUrl,
       lat: ch.latitude,
@@ -243,6 +244,7 @@ export class ChallengeService {
   async upsertChallengeFromDto(challenge: ChallengeDto): Promise<Challenge> {
     const assignData = {
       name: challenge.name.substring(0, 2048),
+      location: challenge.location,
       description: challenge.description.substring(0, 2048),
       imageUrl: challenge.imageUrl.substring(0, 2048),
       latitude: challenge.lat,

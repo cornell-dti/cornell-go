@@ -6,6 +6,7 @@ import {
   TimeLimitationType,
   OrganizationSpecialUsage,
   User,
+  LocationType,
 } from '@prisma/client';
 import { ClientService } from '../client/client.service';
 import { v4 } from 'uuid';
@@ -27,6 +28,7 @@ export const defaultEventData = {
 export const defaultChallengeData = {
   eventIndex: 0,
   name: 'Default Challenge',
+  location: LocationType.ARTS_QUAD,
   description: 'McGraw Tower',
   imageUrl:
     'https://upload.wikimedia.org/wikipedia/commons/5/5f/CentralAvenueCornell2.jpg',

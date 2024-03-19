@@ -226,6 +226,7 @@ class ChallengeDto {
   ChallengeDto.fromJson(Map<String, dynamic> fields) {
     id = fields["id"];
     name = fields["name"];
+    location = fields["location"];
     description = fields["description"];
     imageUrl = fields["imageUrl"];
     lat = fields["lat"].toDouble();
@@ -237,6 +238,7 @@ class ChallengeDto {
 
   String id = "";
   String name = "";
+  String location = "";
   String description = "";
   String imageUrl = "";
   double lat = 0.0;
