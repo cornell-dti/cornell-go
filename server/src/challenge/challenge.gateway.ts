@@ -57,7 +57,7 @@ export class ChallengeGateway {
     const basicChallenges =
       await this.challengeService.getChallengesByIdsForUser(
         user,
-        true,
+        false,
         data.challengeIds,
       );
 
