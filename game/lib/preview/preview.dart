@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:game/gameplay/gameplay_page.dart';
 
 enum previewType { challenge, journey }
 
@@ -393,6 +394,12 @@ class _PreviewState extends State<Preview> {
                                       side: BorderSide(color: backgroundRed)))),
                           onPressed: () {
                             print("Unimplemented. Starting Challenge!");
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => GameplayPage(
+                                        challengeId:
+                                            "37714c5a-0c5b-47a4-a759-64f3a5fc21d8")));
                           },
                           child: Text(
                             "Continue exploring",

@@ -19,35 +19,24 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Color.fromARGB(255, 255, 245, 234),
-        body: Container(
-          child: Column(
-            children: [
-              Align(
-                alignment: Alignment.topRight,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 35, right: 20),
-                  child: IconButton(
-                      alignment: Alignment.topRight,
-                      icon: Icon(Icons.settings, size: 40),
-                      onPressed: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => SettingsPage()));
-                      }),
-                ),
-              ),
-              Container(
-                height: 120,
-                child: Stack(
-                  children: [
-                    Center(
-                      child: Image(
-                        image: AssetImage("assets/images/user_2@2x.png"),
+      backgroundColor: Color.fromARGB(255, 255, 245, 234),
+      body: SafeArea(
+          child: Container(
+        child: Column(
+          children: [
+            Stack(fit: StackFit.passthrough, children: [
+              Center(
+                child: Container(
+                  height: 140,
+                  padding: EdgeInsets.only(top: 30),
+                  child: Stack(
+                    children: [
+                      Center(
+                        child: Image(
+                          image: AssetImage("assets/images/user_2@2x.png"),
+                        ),
                       ),
-                    ),
-                    Align(
+                      Align(
                         alignment: Alignment.bottomCenter,
                         child: Container(
                           height: 30,
@@ -66,84 +55,102 @@ class _ProfilePageState extends State<ProfilePage> {
                               ),
                             ),
                           ),
-                        )),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(5.0),
-                child: Text(
-                  "Hanan Abraha",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8.0),
-                child: Text("@Hanan Abraha"),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 20, right: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text("Achievements",
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold)),
-                    TextButton(
-                      onPressed: () {
-                        // Handle button press, e.g., navigate to details page
-                        print('View Details button pressed');
-                      },
-                      child: Text(
-                        'View Details →',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 16.0,
                         ),
                       ),
-                    )
-                  ],
+                    ],
+                  ),
                 ),
               ),
-              achievementCell("Complete three challenges on the Arts quad", 4,
-                  6, locationImage),
-              achievementCell(
-                  "Complete three challenges on the Engineering quad",
-                  4,
-                  6,
-                  locationImage),
-              Padding(
-                padding: const EdgeInsets.only(left: 20, right: 20.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text("Completed",
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold)),
-                    TextButton(
+              Positioned.directional(
+                textDirection: TextDirection.rtl,
+                start: 10,
+                // top: 22,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 10, right: 20),
+                  child: IconButton(
+                      alignment: Alignment.topRight,
+                      icon: Icon(Icons.settings, size: 40),
                       onPressed: () {
-                        // Handle button press, e.g., navigate to details page
-                        print('View Details button pressed');
-                      },
-                      child: Text(
-                        'View More →',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 16.0,
-                        ),
-                      ),
-                    )
-                  ],
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => SettingsPage()));
+                      }),
                 ),
               ),
-              completedCell("Cornell Cafes", locationImage, "Journeys",
-                  "January 19, 2023", "Arts Quad", "Easy", 120),
-              completedCell("Cornell Cafes", locationImage, "Journeys",
-                  "January 19, 2023", "Arts Quad", "Easy", 120),
-            ],
-          ),
-        ));
+            ]),
+            Padding(
+              padding: const EdgeInsets.all(5.0),
+              child: Text(
+                "Hanan Abraha",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: Text("@Hanan Abraha"),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 24, right: 24),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text("Achievements",
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  TextButton(
+                    onPressed: () {
+                      // Handle button press, e.g., navigate to details page
+                      print('View Details button pressed');
+                    },
+                    child: Text(
+                      'View Details →',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 14.0,
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
+            achievementCell("Complete three challenges on the Arts quad", 4, 6,
+                locationImage),
+            achievementCell("Complete three challenges on the Engineering quad",
+                4, 6, locationImage),
+            Padding(
+              padding: const EdgeInsets.only(left: 24, right: 24.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text("Completed",
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  TextButton(
+                    onPressed: () {
+                      // Handle button press, e.g., navigate to details page
+                      print('View Details button pressed');
+                    },
+                    child: Text(
+                      'View More →',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 14.0,
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
+            completedCell("Cornell Cafes", locationImage, "Journeys",
+                "January 19, 2023", "Arts Quad", "Easy", 120),
+            completedCell("Cornell Cafes", locationImage, "Journeys",
+                "January 19, 2023", "Arts Quad", "Easy", 120),
+          ],
+        ),
+      )),
+    );
   }
 }
