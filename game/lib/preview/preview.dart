@@ -397,7 +397,9 @@ class _PreviewState extends State<Preview> {
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => GameplayPage()));
+                                    builder: (context) => GameplayPage(
+                                        challengeId:
+                                            "37714c5a-0c5b-47a4-a759-64f3a5fc21d8")));
                           },
                           child: Text(
                             "Continue exploring",
