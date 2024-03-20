@@ -135,7 +135,7 @@ export class EventGateway {
     }
 
     if (data.deleted && ev) {
-      await this.eventService.removeEvent(ev.id, user);
+      await this.eventService.removeEvent(ev.id, ability);
       await this.eventService.emitUpdateEventData(ev, true);
     } else {
       if (!data.event.initialOrganizationId) {
@@ -150,6 +150,8 @@ export class EventGateway {
         ability,
         data.event,
       );
+
+      if (!ev) return;
 
       const org = await this.orgService.getOrganizationById(
         data.event.initialOrganizationId!,

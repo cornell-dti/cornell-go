@@ -426,6 +426,8 @@ export class EventService {
       ev = await this.prisma.eventBase.create({
         data,
       });
+    } else {
+      return ev;
     }
 
     if (event?.challenges) {

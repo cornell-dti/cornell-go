@@ -78,6 +78,9 @@ export class OrganizationGateway {
         ability,
         data.organization,
       );
+
+      if (!org) return;
+
       this.clientService.subscribe(user, org.id);
       await this.orgService.emitUpdateOrganizationData(org, false);
     }

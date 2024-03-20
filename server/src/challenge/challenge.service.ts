@@ -226,10 +226,7 @@ export class ChallengeService {
     };
   }
 
-  async upsertChallengeFromDto(
-    ability: AppAbility,
-    challenge: ChallengeDto,
-  ): Promise<Challenge> {
+  async upsertChallengeFromDto(ability: AppAbility, challenge: ChallengeDto) {
     let chal = await this.prisma.challenge.findFirst({
       where: { id: challenge.id },
     });
@@ -293,8 +290,6 @@ export class ChallengeService {
       chal = await this.prisma.challenge.create({
         data,
       });
-    } else {
-      throw 'Forbidden to upsert challenge';
     }
 
     return chal;

@@ -149,6 +149,8 @@ export class ChallengeGateway {
         data.challenge,
       );
 
+      if (!challenge) return;
+
       if (challenge.linkedEventId) {
         const ev = (await this.eventService.getEventById(
           challenge.linkedEventId,
