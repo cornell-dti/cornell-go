@@ -16,12 +16,11 @@ class Preview extends StatefulWidget {
 
   final int locationCount;
   final int numberCompleted;
+  final String location;
 
 // newly added parameters; need to implement higher up in hierarchy
   // final int
   //     totalDistance;
-  // final String
-  //     location;
 
   static Color backgroundColor = Color.fromARGB(255, 217, 214, 213);
   static Color purpleColor = Color.fromARGB(255, 131, 90, 124);
@@ -31,31 +30,26 @@ class Preview extends StatefulWidget {
   final String imgPath = "assets/images/38582.jpg";
 
   Preview(this.challengeName, this.description, this.difficulty, this.points,
-      this.type,
+      this.type, this.location,
       {this.locationCount = 1,
       this.numberCompleted = 0,
       // required this.totalDistance,
-      // required this.location,
       Key? key})
       : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => _PreviewState(challengeName,
-      description, difficulty, points, type, locationCount, numberCompleted
+  State<StatefulWidget> createState() => _PreviewState(
+      challengeName,
+      description,
+      difficulty,
+      points,
+      type,
+      locationCount,
+      numberCompleted,
+      location
       // need to figure out newly added parameters; commented out for now
       // totalDistance,
-      // location
       );
-}
-
-class MyFlutterApp {
-  MyFlutterApp._();
-
-  static const _kFontFam = 'MyFlutterApp';
-  static const String? _kFontPkg = null;
-
-  static const IconData pin_icon =
-      IconData(0xe800, fontFamily: _kFontFam, fontPackage: _kFontPkg);
 }
 
 /**Builds a widget based on the current state which is needed for toggleable 
@@ -69,9 +63,7 @@ class _PreviewState extends State<Preview> {
   // newly added parameter; need to implement higher up in hierarchy
   // final int
   //     totalDistance;
-  // final String
-  //     location;
-  bool _challenge_on = false;
+  final String location;
 
   static Color backgroundRed = Color.fromARGB(255, 237, 86, 86);
   static Color backgroundRedMuted = Color.fromARGB(191, 237, 86, 86);
@@ -83,11 +75,17 @@ class _PreviewState extends State<Preview> {
   //Temporary image for now. Will have to change later
   final String imgPath = "assets/images/38582.jpg";
 
-  _PreviewState(this.challengeName, this.description, this.difficulty,
-      this.points, this.type, this.locationCount, this.numberCompleted
+  _PreviewState(
+      this.challengeName,
+      this.description,
+      this.difficulty,
+      this.points,
+      this.type,
+      this.locationCount,
+      this.numberCompleted,
+      this.location
       // newly added; commented out for now
       // this.totalDistance,
-      // this.location
       );
   @override
   Widget build(BuildContext context) {
@@ -153,7 +151,7 @@ class _PreviewState extends State<Preview> {
                           Icon(Icons.tour,
                               size: 24, color: Preview.purpleColor),
                           Text(
-                              "Location placeholder", // should call new parameter; replace later
+                              location, // should call new parameter; replace later
                               style: TextStyle(
                                   fontSize: 20, color: Preview.purpleColor)),
                           SizedBox(width: 10),
@@ -190,108 +188,91 @@ class _PreviewState extends State<Preview> {
                               color: Preview.greyColor)),
                     ),
                   ),
+                  Padding(
+                    padding:
+                        const EdgeInsets.only(left: 25, right: 25, bottom: 15),
+                    child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: SizedBox(
+                              child: Align(
+                                alignment: Alignment.centerRight,
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Padding(
+                                        padding: const EdgeInsets.only(
+                                            top: 10.0, right: 5),
+                                        child: Container(
+                                          height: 36,
+                                          alignment: Alignment.centerLeft,
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              color: Color.fromARGB(
+                                                  255, 249, 237, 218),
+                                              borderRadius:
+                                                  BorderRadius.circular(16),
+                                            ),
+                                            child: Padding(
+                                              padding: const EdgeInsets.only(
+                                                  left: 8, right: 8),
+                                              child: Align(
+                                                alignment: Alignment.center,
+                                                child: Text(
+                                                  difficulty[0].toUpperCase() +
+                                                      difficulty.substring(1),
+                                                  style: TextStyle(
+                                                      fontSize: 12,
+                                                      color: Colors.black),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        )),
+                                    Padding(
+                                        padding: const EdgeInsets.only(
+                                            left: 4, top: 10.0),
+                                        child: Container(
+                                          height: 36,
+                                          alignment: Alignment.centerLeft,
+                                          child: Container(
+                                            child: Padding(
+                                              padding: const EdgeInsets.only(
+                                                  left: 8, right: 8),
+                                              child: Align(
+                                                alignment: Alignment.center,
+                                                child: Text(
+                                                  (points).toString() + "PTS",
+                                                  style: TextStyle(
+                                                      fontSize: 12,
+                                                      color: Colors.white),
+                                                ),
+                                              ),
+                                            ),
+                                            decoration: new BoxDecoration(
+                                              border: Border.all(
+                                                color: Color.fromARGB(
+                                                    255, 255, 199, 55),
+                                              ),
+                                              color: Color.fromARGB(
+                                                  255, 189, 135, 31),
+                                              borderRadius:
+                                                  BorderRadius.circular(16),
+                                              shape: BoxShape.rectangle,
+                                            ),
+                                          ),
+                                        )),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          )
+                        ]),
+                  ),
                   (type == previewType.journey)
                       ? Column(children: [
                           SizedBox(height: 5),
-                          Padding(
-                            padding: const EdgeInsets.only(
-                                left: 25, right: 25, bottom: 15),
-                            child: Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  Expanded(
-                                    child: SizedBox(
-                                      child: Align(
-                                        alignment: Alignment.centerRight,
-                                        child: Row(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Padding(
-                                                padding: const EdgeInsets.only(
-                                                    top: 10.0, right: 5),
-                                                child: Container(
-                                                  height: 36,
-                                                  alignment:
-                                                      Alignment.centerLeft,
-                                                  child: Container(
-                                                    decoration: BoxDecoration(
-                                                      color: Color.fromARGB(
-                                                          255, 249, 237, 218),
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              16),
-                                                    ),
-                                                    child: Padding(
-                                                      padding:
-                                                          const EdgeInsets.only(
-                                                              left: 8,
-                                                              right: 8),
-                                                      child: Align(
-                                                        alignment:
-                                                            Alignment.center,
-                                                        child: Text(
-                                                          difficulty[0]
-                                                                  .toUpperCase() +
-                                                              difficulty
-                                                                  .substring(1),
-                                                          style: TextStyle(
-                                                              fontSize: 12,
-                                                              color:
-                                                                  Colors.black),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                )),
-                                            Padding(
-                                                padding: const EdgeInsets.only(
-                                                    left: 4, top: 10.0),
-                                                child: Container(
-                                                  height: 36,
-                                                  alignment:
-                                                      Alignment.centerLeft,
-                                                  child: Container(
-                                                    child: Padding(
-                                                      padding:
-                                                          const EdgeInsets.only(
-                                                              left: 8,
-                                                              right: 8),
-                                                      child: Align(
-                                                        alignment:
-                                                            Alignment.center,
-                                                        child: Text(
-                                                          (points).toString() +
-                                                              "PTS",
-                                                          style: TextStyle(
-                                                              fontSize: 12,
-                                                              color:
-                                                                  Colors.white),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    decoration:
-                                                        new BoxDecoration(
-                                                      border: Border.all(
-                                                        color: Color.fromARGB(
-                                                            255, 255, 199, 55),
-                                                      ),
-                                                      color: Color.fromARGB(
-                                                          255, 189, 135, 31),
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              16),
-                                                      shape: BoxShape.rectangle,
-                                                    ),
-                                                  ),
-                                                )),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  )
-                                ]),
-                          ),
                           Padding(
                               padding:
                                   const EdgeInsets.symmetric(horizontal: 25),

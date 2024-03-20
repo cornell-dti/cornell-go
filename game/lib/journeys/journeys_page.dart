@@ -139,7 +139,21 @@ class _JourneysPageState extends State<JourneysPage> {
                         (numberCompleted == event.challengeIds.length);
                     var locationCount = event.challengeIds.length;
 
-                    // if (locationCount < 2) continue;
+                    if (locationCount < 2) continue;
+                    var total_points = 0;
+
+                    var challenge =
+                        challengeModel.getChallengeById(event.challengeIds[0]);
+
+                    if (challenge == null) continue;
+                    var location = challenge.location;
+                    for (var challengeId in event.challengeIds) {
+                      var challenge =
+                          challengeModel.getChallengeById(challengeId);
+                      if (challenge != null) {
+                        total_points += challenge.points;
+                      }
+                    }
                     var difficulty = event.difficulty;
                     DateTime now = DateTime.now();
                     DateTime endtime = HttpDate.parse(event.endTime);
@@ -161,6 +175,7 @@ class _JourneysPageState extends State<JourneysPage> {
                             : JourneyCell(
                                 key: UniqueKey(),
                                 event.name,
+                                location,
                                 Image.network(
                                     "https://picsum.photos/250?image=9"), // dummy data for now; should pass in thumbnail parameter
                                 event.description,
@@ -168,8 +183,7 @@ class _JourneysPageState extends State<JourneysPage> {
                                 numberCompleted,
                                 complete,
                                 difficulty,
-                                event.minimumScore,
-                                0),
+                                total_points),
                       ),
                     );
                   }
