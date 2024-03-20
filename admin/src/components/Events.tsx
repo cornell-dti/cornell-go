@@ -22,7 +22,7 @@ import { SearchBar } from "./SearchBar";
 import { ServerDataContext } from "./ServerData";
 
 import { compareTwoStrings } from "string-similarity";
-import { EventDto } from "../dto/event.dto";
+import { EventDto, EventDifficultyDto } from "../dto/event.dto";
 import { AlertModal } from "./AlertModal";
 
 function EventCard(props: {
@@ -40,11 +40,11 @@ function EventCard(props: {
     props.event.timeLimitation === "LIMITED_TIME" ? "Limited" : "Unlimited";
 
   const difficultyMode =
-    props.event.difficulty === "Easy"
-      ? "Easy"
-      : props.event.difficulty === "Normal"
-      ? "Normal"
-      : "Hard";
+    props.event.difficulty === "EASY"
+      ? "EASY"
+      : props.event.difficulty === "NORMAL"
+        ? "NORMAL"
+        : "HARD";
 
   const affirmOfBool = (val: boolean) => (val ? "Yes" : "No");
 
@@ -72,8 +72,6 @@ function EventCard(props: {
           Challenge Count: <b>{props.event.challengeIds.length}</b> <br />
           Difficulty: <b>{difficultyMode}</b> <br />
           Publicly Visible: <b>{affirmOfBool(props.event.indexable)}</b> <br />
-          Latitude: <b>{props.event.latitude}</b>, Longitude:{" "}
-          <b>{props.event.longitude}</b> <br />
         </ListCardBody>
         <ListCardButtons>
           <HButton onClick={props.onDelete}>DELETE</HButton>
@@ -98,7 +96,7 @@ function makeForm() {
     },
     {
       name: "Difficulty",
-      options: ["Easy", "Normal", "Hard"],
+      options: ["EASY", "Normal", "Hard"],
       value: 1,
     },
     { name: "Publicly Visible", options: ["No", "Yes"], value: 0 },
@@ -119,12 +117,12 @@ function fromForm(form: EntryForm[], id: string): EventDto {
     challengeIds: [],
     difficulty:
       (form[4] as OptionEntryForm).value === 0
-        ? "Easy"
+        ? "EASY"
         : (form[4] as OptionEntryForm).value === 1
-        ? "Normal"
-        : "Hard",
-    latitude: 0,
-    longitude: 0,
+          ? "NORMAL"
+          : "HARD",
+    category: "FOOD", // TODO currently hardcoded, update @Temi
+    location: "ENG_QUAD", // TODO update @Temi
   };
 }
 
@@ -145,13 +143,13 @@ function toForm(event: EventDto) {
     },
     {
       name: "Difficulty",
-      options: ["Easy", "Normal", "Hard"],
+      options: ["EASY", "Normal", "Hard"],
       value:
-        event.difficulty === "Easy"
+        event.difficulty === "EASY"
           ? 0
-          : event.difficulty === "Normal"
-          ? "Normal"
-          : "Hard",
+          : event.difficulty === "NORMAL"
+            ? "NORMAL"
+            : "HARD",
     },
     {
       name: "Publicly Visible",
@@ -237,7 +235,7 @@ export function Events() {
         <CenterText>Select an organization to view events</CenterText>
       ) : serverData.organizations.get(serverData.selectedOrg) ? (
         serverData.organizations.get(serverData.selectedOrg)?.events.length ===
-          0 && <CenterText>No events in organization</CenterText>
+        0 && <CenterText>No events in organization</CenterText>
       ) : (
         <CenterText>Error getting events</CenterText>
       )}

@@ -102,7 +102,7 @@ class EventModel extends ChangeNotifier {
       bool shortestFirst,
       bool skippableOnly) {
     searchResults = null;
-    _client.serverApi?.requestAllEventData(offset, count, timeLimitations,
+    _client.serverApi?.searchEvents(offset, count, timeLimitations,
         closestToEnding, shortestFirst, skippableOnly);
   }
 }

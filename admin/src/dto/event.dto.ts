@@ -1,9 +1,3 @@
-/** DTO for requestAllEventData */
-export interface RequestAllEventDataDto {
-  offset: number;
-  count: number;
-}
-
 /** DTO for requestEventData */
 export interface RequestEventDataDto {
   eventIds: string[];
@@ -16,21 +10,42 @@ export interface RequestEventLeaderDataDto {
   eventId: string;
 }
 
+export type TimeLimitationDto = 'LIMITED_TIME' | 'PERPETUAL';
+
+export type EventDifficultyDto = 'EASY' | 'NORMAL' | 'HARD';
+
+export type EventLocationDto =
+  | 'ENG_QUAD'
+  | 'ARTS_QUAD'
+  | 'AG_QUAD'
+  | 'NORTH_CAMPUS'
+  | 'WEST_CAMPUS'
+  | 'COLLEGETOWN'
+  | 'ITHACA_COMMONS'
+  | 'OTHER';
+
+export type EventCategoryDto =
+  | 'FOOD'
+  | 'NATURE'
+  | 'HISTORICAL'
+  | 'CAFE'
+  | 'DININGHALL'
+  | 'DORM';
+
 export interface EventDto {
   id: string;
   requiredMembers: number;
   name: string;
-  // thumbnail: string; // should be of type Image
   description: string;
-  timeLimitation: "LIMITED_TIME" | "PERPETUAL";
+  timeLimitation: TimeLimitationDto;
   endTime: string;
   challengeIds: string[];
   userFavoriteIds?: string[];
   initialOrganizationId?: string;
-  difficulty: "Easy" | "Normal" | "Hard";
+  difficulty: EventDifficultyDto;
+  category: EventCategoryDto;
+  location: EventLocationDto;
   indexable: boolean;
-  latitude: number;
-  longitude: number;
 }
 
 /** DTO for event tracker in updateEventTrackerData */
@@ -50,4 +65,21 @@ export interface UpdateEventTrackerDataDto {
 export interface UpdateEventDataDto {
   event: EventDto | string;
   deleted: boolean;
+}
+
+/** DTO for searchEvents */
+export interface SearchEventsDto {
+  searchId: string;
+  offset: number;
+  count: number;
+  locations?: EventLocationDto[];
+  difficulties?: EventDifficultyDto[];
+  categories?: EventCategoryDto[];
+}
+
+export interface EventSearchResultsDto {
+  searchId: string;
+  offset: number;
+  count: number;
+  eventIds: string[];
 }

@@ -54,14 +54,14 @@ class GameServerApi {
       _invokeWithRefresh("setCurrentEvent", {"eventId": eventId});
   void requestEventData(List<String> eventIds) =>
       _invokeWithRefresh("requestEventData", {"eventIds": eventIds});
-  void requestAllEventData(
+  void searchEvents(
           int offset,
           int count,
           List<TimeLimitationType> timeLimitations,
           bool closestToEnding,
           bool shortestFirst,
           bool skippableOnly) =>
-      _invokeWithRefresh("requestAllEventData", {
+      _invokeWithRefresh("searchEvents", {
         "offset": offset,
         "count": count,
         "closestToEnding": closestToEnding,
