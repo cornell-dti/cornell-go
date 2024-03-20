@@ -52,7 +52,7 @@ export class ChallengeGateway {
       ability,
       data.challenges,
     );
-
+      
     for (const chal of challenges) {
       await this.challengeService.emitUpdateChallengeData(chal, false, user);
     }

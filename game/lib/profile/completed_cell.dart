@@ -17,8 +17,8 @@ Widget completedCell(String name, String picture, String type, String date,
   return Padding(
     padding: const EdgeInsets.all(8.0),
     child: Container(
-        width: 380,
-        height: 100,
+        width: 345,
+        height: 88,
         decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(10.0),
@@ -32,8 +32,7 @@ Widget completedCell(String name, String picture, String type, String date,
         child: Row(
           children: [
             Padding(
-              padding: const EdgeInsets.only(
-                  left: 18.0, top: 15, bottom: 15, right: 15),
+              padding: const EdgeInsets.all(10),
               child: ClipRRect(
                   borderRadius: BorderRadius.circular(20),
                   child: Image(
@@ -63,7 +62,7 @@ Widget completedCell(String name, String picture, String type, String date,
                     children: [
                       Text(
                         "From " + type + " - ",
-                        style: TextStyle(color: Colors.grey),
+                        style: TextStyle(color: Colors.grey, fontSize: 12),
                       ),
                       Text(date)
                     ],
