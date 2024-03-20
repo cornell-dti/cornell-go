@@ -5,12 +5,10 @@ import 'package:game/api/game_api.dart';
 import 'package:game/api/game_client_dto.dart';
 import 'package:game/journeys/journey_cell.dart';
 import 'package:game/journeys/filter_form.dart';
-import 'package:game/model/challenge_model.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/group_model.dart';
 import 'package:game/model/tracker_model.dart';
 import 'package:game/model/user_model.dart';
-import 'package:game/utils/utility_functions.dart';
 import 'package:provider/provider.dart';
 
 class JourneysPage extends StatefulWidget {
