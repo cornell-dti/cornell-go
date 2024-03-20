@@ -228,6 +228,7 @@ class ChallengeDto {
     name = fields["name"];
     location = fields["location"];
     description = fields["description"];
+    points = fields["points"];
     imageUrl = fields["imageUrl"];
     lat = fields["lat"].toDouble();
     long = fields["long"].toDouble();
@@ -240,6 +241,7 @@ class ChallengeDto {
   String name = "";
   String location = "";
   String description = "";
+  int points = 0;
   String imageUrl = "";
   double lat = 0.0;
   double long = 0.0;

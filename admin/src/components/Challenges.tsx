@@ -50,6 +50,8 @@ function ChallengeCard(props: {
       <ChallengeImage url={props.challenge.imageUrl} />
       <ListCardBody>
         Id: <b>{props.challenge.id}</b> <br />
+        Location: <b>{props.challenge.location}</b> <br />
+        Score: <b>{props.challenge.points}</b> <br />
         Latitude: <b>{props.challenge.lat}</b>, Longitude:{" "}
         <b>{props.challenge.long}</b> <br />
         Awarding Distance: <b>{props.challenge.awardingRadius} meters</b> <br />
@@ -72,8 +74,10 @@ function ChallengeCard(props: {
 function makeForm(): EntryForm[] {
   return [
     { name: "Location", latitude: 42.447546, longitude: -76.484593 },
+    { name: "Location Description", characterLimit: 2048, value: "" },
     { name: "Name", characterLimit: 256, value: "" },
     { name: "Description", characterLimit: 2048, value: "" },
+    { name: "Points", characterLimit: 2048, min: 1, max: 1000, value: 50 },
     { name: "Image URL", characterLimit: 2048, value: "" },
     { name: "Awarding Distance (meters)", min: 1, max: 1000, value: 1 },
     { name: "Close Distance (meters)", min: 1, max: 1000, value: 1 },
@@ -87,8 +91,20 @@ function toForm(challenge: ChallengeDto) {
       latitude: challenge.lat,
       longitude: challenge.long,
     },
+    {
+      name: "Location Description",
+      characterLimit: 2048,
+      value: challenge.location,
+    },
     { name: "Name", characterLimit: 256, value: challenge.name },
     { name: "Description", characterLimit: 2048, value: challenge.description },
+    {
+      name: "Points",
+      characterLimit: 2048,
+      min: 1,
+      max: 1000,
+      value: challenge.points,
+    },
     { name: "Image URL", characterLimit: 2048, value: challenge.imageUrl },
     {
       name: "Awarding Distance (meters)",
@@ -112,13 +128,15 @@ function fromForm(
 ): ChallengeDto {
   return {
     id,
-    name: (form[1] as FreeEntryForm).value,
-    description: (form[2] as FreeEntryForm).value,
-    imageUrl: (form[3] as FreeEntryForm).value,
+    name: (form[2] as FreeEntryForm).value,
+    location: (form[1] as FreeEntryForm).value,
+    description: (form[3] as FreeEntryForm).value,
+    points: (form[4] as NumberEntryForm).value,
+    imageUrl: (form[5] as FreeEntryForm).value,
     lat: (form[0] as MapEntryForm).latitude,
     long: (form[0] as MapEntryForm).longitude,
-    awardingRadius: (form[4] as NumberEntryForm).value,
-    closeRadius: (form[5] as NumberEntryForm).value,
+    awardingRadius: (form[6] as NumberEntryForm).value,
+    closeRadius: (form[7] as NumberEntryForm).value,
     containingEventId: eventId,
   };
 }

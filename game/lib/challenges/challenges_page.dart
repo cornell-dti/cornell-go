@@ -43,8 +43,7 @@ class _ChallengesPageState extends State<ChallengesPage> {
         false,
         "Find this famous statue!",
         "Easy",
-        15,
-        3),
+        15),
     ChallengeCell(
         "ARTS QUAD",
         "Statue on the Arts Quad",
@@ -52,8 +51,7 @@ class _ChallengesPageState extends State<ChallengesPage> {
         true,
         "Find this famous statue!",
         "Normal",
-        15,
-        3),
+        15),
     ChallengeCell(
         "ARTS QUAD",
         "Statue on the Arts Quad",
@@ -61,8 +59,7 @@ class _ChallengesPageState extends State<ChallengesPage> {
         false,
         "Find this famous statue!",
         "Hard",
-        15,
-        3),
+        15),
     ChallengeCell(
         "ARTS QUAD",
         "Statue on the Arts Quad",
@@ -70,8 +67,7 @@ class _ChallengesPageState extends State<ChallengesPage> {
         true,
         "Find this famous statue!",
         "Challenging",
-        15,
-        3),
+        15),
   ];
 
   @override
@@ -201,15 +197,14 @@ class _ChallengesPageState extends State<ChallengesPage> {
                               )
                             : ChallengeCell(
                                 key: UniqueKey(),
-                                "location",
+                                challenge.location,
                                 challenge.name,
                                 Image.network(
                                     "https://picsum.photos/250?image=9"),
                                 complete,
                                 challenge.description,
                                 difficulty,
-                                1,
-                                0),
+                                challenge.points),
                       ),
                     );
                   }

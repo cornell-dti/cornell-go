@@ -116,6 +116,7 @@ model Challenge {
   name           String
   location       LocationType
   description    String
+  points         Int
   imageUrl       String
   latitude       Float
   longitude      Float

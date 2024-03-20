@@ -12,7 +12,6 @@ class Preview extends StatefulWidget {
   final String description;
   final String difficulty;
   final int points;
-  final int challenge_points;
   final previewType type;
 
   final int locationCount;
@@ -32,7 +31,7 @@ class Preview extends StatefulWidget {
   final String imgPath = "assets/images/38582.jpg";
 
   Preview(this.challengeName, this.description, this.difficulty, this.points,
-      this.challenge_points, this.type,
+      this.type,
       {this.locationCount = 1,
       this.numberCompleted = 0,
       // required this.totalDistance,
@@ -41,15 +40,8 @@ class Preview extends StatefulWidget {
       : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => _PreviewState(
-      challengeName,
-      description,
-      difficulty,
-      points,
-      challenge_points,
-      type,
-      locationCount,
-      numberCompleted
+  State<StatefulWidget> createState() => _PreviewState(challengeName,
+      description, difficulty, points, type, locationCount, numberCompleted
       // need to figure out newly added parameters; commented out for now
       // totalDistance,
       // location
@@ -73,7 +65,6 @@ class _PreviewState extends State<Preview> {
   final String description;
   final String difficulty;
   final int points;
-  final int challenge_points;
   final previewType type;
   // newly added parameter; need to implement higher up in hierarchy
   // final int
@@ -92,15 +83,8 @@ class _PreviewState extends State<Preview> {
   //Temporary image for now. Will have to change later
   final String imgPath = "assets/images/38582.jpg";
 
-  _PreviewState(
-      this.challengeName,
-      this.description,
-      this.difficulty,
-      this.points,
-      this.challenge_points,
-      this.type,
-      this.locationCount,
-      this.numberCompleted
+  _PreviewState(this.challengeName, this.description, this.difficulty,
+      this.points, this.type, this.locationCount, this.numberCompleted
       // newly added; commented out for now
       // this.totalDistance,
       // this.location
@@ -277,11 +261,7 @@ class _PreviewState extends State<Preview> {
                                                         alignment:
                                                             Alignment.center,
                                                         child: Text(
-                                                          (points +
-                                                                      (_challenge_on
-                                                                          ? challenge_points
-                                                                          : 0))
-                                                                  .toString() +
+                                                          (points).toString() +
                                                               "PTS",
                                                           style: TextStyle(
                                                               fontSize: 12,

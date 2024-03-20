@@ -77,21 +77,9 @@ class _JourneyCellState extends State<JourneyCell> {
                 BuildContext context,
               ) =>
                   Preview(journeyName, description, difficulty, points,
-                      challengePoints, previewType.journey,
+                      previewType.journey,
                       locationCount: locationCount,
                       numberCompleted: numberCompleted));
-          // await showDialog(
-          //     context: context,
-          //     builder: (context) => Preview(
-          //           journeyName,
-          //           description,
-          //           difficulty,
-          //           points,
-          //           challengePoints,
-          //           previewType.journey,
-          //           locationCount: locationCount,
-          //           numberCompleted: numberCompleted,
-          //         ));
         },
         child: Container(
           decoration: BoxDecoration(

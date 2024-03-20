@@ -139,7 +139,7 @@ class _JourneysPageState extends State<JourneysPage> {
                         (numberCompleted == event.challengeIds.length);
                     var locationCount = event.challengeIds.length;
 
-                    if (locationCount < 2) continue;
+                    // if (locationCount < 2) continue;
                     var difficulty = event.difficulty;
                     DateTime now = DateTime.now();
                     DateTime endtime = HttpDate.parse(event.endTime);

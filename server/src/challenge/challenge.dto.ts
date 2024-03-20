@@ -8,6 +8,7 @@ export interface ChallengeDto {
   name: string;
   location: string;
   description: string;
+  points: number;
   imageUrl: string;
   lat: number;
   long: number;
