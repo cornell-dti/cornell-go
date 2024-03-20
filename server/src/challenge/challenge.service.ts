@@ -208,6 +208,7 @@ export class ChallengeService {
       'updateChallengeData',
       target?.id ?? challenge.id,
       dto,
+      challenge.id,
       subject('Challenge', challenge),
     );
   }
@@ -234,7 +235,7 @@ export class ChallengeService {
     if (
       chal &&
       (await this.prisma.challenge.findFirst({
-        select: {},
+        select: { id: true },
         where: {
           AND: [
             accessibleBy(ability, Action.Update).Challenge,

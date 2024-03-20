@@ -154,7 +154,8 @@ export class OrganizationService {
       'updateOrganizationData',
       target?.id ?? organization.id,
       dto,
-      'Organization',
+      organization.id,
+      subject('Organization', organization),
     );
   }
 
@@ -185,7 +186,7 @@ export class OrganizationService {
     if (
       org &&
       (await this.prisma.organization.findFirst({
-        select: {},
+        select: { id: true },
         where: { AND: [accessibleBy(ability, Action.Update).Organization] },
       }))
     ) {

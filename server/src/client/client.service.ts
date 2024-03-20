@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { UpdateErrorDto } from './client.dto';
@@ -13,6 +13,7 @@ import { PermittedFieldsOptions, permittedFieldsOf } from '@casl/ability/extra';
 import { Action } from '../casl/action.enum';
 import { ExtractSubjectType } from '@casl/ability';
 import { Subjects } from '@casl/prisma';
+import { AuthService } from '../auth/auth.service';
 
 @Injectable()
 export class ClientService {
@@ -36,6 +37,7 @@ export class ClientService {
 
   async emitErrorData(user: User, message: string) {
     const dto: UpdateErrorDto = {
+      id: user.id,
       message,
     };
     await this.sendProtected('updateErrorData', user.id, dto);
@@ -45,9 +47,10 @@ export class ClientService {
     event: string,
     target: string,
     dto: TDto,
+    resourceId?: string,
     dtoSubject?: Subjects<SubjectTypes>,
   ) {
-    this.gateway.server.in(target).socketsJoin(target);
+    if (resourceId) this.gateway.server.in(target).socketsJoin(resourceId);
 
     if (!dtoSubject) {
       this.gateway.server.to(target).emit(event, dto);
@@ -59,14 +62,12 @@ export class ClientService {
       // Get list of targeted sockets
       const socks = await this.gateway.server.in(target).fetchSockets();
 
-      // Find auth tokens of all targeted users
-      const tokens = socks
-        .map(sock => tokenOfHandshake(sock.handshake))
-        .filter(token => token) as string[];
+      // Find ids of all targeted users
+      const userIds = socks.map(sock => sock.data['userId']);
 
       // Find all targeted users
       const users = await this.prisma.user.findMany({
-        where: { authToken: { in: tokens } },
+        where: { id: { in: userIds } },
       });
 
       // Map from sorted list of properties to a list of user ids

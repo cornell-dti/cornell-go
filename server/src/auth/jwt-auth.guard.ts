@@ -3,6 +3,7 @@ import {
   ExecutionContext,
   Inject,
   Injectable,
+  forwardRef,
 } from '@nestjs/common';
 /*
     Custom imports for AuthService, jwt secret, etc...
@@ -22,7 +23,9 @@ export function tokenOfHandshake(handshake: Handshake) {
 
 @Injectable()
 export class UserGuard implements CanActivate {
-  constructor(@Inject(AuthService) private authService: AuthService) {}
+  constructor(
+    @Inject(forwardRef(() => AuthService)) private authService: AuthService,
+  ) {}
 
   async canActivate(context: ExecutionContext) {
     const client = context.switchToWs().getClient<Socket>();

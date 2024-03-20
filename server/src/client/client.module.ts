@@ -3,6 +3,7 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { ClientGateway } from './client.gateway';
 import { ClientService } from './client.service';
 import { CaslModule } from '../casl/casl.module';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [PrismaModule, CaslModule],

@@ -245,7 +245,8 @@ export class UserService {
       'updateUserData',
       target?.id ?? user.id,
       dto,
-      'User',
+      user.id,
+      subject('User', user),
     );
   }
 }

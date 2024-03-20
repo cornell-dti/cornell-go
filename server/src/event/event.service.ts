@@ -305,6 +305,7 @@ export class EventService {
       'updateEventData',
       target?.id ?? ev.id,
       dto,
+      ev.id,
       subject('EventBase', ev),
     );
   }
@@ -387,7 +388,7 @@ export class EventService {
     if (
       ev &&
       (await this.prisma.eventBase.findFirst({
-        select: {},
+        select: { id: true },
         where: {
           AND: [accessibleBy(ability, Action.Update).EventBase, { id: ev.id }],
         },
