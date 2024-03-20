@@ -11,10 +11,10 @@ import { CaslModule } from '../casl/casl.module';
 @Module({
   imports: [
     forwardRef(() => AuthModule),
-    CaslModule,
     ClientModule,
     PrismaModule,
     OrganizationModule,
+    CaslModule,
   ],
   providers: [EventService, EventGateway],
   exports: [EventService, EventGateway],

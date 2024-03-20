@@ -12,6 +12,7 @@ import { v4 } from 'uuid';
 import { ClientService } from '../client/client.service';
 import {
   defaultChallengeData,
+  defaultEventData,
   OrganizationService,
 } from '../organization/organization.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -304,7 +305,7 @@ export class EventService {
       'updateEventData',
       target?.id ?? ev.id,
       dto,
-      'EventBase',
+      subject('EventBase', ev),
     );
   }
 
@@ -314,6 +315,19 @@ export class EventService {
     event: EventBase | null,
     target: User,
   ) {
+    if (
+      event &&
+      this.abilityFactory
+        .createForUser(target)
+        .cannot(Action.Read, subject('EventBase', event))
+    ) {
+      await this.clientService.emitErrorData(
+        target,
+        'Cannot read leader data for inaccessible event!',
+      );
+      return;
+    }
+
     let leaderData: LeaderDto[] = [];
     if (event) {
       const trackers = await this.getTopTrackersForEvent(
@@ -347,74 +361,99 @@ export class EventService {
   }
 
   async upsertEventFromDto(ability: AppAbility, event: EventDto) {
-    const assignData = await this.abilityFactory.filterInaccessible(
-      {
-        requiredMembers: event.requiredMembers,
-        name: event.name?.substring(0, 2048),
-        description: event.description?.substring(0, 2048),
-        timeLimitation:
-          event.timeLimitation === 'LIMITED_TIME'
-            ? TimeLimitationType.LIMITED_TIME
-            : TimeLimitationType.PERPETUAL,
-        endTime: event.endTime && new Date(event.endTime),
-        userFavorites: event.userFavorites,
-        indexable: event.indexable,
-        difficulty:
-          event.difficulty === 'Easy'
-            ? DifficultyMode.EASY
-            : event.difficulty === 'Normal'
-            ? DifficultyMode.NORMAL
-            : DifficultyMode.HARD,
-      },
-      'EventBase',
-      ability,
-      Action.Update,
-    );
+    let ev = await this.prisma.eventBase.findFirst({ where: { id: event.id } });
 
-    const eventEntity = await this.prisma.eventBase.upsert({
-      where: { id: event.id },
-      create: ability.can(Action.Create, 'EventBase')
-        ? {
-            ...assignData,
-            usedIn: {
-              connect: { id: event.initialOrganizationId ?? '' },
-            },
-          }
-        : undefined,
-      update: {
-        ...assignData,
-        challenges: ability.can(
-          Action.Update,
-          subject('EventBase', { id: event.id, ...assignData }),
-          'challenges',
-        )
-          ? {
-              set: event.challenges?.map(id => ({ id })),
-            }
-          : undefined,
-      },
-    });
+    const assignData = {
+      requiredMembers: event.requiredMembers,
+      name: event.name?.substring(0, 2048),
+      description: event.description?.substring(0, 2048),
+      timeLimitation:
+        event.timeLimitation === 'LIMITED_TIME'
+          ? TimeLimitationType.LIMITED_TIME
+          : TimeLimitationType.PERPETUAL,
+      endTime: event.endTime && new Date(event.endTime),
+      userFavorites: event.userFavorites,
+      indexable: event.indexable,
+      difficulty:
+        event.difficulty === 'Easy'
+          ? DifficultyMode.EASY
+          : event.difficulty === 'Normal'
+          ? DifficultyMode.NORMAL
+          : DifficultyMode.HARD,
+      latitude: event.latitude,
+      longitude: event.longitude,
+    };
 
-    let eventIndexChal = 0;
-    for (const id of event?.challenges ?? []) {
-      await this.prisma.challenge.update({
-        where: { id },
-        data: {
-          eventIndex: eventIndexChal,
+    if (
+      ev &&
+      (await this.prisma.eventBase.findFirst({
+        select: {},
+        where: {
+          AND: [accessibleBy(ability, Action.Update).EventBase, { id: ev.id }],
         },
-      });
+      }))
+    ) {
+      const updateData = await this.abilityFactory.filterInaccessible(
+        assignData,
+        subject('EventBase', ev),
+        ability,
+        Action.Update,
+      );
 
-      ++eventIndexChal;
+      ev = await this.prisma.eventBase.update({
+        where: { id: ev.id },
+        data: updateData,
+      });
+    } else if (!ev && ability.can(Action.Create, 'Challenge')) {
+      const data = {
+        requiredMembers:
+          assignData.requiredMembers ?? defaultEventData.requiredMembers,
+        name: assignData.name?.substring(0, 2048) ?? defaultEventData.name,
+        description:
+          assignData.description?.substring(0, 2048) ??
+          defaultEventData.description,
+        timeLimitation: assignData.timeLimitation,
+        endTime: assignData.endTime ?? defaultEventData.endTime,
+        indexable: assignData.indexable ?? defaultEventData.indexable,
+        difficulty: assignData.difficulty ?? defaultEventData.difficulty,
+        latitude: assignData.latitude ?? defaultEventData.latitude,
+        longitude: assignData.longitude ?? defaultEventData.longitude,
+        usedIn: {
+          connect: { id: event.initialOrganizationId ?? '' },
+        },
+      };
+
+      ev = await this.prisma.eventBase.create({
+        data,
+      });
     }
 
-    return eventEntity;
+    if (event?.challenges) {
+      let index = 0;
+      for (const id of event.challenges) {
+        await this.prisma.challenge.update({
+          where: { id },
+          data: {
+            eventIndex: index,
+          },
+        });
+
+        ++index;
+      }
+    }
+
+    return ev;
   }
 
-  async removeEvent(eventId: string, accessor: User) {
+  async removeEvent(eventId: string, ability: AppAbility) {
     return await this.prisma.eventBase.deleteMany({
       where: {
-        id: eventId,
-        usedIn: { some: { managers: { some: { id: accessor.id } } } },
+        AND: [
+          {
+            id: eventId,
+          },
+          accessibleBy(ability, Action.Delete).EventBase,
+        ],
       },
     });
   }

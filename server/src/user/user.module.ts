@@ -13,13 +13,13 @@ import { CaslModule } from '../casl/casl.module';
 @Module({
   imports: [
     forwardRef(() => AuthModule),
-    CaslModule,
+    forwardRef(() => GroupModule),
     SessionLogModule,
     ClientModule,
-    forwardRef(() => GroupModule),
     PrismaModule,
     EventModule,
     OrganizationModule,
+    CaslModule,
   ],
   providers: [UserService, UserGateway],
   exports: [UserService, UserGateway],

@@ -10,10 +10,10 @@ import { CaslModule } from '../casl/casl.module';
 @Module({
   imports: [
     forwardRef(() => AuthModule),
-    CaslModule,
     ClientModule,
     EventModule,
     PrismaModule,
+    CaslModule,
   ],
   exports: [AchievementService],
   providers: [AchievementGateway, AchievementService],

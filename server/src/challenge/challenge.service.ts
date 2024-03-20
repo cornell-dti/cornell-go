@@ -16,6 +16,7 @@ import { AppAbility, CaslAbilityFactory } from '../casl/casl-ability.factory';
 import { accessibleBy } from '@casl/prisma';
 import { Action } from '../casl/action.enum';
 import { subject } from '@casl/ability';
+import { defaultChallengeData } from '../organization/organization.service';
 
 @Injectable()
 export class ChallengeService {
@@ -207,7 +208,7 @@ export class ChallengeService {
       'updateChallengeData',
       target?.id ?? challenge.id,
       dto,
-      'Challenge',
+      subject('Challenge', challenge),
     );
   }
 
@@ -229,8 +230,23 @@ export class ChallengeService {
     ability: AppAbility,
     challenge: ChallengeDto,
   ): Promise<Challenge> {
-    const assignData = await this.abilityFactory.filterInaccessible(
-      {
+    let chal = await this.prisma.challenge.findFirst({
+      where: { id: challenge.id },
+    });
+
+    if (
+      chal &&
+      (await this.prisma.challenge.findFirst({
+        select: {},
+        where: {
+          AND: [
+            accessibleBy(ability, Action.Update).Challenge,
+            { id: chal.id },
+          ],
+        },
+      }))
+    ) {
+      const assignData = {
         name: challenge.name?.substring(0, 2048),
         description: challenge.description?.substring(0, 2048),
         imageUrl: challenge.imageUrl?.substring(0, 2048),
@@ -238,39 +254,50 @@ export class ChallengeService {
         longitude: challenge.long,
         awardingRadius: challenge.awardingRadius,
         closeRadius: challenge.closeRadius,
-      },
-      'Challenge',
-      ability,
-      Action.Update,
-    );
+      };
 
-    const challengeEntity = await this.prisma.challenge.upsert({
-      where: { id: challenge.id },
-      update: assignData,
-      create: ability.can(Action.Create, 'Challenge')
-        ? {
-            ...assignData,
-            eventIndex: -10,
-            linkedEventId: challenge.containingEventId,
-          }
-        : undefined,
-    });
+      const data = await this.abilityFactory.filterInaccessible(
+        assignData,
+        subject('Challenge', chal),
+        ability,
+        Action.Update,
+      );
 
-    if (challengeEntity.eventIndex === -10) {
-      const maxIndexChallenge = await this.prisma.challenge.findFirst({
+      chal = await this.prisma.challenge.update({
+        where: { id: chal.id },
+        data,
+      });
+    } else if (!chal && ability.can(Action.Create, 'Challenge')) {
+      const maxIndexChallenge = await this.prisma.challenge.aggregate({
+        _max: { eventIndex: true },
         where: { linkedEventId: challenge.containingEventId },
-        orderBy: { eventIndex: 'desc' },
       });
 
-      await this.prisma.challenge.update({
-        where: { id: challengeEntity.id },
-        data: {
-          eventIndex: Math.max((maxIndexChallenge?.eventIndex ?? -1) + 1, 0),
-        },
+      const data = {
+        name: challenge.name?.substring(0, 2048) ?? defaultChallengeData.name,
+        description:
+          challenge.description?.substring(0, 2048) ??
+          defaultChallengeData.description,
+        imageUrl:
+          challenge.imageUrl?.substring(0, 2048) ??
+          defaultChallengeData.imageUrl,
+        latitude: challenge.lat ?? defaultChallengeData.latitude,
+        longitude: challenge.long ?? defaultChallengeData.longitude,
+        awardingRadius:
+          challenge.awardingRadius ?? defaultChallengeData.awardingRadius,
+        closeRadius: challenge.closeRadius ?? defaultChallengeData.closeRadius,
+        eventIndex: (maxIndexChallenge._max.eventIndex ?? -1) + 1,
+        linkedEventId: challenge.containingEventId,
+      };
+
+      chal = await this.prisma.challenge.create({
+        data,
       });
+    } else {
+      throw 'Forbidden to upsert challenge';
     }
 
-    return challengeEntity;
+    return chal;
   }
 
   async removeChallenge(ability: AppAbility, challengeId: string) {

@@ -295,7 +295,7 @@ export class GroupService {
       'updateGroupData',
       target?.id ?? group.id,
       dto,
-      'Group',
+      subject('Group', group),
     );
   }
 

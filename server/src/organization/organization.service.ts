@@ -167,39 +167,52 @@ export class OrganizationService {
     ability: AppAbility,
     organization: OrganizationDto,
   ) {
-    const org = await this.prisma.organization.findFirst({
+    let org = await this.prisma.organization.findFirst({
       where: { id: organization.id },
     });
 
-    return await this.prisma.organization.upsert({
-      where: { id: organization.id },
-      create: ability.can(Action.Create, 'Organization')
-        ? {
-            name: organization.name ?? 'New organization',
-            accessCode: Math.floor(Math.random() * 0xffffff).toString(16),
-            members: {
-              connect: organization.members?.map(id => ({ id })),
-            },
-            events: {
-              connect: organization.events?.map(id => ({ id })),
-            },
-            specialUsage: 'NONE',
-          }
-        : ({} as Organization),
-      update:
-        org &&
-        ability.can(Action.Update, subject('Organization', org), 'members') &&
-        ability.can(Action.Update, subject('Organization', org), 'events')
-          ? {
-              members: {
-                set: organization.members?.map(id => ({ id })),
-              },
-              events: {
-                set: organization.events?.map(id => ({ id })),
-              },
-            }
-          : {},
-    });
+    const assignData = {
+      name: organization.name,
+      members: {
+        connect: organization.members?.map(id => ({ id })),
+      },
+      events: {
+        connect: organization.events?.map(id => ({ id })),
+      },
+      specialUsage: OrganizationSpecialUsage.NONE,
+    };
+
+    if (
+      org &&
+      (await this.prisma.organization.findFirst({
+        select: {},
+        where: { AND: [accessibleBy(ability, Action.Update).Organization] },
+      }))
+    ) {
+      const updateData = await this.abilityFactory.filterInaccessible(
+        assignData,
+        subject('Organization', org),
+        ability,
+        Action.Update,
+      );
+
+      org = await this.prisma.organization.update({
+        where: { id: org.id },
+        data: updateData,
+      });
+    } else if (!org && ability.can(Action.Create, 'Organization')) {
+      const data = {
+        ...assignData,
+        name: assignData.name ?? 'New organization',
+        accessCode: Math.floor(Math.random() * 0xffffff).toString(16),
+      };
+
+      org = await this.prisma.organization.create({
+        data,
+      });
+    }
+
+    return org;
   }
 
   async addAllAdmins(org: Organization) {
