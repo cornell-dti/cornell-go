@@ -211,6 +211,8 @@ export class OrganizationService {
       org = await this.prisma.organization.create({
         data,
       });
+
+      console.log(`Created organization ${org.id}`);
     }
 
     return org;
@@ -227,11 +229,19 @@ export class OrganizationService {
   }
 
   async removeOrganization(ability: AppAbility, id: string) {
-    await this.prisma.organization.deleteMany({
-      where: {
-        AND: [{ id }, accessibleBy(ability, Action.Delete).Organization],
-      },
-    });
+    if (
+      await this.prisma.organization.findFirst({
+        where: {
+          AND: [{ id }, accessibleBy(ability, Action.Delete).Organization],
+        },
+      })
+    ) {
+      await this.prisma.organization.delete({
+        where: { id },
+      });
+
+      console.log(`Deleted organization ${id}`);
+    }
   }
 
   async ensureFullAccessIfNeeded(potentialAdmin: User) {
@@ -258,13 +268,17 @@ export class OrganizationService {
     potentialManagerEmail: string,
     organizationId: string,
   ) {
-    const org = await this.prisma.organization.findFirstOrThrow({
+    const org = await this.prisma.organization.findFirst({
       where: { id: organizationId },
     });
 
-    const potentialManager = await this.prisma.user.findFirstOrThrow({
+    const potentialManager = await this.prisma.user.findFirst({
       where: { email: potentialManagerEmail },
     });
+
+    if (!potentialManager || !org) {
+      return false;
+    }
 
     await this.prisma.organization.update({
       where: {

@@ -291,6 +291,8 @@ export class ChallengeService {
       chal = await this.prisma.challenge.create({
         data,
       });
+
+      console.log(`Created challenge ${chal.id}`);
     }
 
     return chal;
@@ -333,10 +335,12 @@ export class ChallengeService {
       });
     }
 
-    await this.prisma.challenge.deleteMany({
+    await this.prisma.challenge.delete({
       where: {
         id: challengeId,
       },
     });
+
+    console.log(`Deleted challenge ${challengeId}`);
   }
 }

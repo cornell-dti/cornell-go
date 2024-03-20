@@ -176,7 +176,16 @@ export class UserGateway {
       return;
     }
 
-    await this.orgService.addManager(ability, data.email, data.organizationId);
+    if (
+      !(await this.orgService.addManager(
+        ability,
+        data.email,
+        data.organizationId,
+      ))
+    ) {
+      await this.clientService.emitErrorData(user, 'Failed to add manager!');
+      return;
+    }
 
     const manager = await this.userService.byEmail(data.email);
     await this.clientService.subscribe(manager, org.id);

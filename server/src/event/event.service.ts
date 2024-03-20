@@ -37,9 +37,8 @@ export class EventService {
   ) {}
 
   /** Get event by id */
-  async getEventById(id: string | null) {
-    if (!id) throw 'Found null event id! Possible null linked event.';
-    return await this.prisma.eventBase.findUnique({ where: { id } });
+  async getEventById(id: string) {
+    return await this.prisma.eventBase.findFirst({ where: { id } });
   }
 
   /** Get events by ids */
@@ -427,6 +426,8 @@ export class EventService {
       ev = await this.prisma.eventBase.create({
         data,
       });
+
+      console.log(`Created event ${ev.id}`);
     } else {
       return ev;
     }
@@ -449,15 +450,25 @@ export class EventService {
   }
 
   async removeEvent(eventId: string, ability: AppAbility) {
-    return await this.prisma.eventBase.deleteMany({
-      where: {
-        AND: [
-          {
-            id: eventId,
-          },
-          accessibleBy(ability, Action.Delete).EventBase,
-        ],
-      },
-    });
+    if (
+      await this.prisma.eventBase.findFirst({
+        where: {
+          AND: [
+            {
+              id: eventId,
+            },
+            accessibleBy(ability, Action.Delete).EventBase,
+          ],
+        },
+      })
+    ) {
+      await this.prisma.eventBase.delete({
+        where: {
+          id: eventId,
+        },
+      });
+
+      console.log(`Deleted event ${eventId}`);
+    }
   }
 }

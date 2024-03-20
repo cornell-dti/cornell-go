@@ -52,7 +52,7 @@ export class ChallengeGateway {
       ability,
       data.challenges,
     );
-      
+
     for (const chal of challenges) {
       await this.challengeService.emitUpdateChallengeData(chal, false, user);
     }
@@ -137,7 +137,7 @@ export class ChallengeGateway {
 
     if (data.deleted && challenge) {
       const ev = (await this.eventService.getEventById(
-        challenge.linkedEventId,
+        challenge.linkedEventId ?? '',
       ))!;
       await this.challengeService.removeChallenge(ability, challenge.id);
 
