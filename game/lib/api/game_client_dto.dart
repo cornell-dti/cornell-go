@@ -167,30 +167,31 @@ enum EventCategory { FOOD, NATURE, HISTORICAL, CAFE, DININGHALL, DORM }
 class EventDto {
   EventDto.fromJson(Map<String, dynamic> fields) {
     id = fields['id'];
-    requiredMembers = fields['requiredMembers'];
+    requiredMembers = fields['requiredMembers'].toInt();
     name = fields['name'];
     description = fields['description'];
-    timeLimitation = fields['timeLimitation'];
+    timeLimitation = TimeLimitationType.values
+        .firstWhere((e) => e.toString() == fields['timeLimitation']);
     endTime = HttpDate.parse(fields['endTime']);
     challengeIds = List<String>.from(fields['challengeIds']);
     difficulty = EventDifficulty.values
         .firstWhere((e) => e.toString() == fields['difficulty']);
     category = EventCategory.values
         .firstWhere((e) => e.toString() == fields['category']);
-    location = EventLocation.values
+    startLocation = EventLocation.values
         .firstWhere((e) => e.toString() == fields['location']);
   }
 
-  String id;
-  int requiredMembers;
-  String name;
-  String description;
-  TimeLimitationType timeLimitation;
-  DateTime endTime;
-  List<String> challengeIds;
-  EventDifficulty difficulty;
-  EventCategory category;
-  EventLocation location;
+  String id = "";
+  int requiredMembers = 0;
+  String name = "";
+  String description = "";
+  TimeLimitationType timeLimitation = TimeLimitationType.PERPETUAL;
+  DateTime endTime = DateTime(0);
+  List<String> challengeIds = [];
+  EventDifficulty difficulty = EventDifficulty.NORMAL;
+  EventCategory category = EventCategory.HISTORICAL;
+  EventLocation startLocation = EventLocation.OTHER;
 }
 
 class EventTrackerDto {
@@ -241,6 +242,7 @@ class ChallengeDto {
     name = fields["name"];
     description = fields["description"];
     imageUrl = fields["imageUrl"];
+    points = fields["points"].toInt();
     lat = fields["lat"].toDouble();
     long = fields["long"].toDouble();
     awardingRadius = fields["awardingRadius"].toDouble();
@@ -252,6 +254,7 @@ class ChallengeDto {
   String name = "";
   String description = "";
   String imageUrl = "";
+  int points = 0;
   double lat = 0.0;
   double long = 0.0;
   double awardingRadius = 0.0;

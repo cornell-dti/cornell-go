@@ -4,22 +4,19 @@ import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/tracker_model.dart';
+import 'package:game/model/challenge_model.dart';
+import 'package:game/model/group_model.dart';
 import 'package:velocity_x/velocity_x.dart';
 import 'package:game/api/geopoint.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:game/model/challenge_model.dart';
 import 'gameplay_map.dart';
 import 'package:provider/provider.dart';
-
 import 'package:flutter/cupertino.dart';
-
 import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:async';
 
 class GameplayPage extends StatefulWidget {
-  final String eventId;
-
-  const GameplayPage({Key? key, required this.eventId}) : super(key: key);
+  const GameplayPage({Key? key}) : super(key: key);
 
   @override
   State<GameplayPage> createState() => _GameplayPageState();
@@ -72,10 +69,11 @@ class _GameplayPageState extends State<GameplayPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer3<ChallengeModel, EventModel, TrackerModel>(
-        builder: (context, challengeModel, eventModel, trackerModel, _) {
-      var event = eventModel.getEventById(widget.eventId);
-      var tracker = trackerModel.trackerByEventId(widget.eventId);
+    return Consumer4<ChallengeModel, EventModel, GroupModel, TrackerModel>(
+        builder:
+            (context, challengeModel, eventModel, groupModel, trackerModel, _) {
+      var event = eventModel.getEventById(groupModel.curEventId ?? "");
+      var tracker = trackerModel.trackerByEventId(groupModel.curEventId ?? "");
       var challenge = challengeModel.getChallengeById(tracker!.curChallengeId);
       if (challenge == null) {
         return Scaffold(

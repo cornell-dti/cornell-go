@@ -4,6 +4,8 @@ import {
   Organization,
   DifficultyMode,
   TimeLimitationType,
+  EventCategoryType,
+  LocationType,
   OrganizationSpecialUsage,
   User,
 } from '@prisma/client';
@@ -20,8 +22,8 @@ export const defaultEventData = {
   timeLimitation: TimeLimitationType.PERPETUAL,
   indexable: false,
   endTime: new Date('2060'),
-  latitude: 42.44755580740012,
-  longitude: -76.48504614830019,
+  category: EventCategoryType.HISTORICAL,
+  location: LocationType.AG_QUAD
 };
 
 export const defaultChallengeData = {
@@ -30,6 +32,7 @@ export const defaultChallengeData = {
   description: 'McGraw Tower',
   imageUrl:
     'https://upload.wikimedia.org/wikipedia/commons/5/5f/CentralAvenueCornell2.jpg',
+  points: 100,
   latitude: 42.44755580740012,
   longitude: -76.48504614830019,
   awardingRadius: 50,

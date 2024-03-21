@@ -7,62 +7,63 @@ import 'package:game/preview/preview.dart';
 /** ChallengeCell was formerly named ChallengeCellNew.
 */
 class ChallengeCell extends StatefulWidget {
+  final String eventId;
   final String location;
   final String challengeName;
   final Image thumbnail;
   final bool isCompleted;
   final String description;
   final String difficulty;
+  final String category;
   final int points;
-  final int challenge_points;
 
   const ChallengeCell(
+      this.eventId,
       this.location,
       this.challengeName,
       this.thumbnail,
       this.isCompleted,
       this.description,
       this.difficulty,
+      this.category,
       this.points,
-      this.challenge_points,
       {Key? key})
       : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _ChallengeCellState(
+      eventId,
       location,
       challengeName,
       thumbnail,
       isCompleted,
       description,
       difficulty,
-      points,
-      challenge_points);
+      category,
+      points);
 }
 
 class _ChallengeCellState extends State<ChallengeCell> {
+  final String eventId;
   final String location;
   final String challengeName;
   final Image thumbnail;
   final bool isCompleted;
   final String description;
   final String difficulty;
+  final String category;
   final int points;
-  final int challenge_points;
-  // newly added field
-  // final int totalDistance;
 
   _ChallengeCellState(
+    this.eventId,
     this.location,
     this.challengeName,
     this.thumbnail,
     this.isCompleted,
     this.description,
     this.difficulty,
+    this.category,
     this.points,
-    this.challenge_points,
-    // newly added field
-    // this.totalDistance
   );
 
   @override
@@ -75,8 +76,17 @@ class _ChallengeCellState extends State<ChallengeCell> {
             ),
             context: context,
             isScrollControlled: true,
-            builder: (context) => Preview(challengeName, description,
-                difficulty, points, challenge_points, previewType.challenge));
+            builder: (context) => Preview(
+                eventId,
+                challengeName,
+                thumbnail,
+                description,
+                difficulty,
+                location,
+                category,
+                points,
+                0.0,
+                previewType.challenge));
       },
       child: Container(
         decoration: BoxDecoration(
@@ -170,7 +180,7 @@ class _ChallengeCellState extends State<ChallengeCell> {
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
-                            challenge_points.toString() + "PTS",
+                            points.toString() + "PTS",
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 14,

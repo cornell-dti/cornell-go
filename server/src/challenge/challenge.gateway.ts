@@ -184,7 +184,7 @@ export class ChallengeGateway {
       const challenge = await this.challengeService.upsertChallengeFromDto(dto);
 
       if (challenge.linkedEventId) {
-        const ev = await this.eventService.updateLongitudeLatitude(
+        const ev = await this.eventService.getEventById(
           challenge.linkedEventId,
         );
         await this.challengeService.emitUpdateChallengeData(challenge, false);

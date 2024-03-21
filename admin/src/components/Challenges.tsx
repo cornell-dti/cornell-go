@@ -115,6 +115,7 @@ function fromForm(
     name: (form[1] as FreeEntryForm).value,
     description: (form[2] as FreeEntryForm).value,
     imageUrl: (form[3] as FreeEntryForm).value,
+    points: 0, // TODO: update @Temi
     lat: (form[0] as MapEntryForm).latitude,
     long: (form[0] as MapEntryForm).longitude,
     awardingRadius: (form[4] as NumberEntryForm).value,

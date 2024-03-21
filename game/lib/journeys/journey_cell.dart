@@ -4,63 +4,76 @@ import 'package:game/preview/preview.dart';
 class JourneyCell extends StatefulWidget {
   final int locationCount;
   final String journeyName;
+  final String eventId;
   final Image thumbnail;
   final String description;
   final int numberCompleted;
   final bool isCompleted;
   final String difficulty;
-  final int points;
-  final int challengePoints;
+  final String location;
+  final String category;
+  final int totalPoints;
+  final double totalDistance;
 
   const JourneyCell(
       this.journeyName,
+      this.eventId,
       this.thumbnail,
       this.description,
       this.locationCount,
       this.numberCompleted,
       this.isCompleted,
       this.difficulty,
-      this.points,
-      this.challengePoints,
+      this.location,
+      this.category,
+      this.totalPoints,
+      this.totalDistance,
       {Key? key})
       : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _JourneyCellState(
       journeyName,
+      eventId,
       thumbnail,
       description,
       locationCount,
       numberCompleted,
       isCompleted,
       difficulty,
-      points,
-      challengePoints);
+      location,
+      category,
+      totalPoints,
+      totalDistance);
 }
 
 class _JourneyCellState extends State<JourneyCell> {
   final int locationCount;
   final String journeyName;
+  final String eventId;
   final Image thumbnail;
   final String description;
   final int numberCompleted;
   final bool isCompleted;
   final String difficulty;
-  final int points;
-  final int challengePoints;
-  // final int totalDistance;
+  final String location;
+  final String category;
+  final int totalPoints;
+  final double totalDistance;
 
   _JourneyCellState(
     this.journeyName,
+    this.eventId,
     this.thumbnail,
     this.description,
     this.locationCount,
     this.numberCompleted,
     this.isCompleted,
     this.difficulty,
-    this.points,
-    this.challengePoints,
-    // this.totalDistance
+    this.location,
+    this.category,
+    this.totalPoints,
+    this.totalDistance,
   );
 
   @override
@@ -76,10 +89,20 @@ class _JourneyCellState extends State<JourneyCell> {
               builder: (
                 BuildContext context,
               ) =>
-                  Preview(journeyName, description, difficulty, points,
-                      challengePoints, previewType.journey,
-                      locationCount: locationCount,
-                      numberCompleted: numberCompleted));
+                  Preview(
+                    eventId,
+                    journeyName,
+                    thumbnail,
+                    description,
+                    difficulty,
+                    location,
+                    category,
+                    totalPoints,
+                    totalDistance,
+                    previewType.journey,
+                    locationCount: locationCount,
+                    numberCompleted: numberCompleted,
+                  ));
           // await showDialog(
           //     context: context,
           //     builder: (context) => Preview(
@@ -232,7 +255,7 @@ class _JourneyCellState extends State<JourneyCell> {
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
-                            challengePoints.toString() + "PTS",
+                            totalPoints.toString() + "PTS",
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 14,

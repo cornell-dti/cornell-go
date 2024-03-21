@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:game/gameplay/gameplay_page.dart';
+import 'package:game/api/game_api.dart';
+import 'package:game/api/game_client_dto.dart';
+import 'package:provider/provider.dart';
 
 enum previewType { challenge, journey }
 
@@ -8,11 +11,15 @@ enum previewType { challenge, journey }
  * difficulty, points, and bonus points for challenge mode. Used for
  * both Challenges and Journeys. */
 class Preview extends StatefulWidget {
+  final String eventId;
   final String challengeName;
+  final Image thumbnail;
   final String description;
   final String difficulty;
+  final String location;
+  final String category;
   final int points;
-  final int challenge_points;
+  final double distance;
   final previewType type;
 
   final int locationCount;
@@ -29,10 +36,19 @@ class Preview extends StatefulWidget {
   static Color greyColor = Color.fromARGB(255, 110, 110, 110);
 
   //Temporary image for now. Will have to change later
-  final String imgPath = "assets/images/38582.jpg";
+  // final String imgPath = "assets/images/38582.jpg";
 
-  Preview(this.challengeName, this.description, this.difficulty, this.points,
-      this.challenge_points, this.type,
+  Preview(
+      this.eventId,
+      this.challengeName,
+      this.thumbnail,
+      this.description,
+      this.difficulty,
+      this.location,
+      this.category,
+      this.points,
+      this.distance,
+      this.type,
       {this.locationCount = 1,
       this.numberCompleted = 0,
       // required this.totalDistance,
@@ -42,18 +58,18 @@ class Preview extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() => _PreviewState(
+      eventId,
       challengeName,
+      thumbnail,
       description,
       difficulty,
+      location,
+      category,
       points,
-      challenge_points,
+      distance,
       type,
       locationCount,
-      numberCompleted
-      // need to figure out newly added parameters; commented out for now
-      // totalDistance,
-      // location
-      );
+      numberCompleted);
 }
 
 class MyFlutterApp {
@@ -69,17 +85,17 @@ class MyFlutterApp {
 /**Builds a widget based on the current state which is needed for toggleable 
  * challenge_on button */
 class _PreviewState extends State<Preview> {
+  final String eventId;
   final String challengeName;
+  final Image thumbnail;
   final String description;
   final String difficulty;
+  final String location;
+  final String category;
   final int points;
-  final int challenge_points;
+  final double distance;
   final previewType type;
-  // newly added parameter; need to implement higher up in hierarchy
-  // final int
-  //     totalDistance;
-  // final String
-  //     location;
+
   bool _challenge_on = false;
 
   static Color backgroundRed = Color.fromARGB(255, 237, 86, 86);
@@ -90,21 +106,21 @@ class _PreviewState extends State<Preview> {
   final int numberCompleted;
 
   //Temporary image for now. Will have to change later
-  final String imgPath = "assets/images/38582.jpg";
+  // final String imgPath = "assets/images/38582.jpg";
 
   _PreviewState(
+      this.eventId,
       this.challengeName,
+      this.thumbnail,
       this.description,
       this.difficulty,
+      this.location,
+      this.category,
       this.points,
-      this.challenge_points,
+      this.distance,
       this.type,
       this.locationCount,
-      this.numberCompleted
-      // newly added; commented out for now
-      // this.totalDistance,
-      // this.location
-      );
+      this.numberCompleted);
   @override
   Widget build(BuildContext context) {
     //The popup box
@@ -131,7 +147,7 @@ class _PreviewState extends State<Preview> {
                           topRight: Radius.circular(3.0),
                         ),
                         image: DecorationImage(
-                            image: AssetImage(imgPath), fit: BoxFit.cover)),
+                            image: thumbnail.image, fit: BoxFit.cover)),
                     height: 150,
                     alignment: Alignment.topCenter,
                     //drag bar icon
@@ -168,18 +184,17 @@ class _PreviewState extends State<Preview> {
                         child: Row(children: [
                           Icon(Icons.tour,
                               size: 24, color: Preview.purpleColor),
-                          Text(
-                              "Location placeholder", // should call new parameter; replace later
+                          Text(location,
                               style: TextStyle(
                                   fontSize: 20, color: Preview.purpleColor)),
-                          SizedBox(width: 10),
-                          Icon(Icons.directions_walk,
-                              size: 24, color: Preview.greyColor),
-                          Text(
-                              "25" + // should call new parameter; replace later
-                                  "mi",
-                              style: TextStyle(
-                                  fontSize: 20, color: Preview.greyColor))
+                          if (type == previewType.journey) SizedBox(width: 10),
+                          if (type == previewType.journey)
+                            Icon(Icons.directions_walk,
+                                size: 24, color: Preview.greyColor),
+                          if (type == previewType.journey)
+                            Text(distance.toString() + "mi",
+                                style: TextStyle(
+                                    fontSize: 20, color: Preview.greyColor))
                         ]),
                       )),
                   Padding(
@@ -250,7 +265,8 @@ class _PreviewState extends State<Preview> {
                                                           difficulty[0]
                                                                   .toUpperCase() +
                                                               difficulty
-                                                                  .substring(1),
+                                                                  .substring(1)
+                                                                  .toLowerCase(),
                                                           style: TextStyle(
                                                               fontSize: 12,
                                                               color:
@@ -277,11 +293,7 @@ class _PreviewState extends State<Preview> {
                                                         alignment:
                                                             Alignment.center,
                                                         child: Text(
-                                                          (points +
-                                                                      (_challenge_on
-                                                                          ? challenge_points
-                                                                          : 0))
-                                                                  .toString() +
+                                                          points.toString() +
                                                               "PTS",
                                                           style: TextStyle(
                                                               fontSize: 12,
@@ -394,12 +406,16 @@ class _PreviewState extends State<Preview> {
                                       side: BorderSide(color: backgroundRed)))),
                           onPressed: () {
                             print("Unimplemented. Starting Challenge!");
+                            Consumer<ApiClient>(
+                              builder: (context, apiClient, child) {
+                                apiClient.serverApi?.setCurrentEvent(eventId);
+                                return Container();
+                              },
+                            );
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => GameplayPage(
-                                        eventId:
-                                            "37714c5a-0c5b-47a4-a759-64f3a5fc21d8")));
+                                    builder: (context) => GameplayPage()));
                           },
                           child: Text(
                             "Continue exploring",

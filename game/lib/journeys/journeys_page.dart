@@ -12,6 +12,7 @@ import 'package:game/model/tracker_model.dart';
 import 'package:game/model/user_model.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:provider/provider.dart';
+import 'package:game/api/geopoint.dart';
 
 class JourneysPage extends StatefulWidget {
   const JourneysPage({Key? key}) : super(key: key);
@@ -108,10 +109,10 @@ class _JourneysPageState extends State<JourneysPage> {
                     ),
                   ),
                 ),
-                Expanded(child:
-                    Consumer4<EventModel, GroupModel, TrackerModel, UserModel>(
-                        builder: (context, myEventModel, groupModel,
-                            trackerModel, userModel, child) {
+                Expanded(child: Consumer5<EventModel, ChallengeModel,
+                        GroupModel, TrackerModel, UserModel>(
+                    builder: (context, myEventModel, challengeModel, groupModel,
+                        trackerModel, userModel, child) {
                   List<Widget> eventCells = [];
                   if (myEventModel.searchResults == null) {
                     myEventModel.searchEvents(
@@ -138,9 +139,26 @@ class _JourneysPageState extends State<JourneysPage> {
                     var complete =
                         (numberCompleted == event.challengeIds.length);
                     var locationCount = event.challengeIds.length;
-                    var difficulty = event.difficulty;
+                    var totalPoints = 0;
+                    var totalDistanceMeters = 0.0;
+                    GeoPoint? lastChalLoc = null;
+                    for (String challengeId in event.challengeIds) {
+                      ChallengeDto? chal =
+                          challengeModel.getChallengeById(challengeId);
+                      totalPoints += chal?.points ?? 0;
+                      if (lastChalLoc == null && chal != null) {
+                        lastChalLoc = GeoPoint(chal.lat, chal.long, 0);
+                      } else if (lastChalLoc != null && chal != null) {
+                        GeoPoint nextChalLoc = GeoPoint(chal.lat, chal.long, 0);
+                        totalDistanceMeters +=
+                            lastChalLoc.distanceTo(nextChalLoc);
+                        lastChalLoc = nextChalLoc;
+                      }
+                    }
+                    var totalDistanceMiles = totalDistanceMeters / 1609.34;
+
                     DateTime now = DateTime.now();
-                    DateTime endtime = HttpDate.parse(event.endTime);
+                    DateTime endtime = HttpDate.parse(event.endTime.toString());
 
                     Duration timeTillExpire = endtime.difference(now);
                     eventCells.add(
@@ -158,6 +176,7 @@ class _JourneysPageState extends State<JourneysPage> {
                               )
                             : JourneyCell(
                                 key: UniqueKey(),
+                                event.id,
                                 event.name,
                                 Image.network(
                                     "https://picsum.photos/250?image=9"), // dummy data for now; should pass in thumbnail parameter
@@ -165,9 +184,11 @@ class _JourneysPageState extends State<JourneysPage> {
                                 locationCount,
                                 numberCompleted,
                                 complete,
-                                difficulty,
-                                event.minimumScore,
-                                0),
+                                event.difficulty.toString().split(".").last,
+                                event.startLocation.toString().split(".").last,
+                                event.category.toString().split(".").last,
+                                totalPoints,
+                                totalDistanceMiles),
                       ),
                     );
                   }
