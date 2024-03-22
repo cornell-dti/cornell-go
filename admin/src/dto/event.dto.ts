@@ -10,27 +10,27 @@ export interface RequestEventLeaderDataDto {
   eventId: string;
 }
 
-export type TimeLimitationDto = 'LIMITED_TIME' | 'PERPETUAL';
+export type TimeLimitationDto = "LIMITED_TIME" | "PERPETUAL";
 
-export type EventDifficultyDto = 'EASY' | 'NORMAL' | 'HARD';
+export type EventDifficultyDto = "EASY" | "NORMAL" | "HARD";
 
 export type EventLocationDto =
-  | 'ENG_QUAD'
-  | 'ARTS_QUAD'
-  | 'AG_QUAD'
-  | 'NORTH_CAMPUS'
-  | 'WEST_CAMPUS'
-  | 'COLLEGETOWN'
-  | 'ITHACA_COMMONS'
-  | 'OTHER';
+  | "ENG_QUAD"
+  | "ARTS_QUAD"
+  | "AG_QUAD"
+  | "NORTH_CAMPUS"
+  | "WEST_CAMPUS"
+  | "COLLEGETOWN"
+  | "ITHACA_COMMONS"
+  | "OTHER";
 
 export type EventCategoryDto =
-  | 'FOOD'
-  | 'NATURE'
-  | 'HISTORICAL'
-  | 'CAFE'
-  | 'DININGHALL'
-  | 'DORM';
+  | "FOOD"
+  | "NATURE"
+  | "HISTORICAL"
+  | "CAFE"
+  | "DININGHALL"
+  | "DORM";
 
 export interface EventDto {
   id: string;

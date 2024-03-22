@@ -24,7 +24,7 @@ export const defaultEventData = {
   indexable: false,
   endTime: new Date('2060'),
   category: EventCategoryType.HISTORICAL,
-  location: LocationType.AG_QUAD
+  location: LocationType.AG_QUAD,
 };
 
 export const defaultChallengeData = {

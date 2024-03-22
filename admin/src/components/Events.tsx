@@ -43,8 +43,8 @@ function EventCard(props: {
     props.event.difficulty === "EASY"
       ? "EASY"
       : props.event.difficulty === "NORMAL"
-        ? "NORMAL"
-        : "HARD";
+      ? "NORMAL"
+      : "HARD";
 
   const affirmOfBool = (val: boolean) => (val ? "Yes" : "No");
 
@@ -119,8 +119,8 @@ function fromForm(form: EntryForm[], id: string): EventDto {
       (form[4] as OptionEntryForm).value === 0
         ? "EASY"
         : (form[4] as OptionEntryForm).value === 1
-          ? "NORMAL"
-          : "HARD",
+        ? "NORMAL"
+        : "HARD",
     category: "FOOD", // TODO currently hardcoded, update @Temi
     location: "ENG_QUAD", // TODO update @Temi
   };
@@ -148,8 +148,8 @@ function toForm(event: EventDto) {
         event.difficulty === "EASY"
           ? 0
           : event.difficulty === "NORMAL"
-            ? "NORMAL"
-            : "HARD",
+          ? "NORMAL"
+          : "HARD",
     },
     {
       name: "Publicly Visible",
@@ -235,7 +235,7 @@ export function Events() {
         <CenterText>Select an organization to view events</CenterText>
       ) : serverData.organizations.get(serverData.selectedOrg) ? (
         serverData.organizations.get(serverData.selectedOrg)?.events.length ===
-        0 && <CenterText>No events in organization</CenterText>
+          0 && <CenterText>No events in organization</CenterText>
       ) : (
         <CenterText>Error getting events</CenterText>
       )}

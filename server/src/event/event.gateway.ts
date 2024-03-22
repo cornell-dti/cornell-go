@@ -29,7 +29,7 @@ export class EventGateway {
     private clientService: ClientService,
     private eventService: EventService,
     private orgService: OrganizationService,
-  ) { }
+  ) {}
 
   /**
    * Subscribes to and emits all events that have an id within data.eventIds
