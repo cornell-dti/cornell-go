@@ -194,7 +194,6 @@ class _JourneysPageState extends State<JourneysPage> {
                                 complete,
                                 event.difficulty.toString().split(".").last,
                                 location.toString().split(".").last,
-                                event.category.toString().split(".").last,
                                 totalPoints,
                                 totalDistanceMiles),
                       ),

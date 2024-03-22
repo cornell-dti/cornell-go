@@ -44,7 +44,6 @@ class _ChallengesPageState extends State<ChallengesPage> {
         false,
         "Find this famous statue!",
         "Easy",
-        "Historical",
         15),
     ChallengeCell(
         "",
@@ -54,7 +53,6 @@ class _ChallengesPageState extends State<ChallengesPage> {
         true,
         "Find this famous statue!",
         "Normal",
-        "Historical",
         15),
     ChallengeCell(
         "",
@@ -64,7 +62,6 @@ class _ChallengesPageState extends State<ChallengesPage> {
         false,
         "Find this famous statue!",
         "Hard",
-        "Historical",
         15),
     ChallengeCell(
         "",
@@ -74,7 +71,6 @@ class _ChallengesPageState extends State<ChallengesPage> {
         true,
         "Find this famous statue!",
         "Hard",
-        "Historical",
         15),
   ];
 
@@ -172,7 +168,10 @@ class _ChallengesPageState extends State<ChallengesPage> {
                       .any((element) => element.id == groupModel.curEventId)) {
                     final curEvent =
                         myEventModel.getEventById(groupModel.curEventId ?? "");
-                    if (curEvent != null) events.add(curEvent);
+                    if (curEvent != null)
+                      events.add(curEvent);
+                    else
+                      print("current event is null");
                   }
                   for (EventDto event in events) {
                     var tracker = trackerModel.trackerByEventId(event.id);
@@ -212,7 +211,6 @@ class _ChallengesPageState extends State<ChallengesPage> {
                                 complete,
                                 challenge.description,
                                 event.difficulty.toString().split(".").last,
-                                event.category.toString().split(".").last,
                                 challenge.points),
                       ),
                     );

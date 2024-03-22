@@ -17,7 +17,6 @@ class Preview extends StatefulWidget {
   final String description;
   final String difficulty;
   final String location;
-  final String category;
   final int points;
   final double distance;
   final previewType type;
@@ -36,17 +35,8 @@ class Preview extends StatefulWidget {
   //Temporary image for now. Will have to change later
   // final String imgPath = "assets/images/38582.jpg";
 
-  Preview(
-      this.eventId,
-      this.challengeName,
-      this.thumbnail,
-      this.description,
-      this.difficulty,
-      this.location,
-      this.category,
-      this.points,
-      this.distance,
-      this.type,
+  Preview(this.eventId, this.challengeName, this.thumbnail, this.description,
+      this.difficulty, this.location, this.points, this.distance, this.type,
       {this.locationCount = 1,
       this.numberCompleted = 0,
       // required this.totalDistance,
@@ -61,7 +51,6 @@ class Preview extends StatefulWidget {
       description,
       difficulty,
       location,
-      category,
       points,
       distance,
       type,
@@ -78,7 +67,6 @@ class _PreviewState extends State<Preview> {
   final String description;
   final String difficulty;
   final String location;
-  final String category;
   final int points;
   final double distance;
   final previewType type;
@@ -102,7 +90,6 @@ class _PreviewState extends State<Preview> {
       this.description,
       this.difficulty,
       this.location,
-      this.category,
       this.points,
       this.distance,
       this.type,

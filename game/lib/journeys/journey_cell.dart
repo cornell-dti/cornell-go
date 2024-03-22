@@ -11,7 +11,6 @@ class JourneyCell extends StatefulWidget {
   final bool isCompleted;
   final String difficulty;
   final String location;
-  final String category;
   final int totalPoints;
   final double totalDistance;
 
@@ -25,7 +24,6 @@ class JourneyCell extends StatefulWidget {
       this.isCompleted,
       this.difficulty,
       this.location,
-      this.category,
       this.totalPoints,
       this.totalDistance,
       {Key? key})
@@ -42,7 +40,6 @@ class JourneyCell extends StatefulWidget {
       isCompleted,
       difficulty,
       location,
-      category,
       totalPoints,
       totalDistance);
 }
@@ -57,7 +54,6 @@ class _JourneyCellState extends State<JourneyCell> {
   final bool isCompleted;
   final String difficulty;
   final String location;
-  final String category;
   final int totalPoints;
   final double totalDistance;
 
@@ -71,7 +67,6 @@ class _JourneyCellState extends State<JourneyCell> {
     this.isCompleted,
     this.difficulty,
     this.location,
-    this.category,
     this.totalPoints,
     this.totalDistance,
   );
@@ -96,7 +91,6 @@ class _JourneyCellState extends State<JourneyCell> {
                     description,
                     difficulty,
                     location,
-                    category,
                     totalPoints,
                     totalDistance,
                     previewType.journey,

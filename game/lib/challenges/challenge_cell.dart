@@ -14,7 +14,6 @@ class ChallengeCell extends StatefulWidget {
   final bool isCompleted;
   final String description;
   final String difficulty;
-  final String category;
   final int points;
 
   const ChallengeCell(
@@ -25,22 +24,13 @@ class ChallengeCell extends StatefulWidget {
       this.isCompleted,
       this.description,
       this.difficulty,
-      this.category,
       this.points,
       {Key? key})
       : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => _ChallengeCellState(
-      eventId,
-      location,
-      challengeName,
-      thumbnail,
-      isCompleted,
-      description,
-      difficulty,
-      category,
-      points);
+  State<StatefulWidget> createState() => _ChallengeCellState(eventId, location,
+      challengeName, thumbnail, isCompleted, description, difficulty, points);
 }
 
 class _ChallengeCellState extends State<ChallengeCell> {
@@ -51,7 +41,6 @@ class _ChallengeCellState extends State<ChallengeCell> {
   final bool isCompleted;
   final String description;
   final String difficulty;
-  final String category;
   final int points;
 
   _ChallengeCellState(
@@ -62,7 +51,6 @@ class _ChallengeCellState extends State<ChallengeCell> {
     this.isCompleted,
     this.description,
     this.difficulty,
-    this.category,
     this.points,
   );
 
@@ -83,7 +71,6 @@ class _ChallengeCellState extends State<ChallengeCell> {
                 description,
                 difficulty,
                 location,
-                category,
                 points,
                 0.0,
                 previewType.challenge));
