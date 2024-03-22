@@ -122,7 +122,6 @@ function fromForm(form: EntryForm[], id: string): EventDto {
         ? "NORMAL"
         : "HARD",
     category: "FOOD", // TODO currently hardcoded, update @Temi
-    location: "ENG_QUAD", // TODO update @Temi
   };
 }
 

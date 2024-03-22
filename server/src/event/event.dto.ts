@@ -44,7 +44,6 @@ export interface EventDto {
   initialOrganizationId?: string;
   difficulty: EventDifficultyDto;
   category: EventCategoryDto;
-  location: EventLocationDto;
   indexable: boolean;
 }
 

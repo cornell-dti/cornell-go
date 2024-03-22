@@ -10,7 +10,6 @@ export interface ChallengeDto {
   description: string;
   points: number;
   imageUrl: string;
-  points: number;
   lat: number;
   long: number;
   awardingRadius: number;

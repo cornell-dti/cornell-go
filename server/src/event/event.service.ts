@@ -7,7 +7,6 @@ import {
   EventTracker,
   User,
   EventCategoryType,
-  LocationType,
 } from '@prisma/client';
 import { LeaderDto, UpdateLeaderDataDto } from '../challenge/challenge.dto';
 import { v4 } from 'uuid';
@@ -244,7 +243,12 @@ export class EventService {
         where: {
           usedIn: { some: { members: { some: { id: user.id } } } },
           category: criteria.categories && { in: criteria.categories },
-          location: criteria.locations && { in: criteria.locations },
+          // location: criteria.locations && { in: criteria.locations },
+          challenges: {
+            some: {
+              location: criteria.locations && { in: criteria.locations },
+            },
+          },
           difficulty: criteria.difficulties && { in: criteria.difficulties },
         },
         skip: criteria.offset,
@@ -282,7 +286,6 @@ export class EventService {
       indexable: ev.indexable,
       challengeIds: sortedChals.map(c => c.id),
       difficulty: ev.difficulty as EventDifficultyDto,
-      location: ev.location as EventLocationDto,
       category: ev.category as EventCategoryDto,
     };
   }
@@ -425,7 +428,6 @@ export class EventService {
       indexable: event.indexable,
       difficulty: event.difficulty as DifficultyMode,
       category: event.category as EventCategoryType,
-      location: event.location as LocationType,
     };
 
     const eventEntity = await this.prisma.eventBase.upsert({

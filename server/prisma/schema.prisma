@@ -127,7 +127,6 @@ model Challenge {
   description    String
   points         Int
   imageUrl       String
-  points         Int
   latitude       Float
   longitude      Float
   awardingRadius Float
@@ -152,7 +151,6 @@ model EventBase {
   achievements    Achievement[]
   difficulty      DifficultyMode
   category        EventCategoryType
-  location        LocationType
 }
 
 model EventTracker {

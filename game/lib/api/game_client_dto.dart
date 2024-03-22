@@ -237,8 +237,9 @@ class ChallengeDto {
   ChallengeDto.fromJson(Map<String, dynamic> fields) {
     id = fields["id"];
     name = fields["name"];
-    location = EventLocation.values
-        .firstWhere((e) => e.toString() == fields["location"]);
+    location = EventLocation.values.firstWhere(
+        (e) => e.toString() == fields["location"],
+        orElse: () => EventLocation.OTHER);
     description = fields["description"];
     points = fields["points"];
     imageUrl = fields["imageUrl"];
