@@ -12,41 +12,57 @@ Widget leaderBoardCell(
     context, String name, int position, int points, bool isUser) {
   //Creating the styles to use for the position, name, and points
   var posStyle = TextStyle(
-    fontFamily: 'Inter',
-    fontSize: 23,
+    color: Color(0xFF474747),
+    fontSize: 20,
+    fontFamily: 'Poppins',
     fontWeight: FontWeight.w500,
-    height: 1.42,
-    letterSpacing: 0.0,
-    color: Colors.black,
+    height: 0,
   );
   var nameStyle = TextStyle(
-    fontFamily: 'Inter',
+    color: Color(0xFF474747),
     fontSize: 14,
+    fontFamily: 'Poppins',
     fontWeight: FontWeight.w500,
-    height: 1.5,
-    letterSpacing: 0,
-    color: Colors.black,
+    height: 0,
   );
+
   var pointStyle = TextStyle(
-    fontFamily: 'Inter',
-    fontSize: 11,
-    fontWeight: FontWeight.w400,
-    height: 1.5455,
-    letterSpacing: 0,
-    color: Colors.black,
+    color: Colors.black.withOpacity(0.699999988079071),
+    fontSize: 12,
+    fontFamily: 'Poppins',
+    fontWeight: FontWeight.w600,
+    height: 0,
   );
 
   return Container(
-      decoration: BoxDecoration(
-        color: (isUser) ? Color.fromARGB(255, 251, 227, 195) : Colors.white,
-        borderRadius: BorderRadius.circular(10.0),
+      // decoration: BoxDecoration(
+      //   color: (isUser) ? Color.fromARGB(255, 251, 227, 195) : Colors.white,
+      //   borderRadius: BorderRadius.circular(10.0),
+      // ),
+
+      decoration: ShapeDecoration(
+        color: (isUser) ? Color(0xFFFFF8F1) : Colors.white,
+        shape: RoundedRectangleBorder(
+          side: (isUser)
+              ? BorderSide(width: 2, color: Color(0xFFFBDDAF))
+              : BorderSide.none,
+          borderRadius: BorderRadius.circular(10),
+        ),
       ),
+
+      // decoration: ShapeDecoration(
+      //   color: Color(0xFFFFF8F1),
+      //   shape: RoundedRectangleBorder(
+      //     side: BorderSide(width: 2, color: Color(0xFFFBDDAF)),
+      //     borderRadius: BorderRadius.circular(10),
+      //   ),
+      // ),
       child: Padding(
-        padding: const EdgeInsets.all(8.74),
+        padding: const EdgeInsets.symmetric(horizontal: 13),
         child: ClipRRect(
           child: Container(
-            width: 266,
-            height: 34,
+            width: 304,
+            height: 68,
             child: Row(
               children: [
                 Row(
@@ -54,7 +70,7 @@ Widget leaderBoardCell(
                     Container(
                       child: Row(
                         children: [
-                          Text(position.toString(),
+                          Text(position.toString() + ".",
                               style: posStyle, textAlign: TextAlign.center),
                           Padding(
                             padding: const EdgeInsets.only(left: 12.0),
@@ -71,9 +87,14 @@ Widget leaderBoardCell(
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.only(left: 16.0),
-                      child: Container(
-                        child: Text(name, style: nameStyle),
+                      padding: const EdgeInsets.only(left: 10, right: 5),
+                      child: SizedBox(
+                        width: 110,
+                        child: FittedBox(
+                          alignment: Alignment.centerLeft,
+                          fit: BoxFit.scaleDown,
+                          child: Text(name, style: nameStyle),
+                        ),
                       ),
                     ),
                   ],

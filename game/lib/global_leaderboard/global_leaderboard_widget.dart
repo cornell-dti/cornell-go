@@ -30,7 +30,7 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
   List<UpdateLeaderDataUserDto> sampleUsers = [
     UpdateLeaderDataUserDto.fromJson({
       "userId": "user1",
-      "username": "user1_username",
+      "username": "Brandon Lee",
       "score": 100,
     }),
     UpdateLeaderDataUserDto.fromJson({
@@ -40,7 +40,7 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
     }),
     UpdateLeaderDataUserDto.fromJson({
       "userId": "user3",
-      "username": "user3_username",
+      "username": "Erica Lee",
       "score": 120,
     }),
     UpdateLeaderDataUserDto.fromJson({
@@ -55,7 +55,7 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
     }),
     UpdateLeaderDataUserDto.fromJson({
       "userId": "user6",
-      "username": "user6_username",
+      "username": "Michelle Dai",
       "score": 110,
     }),
     UpdateLeaderDataUserDto.fromJson({
@@ -75,7 +75,7 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
     }),
     UpdateLeaderDataUserDto.fromJson({
       "userId": "user10",
-      "username": "user10_username",
+      "username": "Lucy Yang",
       "score": 115,
     }),
     UpdateLeaderDataUserDto.fromJson({
@@ -85,7 +85,7 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
     }),
     UpdateLeaderDataUserDto.fromJson({
       "userId": "user12",
-      "username": "user12_username",
+      "username": "David Martinez Lopez",
       "score": 130,
     }),
     UpdateLeaderDataUserDto.fromJson({
@@ -95,7 +95,7 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
     }),
     UpdateLeaderDataUserDto.fromJson({
       "userId": "user14",
-      "username": "user14_username",
+      "username": "Lazim Jarif",
       "score": 105,
     }),
     UpdateLeaderDataUserDto.fromJson({
@@ -108,6 +108,7 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
   //Thhis user represents the users status. This is mock data for now.
   UserDto sampleUserData = UserDto.fromJson({
     "user": {
+      // "id": "user6", or 12 or 10
       "id": "user6",
       "username": "example_username",
       "major": "Computer Science",
@@ -131,30 +132,60 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
     );
     return Scaffold(
         key: scaffoldKey,
-        backgroundColor: Color(0xFFE95755),
+        backgroundColor: Color.fromARGB(255, 255, 248, 241),
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          backgroundColor: Color.fromARGB(255, 237, 86, 86),
+          title: Text(
+            'Leaderboard',
+            style: leaderboardStyle,
+          ),
+          actions: [],
+        ),
         body: Padding(
           padding: const EdgeInsets.only(top: 0),
           child: Column(
             children: [
-              //Title Container
-              Container(
-                height: 29.0,
-                margin: EdgeInsets.only(top: 51.0, left: 25),
-                child: Text(
-                  "Leaderboard",
-                  style: leaderboardStyle,
-                ),
-              ),
               //Podium Container
               Consumer3<GroupModel, EventModel, UserModel>(builder:
                   (context, myGroupModel, myEventModel, myUserModel, child) {
                 //Loading in the lists and then creating podiumList of top 3
                 final List<UpdateLeaderDataUserDto> list =
                     myEventModel.getTopPlayersForEvent('', 1000);
-                ;
+                // ;
+                // Load Sample Data
+                // final List<UpdateLeaderDataUserDto> list = sampleUsers;
+
+                // list.insertAll(0, sampleUsers);
                 list.sort((a, b) => b.score.compareTo(a.score));
-                List<UpdateLeaderDataUserDto> podiumList =
-                    list.sublist(0, list.length >= 3 ? 3 : list.length);
+                UpdateLeaderDataUserDto empty =
+                    UpdateLeaderDataUserDto.fromJson({
+                  "userId": " ",
+                  "username": " ",
+                  "score": 0,
+                });
+
+                // Checking list length
+                int l = list.length;
+                // Ensure list has at least 3 elements, filling with defaults if necessary.
+                if (l < 3) {
+                  for (int i = 0; i < (3 - l); i++) {
+                    list.add(empty);
+                  }
+                }
+
+                // TODO: Should not be locked on 3
+                List<UpdateLeaderDataUserDto> podiumList = list.sublist(0, 3);
+
+                bool firstPodiumUser = podiumList.length > 0 &&
+                    podiumList[0].userId == myUserModel.userData?.id;
+
+                bool secondPodiumUser = podiumList.length > 1 &&
+                    podiumList[1].userId == myUserModel.userData?.id;
+
+                bool thirdPodiumUser = podiumList.length > 2 &&
+                    podiumList[2].userId == myUserModel.userData?.id;
+
                 return Container(
                   width: 328,
                   height: 213,
@@ -168,24 +199,21 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
                                 podiumList[1].score)
                             : podiumCell(context, "", 0),
                         SizedBox(height: 12),
-                        (podiumList.length > 1 &&
-                                podiumList[1].userId == sampleUserData.id)
-                            ? SecondPodiumYellow()
-                            : SecondPodiumRed(),
+                        SecondPodium(
+                            context, podiumList[1].score, secondPodiumUser),
                       ],
                     ),
                     SizedBox(width: 5),
                     Column(
                       children: [
                         podiumList.length > 0
+                            // TODO: Change if not including username/score
                             ? podiumCell(context, podiumList[0].username,
                                 podiumList[0].score)
                             : podiumCell(context, "", 0),
                         SizedBox(height: 12),
-                        (podiumList.length > 0 &&
-                                podiumList[0].userId == sampleUserData.id)
-                            ? FirstPodiumYellow()
-                            : FirstPodiumRed(),
+                        FirstPodium(
+                            context, podiumList[0].score, firstPodiumUser),
                       ],
                     ),
                     SizedBox(width: 5),
@@ -197,15 +225,14 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
                                 podiumList[2].score)
                             : podiumCell(context, "", 0),
                         SizedBox(height: 12),
-                        (podiumList.length > 2 &&
-                                podiumList[2].userId == sampleUserData.id)
-                            ? ThirdPodiumYellow()
-                            : ThirdPodiumRed(),
+                        ThirdPodium(
+                            context, podiumList[2].score, thirdPodiumUser),
                       ],
                     ),
                   ]),
                 );
               }),
+              SizedBox(height: 5),
               //Leaderboard Container
               Expanded(
                 child: Padding(
@@ -214,18 +241,38 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
                   child: Consumer3<GroupModel, EventModel, UserModel>(
                     builder: (context, myGroupModel, myEventModel, myUserModel,
                         child) {
-                      int position = 4;
+                      int position = 0;
                       // Use this line below to retrieve actual data
                       final List<UpdateLeaderDataUserDto> list =
                           myEventModel.getTopPlayersForEvent('', 1000);
-                      // final List<UpdateLeaderDataUserDto> list = sampleUsers;
+
+                      UpdateLeaderDataUserDto empty =
+                          UpdateLeaderDataUserDto.fromJson({
+                        "userId": "n",
+                        "username": " ",
+                        "score": 0,
+                      });
+
                       list.sort((a, b) => b.score.compareTo(a.score));
-                      list.removeRange(0, list.length >= 3 ? 3 : list.length);
+
+                      // Checking list length
+                      int l = list.length;
+                      // Ensure list has at least 3 elements, filling with defaults if necessary.
+                      if (l < 3) {
+                        for (int i = 0; i < (3 - l); i++) {
+                          list.add(empty);
+                        }
+                      }
+
+                      print(list.length);
+
+                      // Use this line to retrieve sample data
+                      // List<UpdateLeaderDataUserDto> list = sampleUsers;
                       return Container(
                         width: 345.0,
                         height: 446.0,
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: Color.fromRGBO(255, 170, 91, 0.15),
                           borderRadius: BorderRadius.only(
                             topLeft: Radius.circular(10.0),
                             topRight: Radius.circular(10.0),
@@ -233,47 +280,46 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
                         ),
                         child: Container(
                           width: 283.05,
+                          // width: 350,
                           height: 432.0,
-                          child: Expanded(
-                            child: ListView(
-                              shrinkWrap: true,
-                              scrollDirection: Axis.vertical,
-                              children: [
-                                for (UpdateLeaderDataUserDto user in list)
-                                  Padding(
-                                    padding: const EdgeInsets.only(
-                                        left: 30.95,
-                                        right: 30.95,
-                                        bottom: 16.0),
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.only(
-                                          topLeft: Radius.circular(10.0),
-                                          topRight: Radius.circular(10.0),
-                                          bottomLeft: Radius.circular(10.0),
-                                          bottomRight: Radius.circular(10.0),
+                          child: ListView(
+                            shrinkWrap: true,
+                            scrollDirection: Axis.vertical,
+                            children: [
+                              // if (list.length > 3)
+                              for (UpdateLeaderDataUserDto user in list)
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 30.95, right: 30.95, top: 16.0),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.only(
+                                        topLeft: Radius.circular(10.0),
+                                        topRight: Radius.circular(10.0),
+                                        bottomLeft: Radius.circular(10.0),
+                                        bottomRight: Radius.circular(10.0),
+                                      ),
+                                      color: Colors.white,
+                                      // Color.fromRGBO(255, 170, 91, 0.15),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Color(0x40000000),
+                                          offset:
+                                              Offset(0.0, 1.7472529411315918),
+                                          blurRadius: 6.989011764526367,
                                         ),
-                                        color: Colors.white,
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Color(0x40000000),
-                                            offset:
-                                                Offset(0.0, 1.7472529411315918),
-                                            blurRadius: 6.989011764526367,
-                                          ),
-                                        ],
-                                      ),
-                                      child: leaderBoardCell(
-                                        context,
-                                        user.username,
-                                        position++,
-                                        user.score,
-                                        user.userId == sampleUserData.id,
-                                      ),
+                                      ],
+                                    ),
+                                    child: leaderBoardCell(
+                                      context,
+                                      user.username,
+                                      position++,
+                                      user.score,
+                                      user.userId == myUserModel.userData?.id,
                                     ),
                                   ),
-                              ],
-                            ),
+                                ),
+                            ],
                           ),
                         ),
                       );
