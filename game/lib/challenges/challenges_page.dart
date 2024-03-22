@@ -1,7 +1,17 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
+import 'package:game/api/game_api.dart';
+import 'package:game/api/game_client_dto.dart';
+import 'package:game/model/challenge_model.dart';
+import 'package:game/model/event_model.dart';
+import 'package:game/model/group_model.dart';
+import 'package:game/model/tracker_model.dart';
+import 'package:game/model/user_model.dart';
+import 'package:provider/provider.dart';
 import 'challenge_cell.dart';
 import 'package:game/journeys/filter_form.dart';
 
@@ -140,18 +150,97 @@ class _ChallengesPageState extends State<ChallengesPage> {
                     ],
                   ),
                 ),
-                Expanded(
-                  child: ListView.separated(
-                    padding: const EdgeInsets.all(0),
-                    itemCount: cells.length,
+                Expanded(child: Consumer4<EventModel, GroupModel, TrackerModel,
+                        ChallengeModel>(
+                    builder: (context, myEventModel, groupModel, trackerModel,
+                        challengeModel, child) {
+                  List<Widget> eventCells = [];
+                  if (myEventModel.searchResults == null) {
+                    myEventModel.searchEvents(
+                        0,
+                        1000,
+                        [
+                          TimeLimitationType.PERPETUAL,
+                          TimeLimitationType.LIMITED_TIME
+                        ],
+                        false,
+                        false,
+                        false);
+                  }
+                  final events = myEventModel.searchResults ?? [];
+                  if (!events
+                      .any((element) => element.id == groupModel.curEventId)) {
+                    final curEvent =
+                        myEventModel.getEventById(groupModel.curEventId ?? "");
+                    if (curEvent != null) events.add(curEvent);
+                  }
+                  for (EventDto event in events) {
+                    var tracker = trackerModel.trackerByEventId(event.id);
+                    var numberCompleted = tracker?.prevChallengeIds.length ?? 0;
+                    var complete =
+                        (numberCompleted == event.challengeIds.length);
+                    var locationCount = event.challengeIds.length;
+                    DateTime now = DateTime.now();
+                    DateTime endtime = event.endTime;
+
+                    Duration timeTillExpire = endtime.difference(now);
+                    if (locationCount != 1) continue;
+                    var challenge =
+                        challengeModel.getChallengeById(event.challengeIds[0]);
+
+                    if (challenge == null) continue;
+                    eventCells.add(
+                      StreamBuilder(
+                        stream:
+                            Stream.fromFuture(Future.delayed(timeTillExpire)),
+                        builder: (stream, value) => timeTillExpire.isNegative
+                            ? Consumer<ApiClient>(
+                                builder: (context, apiClient, child) {
+                                  if (event.id == groupModel.curEventId) {
+                                    apiClient.serverApi?.setCurrentEvent("");
+                                  }
+                                  return Container();
+                                },
+                              )
+                            : ChallengeCell(
+                                key: UniqueKey(),
+                                event.id,
+                                challenge.location.toString().split(".").last,
+                                challenge.name,
+                                Image.network(
+                                    "https://picsum.photos/250?image=9"),
+                                complete,
+                                challenge.description,
+                                event.difficulty.toString().split(".").last,
+                                event.category.toString().split(".").last,
+                                challenge.points),
+                      ),
+                    );
+                  }
+                  return ListView.separated(
+                    padding: const EdgeInsets.symmetric(horizontal: 3),
+                    itemCount: eventCells.length + 1,
                     itemBuilder: (context, index) {
-                      return cells[index];
+                      if (index == eventCells.length) {
+                        // Footer widget
+                        return Padding(
+                            padding: const EdgeInsets.only(bottom: 50.0),
+                            child: Center(
+                              child: Image(
+                                image: AssetImage('assets/images/go-logo.png'),
+                                width: 200,
+                                height: 200,
+                              ),
+                            ));
+                      }
+                      return eventCells[index];
                     },
+                    physics: BouncingScrollPhysics(),
                     separatorBuilder: (context, index) {
                       return SizedBox(height: 10);
                     },
-                  ),
-                ),
+                  );
+                }))
               ],
             ),
           )),

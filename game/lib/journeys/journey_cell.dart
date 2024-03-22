@@ -218,7 +218,7 @@ class _JourneyCellState extends State<JourneyCell> {
                         Icon(Icons.tour,
                             size: 15, color: Color.fromARGB(255, 131, 90, 124)),
                         Text(
-                          "location",
+                          location,
                           style: TextStyle(
                             color: Color.fromARGB(255, 131, 90, 124),
                             fontSize: 16,
@@ -353,7 +353,9 @@ class _JourneyCellState extends State<JourneyCell> {
                               size: 16,
                               color: Color.fromARGB(255, 131, 90, 124)),
                           Text(
-                            numberCompleted.toString() + "/_",
+                            numberCompleted.toString() +
+                                "/" +
+                                locationCount.toString(),
                             style: TextStyle(
                               color: Color.fromARGB(255, 110, 110, 110),
                               fontSize: 16,

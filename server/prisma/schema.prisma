@@ -123,7 +123,9 @@ model Challenge {
   linkedEventId  String?
   eventIndex     Int
   name           String
+  location       LocationType
   description    String
+  points         Int
   imageUrl       String
   points         Int
   latitude       Float

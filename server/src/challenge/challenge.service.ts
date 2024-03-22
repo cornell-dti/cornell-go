@@ -7,6 +7,7 @@ import {
   EventTracker,
   SessionLogEvent,
   User,
+  LocationType,
 } from '@prisma/client';
 import { ClientService } from '../client/client.service';
 import { EventService } from '../event/event.service';
@@ -230,7 +231,9 @@ export class ChallengeService {
     return {
       id: ch.id,
       name: ch.name,
+      location: ch.location as string,
       description: ch.description,
+      points: ch.points,
       imageUrl: ch.imageUrl,
       points: ch.points,
       lat: ch.latitude,
@@ -244,7 +247,9 @@ export class ChallengeService {
   async upsertChallengeFromDto(challenge: ChallengeDto): Promise<Challenge> {
     const assignData = {
       name: challenge.name.substring(0, 2048),
+      location: challenge.location as LocationType,
       description: challenge.description.substring(0, 2048),
+      points: challenge.points,
       imageUrl: challenge.imageUrl.substring(0, 2048),
       points: challenge.points,
       latitude: challenge.lat,

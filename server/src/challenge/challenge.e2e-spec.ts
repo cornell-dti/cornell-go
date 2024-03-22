@@ -127,7 +127,9 @@ describe('ChallengeModule E2E', () => {
       const chaldto: ChallengeDto = {
         id: '12345',
         name: 'test',
+        location: 'ENG_QUAD',
         description: 'chal dto',
+        points: 50,
         imageUrl: 'url',
         points: 100,
         lat: 70,
@@ -168,7 +170,9 @@ describe('ChallengeModule E2E', () => {
       const secondChalDTO: ChallengeDto = {
         id: '123',
         name: 'test',
+        location: 'ANY',
         description: 'chal dto',
+        points: 50,
         imageUrl: 'update test',
         points: 100,
         lat: 70,
@@ -196,7 +200,9 @@ describe('ChallengeModule E2E', () => {
       const chaldto: ChallengeDto = {
         id: chalID,
         name: 'test',
+        location: 'ENG_QUAD',
         description: 'chal dto',
+        points: 50,
         imageUrl: 'update test',
         points: 100,
         lat: 70,

@@ -109,10 +109,10 @@ class _JourneysPageState extends State<JourneysPage> {
                     ),
                   ),
                 ),
-                Expanded(child: Consumer5<EventModel, ChallengeModel,
-                        GroupModel, TrackerModel, UserModel>(
-                    builder: (context, myEventModel, challengeModel, groupModel,
-                        trackerModel, userModel, child) {
+                Expanded(child: Consumer4<EventModel, GroupModel, TrackerModel,
+                        ChallengeModel>(
+                    builder: (context, myEventModel, groupModel, trackerModel,
+                        challengeModel, child) {
                   List<Widget> eventCells = [];
                   if (myEventModel.searchResults == null) {
                     myEventModel.searchEvents(
@@ -139,6 +139,7 @@ class _JourneysPageState extends State<JourneysPage> {
                     var complete =
                         (numberCompleted == event.challengeIds.length);
                     var locationCount = event.challengeIds.length;
+
                     var totalPoints = 0;
                     var totalDistanceMeters = 0.0;
                     GeoPoint? lastChalLoc = null;
@@ -157,6 +158,13 @@ class _JourneysPageState extends State<JourneysPage> {
                     }
                     var totalDistanceMiles = totalDistanceMeters / 1609.34;
 
+                    var challenge = challengeModel.getChallengeById(
+                        tracker?.curChallengeId ?? event.challengeIds[0]);
+
+                    if (challenge == null) continue;
+                    var location = challenge.location;
+
+                    var difficulty = event.difficulty;
                     DateTime now = DateTime.now();
                     DateTime endtime = HttpDate.parse(event.endTime.toString());
 
@@ -176,8 +184,8 @@ class _JourneysPageState extends State<JourneysPage> {
                               )
                             : JourneyCell(
                                 key: UniqueKey(),
-                                event.id,
                                 event.name,
+                                event.id,
                                 Image.network(
                                     "https://picsum.photos/250?image=9"), // dummy data for now; should pass in thumbnail parameter
                                 event.description,
@@ -185,7 +193,7 @@ class _JourneysPageState extends State<JourneysPage> {
                                 numberCompleted,
                                 complete,
                                 event.difficulty.toString().split(".").last,
-                                event.startLocation.toString().split(".").last,
+                                location.toString().split(".").last,
                                 event.category.toString().split(".").last,
                                 totalPoints,
                                 totalDistanceMiles),

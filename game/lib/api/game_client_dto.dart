@@ -151,17 +151,6 @@ enum TimeLimitationType {
 
 enum EventDifficulty { EASY, NORMAL, HARD }
 
-enum EventLocation {
-  ENG_QUAD,
-  ARTS_QUAD,
-  AG_QUAD,
-  NORTH_CAMPUS,
-  WEST_CAMPUS,
-  COLLEGETOWN,
-  ITHACA_COMMONS,
-  OTHER
-}
-
 enum EventCategory { FOOD, NATURE, HISTORICAL, CAFE, DININGHALL, DORM }
 
 class EventDto {
@@ -178,8 +167,6 @@ class EventDto {
         .firstWhere((e) => e.toString() == fields['difficulty']);
     category = EventCategory.values
         .firstWhere((e) => e.toString() == fields['category']);
-    startLocation = EventLocation.values
-        .firstWhere((e) => e.toString() == fields['location']);
   }
 
   String id = "";
@@ -191,7 +178,6 @@ class EventDto {
   List<String> challengeIds = [];
   EventDifficulty difficulty = EventDifficulty.NORMAL;
   EventCategory category = EventCategory.HISTORICAL;
-  EventLocation startLocation = EventLocation.OTHER;
 }
 
 class EventTrackerDto {
@@ -236,11 +222,25 @@ class UpdateEventTrackerDataDto {
   EventTrackerDto? tracker = null;
 }
 
+enum EventLocation {
+  ENG_QUAD,
+  ARTS_QUAD,
+  AG_QUAD,
+  NORTH_CAMPUS,
+  WEST_CAMPUS,
+  COLLEGETOWN,
+  ITHACA_COMMONS,
+  OTHER
+}
+
 class ChallengeDto {
   ChallengeDto.fromJson(Map<String, dynamic> fields) {
     id = fields["id"];
     name = fields["name"];
+    location = EventLocation.values
+        .firstWhere((e) => e.toString() == fields["location"]);
     description = fields["description"];
+    points = fields["points"];
     imageUrl = fields["imageUrl"];
     points = fields["points"].toInt();
     lat = fields["lat"].toDouble();
@@ -252,9 +252,10 @@ class ChallengeDto {
 
   String id = "";
   String name = "";
+  EventLocation location = EventLocation.OTHER;
   String description = "";
-  String imageUrl = "";
   int points = 0;
+  String imageUrl = "";
   double lat = 0.0;
   double long = 0.0;
   double awardingRadius = 0.0;
