@@ -35,12 +35,8 @@ Widget leaderBoardCell(
   );
 
   return Container(
-      // decoration: BoxDecoration(
-      //   color: (isUser) ? Color.fromARGB(255, 251, 227, 195) : Colors.white,
-      //   borderRadius: BorderRadius.circular(10.0),
-      // ),
-
       decoration: ShapeDecoration(
+        // Leaderboard cell is highlighted if it is the user
         color: (isUser) ? Color(0xFFFFF8F1) : Colors.white,
         shape: RoundedRectangleBorder(
           side: (isUser)
@@ -49,14 +45,6 @@ Widget leaderBoardCell(
           borderRadius: BorderRadius.circular(10),
         ),
       ),
-
-      // decoration: ShapeDecoration(
-      //   color: Color(0xFFFFF8F1),
-      //   shape: RoundedRectangleBorder(
-      //     side: BorderSide(width: 2, color: Color(0xFFFBDDAF)),
-      //     borderRadius: BorderRadius.circular(10),
-      //   ),
-      // ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 13),
         child: ClipRRect(

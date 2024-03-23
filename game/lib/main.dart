@@ -77,7 +77,6 @@ class MyApp extends StatelessWidget {
           theme: ThemeData(
               fontFamily: 'Poppins', primarySwatch: ColorPalette.BigRed),
           home: SplashPageWidget(),
-          // home: SettingsPage(),
         )));
   }
 }
