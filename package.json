@@ -10,8 +10,8 @@
     "tests:unit": "node ./scripts/tests.js unit",
     "tests:e2e": "node ./scripts/tests.js e2e",
     "setup": "node ./scripts/setup.js",
-    "gendtos": "node ./scripts/gendtos.js",
-    "compilescripts": "tsc scripts/gendtos.ts --target es2021 --moduleResolution nodenext --module nodenext"
+    "updateapi": "node ./scripts/updateapi.js",
+    "compilescripts": "tsc scripts/updateapi.ts --target es2021 --moduleResolution nodenext --module nodenext"
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11"

@@ -107,8 +107,5 @@ for (const file of project.getSourceFiles()) {
   }
 }
 
-console.log(baseDtos);
-console.log(enumDtos);
-
 let dartCode = "";
 let tsCode = "";
