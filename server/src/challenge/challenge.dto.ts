@@ -8,8 +8,8 @@ export interface ChallengeDto {
   name?: string;
   description?: string;
   imageUrl?: string;
-  lat?: number;
-  long?: number;
+  latF?: number;
+  longF?: number;
   awardingRadius?: number;
   closeRadius?: number;
   containingEventId?: string;

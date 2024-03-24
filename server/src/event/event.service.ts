@@ -218,8 +218,8 @@ export class EventService {
       where ev."id" in (select e."A" from "_eventOrgs" e inner join "_player" p on e."B" = p."A" and ${
         user.id
       } = p."B")
-      order by ((ev."latitude" - ${data.latitude})^2 + (ev."longitude" - ${
-      data.longitude
+      order by ((ev."latitude" - ${data.latitudeF})^2 + (ev."longitude" - ${
+      data.longitudeF
     })^2)
       fetch first ${data.count ?? 4} rows only
     `;

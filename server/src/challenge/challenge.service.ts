@@ -219,8 +219,8 @@ export class ChallengeService {
       name: ch.name,
       description: ch.description,
       imageUrl: ch.imageUrl,
-      lat: ch.latitude,
-      long: ch.longitude,
+      latF: ch.latitude,
+      longF: ch.longitude,
       awardingRadius: ch.awardingRadius,
       closeRadius: ch.closeRadius,
       containingEventId: ch.linkedEventId!,
@@ -248,8 +248,8 @@ export class ChallengeService {
         name: challenge.name?.substring(0, 2048),
         description: challenge.description?.substring(0, 2048),
         imageUrl: challenge.imageUrl?.substring(0, 2048),
-        latitude: challenge.lat,
-        longitude: challenge.long,
+        latitude: challenge.latF,
+        longitude: challenge.longF,
         awardingRadius: challenge.awardingRadius,
         closeRadius: challenge.closeRadius,
       };
@@ -279,8 +279,8 @@ export class ChallengeService {
         imageUrl:
           challenge.imageUrl?.substring(0, 2048) ??
           defaultChallengeData.imageUrl,
-        latitude: challenge.lat ?? defaultChallengeData.latitude,
-        longitude: challenge.long ?? defaultChallengeData.longitude,
+        latitude: challenge.latF ?? defaultChallengeData.latitude,
+        longitude: challenge.longF ?? defaultChallengeData.longitude,
         awardingRadius:
           challenge.awardingRadius ?? defaultChallengeData.awardingRadius,
         closeRadius: challenge.closeRadius ?? defaultChallengeData.closeRadius,

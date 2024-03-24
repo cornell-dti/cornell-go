@@ -17,8 +17,8 @@ export interface RequestEventLeaderDataDto {
 }
 
 export interface RequestRecommendedEventsDto {
-  latitude: number;
-  longitude: number;
+  latitudeF: number;
+  longitudeF: number;
   count?: number;
 }
 
@@ -34,8 +34,8 @@ export interface EventDto {
   initialOrganizationId?: string;
   difficulty?: 'Easy' | 'Normal' | 'Hard';
   indexable?: boolean;
-  longitude?: number;
-  latitude?: number;
+  longitudeF?: number;
+  latitudeF?: number;
 }
 
 /** DTO for event tracker in updateEventTrackerData */
