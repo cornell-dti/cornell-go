@@ -262,8 +262,8 @@ export class EventService {
           : ev.difficulty === DifficultyMode.NORMAL
           ? 'Normal'
           : 'Hard',
-      latitude: ev.latitude,
-      longitude: ev.longitude,
+      latitudeF: ev.latitude,
+      longitudeF: ev.longitude,
     };
   }
 
@@ -380,8 +380,8 @@ export class EventService {
           : event.difficulty === 'Normal'
           ? DifficultyMode.NORMAL
           : DifficultyMode.HARD,
-      latitude: event.latitude,
-      longitude: event.longitude,
+      latitude: event.latitudeF,
+      longitude: event.longitudeF,
     };
 
     if (

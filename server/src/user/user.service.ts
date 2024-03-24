@@ -14,12 +14,7 @@ import { EventService } from '../event/event.service';
 import { GroupService } from '../group/group.service';
 import { OrganizationService } from '../organization/organization.service';
 import { PrismaService } from '../prisma/prisma.service';
-import {
-  UpdateUserDataDto,
-  UserAuthTypeDto,
-  UserDto,
-  eventFilterDto,
-} from './user.dto';
+import { UpdateUserDataDto, UserAuthTypeDto, UserDto } from './user.dto';
 import { CensorSensor } from 'censor-sensor';
 import { AppAbility, CaslAbilityFactory } from '../casl/casl-ability.factory';
 import { Action } from '../casl/action.enum';
