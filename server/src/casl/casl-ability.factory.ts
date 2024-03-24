@@ -56,6 +56,16 @@ export class CaslAbilityFactory {
     return newObj;
   }
 
+  createFull() {
+    const { can, cannot, build } = new AbilityBuilder<AppAbility>(
+      createPrismaAbility,
+    );
+
+    can('all', 'all');
+
+    return build();
+  }
+
   createForUser(user: User) {
     const { can, cannot, build } = new AbilityBuilder<AppAbility>(
       createPrismaAbility,
@@ -67,7 +77,7 @@ export class CaslAbilityFactory {
       return build();
     }
 
-    if (user.administrator || process.env.TESTING_UNIT == 'true') {
+    if (user.administrator) {
       // full access to everything
       can(Action.Manage, 'all');
       return build();

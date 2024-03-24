@@ -19,6 +19,7 @@ import { GroupService } from '../group/group.service';
 import { OrganizationService } from '../organization/organization.service';
 import { ClientModule } from '../client/client.module';
 import { ChallengeDto } from './challenge.dto';
+import { AppAbility, CaslAbilityFactory } from '../casl/casl-ability.factory';
 
 describe('ChallengeModule E2E', () => {
   let app: INestApplication;
@@ -31,6 +32,8 @@ describe('ChallengeModule E2E', () => {
   let tracker: EventTracker;
   let event: EventBase;
   let organizationService: OrganizationService;
+  let abilityFactory: CaslAbilityFactory;
+  let fullAbility: AppAbility;
 
   beforeAll(async () => {
     moduleRef = await Test.createTestingModule({
@@ -61,6 +64,8 @@ describe('ChallengeModule E2E', () => {
     userService = module.get<UserService>(UserService);
     eventService = module.get<EventService>(EventService);
     organizationService = module.get<OrganizationService>(OrganizationService);
+    abilityFactory = module.get<CaslAbilityFactory>(CaslAbilityFactory);
+    fullAbility = abilityFactory.createFull();
 
     user = await userService.register(
       'test@gmail.com',
@@ -134,12 +139,16 @@ describe('ChallengeModule E2E', () => {
         latF: 70,
         longF: 70,
         awardingRadiusF: 1,
-        closeRadius: 2,
+        closeRadiusF: 2,
         containingEventId: event.id,
       };
-      const chal = await challengeService.upsertChallengeFromDto(chaldto);
+
+      const chal = await challengeService.upsertChallengeFromDto(
+        fullAbility,
+        chaldto,
+      );
       const findChal = await prisma.challenge.findFirstOrThrow({
-        where: { id: chal.id },
+        where: { id: chal!.id },
       });
       expect(findChal.description).toEqual('chal dto');
     });
@@ -157,9 +166,8 @@ describe('ChallengeModule E2E', () => {
         where: { linkedEventId: event.id },
       });
 
-      const chalsByUser = await challengeService.getChallengesByIdsForUser(
-        user,
-        false,
+      const chalsByUser = await challengeService.getChallengesByIdsForAbility(
+        fullAbility,
         [chal.id],
       );
       expect(chalsByUser[0]).toEqual(chal);
@@ -176,11 +184,11 @@ describe('ChallengeModule E2E', () => {
         latF: 70,
         longF: 70,
         awardingRadiusF: 1,
-        closeRadius: 2,
+        closeRadiusF: 2,
         containingEventId: event.id,
       };
 
-      await challengeService.upsertChallengeFromDto(secondChalDTO);
+      await challengeService.upsertChallengeFromDto(fullAbility, secondChalDTO);
       const nextChal = await challengeService.nextChallenge(
         await prisma.challenge.findFirstOrThrow({
           where: { linkedEventId: event.id, eventIndex: 0 },
@@ -205,10 +213,10 @@ describe('ChallengeModule E2E', () => {
         latF: 70,
         longF: 70,
         awardingRadiusF: 1,
-        closeRadius: 2,
+        closeRadiusF: 2,
         containingEventId: event.id,
       };
-      await challengeService.upsertChallengeFromDto(chaldto);
+      await challengeService.upsertChallengeFromDto(fullAbility, chaldto);
       const chal = await prisma.challenge.findFirstOrThrow({
         where: { id: chalID },
       });
@@ -239,7 +247,7 @@ describe('ChallengeModule E2E', () => {
         data: { managerOf: { connect: { id: orgID } } },
       });
 
-      await challengeService.removeChallenge(chal.id, user);
+      await challengeService.removeChallenge(fullAbility, chal.id);
       const chalres = await prisma.challenge.findFirst({
         where: { id: chal.id },
       });
