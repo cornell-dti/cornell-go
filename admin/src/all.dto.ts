@@ -31,10 +31,7 @@ type AchievementAchievementTypeDto =
   | "TOTAL_JOURNEYS"
   | "TOTAL_CHALLENGES_OR_JOURNEYS";
 
-type LoginAudDto =
-  | "android"
-  | "ios"
-  | "web";
+type LoginAudDto = "android" | "ios" | "web";
 
 type LoginEnrollmentTypeDto =
   | "UNDERGRADUATE"
@@ -42,18 +39,11 @@ type LoginEnrollmentTypeDto =
   | "FACULTY"
   | "ALUMNI";
 
-type EventTimeLimitationDto =
-  | "LIMITED_TIME"
-  | "PERPETUAL";
+type EventTimeLimitationDto = "LIMITED_TIME" | "PERPETUAL";
 
-type EventDifficultyDto =
-  | "Easy"
-  | "Normal"
-  | "Hard";
+type EventDifficultyDto = "Easy" | "Normal" | "Hard";
 
-type SetAuthToOAuthProviderDto =
-  | "apple"
-  | "google";
+type SetAuthToOAuthProviderDto = "apple" | "google";
 
 type UserEnrollmentTypeDto =
   | "UNDERGRADUATE"
@@ -61,10 +51,7 @@ type UserEnrollmentTypeDto =
   | "FACULTY"
   | "ALUMNI";
 
-type UserAuthTypeDto =
-  | "apple"
-  | "google"
-  | "device";
+type UserAuthTypeDto = "apple" | "google" | "device";
 
 export interface AchievementDto {
   id: string;
@@ -75,7 +62,7 @@ export interface AchievementDto {
   imageUrl: string;
   locationType: AchievementLocationTypeDto;
   achievementType: AchievementAchievementTypeDto;
-  organizations: List<string>;
+  organizations: string[];
 }
 
 export interface AchievementTrackerDto {
@@ -118,7 +105,7 @@ export interface ChallengeDto {
 }
 
 export interface RequestChallengeDataDto {
-  challenges: List<string>;
+  challenges: string[];
 }
 
 export interface UpdateChallengeDataDto {
@@ -127,7 +114,7 @@ export interface UpdateChallengeDataDto {
 }
 
 export interface RequestEventTrackerDataDto {
-  trackedEvents: List<string>;
+  trackedEvents: string[];
 }
 
 export interface SetCurrentChallengeDto {
@@ -143,7 +130,7 @@ export interface LeaderDto {
 export interface UpdateLeaderDataDto {
   eventId: string;
   offset: number;
-  users: List<LeaderDto>;
+  users: LeaderDto[];
 }
 
 export interface UpdateErrorDto {
@@ -157,7 +144,7 @@ export interface RequestAllEventDataDto {
 }
 
 export interface RequestEventDataDto {
-  events?: List<string>;
+  events?: string[];
 }
 
 export interface RequestEventLeaderDataDto {
@@ -179,8 +166,8 @@ export interface EventDto {
   description?: string;
   timeLimitation?: EventTimeLimitationDto;
   endTime?: string;
-  challenges?: List<string>;
-  userFavorites?: List<string>;
+  challenges?: string[];
+  userFavorites?: string[];
   initialOrganizationId?: string;
   difficulty?: EventDifficultyDto;
   indexable?: boolean;
@@ -192,8 +179,8 @@ export interface EventTrackerDto {
   eventId: string;
   isRanked?: boolean;
   curChallengeId?: string;
-  prevChallenges?: List<string>;
-  prevChallengeDates?: List<string>;
+  prevChallenges?: string[];
+  prevChallengeDates?: string[];
 }
 
 export interface UpdateEventTrackerDataDto {
@@ -209,11 +196,9 @@ export interface JoinGroupDto {
   groupId: string;
 }
 
-export interface LeaveGroupDto {
-}
+export interface LeaveGroupDto {}
 
-export interface RequestGroupDataDto {
-}
+export interface RequestGroupDataDto {}
 
 export interface SetCurrentEventDto {
   eventId: string;
@@ -231,7 +216,7 @@ export interface GroupDto {
   friendlyId?: string;
   hostId?: string;
   curEventId?: string;
-  members?: List<GroupMemberDto>;
+  members?: GroupMemberDto[];
 }
 
 export interface UpdateGroupDataDto {
@@ -252,9 +237,9 @@ export interface OrganizationDto {
   id: string;
   name?: string;
   accessCode?: string;
-  members?: List<string>;
-  events?: List<string>;
-  managers?: List<string>;
+  members?: string[];
+  events?: string[];
+  managers?: string[];
 }
 
 export interface RequestOrganizationDataDto {
@@ -266,8 +251,7 @@ export interface UpdateOrganizationDataDto {
   deleted: boolean;
 }
 
-export interface CloseAccountDto {
-}
+export interface CloseAccountDto {}
 
 export interface SetUsernameDto {
   newUsername: string;
@@ -304,8 +288,7 @@ export interface RequestUserDataDto {
   userId?: string;
 }
 
-export interface RequestAllUserDataDto {
-}
+export interface RequestAllUserDataDto {}
 
 export interface RequestFavoriteEventDataDto {
   isFavorite: boolean;
@@ -322,12 +305,11 @@ export interface UserDto {
   isBanned?: boolean;
   groupId?: string;
   authType?: UserAuthTypeDto;
-  trackedEvents?: List<string>;
-  favorites?: List<string>;
+  trackedEvents?: string[];
+  favorites?: string[];
 }
 
 export interface UpdateUserDataDto {
   user: UserDto;
   deleted: boolean;
 }
-

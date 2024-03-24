@@ -16,7 +16,7 @@ function genTsDtoFile(dtoDefs) {
             const isArray = fieldType == "ENUM_DTO[]" ||
                 fieldType == "DEPENDENT_DTO[]" ||
                 fieldType == "PRIMITIVE[]";
-            const fullType = isArray ? `List<${typeName}>` : typeName;
+            const fullType = isArray ? `${typeName}[]` : typeName;
             tsCode += `  ${propName}`;
             if (isOptional) {
                 tsCode += "?";
