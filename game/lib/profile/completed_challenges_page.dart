@@ -39,25 +39,28 @@ class CompletedChallengesPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Align(
-              child: completedChallengeFull(
-                "Cornell Cafes",
-                pictureList,
-                "Journeys",
-                "January 19, 2023",
-                "Arts Quad",
-                "Easy",
-                120,
+              child: CompletedChallengeFull(
+                name: 'Cornell Cafes',
+                pictures: pictureList,
+                type: 'Journeys',
+                date: 'January 19, 2023',
+                location: 'Arts Quad',
+                difficulty: 'Easy',
+                points: 120,
               ),
             ),
             Align(
-              child: completedChallengeFull(
-                "Cornell Slope",
-                pictureList,
-                "Journeys",
-                "March 20, 2024",
-                "Libe Slope",
-                "Easy",
-                120,
+              child: CompletedChallengeFull(
+                name: 'Libe Slope',
+                pictures: [
+                  "assets/images/adwhite.jpeg",
+                  "assets/images/38582.jpg",
+                ],
+                type: 'Journeys',
+                date: 'February 20, 2023',
+                location: 'Arts Quad',
+                difficulty: 'Hard',
+                points: 120,
               ),
             ),
           ],
