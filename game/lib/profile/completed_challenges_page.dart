@@ -3,8 +3,10 @@ import 'package:game/profile/profile_page.dart';
 import 'package:game/profile/completed_challenge_cell.dart';
 
 class CompletedChallengesPage extends StatelessWidget {
-  final locationImage = "assets/images/adwhite.jpeg";
-  final locationImage2 = "assets/images/38582.jpg";
+  // final locationImage = "assets/images/adwhite.jpeg";
+  // final locationImage2 = "assets/images/38582.jpg";
+
+  final pictureList = ["assets/images/adwhite.jpeg", "assets/images/38582.jpg"];
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +41,7 @@ class CompletedChallengesPage extends StatelessWidget {
             Align(
               child: completedChallengeFull(
                 "Cornell Cafes",
-                locationImage,
+                pictureList,
                 "Journeys",
                 "January 19, 2023",
                 "Arts Quad",
@@ -50,7 +52,7 @@ class CompletedChallengesPage extends StatelessWidget {
             Align(
               child: completedChallengeFull(
                 "Cornell Slope",
-                locationImage2,
+                pictureList,
                 "Journeys",
                 "March 20, 2024",
                 "Libe Slope",

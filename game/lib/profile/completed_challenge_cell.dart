@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 
 /**
  * Widget that represents each individual challenge in a full detailed way 
@@ -13,8 +14,11 @@ import 'package:flutter/material.dart';
 
 final locationVector = "assets/images/locationVector.png";
 
-Widget completedChallengeFull(String name, String picture, String type,
+Widget completedChallengeFull(String name, List<String> pictures, String type,
     String date, String location, String difficulty, int points) {
+  final GlobalKey<CarouselSliderState> _carouselKey = GlobalKey();
+  int _currentIndex = 0;
+
   return Padding(
     padding: const EdgeInsets.all(8.0),
     child: Container(
@@ -26,14 +30,37 @@ Widget completedChallengeFull(String name, String picture, String type,
       ),
       child: Stack(
         children: [
-          Positioned.fill(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.asset(
-                picture,
-                fit: BoxFit.cover,
-              ),
+          CarouselSlider(
+            key: _carouselKey,
+            options: CarouselOptions(
+              height: 526.0,
+              aspectRatio: 16 / 9,
+              viewportFraction: 1.0,
+              initialPage: 0,
+              enableInfiniteScroll: true,
+              reverse: false,
+              autoPlay: false,
+              enlargeCenterPage: true,
+              scrollDirection: Axis.horizontal,
+              // onPageChanged: (index, _) {
+              //   setState(() {
+              //     _currentIndex = index;
+              //   });
+              // },
             ),
+            items: pictures.map((String picture) {
+              return Builder(
+                builder: (BuildContext context) {
+                  return ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.asset(
+                      picture,
+                      fit: BoxFit.cover,
+                    ),
+                  );
+                },
+              );
+            }).toList(),
           ),
           Positioned(
             top: 16,
@@ -41,6 +68,20 @@ Widget completedChallengeFull(String name, String picture, String type,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Container(
+                  padding: EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    '${_currentIndex + 1}/${pictures.length}',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
                 Container(
                   width: 130,
                   height: 31.58,
