@@ -48,8 +48,8 @@ export function genDartDtoFile(dtoDefs: DtoDefs) {
         dartCode += `
           fields["${propName}"]
             .map<${dartType}>(
-              (dynamic val) => ${dartType}.fromJson(val))
-          .toList();
+              (dynamic val) => ${dartType}.fromJson(val)
+            ).toList()
         `;
       } else if (fieldType == "ENUM_DTO") {
         dartCode += `${dartType}.values.byName(fields['${propName}'])`;
@@ -57,8 +57,8 @@ export function genDartDtoFile(dtoDefs: DtoDefs) {
         dartCode += `
             fields["${propName}"]
               .map<${dartType}>(
-                (dynamic val) => ${dartType}.values.byName(val))
-            .toList()
+                (dynamic val) => ${dartType}.values.byName(val)
+              ).toList()
         `;
       }
       if (isOptional) {
@@ -81,7 +81,7 @@ export function genDartDtoFile(dtoDefs: DtoDefs) {
 
       const fullType = isArray ? `List<${dartType}>` : dartType;
 
-      dartCode += `  ${fullType}`;
+      dartCode += `  late ${fullType}`;
       if (isOptional) {
         dartCode += "?";
       }

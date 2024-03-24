@@ -1,7 +1,7 @@
 import { useContext, useState } from "react";
 import { compareTwoStrings } from "string-similarity";
 import styled, { css } from "styled-components";
-import { ChallengeDto } from "../dto/challenge.dto";
+import { ChallengeDto } from "../all.dto";
 import { moveDown, moveUp } from "../ordering";
 import { AlertModal } from "./AlertModal";
 import { DeleteModal } from "./DeleteModal";
@@ -47,11 +47,11 @@ function ChallengeCard(props: {
     <ListCardBox>
       <ListCardTitle>{props.challenge.name}</ListCardTitle>
       <ListCardDescription>{props.challenge.description}</ListCardDescription>
-      <ChallengeImage url={props.challenge.imageUrl} />
+      <ChallengeImage url={props.challenge.imageUrl ?? ""} />
       <ListCardBody>
         Id: <b>{props.challenge.id}</b> <br />
-        Latitude: <b>{props.challenge.lat}</b>, Longitude:{" "}
-        <b>{props.challenge.long}</b> <br />
+        Latitude: <b>{props.challenge.latF}</b>, Longitude:{" "}
+        <b>{props.challenge.longF}</b> <br />
         Awarding Distance: <b>{props.challenge.awardingRadius} meters</b> <br />
         Close Distance: <b>{props.challenge.closeRadius} meters</b>
       </ListCardBody>
@@ -84,23 +84,31 @@ function toForm(challenge: ChallengeDto) {
   return [
     {
       name: "Location",
-      latitude: challenge.lat,
-      longitude: challenge.long,
+      latitude: challenge.latF ?? 0,
+      longitude: challenge.longF ?? 0,
     },
-    { name: "Name", characterLimit: 256, value: challenge.name },
-    { name: "Description", characterLimit: 2048, value: challenge.description },
-    { name: "Image URL", characterLimit: 2048, value: challenge.imageUrl },
+    { name: "Name", characterLimit: 256, value: challenge.name ?? "" },
+    {
+      name: "Description",
+      characterLimit: 2048,
+      value: challenge.description ?? "",
+    },
+    {
+      name: "Image URL",
+      characterLimit: 2048,
+      value: challenge.imageUrl ?? "",
+    },
     {
       name: "Awarding Distance (meters)",
       min: 1,
       max: 1000,
-      value: challenge.awardingRadius,
+      value: challenge.awardingRadius ?? 0,
     },
     {
       name: "Close Distance (meters)",
       min: 1,
       max: 1000,
-      value: challenge.closeRadius,
+      value: challenge.closeRadius ?? 0,
     },
   ];
 }
@@ -115,8 +123,8 @@ function fromForm(
     name: (form[1] as FreeEntryForm).value,
     description: (form[2] as FreeEntryForm).value,
     imageUrl: (form[3] as FreeEntryForm).value,
-    lat: (form[0] as MapEntryForm).latitude,
-    long: (form[0] as MapEntryForm).longitude,
+    latF: (form[0] as MapEntryForm).latitude,
+    longF: (form[0] as MapEntryForm).longitude,
     awardingRadius: (form[4] as NumberEntryForm).value,
     closeRadius: (form[5] as NumberEntryForm).value,
     containingEventId: eventId,
@@ -202,17 +210,17 @@ export function Challenges() {
         <CenterText>Error getting challenges</CenterText>
       )}
       {selectedEvent?.challenges
-        .filter((chalId) => serverData.challenges.get(chalId))
-        .map((chalId) => serverData.challenges.get(chalId)!)
-        .sort((a, b) =>
+        .filter((chalId: string) => serverData.challenges.get(chalId))
+        .map((chalId: string) => serverData.challenges.get(chalId)!)
+        .sort((a: ChallengeDto, b: ChallengeDto) =>
           query === ""
             ? 0
-            : compareTwoStrings(b.name, query) -
-              compareTwoStrings(a.name, query) +
-              compareTwoStrings(b.description, query) -
-              compareTwoStrings(a.description, query)
+            : compareTwoStrings(b.name ?? "", query) -
+              compareTwoStrings(a.name ?? "", query) +
+              compareTwoStrings(b.description ?? "", query) -
+              compareTwoStrings(a.description ?? "", query)
         )
-        .map((chal) => (
+        .map((chal: ChallengeDto) => (
           <ChallengeCard
             key={chal.id}
             challenge={chal}
@@ -220,7 +228,9 @@ export function Challenges() {
               if (query !== "") return;
               selectedEvent.challenges = moveUp(
                 selectedEvent.challenges,
-                selectedEvent.challenges.findIndex((id) => id === chal.id)
+                selectedEvent.challenges.findIndex(
+                  (id: string) => id === chal.id
+                )
               );
               serverData.updateEvent(selectedEvent);
             }}
@@ -228,7 +238,9 @@ export function Challenges() {
               if (query !== "") return;
               selectedEvent.challenges = moveDown(
                 selectedEvent.challenges,
-                selectedEvent.challenges.findIndex((id) => id === chal.id)
+                selectedEvent.challenges.findIndex(
+                  (id: string) => id === chal.id
+                )
               );
               serverData.updateEvent(selectedEvent);
             }}

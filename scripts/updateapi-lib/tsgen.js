@@ -8,7 +8,7 @@ function genTsDtoFile(dtoDefs) {
         for (const field of fields) {
             tsCode += `\n  | "${field}"`;
         }
-        tsCode += ";\n";
+        tsCode += ";\n\n";
     }
     for (const [name, propMap] of dtoDefs.baseDtos.entries()) {
         tsCode += `export interface ${name} {\n`;

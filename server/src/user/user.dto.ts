@@ -71,11 +71,3 @@ export interface UpdateUserDataDto {
   user: UserDto;
   deleted: boolean;
 }
-
-export type eventFilterDto = 'new' | 'saved' | 'finished';
-
-export interface RequestFilteredEventDto {
-  filter: eventFilterDto;
-  cursorId?: string;
-  limit: number;
-}

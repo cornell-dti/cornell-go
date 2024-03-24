@@ -23,7 +23,6 @@ import {
   SetGraduationYearDto,
   SetMajorDto,
   SetUsernameDto,
-  RequestFilteredEventDto,
   UpdateUserDataDto,
   UserDto,
   BanUserDto,

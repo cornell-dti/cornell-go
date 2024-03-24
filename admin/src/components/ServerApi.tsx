@@ -2,19 +2,17 @@ import { Socket } from "socket.io-client";
 import {
   RequestChallengeDataDto,
   UpdateChallengeDataDto,
-} from "../dto/challenge.dto";
-import { UpdateErrorDto } from "../dto/client.dto";
-import { RequestEventDataDto, UpdateEventDataDto } from "../dto/event.dto";
-import { RequestGroupDataDto, UpdateGroupDataDto } from "../dto/group.dto";
-import {
   RequestAllUserDataDto,
   RequestUserDataDto,
-  UpdateUserDataDto,
-} from "../dto/user.dto";
-import {
+  RequestEventDataDto,
+  UpdateEventDataDto,
+  RequestGroupDataDto,
+  UpdateGroupDataDto,
   RequestOrganizationDataDto,
   UpdateOrganizationDataDto,
-} from "../dto/organization.dto";
+  UpdateUserDataDto,
+  UpdateErrorDto,
+} from "../all.dto";
 
 //** Web Sockets callback functions are in ./ServerData.tsx*/
 export class ServerApi {
