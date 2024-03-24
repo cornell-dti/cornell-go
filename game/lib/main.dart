@@ -121,7 +121,7 @@ class MyApp extends StatelessWidget {
           supportedLocales: const [Locale('en', '')],
           theme: ThemeData(
               fontFamily: 'Poppins', primarySwatch: ColorPalette.BigRed),
-          home: ProfilePage(),
+          home: SplashPageWidget(),
           // home: GameplayMap(),
         )));
   }
