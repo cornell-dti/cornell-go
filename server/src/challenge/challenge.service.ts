@@ -7,6 +7,7 @@ import {
   EventTracker,
   SessionLogEvent,
   User,
+  LocationType,
 } from '@prisma/client';
 import { ClientService } from '../client/client.service';
 import { EventService } from '../event/event.service';
@@ -217,12 +218,14 @@ export class ChallengeService {
     return {
       id: ch.id,
       name: ch.name,
+      location: ch.location as string,
       description: ch.description,
+      points: ch.points,
       imageUrl: ch.imageUrl,
       latF: ch.latitude,
       longF: ch.longitude,
       awardingRadiusF: ch.awardingRadius,
-      closeRadius: ch.closeRadius,
+      closeRadiusF: ch.closeRadius,
       containingEventId: ch.linkedEventId!,
     };
   }
@@ -246,12 +249,14 @@ export class ChallengeService {
     ) {
       const assignData = {
         name: challenge.name?.substring(0, 2048),
+        location: challenge.location as LocationType,
+        points: challenge.points,
         description: challenge.description?.substring(0, 2048),
         imageUrl: challenge.imageUrl?.substring(0, 2048),
         latitude: challenge.latF,
         longitude: challenge.longF,
         awardingRadius: challenge.awardingRadiusF,
-        closeRadius: challenge.closeRadius,
+        closeRadius: challenge.closeRadiusF,
       };
 
       const data = await this.abilityFactory.filterInaccessible(
@@ -279,11 +284,13 @@ export class ChallengeService {
         imageUrl:
           challenge.imageUrl?.substring(0, 2048) ??
           defaultChallengeData.imageUrl,
+        location: challenge.location as LocationType,
+        points: challenge.points ?? 0,
         latitude: challenge.latF ?? defaultChallengeData.latitude,
         longitude: challenge.longF ?? defaultChallengeData.longitude,
         awardingRadius:
           challenge.awardingRadiusF ?? defaultChallengeData.awardingRadius,
-        closeRadius: challenge.closeRadius ?? defaultChallengeData.closeRadius,
+        closeRadius: challenge.closeRadiusF ?? defaultChallengeData.closeRadius,
         eventIndex: (maxIndexChallenge._max.eventIndex ?? -1) + 1,
         linkedEventId: challenge.containingEventId,
       };

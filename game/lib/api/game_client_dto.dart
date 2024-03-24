@@ -196,7 +196,9 @@ class ChallengeDto {
   ChallengeDto.fromJson(Map<String, dynamic> fields) {
     id = fields["id"];
     name = fields['name'] ? (fields["name"]) : null;
+    location = fields['location'] ? (fields["location"]) : null;
     description = fields['description'] ? (fields["description"]) : null;
+    points = fields['points'] ? (fields["points"]) : null;
     imageUrl = fields['imageUrl'] ? (fields["imageUrl"]) : null;
     latF = fields['latF'] ? (fields["latF"]) : null;
     longF = fields['longF'] ? (fields["longF"]) : null;
@@ -210,7 +212,9 @@ class ChallengeDto {
   void partialUpdate(ChallengeDto other) {
     id = other.id;
     name = other.name == null ? name : other.name;
+    location = other.location == null ? location : other.location;
     description = other.description == null ? description : other.description;
+    points = other.points == null ? points : other.points;
     imageUrl = other.imageUrl == null ? imageUrl : other.imageUrl;
     latF = other.latF == null ? latF : other.latF;
     longF = other.longF == null ? longF : other.longF;
@@ -225,7 +229,9 @@ class ChallengeDto {
 
   late String id;
   late String? name;
+  late String? location;
   late String? description;
+  late int? points;
   late String? imageUrl;
   late double? latF;
   late double? longF;

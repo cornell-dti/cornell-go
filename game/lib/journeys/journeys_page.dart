@@ -108,10 +108,10 @@ class _JourneysPageState extends State<JourneysPage> {
                     ),
                   ),
                 ),
-                Expanded(child:
-                    Consumer4<EventModel, GroupModel, TrackerModel, UserModel>(
-                        builder: (context, myEventModel, groupModel,
-                            trackerModel, userModel, child) {
+                Expanded(child: Consumer4<EventModel, GroupModel, TrackerModel,
+                        ChallengeModel>(
+                    builder: (context, myEventModel, groupModel, trackerModel,
+                        challengeModel, child) {
                   List<Widget> eventCells = [];
                   if (myEventModel.searchResults == null) {
                     myEventModel.searchEvents(
@@ -136,9 +136,25 @@ class _JourneysPageState extends State<JourneysPage> {
                     var tracker = trackerModel.trackerByEventId(event.id);
                     var numberCompleted = tracker?.prevChallenges?.length ?? 0;
                     var complete =
-                        (numberCompleted == event.challenges?.length);
-                    var locationCount = event.challenges?.length ?? 0;
-                    var difficulty = event.difficulty.toString();
+                        (numberCompleted == event.challengeIds.length);
+                    var locationCount = event.challengeIds.length;
+
+                    if (locationCount < 2) continue;
+                    var total_points = 0;
+
+                    var challenge =
+                        challengeModel.getChallengeById(event.challengeIds[0]);
+
+                    if (challenge == null) continue;
+                    var location = challenge.location;
+                    for (var challengeId in event.challengeIds) {
+                      var challenge =
+                          challengeModel.getChallengeById(challengeId);
+                      if (challenge != null) {
+                        total_points += challenge.points;
+                      }
+                    }
+                    var difficulty = event.difficulty;
                     DateTime now = DateTime.now();
                     DateTime endtime = HttpDate.parse(event.endTime ?? "");
 
@@ -158,7 +174,8 @@ class _JourneysPageState extends State<JourneysPage> {
                               )
                             : JourneyCell(
                                 key: UniqueKey(),
-                                event.name ?? "",
+                                event.name,
+                                location,
                                 Image.network(
                                     "https://picsum.photos/250?image=9"), // dummy data for now; should pass in thumbnail parameter
                                 event.description ?? "",
@@ -166,8 +183,7 @@ class _JourneysPageState extends State<JourneysPage> {
                                 numberCompleted,
                                 complete,
                                 difficulty,
-                                0,
-                                0),
+                                total_points),
                       ),
                     );
                   }

@@ -106,7 +106,9 @@ export interface CompletedChallengeDto {
 export interface ChallengeDto {
   id: string;
   name?: string;
+  location?: string;
   description?: string;
+  points?: number;
   imageUrl?: string;
   latF?: number;
   longF?: number;

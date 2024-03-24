@@ -50,10 +50,13 @@ function ChallengeCard(props: {
       <ChallengeImage url={props.challenge.imageUrl ?? ""} />
       <ListCardBody>
         Id: <b>{props.challenge.id}</b> <br />
+        Location: <b>{props.challenge.location}</b> <br />
+        Score: <b>{props.challenge.points}</b> <br />
         Latitude: <b>{props.challenge.latF}</b>, Longitude:{" "}
         <b>{props.challenge.longF}</b> <br />
-        Awarding Distance: <b>{props.challenge.awardingRadius} meters</b> <br />
-        Close Distance: <b>{props.challenge.closeRadius} meters</b>
+        Awarding Distance: <b>{props.challenge.awardingRadiusF} meters</b>{" "}
+        <br />
+        Close Distance: <b>{props.challenge.closeRadiusF} meters</b>
       </ListCardBody>
       <ListCardButtons>
         <HButton onClick={props.onUp}>UP</HButton>
@@ -72,8 +75,10 @@ function ChallengeCard(props: {
 function makeForm(): EntryForm[] {
   return [
     { name: "Location", latitude: 42.447546, longitude: -76.484593 },
+    { name: "Location Description", characterLimit: 2048, value: "" },
     { name: "Name", characterLimit: 256, value: "" },
     { name: "Description", characterLimit: 2048, value: "" },
+    { name: "Points", characterLimit: 2048, min: 1, max: 1000, value: 50 },
     { name: "Image URL", characterLimit: 2048, value: "" },
     { name: "Awarding Distance (meters)", min: 1, max: 1000, value: 1 },
     { name: "Close Distance (meters)", min: 1, max: 1000, value: 1 },
@@ -99,16 +104,39 @@ function toForm(challenge: ChallengeDto) {
       value: challenge.imageUrl ?? "",
     },
     {
+      name: "Location Description",
+      characterLimit: 2048,
+      value: challenge.location ?? "",
+    },
+    { name: "Name", characterLimit: 256, value: challenge.name ?? "" },
+    {
+      name: "Description",
+      characterLimit: 2048,
+      value: challenge.description ?? "",
+    },
+    {
+      name: "Points",
+      characterLimit: 2048,
+      min: 1,
+      max: 1000,
+      value: challenge.points ?? 0,
+    },
+    {
+      name: "Image URL",
+      characterLimit: 2048,
+      value: challenge.imageUrl ?? "",
+    },
+    {
       name: "Awarding Distance (meters)",
       min: 1,
       max: 1000,
-      value: challenge.awardingRadius ?? 0,
+      value: challenge.awardingRadiusF ?? 0,
     },
     {
       name: "Close Distance (meters)",
       min: 1,
       max: 1000,
-      value: challenge.closeRadius ?? 0,
+      value: challenge.closeRadiusF ?? 0,
     },
   ];
 }
@@ -120,13 +148,15 @@ function fromForm(
 ): ChallengeDto {
   return {
     id,
-    name: (form[1] as FreeEntryForm).value,
-    description: (form[2] as FreeEntryForm).value,
-    imageUrl: (form[3] as FreeEntryForm).value,
+    name: (form[2] as FreeEntryForm).value,
+    location: (form[1] as FreeEntryForm).value,
+    description: (form[3] as FreeEntryForm).value,
+    points: (form[4] as NumberEntryForm).value,
+    imageUrl: (form[5] as FreeEntryForm).value,
     latF: (form[0] as MapEntryForm).latitude,
     longF: (form[0] as MapEntryForm).longitude,
-    awardingRadius: (form[4] as NumberEntryForm).value,
-    closeRadius: (form[5] as NumberEntryForm).value,
+    awardingRadiusF: (form[6] as NumberEntryForm).value,
+    closeRadiusF: (form[7] as NumberEntryForm).value,
     containingEventId: eventId,
   };
 }
