@@ -118,8 +118,8 @@ class _JourneysPageState extends State<JourneysPage> {
                         0,
                         1000,
                         [
-                          TimeLimitationType.PERPETUAL,
-                          TimeLimitationType.LIMITED_TIME
+                          EventTimeLimitationDto.PERPETUAL,
+                          EventTimeLimitationDto.LIMITED_TIME
                         ],
                         false,
                         false,
@@ -134,12 +134,13 @@ class _JourneysPageState extends State<JourneysPage> {
                   }
                   for (EventDto event in events) {
                     var tracker = trackerModel.trackerByEventId(event.id);
-                    var numberCompleted = tracker?.prevChallenges.length ?? 0;
-                    var complete = (numberCompleted == event.challenges.length);
-                    var locationCount = event.challenges.length;
-                    var difficulty = event.difficulty;
+                    var numberCompleted = tracker?.prevChallenges?.length ?? 0;
+                    var complete =
+                        (numberCompleted == event.challenges?.length);
+                    var locationCount = event.challenges?.length ?? 0;
+                    var difficulty = event.difficulty.toString();
                     DateTime now = DateTime.now();
-                    DateTime endtime = HttpDate.parse(event.endTime);
+                    DateTime endtime = HttpDate.parse(event.endTime ?? "");
 
                     Duration timeTillExpire = endtime.difference(now);
                     eventCells.add(
@@ -157,15 +158,15 @@ class _JourneysPageState extends State<JourneysPage> {
                               )
                             : JourneyCell(
                                 key: UniqueKey(),
-                                event.name,
+                                event.name ?? "",
                                 Image.network(
                                     "https://picsum.photos/250?image=9"), // dummy data for now; should pass in thumbnail parameter
-                                event.description,
+                                event.description ?? "",
                                 locationCount,
                                 numberCompleted,
                                 complete,
                                 difficulty,
-                                event.minimumScore,
+                                0,
                                 0),
                       ),
                     );

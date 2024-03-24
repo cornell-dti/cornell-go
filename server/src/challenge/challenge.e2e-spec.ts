@@ -131,7 +131,7 @@ describe('ChallengeModule E2E', () => {
         imageUrl: 'url',
         latF: 70,
         longF: 70,
-        awardingRadius: 1,
+        awardingRadiusF: 1,
         closeRadius: 2,
         containingEventId: event.id,
       };
@@ -171,7 +171,7 @@ describe('ChallengeModule E2E', () => {
         imageUrl: 'update test',
         latF: 70,
         longF: 70,
-        awardingRadius: 1,
+        awardingRadiusF: 1,
         closeRadius: 2,
         containingEventId: event.id,
       };
@@ -198,7 +198,7 @@ describe('ChallengeModule E2E', () => {
         imageUrl: 'update test',
         latF: 70,
         longF: 70,
-        awardingRadius: 1,
+        awardingRadiusF: 1,
         closeRadius: 2,
         containingEventId: event.id,
       };

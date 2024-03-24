@@ -57,7 +57,7 @@ class GameServerApi {
   void requestAllEventData(
           int offset,
           int count,
-          List<TimeLimitationType> timeLimitations,
+          List<EventTimeLimitationDto> timeLimitations,
           bool closestToEnding,
           bool shortestFirst,
           bool skippableOnly) =>
@@ -67,11 +67,7 @@ class GameServerApi {
         "closestToEnding": closestToEnding,
         "shortestFirst": shortestFirst,
         "skippableOnly": skippableOnly,
-        "timeLimitations": timeLimitations
-            .map((e) => e == TimeLimitationType.PERPETUAL
-                ? 'PERPETUAL'
-                : 'LIMITED_TIME')
-            .toList()
+        "timeLimitations": timeLimitations.map((e) => e.toString()).toList()
       });
 
   void requestEventLeaderData(int offset, int count, String eventId) =>

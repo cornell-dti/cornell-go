@@ -10,8 +10,8 @@ export interface ChallengeDto {
   imageUrl?: string;
   latF?: number;
   longF?: number;
-  awardingRadius?: number;
-  closeRadius?: number;
+  awardingRadiusF?: number;
+  closeRadiusF?: number;
   containingEventId?: string;
 }
 

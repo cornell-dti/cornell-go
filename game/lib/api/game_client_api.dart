@@ -8,11 +8,6 @@ class GameClientApi {
       StreamController<UserDto>.broadcast(sync: true);
   Stream<UserDto> get updateUserDataStream => _updateUserDataController.stream;
 
-  final _invalidateDataController =
-      StreamController<InvalidateDataDto>.broadcast(sync: true);
-  Stream<InvalidateDataDto> get invalidateDataStream =>
-      _invalidateDataController.stream;
-
   final _updateEventDataController =
       StreamController<UpdateEventDataDto>.broadcast(sync: true);
   Stream<UpdateEventDataDto> get updateEventDataStream =>
@@ -61,10 +56,6 @@ class GameClientApi {
     sock.onDisconnect((data) => disconnectedController.add(null));
     sock.on("updateUserData",
         (data) => _updateUserDataController.add(UserDto.fromJson(data)));
-    sock.on(
-        "invalidateData",
-        (data) =>
-            _invalidateDataController.add(InvalidateDataDto.fromJson(data)));
     sock.on(
         "updateEventData",
         (data) =>
