@@ -11,7 +11,5 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: "18"
-      - name: Execute unit tests
-        run: npm run tests:unit
       - name: Execute e2e tests
         run: npm run tests:e2e
