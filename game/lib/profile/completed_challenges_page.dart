@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:game/profile/profile_page.dart';
 import 'package:game/profile/completed_challenge_cell.dart';
 
+/* The page view of all the completed challenges */
+
 class CompletedChallengesPage extends StatelessWidget {
   // final locationImage = "assets/images/adwhite.jpeg";
   // final locationImage2 = "assets/images/38582.jpg";

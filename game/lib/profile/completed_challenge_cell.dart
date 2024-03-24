@@ -1,6 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 
+/**
+ * Widget that represents each completed challenge 
+ * @param name: Name of the achievement
+ * @param pictures: Array of images corresponding to the challenge/location
+ * @param type: Whether it is a journey or challenge
+ * @param date: Date user achieved/completed the challenge
+ * @param location: Location of the challenge
+ * @param difficulty: Difficulty level of the specific challenge
+ * @param points: Number of points associated with the challenge
+ */
+
 final locationVector = "assets/images/locationVector.png";
 
 class CompletedChallengeFull extends StatefulWidget {
