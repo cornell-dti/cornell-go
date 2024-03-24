@@ -136,22 +136,22 @@ class _JourneysPageState extends State<JourneysPage> {
                     var tracker = trackerModel.trackerByEventId(event.id);
                     var numberCompleted = tracker?.prevChallenges?.length ?? 0;
                     var complete =
-                        (numberCompleted == event.challengeIds.length);
-                    var locationCount = event.challengeIds.length;
+                        (numberCompleted == event.challenges?.length);
+                    var locationCount = event.challenges?.length ?? 0;
 
                     if (locationCount < 2) continue;
                     var total_points = 0;
 
-                    var challenge =
-                        challengeModel.getChallengeById(event.challengeIds[0]);
+                    var challenge = challengeModel
+                        .getChallengeById(event.challenges?[0] ?? "");
 
                     if (challenge == null) continue;
                     var location = challenge.location;
-                    for (var challengeId in event.challengeIds) {
+                    for (var challengeId in event.challenges ?? []) {
                       var challenge =
                           challengeModel.getChallengeById(challengeId);
                       if (challenge != null) {
-                        total_points += challenge.points;
+                        total_points += challenge.points ?? 0;
                       }
                     }
                     var difficulty = event.difficulty;
@@ -174,15 +174,15 @@ class _JourneysPageState extends State<JourneysPage> {
                               )
                             : JourneyCell(
                                 key: UniqueKey(),
-                                event.name,
-                                location,
+                                event.name ?? "",
+                                location ?? "",
                                 Image.network(
                                     "https://picsum.photos/250?image=9"), // dummy data for now; should pass in thumbnail parameter
                                 event.description ?? "",
                                 locationCount,
                                 numberCompleted,
                                 complete,
-                                difficulty,
+                                difficulty?.toString() ?? "",
                                 total_points),
                       ),
                     );
