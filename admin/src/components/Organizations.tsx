@@ -52,7 +52,7 @@ function OrganizationCard(props: {
           <br />
           Access Code: <b>{props.organization.accessCode?.toUpperCase()}</b>
           <br />
-          User Count: <b>{props.organization.members.length}</b>
+          User Count: <b>{props.organization.members?.length}</b>
           <br />
         </ListCardBody>
         <ListCardButtons>
@@ -184,7 +184,7 @@ export function Organizations() {
             organization={org}
             onAdd={() => {
               setCurrentId(org.id);
-              org.events.push(serverData.selectedEvent);
+              org.events?.push(serverData.selectedEvent);
               serverData.updateOrganization(org);
             }}
             onDelete={() => {

@@ -70,7 +70,7 @@ function EventCard(props: {
           <br />
           Required Players: <b>{requiredText}</b> <br />
           Time Limitation: <b>{timeLimitation}</b> <br />
-          Challenge Count: <b>{props.event.challenges.length}</b> <br />
+          Challenge Count: <b>{props.event.challenges?.length}</b> <br />
           Difficulty: <b>{difficultyMode}</b> <br />
           Publicly Visible: <b>{affirmOfBool(!!props.event.indexable)}</b>{" "}
           <br />
@@ -238,15 +238,15 @@ export function Events() {
       {serverData.selectedOrg === "" ? (
         <CenterText>Select an organization to view events</CenterText>
       ) : serverData.organizations.get(serverData.selectedOrg) ? (
-        serverData.organizations.get(serverData.selectedOrg)?.events.length ===
-          0 && <CenterText>No events in organization</CenterText>
+        serverData.organizations?.get(serverData.selectedOrg)?.events
+          ?.length === 0 && <CenterText>No events in organization</CenterText>
       ) : (
         <CenterText>Error getting events</CenterText>
       )}
       {Array.from<EventDto>(
         serverData.organizations
           .get(serverData.selectedOrg)
-          ?.events.map((evId: string) => serverData.events.get(evId)!)
+          ?.events?.map((evId: string) => serverData.events.get(evId)!)
           .filter((ev?: EventDto) => !!ev) ?? []
       )
         .sort(

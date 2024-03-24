@@ -140,9 +140,10 @@ export function ServerDataProvider(props: { children: ReactNode }) {
           serverData.events.get((data.event as EventDto).id)?.challenges ?? [];
 
         sock.requestChallengeData({
-          challenges: (data.event as EventDto).challenges.filter(
-            (chal: string) => !(chal in oldChallenges)
-          ),
+          challenges:
+            (data.event as EventDto).challenges?.filter(
+              (chal: string) => !(chal in oldChallenges)
+            ) ?? [],
         });
 
         serverData.events.set(
@@ -196,7 +197,7 @@ export function ServerDataProvider(props: { children: ReactNode }) {
           )?.events ?? [];
 
         sock.requestEventData({
-          events: (data.organization as OrganizationDto).events.filter(
+          events: (data.organization as OrganizationDto).events?.filter(
             (ev: string) => !(ev in oldEvents)
           ),
         });
