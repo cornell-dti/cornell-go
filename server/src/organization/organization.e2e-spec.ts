@@ -64,6 +64,8 @@ describe('OrganizationModule E2E', () => {
   let exEv: EventBase;
   let exChal: Challenge;
 
+  let sendEventMock: jest.MockContext<Promise<void>, [string[], string, {}]>;
+
   beforeAll(async () => {
     moduleRef = await Test.createTestingModule({
       imports: [AppModule],
@@ -78,6 +80,8 @@ describe('OrganizationModule E2E', () => {
     userService = moduleRef.get<UserService>(UserService);
     clientService = moduleRef.get<ClientService>(ClientService);
     groupService = moduleRef.get<GroupService>(GroupService);
+
+    sendEventMock = jest.spyOn(clientService, 'sendEvent').mock;
 
     chalGateway = moduleRef.get<ChallengeGateway>(ChallengeGateway);
     evGateway = moduleRef.get<EventGateway>(EventGateway);
@@ -164,8 +168,11 @@ describe('OrganizationModule E2E', () => {
   describe('Basic and manager user abilities', () => {
     it('Should be able to read own data', async () => {
       await userGateway.requestUserData(basicAbility, basicUser, {});
-      const [users, ev, dto] = spyOn(clientService, 'sendEvent').mostRecentCall
-        .args as [string[], string, UpdateUserDataDto];
+      const [users, ev, dto] = sendEventMock.lastCall as [
+        string[],
+        string,
+        UpdateUserDataDto,
+      ];
 
       expect(users).toContain(basicUser.id);
       expect(users).not.toContain(managerUser.id);
@@ -189,8 +196,11 @@ describe('OrganizationModule E2E', () => {
         deleted: false,
       });
 
-      const [users, ev, dto] = spyOn(clientService, 'sendEvent').mostRecentCall
-        .args as [string[], string, UpdateUserDataDto];
+      const [users, ev, dto] = sendEventMock.lastCall as [
+        string[],
+        string,
+        UpdateUserDataDto,
+      ];
 
       expect(ev).toEqual('updateUserData');
       expect(dto.user.username).toEqual('myNewUsername');
@@ -201,8 +211,11 @@ describe('OrganizationModule E2E', () => {
         events: [defaultEv.id],
       });
 
-      let [users, ev, dto] = spyOn(clientService, 'sendEvent').mostRecentCall
-        .args as [string[], string, UpdateEventDataDto];
+      let [users, ev, dto] = sendEventMock.lastCall as [
+        string[],
+        string,
+        UpdateEventDataDto,
+      ];
 
       expect(ev).toEqual('updateEventData');
       expect(dto.event.id).toEqual(defaultEv.id);
@@ -212,8 +225,11 @@ describe('OrganizationModule E2E', () => {
         challenges: [defaultChal.id],
       });
 
-      let [users2, ev2, dto2] = spyOn(clientService, 'sendEvent').mostRecentCall
-        .args as [string[], string, UpdateChallengeDataDto];
+      let [users2, ev2, dto2] = sendEventMock.lastCall as [
+        string[],
+        string,
+        UpdateChallengeDataDto,
+      ];
 
       expect(ev2).toEqual('updateChallengeData');
       expect(dto2.challenge.id).toEqual(defaultChal.id);
@@ -224,19 +240,17 @@ describe('OrganizationModule E2E', () => {
       await userGateway.requestAllUserData(basicAbility, basicUser, {});
 
       expect(
-        spyOn(clientService, 'sendEvent')
-          .calls.all()
-          .every(call => {
-            const [users, ev, dto] = call.args as [
-              string[],
-              string,
-              UpdateUserDataDto,
-            ];
+        sendEventMock.calls.every(call => {
+          const [users, ev, dto] = call as [
+            string[],
+            string,
+            UpdateUserDataDto,
+          ];
 
-            if (users.includes(basicUser.id) && ev === 'updateUserData')
-              return basicUser.id == dto.user.id;
-            else return true;
-          }),
+          if (users.includes(basicUser.id) && ev === 'updateUserData')
+            return basicUser.id == dto.user.id;
+          else return true;
+        }),
       ).toBeTruthy();
     });
 
@@ -246,19 +260,17 @@ describe('OrganizationModule E2E', () => {
       });
 
       expect(
-        spyOn(clientService, 'sendEvent')
-          .calls.all()
-          .every(call => {
-            const [users, ev, dto] = call.args as [
-              string[],
-              string,
-              UpdateEventDataDto,
-            ];
+        sendEventMock.calls.every(call => {
+          const [users, ev, dto] = call as [
+            string[],
+            string,
+            UpdateEventDataDto,
+          ];
 
-            if (users.includes(basicUser.id) && ev === 'updateEventData')
-              return exEv.id !== dto.event.id;
-            else return true;
-          }),
+          if (users.includes(basicUser.id) && ev === 'updateEventData')
+            return exEv.id !== dto.event.id;
+          else return true;
+        }),
       ).toBeTruthy();
 
       await chalGateway.requestChallengeData(basicAbility, basicUser, {
@@ -266,19 +278,17 @@ describe('OrganizationModule E2E', () => {
       });
 
       expect(
-        spyOn(clientService, 'sendEvent')
-          .calls.all()
-          .every(call => {
-            const [users, ev, dto] = call.args as [
-              string[],
-              string,
-              UpdateChallengeDataDto,
-            ];
+        sendEventMock.calls.every(call => {
+          const [users, ev, dto] = call as [
+            string[],
+            string,
+            UpdateChallengeDataDto,
+          ];
 
-            if (users.includes(basicUser.id) && ev === 'updateChallengeData')
-              return exChal.id !== dto.challenge.id;
-            else return true;
-          }),
+          if (users.includes(basicUser.id) && ev === 'updateChallengeData')
+            return exChal.id !== dto.challenge.id;
+          else return true;
+        }),
       ).toBeTruthy();
     });
   });
