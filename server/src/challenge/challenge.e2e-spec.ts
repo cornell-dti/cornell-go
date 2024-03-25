@@ -53,6 +53,7 @@ describe('ChallengeModule E2E', () => {
         ClientService,
         GroupService,
         OrganizationService,
+        CaslAbilityFactory,
       ],
     }).compile();
 
