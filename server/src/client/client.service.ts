@@ -43,6 +43,25 @@ export class ClientService {
     await this.sendProtected('updateErrorData', user.id, dto);
   }
 
+  async getAffectedUsers(target: string) {
+    // Get list of targeted sockets
+    const socks = await this.gateway.server.in(target).fetchSockets();
+
+    // Find ids of all targeted users
+    const userIds = socks.map(sock => sock.data['userId']);
+
+    // Find all targeted users
+    const users = await this.prisma.user.findMany({
+      where: { id: { in: userIds } },
+    });
+
+    return users;
+  }
+
+  async sendEvent<TDto extends {}>(users: string[], event: string, dto: TDto) {
+    this.gateway.server.to(users).emit(event, dto);
+  }
+
   async sendProtected<TDto extends {}>(
     event: string,
     target: string,
@@ -59,16 +78,8 @@ export class ClientService {
       const options: PermittedFieldsOptions<AppAbility> = {
         fieldsFrom: rule => rule.fields || fieldList,
       };
-      // Get list of targeted sockets
-      const socks = await this.gateway.server.in(target).fetchSockets();
-
-      // Find ids of all targeted users
-      const userIds = socks.map(sock => sock.data['userId']);
-
       // Find all targeted users
-      const users = await this.prisma.user.findMany({
-        where: { id: { in: userIds } },
-      });
+      const users = await this.getAffectedUsers(target);
 
       // Map from sorted list of properties to a list of user ids
       const separatedDtos = new Map<string[], string[]>();
@@ -98,7 +109,9 @@ export class ClientService {
           Object.entries(dto).filter(([k, v]) => fields.includes(k)),
         );
 
-        this.gateway.server.to(users).emit(event, partialDto);
+        if (Object.entries(partialDto).length === 0) continue;
+
+        await this.sendEvent(users, event, partialDto);
       }
     }
   }
