@@ -92,17 +92,6 @@ function toForm(challenge: ChallengeDto) {
       latitude: challenge.latF ?? 0,
       longitude: challenge.longF ?? 0,
     },
-    { name: "Name", characterLimit: 256, value: challenge.name ?? "" },
-    {
-      name: "Description",
-      characterLimit: 2048,
-      value: challenge.description ?? "",
-    },
-    {
-      name: "Image URL",
-      characterLimit: 2048,
-      value: challenge.imageUrl ?? "",
-    },
     {
       name: "Location Description",
       characterLimit: 2048,

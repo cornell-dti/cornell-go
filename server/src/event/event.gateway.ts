@@ -138,20 +138,15 @@ export class EventGateway {
       await this.eventService.removeEvent(ev.id, ability);
       await this.eventService.emitUpdateEventData(ev, true);
     } else {
-      if (!data.event.initialOrganizationId) {
-        await this.clientService.emitErrorData(
-          user,
-          'Cannot create event without an initial organization!',
-        );
-        return;
-      }
-
       const ev = await this.eventService.upsertEventFromDto(
         ability,
         data.event,
       );
 
-      if (!ev) return;
+      if (!ev) {
+        await this.clientService.emitErrorData(user, 'Failed to upsert event!');
+        return;
+      }
 
       const org = await this.orgService.getOrganizationById(
         data.event.initialOrganizationId!,

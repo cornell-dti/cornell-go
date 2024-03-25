@@ -149,7 +149,13 @@ export class ChallengeGateway {
         data.challenge,
       );
 
-      if (!challenge) return;
+      if (!challenge) {
+        await this.clientService.emitErrorData(
+          user,
+          'Failed to upsert challenge!',
+        );
+        return;
+      }
 
       if (challenge.linkedEventId) {
         const ev = (await this.eventService.getEventById(

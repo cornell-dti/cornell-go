@@ -363,6 +363,10 @@ export class EventService {
   async upsertEventFromDto(ability: AppAbility, event: EventDto) {
     let ev = await this.prisma.eventBase.findFirst({ where: { id: event.id } });
 
+    if (!ev && !event.initialOrganizationId) {
+      return null;
+    }
+
     const assignData = {
       requiredMembers: event.requiredMembers,
       name: event.name?.substring(0, 2048),

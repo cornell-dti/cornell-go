@@ -74,7 +74,13 @@ export class OrganizationGateway {
         data.organization,
       );
 
-      if (!org) return;
+      if (!org) {
+        await this.clientService.emitErrorData(
+          user,
+          'Failed to upsert organization!',
+        );
+        return;
+      }
 
       this.clientService.subscribe(user, org.id);
       await this.orgService.emitUpdateOrganizationData(org, false);
