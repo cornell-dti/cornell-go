@@ -61,7 +61,7 @@ export class CaslAbilityFactory {
       createPrismaAbility,
     );
 
-    can('all', 'all');
+    can(Action.Manage, 'all');
 
     return build();
   }

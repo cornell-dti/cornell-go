@@ -148,6 +148,7 @@ describe('ChallengeModule E2E', () => {
         fullAbility,
         chaldto,
       );
+
       const findChal = await prisma.challenge.findFirstOrThrow({
         where: { id: chal!.id },
       });
