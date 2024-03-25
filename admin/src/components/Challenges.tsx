@@ -146,7 +146,7 @@ function fromForm(
     longF: (form[0] as MapEntryForm).longitude,
     awardingRadiusF: (form[6] as NumberEntryForm).value,
     closeRadiusF: (form[7] as NumberEntryForm).value,
-    containingEventId: eventId,
+    linkedEventId: eventId,
   };
 }
 

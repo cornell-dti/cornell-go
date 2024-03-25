@@ -281,8 +281,8 @@ class ChallengeDto {
     if (closeRadiusF != null) {
       fields['closeRadiusF'] = closeRadiusF;
     }
-    if (containingEventId != null) {
-      fields['containingEventId'] = containingEventId;
+    if (linkedEventId != null) {
+      fields['linkedEventId'] = linkedEventId;
     }
     return fields;
   }
@@ -302,9 +302,8 @@ class ChallengeDto {
         : null;
     closeRadiusF =
         fields.containsKey('closeRadiusF') ? (fields["closeRadiusF"]) : null;
-    containingEventId = fields.containsKey('containingEventId')
-        ? (fields["containingEventId"])
-        : null;
+    linkedEventId =
+        fields.containsKey('linkedEventId') ? (fields["linkedEventId"]) : null;
   }
 
   void partialUpdate(ChallengeDto other) {
@@ -320,9 +319,8 @@ class ChallengeDto {
         other.awardingRadiusF == null ? awardingRadiusF : other.awardingRadiusF;
     closeRadiusF =
         other.closeRadiusF == null ? closeRadiusF : other.closeRadiusF;
-    containingEventId = other.containingEventId == null
-        ? containingEventId
-        : other.containingEventId;
+    linkedEventId =
+        other.linkedEventId == null ? linkedEventId : other.linkedEventId;
   }
 
   late String id;
@@ -335,7 +333,7 @@ class ChallengeDto {
   late double? longF;
   late double? awardingRadiusF;
   late double? closeRadiusF;
-  late String? containingEventId;
+  late String? linkedEventId;
 }
 
 class RequestChallengeDataDto {

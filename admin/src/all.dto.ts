@@ -101,7 +101,7 @@ export interface ChallengeDto {
   longF?: number;
   awardingRadiusF?: number;
   closeRadiusF?: number;
-  containingEventId?: string;
+  linkedEventId?: string;
 }
 
 export interface RequestChallengeDataDto {

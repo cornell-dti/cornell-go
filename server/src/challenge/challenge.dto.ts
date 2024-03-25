@@ -14,7 +14,7 @@ export interface ChallengeDto {
   longF?: number;
   awardingRadiusF?: number;
   closeRadiusF?: number;
-  containingEventId?: string;
+  linkedEventId?: string;
 }
 
 /** DTO for requestChallengeData */

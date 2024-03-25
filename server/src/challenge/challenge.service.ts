@@ -226,7 +226,7 @@ export class ChallengeService {
       longF: ch.longitude,
       awardingRadiusF: ch.awardingRadius,
       closeRadiusF: ch.closeRadius,
-      containingEventId: ch.linkedEventId!,
+      linkedEventId: ch.linkedEventId!,
     };
   }
 
@@ -273,7 +273,7 @@ export class ChallengeService {
     } else if (!chal && ability.can(Action.Create, 'Challenge')) {
       const maxIndexChallenge = await this.prisma.challenge.aggregate({
         _max: { eventIndex: true },
-        where: { linkedEventId: challenge.containingEventId },
+        where: { linkedEventId: challenge.linkedEventId },
       });
 
       const data = {
@@ -292,7 +292,7 @@ export class ChallengeService {
           challenge.awardingRadiusF ?? defaultChallengeData.awardingRadius,
         closeRadius: challenge.closeRadiusF ?? defaultChallengeData.closeRadius,
         eventIndex: (maxIndexChallenge._max.eventIndex ?? -1) + 1,
-        linkedEventId: challenge.containingEventId,
+        linkedEventId: challenge.linkedEventId,
       };
 
       chal = await this.prisma.challenge.create({

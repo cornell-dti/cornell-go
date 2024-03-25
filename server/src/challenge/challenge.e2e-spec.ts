@@ -141,7 +141,7 @@ describe('ChallengeModule E2E', () => {
         longF: 70,
         awardingRadiusF: 1,
         closeRadiusF: 2,
-        containingEventId: event.id,
+        linkedEventId: event.id,
       };
 
       const chal = await challengeService.upsertChallengeFromDto(
@@ -187,7 +187,7 @@ describe('ChallengeModule E2E', () => {
         longF: 70,
         awardingRadiusF: 1,
         closeRadiusF: 2,
-        containingEventId: event.id,
+        linkedEventId: event.id,
       };
 
       await challengeService.upsertChallengeFromDto(fullAbility, secondChalDTO);
@@ -216,7 +216,7 @@ describe('ChallengeModule E2E', () => {
         longF: 70,
         awardingRadiusF: 1,
         closeRadiusF: 2,
-        containingEventId: event.id,
+        linkedEventId: event.id,
       };
       await challengeService.upsertChallengeFromDto(fullAbility, chaldto);
       const chal = await prisma.challenge.findFirstOrThrow({
