@@ -83,7 +83,9 @@ export class UserService {
         authType,
         hashedRefreshToken: '',
         administrator:
-          email === process.env.SUPERUSER || process.env.DEVELOPMENT === 'true',
+          email === process.env.SUPERUSER ||
+          (process.env.DEVELOPMENT === 'true' &&
+            !(process.env.TESTING_E2E === 'true')),
         isRanked: true,
       },
     });
