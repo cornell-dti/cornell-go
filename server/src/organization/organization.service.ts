@@ -272,7 +272,12 @@ export class OrganizationService {
     organizationId: string,
   ) {
     const org = await this.prisma.organization.findFirst({
-      where: { id: organizationId },
+      where: {
+        AND: [
+          accessibleBy(ability, Action.Manage).Organization,
+          { id: organizationId },
+        ],
+      },
     });
 
     const potentialManager = await this.prisma.user.findFirst({
@@ -284,10 +289,7 @@ export class OrganizationService {
     }
 
     await this.prisma.organization.update({
-      where: {
-        ...accessibleBy(ability, Action.Manage).Organization,
-        id: org.id,
-      },
+      where: { id: org.id },
       data: {
         managers: { connect: { id: potentialManager.id } },
         members: { connect: { id: potentialManager.id } },
