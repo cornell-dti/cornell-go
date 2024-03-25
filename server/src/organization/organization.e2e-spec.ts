@@ -158,7 +158,7 @@ describe('OrganizationModule E2E', () => {
     expect(orgService).toBeDefined();
   });
 
-  describe('Basic and manager user abilities', async () => {
+  describe('Basic and manager user abilities', () => {
     it('Should be able to read own data', async () => {
       await userGateway.requestUserData(basicAbility, basicUser, {});
       const [users, ev, dto] = spyOn(clientService, 'sendEvent').mostRecentCall
