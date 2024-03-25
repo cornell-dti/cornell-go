@@ -299,7 +299,9 @@ export class OrganizationService {
       data: { managerOf: { connect: { id: org.id } } },
     });
 
-    console.log('Manager Added');
+    console.log(`Manager ${potentialManagerEmail} Added`);
+
+    return true;
   }
 
   async joinOrganization(user: User, code: string) {

@@ -220,21 +220,127 @@ describe('OrganizationModule E2E', () => {
       expect(dto2.challenge.name).toEqual(defaultChal.name);
     });
 
-    it('Should not be able to read other group', async () => {});
+    it('Should not be able to read other user', async () => {
+      await userGateway.requestAllUserData(basicAbility, basicUser, {});
 
-    it('Should not be able to read other user', async () => {});
+      expect(
+        spyOn(clientService, 'sendEvent')
+          .calls.all()
+          .every(call => {
+            const [users, ev, dto] = call.args as [
+              string[],
+              string,
+              UpdateUserDataDto,
+            ];
 
-    it('Should not be able to see other org', async () => {});
+            if (users.includes(basicUser.id) && ev === 'updateUserData')
+              return basicUser.id == dto.user.id;
+            else return true;
+          }),
+      ).toBeTruthy();
+    });
 
-    it('Should not be able to modify anything in nonmanaged org', async () => {});
+    it('Should not be able to see other org', async () => {
+      await evGateway.requestEventData(basicAbility, basicUser, {
+        events: [exEv.id],
+      });
 
-    it('Should not be able to add managers', async () => {});
+      expect(
+        spyOn(clientService, 'sendEvent')
+          .calls.all()
+          .every(call => {
+            const [users, ev, dto] = call.args as [
+              string[],
+              string,
+              UpdateEventDataDto,
+            ];
+
+            if (users.includes(basicUser.id) && ev === 'updateEventData')
+              return exEv.id !== dto.event.id;
+            else return true;
+          }),
+      ).toBeTruthy();
+
+      await chalGateway.requestChallengeData(basicAbility, basicUser, {
+        challenges: [exChal.id],
+      });
+
+      expect(
+        spyOn(clientService, 'sendEvent')
+          .calls.all()
+          .every(call => {
+            const [users, ev, dto] = call.args as [
+              string[],
+              string,
+              UpdateChallengeDataDto,
+            ];
+
+            if (users.includes(basicUser.id) && ev === 'updateChallengeData')
+              return exChal.id !== dto.challenge.id;
+            else return true;
+          }),
+      ).toBeTruthy();
+    });
   });
 
   describe('Manager user abilities', () => {
-    it('Should be able to add managers to managed org', async () => {});
+    it('Should be able to add managers to managed org', async () => {
+      const addState = await orgService.addManager(
+        managerAbility,
+        'manager@cornell.edu',
+        exOrg.id,
+      );
 
-    it('Should be able to modify managed org', async () => {});
+      expect(addState).toBeTruthy();
+    });
+
+    it('Should not be able to add managers to another org', async () => {
+      const addState = await orgService.addManager(
+        managerAbility,
+        'manager@cornell.edu',
+        defaultOrg.id,
+      );
+
+      expect(addState).toBeFalsy();
+    });
+
+    it('Should be able to modify managed org', async () => {
+      const newEv = await eventService.upsertEventFromDto(managerAbility, {
+        id: exEv.id,
+        name: 'New name',
+      });
+
+      expect(newEv?.name).toEqual('New name');
+
+      const newChal = await challengeService.upsertChallengeFromDto(
+        managerAbility,
+        {
+          id: exChal.id,
+          name: 'New Name',
+        },
+      );
+
+      expect(newChal?.name).toEqual('New Name');
+    });
+
+    it('Should not be able to modify other org', async () => {
+      const newEv = await eventService.upsertEventFromDto(managerAbility, {
+        id: exEv.id,
+        name: 'New name',
+      });
+
+      expect(newEv).toBeNull();
+
+      const newChal = await challengeService.upsertChallengeFromDto(
+        managerAbility,
+        {
+          id: exChal.id,
+          name: 'New Name',
+        },
+      );
+
+      expect(newChal).toBeNull();
+    });
   });
 
   afterAll(async () => {
