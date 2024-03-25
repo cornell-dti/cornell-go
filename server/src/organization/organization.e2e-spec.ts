@@ -25,6 +25,8 @@ import { OrganizationGateway } from './organization.gateway';
 import { GroupGateway } from '../group/group.gateway';
 import { EventGateway } from '../event/event.gateway';
 import { UpdateUserDataDto } from '../user/user.dto';
+import { UpdateEventDataDto } from '../event/event.dto';
+import { UpdateChallengeDataDto } from '../challenge/challenge.dto';
 
 describe('OrganizationModule E2E', () => {
   let app: INestApplication;
@@ -97,6 +99,7 @@ describe('OrganizationModule E2E', () => {
     exChal = (await challengeService.upsertChallengeFromDto(fullAbility, {
       id: '',
       linkedEventId: exEv.id,
+      location: 'ARTS_QUAD',
     }))!;
 
     defaultOrg = await orgService.getDefaultOrganization(
@@ -195,8 +198,26 @@ describe('OrganizationModule E2E', () => {
 
     it('Should be able to read from own org', async () => {
       await evGateway.requestEventData(basicAbility, basicUser, {
-        events: [],
+        events: [defaultEv.id],
       });
+
+      let [users, ev, dto] = spyOn(clientService, 'sendEvent').mostRecentCall
+        .args as [string[], string, UpdateEventDataDto];
+
+      expect(ev).toEqual('updateEventData');
+      expect(dto.event.id).toEqual(defaultEv.id);
+      expect(dto.event.name).toEqual(defaultEv.name);
+
+      await chalGateway.requestChallengeData(basicAbility, basicUser, {
+        challenges: [defaultChal.id],
+      });
+
+      let [users2, ev2, dto2] = spyOn(clientService, 'sendEvent').mostRecentCall
+        .args as [string[], string, UpdateChallengeDataDto];
+
+      expect(ev2).toEqual('updateChallengeData');
+      expect(dto2.challenge.id).toEqual(defaultChal.id);
+      expect(dto2.challenge.name).toEqual(defaultChal.name);
     });
 
     it('Should not be able to read other group', async () => {});
