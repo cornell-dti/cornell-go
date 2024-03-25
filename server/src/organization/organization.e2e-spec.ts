@@ -102,22 +102,6 @@ describe('OrganizationModule E2E', () => {
       location: 'ARTS_QUAD',
     }))!;
 
-    defaultOrg = await orgService.getDefaultOrganization(
-      OrganizationSpecialUsage.CORNELL_LOGIN,
-    );
-
-    defaultEv = (await eventService.getEventById(
-      (
-        await eventService.getCurrentEventTrackerForUser(basicUser)
-      ).eventId,
-    ))!;
-
-    defaultChal = (await challengeService.getChallengeById(
-      (
-        await eventService.getCurrentEventTrackerForUser(basicUser)
-      ).curChallengeId,
-    ))!;
-
     managerUser = await userService.register(
       'manager@cornell.edu',
       'manager',
@@ -139,6 +123,22 @@ describe('OrganizationModule E2E', () => {
       'b',
       EnrollmentType.UNDERGRADUATE,
     );
+
+    defaultOrg = await orgService.getDefaultOrganization(
+      OrganizationSpecialUsage.CORNELL_LOGIN,
+    );
+
+    defaultEv = (await eventService.getEventById(
+      (
+        await eventService.getCurrentEventTrackerForUser(basicUser)
+      ).eventId,
+    ))!;
+
+    defaultChal = (await challengeService.getChallengeById(
+      (
+        await eventService.getCurrentEventTrackerForUser(basicUser)
+      ).curChallengeId,
+    ))!;
 
     managerGroup = await groupService.getGroupForUser(managerUser);
     basicGroup = await groupService.getGroupForUser(basicUser);
