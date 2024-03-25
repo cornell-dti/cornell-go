@@ -26,12 +26,54 @@ function genDartDtoFile(dtoDefs) {
     }
     for (const [name, propMap] of dtoDefs.baseDtos.entries()) {
         dartCode += `class ${name} {\n`;
+        dartCode += `  Map<String, dynamic> toJson() {\n`;
+        dartCode += `    Map<String, dynamic> fields = {};\n`;
+        for (const [propName, [typeName, fieldType, isOptional],] of propMap.entries()) {
+            const dartType = toDartType(typeName, propName);
+            if (isOptional) {
+                dartCode += `  if (${propName} != null) {\n      `;
+            }
+            dartCode += `    fields['${propName}'] = `;
+            if (fieldType == "PRIMITIVE" || fieldType == "PRIMITIVE[]") {
+                dartCode += `${propName}`;
+            }
+            else if (fieldType == "DEPENDENT_DTO") {
+                dartCode += `${propName}!.toJson()`;
+            }
+            else if (fieldType == "DEPENDENT_DTO[]") {
+                dartCode += `
+            ${propName}!
+              .map<Map<String, dynamic>>(
+                (dynamic val) => val!.toJson()
+              ).toList()
+        `;
+            }
+            else if (fieldType == "ENUM_DTO") {
+                dartCode += `${propName}!.toString()`;
+            }
+            else if (fieldType == "ENUM_DTO[]") {
+                dartCode += `
+            ${propName}!
+              .map<String>(
+                (dynamic val) => val!.toString()
+              ).toList()
+        `;
+            }
+            if (isOptional) {
+                dartCode += `;\n    }\n`;
+            }
+            else {
+                dartCode += ";\n";
+            }
+        }
+        dartCode += "    return fields;\n";
+        dartCode += "  }\n\n";
         dartCode += `  ${name}.fromJson(Map<String, dynamic> fields) {\n`;
         for (const [propName, [typeName, fieldType, isOptional],] of propMap.entries()) {
             const dartType = toDartType(typeName, propName);
             dartCode += `    ${propName} = `;
             if (isOptional) {
-                dartCode += `fields['${propName}'] ? (\n      `;
+                dartCode += `fields.containsKey('${propName}') ? (\n      `;
             }
             if (fieldType == "PRIMITIVE") {
                 dartCode += `fields["${propName}"]`;

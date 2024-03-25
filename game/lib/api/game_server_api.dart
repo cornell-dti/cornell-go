@@ -40,8 +40,8 @@ class GameServerApi {
       "requestGlobalLeaderData", {'offset': offset, 'count': count});
 
   void closeAccount() => _invokeWithRefresh("closeAccount", {});
-  void updateUserData(UserDto dto) =>
-      _invokeWithRefresh("updateUserData", {"user": dto, "deleted": "false"});
+  void updateUserData(UserDto dto) => _invokeWithRefresh(
+      "updateUserData", {"user": dto.toJson(), "deleted": "false"});
   void requestUserData() => _invokeWithRefresh("requestUserData", {});
   void requestGroupData() => _invokeWithRefresh("requestGroupData", {});
   void joinGroup(String groupId) =>
