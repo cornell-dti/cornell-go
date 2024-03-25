@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:game/api/game_client_dto.dart';
 import 'package:socket_io_client/socket_io_client.dart';
 
@@ -39,12 +40,8 @@ class GameServerApi {
       "requestGlobalLeaderData", {'offset': offset, 'count': count});
 
   void closeAccount() => _invokeWithRefresh("closeAccount", {});
-  void setUsername(String newUsername) =>
-      _invokeWithRefresh("setUsername", {'newUsername': newUsername});
-  // void setMajor(String newMajor) =>
-  //     _invokeWithRefresh("setMajor", {'newMajor': newMajor});
-  void setGraduationYear(String newYear) =>
-      _invokeWithRefresh("setGraduationYear", {'newYear': newYear});
+  void updateUserData(UserDto dto) =>
+      _invokeWithRefresh("updateUserData", {"user": dto, "deleted": "false"});
   void requestUserData() => _invokeWithRefresh("requestUserData", {});
   void requestGroupData() => _invokeWithRefresh("requestGroupData", {});
   void joinGroup(String groupId) =>
@@ -87,6 +84,6 @@ class GameServerApi {
   void completedChallenge(String challengeId) =>
       _invokeWithRefresh("completedChallenge", {"challengeId": challengeId});
 
-  void requestOrganizationDataDto() =>
-      _invokeWithRefresh("requestOrganizationDataDto", {"admin": false});
+  void requestOrganizationData() =>
+      _invokeWithRefresh("requestOrganizationData", {});
 }
