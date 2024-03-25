@@ -31,6 +31,7 @@ export interface EventDto {
   indexable: boolean;
   latitude: number;
   longitude: number;
+  category: 'FOOD' | 'NATURE' | 'HISTORICAL' | 'CAFE' | 'DININGHALL' | 'DORM';
 }
 
 /** DTO for event tracker in updateEventTrackerData */

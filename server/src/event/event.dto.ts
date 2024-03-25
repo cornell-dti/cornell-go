@@ -27,6 +27,7 @@ export interface EventDto {
   requiredMembers: number;
   name: string;
   description: string;
+  category: 'FOOD' | 'NATURE' | 'HISTORICAL' | 'CAFE' | 'DININGHALL' | 'DORM';
   timeLimitation: 'LIMITED_TIME' | 'PERPETUAL';
   endTime: string;
   challengeIds: string[];

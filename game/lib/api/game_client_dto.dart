@@ -153,6 +153,7 @@ class EventDto {
     requiredMembers = fields['requiredMembers'];
     name = fields['name'];
     description = fields['description'];
+    category = fields['category'];
     timeLimitation = fields['timeLimitation'];
     endTime = fields['endTime'];
     challengeIds = List<String>.from(fields['challengeIds']);
@@ -168,6 +169,7 @@ class EventDto {
   int requiredMembers = 0;
   String name = '';
   String description = '';
+  String category = '';
   String timeLimitation = '';
   String endTime = '';
   List<String>? userFavoriteIds = [];
