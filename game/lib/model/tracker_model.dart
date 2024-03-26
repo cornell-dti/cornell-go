@@ -8,8 +8,7 @@ class TrackerModel extends ChangeNotifier {
 
   TrackerModel(ApiClient client) : _client = client {
     client.clientApi.updateEventTrackerDataStream.listen((event) {
-      if (event.tracker == null) return;
-      _trackers[event.tracker!.eventId] = event.tracker!;
+      _trackers[event.eventId] = event;
 
       notifyListeners();
     });
@@ -24,7 +23,8 @@ class TrackerModel extends ChangeNotifier {
     if (_trackers.containsKey(eventId)) {
       return _trackers[eventId];
     } else {
-      _client.serverApi?.requestEventTrackerData([eventId]);
+      _client.serverApi
+          ?.requestEventTrackerData(RequestEventTrackerDataDto([eventId]));
       return null;
     }
   }

@@ -15,7 +15,7 @@ class UserModel extends ChangeNotifier {
 
     client.clientApi.connectedStream.listen((event) {
       userData = null;
-      client.serverApi?.requestUserData();
+      client.serverApi?.requestUserData(RequestUserDataDto(null));
     });
   }
 }

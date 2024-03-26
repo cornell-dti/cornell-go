@@ -313,3 +313,12 @@ export interface UpdateUserDataDto {
   user: UserDto;
   deleted: boolean;
 }
+
+export interface AddManagerDto {
+  email: string;
+  organizationId: string;
+}
+
+export interface JoinOrganizationDto {
+  accessCode: string;
+}

@@ -13,7 +13,8 @@ class GroupModel extends ChangeNotifier {
       print(event);
       if (!(event.group is String)) {
         group = event.group;
-        client.serverApi?.setCurrentEvent(event.group.curEventId ?? "");
+        client.serverApi
+            ?.setCurrentEvent(SetCurrentEventDto(event.group.curEventId ?? ""));
         curEventId = event.group.curEventId;
         members.removeWhere((element) =>
             event.group.members?.any((mem) => mem.id == element.id) ?? false);
@@ -26,7 +27,7 @@ class GroupModel extends ChangeNotifier {
     client.clientApi.connectedStream.listen((event) {
       members.clear();
       curEventId = null;
-      client.serverApi?.requestGroupData();
+      client.serverApi?.requestGroupData(RequestGroupDataDto());
     });
   }
 }

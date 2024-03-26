@@ -86,8 +86,8 @@ class AchievementDto {
     fields['name'] = name;
     fields['description'] = description;
     fields['imageUrl'] = imageUrl;
-    fields['locationType'] = locationType!.toString();
-    fields['achievementType'] = achievementType!.toString();
+    fields['locationType'] = locationType!.name;
+    fields['achievementType'] = achievementType!.name;
     fields['organizations'] = organizations;
     return fields;
   }
@@ -117,6 +117,18 @@ class AchievementDto {
     achievementType = other.achievementType;
     organizations = other.organizations;
   }
+
+  AchievementDto(
+    this.id,
+    this.eventId,
+    this.requiredPoints,
+    this.name,
+    this.description,
+    this.imageUrl,
+    this.locationType,
+    this.achievementType,
+    this.organizations,
+  );
 
   late String id;
   late String eventId;
@@ -157,6 +169,13 @@ class AchievementTrackerDto {
         other.dateComplete == null ? dateComplete : other.dateComplete;
   }
 
+  AchievementTrackerDto(
+    this.userId,
+    this.progress,
+    this.achievementId,
+    this.dateComplete,
+  );
+
   late String userId;
   late int progress;
   late String achievementId;
@@ -176,9 +195,9 @@ class LoginDto {
       fields['year'] = year;
     }
     if (aud != null) {
-      fields['aud'] = aud!.toString();
+      fields['aud'] = aud!.name;
     }
-    fields['enrollmentType'] = enrollmentType!.toString();
+    fields['enrollmentType'] = enrollmentType!.name;
     return fields;
   }
 
@@ -205,6 +224,16 @@ class LoginDto {
     enrollmentType = other.enrollmentType;
   }
 
+  LoginDto(
+    this.idToken,
+    this.lat,
+    this.long,
+    this.username,
+    this.year,
+    this.aud,
+    this.enrollmentType,
+  );
+
   late String idToken;
   late int lat;
   late int long;
@@ -229,6 +258,10 @@ class RefreshTokenDto {
     refreshToken = other.refreshToken;
   }
 
+  RefreshTokenDto(
+    this.refreshToken,
+  );
+
   late String refreshToken;
 }
 
@@ -246,6 +279,10 @@ class CompletedChallengeDto {
   void partialUpdate(CompletedChallengeDto other) {
     challengeId = other.challengeId;
   }
+
+  CompletedChallengeDto(
+    this.challengeId,
+  );
 
   late String challengeId;
 }
@@ -323,6 +360,20 @@ class ChallengeDto {
         other.linkedEventId == null ? linkedEventId : other.linkedEventId;
   }
 
+  ChallengeDto(
+    this.id,
+    this.name,
+    this.location,
+    this.description,
+    this.points,
+    this.imageUrl,
+    this.latF,
+    this.longF,
+    this.awardingRadiusF,
+    this.closeRadiusF,
+    this.linkedEventId,
+  );
+
   late String id;
   late String? name;
   late String? location;
@@ -351,6 +402,10 @@ class RequestChallengeDataDto {
     challenges = other.challenges;
   }
 
+  RequestChallengeDataDto(
+    this.challenges,
+  );
+
   late List<String> challenges;
 }
 
@@ -372,6 +427,11 @@ class UpdateChallengeDataDto {
     deleted = other.deleted;
   }
 
+  UpdateChallengeDataDto(
+    this.challenge,
+    this.deleted,
+  );
+
   late ChallengeDto challenge;
   late bool deleted;
 }
@@ -391,6 +451,10 @@ class RequestEventTrackerDataDto {
     trackedEvents = other.trackedEvents;
   }
 
+  RequestEventTrackerDataDto(
+    this.trackedEvents,
+  );
+
   late List<String> trackedEvents;
 }
 
@@ -408,6 +472,10 @@ class SetCurrentChallengeDto {
   void partialUpdate(SetCurrentChallengeDto other) {
     challengeId = other.challengeId;
   }
+
+  SetCurrentChallengeDto(
+    this.challengeId,
+  );
 
   late String challengeId;
 }
@@ -432,6 +500,12 @@ class LeaderDto {
     username = other.username;
     score = other.score;
   }
+
+  LeaderDto(
+    this.userId,
+    this.username,
+    this.score,
+  );
 
   late String userId;
   late String username;
@@ -463,6 +537,12 @@ class UpdateLeaderDataDto {
     users = other.users;
   }
 
+  UpdateLeaderDataDto(
+    this.eventId,
+    this.offset,
+    this.users,
+  );
+
   late String eventId;
   late int offset;
   late List<LeaderDto> users;
@@ -486,6 +566,11 @@ class UpdateErrorDto {
     message = other.message;
   }
 
+  UpdateErrorDto(
+    this.id,
+    this.message,
+  );
+
   late String id;
   late String message;
 }
@@ -507,6 +592,11 @@ class RequestAllEventDataDto {
     offset = other.offset;
     count = other.count;
   }
+
+  RequestAllEventDataDto(
+    this.offset,
+    this.count,
+  );
 
   late int offset;
   late int count;
@@ -531,6 +621,10 @@ class RequestEventDataDto {
     events = other.events == null ? events : other.events;
   }
 
+  RequestEventDataDto(
+    this.events,
+  );
+
   late List<String>? events;
 }
 
@@ -554,6 +648,12 @@ class RequestEventLeaderDataDto {
     count = other.count;
     eventId = other.eventId;
   }
+
+  RequestEventLeaderDataDto(
+    this.offset,
+    this.count,
+    this.eventId,
+  );
 
   late int offset;
   late int count;
@@ -583,6 +683,12 @@ class RequestRecommendedEventsDto {
     count = other.count == null ? count : other.count;
   }
 
+  RequestRecommendedEventsDto(
+    this.latitudeF,
+    this.longitudeF,
+    this.count,
+  );
+
   late double latitudeF;
   late double longitudeF;
   late int? count;
@@ -602,7 +708,7 @@ class EventDto {
       fields['description'] = description;
     }
     if (timeLimitation != null) {
-      fields['timeLimitation'] = timeLimitation!.toString();
+      fields['timeLimitation'] = timeLimitation!.name;
     }
     if (endTime != null) {
       fields['endTime'] = endTime;
@@ -617,7 +723,7 @@ class EventDto {
       fields['initialOrganizationId'] = initialOrganizationId;
     }
     if (difficulty != null) {
-      fields['difficulty'] = difficulty!.toString();
+      fields['difficulty'] = difficulty!.name;
     }
     if (indexable != null) {
       fields['indexable'] = indexable;
@@ -682,6 +788,22 @@ class EventDto {
     latitudeF = other.latitudeF == null ? latitudeF : other.latitudeF;
   }
 
+  EventDto(
+    this.id,
+    this.requiredMembers,
+    this.name,
+    this.description,
+    this.timeLimitation,
+    this.endTime,
+    this.challenges,
+    this.userFavorites,
+    this.initialOrganizationId,
+    this.difficulty,
+    this.indexable,
+    this.longitudeF,
+    this.latitudeF,
+  );
+
   late String id;
   late int? requiredMembers;
   late String? name;
@@ -742,6 +864,14 @@ class EventTrackerDto {
         : other.prevChallengeDates;
   }
 
+  EventTrackerDto(
+    this.eventId,
+    this.isRanked,
+    this.curChallengeId,
+    this.prevChallenges,
+    this.prevChallengeDates,
+  );
+
   late String eventId;
   late bool? isRanked;
   late String? curChallengeId;
@@ -764,6 +894,10 @@ class UpdateEventTrackerDataDto {
     tracker = other.tracker;
   }
 
+  UpdateEventTrackerDataDto(
+    this.tracker,
+  );
+
   late EventTrackerDto tracker;
 }
 
@@ -785,6 +919,11 @@ class UpdateEventDataDto {
     deleted = other.deleted;
   }
 
+  UpdateEventDataDto(
+    this.event,
+    this.deleted,
+  );
+
   late EventDto event;
   late bool deleted;
 }
@@ -804,6 +943,10 @@ class JoinGroupDto {
     groupId = other.groupId;
   }
 
+  JoinGroupDto(
+    this.groupId,
+  );
+
   late String groupId;
 }
 
@@ -816,6 +959,8 @@ class LeaveGroupDto {
   LeaveGroupDto.fromJson(Map<String, dynamic> fields) {}
 
   void partialUpdate(LeaveGroupDto other) {}
+
+  LeaveGroupDto();
 }
 
 class RequestGroupDataDto {
@@ -827,6 +972,8 @@ class RequestGroupDataDto {
   RequestGroupDataDto.fromJson(Map<String, dynamic> fields) {}
 
   void partialUpdate(RequestGroupDataDto other) {}
+
+  RequestGroupDataDto();
 }
 
 class SetCurrentEventDto {
@@ -843,6 +990,10 @@ class SetCurrentEventDto {
   void partialUpdate(SetCurrentEventDto other) {
     eventId = other.eventId;
   }
+
+  SetCurrentEventDto(
+    this.eventId,
+  );
 
   late String eventId;
 }
@@ -870,6 +1021,13 @@ class GroupMemberDto {
     points = other.points;
     curChallengeId = other.curChallengeId;
   }
+
+  GroupMemberDto(
+    this.id,
+    this.name,
+    this.points,
+    this.curChallengeId,
+  );
 
   late String id;
   late String name;
@@ -920,6 +1078,14 @@ class GroupDto {
     members = other.members == null ? members : other.members;
   }
 
+  GroupDto(
+    this.id,
+    this.friendlyId,
+    this.hostId,
+    this.curEventId,
+    this.members,
+  );
+
   late String id;
   late String? friendlyId;
   late String? hostId;
@@ -945,6 +1111,11 @@ class UpdateGroupDataDto {
     deleted = other.deleted;
   }
 
+  UpdateGroupDataDto(
+    this.group,
+    this.deleted,
+  );
+
   late GroupDto group;
   late bool deleted;
 }
@@ -967,6 +1138,11 @@ class GroupInviteDto {
     username = other.username;
   }
 
+  GroupInviteDto(
+    this.groupId,
+    this.username,
+  );
+
   late String groupId;
   late String username;
 }
@@ -985,6 +1161,10 @@ class SendGroupInviteDto {
   void partialUpdate(SendGroupInviteDto other) {
     targetUsername = other.targetUsername;
   }
+
+  SendGroupInviteDto(
+    this.targetUsername,
+  );
 
   late String targetUsername;
 }
@@ -1036,6 +1216,15 @@ class OrganizationDto {
     managers = other.managers == null ? managers : other.managers;
   }
 
+  OrganizationDto(
+    this.id,
+    this.name,
+    this.accessCode,
+    this.members,
+    this.events,
+    this.managers,
+  );
+
   late String id;
   late String? name;
   late String? accessCode;
@@ -1059,6 +1248,10 @@ class RequestOrganizationDataDto {
     admin = other.admin;
   }
 
+  RequestOrganizationDataDto(
+    this.admin,
+  );
+
   late bool admin;
 }
 
@@ -1080,6 +1273,11 @@ class UpdateOrganizationDataDto {
     deleted = other.deleted;
   }
 
+  UpdateOrganizationDataDto(
+    this.organization,
+    this.deleted,
+  );
+
   late OrganizationDto organization;
   late bool deleted;
 }
@@ -1093,6 +1291,8 @@ class CloseAccountDto {
   CloseAccountDto.fromJson(Map<String, dynamic> fields) {}
 
   void partialUpdate(CloseAccountDto other) {}
+
+  CloseAccountDto();
 }
 
 class SetUsernameDto {
@@ -1109,6 +1309,10 @@ class SetUsernameDto {
   void partialUpdate(SetUsernameDto other) {
     newUsername = other.newUsername;
   }
+
+  SetUsernameDto(
+    this.newUsername,
+  );
 
   late String newUsername;
 }
@@ -1128,6 +1332,10 @@ class SetMajorDto {
     newMajor = other.newMajor;
   }
 
+  SetMajorDto(
+    this.newMajor,
+  );
+
   late String newMajor;
 }
 
@@ -1145,6 +1353,10 @@ class SetGraduationYearDto {
   void partialUpdate(SetGraduationYearDto other) {
     newYear = other.newYear;
   }
+
+  SetGraduationYearDto(
+    this.newYear,
+  );
 
   late String newYear;
 }
@@ -1167,6 +1379,11 @@ class BanUserDto {
     isBanned = other.isBanned;
   }
 
+  BanUserDto(
+    this.userId,
+    this.isBanned,
+  );
+
   late String userId;
   late bool isBanned;
 }
@@ -1174,7 +1391,7 @@ class BanUserDto {
 class SetAuthToOAuthDto {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> fields = {};
-    fields['provider'] = provider!.toString();
+    fields['provider'] = provider!.name;
     fields['authId'] = authId;
     return fields;
   }
@@ -1188,6 +1405,11 @@ class SetAuthToOAuthDto {
     provider = other.provider;
     authId = other.authId;
   }
+
+  SetAuthToOAuthDto(
+    this.provider,
+    this.authId,
+  );
 
   late SetAuthToOAuthProviderDto provider;
   late String authId;
@@ -1207,6 +1429,10 @@ class SetAuthToDeviceDto {
   void partialUpdate(SetAuthToDeviceDto other) {
     deviceId = other.deviceId;
   }
+
+  SetAuthToDeviceDto(
+    this.deviceId,
+  );
 
   late String deviceId;
 }
@@ -1229,6 +1455,11 @@ class RequestGlobalLeaderDataDto {
     count = other.count;
   }
 
+  RequestGlobalLeaderDataDto(
+    this.offset,
+    this.count,
+  );
+
   late int offset;
   late int count;
 }
@@ -1250,6 +1481,10 @@ class RequestUserDataDto {
     userId = other.userId == null ? userId : other.userId;
   }
 
+  RequestUserDataDto(
+    this.userId,
+  );
+
   late String? userId;
 }
 
@@ -1262,6 +1497,8 @@ class RequestAllUserDataDto {
   RequestAllUserDataDto.fromJson(Map<String, dynamic> fields) {}
 
   void partialUpdate(RequestAllUserDataDto other) {}
+
+  RequestAllUserDataDto();
 }
 
 class RequestFavoriteEventDataDto {
@@ -1282,6 +1519,11 @@ class RequestFavoriteEventDataDto {
     eventId = other.eventId;
   }
 
+  RequestFavoriteEventDataDto(
+    this.isFavorite,
+    this.eventId,
+  );
+
   late bool isFavorite;
   late String eventId;
 }
@@ -1294,7 +1536,7 @@ class UserDto {
       fields['username'] = username;
     }
     if (enrollmentType != null) {
-      fields['enrollmentType'] = enrollmentType!.toString();
+      fields['enrollmentType'] = enrollmentType!.name;
     }
     if (email != null) {
       fields['email'] = email;
@@ -1312,7 +1554,7 @@ class UserDto {
       fields['groupId'] = groupId;
     }
     if (authType != null) {
-      fields['authType'] = authType!.toString();
+      fields['authType'] = authType!.name;
     }
     if (trackedEvents != null) {
       fields['trackedEvents'] = trackedEvents;
@@ -1361,6 +1603,20 @@ class UserDto {
     favorites = other.favorites == null ? favorites : other.favorites;
   }
 
+  UserDto(
+    this.id,
+    this.username,
+    this.enrollmentType,
+    this.email,
+    this.year,
+    this.score,
+    this.isBanned,
+    this.groupId,
+    this.authType,
+    this.trackedEvents,
+    this.favorites,
+  );
+
   late String id;
   late String? username;
   late UserEnrollmentTypeDto? enrollmentType;
@@ -1392,6 +1648,60 @@ class UpdateUserDataDto {
     deleted = other.deleted;
   }
 
+  UpdateUserDataDto(
+    this.user,
+    this.deleted,
+  );
+
   late UserDto user;
   late bool deleted;
+}
+
+class AddManagerDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['email'] = email;
+    fields['organizationId'] = organizationId;
+    return fields;
+  }
+
+  AddManagerDto.fromJson(Map<String, dynamic> fields) {
+    email = fields["email"];
+    organizationId = fields["organizationId"];
+  }
+
+  void partialUpdate(AddManagerDto other) {
+    email = other.email;
+    organizationId = other.organizationId;
+  }
+
+  AddManagerDto(
+    this.email,
+    this.organizationId,
+  );
+
+  late String email;
+  late String organizationId;
+}
+
+class JoinOrganizationDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['accessCode'] = accessCode;
+    return fields;
+  }
+
+  JoinOrganizationDto.fromJson(Map<String, dynamic> fields) {
+    accessCode = fields["accessCode"];
+  }
+
+  void partialUpdate(JoinOrganizationDto other) {
+    accessCode = other.accessCode;
+  }
+
+  JoinOrganizationDto(
+    this.accessCode,
+  );
+
+  late String accessCode;
 }
