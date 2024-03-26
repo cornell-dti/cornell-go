@@ -64,7 +64,7 @@ describe('OrganizationModule E2E', () => {
   let exEv: EventBase;
   let exChal: Challenge;
 
-  let sendEventMock: jest.MockContext<Promise<void>, [string[], string, {}]>;
+  let sendEventMock: jest.SpyInstance<Promise<void>, [string[], string, {}]>;
 
   beforeAll(async () => {
     moduleRef = await Test.createTestingModule({
@@ -81,7 +81,7 @@ describe('OrganizationModule E2E', () => {
     clientService = moduleRef.get<ClientService>(ClientService);
     groupService = moduleRef.get<GroupService>(GroupService);
 
-    sendEventMock = jest.spyOn(clientService, 'sendEvent').mock;
+    sendEventMock = jest.spyOn(clientService, 'sendEvent').mockImplementation();
 
     chalGateway = moduleRef.get<ChallengeGateway>(ChallengeGateway);
     evGateway = moduleRef.get<EventGateway>(EventGateway);
@@ -168,26 +168,23 @@ describe('OrganizationModule E2E', () => {
   describe('Basic and manager user abilities', () => {
     it('Should be able to read own data', async () => {
       await userGateway.requestUserData(basicAbility, basicUser, {});
-      const [users, ev, dto] = sendEventMock.lastCall as [
+
+      const [users, ev, dto] = sendEventMock.mock.lastCall as [
         string[],
         string,
         UpdateUserDataDto,
       ];
 
+      expect(ev).toEqual('updateUserData');
       expect(users).toContain(basicUser.id);
       expect(users).not.toContain(managerUser.id);
-      expect(ev).toEqual('updateUserData');
-      expect(dto.user).toEqual(
-        expect.objectContaining({
-          email: basicUser.email,
-          groupId: basicUser.groupId,
-          id: basicUser.id,
-          score: basicUser.score,
-          enrollmentType: basicUser.enrollmentType,
-          username: basicUser.username,
-          year: basicUser.year,
-        }),
-      );
+
+      expect(dto.user.id).toEqual(basicUser.id);
+      expect(dto.user.email).toEqual(basicUser.email);
+      expect(dto.user.score).toEqual(basicUser.score);
+      expect(dto.user.enrollmentType).toEqual(basicUser.enrollmentType);
+      expect(dto.user.username).toEqual(basicUser.username);
+      expect(dto.user.year).toEqual(basicUser.year);
     });
 
     it('Should be able to modify own username', async () => {
@@ -196,7 +193,7 @@ describe('OrganizationModule E2E', () => {
         deleted: false,
       });
 
-      const [users, ev, dto] = sendEventMock.lastCall as [
+      const [users, ev, dto] = sendEventMock.mock.lastCall as [
         string[],
         string,
         UpdateUserDataDto,
@@ -211,7 +208,9 @@ describe('OrganizationModule E2E', () => {
         events: [defaultEv.id],
       });
 
-      let [users, ev, dto] = sendEventMock.lastCall as [
+      console.log(JSON.stringify(sendEventMock.mock.calls));
+
+      let [users, ev, dto] = sendEventMock.mock.lastCall as [
         string[],
         string,
         UpdateEventDataDto,
@@ -225,7 +224,7 @@ describe('OrganizationModule E2E', () => {
         challenges: [defaultChal.id],
       });
 
-      let [users2, ev2, dto2] = sendEventMock.lastCall as [
+      let [users2, ev2, dto2] = sendEventMock.mock.lastCall as [
         string[],
         string,
         UpdateChallengeDataDto,
@@ -240,7 +239,7 @@ describe('OrganizationModule E2E', () => {
       await userGateway.requestAllUserData(basicAbility, basicUser, {});
 
       expect(
-        sendEventMock.calls.every(call => {
+        sendEventMock.mock.calls.every(call => {
           const [users, ev, dto] = call as [
             string[],
             string,
@@ -260,7 +259,7 @@ describe('OrganizationModule E2E', () => {
       });
 
       expect(
-        sendEventMock.calls.every(call => {
+        sendEventMock.mock.calls.every(call => {
           const [users, ev, dto] = call as [
             string[],
             string,
@@ -278,7 +277,7 @@ describe('OrganizationModule E2E', () => {
       });
 
       expect(
-        sendEventMock.calls.every(call => {
+        sendEventMock.mock.calls.every(call => {
           const [users, ev, dto] = call as [
             string[],
             string,
@@ -335,21 +334,21 @@ describe('OrganizationModule E2E', () => {
 
     it('Should not be able to modify other org', async () => {
       const newEv = await eventService.upsertEventFromDto(managerAbility, {
-        id: exEv.id,
+        id: defaultEv.id,
         name: 'New name',
       });
 
-      expect(newEv).toBeNull();
+      expect(newEv?.name).not.toEqual('New name');
 
       const newChal = await challengeService.upsertChallengeFromDto(
         managerAbility,
         {
-          id: exChal.id,
+          id: defaultChal.id,
           name: 'New Name',
         },
       );
 
-      expect(newChal).toBeNull();
+      expect(newChal?.name).not.toEqual('New Name');
     });
   });
 

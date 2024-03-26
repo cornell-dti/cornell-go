@@ -66,15 +66,21 @@ export class ClientService {
     event: string,
     target: string,
     dto: TDto,
-    resourceId?: string,
-    dtoSubject?: Subjects<SubjectTypes>,
+    resource?: {
+      id: string;
+      dtoField?: keyof TDto;
+      subject: Subjects<SubjectTypes>;
+    },
   ) {
-    if (resourceId) this.gateway.server.in(target).socketsJoin(resourceId);
-
-    if (!dtoSubject) {
+    if (!resource) {
       this.gateway.server.to(target).emit(event, dto);
     } else {
-      const fieldList = Object.keys(dto);
+      this.gateway.server.in(target).socketsJoin(resource.id);
+
+      const fieldList = Object.keys(
+        resource.dtoField ? (dto[resource.dtoField] as {}) : dto,
+      );
+
       const options: PermittedFieldsOptions<AppAbility> = {
         fieldsFrom: rule => rule.fields || fieldList,
       };
@@ -89,7 +95,7 @@ export class ClientService {
         const permittedFields = permittedFieldsOf(
           ability,
           Action.Read,
-          dtoSubject,
+          resource.subject,
           options,
         ).sort();
 
@@ -105,13 +111,23 @@ export class ClientService {
 
       // Process all batches and send out DTO
       for (const [fields, users] of separatedDtos) {
-        const partialDto = Object.fromEntries(
-          Object.entries(dto).filter(([k, v]) => fields.includes(k)),
-        );
+        if (fields.length === 0) continue;
 
-        if (Object.entries(partialDto).length === 0) continue;
+        if (resource.dtoField) {
+          dto[resource.dtoField] = Object.fromEntries(
+            Object.entries(dto[resource.dtoField] as any).filter(([k, v]) =>
+              fields.includes(k),
+            ),
+          ) as any;
 
-        await this.sendEvent(users, event, partialDto);
+          await this.sendEvent(users, event, dto);
+        } else {
+          const partialDto = Object.fromEntries(
+            Object.entries(dto).filter(([k, v]) => fields.includes(k)),
+          );
+
+          await this.sendEvent(users, event, partialDto);
+        }
       }
     }
   }

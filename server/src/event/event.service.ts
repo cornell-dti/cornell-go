@@ -48,7 +48,10 @@ export class EventService {
   ): Promise<EventBase[]> {
     return await this.prisma.eventBase.findMany({
       where: {
-        AND: [{ id: { in: ids } }, accessibleBy(ability).EventBase],
+        AND: [
+          { id: { in: ids } },
+          accessibleBy(ability, Action.Read).EventBase,
+        ],
       },
     });
   }
@@ -290,7 +293,7 @@ export class EventService {
       'updateEventTrackerData',
       target?.id ?? tracker.id,
       dto,
-      'EventTracker',
+      { id: dto.eventId, subject: 'EventTracker' },
     );
   }
 
@@ -304,8 +307,7 @@ export class EventService {
       'updateEventData',
       target?.id ?? ev.id,
       dto,
-      ev.id,
-      subject('EventBase', ev),
+      { id: ev.id, subject: subject('EventBase', ev), dtoField: 'event' },
     );
   }
 
@@ -433,7 +435,7 @@ export class EventService {
 
       console.log(`Created event ${ev.id}`);
     } else {
-      return ev;
+      return null;
     }
 
     if (event?.challenges) {

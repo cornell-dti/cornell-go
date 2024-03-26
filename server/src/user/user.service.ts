@@ -242,8 +242,11 @@ export class UserService {
       'updateUserData',
       target?.id ?? user.id,
       dto,
-      user.id,
-      subject('User', user),
+      {
+        id: user.id,
+        subject: subject('User', user),
+        dtoField: 'user',
+      },
     );
   }
 }

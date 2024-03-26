@@ -209,8 +209,11 @@ export class ChallengeService {
       'updateChallengeData',
       target?.id ?? challenge.id,
       dto,
-      challenge.id,
-      subject('Challenge', challenge),
+      {
+        id: challenge.id,
+        dtoField: 'challenge',
+        subject: subject('Challenge', challenge),
+      },
     );
   }
 
@@ -300,6 +303,8 @@ export class ChallengeService {
       });
 
       console.log(`Created challenge ${chal.id}`);
+    } else {
+      return null;
     }
 
     return chal;

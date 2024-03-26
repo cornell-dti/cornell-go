@@ -23,7 +23,7 @@ export const defaultEventData = {
   requiredMembers: 1,
   difficulty: DifficultyMode.NORMAL,
   timeLimitation: TimeLimitationType.PERPETUAL,
-  indexable: false,
+  indexable: true,
   endTime: new Date('2060'),
   latitude: 42.44755580740012,
   longitude: -76.48504614830019,
@@ -157,8 +157,11 @@ export class OrganizationService {
       'updateOrganizationData',
       target?.id ?? organization.id,
       dto,
-      organization.id,
-      subject('Organization', organization),
+      {
+        id: organization.id,
+        subject: subject('Organization', organization),
+        dtoField: 'organization',
+      },
     );
   }
 
