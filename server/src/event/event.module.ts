@@ -6,6 +6,7 @@ import { OrganizationModule } from '../organization/organization.module';
 import { PrismaModule } from '../prisma/prisma.module';
 import { EventGateway } from './event.gateway';
 import { EventService } from './event.service';
+import { CaslModule } from '../casl/casl.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { EventService } from './event.service';
     ClientModule,
     PrismaModule,
     OrganizationModule,
+    CaslModule,
   ],
   providers: [EventService, EventGateway],
   exports: [EventService, EventGateway],

@@ -15,6 +15,10 @@ import { UserService } from '../user/user.service';
 import { OrganizationService } from '../organization/organization.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { GroupDto, GroupInviteDto, UpdateGroupDataDto } from './group.dto';
+import { AppAbility, CaslAbilityFactory } from '../casl/casl-ability.factory';
+import { subject } from '@casl/ability';
+import { Action } from '../casl/action.enum';
+import { accessibleBy } from '@casl/prisma';
 
 @Injectable()
 export class GroupService {
@@ -25,6 +29,7 @@ export class GroupService {
     private userService: UserService,
     private clientService: ClientService,
     private prisma: PrismaService,
+    private abilityFactory: CaslAbilityFactory,
   ) {}
 
   genFriendlyId() {
@@ -69,6 +74,12 @@ export class GroupService {
   async getGroupForUser(user: User): Promise<Group> {
     return await this.prisma.group.findFirstOrThrow({
       where: { members: { some: { id: user.id } } },
+    });
+  }
+
+  async getGroupById(id: string) {
+    return await this.prisma.group.findFirst({
+      where: { id },
     });
   }
 
@@ -201,6 +212,7 @@ export class GroupService {
    * @returns False if eventId is invalid, otherwise true
    */
   async setCurrentEvent(actor: User, eventId: string) {
+    const actorAbility = this.abilityFactory.createForUser(actor);
     const group = await this.prisma.group.findUniqueOrThrow({
       where: { id: actor.groupId },
       include: { curEvent: { select: { endTime: true } }, members: true },
@@ -208,32 +220,33 @@ export class GroupService {
 
     const stillActive = group.curEvent.endTime.getTime() - Date.now() > 0;
 
-    let newEvent: EventBase | null = null;
+    const newEvent = await this.eventService.getEventById(eventId);
 
-    if (stillActive) {
-      // If actor is setting a new event and actor is not host of the group,
-      // then this is an invalid set event.
-      // If we are only switching an unactive event to a default event,
-      // actor and eventId do not matter.
-      if (group.hostId !== actor.id || eventId === group.curEventId) {
-        return;
-      }
-      // Uses getAllowedEvents helper method
-      const eventIdIntersect = await this.getAllowedEventIds(group);
+    if (!stillActive || !newEvent) return false;
 
-      if (eventIdIntersect === null || !eventIdIntersect?.includes(eventId))
-        return false;
-
-      newEvent = await this.eventService.getEventById(eventId);
+    // If actor is setting a new event and actor is not host of the group,
+    // then this is an invalid set event.
+    // If we are only switching an unactive event to a default event,
+    // actor and eventId do not matter.
+    if (
+      actorAbility.cannot(Action.Update, 'Group', 'curEventId') ||
+      eventId === group.curEventId
+    ) {
+      return;
     }
 
-    if (!newEvent) return false;
+    for (const mem of group.members) {
+      const ability = this.abilityFactory.createForUser(mem);
+      if (ability.cannot(Action.Read, subject('EventBase', newEvent))) {
+        return false;
+      }
+    }
 
     const groupMembers = await this.getMembers(group);
 
     await Promise.all(
       groupMembers.map(async (member: User) => {
-        await this.eventService.createEventTracker(member, newEvent!);
+        await this.eventService.createEventTracker(member, newEvent);
       }),
     );
 
@@ -243,35 +256,6 @@ export class GroupService {
     });
     await this.log.logEvent(SessionLogEvent.SELECT_EVENT, eventId, actor.id);
     return true;
-  }
-
-  /**  Finds all allowed events for group based on user's orgs */
-  async getAllowedEventIds(group: Group) {
-    const users = await this.prisma.user.findMany({
-      where: { groupId: group.id },
-      select: { memberOf: { include: { events: true } } },
-    });
-
-    const uniqueOrgs = Array.from(
-      new Set(users.map(user => user.memberOf).flat()),
-    );
-
-    const orgIntersect = users.reduce((acc, user) => {
-      if (acc.length === 0) {
-        return user.memberOf;
-      } else {
-        return acc.filter(organization => user.memberOf.includes(organization));
-      }
-    }, uniqueOrgs);
-
-    if (orgIntersect.length === 0) return;
-
-    const eventIdIntersect = Array.from(
-      new Set(
-        orgIntersect.map(org => org.events.map(event => event.id)).flat(),
-      ),
-    );
-    return eventIdIntersect;
   }
 
   async dtoForGroup(group: Group): Promise<GroupDto> {
@@ -301,23 +285,18 @@ export class GroupService {
     };
   }
 
-  async emitUpdateGroupData(
-    group: Group,
-    deleted: boolean,
-    admin?: boolean,
-    user?: User,
-  ) {
+  async emitUpdateGroupData(group: Group, deleted: boolean, target?: User) {
     const dto: UpdateGroupDataDto = {
-      group: deleted ? group.id : await this.dtoForGroup(group),
+      group: deleted ? { id: group.id } : await this.dtoForGroup(group),
       deleted,
     };
 
-    if (user) {
-      this.clientService.sendUpdate('updateGroupData', user.id, !!admin, dto);
-    } else {
-      this.clientService.sendUpdate('updateGroupData', group.id, false, dto);
-      this.clientService.sendUpdate('updateGroupData', group.id, true, dto);
-    }
+    await this.clientService.sendProtected(
+      'updateGroupData',
+      target?.id ?? group.id,
+      dto,
+      { id: group.id, subject: subject('Group', group), dtoField: 'group' },
+    );
   }
 
   async emitGroupInvite(group: Group, username: string, user: User) {
@@ -326,37 +305,40 @@ export class GroupService {
     });
 
     const dto: GroupInviteDto = {
-      groupId: await (await this.dtoForGroup(group)).friendlyId,
+      groupId: group.friendlyId,
       username: user.username,
     };
 
     if (targetUser) {
-      this.clientService.sendUpdate(
+      await this.clientService.sendProtected(
         'groupInvitation',
         targetUser.id,
-        false,
         dto,
       );
     } else {
-      this.clientService.emitErrorData(
+      await this.clientService.emitErrorData(
         user,
         'Group Invitation: User not found',
       );
     }
   }
 
-  async updateGroup(group: GroupDto): Promise<Group> {
-    const groupEntity = await this.prisma.group.update({
-      where: { id: group.id },
-      data: {
-        id: group.id,
-        friendlyId: group.friendlyId,
-        hostId: group.hostId,
-        curEventId: group.curEventId,
-      },
+  async updateGroup(ability: AppAbility, group: GroupDto): Promise<Group> {
+    await this.prisma.group.updateMany({
+      where: { AND: [{ id: group.id }, accessibleBy(ability).Group] },
+      data: await this.abilityFactory.filterInaccessible(
+        {
+          friendlyId: group.friendlyId,
+          hostId: group.hostId,
+          curEventId: group.curEventId,
+        },
+        'Group',
+        ability,
+        Action.Update,
+      ),
     });
 
-    return groupEntity;
+    return (await this.getGroupById(group.id))!;
   }
 
   /** Helper function that notifies the user, all old group members,
@@ -364,29 +346,34 @@ export class GroupService {
   async updateGroupMembers(user: User, oldGroup: Group | null) {
     if (oldGroup) {
       await this.emitUpdateGroupData(oldGroup, false);
-      this.clientService.unsubscribe(user, oldGroup.id, false);
+      this.clientService.unsubscribe(user, oldGroup.id);
     }
 
     const newGroup = await this.getGroupForUser(user);
-    this.clientService.subscribe(user, newGroup.id, false);
+    this.clientService.subscribe(user, newGroup.id);
     await this.emitUpdateGroupData(newGroup, false);
   }
 
-  async removeGroup(removeId: string) {
+  async removeGroup(ability: AppAbility, removeId: string) {
     const deletedGroup = await this.prisma.group.findFirstOrThrow({
       where: { id: removeId },
       include: { members: true },
     });
 
+    if (ability.cannot(Action.Delete, subject('Group', deletedGroup))) {
+      return;
+    }
+
     for (const mem of deletedGroup.members) {
       await this.leaveGroup(mem);
-      this.clientService.unsubscribe(mem, deletedGroup.id, false);
-      await this.userService.emitUpdateUserData(mem, false, true, true);
+      this.clientService.unsubscribe(mem, deletedGroup.id);
+
+      await this.userService.emitUpdateUserData(mem, false, true);
       const group = await this.getGroupForUser(mem);
       await this.emitUpdateGroupData(group, false);
     }
 
-    await this.emitUpdateGroupData(deletedGroup, true, true);
+    await this.emitUpdateGroupData(deletedGroup, true);
     await this.clientService.unsubscribeAll(deletedGroup.id);
     await this.prisma.group.delete({ where: { id: removeId } });
   }

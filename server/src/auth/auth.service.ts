@@ -207,7 +207,7 @@ export class AuthService {
     }
   }
 
-  async getManagedOrgIds(user: User) {
+  async getManagedOrgs(user: User) {
     return (
       await this.prisma.organization.findMany({
         where: { managers: { some: { id: user.id } } },

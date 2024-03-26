@@ -74,6 +74,7 @@ enum OrganizationSpecialUsage {
 
 model User {
   id                  String               @id() @default(uuid())
+  subject             String               @default("User")
   authToken           String
   authType            AuthType
   username            String
@@ -100,6 +101,7 @@ model User {
 
 model Group {
   id         String    @id @default(uuid())
+  subject    String    @default("Group")
   friendlyId String    @unique
   members    User[]    @relation("member")
   host       User?     @relation("host", fields: [hostId], references: [id], onDelete: SetNull)
@@ -110,6 +112,7 @@ model Group {
 
 model Challenge {
   id             String          @id @default(uuid()) @map("id")
+  subject        String          @default("Challenge")
   linkedEvent    EventBase?      @relation("all", fields: [linkedEventId], references: [id], onDelete: Cascade)
   linkedEventId  String?
   eventIndex     Int
@@ -128,6 +131,7 @@ model Challenge {
 
 model EventBase {
   id              String             @id @default(uuid())
+  subject         String             @default("EventBase")
   requiredMembers Int
   name            String
   description     String
@@ -147,6 +151,7 @@ model EventBase {
 
 model EventTracker {
   id                  String          @id @default(uuid())
+  subject             String          @default("EventTracker")
   user                User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId              String
   score               Int
@@ -160,6 +165,7 @@ model EventTracker {
 
 model PrevChallenge {
   id           Int          @id @default(autoincrement())
+  subject      String       @default("PrevChallenge")
   user         User         @relation("owner", fields: [userId], references: [id], onDelete: Cascade)
   userId       String
   participants User[]       @relation("prevChallengeParticipant")
@@ -172,6 +178,7 @@ model PrevChallenge {
 
 model Organization {
   id           String                   @id @default(uuid())
+  subject      String                   @default("Organization")
   name         String
   accessCode   String
   members      User[]                   @relation("orgToUser")
@@ -182,6 +189,7 @@ model Organization {
 
 model SessionLogEntry {
   id         String          @id @default(uuid())
+  subject    String          @default("SessionLogEntry")
   linkedUser User?           @relation(fields: [userId], references: [id])
   eventType  SessionLogEvent
   data       String
@@ -191,6 +199,7 @@ model SessionLogEntry {
 
 model Achievement {
   id              String               @id @default(uuid())
+  subject         String               @default("Achievement")
   requiredPoints  Int
   name            String
   description     String
@@ -204,6 +213,7 @@ model Achievement {
 
 model AchievementTracker {
   id            String      @id @default(uuid())
+  subject       String      @default("AchievementTracker")
   user          User        @relation(fields: [userId], references: [id])
   progress      Int
   achievement   Achievement @relation(fields: [achievementId], references: [id])

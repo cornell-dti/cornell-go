@@ -1,10 +1,10 @@
 export interface OrganizationDto {
   id: string;
-  name: string;
-  accessCode: string;
-  members: string[];
-  events: string[];
-  managers: string[];
+  name?: string;
+  accessCode?: string;
+  members?: string[];
+  events?: string[];
+  managers?: string[];
 }
 
 export interface RequestOrganizationDataDto {
@@ -12,6 +12,6 @@ export interface RequestOrganizationDataDto {
 }
 
 export interface UpdateOrganizationDataDto {
-  organization: OrganizationDto | string;
+  organization: OrganizationDto;
   deleted: boolean;
 }

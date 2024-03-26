@@ -18,13 +18,6 @@ class TrackerModel extends ChangeNotifier {
       _trackers.clear();
       notifyListeners();
     });
-
-    client.clientApi.invalidateDataStream.listen((event) {
-      if (event.challengeData) {
-        _trackers.clear();
-        notifyListeners();
-      }
-    });
   }
 
   EventTrackerDto? trackerByEventId(String eventId) {

@@ -1,7 +1,7 @@
 import { useContext, useState } from "react";
 import { compareTwoStrings } from "string-similarity";
 import styled, { css } from "styled-components";
-import { ChallengeDto } from "../dto/challenge.dto";
+import { ChallengeDto } from "../all.dto";
 import { moveDown, moveUp } from "../ordering";
 import { AlertModal } from "./AlertModal";
 import { DeleteModal } from "./DeleteModal";
@@ -47,15 +47,16 @@ function ChallengeCard(props: {
     <ListCardBox>
       <ListCardTitle>{props.challenge.name}</ListCardTitle>
       <ListCardDescription>{props.challenge.description}</ListCardDescription>
-      <ChallengeImage url={props.challenge.imageUrl} />
+      <ChallengeImage url={props.challenge.imageUrl ?? ""} />
       <ListCardBody>
         Id: <b>{props.challenge.id}</b> <br />
         Location: <b>{props.challenge.location}</b> <br />
         Score: <b>{props.challenge.points}</b> <br />
-        Latitude: <b>{props.challenge.lat}</b>, Longitude:{" "}
-        <b>{props.challenge.long}</b> <br />
-        Awarding Distance: <b>{props.challenge.awardingRadius} meters</b> <br />
-        Close Distance: <b>{props.challenge.closeRadius} meters</b>
+        Latitude: <b>{props.challenge.latF}</b>, Longitude:{" "}
+        <b>{props.challenge.longF}</b> <br />
+        Awarding Distance: <b>{props.challenge.awardingRadiusF} meters</b>{" "}
+        <br />
+        Close Distance: <b>{props.challenge.closeRadiusF} meters</b>
       </ListCardBody>
       <ListCardButtons>
         <HButton onClick={props.onUp}>UP</HButton>
@@ -88,35 +89,43 @@ function toForm(challenge: ChallengeDto) {
   return [
     {
       name: "Location",
-      latitude: challenge.lat,
-      longitude: challenge.long,
+      latitude: challenge.latF ?? 0,
+      longitude: challenge.longF ?? 0,
     },
     {
       name: "Location Description",
       characterLimit: 2048,
-      value: challenge.location,
+      value: challenge.location ?? "",
     },
-    { name: "Name", characterLimit: 256, value: challenge.name },
-    { name: "Description", characterLimit: 2048, value: challenge.description },
+    { name: "Name", characterLimit: 256, value: challenge.name ?? "" },
+    {
+      name: "Description",
+      characterLimit: 2048,
+      value: challenge.description ?? "",
+    },
     {
       name: "Points",
       characterLimit: 2048,
       min: 1,
       max: 1000,
-      value: challenge.points,
+      value: challenge.points ?? 0,
     },
-    { name: "Image URL", characterLimit: 2048, value: challenge.imageUrl },
+    {
+      name: "Image URL",
+      characterLimit: 2048,
+      value: challenge.imageUrl ?? "",
+    },
     {
       name: "Awarding Distance (meters)",
       min: 1,
       max: 1000,
-      value: challenge.awardingRadius,
+      value: challenge.awardingRadiusF ?? 0,
     },
     {
       name: "Close Distance (meters)",
       min: 1,
       max: 1000,
-      value: challenge.closeRadius,
+      value: challenge.closeRadiusF ?? 0,
     },
   ];
 }
@@ -133,11 +142,11 @@ function fromForm(
     description: (form[3] as FreeEntryForm).value,
     points: (form[4] as NumberEntryForm).value,
     imageUrl: (form[5] as FreeEntryForm).value,
-    lat: (form[0] as MapEntryForm).latitude,
-    long: (form[0] as MapEntryForm).longitude,
-    awardingRadius: (form[6] as NumberEntryForm).value,
-    closeRadius: (form[7] as NumberEntryForm).value,
-    containingEventId: eventId,
+    latF: (form[0] as MapEntryForm).latitude,
+    longF: (form[0] as MapEntryForm).longitude,
+    awardingRadiusF: (form[6] as NumberEntryForm).value,
+    closeRadiusF: (form[7] as NumberEntryForm).value,
+    linkedEventId: eventId,
   };
 }
 
@@ -214,39 +223,43 @@ export function Challenges() {
       {serverData.selectedEvent === "" ? (
         <CenterText>Select an event to view challenges</CenterText>
       ) : serverData.events.get(serverData.selectedEvent) ? (
-        serverData.events.get(serverData.selectedEvent)?.challengeIds.length ===
+        serverData.events.get(serverData.selectedEvent)?.challenges?.length ===
           0 && <CenterText>No challenges in event</CenterText>
       ) : (
         <CenterText>Error getting challenges</CenterText>
       )}
-      {selectedEvent?.challengeIds
-        .filter((chalId) => serverData.challenges.get(chalId))
-        .map((chalId) => serverData.challenges.get(chalId)!)
-        .sort((a, b) =>
+      {selectedEvent?.challenges
+        ?.filter((chalId: string) => serverData.challenges.get(chalId))
+        .map((chalId: string) => serverData.challenges.get(chalId)!)
+        .sort((a: ChallengeDto, b: ChallengeDto) =>
           query === ""
             ? 0
-            : compareTwoStrings(b.name, query) -
-              compareTwoStrings(a.name, query) +
-              compareTwoStrings(b.description, query) -
-              compareTwoStrings(a.description, query)
+            : compareTwoStrings(b.name ?? "", query) -
+              compareTwoStrings(a.name ?? "", query) +
+              compareTwoStrings(b.description ?? "", query) -
+              compareTwoStrings(a.description ?? "", query)
         )
-        .map((chal) => (
+        .map((chal: ChallengeDto) => (
           <ChallengeCard
             key={chal.id}
             challenge={chal}
             onUp={() => {
-              if (query !== "") return;
-              selectedEvent.challengeIds = moveUp(
-                selectedEvent.challengeIds,
-                selectedEvent.challengeIds.findIndex((id) => id === chal.id)
+              if (query !== "" || !selectedEvent.challenges) return;
+              selectedEvent.challenges = moveUp(
+                selectedEvent.challenges,
+                selectedEvent.challenges.findIndex(
+                  (id: string) => id === chal.id
+                ) ?? 0
               );
               serverData.updateEvent(selectedEvent);
             }}
             onDown={() => {
-              if (query !== "") return;
-              selectedEvent.challengeIds = moveDown(
-                selectedEvent.challengeIds,
-                selectedEvent.challengeIds.findIndex((id) => id === chal.id)
+              if (query !== "" || !selectedEvent.challenges) return;
+              selectedEvent.challenges = moveDown(
+                selectedEvent.challenges,
+                selectedEvent.challenges.findIndex(
+                  (id: string) => id === chal.id
+                )
               );
               serverData.updateEvent(selectedEvent);
             }}
