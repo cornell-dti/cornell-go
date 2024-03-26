@@ -25,7 +25,7 @@ export interface AchievementDto {
   imageUrl: string;
   locationType: LocationType;
   achievementType: AchievementType;
-  organizationIds: string[];
+  organizations: string[];
 }
 
 export interface AchievementTrackerDto {

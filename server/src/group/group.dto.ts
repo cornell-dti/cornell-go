@@ -24,16 +24,16 @@ export interface GroupMemberDto {
 
 export interface GroupDto {
   id: string;
-  friendlyId: string;
-  hostId: string;
-  curEventId: string;
-  members: GroupMemberDto[];
+  friendlyId?: string;
+  hostId?: string;
+  curEventId?: string;
+  members?: GroupMemberDto[];
 }
 
 export interface RequestGroupDataDto {}
 
 export interface UpdateGroupDataDto {
-  group: GroupDto | string;
+  group: GroupDto;
   deleted: boolean;
 }
 

@@ -1,6 +1,7 @@
 #!/bin/sh
 
 npx prisma migrate deploy || true
+node src/caslfix.js
 
 if [ $DEVELOPMENT = "false" ]; then 
   npm run start:prod; 

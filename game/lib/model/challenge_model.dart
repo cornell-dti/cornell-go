@@ -14,11 +14,10 @@ class ChallengeModel extends ChangeNotifier {
      * Stream that listens to updates on the challenges. Challenges can be either deleted or updated. 
      */
     client.clientApi.updateChallengeDataStream.listen((event) {
-      if (event.challengeId != "") {
-        //event.challengeId!=null => event to be deleted.
-        _challengesById.remove(event.challengeId);
+      if (event.deleted) {
+        _challengesById.remove(event.challenge.id);
       } else {
-        _challengesById[event.challenge!.id] = event.challenge!;
+        _challengesById[event.challenge.id] = event.challenge;
       }
       notifyListeners();
     });
@@ -26,13 +25,6 @@ class ChallengeModel extends ChangeNotifier {
     client.clientApi.connectedStream.listen((event) {
       _challengesById.clear();
       notifyListeners();
-    });
-
-    client.clientApi.invalidateDataStream.listen((event) {
-      if (event.challengeData) {
-        _challengesById.clear();
-        notifyListeners();
-      }
     });
   }
 

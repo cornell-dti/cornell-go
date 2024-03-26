@@ -27,78 +27,78 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   //SampleUsers is mock leaderboard data since the users fetch is not working properly.
-  List<UpdateLeaderDataUserDto> sampleUsers = [
-    UpdateLeaderDataUserDto.fromJson({
+  List<LeaderDto> sampleUsers = [
+    LeaderDto.fromJson({
       "userId": "user1",
       "username": "user1_username",
       "score": 100,
     }),
-    UpdateLeaderDataUserDto.fromJson({
+    LeaderDto.fromJson({
       "userId": "user2",
       "username": "user2_username",
       "score": 85,
     }),
-    UpdateLeaderDataUserDto.fromJson({
+    LeaderDto.fromJson({
       "userId": "user3",
       "username": "user3_username",
       "score": 120,
     }),
-    UpdateLeaderDataUserDto.fromJson({
+    LeaderDto.fromJson({
       "userId": "user4",
       "username": "user4_username",
       "score": 75,
     }),
-    UpdateLeaderDataUserDto.fromJson({
+    LeaderDto.fromJson({
       "userId": "user5",
       "username": "user5_username",
       "score": 95,
     }),
-    UpdateLeaderDataUserDto.fromJson({
+    LeaderDto.fromJson({
       "userId": "user6",
       "username": "user6_username",
       "score": 110,
     }),
-    UpdateLeaderDataUserDto.fromJson({
+    LeaderDto.fromJson({
       "userId": "user7",
       "username": "user7_username",
       "score": 90,
     }),
-    UpdateLeaderDataUserDto.fromJson({
+    LeaderDto.fromJson({
       "userId": "user8",
       "username": "user8_username",
       "score": 80,
     }),
-    UpdateLeaderDataUserDto.fromJson({
+    LeaderDto.fromJson({
       "userId": "user9",
       "username": "user9_username",
       "score": 70,
     }),
-    UpdateLeaderDataUserDto.fromJson({
+    LeaderDto.fromJson({
       "userId": "user10",
       "username": "user10_username",
       "score": 115,
     }),
-    UpdateLeaderDataUserDto.fromJson({
+    LeaderDto.fromJson({
       "userId": "user11",
       "username": "user11_username",
       "score": 60,
     }),
-    UpdateLeaderDataUserDto.fromJson({
+    LeaderDto.fromJson({
       "userId": "user12",
       "username": "user12_username",
       "score": 130,
     }),
-    UpdateLeaderDataUserDto.fromJson({
+    LeaderDto.fromJson({
       "userId": "user13",
       "username": "user13_username",
       "score": 55,
     }),
-    UpdateLeaderDataUserDto.fromJson({
+    LeaderDto.fromJson({
       "userId": "user14",
       "username": "user14_username",
       "score": 105,
     }),
-    UpdateLeaderDataUserDto.fromJson({
+    LeaderDto.fromJson({
       "userId": "user15",
       "username": "user15_username",
       "score": 75,
@@ -107,16 +107,14 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
 
   //Thhis user represents the users status. This is mock data for now.
   UserDto sampleUserData = UserDto.fromJson({
-    "user": {
-      "id": "user6",
-      "username": "example_username",
-      "major": "Computer Science",
-      "year": "Senior",
-      "score": 100,
-      "groupId": "group123",
-      "trackedEventIds": ["event1", "event2"],
-      "authType": "google"
-    }
+    "id": "user6",
+    "username": "example_username",
+    "major": "Computer Science",
+    "year": "Senior",
+    "score": 100,
+    "groupId": "group123",
+    "trackedEvents": ["event1", "event2"],
+    "authType": "google"
   });
 
   @override
@@ -149,11 +147,11 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
               Consumer3<GroupModel, EventModel, UserModel>(builder:
                   (context, myGroupModel, myEventModel, myUserModel, child) {
                 //Loading in the lists and then creating podiumList of top 3
-                final List<UpdateLeaderDataUserDto> list =
+                final List<LeaderDto> list =
                     myEventModel.getTopPlayersForEvent('', 1000);
                 ;
                 list.sort((a, b) => b.score.compareTo(a.score));
-                List<UpdateLeaderDataUserDto> podiumList =
+                List<LeaderDto> podiumList =
                     list.sublist(0, list.length >= 3 ? 3 : list.length);
                 return Container(
                   width: 328,
@@ -216,9 +214,9 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
                         child) {
                       int position = 4;
                       // Use this line below to retrieve actual data
-                      final List<UpdateLeaderDataUserDto> list =
+                      final List<LeaderDto> list =
                           myEventModel.getTopPlayersForEvent('', 1000);
-                      // final List<UpdateLeaderDataUserDto> list = sampleUsers;
+                      // final List<LeaderDto> list = sampleUsers;
                       list.sort((a, b) => b.score.compareTo(a.score));
                       list.removeRange(0, list.length >= 3 ? 3 : list.length);
                       return Container(
@@ -239,7 +237,7 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
                               shrinkWrap: true,
                               scrollDirection: Axis.vertical,
                               children: [
-                                for (UpdateLeaderDataUserDto user in list)
+                                for (LeaderDto user in list)
                                   Padding(
                                     padding: const EdgeInsets.only(
                                         left: 30.95,

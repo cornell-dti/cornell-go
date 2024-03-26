@@ -35,8 +35,8 @@ class _EventsLeaderboardWidgetState extends State<EventsLeaderboardWidget> {
                   (context, myGroupModel, myEventModel, myUserModel, child) {
                 int position = 1;
                 if (myGroupModel.curEventId == null) return ListView();
-                final List<UpdateLeaderDataUserDto> list = myEventModel
-                    .getTopPlayersForEvent(myGroupModel.curEventId!, 1000);
+                final List<LeaderDto> list = myEventModel.getTopPlayersForEvent(
+                    myGroupModel.curEventId!, 1000);
                 return Column(children: [
                   for (int i = 0; i < list.length; i++)
                     if (myUserModel.userData?.id != null &&
@@ -48,7 +48,7 @@ class _EventsLeaderboardWidgetState extends State<EventsLeaderboardWidget> {
                     shrinkWrap: true,
                     scrollDirection: Axis.vertical,
                     children: [
-                      for (UpdateLeaderDataUserDto user in list)
+                      for (LeaderDto user in list)
                         leaderBoardCell(context, user.username, position++,
                             user.score, user.userId == myUserModel.userData?.id)
                     ],

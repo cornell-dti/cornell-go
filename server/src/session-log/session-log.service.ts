@@ -10,6 +10,8 @@ export class SessionLogService {
     data: string,
     userId: string | null,
   ) {
+    return; // Prevent filling up the database for now
+
     await this.prisma.sessionLogEntry.create({
       data: {
         eventType,
