@@ -6,8 +6,8 @@ export function getDtoDefinitions(): DtoDefs {
 
   project.addSourceFilesAtPaths("server/src/*/*.dto.ts");
 
-  console.log("Found the following DTO files!");
-  console.log(project.getSourceFiles().map((file) => file.getBaseName()));
+  console.log(`Discovered ${project.getSourceFiles().length} DTO files!`);
+  console.log();
 
   const enumDtos = new Map<String, EnumDto>();
   const baseDtos = new Map<String, BaseDto>();
@@ -15,6 +15,10 @@ export function getDtoDefinitions(): DtoDefs {
   for (const file of project.getSourceFiles()) {
     const interfs = file.getInterfaces();
     const enums = file.getEnums();
+
+    console.log(
+      `${file.getBaseName()}: ${enums.length} enums, ${interfs.length} DTOs`
+    );
 
     for (const enum_ of enums) {
       const vals = enum_.getMembers().map((val) => val.getName());
@@ -112,6 +116,8 @@ export function getDtoDefinitions(): DtoDefs {
       }
     }
   }
+
+  console.log();
 
   return { enumDtos, baseDtos };
 }

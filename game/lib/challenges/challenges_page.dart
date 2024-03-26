@@ -190,7 +190,8 @@ class _ChallengesPageState extends State<ChallengesPage> {
                             ? Consumer<ApiClient>(
                                 builder: (context, apiClient, child) {
                                   if (event.id == groupModel.curEventId) {
-                                    apiClient.serverApi?.setCurrentEvent("");
+                                    apiClient.serverApi?.setCurrentEvent(
+                                        SetCurrentEventDto(eventId: ""));
                                   }
                                   return Container();
                                 },
