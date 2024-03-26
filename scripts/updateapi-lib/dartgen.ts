@@ -43,16 +43,7 @@ export function genDartDtoFile(dtoDefs: DtoDefs) {
         dartCode += `  if (${propName} != null) {\n      `;
       }
       dartCode += `    fields['${propName}'] = `;
-      if (fieldType == "PRIMITIVE" && dartType == "double") {
-        dartCode += `${propName}!.toDouble()`;
-      } else if (fieldType == "PRIMITIVE[]" && dartType == "double") {
-        dartCode += `
-            ${propName}!
-              .map<Map<String, dynamic>>(
-                (dynamic val) => val!.toDouble()
-              ).toList()
-        `;
-      } else if (fieldType == "PRIMITIVE" || fieldType == "PRIMITIVE[]") {
+      if (fieldType == "PRIMITIVE" || fieldType == "PRIMITIVE[]") {
         dartCode += `${propName}`;
       } else if (fieldType == "DEPENDENT_DTO") {
         dartCode += `${propName}!.toJson()`;
@@ -92,7 +83,16 @@ export function genDartDtoFile(dtoDefs: DtoDefs) {
       if (isOptional) {
         dartCode += `fields.containsKey('${propName}') ? (\n      `;
       }
-      if (fieldType == "PRIMITIVE") {
+      if (fieldType == "PRIMITIVE" && dartType == "double") {
+        dartCode += `fields["${propName}"]!.toDouble()`;
+      } else if (fieldType == "PRIMITIVE[]" && dartType == "double") {
+        dartCode += `
+          fields["${propName}"]!
+            .map<${dartType}>(
+                (dynamic val) => val!.toDouble()
+              ).toList()
+        `;
+      } else if (fieldType == "PRIMITIVE") {
         dartCode += `fields["${propName}"]`;
       } else if (fieldType == "PRIMITIVE[]") {
         dartCode += `List<${dartType}>.from(fields['${propName}'])`;

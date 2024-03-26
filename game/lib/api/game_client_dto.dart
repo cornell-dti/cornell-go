@@ -309,16 +309,16 @@ class ChallengeDto {
       fields['imageUrl'] = imageUrl;
     }
     if (latF != null) {
-      fields['latF'] = latF!.toDouble();
+      fields['latF'] = latF;
     }
     if (longF != null) {
-      fields['longF'] = longF!.toDouble();
+      fields['longF'] = longF;
     }
     if (awardingRadiusF != null) {
-      fields['awardingRadiusF'] = awardingRadiusF!.toDouble();
+      fields['awardingRadiusF'] = awardingRadiusF;
     }
     if (closeRadiusF != null) {
-      fields['closeRadiusF'] = closeRadiusF!.toDouble();
+      fields['closeRadiusF'] = closeRadiusF;
     }
     if (linkedEventId != null) {
       fields['linkedEventId'] = linkedEventId;
@@ -334,13 +334,14 @@ class ChallengeDto {
         fields.containsKey('description') ? (fields["description"]) : null;
     points = fields.containsKey('points') ? (fields["points"]) : null;
     imageUrl = fields.containsKey('imageUrl') ? (fields["imageUrl"]) : null;
-    latF = fields.containsKey('latF') ? (fields["latF"]) : null;
-    longF = fields.containsKey('longF') ? (fields["longF"]) : null;
+    latF = fields.containsKey('latF') ? (fields["latF"]!.toDouble()) : null;
+    longF = fields.containsKey('longF') ? (fields["longF"]!.toDouble()) : null;
     awardingRadiusF = fields.containsKey('awardingRadiusF')
-        ? (fields["awardingRadiusF"])
+        ? (fields["awardingRadiusF"]!.toDouble())
         : null;
-    closeRadiusF =
-        fields.containsKey('closeRadiusF') ? (fields["closeRadiusF"]) : null;
+    closeRadiusF = fields.containsKey('closeRadiusF')
+        ? (fields["closeRadiusF"]!.toDouble())
+        : null;
     linkedEventId =
         fields.containsKey('linkedEventId') ? (fields["linkedEventId"]) : null;
   }
@@ -665,8 +666,8 @@ class RequestEventLeaderDataDto {
 class RequestRecommendedEventsDto {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> fields = {};
-    fields['latitudeF'] = latitudeF!.toDouble();
-    fields['longitudeF'] = longitudeF!.toDouble();
+    fields['latitudeF'] = latitudeF;
+    fields['longitudeF'] = longitudeF;
     if (count != null) {
       fields['count'] = count;
     }
@@ -674,8 +675,8 @@ class RequestRecommendedEventsDto {
   }
 
   RequestRecommendedEventsDto.fromJson(Map<String, dynamic> fields) {
-    latitudeF = fields["latitudeF"];
-    longitudeF = fields["longitudeF"];
+    latitudeF = fields["latitudeF"]!.toDouble();
+    longitudeF = fields["longitudeF"]!.toDouble();
     count = fields.containsKey('count') ? (fields["count"]) : null;
   }
 
@@ -731,10 +732,10 @@ class EventDto {
       fields['indexable'] = indexable;
     }
     if (longitudeF != null) {
-      fields['longitudeF'] = longitudeF!.toDouble();
+      fields['longitudeF'] = longitudeF;
     }
     if (latitudeF != null) {
-      fields['latitudeF'] = latitudeF!.toDouble();
+      fields['latitudeF'] = latitudeF;
     }
     return fields;
   }
@@ -764,9 +765,12 @@ class EventDto {
         ? (EventDifficultyDto.values.byName(fields['difficulty']))
         : null;
     indexable = fields.containsKey('indexable') ? (fields["indexable"]) : null;
-    longitudeF =
-        fields.containsKey('longitudeF') ? (fields["longitudeF"]) : null;
-    latitudeF = fields.containsKey('latitudeF') ? (fields["latitudeF"]) : null;
+    longitudeF = fields.containsKey('longitudeF')
+        ? (fields["longitudeF"]!.toDouble())
+        : null;
+    latitudeF = fields.containsKey('latitudeF')
+        ? (fields["latitudeF"]!.toDouble())
+        : null;
   }
 
   void partialUpdate(EventDto other) {
