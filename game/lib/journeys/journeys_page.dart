@@ -168,7 +168,7 @@ class _JourneysPageState extends State<JourneysPage> {
                                 builder: (context, apiClient, child) {
                                   if (event.id == groupModel.curEventId) {
                                     apiClient.serverApi?.setCurrentEvent(
-                                        SetCurrentEventDto(""));
+                                        SetCurrentEventDto(eventId: ""));
                                   }
                                   return Container();
                                 },

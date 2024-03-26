@@ -64,9 +64,12 @@ class EventModel extends ChangeNotifier {
     if (_topPlayers[eventId]?.length == 0) {
       eventId.isEmpty
           ? _client.serverApi?.requestGlobalLeaderData(
-              RequestGlobalLeaderDataDto((topPlayers?.length ?? 0), 1000))
+              RequestGlobalLeaderDataDto(
+                  offset: (topPlayers?.length ?? 0), count: 1000))
           : _client.serverApi?.requestEventLeaderData(RequestEventLeaderDataDto(
-              (topPlayers?.length ?? 0), diff, eventId));
+              offset: (topPlayers?.length ?? 0),
+              count: diff,
+              eventId: eventId));
     }
     return topPlayers ?? [];
   }
@@ -75,7 +78,7 @@ class EventModel extends ChangeNotifier {
     if (_events.containsKey(id)) {
       return _events[id];
     } else {
-      _client.serverApi?.requestEventData(RequestEventDataDto([id]));
+      _client.serverApi?.requestEventData(RequestEventDataDto(events: [id]));
       return null;
     }
   }
@@ -88,6 +91,6 @@ class EventModel extends ChangeNotifier {
       bool shortestFirst,
       bool skippableOnly) {
     searchResults = null;
-    _client.serverApi?.requestEventData(RequestEventDataDto(null));
+    _client.serverApi?.requestEventData(RequestEventDataDto());
   }
 }
