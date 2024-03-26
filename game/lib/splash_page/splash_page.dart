@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:game/register_page/register_page.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class SplashPageWidget extends StatelessWidget {
   SplashPageWidget({Key? key}) : super(key: key);
@@ -13,34 +14,31 @@ class SplashPageWidget extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
+        fit: StackFit.expand,
         children: [
           Positioned(
-            left: 0,
-            top: -50,
-            height: 200,
-            width: 200,
-            child: Container(
-                height: 200,
-                width: 200,
-                decoration: BoxDecoration(
-                    image: DecorationImage(
-                        image: AssetImage("assets/images/splash_top.png")))),
+            left: -5,
+            top: -5,
+            child: SvgPicture.asset(
+              'assets/images/splash.svg',
+              width: MediaQuery.of(context).size.width + 10,
+            ),
           ),
           Column(
               crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                LatoText("CornellGo", 60.0, Colors.black, FontWeight.w700),
-                SizedBox(height: 75),
-                LatoText(
-                    "Login to CornellGo", 20.0, Colors.black, FontWeight.w600),
-                SizedBox(height: 32.5),
                 Consumer<ApiClient>(
                   builder: (context, apiClient, child) {
-                    return ElevatedButton(
+                    return TextButton(
                       style: ButtonStyle(
                           backgroundColor:
-                              MaterialStatePropertyAll<Color>(Colors.white)),
+                              MaterialStatePropertyAll<Color>(Colors.white),
+                          fixedSize:
+                              MaterialStatePropertyAll<Size>(Size(250, 50)),
+                          shape: MaterialStatePropertyAll<OutlinedBorder>(
+                              RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10.0)))),
                       onPressed: () async {
                         final GoogleSignInAccount? account =
                             await apiClient.connectGoogle();
@@ -61,8 +59,11 @@ class SplashPageWidget extends StatelessWidget {
                         height: 50,
                         child: Align(
                           alignment: Alignment.center,
-                          child: LatoText("Continue with Google", 16.0,
-                              Colors.black, FontWeight.w600),
+                          child: Text("Cornell Login",
+                              style: TextStyle(
+                                  color: Color.fromARGB(255, 93, 100, 112),
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w500)),
                         ),
                       ),
                     );
@@ -71,18 +72,26 @@ class SplashPageWidget extends StatelessWidget {
                 SizedBox(height: 16),
                 Row(children: <Widget>[
                   SizedBox(width: 69),
-                  Expanded(child: Divider()),
+                  Expanded(
+                      child: Divider(
+                    color: Colors.white,
+                  )),
                   SizedBox(width: 8),
-                  LatoText("OR", 14.0, Colors.black, FontWeight.w600),
+                  LatoText("OR", 14.0, Colors.white, FontWeight.w600),
                   SizedBox(width: 8),
-                  Expanded(child: Divider()),
+                  Expanded(child: Divider(color: Colors.white)),
                   SizedBox(width: 69),
                 ]),
                 SizedBox(height: 16),
-                ElevatedButton(
+                TextButton(
                     style: ButtonStyle(
                         backgroundColor:
-                            MaterialStatePropertyAll<Color>(Colors.white)),
+                            MaterialStatePropertyAll<Color>(Colors.white),
+                        fixedSize:
+                            MaterialStatePropertyAll<Size>(Size(250, 50)),
+                        shape: MaterialStatePropertyAll<OutlinedBorder>(
+                            RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.0)))),
                     onPressed: () async {
                       final String? id = await getId();
                       print("GOT ID");
@@ -99,23 +108,15 @@ class SplashPageWidget extends StatelessWidget {
                       height: 53,
                       child: Align(
                         alignment: Alignment.center,
-                        child: LatoText("Continue as guest", 16.0, Colors.black,
-                            FontWeight.w600),
+                        child: Text("Continue as Guest",
+                            style: TextStyle(
+                                color: Color.fromARGB(255, 93, 100, 112),
+                                fontSize: 20,
+                                fontWeight: FontWeight.w500)),
                       ),
-                    ))
+                    )),
+                SizedBox(height: 80),
               ]),
-          Positioned(
-            right: 0,
-            bottom: -60,
-            height: 200,
-            width: 200,
-            child: Container(
-                height: 200,
-                width: 200,
-                decoration: BoxDecoration(
-                    image: DecorationImage(
-                        image: AssetImage("assets/images/splash_bottom.png")))),
-          )
         ],
       ),
     );
