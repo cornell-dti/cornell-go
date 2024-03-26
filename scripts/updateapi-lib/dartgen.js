@@ -34,7 +34,18 @@ function genDartDtoFile(dtoDefs) {
                 dartCode += `  if (${propName} != null) {\n      `;
             }
             dartCode += `    fields['${propName}'] = `;
-            if (fieldType == "PRIMITIVE" || fieldType == "PRIMITIVE[]") {
+            if (fieldType == "PRIMITIVE" && dartType == "double") {
+                dartCode += `${propName}!.toDouble()`;
+            }
+            else if (fieldType == "PRIMITIVE[]" && dartType == "double") {
+                dartCode += `
+            ${propName}!
+              .map<Map<String, dynamic>>(
+                (dynamic val) => val!.toDouble()
+              ).toList()
+        `;
+            }
+            else if (fieldType == "PRIMITIVE" || fieldType == "PRIMITIVE[]") {
                 dartCode += `${propName}`;
             }
             else if (fieldType == "DEPENDENT_DTO") {

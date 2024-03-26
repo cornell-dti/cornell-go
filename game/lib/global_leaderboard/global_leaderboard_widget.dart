@@ -107,16 +107,14 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
 
   //Thhis user represents the users status. This is mock data for now.
   UserDto sampleUserData = UserDto.fromJson({
-    "user": {
-      "id": "user6",
-      "username": "example_username",
-      "major": "Computer Science",
-      "year": "Senior",
-      "score": 100,
-      "groupId": "group123",
-      "trackedEvents": ["event1", "event2"],
-      "authType": "google"
-    }
+    "id": "user6",
+    "username": "example_username",
+    "major": "Computer Science",
+    "year": "Senior",
+    "score": 100,
+    "groupId": "group123",
+    "trackedEvents": ["event1", "event2"],
+    "authType": "google"
   });
 
   @override

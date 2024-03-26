@@ -270,16 +270,16 @@ class ChallengeDto {
       fields['imageUrl'] = imageUrl;
     }
     if (latF != null) {
-      fields['latF'] = latF;
+      fields['latF'] = latF!.toDouble();
     }
     if (longF != null) {
-      fields['longF'] = longF;
+      fields['longF'] = longF!.toDouble();
     }
     if (awardingRadiusF != null) {
-      fields['awardingRadiusF'] = awardingRadiusF;
+      fields['awardingRadiusF'] = awardingRadiusF!.toDouble();
     }
     if (closeRadiusF != null) {
-      fields['closeRadiusF'] = closeRadiusF;
+      fields['closeRadiusF'] = closeRadiusF!.toDouble();
     }
     if (linkedEventId != null) {
       fields['linkedEventId'] = linkedEventId;
@@ -563,8 +563,8 @@ class RequestEventLeaderDataDto {
 class RequestRecommendedEventsDto {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> fields = {};
-    fields['latitudeF'] = latitudeF;
-    fields['longitudeF'] = longitudeF;
+    fields['latitudeF'] = latitudeF!.toDouble();
+    fields['longitudeF'] = longitudeF!.toDouble();
     if (count != null) {
       fields['count'] = count;
     }
@@ -623,10 +623,10 @@ class EventDto {
       fields['indexable'] = indexable;
     }
     if (longitudeF != null) {
-      fields['longitudeF'] = longitudeF;
+      fields['longitudeF'] = longitudeF!.toDouble();
     }
     if (latitudeF != null) {
-      fields['latitudeF'] = latitudeF;
+      fields['latitudeF'] = latitudeF!.toDouble();
     }
     return fields;
   }
