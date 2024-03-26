@@ -5,31 +5,31 @@ export interface CompletedChallengeDto {
 
 export interface ChallengeDto {
   id: string;
-  name: string;
-  location: string;
-  description: string;
-  points: number;
-  imageUrl: string;
-  lat: number;
-  long: number;
-  awardingRadius: number;
-  closeRadius: number;
-  containingEventId: string;
+  name?: string;
+  location?: string;
+  description?: string;
+  points?: number;
+  imageUrl?: string;
+  latF?: number;
+  longF?: number;
+  awardingRadiusF?: number;
+  closeRadiusF?: number;
+  linkedEventId?: string;
 }
 
 /** DTO for requestChallengeData */
 export interface RequestChallengeDataDto {
-  challengeIds: string[];
+  challenges: string[];
 }
 
 export interface UpdateChallengeDataDto {
-  challenge: ChallengeDto | string;
+  challenge: ChallengeDto;
   deleted: boolean;
 }
 
 /** DTO for requestEventTrackerData */
 export interface RequestEventTrackerDataDto {
-  trackedEventIds: string[];
+  trackedEvents: string[];
 }
 
 /** DTO for setCurrentChallenge */

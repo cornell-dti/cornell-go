@@ -4,10 +4,12 @@ import { INestApplication } from '@nestjs/common';
 import { UserService } from './user.service';
 import { AuthType } from '@prisma/client';
 import { AppModule } from '../app.module';
+import { AppAbility, CaslAbilityFactory } from '../casl/casl-ability.factory';
 
 describe('UserModule E2E', () => {
   let app: INestApplication;
   let moduleRef: TestingModule;
+  let fullAbility: AppAbility;
 
   beforeAll(async () => {
     moduleRef = await Test.createTestingModule({
@@ -16,6 +18,10 @@ describe('UserModule E2E', () => {
 
     app = moduleRef.createNestApplication();
     await app.init();
+
+    fullAbility = moduleRef
+      .get<CaslAbilityFactory>(CaslAbilityFactory)
+      .createFull();
   });
 
   it('should successfully find UserService', async () => {
@@ -58,26 +64,8 @@ describe('UserModule E2E', () => {
 
     const user = await userService.byAuth(AuthType.DEVICE, 'abcde');
     expect(user).toBeDefined();
-    await userService.deleteUser(user!);
+    await userService.deleteUser(fullAbility, user!);
     expect(user).toBeNull;
-  });
-
-  it(`Checking whether setUsername properly updates a user's username`, async () => {
-    const userService = moduleRef.get<UserService>(UserService);
-    await userService.register(
-      'test3@example.com',
-      'test3',
-      '2024',
-      1,
-      1,
-      AuthType.DEVICE,
-      'abcdef',
-      'UNDERGRADUATE',
-    );
-    let user = await userService.byAuth(AuthType.DEVICE, 'abcdef');
-    await userService.setUsername(user!, 'newUser');
-    user = await userService.byAuth(AuthType.DEVICE, 'abcdef');
-    expect(user?.username).toEqual('newUser');
   });
 
   it(`Checks the size of all the user data`, async () => {

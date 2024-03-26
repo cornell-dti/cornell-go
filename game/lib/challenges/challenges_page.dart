@@ -152,8 +152,8 @@ class _ChallengesPageState extends State<ChallengesPage> {
                         0,
                         1000,
                         [
-                          TimeLimitationType.PERPETUAL,
-                          TimeLimitationType.LIMITED_TIME
+                          EventTimeLimitationDto.PERPETUAL,
+                          EventTimeLimitationDto.LIMITED_TIME
                         ],
                         false,
                         false,
@@ -168,18 +168,18 @@ class _ChallengesPageState extends State<ChallengesPage> {
                   }
                   for (EventDto event in events) {
                     var tracker = trackerModel.trackerByEventId(event.id);
-                    var numberCompleted = tracker?.prevChallengeIds.length ?? 0;
+                    var numberCompleted = tracker?.prevChallenges?.length ?? 0;
                     var complete =
-                        (numberCompleted == event.challengeIds.length);
-                    var locationCount = event.challengeIds.length;
+                        (numberCompleted == event.challenges?.length);
+                    var locationCount = event.challenges?.length ?? 0;
                     var difficulty = event.difficulty;
                     DateTime now = DateTime.now();
-                    DateTime endtime = HttpDate.parse(event.endTime);
+                    DateTime endtime = HttpDate.parse(event.endTime ?? "");
 
                     Duration timeTillExpire = endtime.difference(now);
                     if (locationCount != 1) continue;
-                    var challenge =
-                        challengeModel.getChallengeById(event.challengeIds[0]);
+                    var challenge = challengeModel
+                        .getChallengeById(event.challenges?[0] ?? "");
 
                     if (challenge == null) continue;
                     eventCells.add(
@@ -197,14 +197,14 @@ class _ChallengesPageState extends State<ChallengesPage> {
                               )
                             : ChallengeCell(
                                 key: UniqueKey(),
-                                challenge.location,
-                                challenge.name,
+                                challenge.location ?? "",
+                                challenge.name ?? "",
                                 Image.network(
                                     "https://picsum.photos/250?image=9"),
                                 complete,
-                                challenge.description,
-                                difficulty,
-                                challenge.points),
+                                challenge.description ?? "",
+                                difficulty?.toString() ?? "",
+                                challenge.points ?? 0),
                       ),
                     );
                   }

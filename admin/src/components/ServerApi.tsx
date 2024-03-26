@@ -2,59 +2,62 @@ import { Socket } from "socket.io-client";
 import {
   RequestChallengeDataDto,
   UpdateChallengeDataDto,
-} from "../dto/challenge.dto";
-import { UpdateErrorDto } from "../dto/client.dto";
-import { RequestEventDataDto, UpdateEventDataDto } from "../dto/event.dto";
-import { RequestGroupDataDto, UpdateGroupDataDto } from "../dto/group.dto";
-import {
   RequestAllUserDataDto,
   RequestUserDataDto,
-  UpdateUserDataDto,
-} from "../dto/user.dto";
-import {
+  RequestEventDataDto,
+  UpdateEventDataDto,
+  RequestGroupDataDto,
+  UpdateGroupDataDto,
   RequestOrganizationDataDto,
   UpdateOrganizationDataDto,
-} from "../dto/organization.dto";
+  UpdateUserDataDto,
+  UpdateErrorDto,
+} from "../all.dto";
 
 //** Web Sockets callback functions are in ./ServerData.tsx*/
 export class ServerApi {
   constructor(private socket: Socket) {}
 
+  send(ev: string, data: {}) {
+    console.log(`Sending ${ev} with ${JSON.stringify(data)}`);
+    this.socket.emit(ev, data);
+  }
+
   requestEventData(data: RequestEventDataDto) {
-    this.socket.emit("requestEventData", data);
+    this.send("requestEventData", data);
   }
   requestChallengeData(data: RequestChallengeDataDto) {
-    this.socket.emit("requestChallengeData", data);
+    this.send("requestChallengeData", data);
   }
   requestUserData(data: RequestUserDataDto) {
-    this.socket.emit("requestUserData", data);
+    this.send("requestUserData", data);
   }
   requestAllUserData(data: RequestAllUserDataDto) {
-    this.socket.emit("requestAllUserData", data);
+    this.send("requestAllUserData", data);
   }
   requestGroupData(data: RequestGroupDataDto) {
-    this.socket.emit("requestGroupData", data);
+    this.send("requestGroupData", data);
   }
   requestOrganizationData(data: RequestOrganizationDataDto) {
-    this.socket.emit("requestOrganizationData", data);
+    this.send("requestOrganizationData", data);
   }
   updateEventData(data: UpdateEventDataDto) {
-    this.socket.emit("updateEventData", data);
+    this.send("updateEventData", data);
   }
   updateChallengeData(data: UpdateChallengeDataDto) {
-    this.socket.emit("updateChallengeData", data);
+    this.send("updateChallengeData", data);
   }
   updateUserData(data: UpdateUserDataDto) {
-    this.socket.emit("updateUserData", data);
+    this.send("updateUserData", data);
   }
   updateGroupData(data: UpdateGroupDataDto) {
-    this.socket.emit("updateGroupData", data);
+    this.send("updateGroupData", data);
   }
   updateOrganizationData(data: UpdateOrganizationDataDto) {
-    this.socket.emit("updateOrganizationData", data);
+    this.send("updateOrganizationData", data);
   }
   addManager(email: string, organizationId: string) {
-    this.socket.emit("addManager", {
+    this.send("addManager", {
       email: email,
       organizationId: organizationId,
     });

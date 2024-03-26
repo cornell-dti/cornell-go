@@ -6,7 +6,6 @@ import {
   SessionLogEvent,
   OrganizationSpecialUsage,
   User,
-  PrismaClient,
   EnrollmentType,
   EventBase,
 } from '@prisma/client';
@@ -15,12 +14,12 @@ import { EventService } from '../event/event.service';
 import { GroupService } from '../group/group.service';
 import { OrganizationService } from '../organization/organization.service';
 import { PrismaService } from '../prisma/prisma.service';
-import {
-  UpdateUserDataDto,
-  UserAuthTypeDto,
-  UserDto,
-  eventFilterDto,
-} from './user.dto';
+import { UpdateUserDataDto, UserAuthTypeDto, UserDto } from './user.dto';
+import { CensorSensor } from 'censor-sensor';
+import { AppAbility, CaslAbilityFactory } from '../casl/casl-ability.factory';
+import { Action } from '../casl/action.enum';
+import { subject } from '@casl/ability';
+import { accessibleBy } from '@casl/prisma';
 
 @Injectable()
 export class UserService {
@@ -32,6 +31,7 @@ export class UserService {
     private groupsService: GroupService,
     private orgService: OrganizationService,
     private clientService: ClientService,
+    private abilityFactory: CaslAbilityFactory,
   ) {}
 
   /** Find a user by their authentication token */
@@ -83,7 +83,9 @@ export class UserService {
         authType,
         hashedRefreshToken: '',
         administrator:
-          email === process.env.SUPERUSER || process.env.DEVELOPMENT === 'true',
+          email === process.env.SUPERUSER ||
+          (process.env.DEVELOPMENT === 'true' &&
+            !(process.env.TESTING_E2E === 'true')),
         isRanked: true,
       },
     });
@@ -116,168 +118,15 @@ export class UserService {
     return await this.prisma.user.findMany();
   }
 
-  async deleteUser(user: User) {
+  async deleteUser(ability: AppAbility, user: User) {
+    if (ability.cannot(Action.Delete, subject('User', user))) {
+      return;
+    }
+
     await this.log.logEvent(SessionLogEvent.DELETE_USER, user.id, user.id);
     await this.prisma.user.delete({ where: { id: user.id } });
     await this.prisma.$transaction(async tx => {
       await this.groupsService.fixOrDeleteGroup({ id: user.groupId }, tx);
-    });
-  }
-
-  async setUsername(user: User, username: string) {
-    await this.prisma.user.update({
-      where: { id: user.id },
-      data: { username },
-    });
-  }
-
-  /** Adds event to user's favorite if isFavorite is true, else removes event
-   * from favorites if it exists */
-  async setFavorite(user: User, ev: EventBase, isFavorite: boolean) {
-    if (isFavorite) {
-      return await this.prisma.user.update({
-        where: { id: user.id },
-        data: { favorites: { connect: { id: ev.id } } },
-      });
-    } else {
-      return await this.prisma.user.update({
-        where: { id: user.id },
-        data: { favorites: { disconnect: { id: ev.id } } },
-      });
-    }
-  }
-
-  /**
-   * Filter: new gives all ,
-   * with ongoing events listed before not started events.
-   * cursorId:
-   */
-
-  /**
-   * Grabs all events from all of user's allowed events based on the filter.
-   * @param user user requesting filtered events
-   * @param filter "saved" returns favorited events, "new" returns events that are not started and ongoing, "finished" returns events where each challenge is completed
-   * @param cursorId id of the last event in the previous page
-   * @returns filtered event id list sorted by ascending id
-   */
-  async getFilteredEventIds(
-    user: User,
-    filter: eventFilterDto,
-    cursorId: string | undefined,
-    limit: number,
-  ) {
-    const joinedUser = await this.prisma.user.findFirstOrThrow({
-      where: { id: user.id },
-      include: {
-        favorites: true,
-        memberOf: true,
-      },
-    });
-
-    let filteredEventIds = [{ id: '' }];
-
-    if (filter == 'finished') {
-      filteredEventIds = await this.prisma.eventBase.findMany({
-        select: { id: true },
-        orderBy: {
-          id: 'asc', // must be ordered to use cursor
-        },
-        take: limit,
-        skip: cursorId ? 1 : 0, // skips the event with id = cursorId
-        cursor: cursorId
-          ? {
-              id: cursorId,
-            }
-          : undefined,
-        where: {
-          usedIn: {
-            some: { members: { some: { id: user.id } } },
-          },
-          challenges: {
-            every: {
-              completions: {
-                some: {
-                  participants: {
-                    some: { id: user.id },
-                  },
-                },
-              },
-            },
-          },
-        },
-      });
-    } else if (filter == 'new') {
-      filteredEventIds = await this.prisma.eventBase.findMany({
-        select: { id: true },
-        orderBy: {
-          id: 'asc', // must be ordered to use cursor
-        },
-        take: limit,
-        skip: cursorId ? 1 : 0, // skips the event with id = cursorId
-        cursor: cursorId
-          ? {
-              id: cursorId,
-            }
-          : undefined,
-        where: {
-          usedIn: {
-            some: { members: { some: { id: user.id } } },
-          },
-          challenges: {
-            some: {
-              completions: {
-                none: {
-                  participants: {
-                    some: { id: user.id },
-                  },
-                },
-              },
-            },
-          },
-        },
-      });
-    } else {
-      // filter == 'saved'
-      filteredEventIds = await this.prisma.eventBase.findMany({
-        select: { id: true },
-        orderBy: {
-          id: 'asc', // must be ordered to use cursor
-        },
-        take: limit,
-        skip: cursorId ? 1 : 0, // skips the event with id = cursorId
-        cursor: cursorId
-          ? {
-              id: cursorId,
-            }
-          : undefined,
-        where: {
-          usedIn: {
-            some: { members: { some: { id: user.id } } },
-          },
-          userFavorite: {
-            some: { id: user.id },
-          },
-        },
-      });
-    }
-    return filteredEventIds;
-  }
-
-  // async setMajor(user: User, major: string) {
-  //   await this.prisma.user.update({
-  //     where: { id: user.id },
-  //     data: { major },
-  //   });
-  // }
-  /**
-   * Updates a user's graduation year.
-   * @param user user requesting the change in graduation year
-   * @param year the new graduation year.
-   */
-  async setGraduationYear(user: User, year: string) {
-    await this.prisma.user.update({
-      where: { id: user.id },
-      data: { year },
     });
   }
 
@@ -301,14 +150,39 @@ export class UserService {
    * @param user User requiring an update.
    * @returns The new user after the update is made
    */
-  async updateUser(user: UserDto): Promise<User> {
-    return await this.prisma.user.update({
-      where: { id: user.id },
-      data: {
-        username: user.username,
+  async updateUser(ability: AppAbility, user: UserDto): Promise<User> {
+    const username = user.username
+      ? new CensorSensor()
+          .cleanProfanityIsh(
+            user.username
+              ?.substring(0, 128)
+              ?.replaceAll(/[^_A-z0-9]/g, ' ')
+              ?.replaceAll('_', ' '),
+          )
+          .replaceAll('*', '_')
+          .replaceAll(' ', '_')
+      : undefined;
+
+    const userObj = await this.prisma.user.findFirstOrThrow({
+      where: {
+        AND: [accessibleBy(ability, Action.Update).User, { id: user.id }],
+      },
+    });
+
+    const assignData = await this.abilityFactory.filterInaccessible(
+      {
+        username: username,
         email: user.email,
         year: user.year,
       },
+      subject('User', userObj),
+      ability,
+      Action.Update,
+    );
+
+    return await this.prisma.user.update({
+      where: { id: userObj.id },
+      data: assignData,
     });
   }
 
@@ -334,10 +208,10 @@ export class UserService {
       authType: (
         joinedUser.authType as string
       ).toLowerCase() as UserAuthTypeDto,
-      trackedEventIds: partial
+      trackedEvents: partial
         ? undefined
         : joinedUser.eventTrackers.map(ev => ev.eventId),
-      favoriteIds: partial
+      favorites: partial
         ? undefined
         : joinedUser.favorites.map((ev: EventBase) => ev.id),
     };
@@ -355,19 +229,24 @@ export class UserService {
     user: User,
     deleted: boolean,
     partial: boolean,
-    admin?: boolean,
-    client?: User,
+    target?: User,
   ) {
     const dto: UpdateUserDataDto = {
-      user: deleted ? user.id : await this.dtoForUserData(user, partial),
+      user: deleted
+        ? { id: user.id }
+        : await this.dtoForUserData(user, partial),
       deleted,
     };
 
-    if (client && admin) {
-      this.clientService.sendUpdate('updateUserData', client.id, false, dto);
-    } else if (admin) {
-      this.clientService.sendUpdate('updateUserData', user.id, true, dto);
-    }
-    await this.log.logEvent(SessionLogEvent.EDIT_USERNAME, user.id, user.id);
+    await this.clientService.sendProtected(
+      'updateUserData',
+      target?.id ?? user.id,
+      dto,
+      {
+        id: user.id,
+        subject: subject('User', user),
+        dtoField: 'user',
+      },
+    );
   }
 }

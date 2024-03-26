@@ -6,14 +6,10 @@ import {
 } from '@nestjs/websockets';
 import { User } from '@prisma/client';
 import { UserGuard } from '../auth/jwt-auth.guard';
-import { EventGateway } from '../event/event.gateway';
-import { GroupGateway } from '../group/group.gateway';
-import { UserGateway } from '../user/user.gateway';
 import { CallingUser } from '../auth/calling-user.decorator';
 import { ClientService } from '../client/client.service';
 import { ChallengeService } from './challenge.service';
 import {
-  ChallengeDto,
   CompletedChallengeDto,
   RequestChallengeDataDto,
   SetCurrentChallengeDto,
@@ -23,10 +19,14 @@ import { GroupService } from '../group/group.service';
 import { UserService } from '../user/user.service';
 import { EventService } from '../event/event.service';
 import { RequestGlobalLeaderDataDto } from '../user/user.dto';
-import { EventDto } from '../event/event.dto';
+import { PoliciesGuard } from '../casl/policy.guard';
+import { UserAbility } from '../casl/user-ability.decorator';
+import { AppAbility } from '../casl/casl-ability.factory';
+import { Action } from '../casl/action.enum';
+import { subject } from '@casl/ability';
 
 @WebSocketGateway({ cors: true })
-@UseGuards(UserGuard)
+@UseGuards(UserGuard, PoliciesGuard)
 export class ChallengeGateway {
   constructor(
     private clientService: ClientService,
@@ -40,45 +40,21 @@ export class ChallengeGateway {
    * Subscribes and emits the information of the requested challenges
    *
    * @param user the calling user
-   * @param data array of challengeIds to return
+   * @param data array of challenges to return
    */
   @SubscribeMessage('requestChallengeData')
   async requestChallengeData(
+    @UserAbility() ability: AppAbility,
     @CallingUser() user: User,
     @MessageBody() data: RequestChallengeDataDto,
   ) {
-    const adminChallenges =
-      await this.challengeService.getChallengesByIdsForUser(
-        user,
-        true,
-        data.challengeIds,
-      );
+    const challenges = await this.challengeService.getChallengesByIdsForAbility(
+      ability,
+      data.challenges,
+    );
 
-    const basicChallenges =
-      await this.challengeService.getChallengesByIdsForUser(
-        user,
-        false,
-        data.challengeIds,
-      );
-
-    for (const chal of adminChallenges) {
-      this.clientService.subscribe(user, chal.id, true);
-      await this.challengeService.emitUpdateChallengeData(
-        chal,
-        false,
-        true,
-        user,
-      );
-    }
-
-    for (const chal of basicChallenges) {
-      this.clientService.subscribe(user, chal.id, false);
-      await this.challengeService.emitUpdateChallengeData(
-        chal,
-        false,
-        false,
-        user,
-      );
+    for (const chal of challenges) {
+      await this.challengeService.emitUpdateChallengeData(chal, false, user);
     }
   }
 
@@ -118,7 +94,7 @@ export class ChallengeGateway {
 
       await this.groupService.emitUpdateGroupData(group, false);
       await this.eventService.emitUpdateEventTracker(tracker);
-      await this.userService.emitUpdateUserData(user, false, false, true, user);
+      await this.userService.emitUpdateUserData(user, false, true, user);
     } else {
       await this.clientService.emitErrorData(user, 'Challenge not complete');
     }
@@ -139,54 +115,53 @@ export class ChallengeGateway {
 
   @SubscribeMessage('updateChallengeData')
   async updateChallengeData(
+    @UserAbility() ability: AppAbility,
     @CallingUser() user: User,
     @MessageBody() data: UpdateChallengeDataDto,
   ) {
-    if (data.deleted) {
-      const challenge = await this.challengeService.getChallengeById(
-        data.challenge as string,
+    const challenge = await this.challengeService.getChallengeById(
+      data.challenge.id,
+    );
+
+    if (
+      (!challenge && ability.cannot(Action.Create, 'Challenge')) ||
+      (challenge &&
+        ability.cannot(Action.Manage, subject('Challenge', challenge)))
+    ) {
+      await this.clientService.emitErrorData(
+        user,
+        'Permission denied for challenge update!',
       );
+      return;
+    }
 
-      const ev = await this.eventService.getEventById(challenge.linkedEventId);
-
-      if (
-        !(await this.eventService.hasAdminRights(
-          { id: challenge.linkedEventId! },
-          user,
-        ))
-      ) {
-        await this.clientService.emitErrorData(
-          user,
-          'User has no admin rights',
-        );
-        return;
-      }
-
-      await this.challengeService.removeChallenge(challenge.id, user);
+    if (data.deleted && challenge) {
+      const ev = (await this.eventService.getEventById(
+        challenge.linkedEventId ?? '',
+      ))!;
+      await this.challengeService.removeChallenge(ability, challenge.id);
 
       await this.challengeService.emitUpdateChallengeData(challenge, true);
       await this.eventService.emitUpdateEventData(ev, false);
     } else {
-      const dto = data.challenge as ChallengeDto;
-      if (
-        !(await this.eventService.hasAdminRights(
-          { id: dto.containingEventId },
-          user,
-        ))
-      ) {
+      const challenge = await this.challengeService.upsertChallengeFromDto(
+        ability,
+        data.challenge,
+      );
+
+      if (!challenge) {
         await this.clientService.emitErrorData(
           user,
-          'User has no admin rights',
+          'Failed to upsert challenge!',
         );
         return;
       }
 
-      const challenge = await this.challengeService.upsertChallengeFromDto(dto);
-
       if (challenge.linkedEventId) {
-        const ev = await this.eventService.updateLongitudeLatitude(
+        const ev = (await this.eventService.getEventById(
           challenge.linkedEventId,
-        );
+        ))!;
+        await this.clientService.subscribe(user, challenge.id);
         await this.challengeService.emitUpdateChallengeData(challenge, false);
         await this.eventService.emitUpdateEventData(ev, false);
       }
