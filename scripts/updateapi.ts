@@ -38,9 +38,8 @@ writeFileSync(flutterServerApiPath, dartServerApiCode, {
   flag: "w",
 });
 
-execSync("dart format " + flutterDtoPath);
-execSync("dart format " + flutterServerApiPath);
-execSync("dart format " + dartServerApiCode);
-chdir("./admin");
+chdir("./game");
+execSync("dart format lib");
+chdir("../admin");
 execSync("npm run format");
 console.log("Successfully wrote APIs!");

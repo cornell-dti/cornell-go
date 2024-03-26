@@ -30,9 +30,8 @@ const dartServerApiCode = (0, dartgen_1.getDartServerApiFile)(apis);
     encoding: "utf8",
     flag: "w",
 });
-(0, child_process_1.execSync)("dart format " + flutterDtoPath);
-(0, child_process_1.execSync)("dart format " + flutterServerApiPath);
-(0, child_process_1.execSync)("dart format " + dartServerApiCode);
-(0, process_1.chdir)("./admin");
+(0, process_1.chdir)("./game");
+(0, child_process_1.execSync)("dart format lib");
+(0, process_1.chdir)("../admin");
 (0, child_process_1.execSync)("npm run format");
 console.log("Successfully wrote APIs!");
