@@ -31,10 +31,7 @@ type AchievementAchievementTypeDto =
   | "TOTAL_JOURNEYS"
   | "TOTAL_CHALLENGES_OR_JOURNEYS";
 
-type LoginAudDto =
-  | "android"
-  | "ios"
-  | "web";
+type LoginAudDto = "android" | "ios" | "web";
 
 type LoginEnrollmentTypeDto =
   | "UNDERGRADUATE"
@@ -42,18 +39,11 @@ type LoginEnrollmentTypeDto =
   | "FACULTY"
   | "ALUMNI";
 
-type EventTimeLimitationDto =
-  | "LIMITED_TIME"
-  | "PERPETUAL";
+type EventTimeLimitationDto = "LIMITED_TIME" | "PERPETUAL";
 
-type EventDifficultyDto =
-  | "Easy"
-  | "Normal"
-  | "Hard";
+type EventDifficultyDto = "Easy" | "Normal" | "Hard";
 
-type SetAuthToOAuthProviderDto =
-  | "apple"
-  | "google";
+type SetAuthToOAuthProviderDto = "apple" | "google";
 
 type UserEnrollmentTypeDto =
   | "UNDERGRADUATE"
@@ -61,10 +51,7 @@ type UserEnrollmentTypeDto =
   | "FACULTY"
   | "ALUMNI";
 
-type UserAuthTypeDto =
-  | "apple"
-  | "google"
-  | "device";
+type UserAuthTypeDto = "apple" | "google" | "device";
 
 export interface AchievementDto {
   id: string;
@@ -209,11 +196,9 @@ export interface JoinGroupDto {
   groupId: string;
 }
 
-export interface LeaveGroupDto {
-}
+export interface LeaveGroupDto {}
 
-export interface RequestGroupDataDto {
-}
+export interface RequestGroupDataDto {}
 
 export interface SetCurrentEventDto {
   eventId: string;
@@ -266,8 +251,7 @@ export interface UpdateOrganizationDataDto {
   deleted: boolean;
 }
 
-export interface CloseAccountDto {
-}
+export interface CloseAccountDto {}
 
 export interface SetUsernameDto {
   newUsername: string;
@@ -304,8 +288,7 @@ export interface RequestUserDataDto {
   userId?: string;
 }
 
-export interface RequestAllUserDataDto {
-}
+export interface RequestAllUserDataDto {}
 
 export interface RequestFavoriteEventDataDto {
   isFavorite: boolean;
@@ -330,4 +313,3 @@ export interface UpdateUserDataDto {
   user: UserDto;
   deleted: boolean;
 }
-
