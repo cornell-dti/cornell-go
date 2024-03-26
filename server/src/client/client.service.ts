@@ -8,12 +8,29 @@ import {
   CaslAbilityFactory,
   SubjectTypes,
 } from '../casl/casl-ability.factory';
-import { tokenOfHandshake } from '../auth/jwt-auth.guard';
 import { PermittedFieldsOptions, permittedFieldsOf } from '@casl/ability/extra';
 import { Action } from '../casl/action.enum';
-import { ExtractSubjectType } from '@casl/ability';
 import { Subjects } from '@casl/prisma';
-import { AuthService } from '../auth/auth.service';
+import { UpdateUserDataDto } from '../user/user.dto';
+import {
+  UpdateChallengeDataDto,
+  UpdateLeaderDataDto,
+} from '../challenge/challenge.dto';
+import { EventTrackerDto, UpdateEventDataDto } from '../event/event.dto';
+import { GroupInviteDto, UpdateGroupDataDto } from '../group/group.dto';
+import { UpdateOrganizationDataDto } from '../organization/organization.dto';
+
+export type ClientApiDef = {
+  updateUserData: UpdateUserDataDto;
+  updateErrorData: UpdateErrorDto;
+  updateChallengeData: UpdateChallengeDataDto;
+  updateEventTrackerData: EventTrackerDto;
+  updateEventData: UpdateEventDataDto;
+  updateLeaderData: UpdateLeaderDataDto;
+  groupInvitation: GroupInviteDto;
+  updateGroupData: UpdateGroupDataDto;
+  updateOrganizationData: UpdateOrganizationDataDto;
+};
 
 @Injectable()
 export class ClientService {
@@ -40,6 +57,7 @@ export class ClientService {
       id: user.id,
       message,
     };
+
     await this.sendProtected('updateErrorData', user.id, dto);
   }
 
@@ -62,10 +80,10 @@ export class ClientService {
     this.gateway.server.to(users).emit(event, dto);
   }
 
-  async sendProtected<TDto extends {}>(
-    event: string,
+  async sendProtected<TDto>(
+    event: keyof ClientApiDef,
     target: string,
-    dto: TDto,
+    dto: ClientApiDef[typeof event] & TDto,
     resource?: {
       id: string;
       dtoField?: keyof TDto;
@@ -114,7 +132,7 @@ export class ClientService {
         if (fields.length === 0) continue;
 
         if (resource.dtoField) {
-          dto[resource.dtoField] = Object.fromEntries(
+          (dto as any)[resource.dtoField] = Object.fromEntries(
             Object.entries(dto[resource.dtoField] as any).filter(([k, v]) =>
               fields.includes(k),
             ),
