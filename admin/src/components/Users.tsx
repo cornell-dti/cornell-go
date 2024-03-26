@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import { UserDto } from "../dto/user.dto";
+import { UserDto } from "../all.dto";
 import { ServerDataContext } from "./ServerData";
 import GridTable from "@nadavshaar/react-grid-table";
 import userEvent from "@testing-library/user-event";

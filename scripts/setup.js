@@ -3,6 +3,7 @@ const { rmSync, mkdirSync, existsSync } = require("fs");
 const { chdir } = require("process");
 
 /* 
+npm install
 cd ./server
 npm install
 cd ../admin
@@ -18,6 +19,8 @@ async function main() {
   execSync("docker compose --version");
   console.log("Checking if flutter is installed (will fail if not)");
   execSync("flutter --version");
+  console.log("Installing root dependencies");
+  execSync("npm install");
   console.log("Installing admin page dependencies");
   chdir("./server");
   execSync("npm install");

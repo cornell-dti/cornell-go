@@ -8,16 +8,18 @@ import { OrganizationModule } from '../organization/organization.module';
 import { PrismaModule } from '../prisma/prisma.module';
 import { GroupGateway } from './group.gateway';
 import { GroupService } from './group.service';
+import { CaslModule } from '../casl/casl.module';
 
 @Module({
   imports: [
     forwardRef(() => AuthModule),
-    ClientModule,
     forwardRef(() => UserModule),
+    ClientModule,
     EventModule,
     PrismaModule,
     SessionLogModule,
     OrganizationModule,
+    CaslModule,
   ],
   providers: [GroupService, GroupGateway],
   exports: [GroupService, GroupGateway],

@@ -14,13 +14,17 @@ import {
   UpdateOrganizationDataDto,
 } from './organization.dto';
 import { OrganizationService } from './organization.service';
+import { PoliciesGuard } from '../casl/policy.guard';
+import { AppAbility, CaslAbilityFactory } from '../casl/casl-ability.factory';
+import { UserAbility } from '../casl/user-ability.decorator';
 
 @WebSocketGateway({ cors: true })
-@UseGuards(UserGuard)
+@UseGuards(UserGuard, PoliciesGuard)
 export class OrganizationGateway {
   constructor(
     private clientService: ClientService,
     private orgService: OrganizationService,
+    private abilityFactory: CaslAbilityFactory,
   ) {}
 
   /**
@@ -41,13 +45,7 @@ export class OrganizationGateway {
     );
 
     for (const org of orgs) {
-      this.clientService.subscribe(user, org.id, data.admin);
-      await this.orgService.emitUpdateOrganizationData(
-        org,
-        false,
-        data.admin,
-        user,
-      );
+      await this.orgService.emitUpdateOrganizationData(org, false, user);
     }
   }
 
@@ -59,26 +57,32 @@ export class OrganizationGateway {
    */
   @SubscribeMessage('updateOrganizationData')
   async updateOrganizationData(
+    @UserAbility() ability: AppAbility,
     @CallingUser() user: User,
     @MessageBody() data: UpdateOrganizationDataDto,
   ) {
-    if (!user.administrator) {
-      await this.clientService.emitErrorData(user, 'User has no admin rights');
-      return;
-    }
-
     if (data.deleted) {
       const org = await this.orgService.getOrganizationById(
-        data.organization as string,
+        data.organization.id,
       );
 
-      await this.orgService.removeOrganization(data.organization as string);
+      await this.orgService.removeOrganization(ability, data.organization.id);
       await this.orgService.emitUpdateOrganizationData(org, true);
     } else {
       const org = await this.orgService.upsertOrganizationFromDto(
-        data.organization as OrganizationDto,
+        ability,
+        data.organization,
       );
-      this.clientService.subscribe(user, org.id, true);
+
+      if (!org) {
+        await this.clientService.emitErrorData(
+          user,
+          'Failed to upsert organization!',
+        );
+        return;
+      }
+
+      this.clientService.subscribe(user, org.id);
       await this.orgService.emitUpdateOrganizationData(org, false);
     }
   }

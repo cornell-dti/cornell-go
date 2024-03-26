@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:game/api/game_client_dto.dart';
 import 'package:socket_io_client/socket_io_client.dart';
 
@@ -39,12 +40,8 @@ class GameServerApi {
       "requestGlobalLeaderData", {'offset': offset, 'count': count});
 
   void closeAccount() => _invokeWithRefresh("closeAccount", {});
-  void setUsername(String newUsername) =>
-      _invokeWithRefresh("setUsername", {'newUsername': newUsername});
-  // void setMajor(String newMajor) =>
-  //     _invokeWithRefresh("setMajor", {'newMajor': newMajor});
-  void setGraduationYear(String newYear) =>
-      _invokeWithRefresh("setGraduationYear", {'newYear': newYear});
+  void updateUserData(UserDto dto) => _invokeWithRefresh(
+      "updateUserData", {"user": dto.toJson(), "deleted": "false"});
   void requestUserData() => _invokeWithRefresh("requestUserData", {});
   void requestGroupData() => _invokeWithRefresh("requestGroupData", {});
   void joinGroup(String groupId) =>
@@ -52,12 +49,12 @@ class GameServerApi {
   void leaveGroup() => _invokeWithRefresh("leaveGroup", {});
   void setCurrentEvent(String eventId) =>
       _invokeWithRefresh("setCurrentEvent", {"eventId": eventId});
-  void requestEventData(List<String> eventIds) =>
-      _invokeWithRefresh("requestEventData", {"eventIds": eventIds});
+  void requestEventData(List<String> events) =>
+      _invokeWithRefresh("requestEventData", {"events": events});
   void requestAllEventData(
           int offset,
           int count,
-          List<TimeLimitationType> timeLimitations,
+          List<EventTimeLimitationDto> timeLimitations,
           bool closestToEnding,
           bool shortestFirst,
           bool skippableOnly) =>
@@ -67,23 +64,19 @@ class GameServerApi {
         "closestToEnding": closestToEnding,
         "shortestFirst": shortestFirst,
         "skippableOnly": skippableOnly,
-        "timeLimitations": timeLimitations
-            .map((e) => e == TimeLimitationType.PERPETUAL
-                ? 'PERPETUAL'
-                : 'LIMITED_TIME')
-            .toList()
+        "timeLimitations": timeLimitations.map((e) => e.toString()).toList()
       });
 
   void requestEventLeaderData(int offset, int count, String eventId) =>
       _invokeWithRefresh("requestEventLeaderData",
           {"offset": offset, "count": count, "eventId": eventId});
 
-  void requestEventTrackerData(List<String> trackedEventIds) =>
+  void requestEventTrackerData(List<String> trackedEvents) =>
       _invokeWithRefresh(
-          "requestEventTrackerData", {"trackedEventIds": trackedEventIds});
+          "requestEventTrackerData", {"trackedEvents": trackedEvents});
 
-  void requestChallengeData(List<String> challengeIds) => _invokeWithRefresh(
-      "requestChallengeData", {"challengeIds": challengeIds});
+  void requestChallengeData(List<String> challenges) =>
+      _invokeWithRefresh("requestChallengeData", {"challenges": challenges});
 
   void setCurrentChallenge(String challengeId) =>
       _invokeWithRefresh("setCurrentChallenge", {"challengeId": challengeId});
@@ -91,6 +84,6 @@ class GameServerApi {
   void completedChallenge(String challengeId) =>
       _invokeWithRefresh("completedChallenge", {"challengeId": challengeId});
 
-  void requestOrganizationDataDto() =>
-      _invokeWithRefresh("requestOrganizationDataDto", {"admin": false});
+  void requestOrganizationData() =>
+      _invokeWithRefresh("requestOrganizationData", {});
 }

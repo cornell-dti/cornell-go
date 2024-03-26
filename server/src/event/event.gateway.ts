@@ -21,9 +21,14 @@ import {
 } from './event.dto';
 import { RequestEventTrackerDataDto } from '../challenge/challenge.dto';
 import { OrganizationService } from '../organization/organization.service';
+import { PoliciesGuard } from '../casl/policy.guard';
+import { UserAbility } from '../casl/user-ability.decorator';
+import { AppAbility } from '../casl/casl-ability.factory';
+import { Action } from '../casl/action.enum';
+import { subject } from '@casl/ability';
 
 @WebSocketGateway({ cors: true })
-@UseGuards(UserGuard)
+@UseGuards(UserGuard, PoliciesGuard)
 export class EventGateway {
   constructor(
     private clientService: ClientService,
@@ -32,56 +37,26 @@ export class EventGateway {
   ) {}
 
   /**
-   * Subscribes to and emits all events that have an id within data.eventIds
+   * Subscribes to and emits all events that have an id within data.events
    *
    * @param user The calling user
    * @param data An array of event ids whose info should be emitted
    */
   @SubscribeMessage('requestEventData')
   async requestEventData(
+    @UserAbility() ability: AppAbility,
     @CallingUser() user: User,
     @MessageBody() data: RequestEventDataDto,
   ) {
-    const basic = await this.eventService.getEventsByIdsForUser(
-      data.eventIds,
-      false,
-      user,
+    const evs = await this.eventService.getEventsByIdsForAbility(
+      ability,
+      data.events,
     );
 
-    const admin = await this.eventService.getEventsByIdsForUser(
-      data.eventIds,
-      true,
-      user,
-    );
-
-    for (const ev of basic) {
-      this.clientService.subscribe(user, ev.id, false);
-      await this.eventService.emitUpdateEventData(ev, false, false, user);
-    }
-
-    for (const ev of admin) {
-      this.clientService.subscribe(user, ev.id, true);
-      await this.eventService.emitUpdateEventData(ev, false, true, user);
-    }
-  }
-
-  /**
-   * Emits all found events and has the user subscribe to each event.
-   * 
-   * @param user The calling user
-   * @param data Includes data such as offset, count, rewardTypes,
-        closestToEnding, shortestFirst, and skippable. OnlySee game_server_api.dart for more details.
-   */
-  @SubscribeMessage('requestAllEventData')
-  async requestAllEventData(
-    @CallingUser() user: User,
-    @MessageBody() data: RequestAllEventDataDto,
-  ) {
-    const evs = await this.eventService.getEventsForUser(user);
+    console.log(evs.length);
 
     for (const ev of evs) {
-      this.clientService.subscribe(user, ev.id, false);
-      await this.eventService.emitUpdateEventData(ev, false, false, user);
+      await this.eventService.emitUpdateEventData(ev, false, user);
     }
   }
 
@@ -92,21 +67,33 @@ export class EventGateway {
   ) {
     const evs = await this.eventService.getRecommendedEventsForUser(user, data);
     for (const ev of evs) {
-      await this.eventService.emitUpdateEventData(ev, false, false, user);
+      await this.eventService.emitUpdateEventData(ev, false, user);
     }
   }
 
   @SubscribeMessage('requestEventLeaderData')
   async requestEventLeaderData(
+    @UserAbility() ability: AppAbility,
     @CallingUser() user: User,
     @MessageBody() data: RequestEventLeaderDataDto,
   ) {
-    if (!(await this.eventService.isAllowedEvent(user, data.eventId))) {
-      await this.clientService.emitErrorData(user, 'Access Denied');
+    const ev = await this.eventService.getEventById(data.eventId);
+    if (!ev) {
+      await this.clientService.emitErrorData(
+        user,
+        'Cannot find requested event!',
+      );
       return;
     }
 
-    const ev = await this.eventService.getEventById(data.eventId);
+    if (ability.cannot(Action.Read, subject('EventBase', ev))) {
+      await this.clientService.emitErrorData(
+        user,
+        'Permission to event leader data denied!',
+      );
+      return;
+    }
+
     await this.eventService.emitUpdateLeaderData(
       data.offset,
       Math.min(data.count, 1024),
@@ -122,7 +109,7 @@ export class EventGateway {
   ) {
     const trackers = await this.eventService.getEventTrackersByEventId(
       user,
-      data.trackedEventIds,
+      data.trackedEvents,
     );
 
     for (const tracker of trackers) {
@@ -132,53 +119,42 @@ export class EventGateway {
 
   @SubscribeMessage('updateEventData')
   async updateEventData(
+    @UserAbility() ability: AppAbility,
     @CallingUser() user: User,
     @MessageBody() data: UpdateEventDataDto,
   ) {
-    if (data.deleted) {
-      if (
-        !(await this.eventService.hasAdminRights(
-          { id: data.event as string },
-          user,
-        ))
-      ) {
-        await this.clientService.emitErrorData(
-          user,
-          'User has no admin rights',
-        );
-        return;
-      }
+    const ev = await this.eventService.getEventById(data.event.id);
 
-      const ev = await this.eventService.getEventWithOrgs(data.event as string);
-      await this.eventService.removeEvent(ev.id, user);
-      await this.eventService.emitUpdateEventData(ev, true);
-      for (const org of ev.usedIn) {
-        await this.orgService.emitUpdateOrganizationData(org, false);
-      }
-    } else {
-      const dto = data.event as EventDto;
-      if (
-        !(await this.orgService.isManagerOf(
-          { id: dto.initialOrganizationId ?? '' },
-          user,
-        )) &&
-        !(await this.eventService.hasAdminRights({ id: dto.id }, user))
-      ) {
-        await this.clientService.emitErrorData(
-          user,
-          'User has no admin rights',
-        );
-        return;
-      }
-
-      const ev = await this.eventService.upsertEventFromDto(
-        data.event as EventDto,
+    if (
+      (!ev && ability.cannot(Action.Create, 'EventBase')) ||
+      (ev && ability.cannot(Action.Manage, subject('EventBase', ev)))
+    ) {
+      await this.clientService.emitErrorData(
+        user,
+        'Permission to update event denied!',
       );
+      return;
+    }
+
+    if (data.deleted && ev) {
+      await this.eventService.removeEvent(ev.id, ability);
+      await this.eventService.emitUpdateEventData(ev, true);
+    } else {
+      const ev = await this.eventService.upsertEventFromDto(
+        ability,
+        data.event,
+      );
+
+      if (!ev) {
+        await this.clientService.emitErrorData(user, 'Failed to upsert event!');
+        return;
+      }
 
       const org = await this.orgService.getOrganizationById(
-        dto.initialOrganizationId!,
+        data.event.initialOrganizationId!,
       );
 
+      this.clientService.subscribe(user, ev.id);
       await this.orgService.emitUpdateOrganizationData(org, false);
       await this.eventService.emitUpdateEventData(ev, false);
     }

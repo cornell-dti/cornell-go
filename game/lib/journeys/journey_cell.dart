@@ -3,6 +3,7 @@ import 'package:game/preview/preview.dart';
 
 class JourneyCell extends StatefulWidget {
   final int locationCount;
+  final String location;
   final String journeyName;
   final Image thumbnail;
   final String description;
@@ -10,10 +11,10 @@ class JourneyCell extends StatefulWidget {
   final bool isCompleted;
   final String difficulty;
   final int points;
-  final int challengePoints;
 
   const JourneyCell(
       this.journeyName,
+      this.location,
       this.thumbnail,
       this.description,
       this.locationCount,
@@ -21,37 +22,37 @@ class JourneyCell extends StatefulWidget {
       this.isCompleted,
       this.difficulty,
       this.points,
-      this.challengePoints,
       {Key? key})
       : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _JourneyCellState(
       journeyName,
+      location,
       thumbnail,
       description,
       locationCount,
       numberCompleted,
       isCompleted,
       difficulty,
-      points,
-      challengePoints);
+      points);
 }
 
 class _JourneyCellState extends State<JourneyCell> {
   final int locationCount;
   final String journeyName;
+  final String location;
   final Image thumbnail;
   final String description;
   final int numberCompleted;
   final bool isCompleted;
   final String difficulty;
   final int points;
-  final int challengePoints;
   // final int totalDistance;
 
   _JourneyCellState(
     this.journeyName,
+    this.location,
     this.thumbnail,
     this.description,
     this.locationCount,
@@ -59,7 +60,6 @@ class _JourneyCellState extends State<JourneyCell> {
     this.isCompleted,
     this.difficulty,
     this.points,
-    this.challengePoints,
     // this.totalDistance
   );
 
@@ -77,21 +77,9 @@ class _JourneyCellState extends State<JourneyCell> {
                 BuildContext context,
               ) =>
                   Preview(journeyName, description, difficulty, points,
-                      challengePoints, previewType.journey,
+                      previewType.journey, location,
                       locationCount: locationCount,
                       numberCompleted: numberCompleted));
-          // await showDialog(
-          //     context: context,
-          //     builder: (context) => Preview(
-          //           journeyName,
-          //           description,
-          //           difficulty,
-          //           points,
-          //           challengePoints,
-          //           previewType.journey,
-          //           locationCount: locationCount,
-          //           numberCompleted: numberCompleted,
-          //         ));
         },
         child: Container(
           decoration: BoxDecoration(
@@ -195,7 +183,7 @@ class _JourneyCellState extends State<JourneyCell> {
                         Icon(Icons.tour,
                             size: 15, color: Color.fromARGB(255, 131, 90, 124)),
                         Text(
-                          "location",
+                          location,
                           style: TextStyle(
                             color: Color.fromARGB(255, 131, 90, 124),
                             fontSize: 16,
@@ -232,7 +220,7 @@ class _JourneyCellState extends State<JourneyCell> {
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
-                            challengePoints.toString() + "PTS",
+                            points.toString() + "PTS",
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 14,
@@ -330,7 +318,9 @@ class _JourneyCellState extends State<JourneyCell> {
                               size: 16,
                               color: Color.fromARGB(255, 131, 90, 124)),
                           Text(
-                            numberCompleted.toString() + "/_",
+                            numberCompleted.toString() +
+                                "/" +
+                                locationCount.toString(),
                             style: TextStyle(
                               color: Color.fromARGB(255, 110, 110, 110),
                               fontSize: 16,
