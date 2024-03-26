@@ -14,3 +14,8 @@ export type DtoDefs = {
   enumDtos: Map<String, EnumDto>;
   baseDtos: Map<String, BaseDto>;
 };
+
+export type ApiDefs = {
+  clientEntrypoints: Map<String, String>; // message => dto
+  serverEntrypoints: Map<String, String>; // message => dto
+};

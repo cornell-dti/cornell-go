@@ -26,6 +26,8 @@ import {
   UpdateUserDataDto,
   UserDto,
   BanUserDto,
+  AddManagerDto,
+  JoinOrganizationDto,
 } from './user.dto';
 import { UserService } from './user.service';
 import { readFileSync } from 'fs';
@@ -163,7 +165,7 @@ export class UserGateway {
   async addManager(
     @UserAbility() ability: AppAbility,
     @CallingUser() user: User,
-    @MessageBody() data: { email: string; organizationId: string },
+    @MessageBody() data: AddManagerDto,
   ) {
     const org = await this.orgService.getOrganizationById(data.organizationId);
 
@@ -194,7 +196,7 @@ export class UserGateway {
   @SubscribeMessage('joinOrganization')
   async joinOrganization(
     @CallingUser() user: User,
-    @MessageBody() data: { accessCode: string },
+    @MessageBody() data: JoinOrganizationDto,
   ) {
     await this.orgService.joinOrganization(user, data.accessCode);
 
