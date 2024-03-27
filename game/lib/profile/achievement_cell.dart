@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:game/utils/utility_functions.dart';
 
 /**
  * Widget that represents each individual achievement
