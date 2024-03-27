@@ -154,10 +154,7 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => GameplayPage(
-                                      eventId:
-                                          "1e5b7d13-f13d-4245-b3ce-d7619006a5ed",
-                                    )));
+                                builder: (context) => BottomNavBar()));
                       }
                     }
                   },
