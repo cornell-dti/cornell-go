@@ -4,6 +4,7 @@ import 'package:game/main.dart';
 import 'package:game/navigation_page/bottom_navbar.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:game/utils/utility_functions.dart';
+import 'package:game/gameplay/gameplay_page.dart';
 
 class DetailsPageWidget extends StatefulWidget {
   DetailsPageWidget(
