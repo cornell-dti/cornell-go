@@ -183,7 +183,7 @@ class _JourneysPageState extends State<JourneysPage> {
                                 locationCount,
                                 numberCompleted,
                                 complete,
-                                difficulty?.toString() ?? "",
+                                difficulty?.name ?? "",
                                 totalPoints),
                       ),
                     );
