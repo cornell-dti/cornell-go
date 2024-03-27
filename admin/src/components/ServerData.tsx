@@ -112,7 +112,7 @@ export function ServerDataProvider(props: { children: ReactNode }) {
         });
       },
       addManager(email: string, organizationId: string) {
-        sock.addManager(email, organizationId);
+        sock.addManager({ email, organizationId });
       },
       deleteOrganization(id: string) {
         sock.updateOrganizationData({ organization: { id }, deleted: true });
