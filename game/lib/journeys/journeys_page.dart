@@ -140,7 +140,7 @@ class _JourneysPageState extends State<JourneysPage> {
                     var locationCount = event.challenges?.length ?? 0;
 
                     if (locationCount < 2) continue;
-                    var total_points = 0;
+                    var totalPoints = 0;
 
                     var challenge = challengeModel
                         .getChallengeById(event.challenges?[0] ?? "");
@@ -151,7 +151,7 @@ class _JourneysPageState extends State<JourneysPage> {
                       var challenge =
                           challengeModel.getChallengeById(challengeId);
                       if (challenge != null) {
-                        total_points += challenge.points ?? 0;
+                        totalPoints += challenge.points ?? 0;
                       }
                     }
                     var difficulty = event.difficulty;
@@ -183,8 +183,8 @@ class _JourneysPageState extends State<JourneysPage> {
                                 locationCount,
                                 numberCompleted,
                                 complete,
-                                difficulty?.toString() ?? "",
-                                total_points),
+                                difficulty?.name ?? "",
+                                totalPoints),
                       ),
                     );
                   }
