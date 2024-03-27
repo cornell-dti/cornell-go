@@ -108,18 +108,18 @@ class _JourneysPageState extends State<JourneysPage> {
                     ),
                   ),
                 ),
-                Expanded(child:
-                    Consumer4<EventModel, GroupModel, TrackerModel, UserModel>(
-                        builder: (context, myEventModel, groupModel,
-                            trackerModel, userModel, child) {
+                Expanded(child: Consumer4<EventModel, GroupModel, TrackerModel,
+                        ChallengeModel>(
+                    builder: (context, myEventModel, groupModel, trackerModel,
+                        challengeModel, child) {
                   List<Widget> eventCells = [];
                   if (myEventModel.searchResults == null) {
                     myEventModel.searchEvents(
                         0,
                         1000,
                         [
-                          TimeLimitationType.PERPETUAL,
-                          TimeLimitationType.LIMITED_TIME
+                          EventTimeLimitationDto.PERPETUAL,
+                          EventTimeLimitationDto.LIMITED_TIME
                         ],
                         false,
                         false,
@@ -134,13 +134,29 @@ class _JourneysPageState extends State<JourneysPage> {
                   }
                   for (EventDto event in events) {
                     var tracker = trackerModel.trackerByEventId(event.id);
-                    var numberCompleted = tracker?.prevChallengeIds.length ?? 0;
+                    var numberCompleted = tracker?.prevChallenges?.length ?? 0;
                     var complete =
-                        (numberCompleted == event.challengeIds.length);
-                    var locationCount = event.challengeIds.length;
+                        (numberCompleted == event.challenges?.length);
+                    var locationCount = event.challenges?.length ?? 0;
+
+                    if (locationCount < 2) continue;
+                    var total_points = 0;
+
+                    var challenge = challengeModel
+                        .getChallengeById(event.challenges?[0] ?? "");
+
+                    if (challenge == null) continue;
+                    var location = challenge.location;
+                    for (var challengeId in event.challenges ?? []) {
+                      var challenge =
+                          challengeModel.getChallengeById(challengeId);
+                      if (challenge != null) {
+                        total_points += challenge.points ?? 0;
+                      }
+                    }
                     var difficulty = event.difficulty;
                     DateTime now = DateTime.now();
-                    DateTime endtime = HttpDate.parse(event.endTime);
+                    DateTime endtime = HttpDate.parse(event.endTime ?? "");
 
                     Duration timeTillExpire = endtime.difference(now);
                     eventCells.add(
@@ -151,23 +167,24 @@ class _JourneysPageState extends State<JourneysPage> {
                             ? Consumer<ApiClient>(
                                 builder: (context, apiClient, child) {
                                   if (event.id == groupModel.curEventId) {
-                                    apiClient.serverApi?.setCurrentEvent("");
+                                    apiClient.serverApi?.setCurrentEvent(
+                                        SetCurrentEventDto(eventId: ""));
                                   }
                                   return Container();
                                 },
                               )
                             : JourneyCell(
                                 key: UniqueKey(),
-                                event.name,
+                                event.name ?? "",
+                                location ?? "",
                                 Image.network(
                                     "https://picsum.photos/250?image=9"), // dummy data for now; should pass in thumbnail parameter
-                                event.description,
+                                event.description ?? "",
                                 locationCount,
                                 numberCompleted,
                                 complete,
-                                difficulty,
-                                event.minimumScore,
-                                0),
+                                difficulty?.toString() ?? "",
+                                total_points),
                       ),
                     );
                   }

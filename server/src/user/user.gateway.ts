@@ -23,14 +23,20 @@ import {
   SetGraduationYearDto,
   SetMajorDto,
   SetUsernameDto,
-  RequestFilteredEventDto,
   UpdateUserDataDto,
   UserDto,
   BanUserDto,
+  AddManagerDto,
+  JoinOrganizationDto,
 } from './user.dto';
 import { UserService } from './user.service';
 import { readFileSync } from 'fs';
 import { OrganizationService } from '../organization/organization.service';
+import { PoliciesGuard } from '../casl/policy.guard';
+import { UserAbility } from '../casl/user-ability.decorator';
+import { AppAbility } from '../casl/casl-ability.factory';
+import { Action } from '../casl/action.enum';
+import { subject } from '@casl/ability';
 
 const majors = readFileSync('./src/user/majors.txt', 'utf8').split('\n');
 
@@ -38,7 +44,7 @@ const replaceAll = require('string.prototype.replaceall');
 replaceAll.shim();
 
 @WebSocketGateway({ cors: true })
-@UseGuards(UserGuard)
+@UseGuards(UserGuard, PoliciesGuard)
 export class UserGateway {
   constructor(
     private clientService: ClientService,
@@ -66,140 +72,62 @@ export class UserGateway {
 
   @SubscribeMessage('requestAllUserData')
   async requestAllUserData(
+    @UserAbility() ability: AppAbility,
     @CallingUser() user: User,
     @MessageBody() data: RequestAllUserDataDto,
   ) {
-    if (user.administrator) {
+    if (ability.can(Action.Read, 'User')) {
       const users = await this.userService.getAllUserData();
 
       await users.map(
         async (us: User) =>
-          await this.userService.emitUpdateUserData(
-            us,
-            false,
-            false,
-            true,
-            user,
-          ),
+          await this.userService.emitUpdateUserData(us, false, false, user),
+      );
+    } else {
+      await this.clientService.emitErrorData(
+        user,
+        'Permission to read all user data denied!',
       );
     }
   }
+
   @SubscribeMessage('requestUserData')
   async requestUserData(
+    @UserAbility() ability: AppAbility,
     @CallingUser() user: User,
     @MessageBody() data: RequestUserDataDto,
   ) {
-    if (user.administrator && data.userId) {
+    if (data.userId) {
       const queried = await this.userService.byId(data.userId);
-
-      if (queried) {
-        await this.userService.emitUpdateUserData(
-          queried,
-          false,
-          false,
-          true,
+      if (queried && ability.can(Action.Read, subject('User', queried))) {
+        await this.userService.emitUpdateUserData(queried, false, false, user);
+      } else {
+        await this.clientService.emitErrorData(
           user,
+          'Error requesting user by id',
         );
       }
     } else {
-      await this.userService.emitUpdateUserData(user, false, false, true, user);
+      await this.userService.emitUpdateUserData(user, false, false);
     }
   }
 
   @SubscribeMessage('updateUserData')
   async updateUserData(
+    @UserAbility() ability: AppAbility,
     @CallingUser() user: User,
     @MessageBody() data: UpdateUserDataDto,
   ) {
-    if (!user.administrator && user.id !== (data.user as UserDto).id) return;
-
     if (data.deleted) {
-      const user = await this.userService.byId(data.user as string);
-      if (user !== null) {
-        await this.userService.deleteUser(user);
+      const user = await this.userService.byId(data.user.id);
+      if (user) {
+        await this.userService.deleteUser(ability, user);
         await this.userService.emitUpdateUserData(user, true, true);
       }
     } else {
-      const user = await this.userService.updateUser(data.user as UserDto);
-
+      const user = await this.userService.updateUser(ability, data.user);
       await this.userService.emitUpdateUserData(user, false, true);
     }
-  }
-
-  @SubscribeMessage('requestFilteredEvents')
-  async requestFilteredEvents(
-    @CallingUser() user: User,
-    @MessageBody() data: RequestFilteredEventDto,
-  ) {
-    const eventIds = await this.userService.getFilteredEventIds(
-      user,
-      data.filter,
-      data.cursorId,
-      data.limit,
-    );
-    for (const eventId of eventIds) {
-      const ev = await this.eventService.getEventById(eventId.id);
-      this.clientService.subscribe(user, eventId.id, false);
-      await this.eventService.emitUpdateEventData(ev, false, false, user);
-    }
-  }
-
-  @SubscribeMessage('setFavorite')
-  async setFavorite(
-    @CallingUser() user: User,
-    @MessageBody() data: RequestFavoriteEventDataDto,
-  ) {
-    const ev = await this.eventService.getEventById(data.eventId);
-    await this.userService.setFavorite(user, ev, data.isFavorite);
-    await this.userService.emitUpdateUserData(user, false, false, true, user);
-  }
-
-  @SubscribeMessage('setUsername')
-  async setUsername(
-    @CallingUser() user: User,
-    @MessageBody() data: SetUsernameDto,
-  ) {
-    const username = new CensorSensor()
-      .cleanProfanityIsh(
-        data.newUsername
-          .substring(0, 128)
-          .replaceAll(/[^_A-z0-9]/g, ' ')
-          .replaceAll('_', ' '),
-      )
-      .replaceAll('*', '_')
-      .replaceAll(' ', '_');
-
-    await this.userService.setUsername(user, username);
-
-    user.username = username; // Updated so change here too
-
-    await this.userService.emitUpdateUserData(user, false, true, true);
-
-    const group = await this.groupService.getGroupForUser(user);
-    await this.groupService.emitUpdateGroupData(group, false);
-  }
-
-  // @SubscribeMessage('setMajor')
-  // async setMajor(@CallingUser() user: User, @MessageBody() data: SetMajorDto) {
-  //   if (majors.includes(data.newMajor)) {
-  //     await this.userService.setMajor(user, data.newMajor);
-
-  //     user.major = data.newMajor; // Updated so change here too
-
-  //     await this.userService.emitUpdateUserData(user, false, true, true);
-  //   }
-  // }
-
-  @SubscribeMessage('setGraduationYear')
-  async setGraduationYear(
-    @CallingUser() user: User,
-    @MessageBody() data: SetGraduationYearDto,
-  ) {
-    await this.userService.setGraduationYear(user, data.newYear);
-
-    user.year = data.newYear; // Updated so change here too
-
-    await this.userService.emitUpdateUserData(user, false, true, true);
   }
 
   @SubscribeMessage('setAuthToDevice')
@@ -228,55 +156,65 @@ export class UserGateway {
       const user = await this.userService.byId(data.userId);
       if (!!user) {
         const us = await this.userService.banUser(user, data.isBanned);
-
-        await this.userService.emitUpdateUserData(us, false, false, true);
+        await this.userService.emitUpdateUserData(us, false, false);
       }
     }
   }
 
   @SubscribeMessage('addManager')
   async addManager(
+    @UserAbility() ability: AppAbility,
     @CallingUser() user: User,
-    @MessageBody() data: { email: string; organizationId: string },
+    @MessageBody() data: AddManagerDto,
   ) {
-    if (!user.administrator) return;
-
-    await this.orgService.addManager(user, data.email, data.organizationId);
-
     const org = await this.orgService.getOrganizationById(data.organizationId);
-    await this.orgService.emitUpdateOrganizationData(org, false);
+
+    if (!ability.can(Action.Manage, subject('Organization', org))) {
+      await this.clientService.emitErrorData(
+        user,
+        'Permission to add manager denied!',
+      );
+      return;
+    }
+
+    if (
+      !(await this.orgService.addManager(
+        ability,
+        data.email,
+        data.organizationId,
+      ))
+    ) {
+      await this.clientService.emitErrorData(user, 'Failed to add manager!');
+      return;
+    }
 
     const manager = await this.userService.byEmail(data.email);
-    await this.userService.emitUpdateUserData(
-      manager,
-      false,
-      false,
-      true,
-      user,
-    );
+    await this.clientService.subscribe(manager, org.id);
+    await this.orgService.emitUpdateOrganizationData(org, false);
   }
 
   @SubscribeMessage('joinOrganization')
   async joinOrganization(
     @CallingUser() user: User,
-    @MessageBody() data: { accessCode: string },
+    @MessageBody() data: JoinOrganizationDto,
   ) {
     await this.orgService.joinOrganization(user, data.accessCode);
 
     const org = await this.orgService.getOrganizationByCode(data.accessCode);
     await this.orgService.emitUpdateOrganizationData(org, false);
 
-    await this.userService.emitUpdateUserData(user, false, false, true);
+    await this.userService.emitUpdateUserData(user, false, false);
   }
 
   @SubscribeMessage('closeAccount')
   async closeAccount(
+    @UserAbility() ability: AppAbility,
     @CallingUser() user: User,
     @MessageBody() data: CloseAccountDto,
   ) {
     const group = await this.groupService.getGroupForUser(user);
     await this.userService.setAuthType(user, AuthType.NONE, user.authToken);
-    await this.userService.deleteUser(user);
+    await this.userService.deleteUser(ability, user);
     await this.groupService.emitUpdateGroupData(group, false);
   }
 }

@@ -12,11 +12,12 @@ class GroupModel extends ChangeNotifier {
     client.clientApi.updateGroupDataStream.listen((event) {
       print(event);
       if (!(event.group is String)) {
-        group = event.group!;
-        client.serverApi?.setCurrentEvent(event.group!.curEventId);
-        curEventId = event.group!.curEventId;
+        group = event.group;
+        client.serverApi?.setCurrentEvent(
+            SetCurrentEventDto(eventId: event.group.curEventId ?? ""));
+        curEventId = event.group.curEventId;
         members.removeWhere((element) =>
-            event.group!.members.any((mem) => mem.id == element.id));
+            event.group.members?.any((mem) => mem.id == element.id) ?? false);
         members.clear();
         members.sort((mem1, mem2) => mem1.points - mem2.points);
         notifyListeners();
@@ -26,15 +27,7 @@ class GroupModel extends ChangeNotifier {
     client.clientApi.connectedStream.listen((event) {
       members.clear();
       curEventId = null;
-      client.serverApi?.requestGroupData();
-    });
-
-    client.clientApi.invalidateDataStream.listen((event) {
-      if (event.groupData) {
-        members.clear();
-        curEventId = null;
-        client.serverApi?.requestGroupData();
-      }
+      client.serverApi?.requestGroupData(RequestGroupDataDto());
     });
   }
 }

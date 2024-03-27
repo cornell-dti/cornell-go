@@ -57,19 +57,19 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
               Consumer3<GroupModel, EventModel, UserModel>(builder:
                   (context, myGroupModel, myEventModel, myUserModel, child) {
                 //Loading in the lists and then creating podiumList of top 3
-                final List<UpdateLeaderDataUserDto> list =
+                final List<LeaderDto> list =
                     myEventModel.getTopPlayersForEvent('', 1000);
 
                 list.sort((a, b) => b.score.compareTo(a.score));
-                UpdateLeaderDataUserDto empty =
-                    UpdateLeaderDataUserDto.fromJson({
-                  "userId": " ",
-                  "username": " ",
-                  "score": 0,
-                });
+                LeaderDto empty =
+                    LeaderDto(
+                  userId: " ",
+                  username: " ",
+                  score: 0,
+                );
 
                 // Creating list to be displayed within the podium (filled with empty users if lists length is less than 3)
-                List<UpdateLeaderDataUserDto> fullList = List.from(list);
+                List<LeaderDto> fullList = List.from(list);
 
                 int iterTillFull = 3 - fullList.length;
                 if (fullList.length < 3) {
@@ -78,7 +78,7 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
                   }
                 }
 
-                List<UpdateLeaderDataUserDto> podiumList =
+                List<LeaderDto> podiumList =
                     fullList.sublist(0, 3);
 
                 // Booleans representing whether the current player is in the podium for highlighting purposes
@@ -143,9 +143,8 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
                     builder: (context, myGroupModel, myEventModel, myUserModel,
                         child) {
                       // Use this line below to retrieve actual data
-                      final List<UpdateLeaderDataUserDto> list =
+                      final List<LeaderDto> list =
                           myEventModel.getTopPlayersForEvent('', 1000);
-
                       // Dynamic Positions in leaderboard based on number of inputs
                       int position = 1;
                       if (list.length > 3) {

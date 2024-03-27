@@ -4,7 +4,7 @@ import 'package:game/api/game_client_dto.dart';
 
 class EventModel extends ChangeNotifier {
   Map<String, EventDto> _events = {};
-  Map<String, List<UpdateLeaderDataUserDto>> _topPlayers = {};
+  Map<String, List<LeaderDto>> _topPlayers = {};
 
   ApiClient _client;
   List<EventDto>? searchResults;
@@ -53,23 +53,9 @@ class EventModel extends ChangeNotifier {
       searchResults = null;
       notifyListeners();
     });
-
-    client.clientApi.invalidateDataStream.listen((event) {
-      if (event.userEventData) {
-        _events.clear();
-        searchResults = null;
-      }
-      if (event.leaderboardData) {
-        _topPlayers.clear();
-      }
-      if (event.leaderboardData || event.userEventData) {
-        notifyListeners();
-      }
-    });
   }
 
-  List<UpdateLeaderDataUserDto> getTopPlayersForEvent(
-      String eventId, int count) {
+  List<LeaderDto> getTopPlayersForEvent(String eventId, int count) {
     final topPlayers = _topPlayers[eventId];
     final diff = count - (topPlayers?.length ?? 0);
     if (topPlayers == null) {
@@ -77,10 +63,13 @@ class EventModel extends ChangeNotifier {
     }
     if (_topPlayers[eventId]?.length == 0) {
       eventId.isEmpty
-          ? _client.serverApi
-              ?.requestGlobalLeaderData((topPlayers?.length ?? 0), 1000)
-          : _client.serverApi?.requestEventLeaderData(
-              (topPlayers?.length ?? 0), diff, eventId);
+          ? _client.serverApi?.requestGlobalLeaderData(
+              RequestGlobalLeaderDataDto(
+                  offset: (topPlayers?.length ?? 0), count: 1000))
+          : _client.serverApi?.requestEventLeaderData(RequestEventLeaderDataDto(
+              offset: (topPlayers?.length ?? 0),
+              count: diff,
+              eventId: eventId));
     }
     return topPlayers ?? [];
   }
@@ -89,7 +78,7 @@ class EventModel extends ChangeNotifier {
     if (_events.containsKey(id)) {
       return _events[id];
     } else {
-      _client.serverApi?.requestEventData([id]);
+      _client.serverApi?.requestEventData(RequestEventDataDto(events: [id]));
       return null;
     }
   }
@@ -97,12 +86,11 @@ class EventModel extends ChangeNotifier {
   void searchEvents(
       int offset,
       int count,
-      List<TimeLimitationType> timeLimitations,
+      List<EventTimeLimitationDto> timeLimitations,
       bool closestToEnding,
       bool shortestFirst,
       bool skippableOnly) {
     searchResults = null;
-    _client.serverApi?.requestAllEventData(offset, count, timeLimitations,
-        closestToEnding, shortestFirst, skippableOnly);
+    _client.serverApi?.requestEventData(RequestEventDataDto());
   }
 }

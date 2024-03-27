@@ -22,7 +22,7 @@ import { SearchBar } from "./SearchBar";
 import { ServerDataContext } from "./ServerData";
 
 import { compareTwoStrings } from "string-similarity";
-import { OrganizationDto } from "../dto/organization.dto";
+import { OrganizationDto } from "../all.dto";
 
 function OrganizationCard(props: {
   organization: OrganizationDto;
@@ -50,9 +50,9 @@ function OrganizationCard(props: {
         <ListCardBody>
           Id: <b>{props.organization.id}</b>
           <br />
-          Access Code: <b>{props.organization.accessCode.toUpperCase()}</b>
+          Access Code: <b>{props.organization.accessCode?.toUpperCase()}</b>
           <br />
-          User Count: <b>{props.organization.members.length}</b>
+          User Count: <b>{props.organization.members?.length}</b>
           <br />
         </ListCardBody>
         <ListCardButtons>
@@ -175,7 +175,8 @@ export function Organizations() {
       {Array.from(serverData.organizations.values())
         .sort(
           (a, b) =>
-            compareTwoStrings(b.name, query) - compareTwoStrings(a.name, query)
+            compareTwoStrings(b.name ?? "", query) -
+            compareTwoStrings(a.name ?? "", query)
         )
         .map((org) => (
           <OrganizationCard
@@ -183,7 +184,7 @@ export function Organizations() {
             organization={org}
             onAdd={() => {
               setCurrentId(org.id);
-              org.events.push(serverData.selectedEvent);
+              org.events?.push(serverData.selectedEvent);
               serverData.updateOrganization(org);
             }}
             onDelete={() => {

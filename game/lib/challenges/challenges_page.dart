@@ -1,8 +1,19 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
+import 'package:game/api/game_api.dart';
+import 'package:game/api/game_client_dto.dart';
+import 'package:game/model/challenge_model.dart';
+import 'package:game/model/event_model.dart';
+import 'package:game/model/group_model.dart';
+import 'package:game/model/tracker_model.dart';
+import 'package:game/model/user_model.dart';
+import 'package:provider/provider.dart';
 import 'challenge_cell.dart';
+import 'package:game/journeys/filter_form.dart';
 
 class ChallengesPage extends StatefulWidget {
   const ChallengesPage({Key? key}) : super(key: key);
@@ -12,6 +23,17 @@ class ChallengesPage extends StatefulWidget {
 }
 
 class _ChallengesPageState extends State<ChallengesPage> {
+  void openFilter() {
+    showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        builder: (
+          BuildContext context,
+        ) {
+          return FilterForm();
+        });
+  }
+
   /* Dummy code, to be replaced */
   final cells = [
     ChallengeCell(
@@ -21,8 +43,7 @@ class _ChallengesPageState extends State<ChallengesPage> {
         false,
         "Find this famous statue!",
         "Easy",
-        15,
-        3),
+        15),
     ChallengeCell(
         "ARTS QUAD",
         "Statue on the Arts Quad",
@@ -30,8 +51,7 @@ class _ChallengesPageState extends State<ChallengesPage> {
         true,
         "Find this famous statue!",
         "Normal",
-        15,
-        3),
+        15),
     ChallengeCell(
         "ARTS QUAD",
         "Statue on the Arts Quad",
@@ -39,8 +59,7 @@ class _ChallengesPageState extends State<ChallengesPage> {
         false,
         "Find this famous statue!",
         "Hard",
-        15,
-        3),
+        15),
     ChallengeCell(
         "ARTS QUAD",
         "Statue on the Arts Quad",
@@ -48,8 +67,7 @@ class _ChallengesPageState extends State<ChallengesPage> {
         true,
         "Find this famous statue!",
         "Challenging",
-        15,
-        3),
+        15),
   ];
 
   @override
@@ -93,41 +111,128 @@ class _ChallengesPageState extends State<ChallengesPage> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Container(
-                        padding: EdgeInsets.zero,
-                        color: Color.fromARGB(76, 217, 217, 217),
+                        height: 30,
                         child: TextButton.icon(
-                          onPressed: () {},
-                          icon: Icon(
-                            Icons.tune,
-                            color: Color.fromARGB(204, 0, 0, 0),
-                            size: 12,
-                          ),
-                          label: Text(
-                            "filter",
-                            style: TextStyle(
-                              color: Color.fromARGB(204, 0, 0, 0),
-                              fontSize: 12,
-                              fontFamily: 'Lato',
-                              fontWeight: FontWeight.w600,
+                            onPressed: openFilter,
+                            icon: Icon(
+                              Icons.filter_list_rounded,
+                              color: Color.fromARGB(255, 0, 0, 0),
+                              size: 20.0,
                             ),
-                          ),
-                        ),
+                            style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all<Color>(
+                                  Color.fromARGB(153, 217, 217, 217)),
+                              padding: MaterialStateProperty.all(
+                                EdgeInsets.only(right: 16.0, left: 16.0),
+                              ),
+                              shape: MaterialStateProperty.all(
+                                  RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(3.0),
+                              )),
+                            ),
+                            label: Text(
+                              "Filter By",
+                              style: TextStyle(
+                                color: Color.fromARGB(255, 0, 0, 0),
+                                fontSize: 15,
+                                fontFamily: 'Inter',
+                              ),
+                            )),
                       ),
                     ],
                   ),
                 ),
-                Expanded(
-                  child: ListView.separated(
-                    padding: const EdgeInsets.all(0),
-                    itemCount: cells.length,
+                Expanded(child: Consumer4<EventModel, GroupModel, TrackerModel,
+                        ChallengeModel>(
+                    builder: (context, myEventModel, groupModel, trackerModel,
+                        challengeModel, child) {
+                  List<Widget> eventCells = [];
+                  if (myEventModel.searchResults == null) {
+                    myEventModel.searchEvents(
+                        0,
+                        1000,
+                        [
+                          EventTimeLimitationDto.PERPETUAL,
+                          EventTimeLimitationDto.LIMITED_TIME
+                        ],
+                        false,
+                        false,
+                        false);
+                  }
+                  final events = myEventModel.searchResults ?? [];
+                  if (!events
+                      .any((element) => element.id == groupModel.curEventId)) {
+                    final curEvent =
+                        myEventModel.getEventById(groupModel.curEventId ?? "");
+                    if (curEvent != null) events.add(curEvent);
+                  }
+                  for (EventDto event in events) {
+                    var tracker = trackerModel.trackerByEventId(event.id);
+                    var numberCompleted = tracker?.prevChallenges?.length ?? 0;
+                    var complete =
+                        (numberCompleted == event.challenges?.length);
+                    var locationCount = event.challenges?.length ?? 0;
+                    var difficulty = event.difficulty;
+                    DateTime now = DateTime.now();
+                    DateTime endtime = HttpDate.parse(event.endTime ?? "");
+
+                    Duration timeTillExpire = endtime.difference(now);
+                    if (locationCount != 1) continue;
+                    var challenge = challengeModel
+                        .getChallengeById(event.challenges?[0] ?? "");
+
+                    if (challenge == null) continue;
+                    eventCells.add(
+                      StreamBuilder(
+                        stream:
+                            Stream.fromFuture(Future.delayed(timeTillExpire)),
+                        builder: (stream, value) => timeTillExpire.isNegative
+                            ? Consumer<ApiClient>(
+                                builder: (context, apiClient, child) {
+                                  if (event.id == groupModel.curEventId) {
+                                    apiClient.serverApi?.setCurrentEvent(
+                                        SetCurrentEventDto(eventId: ""));
+                                  }
+                                  return Container();
+                                },
+                              )
+                            : ChallengeCell(
+                                key: UniqueKey(),
+                                challenge.location ?? "",
+                                challenge.name ?? "",
+                                Image.network(
+                                    "https://picsum.photos/250?image=9"),
+                                complete,
+                                challenge.description ?? "",
+                                difficulty?.toString() ?? "",
+                                challenge.points ?? 0),
+                      ),
+                    );
+                  }
+                  return ListView.separated(
+                    padding: const EdgeInsets.symmetric(horizontal: 3),
+                    itemCount: eventCells.length + 1,
                     itemBuilder: (context, index) {
-                      return cells[index];
+                      if (index == eventCells.length) {
+                        // Footer widget
+                        return Padding(
+                            padding: const EdgeInsets.only(bottom: 50.0),
+                            child: Center(
+                              child: Image(
+                                image: AssetImage('assets/images/go-logo.png'),
+                                width: 200,
+                                height: 200,
+                              ),
+                            ));
+                      }
+                      return eventCells[index];
                     },
+                    physics: BouncingScrollPhysics(),
                     separatorBuilder: (context, index) {
                       return SizedBox(height: 10);
                     },
-                  ),
-                ),
+                  );
+                }))
               ],
             ),
           )),

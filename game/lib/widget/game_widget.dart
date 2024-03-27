@@ -79,9 +79,9 @@ class _GameWidgetState extends State<GameWidget> {
                   gameModel.hasConnection = apiCient.serverApi != null;
                   if (curChallenge != null) {
                     gameModel.challengeId = curChallenge.id;
-                    gameModel.description = curChallenge.description;
-                    gameModel.name = curChallenge.name;
-                    gameModel.imageUrl = curChallenge.imageUrl;
+                    gameModel.description = curChallenge.description ?? "";
+                    gameModel.name = curChallenge.name ?? "";
+                    gameModel.imageUrl = curChallenge.imageUrl ?? "";
                   }
 
                   if (serviceStatus == ServiceStatus.disabled ||
@@ -98,25 +98,25 @@ class _GameWidgetState extends State<GameWidget> {
                   if (snapshot.data != null &&
                       curChallenge != null &&
                       requiredSizeMet) {
-                    final chalLoc =
-                        GeoPoint(curChallenge.lat, curChallenge.long);
-                    final location = GeoPoint(
-                        snapshot.data!.latitude, snapshot.data!.longitude);
+                    final chalLoc = GeoPoint(
+                        curChallenge.latF ?? 0, curChallenge.longF ?? 0, 0);
+                    final location = GeoPoint(snapshot.data!.latitude,
+                        snapshot.data!.longitude, snapshot.data!.heading);
                     final distance = location.distanceTo(chalLoc);
 
                     gameModel.walkingTime =
                         (distance / 80).ceil().toString() + " min";
                     gameModel.completionProgress = calcCompletionProgress(
                         distance,
-                        curChallenge.closeRadius,
-                        curChallenge.awardingRadius);
-                    gameModel.closeProgress =
-                        calcCloseProgress(distance, curChallenge.closeRadius);
+                        curChallenge.closeRadiusF ?? 0,
+                        curChallenge.awardingRadiusF ?? 0);
+                    gameModel.closeProgress = calcCloseProgress(
+                        distance, curChallenge.closeRadiusF ?? 0);
                     gameModel.directionDistance = lastDistance - distance;
                     gameModel.withinCompletionRadius =
-                        distance < curChallenge.awardingRadius;
+                        distance < (curChallenge.awardingRadiusF ?? 0);
                     gameModel.withinCloseRadius =
-                        distance < curChallenge.closeRadius;
+                        distance < (curChallenge.closeRadiusF ?? 0);
 
                     if (DateTime.now().difference(lastCheckTime).inSeconds >
                         10) {

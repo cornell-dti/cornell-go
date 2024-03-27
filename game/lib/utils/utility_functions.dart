@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:game/api/game_api.dart';
+import 'package:game/api/game_client_dto.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'dart:io' show Platform; //at the top
@@ -64,7 +65,7 @@ Future<void> showLeaveConfirmationAlert(
           TextButton(
             child: const Text('YES'),
             onPressed: () {
-              client.serverApi?.leaveGroup();
+              client.serverApi?.leaveGroup(LeaveGroupDto());
               Navigator.of(context).pop();
             },
           ),

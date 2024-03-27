@@ -6,12 +6,15 @@ import {
   useMemo,
   useState,
 } from "react";
-import { ChallengeDto } from "../dto/challenge.dto";
-import { UpdateErrorDto } from "../dto/client.dto";
-import { EventDto } from "../dto/event.dto";
-import { UserDto } from "../dto/user.dto";
-import { GroupDto } from "../dto/group.dto";
-import { OrganizationDto } from "../dto/organization.dto";
+import {
+  ChallengeDto,
+  UpdateErrorDto,
+  EventDto,
+  GroupDto,
+  UserDto,
+  OrganizationDto,
+} from "../all.dto";
+
 import { ServerApi } from "./ServerApi";
 import { ServerConnectionContext } from "./ServerConnection";
 
@@ -59,32 +62,32 @@ export function ServerDataProvider(props: { children: ReactNode }) {
       selectEvent(id: string) {
         setServerData({ ...serverData, selectedEvent: id });
         sock.requestChallengeData({
-          challengeIds: serverData.events.get(id)?.challengeIds ?? [],
+          challenges: serverData.events.get(id)?.challenges ?? [],
         });
       },
       selectOrg(id: string) {
         setServerData({ ...serverData, selectedOrg: id, selectedEvent: "" });
         sock.requestEventData({
-          eventIds: serverData.organizations.get(id)?.events ?? [],
+          events: serverData.organizations.get(id)?.events ?? [],
         });
       },
       selectOrganization(id: string) {
         setServerData({ ...serverData, selectedOrg: id, selectedEvent: "" });
         sock.requestEventData({
-          eventIds: serverData.organizations.get(id)?.events ?? [],
+          events: serverData.organizations.get(id)?.events ?? [],
         });
       },
       updateChallenge(challenge: ChallengeDto) {
         sock.updateChallengeData({ challenge, deleted: false });
       },
       deleteChallenge(id: string) {
-        sock.updateChallengeData({ challenge: id, deleted: true });
+        sock.updateChallengeData({ challenge: { id }, deleted: true });
       },
       updateEvent(event: EventDto) {
         sock.updateEventData({ event: event, deleted: false });
       },
       deleteEvent(id: string) {
-        sock.updateEventData({ event: id, deleted: true });
+        sock.updateEventData({ event: { id }, deleted: true });
       },
       deleteError(id: string) {
         serverData.errors.delete(id);
@@ -94,13 +97,13 @@ export function ServerDataProvider(props: { children: ReactNode }) {
         sock.updateUserData({ user, deleted: false });
       },
       deleteUser(id: string) {
-        sock.updateUserData({ user: id, deleted: true });
+        sock.updateUserData({ user: { id }, deleted: true });
       },
       updateGroup(group: GroupDto) {
         sock.updateGroupData({ group, deleted: false });
       },
       deleteGroup(id: string) {
-        sock.updateGroupData({ group: id, deleted: true });
+        sock.updateGroupData({ group: { id }, deleted: true });
       },
       updateOrganization(organization: OrganizationDto) {
         sock.updateOrganizationData({
@@ -109,10 +112,10 @@ export function ServerDataProvider(props: { children: ReactNode }) {
         });
       },
       addManager(email: string, organizationId: string) {
-        sock.addManager(email, organizationId);
+        sock.addManager({ email, organizationId });
       },
       deleteOrganization(id: string) {
-        sock.updateOrganizationData({ organization: id, deleted: true });
+        sock.updateOrganizationData({ organization: { id }, deleted: true });
       },
     }),
     [serverData, setServerData, sock]
@@ -128,19 +131,19 @@ export function ServerDataProvider(props: { children: ReactNode }) {
   useEffect(() => {
     sock.onUpdateEventData((data) => {
       if (data.deleted) {
-        serverData.events.delete(data.event as string);
-        if (data.event === serverData.selectedEvent) {
+        serverData.events.delete(data.event.id);
+        if (data.event.id === serverData.selectedEvent) {
           serverData.selectedEvent = "";
         }
       } else {
         const oldChallenges =
-          serverData.events.get((data.event as EventDto).id)?.challengeIds ??
-          [];
+          serverData.events.get((data.event as EventDto).id)?.challenges ?? [];
 
         sock.requestChallengeData({
-          challengeIds: (data.event as EventDto).challengeIds.filter(
-            (chal) => !(chal in oldChallenges)
-          ),
+          challenges:
+            (data.event as EventDto).challenges?.filter(
+              (chal: string) => !(chal in oldChallenges)
+            ) ?? [],
         });
 
         serverData.events.set(
@@ -153,7 +156,7 @@ export function ServerDataProvider(props: { children: ReactNode }) {
     });
     sock.onUpdateChallengeData((data) => {
       if (data.deleted) {
-        serverData.challenges.delete(data.challenge as string);
+        serverData.challenges.delete(data.challenge.id);
       } else {
         serverData.challenges.set(
           (data.challenge as ChallengeDto).id,
@@ -186,7 +189,7 @@ export function ServerDataProvider(props: { children: ReactNode }) {
     });
     sock.onUpdateOrganizationData((data) => {
       if (data.deleted) {
-        serverData.organizations.delete(data.organization as string);
+        serverData.organizations.delete(data.organization.id);
       } else {
         const oldEvents =
           serverData.organizations.get(
@@ -194,8 +197,8 @@ export function ServerDataProvider(props: { children: ReactNode }) {
           )?.events ?? [];
 
         sock.requestEventData({
-          eventIds: (data.organization as OrganizationDto).events.filter(
-            (ev) => !(ev in oldEvents)
+          events: (data.organization as OrganizationDto).events?.filter(
+            (ev: string) => !(ev in oldEvents)
           ),
         });
 
