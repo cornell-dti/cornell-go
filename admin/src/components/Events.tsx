@@ -22,7 +22,7 @@ import { SearchBar } from "./SearchBar";
 import { ServerDataContext } from "./ServerData";
 
 import { compareTwoStrings } from "string-similarity";
-import { EventDto } from "../dto/event.dto";
+import { EventDto } from "../all.dto";
 import { AlertModal } from "./AlertModal";
 
 function EventCard(props: {
@@ -32,7 +32,7 @@ function EventCard(props: {
   onDelete: () => void;
 }) {
   const requiredText =
-    props.event.requiredMembers < 0
+    props.event.requiredMembers && props.event.requiredMembers < 0
       ? "Any Amount"
       : props.event.requiredMembers;
 
@@ -63,17 +63,19 @@ function EventCard(props: {
         <ListCardBody>
           Id: <b>{props.event.id}</b>
           <br />
-          Available Until: <b>
-            {new Date(props.event.endTime).toString()}
+          Available Until:{" "}
+          <b>
+            {props.event.endTime && new Date(props.event.endTime).toString()}
           </b>{" "}
           <br />
           Required Players: <b>{requiredText}</b> <br />
           Time Limitation: <b>{timeLimitation}</b> <br />
-          Challenge Count: <b>{props.event.challengeIds.length}</b> <br />
+          Challenge Count: <b>{props.event.challenges?.length}</b> <br />
           Difficulty: <b>{difficultyMode}</b> <br />
-          Publicly Visible: <b>{affirmOfBool(props.event.indexable)}</b> <br />
-          Latitude: <b>{props.event.latitude}</b>, Longitude:{" "}
-          <b>{props.event.longitude}</b> <br />
+          Publicly Visible: <b>{affirmOfBool(!!props.event.indexable)}</b>{" "}
+          <br />
+          Latitude: <b>{props.event.latitudeF}</b>, Longitude:{" "}
+          <b>{props.event.longitudeF}</b> <br />
         </ListCardBody>
         <ListCardButtons>
           <HButton onClick={props.onDelete}>DELETE</HButton>
@@ -116,15 +118,15 @@ function fromForm(form: EntryForm[], id: string): EventDto {
     description: (form[1] as FreeEntryForm).value,
     indexable: (form[5] as OptionEntryForm).value === 1,
     endTime: (form[6] as DateEntryForm).date.toUTCString(),
-    challengeIds: [],
+    challenges: [],
     difficulty:
       (form[4] as OptionEntryForm).value === 0
         ? "Easy"
         : (form[4] as OptionEntryForm).value === 1
         ? "Normal"
         : "Hard",
-    latitude: 0,
-    longitude: 0,
+    latitudeF: 0,
+    longitudeF: 0,
   };
 }
 
@@ -158,7 +160,7 @@ function toForm(event: EventDto) {
       options: ["No", "Yes"],
       value: event.indexable ? 1 : 0,
     },
-    { name: "Available Until", date: new Date(event.endTime) },
+    { name: "Available Until", date: event.endTime && new Date(event.endTime) },
   ] as EntryForm[];
 }
 
@@ -201,10 +203,10 @@ export function Events() {
         isOpen={isEditModalOpen}
         entryButtonText="EDIT"
         onEntry={() => {
-          const { challengeIds } = serverData.events.get(currentId)!;
+          const { challenges } = serverData.events.get(currentId)!;
           serverData.updateEvent({
             ...fromForm(form, currentId),
-            challengeIds,
+            challenges,
           });
           setEditModalOpen(false);
         }}
@@ -236,23 +238,23 @@ export function Events() {
       {serverData.selectedOrg === "" ? (
         <CenterText>Select an organization to view events</CenterText>
       ) : serverData.organizations.get(serverData.selectedOrg) ? (
-        serverData.organizations.get(serverData.selectedOrg)?.events.length ===
-          0 && <CenterText>No events in organization</CenterText>
+        serverData.organizations?.get(serverData.selectedOrg)?.events
+          ?.length === 0 && <CenterText>No events in organization</CenterText>
       ) : (
         <CenterText>Error getting events</CenterText>
       )}
-      {Array.from(
+      {Array.from<EventDto>(
         serverData.organizations
           .get(serverData.selectedOrg)
-          ?.events.map((evId) => serverData.events.get(evId)!)
-          .filter((ev) => !!ev) ?? []
+          ?.events?.map((evId: string) => serverData.events.get(evId)!)
+          .filter((ev?: EventDto) => !!ev) ?? []
       )
         .sort(
-          (a, b) =>
-            compareTwoStrings(b.name, query) -
-            compareTwoStrings(a.name, query) +
-            compareTwoStrings(b.description, query) -
-            compareTwoStrings(a.description, query)
+          (a: EventDto, b: EventDto) =>
+            compareTwoStrings(b.name ?? "", query) -
+            compareTwoStrings(a.name ?? "", query) +
+            compareTwoStrings(b.description ?? "", query) -
+            compareTwoStrings(a.description ?? "", query)
         )
         .map((ev) => (
           <EventCard

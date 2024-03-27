@@ -91,8 +91,8 @@ class _GameplayPageState extends State<GameplayPage> {
         );
       }
 
-      GeoPoint targetLocation = GeoPoint(challenge.lat, challenge.long, 0);
-      double awardingRadius = challenge.awardingRadius;
+      GeoPoint targetLocation = GeoPoint(challenge.latF!, challenge.longF!, 0);
+      double awardingRadius = challenge.awardingRadiusF!;
 
       return Scaffold(
         body: Column(
@@ -199,7 +199,7 @@ class _GameplayPageState extends State<GameplayPage> {
                   child: GameplayMap(
                     targetLocation: targetLocation,
                     awardingRadius: awardingRadius,
-                    description: challenge.description,
+                    description: challenge.description ?? "",
                     points: 100, // TODO: update after points is in backend
                   )),
             ),

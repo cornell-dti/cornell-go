@@ -9,9 +9,15 @@
     "dbreset": "node ./scripts/dbreset.js",
     "tests:unit": "node ./scripts/tests.js unit",
     "tests:e2e": "node ./scripts/tests.js e2e",
-    "setup": "node ./scripts/setup.js"
+    "setup": "node ./scripts/setup.js",
+    "updateapi": "node ./scripts/updateapi.js",
+    "compilescripts": "tsc scripts/updateapi.ts --target es2021 --moduleResolution nodenext --module nodenext"
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11"
+  },
+  "dependencies": {
+    "ts-morph": "^22.0.0",
+    "typescript": "^5.4.3"
   }
 }

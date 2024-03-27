@@ -7,7 +7,6 @@ import {
 import { CallingUser } from '../auth/calling-user.decorator';
 import { ClientService } from '../client/client.service';
 import {
-  GroupDto,
   JoinGroupDto,
   LeaveGroupDto,
   RequestGroupDataDto,
@@ -18,10 +17,15 @@ import {
 import { GroupService } from './group.service';
 import { UserGuard } from '../auth/jwt-auth.guard';
 import { UseGuards } from '@nestjs/common';
-import { Group, User } from '@prisma/client';
+import { User } from '@prisma/client';
+import { PoliciesGuard } from '../casl/policy.guard';
+import { UserAbility } from '../casl/user-ability.decorator';
+import { AppAbility } from '../casl/casl-ability.factory';
+import { Action } from '../casl/action.enum';
+import { subject } from '@casl/ability';
 
 @WebSocketGateway({ cors: true })
-@UseGuards(UserGuard)
+@UseGuards(UserGuard, PoliciesGuard)
 export class GroupGateway {
   constructor(
     private clientService: ClientService,
@@ -34,13 +38,7 @@ export class GroupGateway {
     @MessageBody() data: RequestGroupDataDto,
   ) {
     const group = await this.groupService.getGroupForUser(user);
-    this.clientService.subscribe(user, group.id, user.administrator);
-    this.groupService.emitUpdateGroupData(
-      group,
-      false,
-      user.administrator,
-      user,
-    );
+    await this.groupService.emitUpdateGroupData(group, false, user);
   }
 
   @SubscribeMessage('joinGroup')
@@ -85,18 +83,33 @@ export class GroupGateway {
 
   @SubscribeMessage('updateGroupData')
   async updateGroupData(
+    @UserAbility() ability: AppAbility,
     @CallingUser() user: User,
     @MessageBody() data: UpdateGroupDataDto,
   ) {
-    if (!user.administrator) {
-      await this.clientService.emitErrorData(user, 'User is not an admin');
+    const group = await this.groupService.getGroupById(data.group.id);
+    if (!group) {
+      await this.clientService.emitErrorData(
+        user,
+        'This group does not exist!',
+      );
+      return;
+    }
+
+    if (ability.cannot(Action.Manage, subject('Group', group))) {
+      await this.clientService.emitErrorData(
+        user,
+        'Permission to manage this group denied!',
+      );
       return;
     }
 
     if (data.deleted) {
-      await this.groupService.removeGroup(data.group as string);
+      await this.groupService.removeGroup(ability, data.group.id);
+      await this.groupService.emitUpdateGroupData(group, true);
     } else {
-      const group = await this.groupService.updateGroup(data.group as GroupDto);
+      const group = await this.groupService.updateGroup(ability, data.group);
+      this.clientService.subscribe(user, group.id);
       await this.groupService.emitUpdateGroupData(group, false);
     }
   }

@@ -8,11 +8,10 @@ class ChallengeModel extends ChangeNotifier {
 
   ChallengeModel(ApiClient client) : _client = client {
     client.clientApi.updateChallengeDataStream.listen((event) {
-      if (event.challengeId != "") {
-        //event.challengeId!=null => event to be deleted.
-        _challengesById.remove(event.challengeId);
+      if (event.deleted) {
+        _challengesById.remove(event.challenge.id);
       } else {
-        _challengesById[event.challenge!.id] = event.challenge!;
+        _challengesById[event.challenge.id] = event.challenge;
       }
       notifyListeners();
     });
@@ -21,19 +20,13 @@ class ChallengeModel extends ChangeNotifier {
       _challengesById.clear();
       notifyListeners();
     });
-
-    client.clientApi.invalidateDataStream.listen((event) {
-      if (event.challengeData) {
-        _challengesById.clear();
-        notifyListeners();
-      }
-    });
   }
 
   ChallengeDto? getChallengeById(String id) {
     final chal = _challengesById[id];
     if (chal == null) {
-      _client.serverApi?.requestChallengeData([id]);
+      _client.serverApi
+          ?.requestChallengeData(RequestChallengeDataDto(challenges: [id]));
     }
     return chal;
   }

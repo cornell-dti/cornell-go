@@ -55,27 +55,27 @@ export type UserAuthTypeDto = 'device' | 'apple' | 'google';
 /** DTO for updateUserData event */
 export interface UserDto {
   id: string;
-  username: string;
-  enrollmentType: 'UNDERGRADUATE' | 'GRADUATE' | 'FACULTY' | 'ALUMNI';
-  email: string;
-  year: string;
-  score: number;
-  isBanned: boolean;
-  groupId: string;
-  authType: UserAuthTypeDto;
-  trackedEventIds?: string[];
-  favoriteIds?: string[];
+  username?: string;
+  enrollmentType?: 'UNDERGRADUATE' | 'GRADUATE' | 'FACULTY' | 'ALUMNI';
+  email?: string;
+  year?: string;
+  score?: number;
+  isBanned?: boolean;
+  groupId?: string;
+  authType?: UserAuthTypeDto;
+  trackedEvents?: string[];
+  favorites?: string[];
 }
 
 export interface UpdateUserDataDto {
-  user: UserDto | string;
+  user: UserDto;
   deleted: boolean;
 }
+export interface AddManagerDto {
+  email: string;
+  organizationId: string;
+}
 
-export type eventFilterDto = 'new' | 'saved' | 'finished';
-
-export interface RequestFilteredEventDto {
-  filter: eventFilterDto;
-  cursorId?: string;
-  limit: number;
+export interface JoinOrganizationDto {
+  accessCode: string;
 }
