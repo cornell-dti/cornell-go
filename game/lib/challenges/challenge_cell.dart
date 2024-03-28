@@ -4,8 +4,6 @@ import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:game/preview/preview.dart';
 
-/** ChallengeCell was formerly named ChallengeCellNew.
-*/
 class ChallengeCell extends StatefulWidget {
   final String location;
   final String challengeName;

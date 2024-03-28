@@ -38,50 +38,11 @@ class _InterestsPageWidgetState extends State<InterestsPageWidget> {
     super.initState();
   }
 
-  final _formKey = GlobalKey<FormState>();
+  List<String> _categories = ["Food", "Nature", "History", "Cafes", "Dorms"];
 
-  List<String> _colleges = [
-    "Select one",
-    "Agriculture and Life Sciences",
-    "Architecture, Art and Planning",
-    "Arts and Sciences",
-    "Business",
-    // "Computing and Information Science",
-    "Engineering",
-    "Human Ecology",
-    "Industrial and Labor Relations (ILR)",
-    "Public Policy",
-    "Cornell Tech",
-    "Law School",
-    // "Veterinary Medicine",
-    // "Weill Cornell Medicine"
-  ];
-  List<String> _years = ["Select one", "2024", "2025", "2026", "2027"];
-  Map<String, List<String>> _majors = {
-    "Select one": ["Select one"],
-    "Agriculture and Life Sciences": ["Select one"],
-    "Architecture, Art and Planning": ["Select one"],
-    "Business": ["Select one"],
-    "Engineering": [
-      "Select one",
-      "Computer Science",
-      "Information Science",
-      "Chemical Engineering"
-    ],
-    "Arts and Sciences": [
-      "Select one",
-      "Computer Science",
-      "Mathematics",
-      "Chemistry",
-      "Biology",
-      "Psychology"
-    ],
-    "Human Ecology": ["Select one"],
-    "Industrial and Labor Relations (ILR)": ["Select one"],
-    "Public Policy": ["Select one"],
-    "Cornell Tech": ["Select one"],
-    "Law School": ["Select one"],
-  };
+  List<bool> _checked = [false, false, false, false, false, false];
+
+  final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -109,7 +70,43 @@ class _InterestsPageWidgetState extends State<InterestsPageWidget> {
                       fontSize: 14,
                       fontWeight: FontWeight.w400,
                     )),
-                SizedBox(height: 150.0),
+                for (int i = 0; i < _categories.length; i++)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 20.0),
+                    child: CheckboxListTile(
+                        title: Text(_categories[i],
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            )),
+                        value: _checked[i],
+                        controlAffinity: ListTileControlAffinity.leading,
+                        tileColor: _checked[i]
+                            ? Color.fromARGB(77, 255, 170, 91)
+                            : Colors.white,
+                        fillColor: MaterialStateProperty.all<Color>(_checked[i]
+                            ? Colors.white
+                            : Color.fromARGB(25, 0, 0, 0)),
+                        checkColor: Color.fromARGB(255, 110, 74, 40),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          side: BorderSide(
+                              width: 2,
+                              color: _checked[i]
+                                  ? Color.fromARGB(255, 255, 170, 91)
+                                  : Color.fromARGB(255, 228, 228, 228)),
+                        ),
+                        checkboxShape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                        side: BorderSide.none,
+                        onChanged: (newValue) {
+                          setState(() {
+                            _checked[i] = newValue!;
+                          });
+                        }),
+                  ),
+                SizedBox(height: 75.0),
                 TextButton(
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
