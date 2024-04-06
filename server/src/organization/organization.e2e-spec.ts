@@ -314,7 +314,7 @@ describe('OrganizationModule E2E', () => {
       expect(addState).toBeFalsy();
     });
 
-    /*it('Should be able to modify managed org', async () => {
+    it('Should be able to modify managed org', async () => {
       const newEv = await eventService.upsertEventFromDto(managerAbility, {
         id: exEv.id,
         name: 'New name',
@@ -331,7 +331,7 @@ describe('OrganizationModule E2E', () => {
       );
 
       expect(newChal?.name).toEqual('New Name');
-    });*/
+    });
 
     it('Should not be able to modify other org', async () => {
       const newEv = await eventService.upsertEventFromDto(managerAbility, {
