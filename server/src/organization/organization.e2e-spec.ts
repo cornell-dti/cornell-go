@@ -28,6 +28,8 @@ import { UpdateUserDataDto } from '../user/user.dto';
 import { UpdateEventDataDto } from '../event/event.dto';
 import { UpdateChallengeDataDto } from '../challenge/challenge.dto';
 
+type DtoLastCall<T> = [string[], string, T];
+
 describe('OrganizationModule E2E', () => {
   let app: INestApplication;
   let moduleRef: TestingModule;
@@ -64,7 +66,7 @@ describe('OrganizationModule E2E', () => {
   let exEv: EventBase;
   let exChal: Challenge;
 
-  let sendEventMock: jest.SpyInstance<Promise<void>, [string[], string, {}]>;
+  let sendEventMock: jest.SpyInstance<Promise<void>, [string[], string, any]>;
 
   beforeAll(async () => {
     moduleRef = await Test.createTestingModule({
@@ -169,11 +171,8 @@ describe('OrganizationModule E2E', () => {
     it('Should be able to read own data', async () => {
       await userGateway.requestUserData(basicAbility, basicUser, {});
 
-      const [users, ev, dto] = sendEventMock.mock.lastCall as [
-        string[],
-        string,
-        UpdateUserDataDto,
-      ];
+      const [users, ev, dto]: DtoLastCall<UpdateUserDataDto> =
+        sendEventMock.mock.lastCall;
 
       expect(ev).toEqual('updateUserData');
       expect(users).toContain(basicUser.id);
@@ -193,17 +192,13 @@ describe('OrganizationModule E2E', () => {
         deleted: false,
       });
 
-      const [users, ev, dto] = sendEventMock.mock.lastCall as [
-        string[],
-        string,
-        UpdateUserDataDto,
-      ];
+      const [users, ev, dto]: DtoLastCall<UpdateUserDataDto> =
+        sendEventMock.mock.lastCall;
 
       expect(ev).toEqual('updateUserData');
       expect(dto.user.username).toEqual('myNewUsername');
     });
 
-    /*
     it('Should be able to read from own org', async () => {
       await evGateway.requestEventData(basicAbility, basicUser, {
         events: [defaultEv.id],
@@ -234,18 +229,14 @@ describe('OrganizationModule E2E', () => {
       expect(ev2).toEqual('updateChallengeData');
       expect(dto2.challenge.id).toEqual(defaultChal.id);
       expect(dto2.challenge.name).toEqual(defaultChal.name);
-    });*/
+    });
 
     it('Should not be able to read other user', async () => {
       await userGateway.requestAllUserData(basicAbility, basicUser, {});
 
       expect(
         sendEventMock.mock.calls.every(call => {
-          const [users, ev, dto] = call as [
-            string[],
-            string,
-            UpdateUserDataDto,
-          ];
+          const [users, ev, dto]: DtoLastCall<UpdateUserDataDto> = call;
 
           if (users.includes(basicUser.id) && ev === 'updateUserData')
             return basicUser.id == dto.user.id;
@@ -261,11 +252,7 @@ describe('OrganizationModule E2E', () => {
 
       expect(
         sendEventMock.mock.calls.every(call => {
-          const [users, ev, dto] = call as [
-            string[],
-            string,
-            UpdateEventDataDto,
-          ];
+          const [users, ev, dto]: DtoLastCall<UpdateEventDataDto> = call;
 
           if (users.includes(basicUser.id) && ev === 'updateEventData')
             return exEv.id !== dto.event.id;
@@ -279,11 +266,7 @@ describe('OrganizationModule E2E', () => {
 
       expect(
         sendEventMock.mock.calls.every(call => {
-          const [users, ev, dto] = call as [
-            string[],
-            string,
-            UpdateChallengeDataDto,
-          ];
+          const [users, ev, dto]: DtoLastCall<UpdateChallengeDataDto> = call;
 
           if (users.includes(basicUser.id) && ev === 'updateChallengeData')
             return exChal.id !== dto.challenge.id;
@@ -294,7 +277,7 @@ describe('OrganizationModule E2E', () => {
   });
 
   describe('Manager user abilities', () => {
-    /*it('Should be able to add managers to managed org', async () => {
+    it('Should be able to add managers to managed org', async () => {
       const addState = await orgService.addManager(
         managerAbility,
         'manager@cornell.edu',
@@ -302,7 +285,7 @@ describe('OrganizationModule E2E', () => {
       );
 
       expect(addState).toBeTruthy();
-    });*/
+    });
 
     it('Should not be able to add managers to another org', async () => {
       const addState = await orgService.addManager(
