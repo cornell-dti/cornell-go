@@ -50,6 +50,15 @@ enum LoginEnrollmentTypeDto {
   ALUMNI,
 }
 
+enum EventCategoryDto {
+  FOOD,
+  NATURE,
+  HISTORICAL,
+  CAFE,
+  DININGHALL,
+  DORM,
+}
+
 enum EventTimeLimitationDto {
   LIMITED_TIME,
   PERPETUAL,
@@ -710,6 +719,7 @@ class EventDto {
     if (description != null) {
       fields['description'] = description;
     }
+    fields['category'] = category!.name;
     if (timeLimitation != null) {
       fields['timeLimitation'] = timeLimitation!.name;
     }
@@ -748,6 +758,7 @@ class EventDto {
     name = fields.containsKey('name') ? (fields["name"]) : null;
     description =
         fields.containsKey('description') ? (fields["description"]) : null;
+    category = EventCategoryDto.values.byName(fields['category']);
     timeLimitation = fields.containsKey('timeLimitation')
         ? (EventTimeLimitationDto.values.byName(fields['timeLimitation']))
         : null;
@@ -779,6 +790,7 @@ class EventDto {
         other.requiredMembers == null ? requiredMembers : other.requiredMembers;
     name = other.name == null ? name : other.name;
     description = other.description == null ? description : other.description;
+    category = other.category;
     timeLimitation =
         other.timeLimitation == null ? timeLimitation : other.timeLimitation;
     endTime = other.endTime == null ? endTime : other.endTime;
@@ -799,6 +811,7 @@ class EventDto {
     this.requiredMembers,
     this.name,
     this.description,
+    required this.category,
     this.timeLimitation,
     this.endTime,
     this.challenges,
@@ -814,6 +827,7 @@ class EventDto {
   late int? requiredMembers;
   late String? name;
   late String? description;
+  late EventCategoryDto category;
   late EventTimeLimitationDto? timeLimitation;
   late String? endTime;
   late List<String>? challenges;

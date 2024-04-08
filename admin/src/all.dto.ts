@@ -41,6 +41,14 @@ type LoginEnrollmentTypeDto =
   | "FACULTY"
   | "ALUMNI";
 
+type EventCategoryDto =
+  | "FOOD"
+  | "NATURE"
+  | "HISTORICAL"
+  | "CAFE"
+  | "DININGHALL"
+  | "DORM";
+
 type EventTimeLimitationDto = "LIMITED_TIME" | "PERPETUAL";
 
 type EventDifficultyDto = "Easy" | "Normal" | "Hard";
@@ -166,6 +174,7 @@ export interface EventDto {
   requiredMembers?: number;
   name?: string;
   description?: string;
+  category: EventCategoryDto;
   timeLimitation?: EventTimeLimitationDto;
   endTime?: string;
   challenges?: string[];
