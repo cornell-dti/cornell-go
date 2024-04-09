@@ -14,15 +14,23 @@ class ChallengeCell extends StatefulWidget {
   final String description;
   final String difficulty;
   final int points;
+  final String id;
 
   const ChallengeCell(this.location, this.challengeName, this.thumbnail,
-      this.isCompleted, this.description, this.difficulty, this.points,
+      this.isCompleted, this.description, this.difficulty, this.points, this.id,
       {Key? key})
       : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => _ChallengeCellState(location,
-      challengeName, thumbnail, isCompleted, description, difficulty, points);
+  State<StatefulWidget> createState() => _ChallengeCellState(
+      location,
+      challengeName,
+      thumbnail,
+      isCompleted,
+      description,
+      difficulty,
+      points,
+      id);
 }
 
 class _ChallengeCellState extends State<ChallengeCell> {
@@ -33,20 +41,15 @@ class _ChallengeCellState extends State<ChallengeCell> {
   final String description;
   final String difficulty;
   final int points;
+  final String id;
   // newly added field
   // final int totalDistance;
 
-  _ChallengeCellState(
-    this.location,
-    this.challengeName,
-    this.thumbnail,
-    this.isCompleted,
-    this.description,
-    this.difficulty,
-    this.points,
-    // newly added field
-    // this.totalDistance
-  );
+  _ChallengeCellState(this.location, this.challengeName, this.thumbnail,
+      this.isCompleted, this.description, this.difficulty, this.points, this.id
+      // newly added field
+      // this.totalDistance
+      );
 
   @override
   Widget build(BuildContext context) {
