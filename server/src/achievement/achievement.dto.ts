@@ -5,7 +5,7 @@ export enum LocationType {
   NorthCampus = 'NORTH_CAMPUS',
   WestCampus = 'WEST_CAMPUS',
   Collegetown = 'COLLEGETOWN',
-  IthacaCommons = 'IthacaCommons',
+  IthacaCommons = 'ITHACA_COMMONS',
   Any = 'Any',
 }
 
