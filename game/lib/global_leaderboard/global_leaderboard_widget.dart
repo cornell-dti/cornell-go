@@ -61,8 +61,7 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
                     myEventModel.getTopPlayersForEvent('', 1000);
 
                 list.sort((a, b) => b.score.compareTo(a.score));
-                LeaderDto empty =
-                    LeaderDto(
+                LeaderDto empty = LeaderDto(
                   userId: " ",
                   username: " ",
                   score: 0,
@@ -78,8 +77,7 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
                   }
                 }
 
-                List<LeaderDto> podiumList =
-                    fullList.sublist(0, 3);
+                List<LeaderDto> podiumList = fullList.sublist(0, 3);
 
                 // Booleans representing whether the current player is in the podium for highlighting purposes
                 bool firstPodiumUser = podiumList.length > 0 &&
@@ -176,8 +174,7 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
                             shrinkWrap: true,
                             scrollDirection: Axis.vertical,
                             children: [
-                              for (UpdateLeaderDataUserDto user
-                                  in list.skip(skipNumber))
+                              for (LeaderDto user in list.skip(skipNumber))
                                 Padding(
                                   padding: const EdgeInsets.only(
                                       left: 30.95, right: 30.95, top: 16.0),
