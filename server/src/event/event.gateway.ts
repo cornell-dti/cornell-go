@@ -18,6 +18,7 @@ import {
   RequestEventLeaderDataDto,
   UpdateEventDataDto,
   RequestRecommendedEventsDto,
+  RequestFilteredEventsDto,
 } from './event.dto';
 import { RequestEventTrackerDataDto } from '../challenge/challenge.dto';
 import { OrganizationService } from '../organization/organization.service';
@@ -56,6 +57,28 @@ export class EventGateway {
     console.log(evs.length);
 
     for (const ev of evs) {
+      await this.eventService.emitUpdateEventData(ev, false, user);
+    }
+  }
+
+  @SubscribeMessage('requestFilteredEventIds')
+  async requestFilteredEventIds(
+    @UserAbility() ability: AppAbility,
+    @CallingUser() user: User,
+    @MessageBody() data: RequestFilteredEventsDto,
+  ) {
+    const evs = await this.eventService.getEventsByIdsForAbility(
+      ability,
+      data.filterId,
+    );
+
+    console.log(evs.length);
+
+    for (const ev of evs) {
+      if (ev.difficulty == data.difficulty[0]) {
+        return ev;
+      }
+
       await this.eventService.emitUpdateEventData(ev, false, user);
     }
   }
