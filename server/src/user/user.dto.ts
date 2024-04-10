@@ -1,5 +1,5 @@
 /** DTO for closeAccount */
-export interface CloseAccountDto {}
+export interface CloseAccountDto { }
 
 /** DTO for setUsername */
 export interface SetUsernameDto {
@@ -42,7 +42,7 @@ export interface RequestUserDataDto {
   userId?: string;
 }
 
-export interface RequestAllUserDataDto {}
+export interface RequestAllUserDataDto { }
 
 /** DTO for requestFavoriteEventData */
 export interface RequestFavoriteEventDataDto {
@@ -56,7 +56,7 @@ export type UserAuthTypeDto = 'device' | 'apple' | 'google';
 export interface UserDto {
   id: string;
   username?: string;
-  enrollmentType?: 'UNDERGRADUATE' | 'GRADUATE' | 'FACULTY' | 'ALUMNI';
+  enrollmentType?: 'UNDERGRADUATE' | 'GRADUATE' | 'FACULTY' | 'ALUMNI' | 'GUEST';
   email?: string;
   year?: string;
   score?: number;
