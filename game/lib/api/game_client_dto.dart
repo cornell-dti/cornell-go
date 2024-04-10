@@ -1568,6 +1568,9 @@ class UserDto {
     if (favorites != null) {
       fields['favorites'] = favorites;
     }
+    if (completedChallenges != null) {
+      fields['completedChallenges'] = completedChallenges;
+    }
     return fields;
   }
 
@@ -1591,6 +1594,9 @@ class UserDto {
     favorites = fields.containsKey('favorites')
         ? (List<String>.from(fields['favorites']))
         : null;
+    completedChallenges = fields.containsKey('completedChallenges')
+        ? (List<int>.from(fields['completedChallenges']))
+        : null;
   }
 
   void partialUpdate(UserDto other) {
@@ -1607,6 +1613,9 @@ class UserDto {
     trackedEvents =
         other.trackedEvents == null ? trackedEvents : other.trackedEvents;
     favorites = other.favorites == null ? favorites : other.favorites;
+    completedChallenges = other.completedChallenges == null
+        ? completedChallenges
+        : other.completedChallenges;
   }
 
   UserDto({
@@ -1621,6 +1630,7 @@ class UserDto {
     this.authType,
     this.trackedEvents,
     this.favorites,
+    this.completedChallenges,
   });
 
   late String id;
@@ -1634,6 +1644,7 @@ class UserDto {
   late UserAuthTypeDto? authType;
   late List<String>? trackedEvents;
   late List<String>? favorites;
+  late List<int>? completedChallenges;
 }
 
 class UpdateUserDataDto {

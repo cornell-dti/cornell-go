@@ -76,7 +76,7 @@ Widget completedCell(String name, String picture, String type, String date,
                         children: [
                           Container(
                             width: 80,
-                            height: 30,
+                            height: 25,
                             decoration: BoxDecoration(
                               border: Border.all(
                                 color: Colors.purple, // Set the outline color
@@ -103,7 +103,7 @@ Widget completedCell(String name, String picture, String type, String date,
                           ),
                           Container(
                             width: 50,
-                            height: 30,
+                            height: 25,
                             decoration: BoxDecoration(
                               color: Color.fromRGBO(249, 236, 217, 1),
                               borderRadius: BorderRadius.circular(
@@ -120,7 +120,7 @@ Widget completedCell(String name, String picture, String type, String date,
                           ),
                           Container(
                             width: 50,
-                            height: 30,
+                            height: 25,
                             decoration: BoxDecoration(
                               border: Border.all(
                                 color: Color.fromRGBO(

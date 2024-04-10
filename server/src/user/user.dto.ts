@@ -1,3 +1,5 @@
+import { PrevChallenge } from '@prisma/client';
+
 /** DTO for closeAccount */
 export interface CloseAccountDto {}
 
@@ -65,6 +67,7 @@ export interface UserDto {
   authType?: UserAuthTypeDto;
   trackedEvents?: string[];
   favorites?: string[];
+  completedChallenges?: number[];
 }
 
 export interface UpdateUserDataDto {

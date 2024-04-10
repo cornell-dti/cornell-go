@@ -8,6 +8,7 @@ import {
   User,
   EnrollmentType,
   EventBase,
+  PrevChallenge,
 } from '@prisma/client';
 import { ClientService } from '../client/client.service';
 import { EventService } from '../event/event.service';
@@ -193,6 +194,7 @@ export class UserService {
         eventTrackers: true,
         favorites: true,
         group: { select: { friendlyId: true } },
+        completedChallenges: true,
       },
     });
 
@@ -214,6 +216,9 @@ export class UserService {
       favorites: partial
         ? undefined
         : joinedUser.favorites.map((ev: EventBase) => ev.id),
+      completedChallenges: partial
+        ? undefined
+        : joinedUser.completedChallenges.map((ev: PrevChallenge) => ev.id),
     };
   }
 

@@ -18,7 +18,9 @@ class SettingsPage extends StatelessWidget {
           leading: IconButton(
             icon: const Icon(Icons.navigate_before),
             color: Colors.white,
-            onPressed: () {},
+            onPressed: () {
+              Navigator.pop(context);
+            },
           ),
           title: const Text(
             'Settings',

@@ -204,7 +204,7 @@ class _ChallengesPageState extends State<ChallengesPage> {
                                     "https://picsum.photos/250?image=9"),
                                 complete,
                                 challenge.description ?? "",
-                                difficulty?.toString() ?? "",
+                                difficulty?.name ?? "",
                                 challenge.points ?? 0),
                       ),
                     );

@@ -52,11 +52,9 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
                     TextFormField(
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
-                        labelText: 'e.g. Jane Doe',
+                        labelText: 'e.g. Jane Doe (will remove I think?)',
                       ),
-                      onChanged: (newValue) => setState(() {
-                        _name = newValue;
-                      }),
+
                       // The validator receives the text that the user has entered.
                       validator: (value) {
                         if (value == null || value.isEmpty) {
@@ -74,8 +72,8 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
                     LatoText("Username", 18, Colors.black, FontWeight.w700),
                     SizedBox(height: 10),
                     TextFormField(
-                      onSaved: (newValue) => setState(() {
-                        _name = newValue!;
+                      onChanged: (newValue) => setState(() {
+                        _name = newValue;
                       }),
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),

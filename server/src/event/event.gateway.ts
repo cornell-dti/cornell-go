@@ -53,8 +53,6 @@ export class EventGateway {
       data.events,
     );
 
-    console.log(evs.length);
-
     for (const ev of evs) {
       await this.eventService.emitUpdateEventData(ev, false, user);
     }
