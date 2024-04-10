@@ -127,7 +127,6 @@ class MyApp extends StatelessWidget {
               builder: (stream, snapshot) => (snapshot.data ?? false)
                   ? BottomNavBar()
                   : SplashPageWidget()),
-          // home: GameplayMap(),
         )));
   }
 }
