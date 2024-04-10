@@ -41,12 +41,15 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
         key: scaffoldKey,
         backgroundColor: Color.fromARGB(255, 255, 248, 241),
         appBar: AppBar(
+          toolbarHeight: 85,
           automaticallyImplyLeading: false,
           backgroundColor: Color.fromARGB(255, 237, 86, 86),
-          title: Text(
-            'Leaderboard',
-            style: leaderboardStyle,
-          ),
+          flexibleSpace: FlexibleSpaceBar(
+              title: Text(
+                'Leaderboard',
+                style: leaderboardStyle,
+              ),
+              centerTitle: true),
           actions: [],
         ),
         body: Padding(
@@ -143,19 +146,10 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
                       // Use this line below to retrieve actual data
                       final List<LeaderDto> list =
                           myEventModel.getTopPlayersForEvent('', 1000);
-                      // Dynamic Positions in leaderboard based on number of inputs
-                      int position = 1;
-                      if (list.length > 3) {
-                        position = 4;
-                      }
+                      // Leaderboard starts at 4th position because first three already in podium
+                      int position = 4;
 
                       list.sort((a, b) => b.score.compareTo(a.score));
-
-                      // Dynamic Skip Number (More than 3 users: Dont display those top 3 in the leaderboard)
-                      int skipNumber = 3;
-                      if (list.length < 3) {
-                        skipNumber = 0;
-                      }
 
                       return Container(
                         width: 345.0,
@@ -174,7 +168,7 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
                             shrinkWrap: true,
                             scrollDirection: Axis.vertical,
                             children: [
-                              for (LeaderDto user in list.skip(skipNumber))
+                              for (LeaderDto user in list.skip(3))
                                 Padding(
                                   padding: const EdgeInsets.only(
                                       left: 30.95, right: 30.95, top: 16.0),
