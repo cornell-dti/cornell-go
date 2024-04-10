@@ -39,7 +39,8 @@ type LoginEnrollmentTypeDto =
   | "UNDERGRADUATE"
   | "GRADUATE"
   | "FACULTY"
-  | "ALUMNI";
+  | "ALUMNI"
+  | "GUEST";
 
 type EventTimeLimitationDto = "LIMITED_TIME" | "PERPETUAL";
 

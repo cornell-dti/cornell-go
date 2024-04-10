@@ -124,9 +124,9 @@ class MyApp extends StatelessWidget {
               fontFamily: 'Poppins', primarySwatch: ColorPalette.BigRed),
           home: StreamBuilder<bool>(
               stream: Stream.fromFuture(client.tryRelog()),
-              builder: (stream, snapshot) => (snapshot.data ?? false)
-                  ? BottomNavBar()
-                  : SplashPageWidget()),
+              builder: (stream, snapshot) => (snapshot.data == null)
+                  ? Container()
+                  : (snapshot.data! ? BottomNavBar() : SplashPageWidget())),
         )));
   }
 }

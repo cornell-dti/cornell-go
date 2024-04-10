@@ -24,6 +24,7 @@ enum EnrollmentType {
   GRADUATE
   FACULTY
   ALUMNI
+  GUEST
 }
 
 enum LocationType {

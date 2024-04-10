@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:game/main.dart';
 import 'package:provider/provider.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:game/register_page/register_page.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:game/navigation_page/bottom_navbar.dart';
 
 class SplashPageWidget extends StatelessWidget {
   SplashPageWidget({Key? key}) : super(key: key);
@@ -96,12 +98,23 @@ class SplashPageWidget extends StatelessWidget {
                       final String? id = await getId();
                       print("GOT ID");
                       print(id);
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              RegisterPageWidget(user: null, idToken: id),
-                        ),
-                      );
+                      final endpoint_string = API_URL + "/device-login";
+                      final connectionResult = await client.connect(id!,
+                          Uri.parse(endpoint_string), "GUEST", "", "@guest");
+
+                      if (connectionResult == null) {
+                        displayToast("An error occurred while signing you up!",
+                            Status.error);
+                      } else {
+                        //Connect to home page here.
+                        print("Connection result:");
+                        print(connectionResult.body);
+                        displayToast("Signed in!", Status.success);
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => BottomNavBar()));
+                      }
                     },
                     child: Container(
                       width: 255,
