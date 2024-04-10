@@ -5,13 +5,14 @@ const ts_morph_1 = require("ts-morph");
 function getDtoDefinitions() {
     const project = new ts_morph_1.Project({});
     project.addSourceFilesAtPaths("server/src/*/*.dto.ts");
-    console.log("Found the following DTO files!");
-    console.log(project.getSourceFiles().map((file) => file.getBaseName()));
+    console.log(`Discovered ${project.getSourceFiles().length} DTO files!`);
+    console.log();
     const enumDtos = new Map();
     const baseDtos = new Map();
     for (const file of project.getSourceFiles()) {
         const interfs = file.getInterfaces();
         const enums = file.getEnums();
+        console.log(`${file.getBaseName()}: ${enums.length} enums, ${interfs.length} DTOs`);
         for (const enum_ of enums) {
             const vals = enum_.getMembers().map((val) => val.getName());
             enumDtos.set(enum_.getName(), vals);
@@ -90,6 +91,7 @@ function getDtoDefinitions() {
             }
         }
     }
+    console.log();
     return { enumDtos, baseDtos };
 }
 exports.getDtoDefinitions = getDtoDefinitions;

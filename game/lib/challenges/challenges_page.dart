@@ -34,42 +34,6 @@ class _ChallengesPageState extends State<ChallengesPage> {
         });
   }
 
-  /* Dummy code, to be replaced */
-  final cells = [
-    ChallengeCell(
-        "ARTS QUAD",
-        "Statue on the Arts Quad",
-        Image.network('https://picsum.photos/250?image=9'),
-        false,
-        "Find this famous statue!",
-        "Easy",
-        15),
-    ChallengeCell(
-        "ARTS QUAD",
-        "Statue on the Arts Quad",
-        Image.network('https://picsum.photos/250?image=9'),
-        true,
-        "Find this famous statue!",
-        "Normal",
-        15),
-    ChallengeCell(
-        "ARTS QUAD",
-        "Statue on the Arts Quad",
-        Image.network('https://picsum.photos/250?image=9'),
-        false,
-        "Find this famous statue!",
-        "Hard",
-        15),
-    ChallengeCell(
-        "ARTS QUAD",
-        "Statue on the Arts Quad",
-        Image.network('https://picsum.photos/250?image=9'),
-        true,
-        "Find this famous statue!",
-        "Challenging",
-        15),
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -190,7 +154,8 @@ class _ChallengesPageState extends State<ChallengesPage> {
                             ? Consumer<ApiClient>(
                                 builder: (context, apiClient, child) {
                                   if (event.id == groupModel.curEventId) {
-                                    apiClient.serverApi?.setCurrentEvent("");
+                                    apiClient.serverApi?.setCurrentEvent(
+                                        SetCurrentEventDto(eventId: ""));
                                   }
                                   return Container();
                                 },
@@ -203,7 +168,7 @@ class _ChallengesPageState extends State<ChallengesPage> {
                                     "https://picsum.photos/250?image=9"),
                                 complete,
                                 challenge.description ?? "",
-                                difficulty?.toString() ?? "",
+                                difficulty?.name ?? "",
                                 challenge.points ?? 0),
                       ),
                     );
