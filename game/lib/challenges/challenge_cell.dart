@@ -56,7 +56,7 @@ class _ChallengeCellState extends State<ChallengeCell> {
             context: context,
             isScrollControlled: true,
             builder: (context) => Preview(challengeName, description,
-                difficulty, points, previewType.challenge, location));
+                difficulty, points, PreviewType.CHALLENGE, location));
       },
       child: Container(
         decoration: BoxDecoration(
