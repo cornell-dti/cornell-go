@@ -12,7 +12,7 @@ import {
 import { ClientService } from '../client/client.service';
 import { EventService } from '../event/event.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { ChallengeDto, UpdateChallengeDataDto } from './challenge.dto';
+import { ChallengeDto, UpdateChallengeDataDto, LocationTypeDto } from './challenge.dto';
 import { AppAbility, CaslAbilityFactory } from '../casl/casl-ability.factory';
 import { accessibleBy } from '@casl/prisma';
 import { Action } from '../casl/action.enum';
@@ -221,7 +221,7 @@ export class ChallengeService {
     return {
       id: ch.id,
       name: ch.name,
-      location: ch.location as string,
+      location: ch.location as LocationTypeDto,
       description: ch.description,
       points: ch.points,
       imageUrl: ch.imageUrl,
