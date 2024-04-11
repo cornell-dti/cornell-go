@@ -37,4 +37,8 @@ postgres-data-saved
 /.vs/CornellGo/v16
 docs
 
+# dotenv environment variables file
+.env
+.env.test
+
 documentation
