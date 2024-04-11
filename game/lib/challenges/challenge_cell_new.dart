@@ -63,7 +63,7 @@ class _ChallengeCellState extends State<ChallengeCell> {
           await showDialog(
               context: context,
               builder: (context) => Preview(challengeName, description,
-                  difficulty, points, previewType.challenge, "MY LOCATION"));
+                  difficulty, points, PreviewType.CHALLENGE, "MY LOCATION"));
         },
         child: Container(
           color: Color.fromARGB(51, 217, 217, 217),

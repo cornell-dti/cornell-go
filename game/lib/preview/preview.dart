@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:game/gameplay/gameplay_page.dart';
 
-enum previewType { challenge, journey }
+enum PreviewType { CHALLENGE, JOURNEY }
 
 /** Returns a preview of a challenge given the challenge name, description, 
  * difficulty, points, and bonus points for challenge mode. Used for
@@ -12,7 +11,7 @@ class Preview extends StatefulWidget {
   final String description;
   final String difficulty;
   final int points;
-  final previewType type;
+  final PreviewType type;
 
   final int locationCount;
   final int numberCompleted;
@@ -59,7 +58,7 @@ class _PreviewState extends State<Preview> {
   final String description;
   final String difficulty;
   final int points;
-  final previewType type;
+  final PreviewType type;
   // newly added parameter; need to implement higher up in hierarchy
   // final int
   //     totalDistance;
@@ -270,7 +269,7 @@ class _PreviewState extends State<Preview> {
                           )
                         ]),
                   ),
-                  (type == previewType.journey)
+                  (type == PreviewType.JOURNEY)
                       ? Column(children: [
                           SizedBox(height: 5),
                           Padding(
