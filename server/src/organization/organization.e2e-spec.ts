@@ -217,7 +217,6 @@ describe('OrganizationModule E2E', () => {
     });
 
     it('Should be able to read from own org', async () => {
-      console.log('Should be able to read from own org');
       await evGateway.requestEventData(basicAbility, basicUser, {
         events: [defaultEv.id],
       });
