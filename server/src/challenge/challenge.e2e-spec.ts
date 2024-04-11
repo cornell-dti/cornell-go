@@ -130,7 +130,7 @@ describe('ChallengeModule E2E', () => {
 
   describe('Create and read functions', () => {
     it('should add a challenge to eventbase: upsertChallengeFromDto', async () => {
-      const chaldto: ChallengeDto = {
+      const chalDto: ChallengeDto = {
         id: '12345',
         name: 'test',
         location: 'ENG_QUAD',
@@ -146,7 +146,7 @@ describe('ChallengeModule E2E', () => {
 
       const chal = await challengeService.upsertChallengeFromDto(
         fullAbility,
-        chaldto,
+        chalDto,
       );
 
       const findChal = await prisma.challenge.findFirstOrThrow({
@@ -176,7 +176,7 @@ describe('ChallengeModule E2E', () => {
       const chalById = await challengeService.getChallengeById(chal.id);
       expect(chalById).toEqual(chal);
 
-      const secondChalDTO: ChallengeDto = {
+      const secondChalDto: ChallengeDto = {
         id: '123',
         name: 'test',
         location: 'ANY',
@@ -190,7 +190,7 @@ describe('ChallengeModule E2E', () => {
         linkedEventId: event.id,
       };
 
-      await challengeService.upsertChallengeFromDto(fullAbility, secondChalDTO);
+      await challengeService.upsertChallengeFromDto(fullAbility, secondChalDto);
       const nextChal = await challengeService.nextChallenge(
         await prisma.challenge.findFirstOrThrow({
           where: { linkedEventId: event.id, eventIndex: 0 },
@@ -205,7 +205,7 @@ describe('ChallengeModule E2E', () => {
   describe('Update functions', () => {
     it('should update challenge from eventbase: upsertChallengeFromDto', async () => {
       const chalID = (await prisma.challenge.findFirstOrThrow()).id;
-      const chaldto: ChallengeDto = {
+      const chalDto: ChallengeDto = {
         id: chalID,
         name: 'test',
         location: 'ENG_QUAD',
@@ -218,7 +218,7 @@ describe('ChallengeModule E2E', () => {
         closeRadiusF: 2,
         linkedEventId: event.id,
       };
-      await challengeService.upsertChallengeFromDto(fullAbility, chaldto);
+      await challengeService.upsertChallengeFromDto(fullAbility, chalDto);
       const chal = await prisma.challenge.findFirstOrThrow({
         where: { id: chalID },
       });

@@ -5,12 +5,11 @@ import 'package:game/api/game_api.dart';
 import 'package:game/api/game_client_dto.dart';
 import 'package:game/journeys/journey_cell.dart';
 import 'package:game/journeys/filter_form.dart';
-import 'package:game/model/challenge_model.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/group_model.dart';
 import 'package:game/model/tracker_model.dart';
+import 'package:game/model/challenge_model.dart';
 import 'package:game/model/user_model.dart';
-import 'package:game/utils/utility_functions.dart';
 import 'package:provider/provider.dart';
 
 class JourneysPage extends StatefulWidget {
@@ -140,7 +139,7 @@ class _JourneysPageState extends State<JourneysPage> {
                     var locationCount = event.challenges?.length ?? 0;
 
                     if (locationCount < 2) continue;
-                    var total_points = 0;
+                    var totalPoints = 0;
 
                     var challenge = challengeModel
                         .getChallengeById(event.challenges?[0] ?? "");
@@ -151,7 +150,7 @@ class _JourneysPageState extends State<JourneysPage> {
                       var challenge =
                           challengeModel.getChallengeById(challengeId);
                       if (challenge != null) {
-                        total_points += challenge.points ?? 0;
+                        totalPoints += challenge.points ?? 0;
                       }
                     }
                     var difficulty = event.difficulty;
@@ -183,8 +182,8 @@ class _JourneysPageState extends State<JourneysPage> {
                                 locationCount,
                                 numberCompleted,
                                 complete,
-                                difficulty?.toString() ?? "",
-                                total_points),
+                                difficulty?.name ?? "",
+                                totalPoints),
                       ),
                     );
                   }
