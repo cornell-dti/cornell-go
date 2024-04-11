@@ -155,6 +155,21 @@ export class ChallengeService {
     );
   }
 
+  async addChallengeToEvent(challenge: Challenge, ev: EventBase) {
+    const maxIndexChallenge = await this.prisma.challenge.aggregate({
+      _max: { eventIndex: true },
+      where: { linkedEventId: challenge.linkedEventId },
+    });
+
+    await this.prisma.challenge.update({
+      where: { id: challenge.id },
+      data: {
+        eventIndex: (maxIndexChallenge._max.eventIndex ?? -1) + 1,
+        linkedEventId: ev.id,
+      },
+    });
+  }
+
   // Disabled for now
   /*
   async setCurrentChallenge(user: User, challengeId: string) {

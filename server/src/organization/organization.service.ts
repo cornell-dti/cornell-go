@@ -51,12 +51,18 @@ export class OrganizationService {
     private abilityFactory: CaslAbilityFactory,
   ) {}
 
-  async makeDefaultEvent() {
-    const chal = await this.prisma.challenge.create({
+  // TODO: maybe move this to challenge.service in the future?
+  async makeDefaultChallenge() {
+    return await this.prisma.challenge.create({
       data: {
         ...defaultChallengeData,
       },
     });
+  }
+
+  // TODO: maybe move this to event.service in the future?
+  async makeDefaultEvent() {
+    const chal = await this.makeDefaultChallenge();
 
     const ev = await this.prisma.eventBase.create({
       data: {
