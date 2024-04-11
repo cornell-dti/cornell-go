@@ -32,7 +32,7 @@ export class UserService {
     private orgService: OrganizationService,
     private clientService: ClientService,
     private abilityFactory: CaslAbilityFactory,
-  ) { }
+  ) {}
 
   /** Find a user by their authentication token */
   async byAuth(authType: AuthType, authToken: string) {
@@ -60,9 +60,8 @@ export class UserService {
   ) {
     if (username == null && authType == AuthType.GOOGLE) {
       username = email?.split('@')[0];
-    }
-    else if (authType == AuthType.DEVICE) {
-      username = "@guest" + this.prisma.user.count();
+    } else if (authType == AuthType.DEVICE) {
+      username = '@guest' + this.prisma.user.count();
     }
 
     const defOrg = await this.orgService.getDefaultOrganization(
@@ -159,14 +158,14 @@ export class UserService {
   async updateUser(ability: AppAbility, user: UserDto): Promise<User> {
     const username = user.username
       ? new CensorSensor()
-        .cleanProfanityIsh(
-          user.username
-            ?.substring(0, 128)
-            ?.replaceAll(/[^_A-z0-9]/g, ' ')
-            ?.replaceAll('_', ' '),
-        )
-        .replaceAll('*', '_')
-        .replaceAll(' ', '_')
+          .cleanProfanityIsh(
+            user.username
+              ?.substring(0, 128)
+              ?.replaceAll(/[^_A-z0-9]/g, ' ')
+              ?.replaceAll('_', ' '),
+          )
+          .replaceAll('*', '_')
+          .replaceAll(' ', '_')
       : undefined;
 
     const userObj = await this.prisma.user.findFirstOrThrow({

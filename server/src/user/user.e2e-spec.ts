@@ -34,8 +34,8 @@ describe('UserModule E2E', () => {
 
     await userService.register(
       'test1@example.com',
-      'test1',
-      '2024',
+      '',
+      '',
       1,
       1,
       AuthType.DEVICE,
@@ -45,7 +45,7 @@ describe('UserModule E2E', () => {
 
     const user = await userService.byAuth(AuthType.DEVICE, 'abcd');
     expect(user).toBeDefined();
-    expect(user?.username).toEqual('test1');
+    expect(user?.username).toContain('guest');
   });
 
   it(`should properly delete user`, async () => {
@@ -53,8 +53,8 @@ describe('UserModule E2E', () => {
 
     await userService.register(
       'test2@example.com',
-      'test2',
-      '2024',
+      '',
+      '',
       1,
       1,
       AuthType.DEVICE,
@@ -72,8 +72,8 @@ describe('UserModule E2E', () => {
     const userSer = moduleRef.get<UserService>(UserService);
     await userSer.register(
       'test4@example.com',
-      'test4',
-      '2024',
+      '',
+      '',
       1,
       1,
       AuthType.DEVICE,
@@ -83,8 +83,8 @@ describe('UserModule E2E', () => {
     let oldList = await userSer.getAllUserData();
     await userSer.register(
       'test4@example.com',
-      'test4',
-      '2024',
+      '',
+      '',
       1,
       1,
       AuthType.DEVICE,
