@@ -161,6 +161,10 @@ describe('OrganizationModule E2E', () => {
     await app.init();
   });
 
+  afterEach(() => {
+    sendEventMock.mockClear();
+  });
+
   it('should successfully find OrganizationService', async () => {
     const orgService = moduleRef.get<OrganizationService>(OrganizationService);
 
@@ -200,11 +204,10 @@ describe('OrganizationModule E2E', () => {
     });
 
     it('Should be able to read from own org', async () => {
+      console.log('Should be able to read from own org');
       await evGateway.requestEventData(basicAbility, basicUser, {
         events: [defaultEv.id],
       });
-
-      console.log(JSON.stringify(sendEventMock.mock.calls));
 
       let [users, ev, dto] = sendEventMock.mock.lastCall as [
         string[],
@@ -229,6 +232,7 @@ describe('OrganizationModule E2E', () => {
       expect(ev2).toEqual('updateChallengeData');
       expect(dto2.challenge.id).toEqual(defaultChal.id);
       expect(dto2.challenge.name).toEqual(defaultChal.name);
+      console.log('Should be able to read from own org finalized');
     });
 
     it('Should not be able to read other user', async () => {
@@ -238,6 +242,7 @@ describe('OrganizationModule E2E', () => {
         sendEventMock.mock.calls.every(call => {
           const [users, ev, dto]: DtoLastCall<UpdateUserDataDto> = call;
 
+          // Check only the call with updateUserData not any other one
           if (users.includes(basicUser.id) && ev === 'updateUserData')
             return basicUser.id == dto.user.id;
           else return true;

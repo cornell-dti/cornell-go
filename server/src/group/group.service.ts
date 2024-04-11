@@ -295,7 +295,12 @@ export class GroupService {
       'updateGroupData',
       target?.id ?? group.id,
       dto,
-      { id: group.id, subject: subject('Group', group), dtoField: 'group' },
+      {
+        id: group.id,
+        subject: 'Group',
+        dtoField: 'group',
+        prismaStore: this.prisma.group,
+      },
     );
   }
 
@@ -327,6 +332,7 @@ export class GroupService {
     await this.prisma.group.updateMany({
       where: { AND: [{ id: group.id }, accessibleBy(ability).Group] },
       data: await this.abilityFactory.filterInaccessible(
+        group.id,
         {
           friendlyId: group.friendlyId,
           hostId: group.hostId,
@@ -335,6 +341,7 @@ export class GroupService {
         'Group',
         ability,
         Action.Update,
+        this.prisma.group,
       ),
     });
 

@@ -159,8 +159,9 @@ export class OrganizationService {
       dto,
       {
         id: organization.id,
-        subject: subject('Organization', organization),
+        subject: 'Organization',
         dtoField: 'organization',
+        prismaStore: this.prisma.organization,
       },
     );
   }
@@ -197,10 +198,12 @@ export class OrganizationService {
       }))
     ) {
       const updateData = await this.abilityFactory.filterInaccessible(
+        org.id,
         assignData,
-        subject('Organization', org),
+        'Organization',
         ability,
         Action.Update,
+        this.prisma.organization,
       );
 
       org = await this.prisma.organization.update({

@@ -212,7 +212,8 @@ export class ChallengeService {
       {
         id: challenge.id,
         dtoField: 'challenge',
-        subject: subject('Challenge', challenge),
+        subject: 'Challenge',
+        prismaStore: this.prisma.challenge,
       },
     );
   }
@@ -263,10 +264,12 @@ export class ChallengeService {
       };
 
       const data = await this.abilityFactory.filterInaccessible(
+        chal.id,
         assignData,
-        subject('Challenge', chal),
+        'Challenge',
         ability,
         Action.Update,
+        this.prisma.challenge,
       );
 
       chal = await this.prisma.challenge.update({

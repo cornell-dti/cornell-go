@@ -170,14 +170,16 @@ export class UserService {
     });
 
     const assignData = await this.abilityFactory.filterInaccessible(
+      userObj.id,
       {
         username: username,
         email: user.email,
         year: user.year,
       },
-      subject('User', userObj),
+      'User',
       ability,
       Action.Update,
+      this.prisma.user,
     );
 
     return await this.prisma.user.update({
@@ -244,8 +246,9 @@ export class UserService {
       dto,
       {
         id: user.id,
-        subject: subject('User', user),
+        subject: 'User',
         dtoField: 'user',
+        prismaStore: this.prisma.user,
       },
     );
   }

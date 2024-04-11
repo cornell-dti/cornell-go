@@ -1,4 +1,3 @@
-import { PermittedFieldsOptions, permittedFieldsOf } from '@casl/ability/extra';
 import { Action } from './action.enum';
 import { AbilityBuilder, ExtractSubjectType, PureAbility } from '@casl/ability';
 import { PrismaQuery, Subjects, createPrismaAbility } from '@casl/prisma';
@@ -36,21 +35,85 @@ export type AppAbility = PureAbility<
 
 @Injectable()
 export class CaslAbilityFactory {
-  async filterInaccessible(
-    data: any,
-    subject: Subjects<SubjectTypes>,
+  async filterInaccessible<TObj, TPrismaStore>(
+    id: string,
+    data: TObj,
+    subject: ExtractSubjectType<Subjects<SubjectTypes>>,
     ability: AppAbility,
     action: Action,
-  ) {
-    const fieldList = Object.keys(data);
-    const options: PermittedFieldsOptions<AppAbility> = {
-      fieldsFrom: rule => rule.fields || fieldList,
-    };
+    prismaStore: {
+      count: (...args: any[]) => Promise<number>;
+    },
+  ): Promise<Partial<TObj>> {
+    // TODO: optimize this function to minimize database hits (maybe a cache?)
+    // Potentially the following info inside the AppAbility (should not be too hard)
 
-    const permitted = permittedFieldsOf(ability, action, subject, options);
+    if (ability.can(action, subject)) return data;
+
     const newObj: any = {};
-    for (const permittedField of permitted) {
-      newObj[permittedField] = data[permittedField];
+    let remainingFields: string[] = [];
+
+    for (const field in data) {
+      if (ability.can(action, subject, field)) {
+        newObj[field] = (data as any)[field];
+      } else {
+        remainingFields.push(field);
+      }
+    }
+
+    let positiveFieldMap = new Map<Object, string[]>(); // These can be added
+    let negativeFieldMap = new Map<Object, string[]>(); // These must be removed
+
+    for (const field of remainingFields) {
+      for (const rule of ability.rulesFor(action, subject, field)) {
+        const cond = rule.conditions;
+
+        if (rule.inverted) {
+          if (!cond) {
+            delete newObj[field];
+          } else {
+            if (!negativeFieldMap.has(cond)) negativeFieldMap.set(cond, []);
+            negativeFieldMap.get(cond)!.push(field);
+          }
+        } else {
+          if (!cond) {
+            continue;
+          }
+
+          if (!positiveFieldMap.has(cond)) positiveFieldMap.set(cond, []);
+          positiveFieldMap.get(cond)!.push(field);
+        }
+      }
+    }
+
+    const fieldSet = new Set<string>();
+
+    for (const [cond, fields] of positiveFieldMap.entries()) {
+      const prismaCond = {
+        where: {
+          AND: [{ id }, cond],
+        },
+      };
+
+      if ((await prismaStore.count(prismaCond)) > 0) {
+        fields.forEach(v => fieldSet.add(v));
+      }
+    }
+
+    for (const [cond, fields] of negativeFieldMap.entries()) {
+      const prismaCond = {
+        where: {
+          AND: [{ id }, cond],
+        },
+      };
+
+      if ((await prismaStore.count(prismaCond)) > 0) {
+        fields.forEach(v => fieldSet.delete(v));
+      }
+    }
+
+    for (const field of fieldSet) {
+      newObj[field] = (data as any)[field];
     }
 
     return newObj;
@@ -102,28 +165,28 @@ export class CaslAbilityFactory {
 
     can(Action.Read, 'Achievement');
 
-    can(Action.Read, 'AchievementTracker', undefined, { userId: user.id });
+    can(Action.Read, 'AchievementTracker', { userId: user.id });
 
-    can(Action.Read, 'Challenge', undefined, {
+    can(Action.Read, 'Challenge', {
       linkedEvent: { usedIn: { some: { members: { some: { id: user.id } } } } },
     });
 
-    can(Action.Manage, 'Challenge', undefined, {
+    can(Action.Manage, 'Challenge', {
       linkedEvent: {
         usedIn: { some: { managers: { some: { id: user.id } } } },
       },
     });
 
-    can(Action.Read, 'EventBase', undefined, {
+    can(Action.Read, 'EventBase', {
       usedIn: { some: { members: { some: { id: user.id } } } },
       indexable: true,
     });
 
-    can(Action.Manage, 'EventBase', undefined, {
+    can(Action.Manage, 'EventBase', {
       usedIn: { some: { managers: { some: { id: user.id } } } },
     });
 
-    can(Action.Read, 'EventTracker', undefined, {
+    can(Action.Read, 'EventTracker', {
       OR: [
         { userId: user.id },
         {
@@ -132,26 +195,26 @@ export class CaslAbilityFactory {
       ],
     });
 
-    can(Action.Read, 'Group', undefined, {
+    can(Action.Read, 'Group', {
       members: { some: { id: user.id } },
     });
 
-    can(Action.Update, 'Group', undefined, {
+    can(Action.Update, 'Group', {
       hostId: user.id,
     });
 
-    can(Action.Read, 'Organization', undefined, {
+    can(Action.Read, 'Organization', {
       members: { some: { id: user.id } },
     });
 
     // These come from DTO
     cannot(Action.Read, 'Organization', ['members', 'managers']);
 
-    can(Action.Manage, 'Organization', undefined, {
+    can(Action.Manage, 'Organization', {
       managers: { some: { id: user.id } },
     });
 
-    can(Action.Read, 'PrevChallenge', undefined, {
+    can(Action.Read, 'PrevChallenge', {
       OR: [
         { userId: user.id },
         {

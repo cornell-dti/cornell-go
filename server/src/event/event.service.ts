@@ -293,7 +293,11 @@ export class EventService {
       'updateEventTrackerData',
       target?.id ?? tracker.id,
       dto,
-      { id: dto.eventId, subject: 'EventTracker' },
+      {
+        id: dto.eventId,
+        subject: 'EventTracker',
+        prismaStore: this.prisma.eventTracker,
+      },
     );
   }
 
@@ -307,7 +311,12 @@ export class EventService {
       'updateEventData',
       target?.id ?? ev.id,
       dto,
-      { id: ev.id, subject: subject('EventBase', ev), dtoField: 'event' },
+      {
+        id: ev.id,
+        subject: 'EventBase',
+        dtoField: 'event',
+        prismaStore: this.prisma.eventBase,
+      },
     );
   }
 
@@ -378,14 +387,14 @@ export class EventService {
           ? TimeLimitationType.LIMITED_TIME
           : TimeLimitationType.PERPETUAL,
       endTime: event.endTime && new Date(event.endTime),
-      userFavorites: event.userFavorites,
       indexable: event.indexable,
       difficulty:
-        event.difficulty === 'Easy'
+        event.difficulty &&
+        (event.difficulty === 'Easy'
           ? DifficultyMode.EASY
           : event.difficulty === 'Normal'
           ? DifficultyMode.NORMAL
-          : DifficultyMode.HARD,
+          : DifficultyMode.HARD),
       latitude: event.latitudeF,
       longitude: event.longitudeF,
     };
@@ -400,10 +409,12 @@ export class EventService {
       }))
     ) {
       const updateData = await this.abilityFactory.filterInaccessible(
+        ev.id,
         assignData,
-        subject('EventBase', ev),
+        'EventBase',
         ability,
         Action.Update,
+        this.prisma.eventBase,
       );
 
       ev = await this.prisma.eventBase.update({
