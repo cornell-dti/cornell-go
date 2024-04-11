@@ -58,6 +58,8 @@ export class ChallengeGateway {
     }
   }
 
+  // Disabled for now to prevent any cheating
+  /*
   @SubscribeMessage('setCurrentChallenge')
   async setCurrentChallenge(
     @CallingUser() user: User,
@@ -79,7 +81,7 @@ export class ChallengeGateway {
         'Challenge is not valid (Challenge is not in event)',
       );
     }
-  }
+  }*/
 
   @SubscribeMessage('completedChallenge')
   async completedChallenge(
@@ -96,7 +98,10 @@ export class ChallengeGateway {
       await this.eventService.emitUpdateEventTracker(tracker);
       await this.userService.emitUpdateUserData(user, false, true, user);
     } else {
-      await this.clientService.emitErrorData(user, 'Challenge not complete');
+      await this.clientService.emitErrorData(
+        user,
+        'Challenge could not be completed',
+      );
     }
   }
 

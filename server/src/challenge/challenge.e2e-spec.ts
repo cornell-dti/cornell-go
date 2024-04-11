@@ -106,7 +106,9 @@ describe('ChallengeModule E2E', () => {
       let chal = await prisma.challenge.findFirstOrThrow({
         where: { id: tracker.curChallengeId },
       });
+
       await challengeService.completeChallenge(user, chal.id);
+
       const score2 = (
         await prisma.user.findFirstOrThrow({
           where: {
@@ -114,6 +116,7 @@ describe('ChallengeModule E2E', () => {
           },
         })
       ).score;
+
       const trackerScore2 = (
         await prisma.eventTracker.findFirstOrThrow({
           where: {
@@ -121,7 +124,9 @@ describe('ChallengeModule E2E', () => {
           },
         })
       ).score;
-      expect(score + 1).toEqual(score2);
+
+      expect(score + chal.points).toEqual(score2);
+      expect(trackerScore + chal.points).toEqual(trackerScore2);
       expect(
         await challengeService.isChallengeCompletedByUser(user, chal),
       ).toEqual(true);
@@ -255,20 +260,6 @@ describe('ChallengeModule E2E', () => {
       });
 
       expect(chalres).toEqual(null);*/
-    });
-  });
-
-  describe('setCurrentChallenge', () => {
-    it('should set challenge to current', async () => {
-      const chal = await prisma.challenge.findFirstOrThrow({
-        where: {
-          linkedEvent: event,
-        },
-      });
-
-      await challengeService.setCurrentChallenge(user, chal.id);
-      const tracker = await eventService.getCurrentEventTrackerForUser(user);
-      expect(tracker.curChallengeId).toEqual(chal.id);
     });
   });
 

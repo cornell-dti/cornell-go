@@ -135,7 +135,7 @@ export class EventGateway {
     }
 
     if (data.deleted && ev) {
-      await this.eventService.removeEvent(ev.id, ability);
+      await this.eventService.removeEvent(ability, ev.id);
       await this.eventService.emitUpdateEventData(ev, true);
     } else {
       const ev = await this.eventService.upsertEventFromDto(

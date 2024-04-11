@@ -203,6 +203,19 @@ describe('OrganizationModule E2E', () => {
       expect(dto.user.username).toEqual('myNewUsername');
     });
 
+    it('Should not be able to modify ban status', async () => {
+      await userGateway.updateUserData(basicAbility, basicUser, {
+        user: { id: basicUser.id, isBanned: true },
+        deleted: false,
+      });
+
+      const [users, ev, dto]: DtoLastCall<UpdateUserDataDto> =
+        sendEventMock.mock.lastCall;
+
+      expect(ev).toEqual('updateUserData');
+      expect(dto.user.isBanned).toEqual(false);
+    });
+
     it('Should be able to read from own org', async () => {
       console.log('Should be able to read from own org');
       await evGateway.requestEventData(basicAbility, basicUser, {
@@ -342,6 +355,11 @@ describe('OrganizationModule E2E', () => {
   });
 
   afterAll(async () => {
+    await userService.deleteUser(fullAbility, basicUser);
+    await userService.deleteUser(fullAbility, managerUser);
+    await challengeService.removeChallenge(fullAbility, exChal.id);
+    await eventService.removeEvent(fullAbility, exEv.id);
+    await orgService.removeOrganization(fullAbility, exOrg.id);
     await app.close();
   });
 });

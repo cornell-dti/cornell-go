@@ -92,20 +92,21 @@ export class ChallengeService {
     const eventTracker: EventTracker =
       await this.eventService.getCurrentEventTrackerForUser(user);
 
-    const curEvent = await this.prisma.eventBase.findUniqueOrThrow({
-      where: { id: eventTracker.eventId },
-    });
+    const alreadyDone =
+      (await this.prisma.prevChallenge.count({
+        where: {
+          userId: user.id,
+          challengeId: eventTracker.curChallengeId,
+          trackerId: eventTracker.id,
+        },
+      })) > 0;
 
     // Ensure that the correct challenge is marked complete
-    if (
-      challengeId !== eventTracker.curChallengeId ||
-      (groupMembers.length !== curEvent.requiredMembers &&
-        curEvent.requiredMembers >= 0)
-    ) {
+    if (challengeId !== eventTracker.curChallengeId || alreadyDone) {
       return false;
     }
 
-    const prevChal = await this.prisma.prevChallenge.create({
+    await this.prisma.prevChallenge.create({
       data: {
         userId: user.id,
         challengeId: eventTracker.curChallengeId,
@@ -124,15 +125,14 @@ export class ChallengeService {
 
     await this.prisma.user.update({
       where: { id: user.id },
-      data: { score: { increment: 1 } },
+      data: { score: { increment: curChallenge.points } },
     });
 
     await this.prisma.eventTracker.update({
       where: { id: eventTracker.id },
       data: {
-        score: { increment: 1 },
+        score: { increment: curChallenge.points },
         curChallenge: { connect: { id: nextChallenge.id } },
-        completedChallenges: { connect: { id: prevChal.id } },
       },
     });
 
@@ -155,6 +155,8 @@ export class ChallengeService {
     );
   }
 
+  // Disabled for now
+  /*
   async setCurrentChallenge(user: User, challengeId: string) {
     const group = await this.prisma.group.findUniqueOrThrow({
       where: { id: user.groupId },
@@ -191,7 +193,7 @@ export class ChallengeService {
     );
 
     return true;
-  }
+  }*/
 
   async emitUpdateChallengeData(
     challenge: Challenge,

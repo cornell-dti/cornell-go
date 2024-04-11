@@ -466,7 +466,7 @@ export class EventService {
     return ev;
   }
 
-  async removeEvent(eventId: string, ability: AppAbility) {
+  async removeEvent(ability: AppAbility, eventId: string) {
     if (
       await this.prisma.eventBase.findFirst({
         where: {
