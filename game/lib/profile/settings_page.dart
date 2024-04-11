@@ -156,7 +156,7 @@ class SettingsPage extends StatelessWidget {
                               context,
                               MaterialPageRoute(
                                   builder: (context) => SplashPageWidget())),
-                          displayToast("Signed in!", Status.success)
+                          displayToast("Signed out", Status.success)
                         },
                         style: TextButton.styleFrom(
                             padding: EdgeInsets.only(left: 20.0),
