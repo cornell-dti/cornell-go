@@ -81,7 +81,7 @@ export class ClientService {
     this.gateway.server.to(users).emit(event, dto);
   }
 
-  async sendProtected<TDto>(
+  async sendProtected<TDto extends {}>(
     event: keyof ClientApiDef,
     target: string,
     dto: ClientApiDef[typeof event] & TDto,
@@ -106,7 +106,7 @@ export class ClientService {
         const ability = this.abilityFactory.createForUser(user);
         const accessibleObj = await this.abilityFactory.filterInaccessible(
           resource.id,
-          resource.dtoField ? dto[resource.dtoField] : dto,
+          resource.dtoField ? (dto[resource.dtoField] as any) : dto,
           resource.subject,
           ability,
           Action.Read,

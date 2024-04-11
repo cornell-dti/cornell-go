@@ -57,9 +57,6 @@ describe('ChallengeModule E2E', () => {
       ],
     }).compile();
 
-    const log = console.log;
-    console.log = function () {};
-
     challengeService = module.get<ChallengeService>(ChallengeService);
     prisma = module.get<PrismaService>(PrismaService);
     userService = module.get<UserService>(UserService);
@@ -89,8 +86,6 @@ describe('ChallengeModule E2E', () => {
     event = await prisma.eventBase.findUniqueOrThrow({
       where: { id: tracker.eventId },
     });
-
-    console.log = log;
   });
 
   it('should successfully find ChallengeService', async () => {

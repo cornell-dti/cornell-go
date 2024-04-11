@@ -79,9 +79,11 @@ export class UserGateway {
     if (ability.can(Action.Read, 'User')) {
       const users = await this.userService.getAllUserData();
 
-      await users.map(
-        async (us: User) =>
-          await this.userService.emitUpdateUserData(us, false, false, user),
+      await Promise.all(
+        users.map(
+          async (us: User) =>
+            await this.userService.emitUpdateUserData(us, false, false, user),
+        ),
       );
     } else {
       await this.clientService.emitErrorData(

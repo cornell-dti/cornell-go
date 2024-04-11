@@ -35,7 +35,7 @@ export type AppAbility = PureAbility<
 
 @Injectable()
 export class CaslAbilityFactory {
-  async filterInaccessible<TObj, TPrismaStore>(
+  async filterInaccessible<TObj extends {}>(
     id: string,
     data: TObj,
     subject: ExtractSubjectType<Subjects<SubjectTypes>>,
@@ -48,45 +48,42 @@ export class CaslAbilityFactory {
     // TODO: optimize this function to minimize database hits (maybe a cache?)
     // Potentially the following info inside the AppAbility (should not be too hard)
 
-    if (ability.can(action, subject)) return data;
-
     const newObj: any = {};
-    let remainingFields: string[] = [];
+    let fields: string[] = Object.keys(data);
 
-    for (const field in data) {
-      if (ability.can(action, subject, field)) {
-        newObj[field] = (data as any)[field];
-      } else {
-        remainingFields.push(field);
-      }
-    }
+    const fieldSet = new Set<string>();
+    const toRemoveSet = new Set<string>();
 
     let positiveFieldMap = new Map<Object, string[]>(); // These can be added
     let negativeFieldMap = new Map<Object, string[]>(); // These must be removed
 
-    for (const field of remainingFields) {
+    for (const field of fields) {
       for (const rule of ability.rulesFor(action, subject, field)) {
         const cond = rule.conditions;
 
         if (rule.inverted) {
           if (!cond) {
-            delete newObj[field];
+            toRemoveSet.add(field); // Always denied
           } else {
             if (!negativeFieldMap.has(cond)) negativeFieldMap.set(cond, []);
             negativeFieldMap.get(cond)!.push(field);
           }
         } else {
           if (!cond) {
+            fieldSet.add(field); // Always allowed
             continue;
+          } else {
+            if (!positiveFieldMap.has(cond)) positiveFieldMap.set(cond, []);
+            positiveFieldMap.get(cond)!.push(field);
           }
-
-          if (!positiveFieldMap.has(cond)) positiveFieldMap.set(cond, []);
-          positiveFieldMap.get(cond)!.push(field);
         }
       }
     }
 
-    const fieldSet = new Set<string>();
+    // Always denied takes precedence
+    for (const toRemove of toRemoveSet) {
+      fieldSet.delete(toRemove);
+    }
 
     for (const [cond, fields] of positiveFieldMap.entries()) {
       const prismaCond = {
@@ -96,6 +93,7 @@ export class CaslAbilityFactory {
       };
 
       if ((await prismaStore.count(prismaCond)) > 0) {
+        // Ensure positive access to field
         fields.forEach(v => fieldSet.add(v));
       }
     }
@@ -108,6 +106,7 @@ export class CaslAbilityFactory {
       };
 
       if ((await prismaStore.count(prismaCond)) > 0) {
+        // Check negative access to field
         fields.forEach(v => fieldSet.delete(v));
       }
     }

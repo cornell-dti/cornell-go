@@ -255,9 +255,9 @@ describe('OrganizationModule E2E', () => {
         sendEventMock.mock.calls.every(call => {
           const [users, ev, dto]: DtoLastCall<UpdateUserDataDto> = call;
 
-          // Check only the call with updateUserData not any other one
+          // Check only the call with updateUserData directed at basicUser not any other one
           if (users.includes(basicUser.id) && ev === 'updateUserData')
-            return basicUser.id == dto.user.id;
+            return basicUser.id === dto.user.id;
           else return true;
         }),
       ).toBeTruthy();
