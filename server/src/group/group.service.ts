@@ -232,12 +232,23 @@ export class GroupService {
       actorAbility.cannot(Action.Update, 'Group', 'curEventId') ||
       eventId === group.curEventId
     ) {
-      return;
+      return false;
     }
 
     for (const mem of group.members) {
       const ability = this.abilityFactory.createForUser(mem);
-      if (ability.cannot(Action.Read, subject('EventBase', newEvent))) {
+      const canAccess =
+        (await this.prisma.eventBase.count({
+          where: {
+            AND: [
+              { id: newEvent.id },
+              accessibleBy(ability, Action.Read).EventBase,
+            ],
+          },
+        })) > 0;
+
+      if (!canAccess) {
+        console.log('A GROUP MEMBER CANNOT ACCESS!');
         return false;
       }
     }

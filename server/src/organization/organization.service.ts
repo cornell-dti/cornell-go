@@ -52,22 +52,24 @@ export class OrganizationService {
   ) {}
 
   // TODO: maybe move this to challenge.service in the future?
-  async makeDefaultChallenge() {
+  async makeDefaultChallenge(evId?: string) {
     return await this.prisma.challenge.create({
       data: {
         ...defaultChallengeData,
+        linkedEvent: new String(evId) && { connect: { id: evId } },
       },
     });
   }
 
   // TODO: maybe move this to event.service in the future?
-  async makeDefaultEvent() {
+  async makeDefaultEvent(orgId?: string) {
     const chal = await this.makeDefaultChallenge();
 
     const ev = await this.prisma.eventBase.create({
       data: {
         ...defaultEventData,
         challenges: { connect: { id: chal.id } },
+        usedIn: new String(orgId) && { connect: { id: orgId } },
       },
     });
 

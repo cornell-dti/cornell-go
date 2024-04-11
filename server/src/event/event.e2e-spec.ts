@@ -95,15 +95,12 @@ describe('EventModule E2E', () => {
 
     clientService.getAffectedUsers = async (target: string) => [exPlayer];
 
-    exJourney1 = await orgService.makeDefaultEvent();
-    exJourney2 = await orgService.makeDefaultEvent();
-    exChallenge1 = await orgService.makeDefaultEvent();
+    exJourney1 = await orgService.makeDefaultEvent(playerOrg.id);
+    exJourney2 = await orgService.makeDefaultEvent(playerOrg.id);
+    exChallenge1 = await orgService.makeDefaultEvent(playerOrg.id);
 
-    journey1Chal = await orgService.makeDefaultChallenge();
-    journey2Chal = await orgService.makeDefaultChallenge();
-
-    await challengeService.addChallengeToEvent(journey1Chal, exJourney1);
-    await challengeService.addChallengeToEvent(journey2Chal, exJourney2);
+    journey1Chal = await orgService.makeDefaultChallenge(exJourney1.id);
+    journey2Chal = await orgService.makeDefaultChallenge(exJourney2.id);
 
     await app.init();
   });
