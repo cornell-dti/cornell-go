@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:game/model/challenge_model.dart';
 import 'package:game/model/event_model.dart';
+import 'package:game/model/tracker_model.dart';
 import 'package:game/model/user_model.dart';
 import 'package:game/profile/achievement_cell.dart';
 import 'package:game/profile/completed_cell.dart';
 import 'package:game/profile/settings_page.dart';
+import 'package:game/utils/utility_functions.dart';
+import 'package:intl/intl.dart' hide TextDirection;
 import 'package:provider/provider.dart';
 
 /**
@@ -24,8 +28,9 @@ class _ProfilePageState extends State<ProfilePage> {
     return Scaffold(
       backgroundColor: Color.fromARGB(255, 255, 245, 234),
       body: SafeArea(child: Container(
-        child: Consumer2<EventModel, UserModel>(
-            builder: (context, eventModel, userModel, child) {
+        child: Consumer4<UserModel, EventModel, TrackerModel, ChallengeModel>(
+            builder: (context, userModel, eventModel, trackerModel,
+                challengeModel, child) {
           if (userModel.userData == null) {
             return Center(
               child: CircularProgressIndicator(),
@@ -33,14 +38,26 @@ class _ProfilePageState extends State<ProfilePage> {
           }
           var username = userModel.userData?.username;
           var score = userModel.userData?.score;
-          print(userModel.userData?.toJson());
-          var completedChallengesId = userModel.userData?.completedChallenges;
+
           var completedChallenges = [];
 
-          if (completedChallengesId != null) {
-            completedChallenges = completedChallengesId
-                .map((e) => eventModel.getEventById(e))
-                .toList();
+          for (var eventId in userModel.userData!.trackedEvents!) {
+            var tracker = trackerModel.trackerByEventId(eventId);
+            var event = eventModel.getEventById(eventId);
+            if (tracker == null || event == null) {
+              continue;
+            }
+            if (tracker.prevChallengeDates!.length !=
+                event.challenges!.length) {
+              continue;
+            }
+
+            var completedDate = tracker.prevChallengeDates!.last;
+            DateTime date =
+                DateFormat("E, d MMM y HH:mm:ss").parse(completedDate);
+            String formattedDate = DateFormat("MMMM d, y").format(date);
+
+            completedChallenges.add((formattedDate, event));
           }
           return Column(
             children: [
@@ -130,6 +147,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ],
                 ),
               ),
+              //To be replaced with real data
               achievementCell("Complete three challenges on the Arts quad", 4,
                   6, locationImage),
               achievementCell(
@@ -137,6 +155,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   4,
                   6,
                   locationImage),
+              //Completed Challenges
               Padding(
                 padding: const EdgeInsets.only(left: 24, right: 24.0),
                 child: Row(
@@ -164,23 +183,34 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               SizedBox(
                 height: 200,
+                width: 345,
                 child: ListView.separated(
                   itemCount: 2,
                   itemBuilder: (context, index) {
                     if (index >= completedChallenges.length) {
                       return Container();
                     }
-                    var event = completedChallenges[index];
+                    var (completedDate, event) = completedChallenges[index];
+
                     var type =
                         event.challenges.length > 1 ? "Journeys" : "Challenge";
+
+                    //Calculate totalPoints.
+                    var totalPoints = 0;
+                    for (var challengeId in event.challenges ?? []) {
+                      var challenge =
+                          challengeModel.getChallengeById(challengeId);
+                      if (challenge != null) {
+                        totalPoints += challenge.points ?? 0;
+                      }
+                    }
                     return completedCell(
                         event.name,
                         locationImage,
                         type,
-                        event.date,
-                        event.location,
-                        event.difficulty,
-                        event.score);
+                        completedDate,
+                        difficultyToString[event.difficulty]!,
+                        totalPoints);
                   },
                   physics: BouncingScrollPhysics(),
                   separatorBuilder: (context, index) {

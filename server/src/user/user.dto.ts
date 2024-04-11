@@ -67,7 +67,6 @@ export interface UserDto {
   authType?: UserAuthTypeDto;
   trackedEvents?: string[];
   favorites?: string[];
-  completedChallenges?: number[];
 }
 
 export interface UpdateUserDataDto {

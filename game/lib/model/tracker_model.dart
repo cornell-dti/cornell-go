@@ -8,6 +8,7 @@ class TrackerModel extends ChangeNotifier {
 
   TrackerModel(ApiClient client) : _client = client {
     client.clientApi.updateEventTrackerDataStream.listen((event) {
+      print("TrackerModel: updateEventTrackerDataStream");
       _trackers[event.eventId] = event;
 
       notifyListeners();
