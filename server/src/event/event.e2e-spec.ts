@@ -82,7 +82,7 @@ describe('EventModule E2E', () => {
       '2024',
       0,
       0,
-      AuthType.NONE,
+      AuthType.DEVICE,
       'player1auth',
       EnrollmentType.UNDERGRADUATE,
     );
@@ -90,7 +90,7 @@ describe('EventModule E2E', () => {
     exPlayerAbility = await abilityFactory.createForUser(exPlayer);
 
     playerOrg = await orgService.getDefaultOrganization(
-      OrganizationSpecialUsage.CORNELL_LOGIN,
+      OrganizationSpecialUsage.DEVICE_LOGIN,
     );
 
     clientService.getAffectedUsers = async (target: string) => [exPlayer];
