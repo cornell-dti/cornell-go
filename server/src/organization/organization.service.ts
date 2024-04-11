@@ -34,7 +34,7 @@ export const defaultChallengeData = {
   name: 'Default Challenge',
   location: LocationType.ARTS_QUAD,
   description: 'McGraw Tower',
-  points: 50,
+  points: 1,
   imageUrl:
     'https://upload.wikimedia.org/wikipedia/commons/5/5f/CentralAvenueCornell2.jpg',
   latitude: 42.44755580740012,
@@ -53,25 +53,35 @@ export class OrganizationService {
 
   // TODO: maybe move this to challenge.service in the future?
   async makeDefaultChallenge(evId?: string) {
+    let index = 0;
+    if (evId) {
+      const maxIndexChallenge = await this.prisma.challenge.aggregate({
+        _max: { eventIndex: true },
+        where: { linkedEventId: evId },
+      });
+
+      index = (maxIndexChallenge._max.eventIndex ?? -1) + 1;
+    }
+
     return await this.prisma.challenge.create({
       data: {
         ...defaultChallengeData,
-        linkedEvent: new String(evId) && { connect: { id: evId } },
+        linkedEventId: evId,
+        eventIndex: index,
       },
     });
   }
 
   // TODO: maybe move this to event.service in the future?
   async makeDefaultEvent(orgId?: string) {
-    const chal = await this.makeDefaultChallenge();
-
     const ev = await this.prisma.eventBase.create({
       data: {
         ...defaultEventData,
-        challenges: { connect: { id: chal.id } },
-        usedIn: new String(orgId) && { connect: { id: orgId } },
+        usedIn: orgId ? { connect: { id: orgId } } : undefined,
       },
     });
+
+    await this.makeDefaultChallenge(ev.id);
 
     return ev;
   }

@@ -246,6 +246,7 @@ export class GroupService {
             ],
           },
         })) > 0;
+      break;
 
       if (!canAccess) {
         console.log('A GROUP MEMBER CANNOT ACCESS!');
