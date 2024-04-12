@@ -77,7 +77,7 @@ class _JourneyCellState extends State<JourneyCell> {
                 BuildContext context,
               ) =>
                   Preview(journeyName, description, difficulty, points,
-                      previewType.journey, location,
+                      PreviewType.JOURNEY, location,
                       locationCount: locationCount,
                       numberCompleted: numberCompleted));
         },

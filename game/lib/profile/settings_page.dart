@@ -1,12 +1,8 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:game/main.dart';
 import 'package:game/splash_page/splash_page.dart';
-import 'package:velocity_x/velocity_x.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
