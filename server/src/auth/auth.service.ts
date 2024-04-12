@@ -129,8 +129,8 @@ export class AuthService {
     if (!user) {
       user = await this.userService.register(
         idToken.email,
-        req.username ?? "",
-        req.year ?? "",
+        req.username ?? '',
+        req.year ?? '',
         req.lat,
         req.long,
         authType,
@@ -140,7 +140,7 @@ export class AuthService {
     }
 
     if (!user) {
-      console.log("Unable to register user");
+      console.log('Unable to register user');
       return null;
     }
 
