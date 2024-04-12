@@ -294,7 +294,7 @@ export class EventService {
       target?.id ?? tracker.id,
       dto,
       {
-        id: dto.eventId,
+        id: tracker.id,
         subject: 'EventTracker',
         prismaStore: this.prisma.eventTracker,
       },
