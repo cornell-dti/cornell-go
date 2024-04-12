@@ -52,7 +52,8 @@ type UserEnrollmentTypeDto =
   | "UNDERGRADUATE"
   | "GRADUATE"
   | "FACULTY"
-  | "ALUMNI";
+  | "ALUMNI"
+  | "GUEST";
 
 type UserAuthTypeDto = "apple" | "google" | "device";
 

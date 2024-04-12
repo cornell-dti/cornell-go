@@ -61,7 +61,8 @@ export class UserService {
     if (username == null && authType == AuthType.GOOGLE) {
       username = email?.split('@')[0];
     } else if (authType == AuthType.DEVICE) {
-      username = '@guest' + this.prisma.user.count();
+      const count = await this.prisma.user.count();
+      username = 'guest' + count;
     }
 
     const defOrg = await this.orgService.getDefaultOrganization(
@@ -96,7 +97,7 @@ export class UserService {
     });
 
     await this.eventsService.createDefaultEventTracker(user, lat, long);
-    console.log(`User ${user.id} created!`);
+    console.log(`User ${user.id} created with username ${username}!`);
     await this.log.logEvent(SessionLogEvent.CREATE_USER, user.id, user.id);
     return user;
   }

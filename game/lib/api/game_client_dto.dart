@@ -72,6 +72,7 @@ enum UserEnrollmentTypeDto {
   GRADUATE,
   FACULTY,
   ALUMNI,
+  GUEST,
 }
 
 enum UserAuthTypeDto {
