@@ -272,7 +272,10 @@ export class EventService {
 
   async dtoForEventTracker(tracker: EventTracker): Promise<EventTrackerDto> {
     const completedChallenges = await this.prisma.challenge.findMany({
-      where: { completions: { some: { userId: tracker.userId } } },
+      where: {
+        completions: { some: { userId: tracker.userId } },
+        linkedEventId: tracker.eventId,
+      },
       include: { completions: { where: { userId: tracker.userId } } },
     });
 

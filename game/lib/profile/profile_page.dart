@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:game/api/game_client_dto.dart';
 import 'package:game/model/challenge_model.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/tracker_model.dart';
@@ -10,6 +11,7 @@ import 'package:game/profile/settings_page.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:intl/intl.dart' hide TextDirection;
 import 'package:provider/provider.dart';
+import 'package:tuple/tuple.dart';
 
 /**
  * The profile page of the app that is rendered for the user's profile
@@ -39,11 +41,11 @@ class _ProfilePageState extends State<ProfilePage> {
           var username = userModel.userData?.username;
           var score = userModel.userData?.score;
 
-          var completedChallenges = [];
+          List<Tuple2<DateTime, EventDto>> completedEvents = [];
 
           for (var eventId in userModel.userData!.trackedEvents!) {
             var tracker = trackerModel.trackerByEventId(eventId);
-            var event = eventModel.getEventById(eventId);
+            EventDto? event = eventModel.getEventById(eventId);
             if (tracker == null || event == null) {
               continue;
             }
@@ -55,10 +57,11 @@ class _ProfilePageState extends State<ProfilePage> {
             var completedDate = tracker.prevChallengeDates!.last;
             DateTime date =
                 DateFormat("E, d MMM y HH:mm:ss").parse(completedDate);
-            String formattedDate = DateFormat("MMMM d, y").format(date);
 
-            completedChallenges.add((formattedDate, event));
+            completedEvents.add(Tuple2<DateTime, EventDto>(date, event));
           }
+          //Sort so that the most recent events are first
+          completedEvents.sort((a, b) => b.item1.compareTo(a.item1));
           return Column(
             children: [
               Stack(fit: StackFit.passthrough, children: [
@@ -155,7 +158,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   4,
                   6,
                   locationImage),
-              //Completed Challenges
+              //Completed Events
               Padding(
                 padding: const EdgeInsets.only(left: 24, right: 24.0),
                 child: Row(
@@ -187,13 +190,14 @@ class _ProfilePageState extends State<ProfilePage> {
                 child: ListView.separated(
                   itemCount: 2,
                   itemBuilder: (context, index) {
-                    if (index >= completedChallenges.length) {
+                    if (index >= completedEvents.length) {
                       return Container();
                     }
-                    var (completedDate, event) = completedChallenges[index];
-
+                    var date = completedEvents[index].item1;
+                    var event = completedEvents[index].item2;
+                    String formattedDate = DateFormat("MMMM d, y").format(date);
                     var type =
-                        event.challenges.length > 1 ? "Journeys" : "Challenge";
+                        event.challenges!.length > 1 ? "Journeys" : "Challenge";
 
                     //Calculate totalPoints.
                     var totalPoints = 0;
@@ -205,10 +209,10 @@ class _ProfilePageState extends State<ProfilePage> {
                       }
                     }
                     return completedCell(
-                        event.name,
+                        event.name!,
                         locationImage,
                         type,
-                        completedDate,
+                        formattedDate,
                         difficultyToString[event.difficulty]!,
                         totalPoints);
                   },
