@@ -244,7 +244,6 @@ describe('OrganizationModule E2E', () => {
       expect(ev2).toEqual('updateChallengeData');
       expect(dto2.challenge.id).toEqual(defaultChal.id);
       expect(dto2.challenge.name).toEqual(defaultChal.name);
-      console.log('Should be able to read from own org finalized');
     });
 
     it('Should not be able to read other user', async () => {
