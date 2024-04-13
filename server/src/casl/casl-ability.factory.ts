@@ -1,5 +1,10 @@
 import { Action } from './action.enum';
-import { AbilityBuilder, ExtractSubjectType, PureAbility } from '@casl/ability';
+import {
+  AbilityBuilder,
+  ExtractSubjectType,
+  PureAbility,
+  subject,
+} from '@casl/ability';
 import { PrismaQuery, Subjects, createPrismaAbility } from '@casl/prisma';
 import { Injectable } from '@nestjs/common';
 import {
@@ -38,7 +43,7 @@ export class CaslAbilityFactory {
   async filterInaccessible<TObj extends {}>(
     id: string,
     data: TObj,
-    subject: ExtractSubjectType<Subjects<SubjectTypes>>,
+    subj: ExtractSubjectType<Subjects<SubjectTypes>>,
     ability: AppAbility,
     action: Action,
     prismaStore: {
@@ -52,62 +57,22 @@ export class CaslAbilityFactory {
     let fields: string[] = Object.keys(data);
 
     const fieldSet = new Set<string>();
-    const toRemoveSet = new Set<string>();
-
-    let positiveFieldMap = new Map<Object, string[]>(); // These can be added
-    let negativeFieldMap = new Map<Object, string[]>(); // These must be removed
 
     for (const field of fields) {
-      for (const rule of ability.rulesFor(action, subject, field)) {
-        const cond = rule.conditions;
+      for (const rule of ability.rulesFor(action, subj, field)) {
+        const prismaCond = {
+          where: {
+            AND: [{ id }, rule.conditions],
+          },
+        };
 
-        if (rule.inverted) {
-          if (!cond) {
-            toRemoveSet.add(field); // Always denied
+        if (!rule.conditions || (await prismaStore.count(prismaCond)) > 0) {
+          if (rule.inverted) {
+            fieldSet.delete(field);
           } else {
-            if (!negativeFieldMap.has(cond)) negativeFieldMap.set(cond, []);
-            negativeFieldMap.get(cond)!.push(field);
-          }
-        } else {
-          if (!cond) {
-            fieldSet.add(field); // Always allowed
-            continue;
-          } else {
-            if (!positiveFieldMap.has(cond)) positiveFieldMap.set(cond, []);
-            positiveFieldMap.get(cond)!.push(field);
+            fieldSet.add(field);
           }
         }
-      }
-    }
-
-    // Always denied takes precedence
-    for (const toRemove of toRemoveSet) {
-      fieldSet.delete(toRemove);
-    }
-
-    for (const [cond, fields] of positiveFieldMap.entries()) {
-      const prismaCond = {
-        where: {
-          AND: [{ id }, cond],
-        },
-      };
-
-      if ((await prismaStore.count(prismaCond)) > 0) {
-        // Ensure positive access to field
-        fields.forEach(v => fieldSet.add(v));
-      }
-    }
-
-    for (const [cond, fields] of negativeFieldMap.entries()) {
-      const prismaCond = {
-        where: {
-          AND: [{ id }, cond],
-        },
-      };
-
-      if ((await prismaStore.count(prismaCond)) > 0) {
-        // Check negative access to field
-        fields.forEach(v => fieldSet.delete(v));
       }
     }
 
