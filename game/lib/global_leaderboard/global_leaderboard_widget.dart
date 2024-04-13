@@ -20,102 +20,11 @@ class GlobalLeaderboardWidget extends StatefulWidget {
 }
 
 /**
- * This widget is the mutable state of the global leaderboard. Currently, there 
- * are sample users, but it gets the top 10 users and displays them on the leaderboard!
+ * This widget is the mutable state of the global leaderboard. Currently, if the system has less than 3 users
+ * then empty users with no name are added to the podium. 
  */
 class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
-
-  //SampleUsers is mock leaderboard data since the users fetch is not working properly.
-  List<LeaderDto> sampleUsers = [
-    LeaderDto.fromJson({
-      "userId": "user1",
-      "username": "user1_username",
-      "score": 100,
-    }),
-    LeaderDto.fromJson({
-      "userId": "user2",
-      "username": "user2_username",
-      "score": 85,
-    }),
-    LeaderDto.fromJson({
-      "userId": "user3",
-      "username": "user3_username",
-      "score": 120,
-    }),
-    LeaderDto.fromJson({
-      "userId": "user4",
-      "username": "user4_username",
-      "score": 75,
-    }),
-    LeaderDto.fromJson({
-      "userId": "user5",
-      "username": "user5_username",
-      "score": 95,
-    }),
-    LeaderDto.fromJson({
-      "userId": "user6",
-      "username": "user6_username",
-      "score": 110,
-    }),
-    LeaderDto.fromJson({
-      "userId": "user7",
-      "username": "user7_username",
-      "score": 90,
-    }),
-    LeaderDto.fromJson({
-      "userId": "user8",
-      "username": "user8_username",
-      "score": 80,
-    }),
-    LeaderDto.fromJson({
-      "userId": "user9",
-      "username": "user9_username",
-      "score": 70,
-    }),
-    LeaderDto.fromJson({
-      "userId": "user10",
-      "username": "user10_username",
-      "score": 115,
-    }),
-    LeaderDto.fromJson({
-      "userId": "user11",
-      "username": "user11_username",
-      "score": 60,
-    }),
-    LeaderDto.fromJson({
-      "userId": "user12",
-      "username": "user12_username",
-      "score": 130,
-    }),
-    LeaderDto.fromJson({
-      "userId": "user13",
-      "username": "user13_username",
-      "score": 55,
-    }),
-    LeaderDto.fromJson({
-      "userId": "user14",
-      "username": "user14_username",
-      "score": 105,
-    }),
-    LeaderDto.fromJson({
-      "userId": "user15",
-      "username": "user15_username",
-      "score": 75,
-    }),
-  ];
-
-  //Thhis user represents the users status. This is mock data for now.
-  UserDto sampleUserData = UserDto.fromJson({
-    "id": "user6",
-    "username": "example_username",
-    "major": "Computer Science",
-    "year": "Senior",
-    "score": 100,
-    "groupId": "group123",
-    "trackedEvents": ["event1", "event2"],
-    "authType": "google"
-  });
 
   @override
   Widget build(BuildContext context) {
@@ -127,32 +36,62 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
       height: 29.0 / 24.0,
       letterSpacing: 0.0,
     );
+
     return Scaffold(
         key: scaffoldKey,
-        backgroundColor: Color(0xFFE95755),
+        backgroundColor: Color.fromARGB(255, 255, 248, 241),
+        appBar: AppBar(
+          toolbarHeight: 85,
+          automaticallyImplyLeading: false,
+          backgroundColor: Color.fromARGB(255, 237, 86, 86),
+          flexibleSpace: FlexibleSpaceBar(
+              title: Text(
+                'Leaderboard',
+                style: leaderboardStyle,
+              ),
+              centerTitle: true),
+          actions: [],
+        ),
         body: Padding(
           padding: const EdgeInsets.only(top: 0),
           child: Column(
             children: [
-              //Title Container
-              Container(
-                height: 29.0,
-                margin: EdgeInsets.only(top: 51.0, left: 25),
-                child: Text(
-                  "Leaderboard",
-                  style: leaderboardStyle,
-                ),
-              ),
               //Podium Container
               Consumer3<GroupModel, EventModel, UserModel>(builder:
                   (context, myGroupModel, myEventModel, myUserModel, child) {
                 //Loading in the lists and then creating podiumList of top 3
                 final List<LeaderDto> list =
                     myEventModel.getTopPlayersForEvent('', 1000);
-                ;
+
                 list.sort((a, b) => b.score.compareTo(a.score));
-                List<LeaderDto> podiumList =
-                    list.sublist(0, list.length >= 3 ? 3 : list.length);
+                LeaderDto empty = LeaderDto(
+                  userId: " ",
+                  username: " ",
+                  score: 0,
+                );
+
+                // Creating list to be displayed within the podium (filled with empty users if lists length is less than 3)
+                List<LeaderDto> fullList = List.from(list);
+
+                int iterTillFull = 3 - fullList.length;
+                if (fullList.length < 3) {
+                  for (int i = 0; i < iterTillFull; i++) {
+                    fullList.add(empty);
+                  }
+                }
+
+                List<LeaderDto> podiumList = fullList.sublist(0, 3);
+
+                // Booleans representing whether the current player is in the podium for highlighting purposes
+                bool firstPodiumUser = podiumList.length > 0 &&
+                    podiumList[0].userId == myUserModel.userData?.id;
+
+                bool secondPodiumUser = podiumList.length > 1 &&
+                    podiumList[1].userId == myUserModel.userData?.id;
+
+                bool thirdPodiumUser = podiumList.length > 2 &&
+                    podiumList[2].userId == myUserModel.userData?.id;
+
                 return Container(
                   width: 328,
                   height: 213,
@@ -162,28 +101,22 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
                       children: [
                         SizedBox(height: 26),
                         podiumList.length > 1
-                            ? podiumCell(context, podiumList[1].username,
-                                podiumList[1].score)
-                            : podiumCell(context, "", 0),
+                            ? podiumCell(context, podiumList[1].username)
+                            : podiumCell(context, ""),
                         SizedBox(height: 12),
-                        (podiumList.length > 1 &&
-                                podiumList[1].userId == sampleUserData.id)
-                            ? SecondPodiumYellow()
-                            : SecondPodiumRed(),
+                        SecondPodium(
+                            context, podiumList[1].score, secondPodiumUser),
                       ],
                     ),
                     SizedBox(width: 5),
                     Column(
                       children: [
                         podiumList.length > 0
-                            ? podiumCell(context, podiumList[0].username,
-                                podiumList[0].score)
-                            : podiumCell(context, "", 0),
+                            ? podiumCell(context, podiumList[0].username)
+                            : podiumCell(context, ""),
                         SizedBox(height: 12),
-                        (podiumList.length > 0 &&
-                                podiumList[0].userId == sampleUserData.id)
-                            ? FirstPodiumYellow()
-                            : FirstPodiumRed(),
+                        FirstPodium(
+                            context, podiumList[0].score, firstPodiumUser),
                       ],
                     ),
                     SizedBox(width: 5),
@@ -191,19 +124,17 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
                       children: [
                         SizedBox(height: 50),
                         podiumList.length > 2
-                            ? podiumCell(context, podiumList[2].username,
-                                podiumList[2].score)
-                            : podiumCell(context, "", 0),
+                            ? podiumCell(context, podiumList[2].username)
+                            : podiumCell(context, ""),
                         SizedBox(height: 12),
-                        (podiumList.length > 2 &&
-                                podiumList[2].userId == sampleUserData.id)
-                            ? ThirdPodiumYellow()
-                            : ThirdPodiumRed(),
+                        ThirdPodium(
+                            context, podiumList[2].score, thirdPodiumUser),
                       ],
                     ),
                   ]),
                 );
               }),
+              SizedBox(height: 5),
               //Leaderboard Container
               Expanded(
                 child: Padding(
@@ -212,18 +143,19 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
                   child: Consumer3<GroupModel, EventModel, UserModel>(
                     builder: (context, myGroupModel, myEventModel, myUserModel,
                         child) {
-                      int position = 4;
                       // Use this line below to retrieve actual data
                       final List<LeaderDto> list =
                           myEventModel.getTopPlayersForEvent('', 1000);
-                      // final List<LeaderDto> list = sampleUsers;
+                      // Leaderboard starts at 4th position because first three already in podium
+                      int position = 4;
+
                       list.sort((a, b) => b.score.compareTo(a.score));
-                      list.removeRange(0, list.length >= 3 ? 3 : list.length);
+
                       return Container(
                         width: 345.0,
                         height: 446.0,
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: Color.fromRGBO(255, 170, 91, 0.15),
                           borderRadius: BorderRadius.only(
                             topLeft: Radius.circular(10.0),
                             topRight: Radius.circular(10.0),
@@ -232,46 +164,42 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
                         child: Container(
                           width: 283.05,
                           height: 432.0,
-                          child: Expanded(
-                            child: ListView(
-                              shrinkWrap: true,
-                              scrollDirection: Axis.vertical,
-                              children: [
-                                for (LeaderDto user in list)
-                                  Padding(
-                                    padding: const EdgeInsets.only(
-                                        left: 30.95,
-                                        right: 30.95,
-                                        bottom: 16.0),
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.only(
-                                          topLeft: Radius.circular(10.0),
-                                          topRight: Radius.circular(10.0),
-                                          bottomLeft: Radius.circular(10.0),
-                                          bottomRight: Radius.circular(10.0),
+                          child: ListView(
+                            shrinkWrap: true,
+                            scrollDirection: Axis.vertical,
+                            children: [
+                              for (LeaderDto user in list.skip(3))
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 30.95, right: 30.95, top: 16.0),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.only(
+                                        topLeft: Radius.circular(10.0),
+                                        topRight: Radius.circular(10.0),
+                                        bottomLeft: Radius.circular(10.0),
+                                        bottomRight: Radius.circular(10.0),
+                                      ),
+                                      color: Colors.white,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Color(0x40000000),
+                                          offset:
+                                              Offset(0.0, 1.7472529411315918),
+                                          blurRadius: 6.989011764526367,
                                         ),
-                                        color: Colors.white,
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Color(0x40000000),
-                                            offset:
-                                                Offset(0.0, 1.7472529411315918),
-                                            blurRadius: 6.989011764526367,
-                                          ),
-                                        ],
-                                      ),
-                                      child: leaderBoardCell(
-                                        context,
-                                        user.username,
-                                        position++,
-                                        user.score,
-                                        user.userId == sampleUserData.id,
-                                      ),
+                                      ],
+                                    ),
+                                    child: leaderBoardCell(
+                                      context,
+                                      user.username,
+                                      position++,
+                                      user.score,
+                                      user.userId == myUserModel.userData?.id,
                                     ),
                                   ),
-                              ],
-                            ),
+                                ),
+                            ],
                           ),
                         ),
                       );
