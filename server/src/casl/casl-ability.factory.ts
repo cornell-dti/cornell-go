@@ -166,11 +166,64 @@ export class CaslAbilityFactory {
 
     can(Action.Read, 'AchievementTracker', { userId: user.id });
 
-    can(Action.Read, 'Challenge', {
-      linkedEvent: { usedIn: { some: { members: { some: { id: user.id } } } } },
+    can(Action.Read, 'Challenge', undefined, {
+      AND: [
+        {
+          linkedEvent: {
+            usedIn: { some: { members: { some: { id: user.id } } } },
+          },
+        },
+        {
+          OR: [
+            {
+              completions: {
+                some: { userId: user.id },
+              },
+            },
+            {
+              activeTrackers: {
+                some: { userId: user.id },
+              },
+            },
+          ],
+        },
+      ],
     });
 
-    can(Action.Manage, 'Challenge', {
+    cannot(Action.Read, 'Challenge', ['name'], {
+      AND: [
+        {
+          completions: {
+            none: { userId: user.id },
+          },
+        },
+        {
+          activeTrackers: {
+            some: { userId: user.id },
+          },
+        },
+      ],
+    });
+
+    cannot(
+      Action.Read,
+      'Challenge',
+      ['latitude', 'longitude', 'latitudeF', 'longitudeF'],
+      {
+        // names come from DTO
+        // hide lat long from users that do not have an active tracker which is their current event
+        activeTrackers: {
+          none: {
+            user: { id: user.id },
+            event: {
+              activeGroups: { some: { members: { some: { id: user.id } } } },
+            },
+          },
+        },
+      },
+    );
+
+    can(Action.Manage, 'Challenge', undefined, {
       linkedEvent: {
         usedIn: { some: { managers: { some: { id: user.id } } } },
       },
