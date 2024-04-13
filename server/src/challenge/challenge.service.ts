@@ -343,7 +343,7 @@ export class ChallengeService {
       },
     });
 
-    if (!challenge) return;
+    if (!challenge) return false;
 
     const usedTrackers = await this.prisma.eventTracker.findMany({
       where: {
@@ -374,5 +374,6 @@ export class ChallengeService {
     });
 
     console.log(`Deleted challenge ${challengeId}`);
+    return true;
   }
 }

@@ -228,10 +228,18 @@ export class GroupService {
     // then this is an invalid set event.
     // If we are only switching an unactive event to a default event,
     // actor and eventId do not matter.
-    if (
-      actorAbility.cannot(Action.Update, 'Group', 'curEventId') ||
-      eventId === group.curEventId
-    ) {
+
+    // Slight hack
+    const filteredData = await this.abilityFactory.filterInaccessible(
+      group.id,
+      { curEventId: group.curEventId },
+      'Group',
+      actorAbility,
+      Action.Update,
+      this.prisma.group,
+    );
+
+    if (eventId === filteredData.curEventId) {
       return false;
     }
 
@@ -372,14 +380,14 @@ export class GroupService {
   }
 
   async removeGroup(ability: AppAbility, removeId: string) {
-    const deletedGroup = await this.prisma.group.findFirstOrThrow({
-      where: { id: removeId },
+    const deletedGroup = await this.prisma.group.findFirst({
+      where: {
+        AND: [{ id: removeId }, accessibleBy(ability, Action.Delete).Group],
+      },
       include: { members: true },
     });
 
-    if (ability.cannot(Action.Delete, subject('Group', deletedGroup))) {
-      return;
-    }
+    if (!deletedGroup) return false;
 
     for (const mem of deletedGroup.members) {
       await this.leaveGroup(mem);

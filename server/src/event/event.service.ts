@@ -421,7 +421,7 @@ export class EventService {
         where: { id: ev.id },
         data: updateData,
       });
-    } else if (!ev && ability.can(Action.Create, 'Challenge')) {
+    } else if (!ev && ability.can(Action.Create, 'EventBase')) {
       const data = {
         requiredMembers:
           assignData.requiredMembers ?? defaultEventData.requiredMembers,
@@ -486,6 +486,8 @@ export class EventService {
       });
 
       console.log(`Deleted event ${eventId}`);
+      return true;
     }
+    return false;
   }
 }

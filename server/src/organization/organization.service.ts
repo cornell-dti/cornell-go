@@ -256,19 +256,24 @@ export class OrganizationService {
   }
 
   async removeOrganization(ability: AppAbility, id: string) {
-    if (
-      await this.prisma.organization.findFirst({
-        where: {
-          AND: [{ id }, accessibleBy(ability, Action.Delete).Organization],
-        },
-      })
-    ) {
-      await this.prisma.organization.delete({
-        where: { id },
-      });
+    try {
+      if (
+        await this.prisma.organization.findFirst({
+          where: {
+            AND: [{ id }, accessibleBy(ability, Action.Delete).Organization],
+          },
+        })
+      ) {
+        await this.prisma.organization.delete({
+          where: { id },
+        });
 
-      console.log(`Deleted organization ${id}`);
-    }
+        console.log(`Deleted organization ${id}`);
+        return true;
+      }
+    } catch {}
+
+    return false;
   }
 
   async ensureFullAccessIfNeeded(potentialAdmin: User) {

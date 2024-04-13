@@ -119,7 +119,13 @@ export class UserService {
   }
 
   async deleteUser(ability: AppAbility, user: User) {
-    if (ability.cannot(Action.Delete, subject('User', user))) {
+    if (
+      (await this.prisma.user.count({
+        where: {
+          AND: [{ id: user.id }, accessibleBy(ability, Action.Delete).User],
+        },
+      })) < 1
+    ) {
       return;
     }
 

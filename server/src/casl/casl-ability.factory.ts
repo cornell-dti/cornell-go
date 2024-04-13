@@ -131,7 +131,7 @@ export class CaslAbilityFactory {
 
     can(Action.Read, 'AchievementTracker', { userId: user.id });
 
-    can(Action.Read, 'Challenge', undefined, {
+    can(Action.Read, 'Challenge', {
       AND: [
         {
           linkedEvent: {
@@ -183,7 +183,7 @@ export class CaslAbilityFactory {
       },
     );
 
-    can(Action.Manage, 'Challenge', undefined, {
+    can(Action.Manage, 'Challenge', {
       linkedEvent: {
         usedIn: { some: { managers: { some: { id: user.id } } } },
       },
@@ -225,6 +225,8 @@ export class CaslAbilityFactory {
     can(Action.Manage, 'Organization', {
       managers: { some: { id: user.id } },
     });
+
+    cannot(Action.Delete, 'Organization');
 
     can(Action.Read, 'PrevChallenge', {
       OR: [

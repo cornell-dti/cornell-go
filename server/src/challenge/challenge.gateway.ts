@@ -128,23 +128,16 @@ export class ChallengeGateway {
       data.challenge.id,
     );
 
-    if (
-      (!challenge && ability.cannot(Action.Create, 'Challenge')) ||
-      (challenge &&
-        ability.cannot(Action.Manage, subject('Challenge', challenge)))
-    ) {
-      await this.clientService.emitErrorData(
-        user,
-        'Permission denied for challenge update!',
-      );
-      return;
-    }
-
     if (data.deleted && challenge) {
       const ev = (await this.eventService.getEventById(
         challenge.linkedEventId ?? '',
       ))!;
-      await this.challengeService.removeChallenge(ability, challenge.id);
+
+      if (
+        !(await this.challengeService.removeChallenge(ability, challenge.id))
+      ) {
+        return;
+      }
 
       await this.challengeService.emitUpdateChallengeData(challenge, true);
       await this.eventService.emitUpdateEventData(ev, false);

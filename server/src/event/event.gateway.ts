@@ -84,14 +84,6 @@ export class EventGateway {
       return;
     }
 
-    if (ability.cannot(Action.Read, subject('EventBase', ev))) {
-      await this.clientService.emitErrorData(
-        user,
-        'Permission to event leader data denied!',
-      );
-      return;
-    }
-
     await this.eventService.emitUpdateLeaderData(
       data.offset,
       Math.min(data.count, 1024),
@@ -123,19 +115,11 @@ export class EventGateway {
   ) {
     const ev = await this.eventService.getEventById(data.event.id);
 
-    if (
-      (!ev && ability.cannot(Action.Create, 'EventBase')) ||
-      (ev && ability.cannot(Action.Manage, subject('EventBase', ev)))
-    ) {
-      await this.clientService.emitErrorData(
-        user,
-        'Permission to update event denied!',
-      );
-      return;
-    }
-
     if (data.deleted && ev) {
-      await this.eventService.removeEvent(ability, ev.id);
+      if (!(await this.eventService.removeEvent(ability, ev.id))) {
+        await this.clientService.emitErrorData(user, 'Failed to delete event!');
+        return;
+      }
       await this.eventService.emitUpdateEventData(ev, true);
     } else {
       const ev = await this.eventService.upsertEventFromDto(
