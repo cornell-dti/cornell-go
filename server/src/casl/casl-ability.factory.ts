@@ -197,11 +197,6 @@ export class CaslAbilityFactory {
             none: { userId: user.id },
           },
         },
-        {
-          activeTrackers: {
-            some: { userId: user.id },
-          },
-        },
       ],
     });
 
