@@ -14,10 +14,17 @@ class ChallengeCell extends StatefulWidget {
   final String description;
   final String difficulty;
   final int points;
-  final String id;
+  final String eventId;
 
-  const ChallengeCell(this.location, this.challengeName, this.thumbnail,
-      this.isCompleted, this.description, this.difficulty, this.points, this.id,
+  const ChallengeCell(
+      this.location,
+      this.challengeName,
+      this.thumbnail,
+      this.isCompleted,
+      this.description,
+      this.difficulty,
+      this.points,
+      this.eventId,
       {Key? key})
       : super(key: key);
 
@@ -30,7 +37,7 @@ class ChallengeCell extends StatefulWidget {
       description,
       difficulty,
       points,
-      id);
+      eventId);
 }
 
 class _ChallengeCellState extends State<ChallengeCell> {
@@ -41,12 +48,19 @@ class _ChallengeCellState extends State<ChallengeCell> {
   final String description;
   final String difficulty;
   final int points;
-  final String id;
+  final String eventId;
   // newly added field
   // final int totalDistance;
 
-  _ChallengeCellState(this.location, this.challengeName, this.thumbnail,
-      this.isCompleted, this.description, this.difficulty, this.points, this.id
+  _ChallengeCellState(
+      this.location,
+      this.challengeName,
+      this.thumbnail,
+      this.isCompleted,
+      this.description,
+      this.difficulty,
+      this.points,
+      this.eventId
       // newly added field
       // this.totalDistance
       );
@@ -62,7 +76,7 @@ class _ChallengeCellState extends State<ChallengeCell> {
             context: context,
             isScrollControlled: true,
             builder: (context) => Preview(challengeName, description,
-                difficulty, points, previewType.challenge, location));
+                difficulty, points, previewType.challenge, location, eventId));
       },
       child: Container(
         decoration: BoxDecoration(

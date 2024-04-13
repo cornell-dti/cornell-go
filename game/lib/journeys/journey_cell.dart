@@ -11,6 +11,7 @@ class JourneyCell extends StatefulWidget {
   final bool isCompleted;
   final String difficulty;
   final int points;
+  final String id;
 
   const JourneyCell(
       this.journeyName,
@@ -22,6 +23,7 @@ class JourneyCell extends StatefulWidget {
       this.isCompleted,
       this.difficulty,
       this.points,
+      this.id,
       {Key? key})
       : super(key: key);
 
@@ -35,7 +37,8 @@ class JourneyCell extends StatefulWidget {
       numberCompleted,
       isCompleted,
       difficulty,
-      points);
+      points,
+      id);
 }
 
 class _JourneyCellState extends State<JourneyCell> {
@@ -48,6 +51,7 @@ class _JourneyCellState extends State<JourneyCell> {
   final bool isCompleted;
   final String difficulty;
   final int points;
+  final String id;
   // final int totalDistance;
 
   _JourneyCellState(
@@ -60,6 +64,7 @@ class _JourneyCellState extends State<JourneyCell> {
     this.isCompleted,
     this.difficulty,
     this.points,
+    this.id,
     // this.totalDistance
   );
 
@@ -77,7 +82,7 @@ class _JourneyCellState extends State<JourneyCell> {
                 BuildContext context,
               ) =>
                   Preview(journeyName, description, difficulty, points,
-                      previewType.journey, location,
+                      previewType.journey, location, id,
                       locationCount: locationCount,
                       numberCompleted: numberCompleted));
         },

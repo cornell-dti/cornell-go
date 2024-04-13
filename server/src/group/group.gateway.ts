@@ -70,15 +70,9 @@ export class GroupGateway {
     @CallingUser() user: User,
     @MessageBody() data: SetCurrentEventDto,
   ) {
-    if (await this.groupService.setCurrentEvent(user, data.eventId)) {
-      const group = await this.groupService.getGroupForUser(user);
-      await this.groupService.emitUpdateGroupData(group, false);
-    } else {
-      await this.clientService.emitErrorData(
-        user,
-        'Error setting current event',
-      );
-    }
+    await this.groupService.setCurrentEvent(user, data.eventId);
+    const group = await this.groupService.getGroupForUser(user);
+    await this.groupService.emitUpdateGroupData(group, false, user);
   }
 
   @SubscribeMessage('updateGroupData')

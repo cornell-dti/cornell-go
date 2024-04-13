@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:game/api/game_api.dart';
 import 'package:game/gameplay/gameplay_page.dart';
+import 'package:provider/provider.dart';
+import 'package:game/api/game_client_dto.dart';
 
 enum previewType { challenge, journey }
 
@@ -17,6 +20,7 @@ class Preview extends StatefulWidget {
   final int locationCount;
   final int numberCompleted;
   final String location;
+  final String eventId;
 
 // newly added parameters; need to implement higher up in hierarchy
   // final int
@@ -30,7 +34,7 @@ class Preview extends StatefulWidget {
   final String imgPath = "assets/images/38582.jpg";
 
   Preview(this.challengeName, this.description, this.difficulty, this.points,
-      this.type, this.location,
+      this.type, this.location, this.eventId,
       {this.locationCount = 1,
       this.numberCompleted = 0,
       // required this.totalDistance,
@@ -46,7 +50,8 @@ class Preview extends StatefulWidget {
       type,
       locationCount,
       numberCompleted,
-      location
+      location,
+      eventId
       // need to figure out newly added parameters; commented out for now
       // totalDistance,
       );
@@ -71,6 +76,7 @@ class _PreviewState extends State<Preview> {
   //fields unique to journeys
   final int locationCount;
   final int numberCompleted;
+  final String eventId;
 
   //Temporary image for now. Will have to change later
   final String imgPath = "assets/images/38582.jpg";
@@ -83,7 +89,8 @@ class _PreviewState extends State<Preview> {
       this.type,
       this.locationCount,
       this.numberCompleted,
-      this.location
+      this.location,
+      this.eventId
       // newly added; commented out for now
       // this.totalDistance,
       );
@@ -354,13 +361,18 @@ class _PreviewState extends State<Preview> {
                                       borderRadius: BorderRadius.circular(10.0),
                                       side: BorderSide(color: backgroundRed)))),
                           onPressed: () {
-                            print("Unimplemented. Starting Challenge!");
+                            Consumer<ApiClient>(
+                                builder: (context, apiClient, child) {
+                              print(eventId);
+                              apiClient.serverApi?.setCurrentEvent(
+                                  SetCurrentEventDto(eventId: eventId));
+                              return Container();
+                            });
+
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => GameplayPage(
-                                        eventId:
-                                            "37714c5a-0c5b-47a4-a759-64f3a5fc21d8")));
+                                    builder: (context) => GameplayPage()));
                           },
                           child: Text(
                             "Continue exploring",

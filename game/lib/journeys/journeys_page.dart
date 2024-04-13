@@ -184,7 +184,8 @@ class _JourneysPageState extends State<JourneysPage> {
                                 numberCompleted,
                                 complete,
                                 difficulty?.toString() ?? "",
-                                total_points),
+                                total_points,
+                                event.id),
                       ),
                     );
                   }

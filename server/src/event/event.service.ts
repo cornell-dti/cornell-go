@@ -287,11 +287,11 @@ export class EventService {
     };
   }
 
-  async emitUpdateEventTracker(tracker: EventTracker, target?: User) {
+  async emitUpdateEventTracker(tracker: EventTracker, target: User) {
     const dto = await this.dtoForEventTracker(tracker);
     await this.clientService.sendProtected(
       'updateEventTrackerData',
-      target?.id ?? tracker.id,
+      target.id,
       dto,
       { id: dto.eventId, subject: 'EventTracker' },
     );
