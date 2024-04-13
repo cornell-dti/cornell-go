@@ -20,8 +20,6 @@ npm run tests:e2e
 */
 
 async function main() {
-  console.log("Converting start.sh to LF (required with some Git setups)");
-  execSync("npx crlf --set=LF ./server/start.sh");
   console.log("Checking if docker is installed and running (will fail if not)");
   execSync("docker compose --version");
   console.log("Checking if flutter is installed (will fail if not)");
