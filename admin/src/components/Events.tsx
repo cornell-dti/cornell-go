@@ -105,6 +105,10 @@ function makeForm() {
     },
     { name: "Publicly Visible", options: ["No", "Yes"], value: 0 },
     { name: "Available Until", date: new Date("2050") },
+    // {name: "Category",
+    // options: ["FOOD", "NATURE", "HISTORICAL", "CAFE", "DININGHALL", "DORM"],
+
+    // }
   ] as EntryForm[];
 }
 

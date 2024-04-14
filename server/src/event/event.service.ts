@@ -251,6 +251,7 @@ export class EventService {
       id: ev.id,
       name: ev.name,
       description: ev.description,
+      category: ev.category,
       timeLimitation:
         ev.timeLimitation == TimeLimitationType.LIMITED_TIME
           ? 'LIMITED_TIME'
@@ -418,6 +419,7 @@ export class EventService {
         description:
           assignData.description?.substring(0, 2048) ??
           defaultEventData.description,
+        category: defaultEventData.category,
         timeLimitation: assignData.timeLimitation,
         endTime: assignData.endTime ?? defaultEventData.endTime,
         indexable: assignData.indexable ?? defaultEventData.indexable,

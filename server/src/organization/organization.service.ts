@@ -7,6 +7,7 @@ import {
   OrganizationSpecialUsage,
   User,
   LocationType,
+  EventCategoryType,
 } from '@prisma/client';
 import { ClientService } from '../client/client.service';
 import { v4 } from 'uuid';
@@ -22,6 +23,7 @@ export const defaultEventData = {
   description: 'Default Event',
   requiredMembers: 1,
   difficulty: DifficultyMode.NORMAL,
+  category: EventCategoryType.NATURE,
   timeLimitation: TimeLimitationType.PERPETUAL,
   indexable: true,
   endTime: new Date('2060'),

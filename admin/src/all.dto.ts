@@ -24,7 +24,7 @@ type AchievementLocationTypeDto =
   | "NORTH_CAMPUS"
   | "WEST_CAMPUS"
   | "COLLEGETOWN"
-  | "IthacaCommons"
+  | "ITHACA_COMMONS"
   | "Any";
 
 type AchievementAchievementTypeDto =
@@ -40,6 +40,26 @@ type LoginEnrollmentTypeDto =
   | "GRADUATE"
   | "FACULTY"
   | "ALUMNI";
+
+type LocationTypeDto =
+  | "EngQuad"
+  | "ArtsQuad"
+  | "AgQuad"
+  | "NorthCampus"
+  | "WestCampus"
+  | "Collegetown"
+  | "IthacaCommons"
+  | "Any";
+
+type ChallengeLocationDto =
+  | "ENG_QUAD"
+  | "ARTS_QUAD"
+  | "AG_QUAD"
+  | "NORTH_CAMPUS"
+  | "WEST_CAMPUS"
+  | "COLLEGETOWN"
+  | "ITHACA_COMMONS"
+  | "Any";
 
 type EventCategoryDto =
   | "FOOD"
@@ -103,7 +123,7 @@ export interface CompletedChallengeDto {
 export interface ChallengeDto {
   id: string;
   name?: string;
-  location?: string;
+  location?: ChallengeLocationDto;
   description?: string;
   points?: number;
   imageUrl?: string;
@@ -174,7 +194,7 @@ export interface EventDto {
   requiredMembers?: number;
   name?: string;
   description?: string;
-  category: EventCategoryDto;
+  category?: EventCategoryDto;
   timeLimitation?: EventTimeLimitationDto;
   endTime?: string;
   challenges?: string[];
