@@ -208,13 +208,17 @@ export class OrganizationService {
       specialUsage: OrganizationSpecialUsage.NONE,
     };
 
-    if (
-      org &&
-      (await this.prisma.organization.findFirst({
-        select: { id: true },
-        where: { AND: [accessibleBy(ability, Action.Update).Organization] },
-      }))
-    ) {
+    const canUpdateOrg =
+      (await this.prisma.organization.count({
+        where: {
+          AND: [
+            accessibleBy(ability, Action.Update).Organization,
+            { id: org?.id ?? '' },
+          ],
+        },
+      })) > 0;
+
+    if (org && canUpdateOrg) {
       const updateData = await this.abilityFactory.filterInaccessible(
         org.id,
         assignData,

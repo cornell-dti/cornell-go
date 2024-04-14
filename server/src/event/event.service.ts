@@ -374,9 +374,25 @@ export class EventService {
   async upsertEventFromDto(ability: AppAbility, event: EventDto) {
     let ev = await this.prisma.eventBase.findFirst({ where: { id: event.id } });
 
-    if (!ev && !event.initialOrganizationId) {
-      return null;
-    }
+    const canUpdateOrg =
+      (await this.prisma.organization.count({
+        where: {
+          AND: [
+            { id: event.initialOrganizationId ?? '' },
+            accessibleBy(ability, Action.Update).Organization,
+          ],
+        },
+      })) > 0;
+
+    const canUpdateEv =
+      (await this.prisma.eventBase.count({
+        where: {
+          AND: [
+            accessibleBy(ability, Action.Update).EventBase,
+            { id: ev?.id ?? '' },
+          ],
+        },
+      })) > 0;
 
     const assignData = {
       requiredMembers: event.requiredMembers,
@@ -399,15 +415,7 @@ export class EventService {
       longitude: event.longitudeF,
     };
 
-    if (
-      ev &&
-      (await this.prisma.eventBase.findFirst({
-        select: { id: true },
-        where: {
-          AND: [accessibleBy(ability, Action.Update).EventBase, { id: ev.id }],
-        },
-      }))
-    ) {
+    if (ev && canUpdateEv) {
       const updateData = await this.abilityFactory.filterInaccessible(
         ev.id,
         assignData,
@@ -421,7 +429,7 @@ export class EventService {
         where: { id: ev.id },
         data: updateData,
       });
-    } else if (!ev && ability.can(Action.Create, 'EventBase')) {
+    } else if (!ev && canUpdateOrg) {
       const data = {
         requiredMembers:
           assignData.requiredMembers ?? defaultEventData.requiredMembers,

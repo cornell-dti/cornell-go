@@ -256,18 +256,27 @@ export class ChallengeService {
       where: { id: challenge.id },
     });
 
-    if (
-      chal &&
-      (await this.prisma.challenge.findFirst({
-        select: { id: true },
+    const canUpdateEv =
+      (await this.prisma.eventBase.count({
+        where: {
+          AND: [
+            accessibleBy(ability, Action.Update).EventBase,
+            { id: challenge.linkedEventId ?? '' },
+          ],
+        },
+      })) > 0;
+
+    const canUpdateChal =
+      (await this.prisma.challenge.count({
         where: {
           AND: [
             accessibleBy(ability, Action.Update).Challenge,
-            { id: chal.id },
+            { id: chal?.id ?? '' },
           ],
         },
-      }))
-    ) {
+      })) > 0;
+
+    if (chal && canUpdateChal) {
       const assignData = {
         name: challenge.name?.substring(0, 2048),
         location: challenge.location as LocationType,
@@ -293,7 +302,7 @@ export class ChallengeService {
         where: { id: chal.id },
         data,
       });
-    } else if (!chal && ability.can(Action.Create, 'Challenge')) {
+    } else if (!chal && canUpdateEv) {
       const maxIndexChallenge = await this.prisma.challenge.aggregate({
         _max: { eventIndex: true },
         where: { linkedEventId: challenge.linkedEventId },

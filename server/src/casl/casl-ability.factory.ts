@@ -246,11 +246,13 @@ export class CaslAbilityFactory {
     // These come from DTO
     cannot(Action.Read, 'Organization', ['members', 'managers']);
 
-    can(Action.Manage, 'Organization', {
+    can(Action.Read, 'Organization', ['members', 'managers'], {
       managers: { some: { id: user.id } },
     });
 
-    cannot(Action.Delete, 'Organization');
+    can(Action.Update, 'Organization', {
+      managers: { some: { id: user.id } },
+    });
 
     can(Action.Read, 'PrevChallenge', {
       OR: [
