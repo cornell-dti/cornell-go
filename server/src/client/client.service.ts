@@ -119,7 +119,7 @@ export class ClientService {
           const newDto = Object.create(dto);
           newDto[resource.dtoField] = accessibleObj;
 
-          await this.sendEvent([user.id], event, dto);
+          await this.sendEvent([user.id], event, newDto);
         } else {
           await this.sendEvent([user.id], event, accessibleObj);
         }

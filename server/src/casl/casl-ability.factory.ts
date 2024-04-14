@@ -59,7 +59,16 @@ export class CaslAbilityFactory {
     const fieldSet = new Set<string>();
 
     for (const field of fields) {
-      for (const rule of ability.rulesFor(action, subj, field)) {
+      const rules = ability
+        .rulesFor(action, subj, field)
+        .sort((a, b) => b.priority - a.priority); // Higher priority first
+
+      for (const rule of rules) {
+        // Skip when it already has and it isn't a negative rule
+        // and when it does not have but it's a positive rule
+        // to save on database queries
+        if (fieldSet.has(field) === !rule.inverted) continue;
+
         const prismaCond = {
           where: {
             AND: [{ id }, rule.conditions],
@@ -131,7 +140,9 @@ export class CaslAbilityFactory {
 
     can(Action.Read, 'AchievementTracker', { userId: user.id });
 
-    can(Action.Read, 'Challenge', {
+    // Read challenges that belong to events you're allowed to access
+    // And you must have completed them or are in the process
+    can(Action.Read, 'Challenge', undefined, {
       AND: [
         {
           linkedEvent: {
@@ -147,7 +158,14 @@ export class CaslAbilityFactory {
             },
             {
               activeTrackers: {
-                some: { userId: user.id },
+                some: {
+                  user: { id: user.id },
+                  event: {
+                    activeGroups: {
+                      some: { members: { some: { id: user.id } } },
+                    },
+                  },
+                },
               },
             },
           ],
@@ -165,23 +183,29 @@ export class CaslAbilityFactory {
       ],
     });
 
-    cannot(
-      Action.Read,
-      'Challenge',
-      ['latitude', 'longitude', 'latitudeF', 'longitudeF'],
-      {
-        // names come from DTO
-        // hide lat long from users that do not have an active tracker which is their current event
-        activeTrackers: {
-          none: {
-            user: { id: user.id },
-            event: {
-              activeGroups: { some: { members: { some: { id: user.id } } } },
-            },
+    const latlongNames = [
+      'latitude',
+      'longitude',
+      'latitudeF',
+      'longitudeF',
+      'lat',
+      'long',
+      'latF',
+      'longF',
+    ];
+
+    cannot(Action.Read, 'Challenge', latlongNames, {
+      // names come from DTO
+      // hide lat long from users that do not have an active tracker which is their current event
+      activeTrackers: {
+        none: {
+          user: { id: user.id },
+          event: {
+            activeGroups: { some: { members: { some: { id: user.id } } } },
           },
         },
       },
-    );
+    });
 
     can(Action.Manage, 'Challenge', {
       linkedEvent: {
