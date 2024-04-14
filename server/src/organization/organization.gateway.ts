@@ -66,7 +66,18 @@ export class OrganizationGateway {
         data.organization.id,
       );
 
-      await this.orgService.removeOrganization(ability, data.organization.id);
+      if (
+        !(await this.orgService.removeOrganization(
+          ability,
+          data.organization.id,
+        ))
+      ) {
+        await this.clientService.emitErrorData(
+          user,
+          'Failed to remove organization!',
+        );
+        return;
+      }
       await this.orgService.emitUpdateOrganizationData(org, true);
     } else {
       const org = await this.orgService.upsertOrganizationFromDto(
