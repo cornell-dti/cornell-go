@@ -116,10 +116,11 @@ export class ClientService {
         if (Object.keys(accessibleObj).length === 0) continue;
 
         if (resource.dtoField) {
-          const oldDtoField = dto[resource.dtoField];
-          (dto as any)[resource.dtoField] = accessibleObj;
-          await this.sendEvent([user.id], event, dto);
-          dto[resource.dtoField] = oldDtoField;
+          const newDto = {
+            ...dto,
+            [resource.dtoField]: accessibleObj,
+          };
+          await this.sendEvent([user.id], event, newDto);
         } else {
           await this.sendEvent([user.id], event, accessibleObj);
         }
