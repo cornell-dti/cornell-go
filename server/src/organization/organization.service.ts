@@ -307,7 +307,7 @@ export class OrganizationService {
     const org = await this.prisma.organization.findFirst({
       where: {
         AND: [
-          accessibleBy(ability, Action.Manage).Organization,
+          accessibleBy(ability, Action.Update).Organization,
           { id: organizationId },
         ],
       },
