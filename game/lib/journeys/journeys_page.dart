@@ -9,8 +9,6 @@ import 'package:game/model/challenge_model.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/group_model.dart';
 import 'package:game/model/tracker_model.dart';
-import 'package:game/model/user_model.dart';
-import 'package:game/utils/utility_functions.dart';
 import 'package:provider/provider.dart';
 
 class JourneysPage extends StatefulWidget {
@@ -21,6 +19,10 @@ class JourneysPage extends StatefulWidget {
 }
 
 class _JourneysPageState extends State<JourneysPage> {
+  List<String> selectedCategories = [];
+  List<String> selectedLocations = [];
+  String selectedStatus = 'Easy';
+
   void openFilter() {
     showModalBottomSheet(
         context: context,
@@ -28,8 +30,16 @@ class _JourneysPageState extends State<JourneysPage> {
         builder: (
           BuildContext context,
         ) {
-          return FilterForm();
+          return FilterForm(onSubmit:handleFilterSubmit);
         });
+  }
+  // Callback function to receive updated state values from the child
+  void handleFilterSubmit(List<String> a, List<String> b, String c) {
+    setState(() {
+      selectedCategories = a;
+      selectedLocations = b;
+      selectedStatus = c;
+    });
   }
 
   @override

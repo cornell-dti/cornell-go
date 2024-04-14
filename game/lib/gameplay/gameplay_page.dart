@@ -1,17 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
-import 'package:velocity_x/velocity_x.dart';
 import 'package:game/api/geopoint.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:game/model/challenge_model.dart';
 import 'gameplay_map.dart';
 import 'package:provider/provider.dart';
 
-import 'package:flutter/cupertino.dart';
 
-import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:async';
 
 class GameplayPage extends StatefulWidget {

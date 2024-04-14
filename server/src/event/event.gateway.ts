@@ -12,8 +12,8 @@ import { UserGuard } from '../auth/jwt-auth.guard';
 import { UseGuards } from '@nestjs/common';
 import { EventBase, TimeLimitationType, User } from '@prisma/client';
 import {
-  EventDto,
-  RequestAllEventDataDto,
+  // EventDto,
+  // RequestAllEventDataDto,
   RequestEventDataDto,
   RequestEventLeaderDataDto,
   UpdateEventDataDto,
@@ -57,6 +57,7 @@ export class EventGateway {
     console.log(evs.length);
 
     for (const ev of evs) {
+
       await this.eventService.emitUpdateEventData(ev, false, user);
     }
   }
@@ -73,14 +74,16 @@ export class EventGateway {
     );
 
     console.log(evs.length);
-
     for (const ev of evs) {
-      if (ev.difficulty == data.difficulty[0]) {
-        return ev;
-      }
 
-      await this.eventService.emitUpdateEventData(ev, false, user);
+      if (ev.difficulty == data.difficulty[0]) {
+      // if (ev.difficulty == "EASY") {
+        console.log("Ev is " + (<EventBase>ev).name.toString())
+        await this.eventService.emitUpdateEventData(ev, false, user);
+        }
+      // return ev;
     }
+    
   }
 
   @SubscribeMessage('requestRecommendedEvents')
@@ -134,7 +137,6 @@ export class EventGateway {
       user,
       data.trackedEvents,
     );
-
     for (const tracker of trackers) {
       await this.eventService.emitUpdateEventTracker(tracker);
     }

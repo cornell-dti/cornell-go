@@ -46,6 +46,7 @@ export class EventService {
     ability: AppAbility,
     ids?: string[],
   ): Promise<EventBase[]> {
+    // console.log("Ids are " + ids)
     return await this.prisma.eventBase.findMany({
       where: {
         AND: [

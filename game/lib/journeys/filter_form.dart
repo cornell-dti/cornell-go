@@ -1,19 +1,38 @@
 import 'package:flutter/material.dart';
-import 'package:game/journeys/journeys_page.dart';
 
 class FilterForm extends StatefulWidget {
-  const FilterForm({Key? key}) : super(key: key);
+  final void Function(List<String>,List<String>,String) onSubmit;
+  String? myStatus;
+  List<String>? myLocations;
+  List<String>? myCategories;
+  FilterForm({Key? key, required this.onSubmit,String? status,List<String>?locations, List<String>?categories}) : super(key: key) {
+    myStatus=status;
+    myLocations = locations;
+      print ("Start of FilterForm Build: Selected status is " + myStatus.toString()  );
+  }
 
+  
   @override
-  State<FilterForm> createState() => _FilterFormState();
+  // State<FilterForm> createState() => _FilterFormState(status);
+State<FilterForm> createState() {
+      print ("Start of FilterFormState Build: Selected status is " + myStatus.toString()  );
+  return _FilterFormState(myStatus,myLocations,myCategories);
+}
 }
 
 class _FilterFormState extends State<FilterForm> {
   // Define variables for tracking the selected values
   List<String> selectedCategories = [];
   List<String> selectedLocations = [];
-  String selectedStatus = 'Easy';
+  late String selectedStatus;
 
+_FilterFormState(String? status,List<String>?locations, List<String>?categories) {
+        print ("Start of FilterFormState : Selected status is " + status.toString()  );
+
+   selectedStatus = status ?? "Easy";
+   selectedLocations = locations??[];
+   selectedCategories=categories??[];
+}
   List<String> categories = [
     'Food',
     'Nature',
@@ -22,10 +41,22 @@ class _FilterFormState extends State<FilterForm> {
     'Dining Hall',
     'Dorm'
   ];
-  List<String> locations = ['Location 1', 'Location 2', 'Location 3'];
-  List<String> statuses = ['Easy', 'Medium', 'Hard'];
+
+  List<String> locations = ['ENG_QUAD', 'ARTS_QUAD', 'AG_QUAD','NORTH_CAMPUS','WEST_CAMPUS','COLLEGETOWN','ITHACA_COMMONS'];
+  List<String> statuses = ['Easy', 'Normal', 'Hard'];
 
   // Define methods for updating the selected values
+  void filterChallenges() {
+    // setState(() {
+    //   selectedCategories;
+    //   selectedLocations;
+    //   selectedStatus;
+    // });
+    widget.onSubmit(selectedCategories, selectedLocations,selectedStatus);
+
+    Navigator.pop(context);
+  }
+
   void toggleCategory(String category) {
     if (selectedCategories.contains(category)) {
       selectedCategories.remove(category);
@@ -219,7 +250,7 @@ class _FilterFormState extends State<FilterForm> {
                           elevation: 0,
                         ),
                         child: Padding(
-                          padding: EdgeInsets.symmetric(vertical: 8.0),
+                          padding: EdgeInsets.symmetric(vertical: 1.0),
                           child: Text(
                             status,
                             style: TextStyle(
@@ -234,7 +265,7 @@ class _FilterFormState extends State<FilterForm> {
                 ],
               ),
             ),
-            Padding(padding: EdgeInsets.symmetric(vertical: 40.0)),
+            Padding(padding: EdgeInsets.symmetric(vertical: 20.0)),
             Container(
               width: 600,
               decoration: ShapeDecoration(
@@ -247,7 +278,7 @@ class _FilterFormState extends State<FilterForm> {
                 ),
               ),
             ),
-            Padding(padding: EdgeInsets.symmetric(vertical: 20.0)),
+            Padding(padding: EdgeInsets.symmetric(vertical: 5.0)),
             Row(
               // padding: EdgeInsets.symmetric(vertical: 30),
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -275,9 +306,7 @@ class _FilterFormState extends State<FilterForm> {
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 20.0),
                   child: TextButton(
-                    onPressed: () {
-                      // TODO: Implement apply filters button
-                    },
+                    onPressed:filterChallenges,
                     child: Text('See results'),
                     style: ElevatedButton.styleFrom(
                       foregroundColor: Color.fromARGB(255, 255, 255, 255),

@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:game/preview/preview.dart';
 
 /** ChallengeCell was formerly named ChallengeCellNew.
@@ -135,9 +132,9 @@ class _ChallengeCellState extends State<ChallengeCell> {
                             difficulty,
                             style: TextStyle(
                               color: Color.fromARGB(204, 0, 0, 0),
-                              fontSize: 14,
+                              fontSize: 10,
                               fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w600,
+                              fontWeight: FontWeight.w300,
                             ),
                           ),
                         ),

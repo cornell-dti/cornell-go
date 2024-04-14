@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:game/profile/achievement_cell.dart';
 import 'package:game/profile/completed_cell.dart';
 import 'package:game/profile/settings_page.dart';
-import 'package:game/settings/settings.dart';
 
 /**
  * The profile page of the app that is rendered for the user's profile

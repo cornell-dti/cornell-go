@@ -1,6 +1,4 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:game/api/geopoint.dart';
 import 'package:geolocator/geolocator.dart';
@@ -8,8 +6,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:async';
 import 'dart:math';
 
-import 'package:provider/provider.dart';
-import 'package:velocity_x/velocity_x.dart';
 
 class GameplayMap extends StatefulWidget {
   final GeoPoint targetLocation;

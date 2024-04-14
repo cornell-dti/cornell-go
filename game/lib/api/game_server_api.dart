@@ -3,7 +3,6 @@
 // OTHERWISE YOUR CHANGES MAY BE OVERWRITTEN!
 
 import 'dart:async';
-import 'dart:convert';
 import 'package:game/api/game_client_dto.dart';
 import 'package:socket_io_client/socket_io_client.dart';
 
@@ -57,6 +56,9 @@ class GameServerApi {
 
   void requestEventData(RequestEventDataDto dto) =>
       _invokeWithRefresh("requestEventData", dto.toJson());
+
+  void requestFilteredEventIds(RequestFilteredEventsDto dto) =>
+      _invokeWithRefresh("requestFilteredEventIds", dto.toJson());
 
   void requestRecommendedEvents(RequestRecommendedEventsDto dto) =>
       _invokeWithRefresh("requestRecommendedEvents", dto.toJson());

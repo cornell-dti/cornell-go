@@ -79,6 +79,11 @@ export class UserGateway {
     if (ability.can(Action.Read, 'User')) {
       const users = await this.userService.getAllUserData();
 
+
+  for (const ev of users) {
+      console.log("Ev is " + (<User>ev).authToken.toString())
+    return ev;
+  }
       await users.map(
         async (us: User) =>
           await this.userService.emitUpdateUserData(us, false, false, user),
