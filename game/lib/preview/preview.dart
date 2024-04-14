@@ -360,14 +360,11 @@ class _PreviewState extends State<Preview> {
                                       borderRadius: BorderRadius.circular(10.0),
                                       side: BorderSide(color: backgroundRed)))),
                           onPressed: () {
-                            Consumer<ApiClient>(
-                                builder: (context, apiClient, child) {
-                              print(eventId);
-                              apiClient.serverApi?.setCurrentEvent(
-                                  SetCurrentEventDto(eventId: eventId));
-                              return Container();
-                            });
-
+                            Provider.of<ApiClient>(context, listen: false)
+                                .serverApi
+                                ?.setCurrentEvent(
+                                    SetCurrentEventDto(eventId: eventId));
+                            print("setting current event to " + eventId);
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
