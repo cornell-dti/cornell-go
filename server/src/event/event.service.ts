@@ -293,7 +293,11 @@ export class EventService {
       'updateEventTrackerData',
       target?.id ?? tracker.id,
       dto,
-      { id: dto.eventId, subject: 'EventTracker' },
+      {
+        id: tracker.id,
+        subject: 'EventTracker',
+        prismaStore: this.prisma.eventTracker,
+      },
     );
   }
 
@@ -307,7 +311,12 @@ export class EventService {
       'updateEventData',
       target?.id ?? ev.id,
       dto,
-      { id: ev.id, subject: subject('EventBase', ev), dtoField: 'event' },
+      {
+        id: ev.id,
+        subject: 'EventBase',
+        dtoField: 'event',
+        prismaStore: this.prisma.eventBase,
+      },
     );
   }
 
@@ -365,9 +374,25 @@ export class EventService {
   async upsertEventFromDto(ability: AppAbility, event: EventDto) {
     let ev = await this.prisma.eventBase.findFirst({ where: { id: event.id } });
 
-    if (!ev && !event.initialOrganizationId) {
-      return null;
-    }
+    const canUpdateOrg =
+      (await this.prisma.organization.count({
+        where: {
+          AND: [
+            { id: event.initialOrganizationId ?? '' },
+            accessibleBy(ability, Action.Update).Organization,
+          ],
+        },
+      })) > 0;
+
+    const canUpdateEv =
+      (await this.prisma.eventBase.count({
+        where: {
+          AND: [
+            accessibleBy(ability, Action.Update).EventBase,
+            { id: ev?.id ?? '' },
+          ],
+        },
+      })) > 0;
 
     const assignData = {
       requiredMembers: event.requiredMembers,
@@ -378,39 +403,33 @@ export class EventService {
           ? TimeLimitationType.LIMITED_TIME
           : TimeLimitationType.PERPETUAL,
       endTime: event.endTime && new Date(event.endTime),
-      userFavorites: event.userFavorites,
       indexable: event.indexable,
       difficulty:
-        event.difficulty === 'Easy'
+        event.difficulty &&
+        (event.difficulty === 'Easy'
           ? DifficultyMode.EASY
           : event.difficulty === 'Normal'
           ? DifficultyMode.NORMAL
-          : DifficultyMode.HARD,
+          : DifficultyMode.HARD),
       latitude: event.latitudeF,
       longitude: event.longitudeF,
     };
 
-    if (
-      ev &&
-      (await this.prisma.eventBase.findFirst({
-        select: { id: true },
-        where: {
-          AND: [accessibleBy(ability, Action.Update).EventBase, { id: ev.id }],
-        },
-      }))
-    ) {
+    if (ev && canUpdateEv) {
       const updateData = await this.abilityFactory.filterInaccessible(
+        ev.id,
         assignData,
-        subject('EventBase', ev),
+        'EventBase',
         ability,
         Action.Update,
+        this.prisma.eventBase,
       );
 
       ev = await this.prisma.eventBase.update({
         where: { id: ev.id },
         data: updateData,
       });
-    } else if (!ev && ability.can(Action.Create, 'Challenge')) {
+    } else if (!ev && canUpdateOrg) {
       const data = {
         requiredMembers:
           assignData.requiredMembers ?? defaultEventData.requiredMembers,
@@ -455,7 +474,7 @@ export class EventService {
     return ev;
   }
 
-  async removeEvent(eventId: string, ability: AppAbility) {
+  async removeEvent(ability: AppAbility, eventId: string) {
     if (
       await this.prisma.eventBase.findFirst({
         where: {
@@ -475,6 +494,8 @@ export class EventService {
       });
 
       console.log(`Deleted event ${eventId}`);
+      return true;
     }
+    return false;
   }
 }

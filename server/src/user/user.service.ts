@@ -125,7 +125,13 @@ export class UserService {
   }
 
   async deleteUser(ability: AppAbility, user: User) {
-    if (ability.cannot(Action.Delete, subject('User', user))) {
+    if (
+      (await this.prisma.user.count({
+        where: {
+          AND: [{ id: user.id }, accessibleBy(ability, Action.Delete).User],
+        },
+      })) < 1
+    ) {
       return;
     }
 
@@ -176,14 +182,16 @@ export class UserService {
     });
 
     const assignData = await this.abilityFactory.filterInaccessible(
+      userObj.id,
       {
         username: username,
         email: user.email,
         year: user.year,
       },
-      subject('User', userObj),
+      'User',
       ability,
       Action.Update,
+      this.prisma.user,
     );
 
     return await this.prisma.user.update({
@@ -250,8 +258,9 @@ export class UserService {
       dto,
       {
         id: user.id,
-        subject: subject('User', user),
+        subject: 'User',
         dtoField: 'user',
+        prismaStore: this.prisma.user,
       },
     );
   }

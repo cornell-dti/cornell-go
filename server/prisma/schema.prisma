@@ -75,6 +75,8 @@ enum OrganizationSpecialUsage {
 
 model User {
   id                  String               @id() @default(uuid())
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt()
   subject             String               @default("User")
   authToken           String
   authType            AuthType
@@ -102,6 +104,8 @@ model User {
 
 model Group {
   id         String    @id @default(uuid())
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt()
   subject    String    @default("Group")
   friendlyId String    @unique
   members    User[]    @relation("member")
@@ -113,6 +117,8 @@ model Group {
 
 model Challenge {
   id             String          @id @default(uuid()) @map("id")
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt()
   subject        String          @default("Challenge")
   linkedEvent    EventBase?      @relation("all", fields: [linkedEventId], references: [id], onDelete: Cascade)
   linkedEventId  String?
@@ -132,6 +138,8 @@ model Challenge {
 
 model EventBase {
   id              String             @id @default(uuid())
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt()
   subject         String             @default("EventBase")
   requiredMembers Int
   name            String
@@ -152,6 +160,8 @@ model EventBase {
 
 model EventTracker {
   id                  String          @id @default(uuid())
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt()
   subject             String          @default("EventTracker")
   user                User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId              String
@@ -179,6 +189,8 @@ model PrevChallenge {
 
 model Organization {
   id           String                   @id @default(uuid())
+  createdAt    DateTime                 @default(now())
+  updatedAt    DateTime                 @updatedAt()
   subject      String                   @default("Organization")
   name         String
   accessCode   String
@@ -200,6 +212,8 @@ model SessionLogEntry {
 
 model Achievement {
   id              String               @id @default(uuid())
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt()
   subject         String               @default("Achievement")
   requiredPoints  Int
   name            String
@@ -214,6 +228,8 @@ model Achievement {
 
 model AchievementTracker {
   id            String      @id @default(uuid())
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt()
   subject       String      @default("AchievementTracker")
   user          User        @relation(fields: [userId], references: [id])
   progress      Int

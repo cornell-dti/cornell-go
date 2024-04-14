@@ -92,20 +92,21 @@ export class ChallengeService {
     const eventTracker: EventTracker =
       await this.eventService.getCurrentEventTrackerForUser(user);
 
-    const curEvent = await this.prisma.eventBase.findUniqueOrThrow({
-      where: { id: eventTracker.eventId },
-    });
+    const alreadyDone =
+      (await this.prisma.prevChallenge.count({
+        where: {
+          userId: user.id,
+          challengeId: eventTracker.curChallengeId,
+          trackerId: eventTracker.id,
+        },
+      })) > 0;
 
     // Ensure that the correct challenge is marked complete
-    if (
-      challengeId !== eventTracker.curChallengeId ||
-      (groupMembers.length !== curEvent.requiredMembers &&
-        curEvent.requiredMembers >= 0)
-    ) {
+    if (challengeId !== eventTracker.curChallengeId || alreadyDone) {
       return false;
     }
 
-    const prevChal = await this.prisma.prevChallenge.create({
+    await this.prisma.prevChallenge.create({
       data: {
         userId: user.id,
         challengeId: eventTracker.curChallengeId,
@@ -124,15 +125,14 @@ export class ChallengeService {
 
     await this.prisma.user.update({
       where: { id: user.id },
-      data: { score: { increment: 1 } },
+      data: { score: { increment: curChallenge.points } },
     });
 
     await this.prisma.eventTracker.update({
       where: { id: eventTracker.id },
       data: {
-        score: { increment: 1 },
+        score: { increment: curChallenge.points },
         curChallenge: { connect: { id: nextChallenge.id } },
-        completedChallenges: { connect: { id: prevChal.id } },
       },
     });
 
@@ -155,6 +155,23 @@ export class ChallengeService {
     );
   }
 
+  async addChallengeToEvent(challenge: Challenge, ev: EventBase) {
+    const maxIndexChallenge = await this.prisma.challenge.aggregate({
+      _max: { eventIndex: true },
+      where: { linkedEventId: challenge.linkedEventId },
+    });
+
+    await this.prisma.challenge.update({
+      where: { id: challenge.id },
+      data: {
+        eventIndex: (maxIndexChallenge._max.eventIndex ?? -1) + 1,
+        linkedEventId: ev.id,
+      },
+    });
+  }
+
+  // Disabled for now
+  /*
   async setCurrentChallenge(user: User, challengeId: string) {
     const group = await this.prisma.group.findUniqueOrThrow({
       where: { id: user.groupId },
@@ -191,7 +208,7 @@ export class ChallengeService {
     );
 
     return true;
-  }
+  }*/
 
   async emitUpdateChallengeData(
     challenge: Challenge,
@@ -212,7 +229,8 @@ export class ChallengeService {
       {
         id: challenge.id,
         dtoField: 'challenge',
-        subject: subject('Challenge', challenge),
+        subject: 'Challenge',
+        prismaStore: this.prisma.challenge,
       },
     );
   }
@@ -238,18 +256,27 @@ export class ChallengeService {
       where: { id: challenge.id },
     });
 
-    if (
-      chal &&
-      (await this.prisma.challenge.findFirst({
-        select: { id: true },
+    const canUpdateEv =
+      (await this.prisma.eventBase.count({
+        where: {
+          AND: [
+            accessibleBy(ability, Action.Update).EventBase,
+            { id: challenge.linkedEventId ?? '' },
+          ],
+        },
+      })) > 0;
+
+    const canUpdateChal =
+      (await this.prisma.challenge.count({
         where: {
           AND: [
             accessibleBy(ability, Action.Update).Challenge,
-            { id: chal.id },
+            { id: chal?.id ?? '' },
           ],
         },
-      }))
-    ) {
+      })) > 0;
+
+    if (chal && canUpdateChal) {
       const assignData = {
         name: challenge.name?.substring(0, 2048),
         location: challenge.location as LocationType,
@@ -263,17 +290,19 @@ export class ChallengeService {
       };
 
       const data = await this.abilityFactory.filterInaccessible(
+        chal.id,
         assignData,
-        subject('Challenge', chal),
+        'Challenge',
         ability,
         Action.Update,
+        this.prisma.challenge,
       );
 
       chal = await this.prisma.challenge.update({
         where: { id: chal.id },
         data,
       });
-    } else if (!chal && ability.can(Action.Create, 'Challenge')) {
+    } else if (!chal && canUpdateEv) {
       const maxIndexChallenge = await this.prisma.challenge.aggregate({
         _max: { eventIndex: true },
         where: { linkedEventId: challenge.linkedEventId },
@@ -323,7 +352,7 @@ export class ChallengeService {
       },
     });
 
-    if (!challenge) return;
+    if (!challenge) return false;
 
     const usedTrackers = await this.prisma.eventTracker.findMany({
       where: {
@@ -354,5 +383,6 @@ export class ChallengeService {
     });
 
     console.log(`Deleted challenge ${challengeId}`);
+    return true;
   }
 }

@@ -1,6 +1,10 @@
-import { PermittedFieldsOptions, permittedFieldsOf } from '@casl/ability/extra';
 import { Action } from './action.enum';
-import { AbilityBuilder, ExtractSubjectType, PureAbility } from '@casl/ability';
+import {
+  AbilityBuilder,
+  ExtractSubjectType,
+  PureAbility,
+  subject,
+} from '@casl/ability';
 import { PrismaQuery, Subjects, createPrismaAbility } from '@casl/prisma';
 import { Injectable } from '@nestjs/common';
 import {
@@ -36,21 +40,53 @@ export type AppAbility = PureAbility<
 
 @Injectable()
 export class CaslAbilityFactory {
-  async filterInaccessible(
-    data: any,
-    subject: Subjects<SubjectTypes>,
+  async filterInaccessible<TObj extends {}>(
+    id: string,
+    data: TObj,
+    subj: ExtractSubjectType<Subjects<SubjectTypes>>,
     ability: AppAbility,
     action: Action,
-  ) {
-    const fieldList = Object.keys(data);
-    const options: PermittedFieldsOptions<AppAbility> = {
-      fieldsFrom: rule => rule.fields || fieldList,
-    };
+    prismaStore: {
+      count: (...args: any[]) => Promise<number>;
+    },
+  ): Promise<Partial<TObj>> {
+    // TODO: optimize this function to minimize database hits (maybe a cache?)
+    // Potentially the following info inside the AppAbility (should not be too hard)
 
-    const permitted = permittedFieldsOf(ability, action, subject, options);
     const newObj: any = {};
-    for (const permittedField of permitted) {
-      newObj[permittedField] = data[permittedField];
+    let fields: string[] = Object.keys(data);
+
+    const fieldSet = new Set<string>();
+
+    for (const field of fields) {
+      const rules = ability
+        .rulesFor(action, subj, field)
+        .sort((a, b) => b.priority - a.priority); // Higher priority first
+
+      for (const rule of rules) {
+        // Skip when it already has and it isn't a negative rule
+        // and when it does not have but it's a positive rule
+        // to save on database queries
+        if (fieldSet.has(field) === !rule.inverted) continue;
+
+        const prismaCond = {
+          where: {
+            AND: [{ id }, rule.conditions],
+          },
+        };
+
+        if (!rule.conditions || (await prismaStore.count(prismaCond)) > 0) {
+          if (rule.inverted) {
+            fieldSet.delete(field);
+          } else {
+            fieldSet.add(field);
+          }
+        }
+      }
+    }
+
+    for (const field of fieldSet) {
+      newObj[field] = (data as any)[field];
     }
 
     return newObj;
@@ -102,28 +138,91 @@ export class CaslAbilityFactory {
 
     can(Action.Read, 'Achievement');
 
-    can(Action.Read, 'AchievementTracker', undefined, { userId: user.id });
+    can(Action.Read, 'AchievementTracker', { userId: user.id });
 
+    // Read challenges that belong to events you're allowed to access
+    // And you must have completed them or are in the process
     can(Action.Read, 'Challenge', undefined, {
-      linkedEvent: { usedIn: { some: { members: { some: { id: user.id } } } } },
+      AND: [
+        {
+          linkedEvent: {
+            usedIn: { some: { members: { some: { id: user.id } } } },
+          },
+        },
+        {
+          OR: [
+            {
+              completions: {
+                some: { userId: user.id },
+              },
+            },
+            {
+              activeTrackers: {
+                some: {
+                  user: { id: user.id },
+                  event: {
+                    activeGroups: {
+                      some: { members: { some: { id: user.id } } },
+                    },
+                  },
+                },
+              },
+            },
+          ],
+        },
+      ],
     });
 
-    can(Action.Manage, 'Challenge', undefined, {
+    cannot(Action.Read, 'Challenge', ['name'], {
+      AND: [
+        {
+          completions: {
+            none: { userId: user.id },
+          },
+        },
+      ],
+    });
+
+    const latlongNames = [
+      'latitude',
+      'longitude',
+      'latitudeF',
+      'longitudeF',
+      'lat',
+      'long',
+      'latF',
+      'longF',
+    ];
+
+    cannot(Action.Read, 'Challenge', latlongNames, {
+      // names come from DTO
+      // hide lat long from users that do not have an active tracker which is their current event
+      activeTrackers: {
+        none: {
+          user: { id: user.id },
+          event: {
+            activeGroups: { some: { members: { some: { id: user.id } } } },
+          },
+        },
+      },
+    });
+
+    can(Action.Manage, 'Challenge', {
       linkedEvent: {
         usedIn: { some: { managers: { some: { id: user.id } } } },
       },
     });
 
-    can(Action.Read, 'EventBase', undefined, {
+    can(Action.Read, 'EventBase', {
       usedIn: { some: { members: { some: { id: user.id } } } },
       indexable: true,
     });
 
-    can(Action.Manage, 'EventBase', undefined, {
+    can(Action.Manage, 'EventBase', {
       usedIn: { some: { managers: { some: { id: user.id } } } },
     });
 
-    can(Action.Read, 'EventTracker', undefined, {
+    can(Action.Read, 'EventTracker', {
       OR: [
         { userId: user.id },
         {
@@ -132,26 +231,30 @@ export class CaslAbilityFactory {
       ],
     });
 
-    can(Action.Read, 'Group', undefined, {
+    can(Action.Read, 'Group', {
       members: { some: { id: user.id } },
     });
 
-    can(Action.Update, 'Group', undefined, {
+    can(Action.Update, 'Group', {
       hostId: user.id,
     });
 
-    can(Action.Read, 'Organization', undefined, {
+    can(Action.Read, 'Organization', {
       members: { some: { id: user.id } },
     });
 
     // These come from DTO
     cannot(Action.Read, 'Organization', ['members', 'managers']);
 
-    can(Action.Manage, 'Organization', undefined, {
+    can(Action.Read, 'Organization', ['members', 'managers'], {
       managers: { some: { id: user.id } },
     });
 
-    can(Action.Read, 'PrevChallenge', undefined, {
+    can(Action.Update, 'Organization', {
+      managers: { some: { id: user.id } },
+    });
+
+    can(Action.Read, 'PrevChallenge', {
       OR: [
         { userId: user.id },
         {
