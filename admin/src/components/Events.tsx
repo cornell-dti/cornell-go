@@ -46,6 +46,19 @@ function EventCard(props: {
       ? "Normal"
       : "Hard";
 
+  const categoryType =
+    (props.event.category as string) === "FOOD"
+      ? "Food"
+      : (props.event.category as string) === "NATURE"
+      ? "Nature"
+      : (props.event.category as string) === "HISTORICAL"
+      ? "Historical"
+      : (props.event.category as string) === "CAFE"
+      ? "Cafe"
+      : (props.event.category as string) === "DININGHALL"
+      ? "Dining Hall"
+      : "Dorm";
+
   const affirmOfBool = (val: boolean) => (val ? "Yes" : "No");
 
   return (
@@ -72,6 +85,7 @@ function EventCard(props: {
           Time Limitation: <b>{timeLimitation}</b> <br />
           Challenge Count: <b>{props.event.challenges?.length}</b> <br />
           Difficulty: <b>{difficultyMode}</b> <br />
+          Category: <b>{categoryType}</b> <br />
           Publicly Visible: <b>{affirmOfBool(!!props.event.indexable)}</b>{" "}
           <br />
           Latitude: <b>{props.event.latitudeF}</b>, Longitude:{" "}
@@ -88,6 +102,7 @@ function EventCard(props: {
   );
 }
 
+// Default Form Creation
 function makeForm() {
   return [
     { name: "Name", characterLimit: 256, value: "" },
@@ -105,13 +120,15 @@ function makeForm() {
     },
     { name: "Publicly Visible", options: ["No", "Yes"], value: 0 },
     { name: "Available Until", date: new Date("2050") },
-    // {name: "Category",
-    // options: ["FOOD", "NATURE", "HISTORICAL", "CAFE", "DININGHALL", "DORM"],
-
-    // }
+    {
+      name: "Category",
+      options: ["FOOD", "NATURE", "HISTORICAL", "CAFE", "DININGHALL", "DORM"],
+      value: 1,
+    },
   ] as EntryForm[];
 }
 
+// Form to DTO Conversion
 function fromForm(form: EntryForm[], id: string): EventDto {
   return {
     id,
@@ -120,6 +137,18 @@ function fromForm(form: EntryForm[], id: string): EventDto {
       (form[3] as OptionEntryForm).value === 0 ? "PERPETUAL" : "LIMITED_TIME",
     name: (form[0] as FreeEntryForm).value,
     description: (form[1] as FreeEntryForm).value,
+    category:
+      (form[7] as OptionEntryForm).value === 0
+        ? "FOOD"
+        : (form[7] as OptionEntryForm).value === 1
+        ? "NATURE"
+        : (form[7] as OptionEntryForm).value === 2
+        ? "HISTORICAL"
+        : (form[7] as OptionEntryForm).value === 3
+        ? "CAFE"
+        : (form[7] as OptionEntryForm).value === 4
+        ? "DININGHALL"
+        : "DORM",
     indexable: (form[5] as OptionEntryForm).value === 1,
     endTime: (form[6] as DateEntryForm).date.toUTCString(),
     challenges: [],
@@ -134,6 +163,7 @@ function fromForm(form: EntryForm[], id: string): EventDto {
   };
 }
 
+// DTO to Form Conversion
 function toForm(event: EventDto) {
   return [
     { name: "Name", characterLimit: 256, value: event.name },
@@ -158,6 +188,22 @@ function toForm(event: EventDto) {
           : event.difficulty === "Normal"
           ? "Normal"
           : "Hard",
+    },
+    {
+      name: "Category",
+      options: ["FOOD", "NATURE", "HISTORICAL", "CAFE", "DININGHALL", "DORM"],
+      value:
+        (event.category as string) === "FOOD"
+          ? 0
+          : (event.category as string) === "NATURE"
+          ? 1
+          : (event.category as string) === "HISTORICAL"
+          ? 2
+          : (event.category as string) === "CAFE"
+          ? 3
+          : (event.category as string) === "DININGHALL"
+          ? 4
+          : 5,
     },
     {
       name: "Publicly Visible",

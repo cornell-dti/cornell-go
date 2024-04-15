@@ -9,6 +9,7 @@ import {
   EntryForm,
   EntryModal,
   FreeEntryForm,
+  OptionEntryForm,
   MapEntryForm,
   NumberEntryForm,
 } from "./EntryModal";
@@ -75,7 +76,20 @@ function ChallengeCard(props: {
 function makeForm(): EntryForm[] {
   return [
     { name: "Location", latitude: 42.447546, longitude: -76.484593 },
-    { name: "Location Description", characterLimit: 2048, value: "" },
+    {
+      name: "Location Description",
+      options: [
+        "ENG_QUAD",
+        "ARTS_QUAD",
+        "AG_QUAD",
+        "NORTH_CAMPUS",
+        "WEST_CAMPUS",
+        "COLLEGETOWN",
+        "ITHACA_COMMONS",
+        "Any",
+      ],
+      value: 0,
+    },
     { name: "Name", characterLimit: 256, value: "" },
     { name: "Description", characterLimit: 2048, value: "" },
     { name: "Points", characterLimit: 2048, min: 1, max: 1000, value: 50 },
@@ -94,8 +108,32 @@ function toForm(challenge: ChallengeDto) {
     },
     {
       name: "Location Description",
-      characterLimit: 2048,
-      value: challenge.location ?? "",
+      options: [
+        "ENG_QUAD",
+        "ARTS_QUAD",
+        "AG_QUAD",
+        "NORTH_CAMPUS",
+        "WEST_CAMPUS",
+        "COLLEGETOWN",
+        "ITHACA_COMMONS",
+        "Any",
+      ],
+      value:
+        (challenge.location as string) === "ENG_QUAD"
+          ? 0
+          : (challenge.location as string) === "ARTS_QUAD"
+          ? 1
+          : (challenge.location as string) === "AG_QUAD"
+          ? 2
+          : (challenge.location as string) === "NORTH_CAMPUS"
+          ? 3
+          : (challenge.location as string) === "WEST_CAMPUS"
+          ? 4
+          : (challenge.location as string) === "COLLEGETOWN"
+          ? 5
+          : (challenge.location as string) === "ITHACA_COMMONS"
+          ? 6
+          : 7,
     },
     { name: "Name", characterLimit: 256, value: challenge.name ?? "" },
     {
@@ -138,7 +176,22 @@ function fromForm(
   return {
     id,
     name: (form[2] as FreeEntryForm).value,
-    location: (form[1] as FreeEntryForm).value,
+    location:
+      (form[1] as OptionEntryForm).value === 0
+        ? "ENG_QUAD"
+        : (form[1] as OptionEntryForm).value === 1
+        ? "ARTS_QUAD"
+        : (form[1] as OptionEntryForm).value === 2
+        ? "AG_QUAD"
+        : (form[1] as OptionEntryForm).value === 3
+        ? "NORTH_CAMPUS"
+        : (form[1] as OptionEntryForm).value === 4
+        ? "WEST_CAMPUS"
+        : (form[1] as OptionEntryForm).value === 5
+        ? "COLLEGETOWN"
+        : (form[1] as OptionEntryForm).value === 6
+        ? "ITHACA_COMMONS"
+        : "Any",
     description: (form[3] as FreeEntryForm).value,
     points: (form[4] as NumberEntryForm).value,
     imageUrl: (form[5] as FreeEntryForm).value,
