@@ -51,7 +51,7 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
                     TextFormField(
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
-                        labelText: 'e.g. Jane Doe (will remove I think?)',
+                        labelText: 'e.g. Jane Doe',
                       ),
 
                       // The validator receives the text that the user has entered.

@@ -44,6 +44,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
           List<Tuple2<DateTime, EventDto>> completedEvents = [];
 
+          //Get completed events
           for (var eventId in userModel.userData!.trackedEvents!) {
             var tracker = trackerModel.trackerByEventId(eventId);
             EventDto? event = eventModel.getEventById(eventId);

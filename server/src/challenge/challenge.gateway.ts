@@ -72,7 +72,7 @@ export class ChallengeGateway {
       );
 
       await this.groupService.emitUpdateGroupData(group, false);
-      await this.eventService.emitUpdateEventTracker(tracker, user);
+      await this.eventService.emitUpdateEventTracker(tracker);
     } else {
       await this.clientService.emitErrorData(
         user,
@@ -93,7 +93,7 @@ export class ChallengeGateway {
       );
 
       await this.groupService.emitUpdateGroupData(group, false);
-      await this.eventService.emitUpdateEventTracker(tracker, user);
+      await this.eventService.emitUpdateEventTracker(tracker);
       await this.userService.emitUpdateUserData(user, false, true, user);
     } else {
       await this.clientService.emitErrorData(user, 'Challenge not complete');

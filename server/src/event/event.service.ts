@@ -239,6 +239,11 @@ export class EventService {
     });
   }
 
+  /**
+   * Converts an event from the database to a DTO
+   * @param ev event to get DTO for
+   * @returns an EventDTO for the event
+   */
   async dtoForEvent(ev: EventBase): Promise<EventDto> {
     const chals = await this.prisma.challenge.findMany({
       where: { linkedEventId: ev.id },
@@ -270,6 +275,11 @@ export class EventService {
     };
   }
 
+  /**
+   * Converts an event tracker from the database to a DTO
+   * @param tracker event tracker to get DTO for
+   * @returns an EventTrackerDTO for the event tracker
+   */
   async dtoForEventTracker(tracker: EventTracker): Promise<EventTrackerDto> {
     const completedChallenges = await this.prisma.challenge.findMany({
       where: {
