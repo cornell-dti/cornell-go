@@ -8,6 +8,7 @@ import {
   User,
   EnrollmentType,
   EventBase,
+  PrevChallenge,
 } from '@prisma/client';
 import { ClientService } from '../client/client.service';
 import { EventService } from '../event/event.service';
@@ -201,6 +202,7 @@ export class UserService {
         eventTrackers: true,
         favorites: true,
         group: { select: { friendlyId: true } },
+        completedChallenges: true,
       },
     });
 
@@ -230,7 +232,6 @@ export class UserService {
    * @param user User to emit
    * @param deleted True if user was deleted
    * @param partial True if partial data is updated
-   * @param admin True if admin
    * @param client The User requesting the information
    */
   async emitUpdateUserData(

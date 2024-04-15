@@ -146,6 +146,7 @@ class _JourneysPageState extends State<JourneysPage> {
 
                     if (challenge == null) continue;
                     var location = challenge.location;
+
                     for (var challengeId in event.challenges ?? []) {
                       var challenge =
                           challengeModel.getChallengeById(challengeId);
