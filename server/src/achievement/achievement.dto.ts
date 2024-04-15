@@ -25,6 +25,13 @@ export interface AchievementDto {
   imageUrl?: string;
   locationType?: LocationType;
   achievementType?: AchievementType;
+  eventId?: string;
+  requiredPoints?: number;
+  name?: string;
+  description?: string;
+  imageUrl?: string;
+  locationType?: LocationType;
+  achievementType?: AchievementType;
 }
 
 export interface AchievementTrackerDto {
@@ -32,13 +39,4 @@ export interface AchievementTrackerDto {
   progress: number;
   achievementId: string;
   dateComplete?: string;
-}
-
-export interface UpdateAchievementDataDto {
-  achievement: AchievementDto;
-  deleted: boolean;
-}
-
-export interface RequestAchievementDataDto {
-  achievements: string[];
 }
