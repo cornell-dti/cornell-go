@@ -9,7 +9,12 @@ import { UserGuard } from '../auth/jwt-auth.guard';
 import { EventService } from '../event/event.service';
 import { CallingUser } from '../auth/calling-user.decorator';
 import { ClientService } from '../client/client.service';
-import { AchievementDto, AchievementTrackerDto, RequestAchievementDataDto, UpdateAchievementDataDto } from './achievement.dto';
+import {
+  AchievementDto,
+  AchievementTrackerDto,
+  RequestAchievementDataDto,
+  UpdateAchievementDataDto,
+} from './achievement.dto';
 import { AchievementService } from './achievement.service';
 import { PoliciesGuard } from '../casl/policy.guard';
 import { UserAbility } from '../casl/user-ability.decorator';
@@ -22,10 +27,10 @@ import { subject } from '@casl/ability';
 export class AchievementGateway {
   constructor(
     private achievementService: AchievementService,
-    private clientService: ClientService
+    private clientService: ClientService,
   ) {}
 
-  /** 
+  /**
    * request achievements by list of ids
    * update achievement with a dto
    * @param user
@@ -38,10 +43,12 @@ export class AchievementGateway {
     @CallingUser() user: User,
     @MessageBody() data: RequestAchievementDataDto,
   ) {
-    const achievement = 
-    await this.achievementService.getAchievementsByIdsForAbility(ability, data.achievements);
+    const achievement =
+      await this.achievementService.getAchievementsByIdsForAbility(
+        ability,
+        data.achievements,
+      );
   }
-
 
   @SubscribeMessage('updateAchievementData')
   async updateAchievementData(
@@ -49,7 +56,9 @@ export class AchievementGateway {
     @CallingUser() user: User,
     @MessageBody() data: UpdateAchievementDataDto,
   ) {
-    const achievement = await this.achievementService.getAchievementFromId(data.achievement.id);
+    const achievement = await this.achievementService.getAchievementFromId(
+      data.achievement.id,
+    );
 
     if (!achievement && ability.cannot(Action.Create, 'Achievement')) {
       await this.clientService.emitErrorData(
@@ -61,15 +70,24 @@ export class AchievementGateway {
 
     if (data.deleted && achievement) {
       await this.achievementService.removeAchievement(ability, achievement.id);
-      await this.achievementService.emitUpdateAchievementData(achievement, true);
+      await this.achievementService.emitUpdateAchievementData(
+        achievement,
+        true,
+      );
     } else {
-      const achievement = await this.achievementService.upsertAchievementFromDto(ability, data.achievement);
+      const achievement =
+        await this.achievementService.upsertAchievementFromDto(
+          ability,
+          data.achievement,
+        );
     }
 
     if (!achievement) {
-      await this.clientService.emitErrorData(user, 'Failed to update achievement!');
+      await this.clientService.emitErrorData(
+        user,
+        'Failed to update achievement!',
+      );
       return;
     }
   }
 }
-

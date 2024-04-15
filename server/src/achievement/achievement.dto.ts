@@ -35,7 +35,7 @@ export interface AchievementTrackerDto {
 }
 
 export interface UpdateAchievementDataDto {
-   achievement: AchievementDto;
+  achievement: AchievementDto;
   deleted: boolean;
 }
 
