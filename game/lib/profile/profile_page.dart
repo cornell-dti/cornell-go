@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:game/profile/achievement_cell.dart';
 import 'package:game/profile/completed_cell.dart';
 import 'package:game/profile/settings_page.dart';
-import 'package:game/settings/settings.dart';
+import 'package:game/profile/completed_challenges_page.dart';
 
 /**
  * The profile page of the app that is rendered for the user's profile
@@ -129,9 +129,15 @@ class _ProfilePageState extends State<ProfilePage> {
                       style:
                           TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                   TextButton(
+                    // onPressed: () {
+                    //   // Handle button press, e.g., navigate to details page
+                    //   print('View Details button pressed');
+                    // },
                     onPressed: () {
-                      // Handle button press, e.g., navigate to details page
-                      print('View Details button pressed');
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => CompletedChallengesPage()));
                     },
                     child: Text(
                       'View More →',

@@ -10,6 +10,7 @@ import 'package:game/model/event_model.dart';
 import 'package:game/model/tracker_model.dart';
 import 'package:game/model/group_model.dart';
 import 'package:game/api/geopoint.dart';
+import 'package:game/navigation_page/home_navbar.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:game/model/challenge_model.dart';
 import 'gameplay_map.dart';
@@ -80,7 +81,7 @@ class _GameplayPageState extends State<GameplayPage> {
         builder: (context, challengeModel, eventModel, trackerModel, apiClient,
             groupModel, _) {
       var eventId = groupModel.curEventId;
-      print(eventId);
+      // print(eventId);
       var event = eventModel.getEventById(eventId ?? "");
       var tracker = trackerModel.trackerByEventId(eventId ?? "");
       if (tracker == null) {
@@ -123,11 +124,20 @@ class _GameplayPageState extends State<GameplayPage> {
                                         foregroundColor: Colors.grey),
                                     onPressed: () {
                                       // Left button action
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  HomeNavBar()));
                                     },
                                     child: Row(children: [
                                       SvgPicture.asset(
                                           "assets/icons/backcarrot.svg"),
-                                      Text('  Leave Journey',
+                                      Text(
+                                          '  Leave ' +
+                                              (event!.challenges!.length > 1
+                                                  ? "Journey"
+                                                  : "Challenge"),
                                           style: TextStyle(
                                               fontSize: 14,
                                               color: Color(0xFF835A7C)))

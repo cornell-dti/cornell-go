@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:game/preview/preview.dart';
 
 /** ChallengeCell was formerly named ChallengeCellNew.
@@ -76,7 +73,7 @@ class _ChallengeCellState extends State<ChallengeCell> {
             context: context,
             isScrollControlled: true,
             builder: (context) => Preview(challengeName, description,
-                difficulty, points, previewType.challenge, location, eventId));
+                difficulty, points, PreviewType.CHALLENGE, location, eventId));
       },
       child: Container(
         decoration: BoxDecoration(

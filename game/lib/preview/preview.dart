@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/gameplay/gameplay_page.dart';
 import 'package:provider/provider.dart';
 import 'package:game/api/game_client_dto.dart';
 
-enum previewType { challenge, journey }
+enum PreviewType { CHALLENGE, JOURNEY }
 
 /** Returns a preview of a challenge given the challenge name, description, 
  * difficulty, points, and bonus points for challenge mode. Used for
@@ -15,7 +14,7 @@ class Preview extends StatefulWidget {
   final String description;
   final String difficulty;
   final int points;
-  final previewType type;
+  final PreviewType type;
 
   final int locationCount;
   final int numberCompleted;
@@ -64,7 +63,7 @@ class _PreviewState extends State<Preview> {
   final String description;
   final String difficulty;
   final int points;
-  final previewType type;
+  final PreviewType type;
   // newly added parameter; need to implement higher up in hierarchy
   // final int
   //     totalDistance;
@@ -277,7 +276,7 @@ class _PreviewState extends State<Preview> {
                           )
                         ]),
                   ),
-                  (type == previewType.journey)
+                  (type == PreviewType.JOURNEY)
                       ? Column(children: [
                           SizedBox(height: 5),
                           Padding(
@@ -361,14 +360,11 @@ class _PreviewState extends State<Preview> {
                                       borderRadius: BorderRadius.circular(10.0),
                                       side: BorderSide(color: backgroundRed)))),
                           onPressed: () {
-                            Consumer<ApiClient>(
-                                builder: (context, apiClient, child) {
-                              print(eventId);
-                              apiClient.serverApi?.setCurrentEvent(
-                                  SetCurrentEventDto(eventId: eventId));
-                              return Container();
-                            });
-
+                            Provider.of<ApiClient>(context, listen: false)
+                                .serverApi
+                                ?.setCurrentEvent(
+                                    SetCurrentEventDto(eventId: eventId));
+                            print("setting current event to " + eventId);
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
