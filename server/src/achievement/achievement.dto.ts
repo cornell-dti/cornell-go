@@ -18,14 +18,13 @@ export enum AchievementType {
 
 export interface AchievementDto {
   id: string;
-  eventId: string;
-  requiredPoints: number;
-  name: string;
-  description: string;
-  imageUrl: string;
-  locationType: LocationType;
-  achievementType: AchievementType;
-  organizations: string[];
+  eventId?: string;
+  requiredPoints?: number;
+  name?: string;
+  description?: string;
+  imageUrl?: string;
+  locationType?: LocationType;
+  achievementType?: AchievementType;
 }
 
 export interface AchievementTrackerDto {
@@ -33,4 +32,13 @@ export interface AchievementTrackerDto {
   progress: number;
   achievementId: string;
   dateComplete?: string;
+}
+
+export interface UpdateAchievementDataDto {
+   achievement: AchievementDto;
+  deleted: boolean;
+}
+
+export interface RequestAchievementDataDto {
+  achievements: string[];
 }

@@ -19,11 +19,14 @@ import {
 import { EventTrackerDto, UpdateEventDataDto } from '../event/event.dto';
 import { GroupInviteDto, UpdateGroupDataDto } from '../group/group.dto';
 import { UpdateOrganizationDataDto } from '../organization/organization.dto';
+import { AchievementTrackerDto, UpdateAchievementDataDto } from '../achievement/achievement.dto';
 
 export type ClientApiDef = {
   updateUserData: UpdateUserDataDto;
   updateErrorData: UpdateErrorDto;
   updateChallengeData: UpdateChallengeDataDto;
+  updateAchievementData: UpdateAchievementDataDto;
+  updateAchievementTrackerData: AchievementTrackerDto;
   updateEventTrackerData: EventTrackerDto;
   updateEventData: UpdateEventDataDto;
   updateLeaderData: UpdateLeaderDataDto;
@@ -96,7 +99,7 @@ export class ClientService {
       this.gateway.server.in(target).socketsJoin(resource.id);
 
       const fieldList = Object.keys(
-        resource.dtoField ? (dto[resource.dtoField] as {}) : dto,
+        resource.dtoField ? (resource.dtoField as {}) : dto,
       );
 
       const options: PermittedFieldsOptions<AppAbility> = {
@@ -133,7 +136,7 @@ export class ClientService {
 
         if (resource.dtoField) {
           (dto as any)[resource.dtoField] = Object.fromEntries(
-            Object.entries(dto[resource.dtoField] as any).filter(([k, v]) =>
+            Object.entries(resource.dtoField as any).filter(([k, v]) =>
               fields.includes(k),
             ),
           ) as any;

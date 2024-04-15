@@ -6,7 +6,8 @@ import {
   TimeLimitationType,
   OrganizationSpecialUsage,
   User,
-  LocationType,
+  LocationType,s
+  AchievementType
 } from '@prisma/client';
 import { ClientService } from '../client/client.service';
 import { v4 } from 'uuid';
@@ -41,6 +42,16 @@ export const defaultChallengeData = {
   longitude: -76.48504614830019,
   awardingRadius: 50,
   closeRadius: 100,
+};
+
+export const defaultAchievementData = {
+  eventIndex: 0,
+  requiredPoints: 50,
+  name: 'Default Achievement',
+  description: 'Statue',
+  imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/5/5f/CentralAvenueCornell2.jpg',
+  locationType: LocationType.ARTS_QUAD,
+  achievementType: AchievementType.TOTAL_CHALLENGES,
 };
 
 @Injectable()
