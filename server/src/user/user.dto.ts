@@ -1,3 +1,5 @@
+import { PrevChallenge } from '@prisma/client';
+
 /** DTO for closeAccount */
 export interface CloseAccountDto {}
 

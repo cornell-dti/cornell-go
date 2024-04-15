@@ -57,6 +57,7 @@ dependencies:
   flutter_config: ^2.0.2
   dropdown_button2: ^2.3.9
   carousel_slider: ^4.0.0
+  tuple: ^2.0.2
 
 flutter_icons:
   android: true
