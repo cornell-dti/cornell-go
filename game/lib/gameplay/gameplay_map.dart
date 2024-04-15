@@ -461,50 +461,6 @@ class _GameplayMapState extends State<GameplayMap> {
                         Text("+ " + widget.points.toString() + " points"),
                       ],
                     )),
-                if (numHintsLeft < 3)
-                  Container(
-                      margin: EdgeInsets.only(bottom: 10),
-                      child: Row(
-                        children: [
-                          Text(
-                            "Used 1st Hint",
-                          ),
-                          Spacer(),
-                          Text("- 25 points"),
-                        ],
-                      )),
-                if (numHintsLeft < 2)
-                  Container(
-                      margin: EdgeInsets.only(bottom: 10),
-                      child: Row(
-                        children: [
-                          Text(
-                            "Used 2nd Hint",
-                          ),
-                          Spacer(),
-                          Text("- 25 points"),
-                        ],
-                      )),
-                if (numHintsLeft < 1)
-                  Container(
-                      margin: EdgeInsets.only(bottom: 10),
-                      child: Row(
-                        children: [
-                          Text(
-                            "Used 3rd Hint",
-                          ),
-                          Spacer(),
-                          Text("- 25 points"),
-                        ],
-                      )),
-                Container(
-                    alignment: Alignment.center,
-                    margin: EdgeInsets.only(bottom: 10),
-                    child: Text(
-                        "Total Points: " +
-                            (widget.points - 25 * (3 - numHintsLeft))
-                                .toString(),
-                        style: TextStyle(fontWeight: FontWeight.bold))),
                 Row(children: [
                   TextButton(
                       onPressed: () => Navigator.pop(context, false),
