@@ -110,7 +110,7 @@ class SplashPageWidget extends StatelessWidget {
                         print("Connection result:");
                         print(connectionResult.body);
                         displayToast("Signed in!", Status.success);
-                        Navigator.push(
+                        Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
                                 builder: (context) => BottomNavBar()));

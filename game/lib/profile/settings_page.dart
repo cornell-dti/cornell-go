@@ -150,7 +150,7 @@ class SettingsPage extends StatelessWidget {
                         onPressed: () async => {
                           await client.disconnect(),
                           Navigator.pop(context),
-                          Navigator.push(
+                          Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
                                   builder: (context) => SplashPageWidget())),
