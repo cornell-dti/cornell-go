@@ -144,6 +144,7 @@ class _GameplayMapState extends State<GameplayMap> {
   void recenterCamera() async {
     GoogleMapController googleMapController = await mapCompleter.future;
 
+    // recenters camera to user location
     googleMapController.animateCamera(
       CameraUpdate.newCameraPosition(
         CameraPosition(
@@ -153,12 +154,13 @@ class _GameplayMapState extends State<GameplayMap> {
       ),
     );
 
+    // Upon receiving new user location data, moves map camera to be centered
+    // around new position and sets zoom. This causes the map to follow the
+    // user as they move.
     positionStream.onData((newPos) {
       currentLocation =
           GeoPoint(newPos.latitude, newPos.longitude, newPos.heading);
 
-      // upon new user location data, moves map camera to be centered around
-      // new position and sets zoom.
       googleMapController.animateCamera(
         CameraUpdate.newCameraPosition(
           CameraPosition(
@@ -183,6 +185,10 @@ class _GameplayMapState extends State<GameplayMap> {
     });
   }
 
+  /** 
+   * Sets the custom user location icon, which is called upon
+   * initializing the state
+   */
   BitmapDescriptor currentLocationIcon = BitmapDescriptor.defaultMarker;
   void setCustomMarkerIcon() {
     BitmapDescriptor.fromAssetImage(
@@ -195,8 +201,16 @@ class _GameplayMapState extends State<GameplayMap> {
     setState(() {});
   }
 
+  /** 
+   * Handles logic to use a hint. This includes updating hints left, 
+   * calculating the updated radius of the hint circle, and changing the
+   * location of the hint center such that it still contains the awarding
+   * radius.
+   */
   void useHint() {
     if (numHintsLeft > 0 && hintCenter != null && startingHintCenter != null) {
+      // decreases radius by 0.33 upon each hint press
+      // after 3 hints, hint radius will equal that of the awarding radius
       double newRadius =
           hintRadius - (startingHintRadius - widget.awardingRadius) * 0.33;
       double newLat = hintCenter!.lat -
@@ -206,6 +220,7 @@ class _GameplayMapState extends State<GameplayMap> {
       numHintsLeft -= 1;
       hintRadius = newRadius;
       hintCenter = GeoPoint(newLat, newLong, 0);
+      // updates the widget's state, causing it to rebuild
       setState(() {});
     }
   }
@@ -369,6 +384,7 @@ class _GameplayMapState extends State<GameplayMap> {
                 ],
               ),
               Padding(
+                // expandable image in top right of map
                 padding: EdgeInsets.only(left: 24.0, top: 40.0),
                 child: isExpanded
                     ? Container(
@@ -422,6 +438,7 @@ class _GameplayMapState extends State<GameplayMap> {
     );
   }
 
+  /** Returns whether the user is at the challenge location */
   bool checkArrived() {
     return currentLocation!.distanceTo(widget.targetLocation) <=
         widget.awardingRadius;
