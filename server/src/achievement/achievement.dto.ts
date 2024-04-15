@@ -40,3 +40,12 @@ export interface AchievementTrackerDto {
   achievementId: string;
   dateComplete?: string;
 }
+
+export interface UpdateAchievementDataDto {
+  achievement: AchievementDto;
+  deleted: boolean;
+}
+
+export interface RequestAchievementDataDto {
+  achievements: string[];
+}
