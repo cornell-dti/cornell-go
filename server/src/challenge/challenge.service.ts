@@ -287,7 +287,7 @@ export class ChallengeService {
         imageUrl:
           challenge.imageUrl?.substring(0, 2048) ??
           defaultChallengeData.imageUrl,
-        location: challenge.location as LocationType,
+        location: LocationType[challenge.location as String as keyof typeof LocationType] ?? defaultChallengeData.location,
         points: challenge.points ?? 0,
         latitude: challenge.latF ?? defaultChallengeData.latitude,
         longitude: challenge.longF ?? defaultChallengeData.longitude,
