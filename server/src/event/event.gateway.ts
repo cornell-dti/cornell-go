@@ -103,7 +103,7 @@ export class EventGateway {
     );
 
     for (const tracker of trackers) {
-      await this.eventService.emitUpdateEventTracker(tracker);
+      await this.eventService.emitUpdateEventTracker(tracker, user);
     }
   }
 
