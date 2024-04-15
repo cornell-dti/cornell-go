@@ -15,16 +15,9 @@ export enum AchievementType {
   TotalJourneys = 'TOTAL_JOURNEYS',
   TotalChallengesOrJourneys = 'TOTAL_CHALLENGES_OR_JOURNEYS',
 }
-
+)
 export interface AchievementDto {
   id: string;
-  eventId?: string;
-  requiredPoints?: number;
-  name?: string;
-  description?: string;
-  imageUrl?: string;
-  locationType?: LocationType;
-  achievementType?: AchievementType;
   eventId?: string;
   requiredPoints?: number;
   name?: string;

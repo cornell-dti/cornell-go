@@ -50,6 +50,14 @@ export class AchievementGateway {
       );
   }
 
+  /**
+   * Updates achievement data based on a provided DTO.
+   * Triggered by the 'updateAchievementData' message.
+   * @param ability
+   * @param user
+   * @param data
+   * @returns
+   */
   @SubscribeMessage('updateAchievementData')
   async updateAchievementData(
     @UserAbility() ability: AppAbility,

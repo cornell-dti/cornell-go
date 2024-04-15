@@ -31,12 +31,12 @@ export class AchievementService {
     private abilityFactory: CaslAbilityFactory,
   ) {}
 
-  /** get an achievement by its id */
+  /** get an achievement by its ID */
   async getAchievementFromId(id: string) {
     return await this.prisma.achievement.findFirstOrThrow({ where: { id } });
   }
 
-  /** get list of achievements by IDs */
+  /** get list of achievements by IDs, based on ability */
   async getAchievementsByIdsForAbility(
     ability: AppAbility,
     ids: string[],
@@ -119,7 +119,7 @@ export class AchievementService {
     return ach;
   }
 
-  /** removes achievement by ID */
+  /** remove achievement by ID */
   async removeAchievement(ability: AppAbility, achievementId: string) {
     const achievement = await this.prisma.achievement.findFirst({
       where: {
@@ -144,6 +144,7 @@ export class AchievementService {
     console.log(`Deleted achievement ${achievementId}`);
   }
 
+  /** emit & update data for an achievement */
   async emitUpdateAchievementData(
     achievement: Achievement,
     deleted: boolean,
@@ -180,6 +181,8 @@ export class AchievementService {
       achievementType: ach.achievementType as AchievementType,
     };
   }
+
+  /** tracking functions; not yet completed */
 
   // /** Creates an achievement tracker */
   // async createAchievementTracker(user: User, achievementId: string) {
