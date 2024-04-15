@@ -20,6 +20,7 @@ import { EventTrackerDto, UpdateEventDataDto } from '../event/event.dto';
 import { GroupInviteDto, UpdateGroupDataDto } from '../group/group.dto';
 import { UpdateOrganizationDataDto } from '../organization/organization.dto';
 import { AchievementTrackerDto, UpdateAchievementDataDto } from '../achievement/achievement.dto';
+import { ExtractSubjectType } from '@casl/ability';
 
 export type ClientApiDef = {
   updateUserData: UpdateUserDataDto;
@@ -83,14 +84,17 @@ export class ClientService {
     this.gateway.server.to(users).emit(event, dto);
   }
 
-  async sendProtected<TDto>(
+  async sendProtected<TDto extends {}>(
     event: keyof ClientApiDef,
     target: string,
     dto: ClientApiDef[typeof event] & TDto,
     resource?: {
       id: string;
       dtoField?: keyof TDto;
-      subject: Subjects<SubjectTypes>;
+      subject: ExtractSubjectType<Subjects<SubjectTypes>>;
+      prismaStore: {
+        count: (...args: any[]) => Promise<number>;
+      };
     },
   ) {
     if (!resource) {
@@ -105,34 +109,22 @@ export class ClientService {
       const options: PermittedFieldsOptions<AppAbility> = {
         fieldsFrom: rule => rule.fields || fieldList,
       };
+
       // Find all targeted users
       const users = await this.getAffectedUsers(target);
 
-      // Map from sorted list of properties to a list of user ids
-      const separatedDtos = new Map<string[], string[]>();
-
       for (const user of users) {
         const ability = this.abilityFactory.createForUser(user);
-        const permittedFields = permittedFieldsOf(
+        const accessibleObj = await this.abilityFactory.filterInaccessible(
+          resource.id,
+          resource.dtoField ? (dto[resource.dtoField] as any) : dto,
+          resource.subject,
           ability,
           Action.Read,
-          resource.subject,
-          options,
-        ).sort();
+          resource.prismaStore,
+        );
 
-        // Add user to this batch (which contains exactly these properties)
-        let userList = separatedDtos.get(permittedFields);
-        if (!userList) {
-          userList = [];
-          separatedDtos.set(permittedFields, userList);
-        }
-
-        userList.push(user.id);
-      }
-
-      // Process all batches and send out DTO
-      for (const [fields, users] of separatedDtos) {
-        if (fields.length === 0) continue;
+        if (Object.keys(accessibleObj).length === 0) continue;
 
         if (resource.dtoField) {
           (dto as any)[resource.dtoField] = Object.fromEntries(
@@ -143,11 +135,7 @@ export class ClientService {
 
           await this.sendEvent(users, event, dto);
         } else {
-          const partialDto = Object.fromEntries(
-            Object.entries(dto).filter(([k, v]) => fields.includes(k)),
-          );
-
-          await this.sendEvent(users, event, partialDto);
+          await this.sendEvent([user.id], event, accessibleObj);
         }
       }
     }

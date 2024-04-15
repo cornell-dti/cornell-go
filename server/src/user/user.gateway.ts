@@ -76,19 +76,14 @@ export class UserGateway {
     @CallingUser() user: User,
     @MessageBody() data: RequestAllUserDataDto,
   ) {
-    if (ability.can(Action.Read, 'User')) {
-      const users = await this.userService.getAllUserData();
+    const users = await this.userService.getAllUserData();
 
-      await users.map(
+    await Promise.all(
+      users.map(
         async (us: User) =>
           await this.userService.emitUpdateUserData(us, false, false, user),
-      );
-    } else {
-      await this.clientService.emitErrorData(
-        user,
-        'Permission to read all user data denied!',
-      );
-    }
+      ),
+    );
   }
 
   @SubscribeMessage('requestUserData')
@@ -99,7 +94,7 @@ export class UserGateway {
   ) {
     if (data.userId) {
       const queried = await this.userService.byId(data.userId);
-      if (queried && ability.can(Action.Read, subject('User', queried))) {
+      if (queried) {
         await this.userService.emitUpdateUserData(queried, false, false, user);
       } else {
         await this.clientService.emitErrorData(
@@ -168,14 +163,6 @@ export class UserGateway {
     @MessageBody() data: AddManagerDto,
   ) {
     const org = await this.orgService.getOrganizationById(data.organizationId);
-
-    if (!ability.can(Action.Manage, subject('Organization', org))) {
-      await this.clientService.emitErrorData(
-        user,
-        'Permission to add manager denied!',
-      );
-      return;
-    }
 
     if (
       !(await this.orgService.addManager(

@@ -35,7 +35,7 @@ export const defaultChallengeData = {
   name: 'Default Challenge',
   location: LocationType.ARTS_QUAD,
   description: 'McGraw Tower',
-  points: 50,
+  points: 1,
   imageUrl:
     'https://upload.wikimedia.org/wikipedia/commons/5/5f/CentralAvenueCornell2.jpg',
   latitude: 42.44755580740012,
@@ -62,19 +62,37 @@ export class OrganizationService {
     private abilityFactory: CaslAbilityFactory,
   ) {}
 
-  async makeDefaultEvent() {
-    const chal = await this.prisma.challenge.create({
+  // TODO: maybe move this to challenge.service in the future?
+  async makeDefaultChallenge(evId?: string) {
+    let index = 0;
+    if (evId) {
+      const maxIndexChallenge = await this.prisma.challenge.aggregate({
+        _max: { eventIndex: true },
+        where: { linkedEventId: evId },
+      });
+
+      index = (maxIndexChallenge._max.eventIndex ?? -1) + 1;
+    }
+
+    return await this.prisma.challenge.create({
       data: {
         ...defaultChallengeData,
+        linkedEventId: evId,
+        eventIndex: index,
       },
     });
+  }
 
+  // TODO: maybe move this to event.service in the future?
+  async makeDefaultEvent(orgId?: string) {
     const ev = await this.prisma.eventBase.create({
       data: {
         ...defaultEventData,
-        challenges: { connect: { id: chal.id } },
+        usedIn: orgId ? { connect: { id: orgId } } : undefined,
       },
     });
+
+    await this.makeDefaultChallenge(ev.id);
 
     return ev;
   }
@@ -170,8 +188,9 @@ export class OrganizationService {
       dto,
       {
         id: organization.id,
-        subject: subject('Organization', organization),
+        subject: 'Organization',
         dtoField: 'organization',
+        prismaStore: this.prisma.organization,
       },
     );
   }
@@ -200,18 +219,24 @@ export class OrganizationService {
       specialUsage: OrganizationSpecialUsage.NONE,
     };
 
-    if (
-      org &&
-      (await this.prisma.organization.findFirst({
-        select: { id: true },
-        where: { AND: [accessibleBy(ability, Action.Update).Organization] },
-      }))
-    ) {
+    const canUpdateOrg =
+      (await this.prisma.organization.count({
+        where: {
+          AND: [
+            accessibleBy(ability, Action.Update).Organization,
+            { id: org?.id ?? '' },
+          ],
+        },
+      })) > 0;
+
+    if (org && canUpdateOrg) {
       const updateData = await this.abilityFactory.filterInaccessible(
+        org.id,
         assignData,
-        subject('Organization', org),
+        'Organization',
         ability,
         Action.Update,
+        this.prisma.organization,
       );
 
       org = await this.prisma.organization.update({
@@ -246,19 +271,24 @@ export class OrganizationService {
   }
 
   async removeOrganization(ability: AppAbility, id: string) {
-    if (
-      await this.prisma.organization.findFirst({
-        where: {
-          AND: [{ id }, accessibleBy(ability, Action.Delete).Organization],
-        },
-      })
-    ) {
-      await this.prisma.organization.delete({
-        where: { id },
-      });
+    try {
+      if (
+        await this.prisma.organization.findFirst({
+          where: {
+            AND: [{ id }, accessibleBy(ability, Action.Delete).Organization],
+          },
+        })
+      ) {
+        await this.prisma.organization.delete({
+          where: { id },
+        });
 
-      console.log(`Deleted organization ${id}`);
-    }
+        console.log(`Deleted organization ${id}`);
+        return true;
+      }
+    } catch {}
+
+    return false;
   }
 
   async ensureFullAccessIfNeeded(potentialAdmin: User) {
@@ -288,7 +318,7 @@ export class OrganizationService {
     const org = await this.prisma.organization.findFirst({
       where: {
         AND: [
-          accessibleBy(ability, Action.Manage).Organization,
+          accessibleBy(ability, Action.Update).Organization,
           { id: organizationId },
         ],
       },

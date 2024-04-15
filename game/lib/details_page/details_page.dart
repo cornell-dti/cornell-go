@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:game/journeys/journeys_page.dart';
 import 'package:game/main.dart';
 import 'package:game/navigation_page/bottom_navbar.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -54,9 +53,7 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
                         border: OutlineInputBorder(),
                         labelText: 'e.g. Jane Doe',
                       ),
-                      onChanged: (newValue) => setState(() {
-                        _name = newValue;
-                      }),
+
                       // The validator receives the text that the user has entered.
                       validator: (value) {
                         if (value == null || value.isEmpty) {
@@ -74,8 +71,8 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
                     LatoText("Username", 18, Colors.black, FontWeight.w700),
                     SizedBox(height: 10),
                     TextFormField(
-                      onSaved: (newValue) => setState(() {
-                        _name = newValue!;
+                      onChanged: (newValue) => setState(() {
+                        _name = newValue;
                       }),
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
