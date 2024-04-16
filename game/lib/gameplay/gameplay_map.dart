@@ -256,6 +256,12 @@ class _GameplayMapState extends State<GameplayMap> {
     }
   }
 
+  // size variables for expanding picture for animation
+  var pictureWidth = 80.0;
+  var pictureHeight = 80.0;
+  var pictureIcon = SvgPicture.asset("assets/icons/mapexpand.svg");
+  var pictureAlign = Alignment.topRight;
+
   @override
   Widget build(BuildContext context) {
     // return FutureBuilder<bool>(
@@ -377,7 +383,10 @@ class _GameplayMapState extends State<GameplayMap> {
                       children: [
                         FloatingActionButton.extended(
                           onPressed: useHint,
-                          label: SvgPicture.asset("assets/icons/maphint.svg"),
+                          label: SvgPicture.asset("assets/icons/maphint.svg",
+                              colorFilter: ColorFilter.mode(
+                                  Color.fromARGB(255, 131, 90, 124),
+                                  BlendMode.srcIn)),
                           backgroundColor: Color.fromARGB(255, 255, 255, 255),
                           shape: CircleBorder(),
                         ),
@@ -402,7 +411,7 @@ class _GameplayMapState extends State<GameplayMap> {
                             child: Text(
                               numHintsLeft.toString(),
                               style: TextStyle(
-                                color: Color.fromARGB(255, 237, 86, 86),
+                                color: Color.fromARGB(255, 131, 90, 124),
                                 fontSize: 15,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -416,7 +425,10 @@ class _GameplayMapState extends State<GameplayMap> {
                     padding: EdgeInsets.only(bottom: 150.0),
                     child: FloatingActionButton.extended(
                       onPressed: recenterCamera,
-                      label: SvgPicture.asset("assets/icons/maprecenter.svg"),
+                      label: SvgPicture.asset("assets/icons/maprecenter.svg",
+                          colorFilter: ColorFilter.mode(
+                              Color.fromARGB(255, 131, 90, 124),
+                              BlendMode.srcIn)),
                       backgroundColor: Color.fromARGB(255, 255, 255, 255),
                       shape: CircleBorder(),
                     ),
@@ -425,53 +437,57 @@ class _GameplayMapState extends State<GameplayMap> {
               ),
               Padding(
                 // expandable image in top right of map
-                padding: EdgeInsets.only(left: 24.0, top: 40.0),
-                child: isExpanded
-                    ? Container(
-                        width: MediaQuery.of(context).size.width * 0.9,
-                        height: MediaQuery.of(context).size.height * 0.7,
-                        alignment: Alignment.topCenter,
-                        child: Stack(
-                          alignment: Alignment.topRight,
-                          children: [
-                            Image.asset('assets/images/main-bg.jpeg'),
-                            IconButton(
-                              onPressed: () {
-                                setState(() {
-                                  isExpanded = false;
-                                });
-                              },
-                              icon: Image.asset("assets/icons/mapexit.png"),
-                            ),
-                          ],
-                        ),
-                      )
-                    : GestureDetector(
-                        onTap: () {
-                          setState(() {
+                padding: EdgeInsets.only(left: 10.0, right: 10, top: 40.0),
+                child: GestureDetector(
+                  onTap: () {
+                    isExpanded
+                        ? setState(() {
+                            isExpanded = false;
+                            pictureHeight = 80.0;
+                            pictureWidth = 80.0;
+                            pictureIcon =
+                                SvgPicture.asset("assets/icons/mapexpand.svg");
+                            pictureAlign = Alignment.topRight;
+                          })
+                        : setState(() {
                             isExpanded = true;
+                            pictureHeight =
+                                MediaQuery.of(context).size.height * 0.6;
+                            pictureWidth =
+                                MediaQuery.of(context).size.width * 0.85;
+                            pictureIcon =
+                                SvgPicture.asset("assets/icons/mapexit.svg");
+                            pictureAlign = Alignment.topCenter;
                           });
-                        },
-                        child: Stack(
-                          alignment: Alignment.topRight,
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(10),
-                              child: Image.asset(
-                                'assets/images/main-bg.jpeg',
-                                fit: BoxFit.cover,
-                                width: 100,
-                                height: 100,
-                              ),
+                  },
+                  child: AnimatedContainer(
+                    duration: Duration(milliseconds: 50),
+                    width: pictureWidth,
+                    height: pictureHeight,
+                    child: Stack(
+                      children: [
+                        Container(
+                          alignment: pictureAlign,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: Image.asset(
+                              'assets/images/main-bg.jpeg',
+                              fit: BoxFit.cover,
+                              width: pictureWidth,
+                              height: pictureHeight,
                             ),
-                            Padding(
-                              padding: EdgeInsets.all(4.0),
-                              child: SvgPicture.asset(
-                                  "assets/icons/mapexpand.svg"),
-                            ),
-                          ],
+                          ),
                         ),
-                      ),
+                        Padding(
+                          padding: EdgeInsets.all(4.0),
+                          child: Container(
+                              alignment: Alignment.topRight,
+                              child: pictureIcon),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
             ],
           )),

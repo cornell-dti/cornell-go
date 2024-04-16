@@ -41,6 +41,17 @@ class _GameplayPageState extends State<GameplayPage> {
 
   late StreamSubscription<Position> positionStream;
 
+  final Map<String, String> friendlyLocation = {
+    "ENG_QUAD": "Eng Quad",
+    "ARTS_QUAD": "Arts Quad",
+    "AG_QUAD": "Ag Quad",
+    "NORTH_CAMPUS": "North Campus",
+    "WEST_CAMPUS": "West Campus",
+    "COLLEGETOWN": "Collegetown",
+    "ITHACA_COMMONS": "Ithaca Commons",
+    "ANY": "Cornell",
+  };
+
   @override
   void initState() {
     startPositionStream();
@@ -153,7 +164,10 @@ class _GameplayPageState extends State<GameplayPage> {
                                   ),
                                   padding: const EdgeInsets.symmetric(
                                       vertical: 4.0, horizontal: 8.0),
-                                  child: const Text('Challenge',
+                                  child: Text(
+                                      (event.challenges!.length > 1
+                                          ? "Journey"
+                                          : "Challenge"),
                                       style: TextStyle(
                                           fontSize: 14,
                                           color: Color(0xFFA4A4A4))),
@@ -170,44 +184,50 @@ class _GameplayPageState extends State<GameplayPage> {
                             ),
                           ),
                           Container(
-                              padding: EdgeInsets.only(left: 18, right: 18),
+                              // padding: EdgeInsets.only(left: 18, right: 18),
                               child: Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Row(children: [
-                                      SvgPicture.asset(
-                                          "assets/icons/locationpin.svg"),
-                                      Text(' Arts Quad',
-                                          style: TextStyle(
-                                              fontSize: 12,
-                                              color: Color(0xFF835A7C)))
-                                    ]),
-                                    Row(children: [
-                                      SvgPicture.asset(
-                                          "assets/icons/feetpics.svg"),
-                                      Text(
-                                          ' ' +
-                                              (currentLocation != null
-                                                  ? (currentLocation!.distanceTo(
-                                                              targetLocation) /
-                                                          1609.34)
-                                                      .toStringAsFixed(1)
-                                                  : "0.0") +
-                                              ' Miles Away',
-                                          style: TextStyle(
-                                              fontSize: 12,
-                                              color: Color(0xFF58B171)))
-                                    ]),
-                                    Row(children: [
-                                      SvgPicture.asset(
-                                          "assets/icons/bearcoins.svg"),
-                                      Text(' 0/100',
-                                          style: TextStyle(
-                                              fontSize: 12,
-                                              color: Color(0xFFFFC737)))
-                                    ]),
-                                  ]))
+                                Row(children: [
+                                  SvgPicture.asset(
+                                      "assets/icons/locationpin.svg"),
+                                  Text(
+                                      ' ' +
+                                          (friendlyLocation[
+                                                  challenge.location] ??
+                                              ""),
+                                      style: TextStyle(
+                                          fontSize: 12,
+                                          color: Color(0xFF835A7C)))
+                                ]),
+                                Row(children: [
+                                  SvgPicture.asset("assets/icons/feetpics.svg"),
+                                  Text(
+                                      ' ' +
+                                          (currentLocation != null
+                                              ? (currentLocation!.distanceTo(
+                                                          targetLocation) /
+                                                      1609.34)
+                                                  .toStringAsFixed(1)
+                                              : "?.?") +
+                                          ' Miles Away',
+                                      style: TextStyle(
+                                          fontSize: 12,
+                                          color: Color(0xFF58B171)))
+                                ]),
+                                Row(children: [
+                                  SvgPicture.asset(
+                                      "assets/icons/bearcoins.svg"),
+                                  Text(
+                                      ' ' +
+                                          (challenge.points ?? 0).toString() +
+                                          " PTS",
+                                      style: TextStyle(
+                                          fontSize: 12,
+                                          color: Color(0xFFFFC737)))
+                                ]),
+                              ]))
                         ]))),
             Expanded(
               child: Padding(
