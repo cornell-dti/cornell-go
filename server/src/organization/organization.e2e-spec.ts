@@ -28,6 +28,8 @@ import { UpdateUserDataDto } from '../user/user.dto';
 import { UpdateEventDataDto } from '../event/event.dto';
 import { UpdateChallengeDataDto } from '../challenge/challenge.dto';
 
+type DtoLastCall<T> = [string[], string, T];
+
 describe('OrganizationModule E2E', () => {
   let app: INestApplication;
   let moduleRef: TestingModule;
@@ -64,7 +66,8 @@ describe('OrganizationModule E2E', () => {
   let exEv: EventBase;
   let exChal: Challenge;
 
-  let sendEventMock: jest.SpyInstance<Promise<void>, [string[], string, {}]>;
+  let sendEventMock: jest.SpyInstance<Promise<void>, [string[], string, any]>;
+  let affectedUsers: User[] = [];
 
   beforeAll(async () => {
     moduleRef = await Test.createTestingModule({
@@ -129,7 +132,7 @@ describe('OrganizationModule E2E', () => {
     );
 
     defaultOrg = await orgService.getDefaultOrganization(
-      OrganizationSpecialUsage.CORNELL_LOGIN,
+      OrganizationSpecialUsage.DEVICE_LOGIN,
     );
 
     defaultEv = (await eventService.getEventById(
@@ -151,12 +154,14 @@ describe('OrganizationModule E2E', () => {
     managerAbility = abilityFactory.createForUser(managerUser);
     basicAbility = abilityFactory.createForUser(basicUser);
 
-    clientService.getAffectedUsers = async (target: string) => [
-      managerUser,
-      basicUser,
-    ];
+    clientService.getAffectedUsers = async (target: string) => affectedUsers;
 
     await app.init();
+  });
+
+  afterEach(() => {
+    sendEventMock.mockClear();
+    affectedUsers.splice(0, affectedUsers.length);
   });
 
   it('should successfully find OrganizationService', async () => {
@@ -167,13 +172,11 @@ describe('OrganizationModule E2E', () => {
 
   describe('Basic and manager user abilities', () => {
     it('Should be able to read own data', async () => {
+      affectedUsers.push(basicUser);
       await userGateway.requestUserData(basicAbility, basicUser, {});
 
-      const [users, ev, dto] = sendEventMock.mock.lastCall as [
-        string[],
-        string,
-        UpdateUserDataDto,
-      ];
+      const [users, ev, dto]: DtoLastCall<UpdateUserDataDto> =
+        sendEventMock.mock.lastCall;
 
       expect(ev).toEqual('updateUserData');
       expect(users).toContain(basicUser.id);
@@ -188,28 +191,92 @@ describe('OrganizationModule E2E', () => {
     });
 
     it('Should be able to modify own username', async () => {
+      affectedUsers.push(basicUser);
       await userGateway.updateUserData(basicAbility, basicUser, {
         user: { id: basicUser.id, username: 'myNewUsername' },
         deleted: false,
       });
 
-      const [users, ev, dto] = sendEventMock.mock.lastCall as [
-        string[],
-        string,
-        UpdateUserDataDto,
-      ];
+      const [users, ev, dto]: DtoLastCall<UpdateUserDataDto> =
+        sendEventMock.mock.lastCall;
 
       expect(ev).toEqual('updateUserData');
       expect(dto.user.username).toEqual('myNewUsername');
     });
 
-    /*
+    it('Should not be able to see non-current challenge', async () => {
+      await groupService.setCurrentEvent(managerUser, exEv.id);
+
+      affectedUsers.push(managerUser);
+      await chalGateway.requestChallengeData(managerAbility, managerUser, {
+        challenges: [defaultChal.id],
+      });
+
+      expect(sendEventMock.mock.lastCall).toBeUndefined();
+    });
+
+    it('Should be able to see current challenge lat long but not name', async () => {
+      await groupService.setCurrentEvent(basicUser, defaultEv.id);
+      affectedUsers.push(basicUser);
+      await chalGateway.requestChallengeData(basicAbility, basicUser, {
+        challenges: [defaultChal.id],
+      });
+
+      const [users, ev, dto]: DtoLastCall<UpdateChallengeDataDto> =
+        sendEventMock.mock.lastCall;
+
+      expect(ev).toEqual('updateChallengeData');
+      expect(dto.challenge.name).toBeUndefined();
+      expect(dto.challenge.latF).toBeDefined();
+      expect(dto.challenge.longF).toBeDefined();
+    });
+
+    it('Should be able to see completed challenge name but not lat long', async () => {
+      await groupService.setCurrentEvent(managerUser, defaultEv.id);
+      await chalGateway.completedChallenge(managerUser, {
+        challengeId: defaultChal.id,
+      });
+      await groupService.setCurrentEvent(managerUser, exEv.id);
+
+      affectedUsers.push(managerUser);
+      await chalGateway.requestChallengeData(managerAbility, managerUser, {
+        challenges: [defaultChal.id],
+      });
+
+      const [users, ev, dto]: DtoLastCall<UpdateChallengeDataDto> =
+        sendEventMock.mock.lastCall;
+
+      expect(ev).toEqual('updateChallengeData');
+      expect(dto.challenge.name).toBeDefined();
+      expect(dto.challenge.latF).toBeUndefined();
+      expect(dto.challenge.longF).toBeUndefined();
+    });
+
+    it('Should not be able to set current event to event of not allowed org', async () => {
+      expect(
+        await groupService.setCurrentEvent(basicUser, exEv.id),
+      ).toBeFalsy();
+    });
+
+    it('Should not be able to modify score', async () => {
+      affectedUsers.push(basicUser);
+      await userGateway.updateUserData(basicAbility, basicUser, {
+        user: { id: basicUser.id, score: 600 },
+        deleted: false,
+      });
+
+      const [users, ev, dto]: DtoLastCall<UpdateUserDataDto> =
+        sendEventMock.mock.lastCall;
+
+      expect(ev).toEqual('updateUserData');
+      expect(dto.user.score).toEqual(basicUser.score);
+    });
+
     it('Should be able to read from own org', async () => {
+      affectedUsers.push(basicUser);
       await evGateway.requestEventData(basicAbility, basicUser, {
         events: [defaultEv.id],
       });
-
-      console.log(JSON.stringify(sendEventMock.mock.calls));
 
       let [users, ev, dto] = sendEventMock.mock.lastCall as [
         string[],
@@ -221,6 +288,8 @@ describe('OrganizationModule E2E', () => {
       expect(dto.event.id).toEqual(defaultEv.id);
       expect(dto.event.name).toEqual(defaultEv.name);
 
+      await groupService.setCurrentEvent(basicUser, defaultEv.id);
+      affectedUsers.push(basicUser);
       await chalGateway.requestChallengeData(basicAbility, basicUser, {
         challenges: [defaultChal.id],
       });
@@ -233,59 +302,49 @@ describe('OrganizationModule E2E', () => {
 
       expect(ev2).toEqual('updateChallengeData');
       expect(dto2.challenge.id).toEqual(defaultChal.id);
-      expect(dto2.challenge.name).toEqual(defaultChal.name);
-    });*/
+      expect(dto2.challenge.imageUrl).toEqual(defaultChal.imageUrl);
+    });
 
     it('Should not be able to read other user', async () => {
+      affectedUsers.push(basicUser);
       await userGateway.requestAllUserData(basicAbility, basicUser, {});
 
       expect(
         sendEventMock.mock.calls.every(call => {
-          const [users, ev, dto] = call as [
-            string[],
-            string,
-            UpdateUserDataDto,
-          ];
+          const [users, ev, dto]: DtoLastCall<UpdateUserDataDto> = call;
 
-          if (users.includes(basicUser.id) && ev === 'updateUserData')
-            return basicUser.id == dto.user.id;
-          else return true;
+          // Check only the call with updateUserData directed at basicUser not any other one
+          if (ev === 'updateUserData') return basicUser.id === dto.user.id;
+          return true;
         }),
       ).toBeTruthy();
     });
 
     it('Should not be able to see other org', async () => {
+      affectedUsers.push(basicUser);
       await evGateway.requestEventData(basicAbility, basicUser, {
         events: [exEv.id],
       });
 
       expect(
         sendEventMock.mock.calls.every(call => {
-          const [users, ev, dto] = call as [
-            string[],
-            string,
-            UpdateEventDataDto,
-          ];
+          const [users, ev, dto]: DtoLastCall<UpdateEventDataDto> = call;
 
-          if (users.includes(basicUser.id) && ev === 'updateEventData')
-            return exEv.id !== dto.event.id;
+          if (ev === 'updateEventData') return exEv.id !== dto.event.id;
           else return true;
         }),
       ).toBeTruthy();
 
+      affectedUsers.push(basicUser);
       await chalGateway.requestChallengeData(basicAbility, basicUser, {
         challenges: [exChal.id],
       });
 
       expect(
         sendEventMock.mock.calls.every(call => {
-          const [users, ev, dto] = call as [
-            string[],
-            string,
-            UpdateChallengeDataDto,
-          ];
+          const [users, ev, dto]: DtoLastCall<UpdateChallengeDataDto> = call;
 
-          if (users.includes(basicUser.id) && ev === 'updateChallengeData')
+          if (ev === 'updateChallengeData')
             return exChal.id !== dto.challenge.id;
           else return true;
         }),
@@ -294,7 +353,7 @@ describe('OrganizationModule E2E', () => {
   });
 
   describe('Manager user abilities', () => {
-    /*it('Should be able to add managers to managed org', async () => {
+    it('Should be able to add managers to managed org', async () => {
       const addState = await orgService.addManager(
         managerAbility,
         'manager@cornell.edu',
@@ -302,7 +361,7 @@ describe('OrganizationModule E2E', () => {
       );
 
       expect(addState).toBeTruthy();
-    });*/
+    });
 
     it('Should not be able to add managers to another org', async () => {
       const addState = await orgService.addManager(
@@ -314,7 +373,7 @@ describe('OrganizationModule E2E', () => {
       expect(addState).toBeFalsy();
     });
 
-    /*it('Should be able to modify managed org', async () => {
+    it('Should be able to modify managed org', async () => {
       const newEv = await eventService.upsertEventFromDto(managerAbility, {
         id: exEv.id,
         name: 'New name',
@@ -331,7 +390,7 @@ describe('OrganizationModule E2E', () => {
       );
 
       expect(newChal?.name).toEqual('New Name');
-    });*/
+    });
 
     it('Should not be able to modify other org', async () => {
       const newEv = await eventService.upsertEventFromDto(managerAbility, {
@@ -354,6 +413,11 @@ describe('OrganizationModule E2E', () => {
   });
 
   afterAll(async () => {
+    await userService.deleteUser(fullAbility, basicUser);
+    await userService.deleteUser(fullAbility, managerUser);
+    await challengeService.removeChallenge(fullAbility, exChal.id);
+    await eventService.removeEvent(fullAbility, exEv.id);
+    await orgService.removeOrganization(fullAbility, exOrg.id);
     await app.close();
   });
 });

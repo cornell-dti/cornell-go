@@ -20,9 +20,8 @@ class CompletedChallengesPage extends StatelessWidget {
           icon: const Icon(Icons.navigate_before),
           color: Colors.white,
           onPressed: () {
-            Navigator.push(
+            Navigator.pop(
               context,
-              MaterialPageRoute(builder: (context) => ProfilePage()),
             );
           },
         ),
