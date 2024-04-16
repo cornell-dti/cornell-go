@@ -336,35 +336,6 @@ class _GameplayMapState extends State<GameplayMap> {
                         color: Color(0xFFFFFFFF)),
                   ),
                   onPressed: () {
-                    var eventId =
-                        Provider.of<GroupModel>(context, listen: false)
-                            .curEventId;
-                    var event = Provider.of<EventModel>(context, listen: false)
-                        .getEventById(eventId ?? "");
-                    var tracker =
-                        Provider.of<TrackerModel>(context, listen: false)
-                            .trackerByEventId(eventId ?? "");
-
-                    if (tracker == null) {
-                      displayToast(
-                          "An error occurred while getting event tracker",
-                          Status.error);
-                    } else {
-                      var challenge =
-                          Provider.of<ChallengeModel>(context, listen: false)
-                              .getChallengeById(tracker.curChallengeId!);
-                      if (challenge == null) {
-                        displayToast(
-                            "An error occurred while getting challenge",
-                            Status.error);
-                      } else {
-                        Provider.of<ApiClient>(context, listen: false)
-                            .serverApi
-                            ?.completedChallenge(CompletedChallengeDto(
-                                challengeId: challenge.id));
-                      }
-                    }
-
                     showDialog(
                       context: context,
                       builder: (context) {
@@ -572,8 +543,38 @@ class _GameplayMapState extends State<GameplayMap> {
                               color: Color.fromARGB(255, 237, 86, 86)))),
                   Spacer(),
                   ElevatedButton(
-                    onPressed: () => {
-                      Navigator.pop(context),
+                    onPressed: () {
+                      var eventId =
+                          Provider.of<GroupModel>(context, listen: false)
+                              .curEventId;
+                      var event =
+                          Provider.of<EventModel>(context, listen: false)
+                              .getEventById(eventId ?? "");
+                      var tracker =
+                          Provider.of<TrackerModel>(context, listen: false)
+                              .trackerByEventId(eventId ?? "");
+
+                      if (tracker == null) {
+                        displayToast(
+                            "An error occurred while getting event tracker",
+                            Status.error);
+                      } else {
+                        var challenge =
+                            Provider.of<ChallengeModel>(context, listen: false)
+                                .getChallengeById(tracker.curChallengeId!);
+                        if (challenge == null) {
+                          displayToast(
+                              "An error occurred while getting challenge",
+                              Status.error);
+                        } else {
+                          Provider.of<ApiClient>(context, listen: false)
+                              .serverApi
+                              ?.completedChallenge(CompletedChallengeDto(
+                                  challengeId: challenge.id));
+                        }
+                      }
+
+                      Navigator.pop(context);
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
@@ -581,7 +582,7 @@ class _GameplayMapState extends State<GameplayMap> {
                                 description: widget.description,
                                 points: widget.points,
                                 numHintsLeft: numHintsLeft)),
-                      )
+                      );
                     },
                     style: ButtonStyle(
                       padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
