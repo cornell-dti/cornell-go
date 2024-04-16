@@ -72,8 +72,8 @@ describe('UserModule E2E', () => {
     const userSer = moduleRef.get<UserService>(UserService);
     await userSer.register(
       'test4@example.com',
-      '',
-      '',
+      '23e21e',
+      '23dwe',
       1,
       1,
       AuthType.DEVICE,
@@ -83,8 +83,8 @@ describe('UserModule E2E', () => {
     let oldList = await userSer.getAllUserData();
     await userSer.register(
       'test4@example.com',
-      '',
-      '',
+      'wefwef',
+      'wef324f',
       1,
       1,
       AuthType.DEVICE,
