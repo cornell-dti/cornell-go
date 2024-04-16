@@ -78,7 +78,7 @@ model User {
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt()
   subject             String               @default("User")
-  authToken           String
+  authToken           String               @unique
   authType            AuthType
   username            String
   year                String
