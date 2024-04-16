@@ -90,16 +90,10 @@ export class GroupGateway {
       return;
     }
 
-    if (ability.cannot(Action.Manage, subject('Group', group))) {
-      await this.clientService.emitErrorData(
-        user,
-        'Permission to manage this group denied!',
-      );
-      return;
-    }
-
     if (data.deleted) {
-      await this.groupService.removeGroup(ability, data.group.id);
+      if (!(await this.groupService.removeGroup(ability, data.group.id))) {
+        await this.clientService.emitErrorData(user, 'Failed to remove group!');
+      }
       await this.groupService.emitUpdateGroupData(group, true);
     } else {
       const group = await this.groupService.updateGroup(ability, data.group);

@@ -128,3 +128,9 @@ Text LatoText(String text, double fs, Color color, FontWeight fw) {
           textStyle: TextStyle(
               color: color, fontWeight: FontWeight.bold, fontSize: fs)));
 }
+
+final Map<EventDifficultyDto, String> difficultyToString = {
+  EventDifficultyDto.Easy: "Easy",
+  EventDifficultyDto.Normal: "Normal",
+  EventDifficultyDto.Hard: "Hard",
+};

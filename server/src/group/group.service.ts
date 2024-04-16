@@ -228,16 +228,34 @@ export class GroupService {
     // then this is an invalid set event.
     // If we are only switching an unactive event to a default event,
     // actor and eventId do not matter.
-    if (
-      actorAbility.cannot(Action.Update, 'Group', 'curEventId') ||
-      eventId === group.curEventId
-    ) {
-      return;
+
+    // Slight hack
+    const filteredData = await this.abilityFactory.filterInaccessible(
+      group.id,
+      { curEventId: group.curEventId },
+      'Group',
+      actorAbility,
+      Action.Update,
+      this.prisma.group,
+    );
+
+    if (eventId === filteredData.curEventId) {
+      return false;
     }
 
     for (const mem of group.members) {
       const ability = this.abilityFactory.createForUser(mem);
-      if (ability.cannot(Action.Read, subject('EventBase', newEvent))) {
+      const canAccess =
+        (await this.prisma.eventBase.count({
+          where: {
+            AND: [
+              { id: newEvent.id },
+              accessibleBy(ability, Action.Read).EventBase,
+            ],
+          },
+        })) > 0;
+
+      if (!canAccess) {
         return false;
       }
     }
@@ -295,7 +313,12 @@ export class GroupService {
       'updateGroupData',
       target?.id ?? group.id,
       dto,
-      { id: group.id, subject: subject('Group', group), dtoField: 'group' },
+      {
+        id: group.id,
+        subject: 'Group',
+        dtoField: 'group',
+        prismaStore: this.prisma.group,
+      },
     );
   }
 
@@ -327,6 +350,7 @@ export class GroupService {
     await this.prisma.group.updateMany({
       where: { AND: [{ id: group.id }, accessibleBy(ability).Group] },
       data: await this.abilityFactory.filterInaccessible(
+        group.id,
         {
           friendlyId: group.friendlyId,
           hostId: group.hostId,
@@ -335,6 +359,7 @@ export class GroupService {
         'Group',
         ability,
         Action.Update,
+        this.prisma.group,
       ),
     });
 
@@ -355,14 +380,14 @@ export class GroupService {
   }
 
   async removeGroup(ability: AppAbility, removeId: string) {
-    const deletedGroup = await this.prisma.group.findFirstOrThrow({
-      where: { id: removeId },
+    const deletedGroup = await this.prisma.group.findFirst({
+      where: {
+        AND: [{ id: removeId }, accessibleBy(ability, Action.Delete).Group],
+      },
       include: { members: true },
     });
 
-    if (ability.cannot(Action.Delete, subject('Group', deletedGroup))) {
-      return;
-    }
+    if (!deletedGroup) return false;
 
     for (const mem of deletedGroup.members) {
       await this.leaveGroup(mem);

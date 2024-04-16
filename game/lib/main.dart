@@ -25,7 +25,6 @@ import 'package:game/profile/completed_cell.dart';
 import 'package:game/profile/profile_page.dart';
 import 'package:game/profile/settings_page.dart';
 import 'package:game/register_page/register_page.dart';
-import 'package:game/settings/settings.dart';
 import 'package:game/splash_page/splash_page.dart';
 import 'package:game/widget/game_widget.dart';
 import 'package:provider/provider.dart';
@@ -123,7 +122,6 @@ class MyApp extends StatelessWidget {
           theme: ThemeData(
               fontFamily: 'Poppins', primarySwatch: ColorPalette.BigRed),
           home: SplashPageWidget(),
-          // home: GameplayMap(),
         )));
   }
 }
