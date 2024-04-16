@@ -1,10 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:game/api/geopoint.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:async';
 import 'dart:math';
+import 'package:game/gameplay/challenge_completed.dart';
+import 'package:game/progress_indicators/circular_progress_indicator.dart';
+import 'package:game/utils/utility_functions.dart';
+
+// for backend connection
+import 'package:provider/provider.dart';
+import 'package:game/api/game_client_dto.dart';
+import 'package:game/api/game_api.dart';
+import 'package:game/model/event_model.dart';
+import 'package:game/model/tracker_model.dart';
+import 'package:game/model/group_model.dart';
+import 'package:game/model/challenge_model.dart';
 
 import 'package:provider/provider.dart';
 import 'package:velocity_x/velocity_x.dart';
@@ -32,6 +45,8 @@ class _GameplayMapState extends State<GameplayMap> {
 
   late Completer<GoogleMapController> mapCompleter = Completer();
   late StreamSubscription<Position> positionStream;
+  // Whether location streaming has begun
+  late Future<bool> streamStarted;
 
   // User is by default centered around some location on Cornell's campus.
   // User should only be at these coords briefly before map is moved to user's
@@ -53,10 +68,22 @@ class _GameplayMapState extends State<GameplayMap> {
 
   @override
   void initState() {
-    setCustomMarkerIcon();
-    startPositionStream();
-    setStartingHintCenter();
     super.initState();
+    setCustomMarkerIcon();
+    streamStarted = startPositionStream();
+    setStartingHintCenter();
+  }
+
+  @override
+  void dispose() {
+    positionStream.cancel();
+    _disposeController();
+    super.dispose();
+  }
+
+  Future<void> _disposeController() async {
+    final GoogleMapController controller = await mapCompleter.future;
+    controller.dispose();
   }
 
   /**
@@ -94,8 +121,10 @@ class _GameplayMapState extends State<GameplayMap> {
   /**
    * Starts the user's current location streaming upon state initialization
    * Sets the camera to center on user's location by default
+   * 
+   * Returns true if stream is successfully set up
    */
-  void startPositionStream() async {
+  Future<bool> startPositionStream() async {
     GoogleMapController googleMapController = await mapCompleter.future;
 
     GeoPoint.current().then(
@@ -117,6 +146,7 @@ class _GameplayMapState extends State<GameplayMap> {
       currentLocation = newPos == null
           ? GeoPoint(_center.latitude, _center.longitude, 0)
           : GeoPoint(newPos.latitude, newPos.longitude, newPos.heading);
+      setState(() {});
     });
 
     positionStream.onData((newPos) {
@@ -135,6 +165,7 @@ class _GameplayMapState extends State<GameplayMap> {
       );
       setState(() {});
     });
+    return true;
   }
 
   /**
@@ -227,6 +258,11 @@ class _GameplayMapState extends State<GameplayMap> {
 
   @override
   Widget build(BuildContext context) {
+    // return FutureBuilder<bool>(
+    //     future: streamStarted,
+    //     builder: (context, AsyncSnapshot<bool> snapshot) {
+    //       return !snapshot.hasData
+    //           ? CircularIndicator()
     return MaterialApp(
       theme: ThemeData(
         useMaterial3: true,
@@ -300,6 +336,35 @@ class _GameplayMapState extends State<GameplayMap> {
                         color: Color(0xFFFFFFFF)),
                   ),
                   onPressed: () {
+                    var eventId =
+                        Provider.of<GroupModel>(context, listen: false)
+                            .curEventId;
+                    var event = Provider.of<EventModel>(context, listen: false)
+                        .getEventById(eventId ?? "");
+                    var tracker =
+                        Provider.of<TrackerModel>(context, listen: false)
+                            .trackerByEventId(eventId ?? "");
+
+                    if (tracker == null) {
+                      displayToast(
+                          "An error occurred while getting event tracker",
+                          Status.error);
+                    } else {
+                      var challenge =
+                          Provider.of<ChallengeModel>(context, listen: false)
+                              .getChallengeById(tracker.curChallengeId!);
+                      if (challenge == null) {
+                        displayToast(
+                            "An error occurred while getting challenge",
+                            Status.error);
+                      } else {
+                        Provider.of<ApiClient>(context, listen: false)
+                            .serverApi
+                            ?.completedChallenge(CompletedChallengeDto(
+                                challengeId: challenge.id));
+                      }
+                    }
+
                     showDialog(
                       context: context,
                       builder: (context) {
@@ -308,12 +373,16 @@ class _GameplayMapState extends State<GameplayMap> {
                               .withOpacity(0.3), // Adjust opacity as needed
                           width: MediaQuery.of(context).size.width,
                           height: MediaQuery.of(context).size.height,
-                          child: Dialog(
-                            elevation: 16, //arbitrary large number
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(
-                                  10), // Same as the Dialog's shape
-                              child: displayDialogue(),
+                          child: Container(
+                            margin:
+                                EdgeInsetsDirectional.only(start: 10, end: 10),
+                            child: Dialog(
+                              elevation: 16, //arbitrary large number
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(
+                                    10), // Same as the Dialog's shape
+                                child: displayDialogue(),
+                              ),
                             ),
                           ),
                         );
@@ -436,6 +505,7 @@ class _GameplayMapState extends State<GameplayMap> {
             ],
           )),
     );
+    // });
   }
 
   /** Returns whether the user is at the challenge location */
@@ -447,8 +517,9 @@ class _GameplayMapState extends State<GameplayMap> {
   Container displayDialogue() {
     return checkArrived()
         ? Container(
+            // margin: EdgeInsetsDirectional.only(start: 50, end: 50),
             color: Colors.white,
-            padding: EdgeInsets.all(20),
+            padding: EdgeInsets.all(25),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -458,77 +529,23 @@ class _GameplayMapState extends State<GameplayMap> {
                     child: Text(
                       "Congratulations!",
                       style:
-                          TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     )),
                 Container(
                     margin: EdgeInsets.only(bottom: 10),
                     child: Text(
-                      "You have arrived at ${widget.description}!",
-                    )),
-                Container(
-                    margin: EdgeInsets.only(bottom: 10),
-                    child: Row(
-                      children: [
-                        Text(
-                          "Found Location",
-                        ),
-                        Spacer(),
-                        Text("+ " + widget.points.toString() + " points"),
-                      ],
-                    )),
-                Row(children: [
-                  TextButton(
-                      onPressed: () => Navigator.pop(context, false),
-                      child: Text("EXIT",
-                          style: TextStyle(
-                              fontSize: 14,
-                              decoration: TextDecoration.underline,
-                              color: Color.fromARGB(255, 131, 90, 124)))),
-                  Spacer(),
-                  ElevatedButton(
-                      onPressed: () =>
-                          {useHint(), Navigator.pop(context, false)},
-                      style: ButtonStyle(
-                        shape:
-                            MaterialStateProperty.all<RoundedRectangleBorder>(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                                7.3), // Adjust the radius as needed
-                          ),
-                        ),
-                        backgroundColor: MaterialStateProperty.all<Color>(
-                            Color.fromARGB(255, 237, 86, 86)),
-                      ),
-                      child: Row(
-                        children: [
-                          SvgPicture.asset("assets/icons/mapcamera.svg"),
-                          Text("Take Photo (+25pt)",
-                              style: TextStyle(color: Colors.white)),
-                        ],
-                      )),
-                ])
-              ],
-            ),
-          )
-        : Container(
-            color: Colors.white,
-            padding: EdgeInsets.all(20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                    margin: EdgeInsets.only(top: 5),
-                    child: Text(
-                      "Nearly There!",
+                      "You've arrived at ${widget.description}!",
                       style:
-                          TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                          TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
                     )),
                 Container(
-                    margin: EdgeInsets.only(bottom: 10),
-                    child: Text(
-                      "Use a hint if needed, you are close!",
-                    )),
+                  margin: EdgeInsets.only(bottom: 10),
+                  width: MediaQuery.of(context).size.width,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(5.0))),
+                  child: SvgPicture.asset('assets/images/arrived.svg',
+                      fit: BoxFit.cover),
+                ),
                 Row(children: [
                   ElevatedButton(
                       onPressed: () => Navigator.pop(context, false),
@@ -550,7 +567,85 @@ class _GameplayMapState extends State<GameplayMap> {
                         backgroundColor:
                             MaterialStateProperty.all<Color>(Colors.white),
                       ),
-                      child: Text("Continue",
+                      child: Text("Leave",
+                          style: TextStyle(
+                              color: Color.fromARGB(255, 237, 86, 86)))),
+                  Spacer(),
+                  ElevatedButton(
+                    onPressed: () => {
+                      Navigator.pop(context),
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => ChallengeCompletedPage(
+                                description: widget.description,
+                                points: widget.points,
+                                numHintsLeft: numHintsLeft)),
+                      )
+                    },
+                    style: ButtonStyle(
+                      padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
+                          EdgeInsets.only(left: 15, right: 15)),
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                              7.3), // Adjust the radius as needed
+                        ),
+                      ),
+                      backgroundColor: MaterialStateProperty.all<Color>(
+                          Color.fromARGB(255, 237, 86, 86)),
+                    ),
+                    child: Text("Point Breakdown",
+                        style: TextStyle(color: Colors.white)),
+                  ),
+                ])
+              ],
+            ),
+          )
+        : Container(
+            color: Colors.white,
+            padding: EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                    margin: EdgeInsets.only(top: 5),
+                    child: Text(
+                      "Nearly There!",
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                    )),
+                Container(
+                    margin: EdgeInsets.only(bottom: 10),
+                    child: Text(
+                        "You’re close, but not there yet. Use a hint if needed! Hints use 25 points.",
+                        style: TextStyle(
+                            fontSize: 14, fontWeight: FontWeight.w400))),
+                Row(children: [
+                  ElevatedButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      style: ButtonStyle(
+                        padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
+                            EdgeInsets.only(left: 15, right: 15)),
+                        shape:
+                            MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                                7.3), // Adjust the radius as needed
+                          ),
+                        ),
+                        side: MaterialStateProperty.all<BorderSide>(
+                          BorderSide(
+                            color: Color.fromARGB(
+                                255, 237, 86, 86), // Specify the border color
+                            width: 2.0, // Specify the border width
+                          ),
+                        ),
+                        backgroundColor:
+                            MaterialStateProperty.all<Color>(Colors.white),
+                      ),
+                      child: Text("Nevermind",
                           style: TextStyle(
                               color: Color.fromARGB(255, 237, 86, 86)))),
                   Spacer(),
@@ -558,6 +653,8 @@ class _GameplayMapState extends State<GameplayMap> {
                       onPressed: () =>
                           {useHint(), Navigator.pop(context, false)},
                       style: ButtonStyle(
+                        padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
+                            EdgeInsets.only(left: 20, right: 20)),
                         shape:
                             MaterialStateProperty.all<RoundedRectangleBorder>(
                           RoundedRectangleBorder(

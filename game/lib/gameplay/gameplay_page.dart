@@ -47,6 +47,12 @@ class _GameplayPageState extends State<GameplayPage> {
     super.initState();
   }
 
+  @override
+  void dispose() {
+    positionStream.cancel();
+    super.dispose();
+  }
+
   /**
    * Starts the user's current location streaming upon state initialization
    * Sets the camera to center on user's location by default
@@ -124,11 +130,7 @@ class _GameplayPageState extends State<GameplayPage> {
                                         foregroundColor: Colors.grey),
                                     onPressed: () {
                                       // Left button action
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  HomeNavBar()));
+                                      Navigator.pop(context);
                                     },
                                     child: Row(children: [
                                       SvgPicture.asset(
@@ -214,7 +216,7 @@ class _GameplayPageState extends State<GameplayPage> {
                     targetLocation: targetLocation,
                     awardingRadius: awardingRadius,
                     description: challenge.description ?? "",
-                    points: 100, // TODO: update after points is in backend
+                    points: challenge.points ?? 0,
                   )),
             ),
           ],
