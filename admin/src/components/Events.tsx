@@ -138,19 +138,19 @@ function fromForm(form: EntryForm[], id: string): EventDto {
     name: (form[0] as FreeEntryForm).value,
     description: (form[1] as FreeEntryForm).value,
     category:
-      (form[7] as OptionEntryForm).value === 0
+      (form[5] as OptionEntryForm).value === 0
         ? "FOOD"
-        : (form[7] as OptionEntryForm).value === 1
+        : (form[5] as OptionEntryForm).value === 1
         ? "NATURE"
-        : (form[7] as OptionEntryForm).value === 2
+        : (form[5] as OptionEntryForm).value === 2
         ? "HISTORICAL"
-        : (form[7] as OptionEntryForm).value === 3
+        : (form[5] as OptionEntryForm).value === 3
         ? "CAFE"
-        : (form[7] as OptionEntryForm).value === 4
+        : (form[5] as OptionEntryForm).value === 4
         ? "DININGHALL"
         : "DORM",
-    indexable: (form[5] as OptionEntryForm).value === 1,
-    endTime: (form[6] as DateEntryForm).date.toUTCString(),
+    indexable: (form[6] as OptionEntryForm).value === 1,
+    endTime: (form[7] as DateEntryForm).date.toUTCString(),
     challenges: [],
     difficulty:
       (form[4] as OptionEntryForm).value === 0
