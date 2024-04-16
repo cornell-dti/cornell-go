@@ -832,6 +832,9 @@ class EventTrackerDto {
     if (isRanked != null) {
       fields['isRanked'] = isRanked;
     }
+    if (hintsUsed != null) {
+      fields['hintsUsed'] = hintsUsed;
+    }
     if (curChallengeId != null) {
       fields['curChallengeId'] = curChallengeId;
     }
@@ -847,6 +850,7 @@ class EventTrackerDto {
   EventTrackerDto.fromJson(Map<String, dynamic> fields) {
     eventId = fields["eventId"];
     isRanked = fields.containsKey('isRanked') ? (fields["isRanked"]) : null;
+    hintsUsed = fields.containsKey('hintsUsed') ? (fields["hintsUsed"]) : null;
     curChallengeId = fields.containsKey('curChallengeId')
         ? (fields["curChallengeId"])
         : null;
@@ -861,6 +865,7 @@ class EventTrackerDto {
   void partialUpdate(EventTrackerDto other) {
     eventId = other.eventId;
     isRanked = other.isRanked == null ? isRanked : other.isRanked;
+    hintsUsed = other.hintsUsed == null ? hintsUsed : other.hintsUsed;
     curChallengeId =
         other.curChallengeId == null ? curChallengeId : other.curChallengeId;
     prevChallenges =
@@ -873,6 +878,7 @@ class EventTrackerDto {
   EventTrackerDto({
     required this.eventId,
     this.isRanked,
+    this.hintsUsed,
     this.curChallengeId,
     this.prevChallenges,
     this.prevChallengeDates,
@@ -880,6 +886,7 @@ class EventTrackerDto {
 
   late String eventId;
   late bool? isRanked;
+  late int? hintsUsed;
   late String? curChallengeId;
   late List<String>? prevChallenges;
   late List<String>? prevChallengeDates;

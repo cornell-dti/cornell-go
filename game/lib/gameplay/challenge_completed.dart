@@ -241,7 +241,9 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                           Spacer(),
                           Text(
                             "+ " +
-                                (challenge.points ?? 0).toString() +
+                                ((challenge.points ?? 0) -
+                                        (tracker.hintsUsed ?? 0) * 25)
+                                    .toString() +
                                 " points",
                             style:
                                 TextStyle(color: Colors.white, fontSize: 16.0),

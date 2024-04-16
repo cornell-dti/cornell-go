@@ -180,6 +180,7 @@ export interface EventDto {
 export interface EventTrackerDto {
   eventId: string;
   isRanked?: boolean;
+  hintsUsed?: number;
   curChallengeId?: string;
   prevChallenges?: string[];
   prevChallengeDates?: string[];

@@ -57,6 +57,7 @@ class _GameplayMapState extends State<GameplayMap> {
   // cannot be found
   GeoPoint? currentLocation;
 
+  int totalHints = 3;
   int numHintsLeft = 3;
   GeoPoint? startingHintCenter;
   GeoPoint? hintCenter;
@@ -240,6 +241,21 @@ class _GameplayMapState extends State<GameplayMap> {
    */
   void useHint() {
     if (numHintsLeft > 0 && hintCenter != null && startingHintCenter != null) {
+      numHintsLeft -= 1;
+
+      // update event tracker with new hints left value
+      var eventId = Provider.of<GroupModel>(context, listen: false).curEventId;
+      var tracker = Provider.of<TrackerModel>(context, listen: false)
+          .trackerByEventId(eventId ?? "");
+
+      if (eventId == null || tracker == null) {
+        displayToast(
+            "An error occurred while getting event tracker", Status.error);
+      } else {
+        tracker.partialUpdate(EventTrackerDto(
+            eventId: eventId, hintsUsed: (totalHints - numHintsLeft)));
+      }
+
       // decreases radius by 0.33 upon each hint press
       // after 3 hints, hint radius will equal that of the awarding radius
       double newRadius =
@@ -248,7 +264,6 @@ class _GameplayMapState extends State<GameplayMap> {
           (startingHintCenter!.lat - widget.targetLocation.lat) * 0.33;
       double newLong = hintCenter!.long -
           (startingHintCenter!.long - widget.targetLocation.long) * 0.33;
-      numHintsLeft -= 1;
       hintRadius = newRadius;
       hintCenter = GeoPoint(newLat, newLong, 0);
       // updates the widget's state, causing it to rebuild
@@ -270,228 +285,242 @@ class _GameplayMapState extends State<GameplayMap> {
     //       return !snapshot.hasData
     //           ? CircularIndicator()
     return MaterialApp(
-      theme: ThemeData(
-        useMaterial3: true,
-        colorSchemeSeed: Colors.green[700],
-      ),
-      home: Scaffold(
-          body: Stack(
-            alignment: Alignment.bottomCenter,
-            children: [
-              Listener(
-                onPointerDown: (e) {
-                  cancelRecenterCamera();
-                },
-                child: GoogleMap(
-                  onMapCreated: _onMapCreated,
-                  compassEnabled: false,
-                  myLocationButtonEnabled: false,
-                  zoomControlsEnabled: false,
-                  myLocationEnabled: false,
-                  mapToolbarEnabled: false,
-                  mapType: MapType.normal,
-                  initialCameraPosition: CameraPosition(
-                    target: currentLocation == null
-                        ? _center
-                        : LatLng(currentLocation!.lat, currentLocation!.lat),
-                    zoom: 11,
-                  ),
-                  markers: {
-                    Marker(
-                      markerId: const MarkerId("currentLocation"),
-                      icon: currentLocationIcon,
-                      position: currentLocation == null
+        theme: ThemeData(
+          useMaterial3: true,
+          colorSchemeSeed: Colors.green[700],
+        ),
+        home: Scaffold(
+            body: Stack(
+              alignment: Alignment.bottomCenter,
+              children: [
+                Listener(
+                  onPointerDown: (e) {
+                    cancelRecenterCamera();
+                  },
+                  child: GoogleMap(
+                    onMapCreated: _onMapCreated,
+                    compassEnabled: false,
+                    myLocationButtonEnabled: false,
+                    zoomControlsEnabled: false,
+                    myLocationEnabled: false,
+                    mapToolbarEnabled: false,
+                    mapType: MapType.normal,
+                    initialCameraPosition: CameraPosition(
+                      target: currentLocation == null
                           ? _center
-                          : LatLng(currentLocation!.lat, currentLocation!.long),
-                      rotation: currentLocation == null
-                          ? 0
-                          : currentLocation!.heading,
+                          : LatLng(currentLocation!.lat, currentLocation!.lat),
+                      zoom: 11,
                     ),
-                  },
-                  circles: {
-                    Circle(
-                      circleId: CircleId("hintCircle"),
-                      center: hintCenter != null
-                          ? LatLng(hintCenter!.lat, hintCenter!.long)
-                          : _center,
-                      radius: hintRadius,
-                      strokeColor: Color.fromARGB(80, 30, 41, 143),
-                      strokeWidth: 2,
-                      fillColor: Color.fromARGB(80, 83, 134, 237),
-                    )
-                  },
+                    markers: {
+                      Marker(
+                        markerId: const MarkerId("currentLocation"),
+                        icon: currentLocationIcon,
+                        position: currentLocation == null
+                            ? _center
+                            : LatLng(
+                                currentLocation!.lat, currentLocation!.long),
+                        rotation: currentLocation == null
+                            ? 0
+                            : currentLocation!.heading,
+                      ),
+                    },
+                    circles: {
+                      Circle(
+                        circleId: CircleId("hintCircle"),
+                        center: hintCenter != null
+                            ? LatLng(hintCenter!.lat, hintCenter!.long)
+                            : _center,
+                        radius: hintRadius,
+                        strokeColor: Color.fromARGB(80, 30, 41, 143),
+                        strokeWidth: 2,
+                        fillColor: Color.fromARGB(80, 83, 134, 237),
+                      )
+                    },
+                  ),
                 ),
-              ),
-              Container(
-                margin: EdgeInsets.only(bottom: 70),
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color.fromARGB(255, 237, 86, 86),
-                    padding: EdgeInsets.only(
-                        right: 15, left: 15, top: 10, bottom: 10),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10), // button's shape
+                Container(
+                  margin: EdgeInsets.only(bottom: 70),
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color.fromARGB(255, 237, 86, 86),
+                      padding: EdgeInsets.only(
+                          right: 15, left: 15, top: 10, bottom: 10),
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(10), // button's shape
+                      ),
                     ),
-                  ),
-                  child: Text(
-                    "I've Arrived!",
-                    style: TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 21,
-                        fontWeight: FontWeight.w400,
-                        color: Color(0xFFFFFFFF)),
-                  ),
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) {
-                        return Container(
-                          color: Colors.white
-                              .withOpacity(0.3), // Adjust opacity as needed
-                          width: MediaQuery.of(context).size.width,
-                          height: MediaQuery.of(context).size.height,
-                          child: Container(
-                            margin:
-                                EdgeInsetsDirectional.only(start: 10, end: 10),
-                            child: Dialog(
-                              elevation: 16, //arbitrary large number
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(
-                                    10), // Same as the Dialog's shape
-                                child: displayDialogue(),
+                    child: Text(
+                      "I've Arrived!",
+                      style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 21,
+                          fontWeight: FontWeight.w400,
+                          color: Color(0xFFFFFFFF)),
+                    ),
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return Container(
+                            color: Colors.white
+                                .withOpacity(0.3), // Adjust opacity as needed
+                            width: MediaQuery.of(context).size.width,
+                            height: MediaQuery.of(context).size.height,
+                            child: Container(
+                              margin: EdgeInsetsDirectional.only(
+                                  start: 10, end: 10),
+                              child: Dialog(
+                                elevation: 16, //arbitrary large number
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(
+                                      10), // Same as the Dialog's shape
+                                  child: displayDialogue(),
+                                ),
                               ),
                             ),
-                          ),
-                        );
-                      },
-                    );
-                  },
+                          );
+                        },
+                      );
+                    },
+                  ),
                 ),
-              ),
-            ],
-          ),
-          floatingActionButton: Stack(
-            alignment: AlignmentDirectional.topEnd,
-            children: [
-              Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                crossAxisAlignment: CrossAxisAlignment.end,
+              ],
+            ),
+            floatingActionButton: Consumer2<GroupModel, TrackerModel>(
+                builder: (context, groupModel, trackerModel, child) {
+              EventTrackerDto? tracker =
+                  trackerModel.trackerByEventId(groupModel.curEventId ?? "");
+              if (tracker == null) {
+                displayToast("Error getting event tracker", Status.error);
+              } else {
+                numHintsLeft = tracker.hintsUsed ?? totalHints;
+              }
+              return Stack(
+                alignment: AlignmentDirectional.topEnd,
                 children: [
-                  Padding(
-                    padding: EdgeInsets.only(bottom: 15.0, right: 10.0),
-                    child: Stack(
-                      children: [
-                        FloatingActionButton.extended(
-                          onPressed: useHint,
-                          label: SvgPicture.asset("assets/icons/maphint.svg",
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.only(bottom: 15.0, right: 10.0),
+                        child: Stack(
+                          children: [
+                            FloatingActionButton.extended(
+                              onPressed: useHint,
+                              label: SvgPicture.asset(
+                                  "assets/icons/maphint.svg",
+                                  colorFilter: ColorFilter.mode(
+                                      Color.fromARGB(255, 131, 90, 124),
+                                      BlendMode.srcIn)),
+                              backgroundColor:
+                                  Color.fromARGB(255, 255, 255, 255),
+                              shape: CircleBorder(),
+                            ),
+                            Positioned(
+                              top: -5,
+                              right: 0,
+                              child: Container(
+                                padding: EdgeInsets.all(5.0),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.white,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black
+                                          .withOpacity(0.3), // Shadow color
+                                      blurRadius: 5, // Spread radius
+                                      offset: Offset(2,
+                                          2), // Shadow position, you can adjust this
+                                    ),
+                                  ],
+                                ),
+                                child: Text(
+                                  numHintsLeft.toString(),
+                                  style: TextStyle(
+                                    color: Color.fromARGB(255, 131, 90, 124),
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(bottom: 150.0),
+                        child: FloatingActionButton.extended(
+                          onPressed: recenterCamera,
+                          label: SvgPicture.asset(
+                              "assets/icons/maprecenter.svg",
                               colorFilter: ColorFilter.mode(
                                   Color.fromARGB(255, 131, 90, 124),
                                   BlendMode.srcIn)),
                           backgroundColor: Color.fromARGB(255, 255, 255, 255),
                           shape: CircleBorder(),
                         ),
-                        Positioned(
-                          top: -5,
-                          right: 0,
-                          child: Container(
-                            padding: EdgeInsets.all(5.0),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.white,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black
-                                      .withOpacity(0.3), // Shadow color
-                                  blurRadius: 5, // Spread radius
-                                  offset: Offset(2,
-                                      2), // Shadow position, you can adjust this
-                                ),
-                              ],
-                            ),
-                            child: Text(
-                              numHintsLeft.toString(),
-                              style: TextStyle(
-                                color: Color.fromARGB(255, 131, 90, 124),
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                   Padding(
-                    padding: EdgeInsets.only(bottom: 150.0),
-                    child: FloatingActionButton.extended(
-                      onPressed: recenterCamera,
-                      label: SvgPicture.asset("assets/icons/maprecenter.svg",
-                          colorFilter: ColorFilter.mode(
-                              Color.fromARGB(255, 131, 90, 124),
-                              BlendMode.srcIn)),
-                      backgroundColor: Color.fromARGB(255, 255, 255, 255),
-                      shape: CircleBorder(),
+                    // expandable image in top right of map
+                    padding: EdgeInsets.only(left: 10.0, right: 10, top: 40.0),
+                    child: GestureDetector(
+                      onTap: () {
+                        isExpanded
+                            ? setState(() {
+                                isExpanded = false;
+                                pictureHeight = 80.0;
+                                pictureWidth = 80.0;
+                                pictureIcon = SvgPicture.asset(
+                                    "assets/icons/mapexpand.svg");
+                                pictureAlign = Alignment.topRight;
+                              })
+                            : setState(() {
+                                isExpanded = true;
+                                pictureHeight =
+                                    MediaQuery.of(context).size.height * 0.6;
+                                pictureWidth =
+                                    MediaQuery.of(context).size.width * 0.85;
+                                pictureIcon = SvgPicture.asset(
+                                    "assets/icons/mapexit.svg");
+                                pictureAlign = Alignment.topCenter;
+                              });
+                      },
+                      child: AnimatedContainer(
+                        duration: Duration(milliseconds: 50),
+                        width: pictureWidth,
+                        height: pictureHeight,
+                        child: Stack(
+                          children: [
+                            Container(
+                              alignment: pictureAlign,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: Image.asset(
+                                  'assets/images/main-bg.jpeg',
+                                  fit: BoxFit.cover,
+                                  width: pictureWidth,
+                                  height: pictureHeight,
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.all(4.0),
+                              child: Container(
+                                  alignment: Alignment.topRight,
+                                  child: pictureIcon),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ],
-              ),
-              Padding(
-                // expandable image in top right of map
-                padding: EdgeInsets.only(left: 10.0, right: 10, top: 40.0),
-                child: GestureDetector(
-                  onTap: () {
-                    isExpanded
-                        ? setState(() {
-                            isExpanded = false;
-                            pictureHeight = 80.0;
-                            pictureWidth = 80.0;
-                            pictureIcon =
-                                SvgPicture.asset("assets/icons/mapexpand.svg");
-                            pictureAlign = Alignment.topRight;
-                          })
-                        : setState(() {
-                            isExpanded = true;
-                            pictureHeight =
-                                MediaQuery.of(context).size.height * 0.6;
-                            pictureWidth =
-                                MediaQuery.of(context).size.width * 0.85;
-                            pictureIcon =
-                                SvgPicture.asset("assets/icons/mapexit.svg");
-                            pictureAlign = Alignment.topCenter;
-                          });
-                  },
-                  child: AnimatedContainer(
-                    duration: Duration(milliseconds: 50),
-                    width: pictureWidth,
-                    height: pictureHeight,
-                    child: Stack(
-                      children: [
-                        Container(
-                          alignment: pictureAlign,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: Image.asset(
-                              'assets/images/main-bg.jpeg',
-                              fit: BoxFit.cover,
-                              width: pictureWidth,
-                              height: pictureHeight,
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.all(4.0),
-                          child: Container(
-                              alignment: Alignment.topRight,
-                              child: pictureIcon),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          )),
-    );
+              );
+            })));
     // });
   }
 

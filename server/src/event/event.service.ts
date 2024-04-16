@@ -125,6 +125,7 @@ export class EventService {
     const progress = await this.prisma.eventTracker.create({
       data: {
         score: 0,
+        hintsUsed: 0,
         isRankedForEvent: true,
         event: { connect: { id: defaultEvId } },
         curChallenge: { connect: { id: closestChalId } },
@@ -160,6 +161,7 @@ export class EventService {
     const progress = await this.prisma.eventTracker.create({
       data: {
         score: 0,
+        hintsUsed: 0,
         isRankedForEvent: true,
         eventId: event.id,
         curChallengeId: closestChallenge.id,
