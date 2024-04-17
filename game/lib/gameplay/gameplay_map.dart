@@ -58,7 +58,7 @@ class _GameplayMapState extends State<GameplayMap> {
   GeoPoint? currentLocation;
 
   int totalHints = 3;
-  int numHintsLeft = 3;
+  int numHintsLeft = 10;
   GeoPoint? startingHintCenter;
   GeoPoint? hintCenter;
   double startingHintRadius = 100.0;
@@ -110,9 +110,6 @@ class _GameplayMapState extends State<GameplayMap> {
 
     startingHintCenter = GeoPoint(dx, dy, 0);
     hintCenter = startingHintCenter;
-    print("starting hint center: " +
-        startingHintCenter!.lat.toString() +
-        startingHintCenter!.long.toString());
   }
 
   Future<void> _onMapCreated(GoogleMapController controller) async {
@@ -247,7 +244,7 @@ class _GameplayMapState extends State<GameplayMap> {
         displayToast("Could not get event", Status.error);
       } else {
         Provider.of<TrackerModel>(context, listen: false)
-            .useHintForTracker(eventId);
+            .useEventTrackerHint(eventId);
       }
 
       // decreases radius by 0.33 upon each hint press
@@ -279,11 +276,20 @@ class _GameplayMapState extends State<GameplayMap> {
     //       return !snapshot.hasData
     //           ? CircularIndicator()
     return MaterialApp(
-        theme: ThemeData(
-          useMaterial3: true,
-          colorSchemeSeed: Colors.green[700],
-        ),
-        home: Scaffold(
+      theme: ThemeData(
+        useMaterial3: true,
+        colorSchemeSeed: Colors.green[700],
+      ),
+      home: Consumer2<GroupModel, TrackerModel>(
+          builder: (context, groupModel, trackerModel, child) {
+        EventTrackerDto? tracker =
+            trackerModel.trackerByEventId(groupModel.curEventId ?? "");
+        if (tracker == null) {
+          displayToast("Error getting event tracker", Status.error);
+        } else {
+          numHintsLeft = totalHints - (tracker.hintsUsed ?? 0);
+        }
+        return Scaffold(
             body: Stack(
               alignment: Alignment.bottomCenter,
               children: [
@@ -381,140 +387,129 @@ class _GameplayMapState extends State<GameplayMap> {
                 ),
               ],
             ),
-            floatingActionButton: Consumer2<GroupModel, TrackerModel>(
-                builder: (context, groupModel, trackerModel, child) {
-              EventTrackerDto? tracker =
-                  trackerModel.trackerByEventId(groupModel.curEventId ?? "");
-              if (tracker == null) {
-                displayToast("Error getting event tracker", Status.error);
-              } else {
-                numHintsLeft = tracker.hintsUsed ?? totalHints;
-              }
-              return Stack(
-                alignment: AlignmentDirectional.topEnd,
-                children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.only(bottom: 15.0, right: 10.0),
-                        child: Stack(
-                          children: [
-                            FloatingActionButton.extended(
-                              onPressed: useHint,
-                              label: SvgPicture.asset(
-                                  "assets/icons/maphint.svg",
-                                  colorFilter: ColorFilter.mode(
-                                      Color.fromARGB(255, 131, 90, 124),
-                                      BlendMode.srcIn)),
-                              backgroundColor:
-                                  Color.fromARGB(255, 255, 255, 255),
-                              shape: CircleBorder(),
-                            ),
-                            Positioned(
-                              top: -5,
-                              right: 0,
-                              child: Container(
-                                padding: EdgeInsets.all(5.0),
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Colors.white,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black
-                                          .withOpacity(0.3), // Shadow color
-                                      blurRadius: 5, // Spread radius
-                                      offset: Offset(2,
-                                          2), // Shadow position, you can adjust this
-                                    ),
-                                  ],
-                                ),
-                                child: Text(
-                                  numHintsLeft.toString(),
-                                  style: TextStyle(
-                                    color: Color.fromARGB(255, 131, 90, 124),
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.bold,
+            floatingActionButton: Stack(
+              alignment: AlignmentDirectional.topEnd,
+              children: [
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(bottom: 15.0, right: 10.0),
+                      child: Stack(
+                        children: [
+                          FloatingActionButton.extended(
+                            onPressed: useHint,
+                            label: SvgPicture.asset("assets/icons/maphint.svg",
+                                colorFilter: ColorFilter.mode(
+                                    Color.fromARGB(255, 131, 90, 124),
+                                    BlendMode.srcIn)),
+                            backgroundColor: Color.fromARGB(255, 255, 255, 255),
+                            shape: CircleBorder(),
+                          ),
+                          Positioned(
+                            top: -5,
+                            right: 0,
+                            child: Container(
+                              padding: EdgeInsets.all(5.0),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.white,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black
+                                        .withOpacity(0.3), // Shadow color
+                                    blurRadius: 5, // Spread radius
+                                    offset: Offset(2,
+                                        2), // Shadow position, you can adjust this
                                   ),
+                                ],
+                              ),
+                              child: Text(
+                                numHintsLeft.toString(),
+                                style: TextStyle(
+                                  color: Color.fromARGB(255, 131, 90, 124),
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                      Padding(
-                        padding: EdgeInsets.only(bottom: 150.0),
-                        child: FloatingActionButton.extended(
-                          onPressed: recenterCamera,
-                          label: SvgPicture.asset(
-                              "assets/icons/maprecenter.svg",
-                              colorFilter: ColorFilter.mode(
-                                  Color.fromARGB(255, 131, 90, 124),
-                                  BlendMode.srcIn)),
-                          backgroundColor: Color.fromARGB(255, 255, 255, 255),
-                          shape: CircleBorder(),
-                        ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(bottom: 150.0),
+                      child: FloatingActionButton.extended(
+                        onPressed: recenterCamera,
+                        label: SvgPicture.asset("assets/icons/maprecenter.svg",
+                            colorFilter: ColorFilter.mode(
+                                Color.fromARGB(255, 131, 90, 124),
+                                BlendMode.srcIn)),
+                        backgroundColor: Color.fromARGB(255, 255, 255, 255),
+                        shape: CircleBorder(),
                       ),
-                    ],
-                  ),
-                  Padding(
-                    // expandable image in top right of map
-                    padding: EdgeInsets.only(left: 10.0, right: 10, top: 40.0),
-                    child: GestureDetector(
-                      onTap: () {
-                        isExpanded
-                            ? setState(() {
-                                isExpanded = false;
-                                pictureHeight = 80.0;
-                                pictureWidth = 80.0;
-                                pictureIcon = SvgPicture.asset(
-                                    "assets/icons/mapexpand.svg");
-                                pictureAlign = Alignment.topRight;
-                              })
-                            : setState(() {
-                                isExpanded = true;
-                                pictureHeight =
-                                    MediaQuery.of(context).size.height * 0.6;
-                                pictureWidth =
-                                    MediaQuery.of(context).size.width * 0.85;
-                                pictureIcon = SvgPicture.asset(
-                                    "assets/icons/mapexit.svg");
-                                pictureAlign = Alignment.topCenter;
-                              });
-                      },
-                      child: AnimatedContainer(
-                        duration: Duration(milliseconds: 50),
-                        width: pictureWidth,
-                        height: pictureHeight,
-                        child: Stack(
-                          children: [
-                            Container(
-                              alignment: pictureAlign,
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(10),
-                                child: Image.asset(
-                                  'assets/images/main-bg.jpeg',
-                                  fit: BoxFit.cover,
-                                  width: pictureWidth,
-                                  height: pictureHeight,
-                                ),
+                    ),
+                  ],
+                ),
+                Padding(
+                  // expandable image in top right of map
+                  padding: EdgeInsets.only(left: 10.0, right: 10, top: 40.0),
+                  child: GestureDetector(
+                    onTap: () {
+                      isExpanded
+                          ? setState(() {
+                              isExpanded = false;
+                              pictureHeight = 80.0;
+                              pictureWidth = 80.0;
+                              pictureIcon = SvgPicture.asset(
+                                  "assets/icons/mapexpand.svg");
+                              pictureAlign = Alignment.topRight;
+                            })
+                          : setState(() {
+                              isExpanded = true;
+                              pictureHeight =
+                                  MediaQuery.of(context).size.height * 0.6;
+                              pictureWidth =
+                                  MediaQuery.of(context).size.width * 0.85;
+                              pictureIcon =
+                                  SvgPicture.asset("assets/icons/mapexit.svg");
+                              pictureAlign = Alignment.topCenter;
+                            });
+                    },
+                    child: AnimatedContainer(
+                      duration: Duration(milliseconds: 50),
+                      width: pictureWidth,
+                      height: pictureHeight,
+                      child: Stack(
+                        children: [
+                          Container(
+                            alignment: pictureAlign,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: Image.asset(
+                                'assets/images/main-bg.jpeg',
+                                fit: BoxFit.cover,
+                                width: pictureWidth,
+                                height: pictureHeight,
                               ),
                             ),
-                            Padding(
-                              padding: EdgeInsets.all(4.0),
-                              child: Container(
-                                  alignment: Alignment.topRight,
-                                  child: pictureIcon),
-                            ),
-                          ],
-                        ),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.all(4.0),
+                            child: Container(
+                                alignment: Alignment.topRight,
+                                child: pictureIcon),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                ],
-              );
-            })));
+                ),
+              ],
+            ));
+      }),
+    );
     // });
   }
 
@@ -617,10 +612,7 @@ class _GameplayMapState extends State<GameplayMap> {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => ChallengeCompletedPage(
-                                description: widget.description,
-                                points: widget.points,
-                                numHintsLeft: numHintsLeft)),
+                            builder: (context) => ChallengeCompletedPage()),
                       );
                     },
                     style: ButtonStyle(

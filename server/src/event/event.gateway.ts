@@ -113,9 +113,11 @@ export class EventGateway {
     @CallingUser() user: User,
     @MessageBody() data: UseEventTrackerHintDto,
   ) {
+    console.log("use event tracker hint called");
     const tracker = await this.eventService.useEventTrackerHint(user, data);
     if (tracker) {
       await this.eventService.emitUpdateEventTracker(tracker, user);
+      console.log("emitted update tracker event, " + tracker.curChallengeId);
       return;
     }
     await this.clientService.emitErrorData(user, 'Failed to track used hint!');

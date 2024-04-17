@@ -296,6 +296,7 @@ export class EventService {
     return {
       eventId: tracker.eventId,
       isRanked: tracker.isRankedForEvent,
+      hintsUsed: tracker.hintsUsed,
       curChallengeId: tracker.curChallengeId,
       prevChallenges: completedChallenges.map(pc => pc.id),
       prevChallengeDates: completedChallenges.map(pc =>
@@ -319,21 +320,11 @@ export class EventService {
   }
 
   async useEventTrackerHint(user: User, data: UseEventTrackerHintDto) {
-    var evTracker = await this.prisma.eventTracker.findFirst({
-      where: {
-        id: user.id,
-        event: {
-          activeGroups: { some: { id: user.groupId } },
-        },
-      },
-    });
-    if (!evTracker) {
-      return null;
-    }
+    var evTracker = await this.getCurrentEventTrackerForUser(user);
 
     evTracker = await this.prisma.eventTracker.update({
       where: { id: evTracker.id },
-      data: { hintsUsed: evTracker.hintsUsed - 1 },
+      data: { hintsUsed: evTracker.hintsUsed + 1 },
     });
     console.log('increased hints used for event tracker');
     return evTracker;

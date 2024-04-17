@@ -21,15 +21,8 @@ import 'package:game/model/challenge_model.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class ChallengeCompletedPage extends StatefulWidget {
-  final String description;
-  final int points;
-  final int numHintsLeft;
-
   const ChallengeCompletedPage({
     Key? key,
-    required this.description,
-    required this.points,
-    required this.numHintsLeft,
   }) : super(key: key);
 
   @override
@@ -250,7 +243,7 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                           ),
                         ],
                       )),
-                  if (widget.numHintsLeft < 3)
+                  if ((tracker.hintsUsed ?? 0) > 0)
                     Container(
                         margin:
                             EdgeInsets.only(left: 30, bottom: 10, right: 30),
@@ -278,7 +271,7 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                             ),
                           ],
                         )),
-                  if (widget.numHintsLeft < 2)
+                  if ((tracker.hintsUsed ?? 0) > 1)
                     Container(
                         margin:
                             EdgeInsets.only(left: 30, bottom: 10, right: 30),
@@ -304,7 +297,7 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                             ),
                           ],
                         )),
-                  if (widget.numHintsLeft < 1)
+                  if ((tracker.hintsUsed ?? 0) > 2)
                     Container(
                         margin:
                             EdgeInsets.only(left: 30, bottom: 10, right: 30),
@@ -337,7 +330,8 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                   journeyPage
                       ? "Total Points: " + total_pts.toString()
                       : "Points Earned: " +
-                          (widget.points - 25 * (3 - widget.numHintsLeft))
+                          ((challenge.points ?? 0) -
+                                  (tracker.hintsUsed ?? 0) * 25)
                               .toString(),
                   style: TextStyle(
                     color: Colors.white,

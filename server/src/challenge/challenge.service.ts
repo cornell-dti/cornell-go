@@ -85,7 +85,6 @@ export class ChallengeService {
 
   /** Progress user through challenges, ensuring challengeId is current */
   async completeChallenge(user: User, challengeId: string) {
-    console.log('complete challenge called');
     const groupMembers = await this.prisma.user.findMany({
       where: { groupId: user.groupId },
     });
@@ -125,18 +124,18 @@ export class ChallengeService {
 
     const nextChallenge = await this.nextChallenge(curChallenge);
 
+    const totalScore = curChallenge.points - 25 * eventTracker.hintsUsed;
+
     await this.prisma.user.update({
       where: { id: user.id },
-      data: { score: { increment: curChallenge.points } },
+      data: { score: { increment: totalScore } },
     });
 
-    const totalScore = curChallenge.points - 25 * eventTracker.hintsUsed;
-    console.log('completed challenge score: ' + totalScore);
-    console.log('used hints: ' + eventTracker.hintsUsed);
     await this.prisma.eventTracker.update({
       where: { id: eventTracker.id },
       data: {
         score: { increment: totalScore },
+        hintsUsed: 0,
         curChallenge: { connect: { id: nextChallenge.id } },
       },
     });
