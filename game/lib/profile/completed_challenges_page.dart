@@ -14,7 +14,6 @@ import 'package:tuple/tuple.dart';
 /* The page view of all the completed challenges */
 
 class CompletedChallengesPage extends StatelessWidget {
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -111,7 +110,6 @@ class CompletedChallengesPage extends StatelessWidget {
               },
               separatorBuilder: (context, index) => const Divider(),
               itemCount: itemCount);
-        }
-            ));
+        }));
   }
 }
