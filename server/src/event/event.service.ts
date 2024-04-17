@@ -21,6 +21,7 @@ import {
   EventTrackerDto,
   UpdateEventDataDto,
   RequestRecommendedEventsDto,
+  EventCategory,
 } from './event.dto';
 import { AppAbility, CaslAbilityFactory } from '../casl/casl-ability.factory';
 import { accessibleBy } from '@casl/prisma';
@@ -251,7 +252,7 @@ export class EventService {
       id: ev.id,
       name: ev.name,
       description: ev.description,
-      category: ev.category,
+      category: ev.category as EventCategory,
       timeLimitation:
         ev.timeLimitation == TimeLimitationType.LIMITED_TIME
           ? 'LIMITED_TIME'

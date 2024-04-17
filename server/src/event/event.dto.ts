@@ -22,21 +22,21 @@ export interface RequestRecommendedEventsDto {
   count?: number;
 }
 
-// export enum EventCategory {
-//   FOOD = 'FOOD',
-//   NATURE = 'NATURE',
-//   HISTORICAL = 'HISTORICAL',
-//   CAFE = 'CAFE',
-//   DININGHALL = 'DININGHALL',
-//   DORM = 'DORM',
-// }
+export enum EventCategory {
+  FOOD = 'FOOD',
+  NATURE = 'NATURE',
+  HISTORICAL = 'HISTORICAL',
+  CAFE = 'CAFE',
+  DININGHALL = 'DININGHALL',
+  DORM = 'DORM',
+}
 
 export interface EventDto {
   id: string;
   requiredMembers?: number;
   name?: string;
   description?: string;
-  category?: 'FOOD' | 'NATURE' | 'HISTORICAL' | 'CAFE' | 'DININGHALL' | 'DORM';
+  category?: EventCategory;
   timeLimitation?: 'LIMITED_TIME' | 'PERPETUAL';
   endTime?: string;
   challenges?: string[];
