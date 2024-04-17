@@ -39,11 +39,11 @@ describe('UserModule E2E', () => {
       1,
       1,
       AuthType.DEVICE,
-      'abcd',
+      'auth1',
       'UNDERGRADUATE',
     );
 
-    const user = await userService.byAuth(AuthType.DEVICE, 'abcd');
+    const user = await userService.byAuth(AuthType.DEVICE, 'auth1');
     expect(user).toBeDefined();
     expect(user?.username).toContain('guest');
   });
@@ -58,11 +58,11 @@ describe('UserModule E2E', () => {
       1,
       1,
       AuthType.DEVICE,
-      'abcde',
+      'auth2',
       'UNDERGRADUATE',
     );
 
-    const user = await userService.byAuth(AuthType.DEVICE, 'abcde');
+    const user = await userService.byAuth(AuthType.DEVICE, 'auth2');
     expect(user).toBeDefined();
     await userService.deleteUser(fullAbility, user!);
     expect(user).toBeNull;
@@ -77,7 +77,7 @@ describe('UserModule E2E', () => {
       1,
       1,
       AuthType.DEVICE,
-      'abcdefg',
+      'auth3',
       'UNDERGRADUATE',
     );
     let oldList = await userSer.getAllUserData();
@@ -88,7 +88,7 @@ describe('UserModule E2E', () => {
       1,
       1,
       AuthType.DEVICE,
-      'abcdefg',
+      'auth4',
       'UNDERGRADUATE',
     );
     let newList = await userSer.getAllUserData();
