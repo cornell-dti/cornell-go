@@ -107,6 +107,11 @@ function makeForm() {
   return [
     { name: "Name", characterLimit: 256, value: "" },
     { name: "Description", characterLimit: 2048, value: "" },
+    {
+      name: "Category",
+      options: ["FOOD", "NATURE", "HISTORICAL", "CAFE", "DININGHALL", "DORM"],
+      value: 1,
+    },
     { name: "Required Members", value: -1, min: -1, max: 99 },
     {
       name: "Time Limitation",
@@ -120,11 +125,6 @@ function makeForm() {
     },
     { name: "Publicly Visible", options: ["No", "Yes"], value: 0 },
     { name: "Available Until", date: new Date("2050") },
-    {
-      name: "Category",
-      options: ["FOOD", "NATURE", "HISTORICAL", "CAFE", "DININGHALL", "DORM"],
-      value: 1,
-    },
   ] as EntryForm[];
 }
 
@@ -134,28 +134,28 @@ function fromForm(form: EntryForm[], id: string): EventDto {
     id,
     requiredMembers: (form[2] as NumberEntryForm).value,
     timeLimitation:
-      (form[3] as OptionEntryForm).value === 0 ? "PERPETUAL" : "LIMITED_TIME",
+      (form[4] as OptionEntryForm).value === 0 ? "PERPETUAL" : "LIMITED_TIME",
     name: (form[0] as FreeEntryForm).value,
     description: (form[1] as FreeEntryForm).value,
     category:
-      (form[5] as OptionEntryForm).value === 0
+      (form[2] as OptionEntryForm).value === 0
         ? "FOOD"
-        : (form[5] as OptionEntryForm).value === 1
+        : (form[2] as OptionEntryForm).value === 1
         ? "NATURE"
-        : (form[5] as OptionEntryForm).value === 2
+        : (form[2] as OptionEntryForm).value === 2
         ? "HISTORICAL"
-        : (form[5] as OptionEntryForm).value === 3
+        : (form[2] as OptionEntryForm).value === 3
         ? "CAFE"
-        : (form[5] as OptionEntryForm).value === 4
+        : (form[2] as OptionEntryForm).value === 4
         ? "DININGHALL"
         : "DORM",
     indexable: (form[6] as OptionEntryForm).value === 1,
     endTime: (form[7] as DateEntryForm).date.toUTCString(),
     challenges: [],
     difficulty:
-      (form[4] as OptionEntryForm).value === 0
+      (form[5] as OptionEntryForm).value === 0
         ? "Easy"
-        : (form[4] as OptionEntryForm).value === 1
+        : (form[5] as OptionEntryForm).value === 1
         ? "Normal"
         : "Hard",
     latitudeF: 0,
@@ -168,6 +168,22 @@ function toForm(event: EventDto) {
   return [
     { name: "Name", characterLimit: 256, value: event.name },
     { name: "Description", characterLimit: 2048, value: event.description },
+    {
+      name: "Category",
+      options: ["FOOD", "NATURE", "HISTORICAL", "CAFE", "DININGHALL", "DORM"],
+      value:
+        (event.category as string) === "FOOD"
+          ? 0
+          : (event.category as string) === "NATURE"
+          ? 1
+          : (event.category as string) === "HISTORICAL"
+          ? 2
+          : (event.category as string) === "CAFE"
+          ? 3
+          : (event.category as string) === "DININGHALL"
+          ? 4
+          : 5,
+    },
     {
       name: "Required Members",
       value: event.requiredMembers,
@@ -188,22 +204,6 @@ function toForm(event: EventDto) {
           : event.difficulty === "Normal"
           ? "Normal"
           : "Hard",
-    },
-    {
-      name: "Category",
-      options: ["FOOD", "NATURE", "HISTORICAL", "CAFE", "DININGHALL", "DORM"],
-      value:
-        (event.category as string) === "FOOD"
-          ? 0
-          : (event.category as string) === "NATURE"
-          ? 1
-          : (event.category as string) === "HISTORICAL"
-          ? 2
-          : (event.category as string) === "CAFE"
-          ? 3
-          : (event.category as string) === "DININGHALL"
-          ? 4
-          : 5,
     },
     {
       name: "Publicly Visible",
