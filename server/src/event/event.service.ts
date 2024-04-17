@@ -21,6 +21,8 @@ import {
   EventTrackerDto,
   UpdateEventDataDto,
   RequestRecommendedEventsDto,
+  UpdateEventTrackerDataDto,
+  UseEventTrackerHintDto,
 } from './event.dto';
 import { AppAbility, CaslAbilityFactory } from '../casl/casl-ability.factory';
 import { accessibleBy } from '@casl/prisma';
@@ -314,6 +316,27 @@ export class EventService {
         prismaStore: this.prisma.eventTracker,
       },
     );
+  }
+
+  async useEventTrackerHint(user: User, data: UseEventTrackerHintDto) {
+    var evTracker = await this.prisma.eventTracker.findFirst({
+      where: {
+        id: user.id,
+        event: {
+          activeGroups: { some: { id: user.groupId } },
+        },
+      },
+    });
+    if (!evTracker) {
+      return null;
+    }
+
+    evTracker = await this.prisma.eventTracker.update({
+      where: { id: evTracker.id },
+      data: { hintsUsed: evTracker.hintsUsed - 1 },
+    });
+    console.log('increased hints used for event tracker');
+    return evTracker;
   }
 
   async emitUpdateEventData(ev: EventBase, deleted: boolean, target?: User) {

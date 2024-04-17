@@ -190,6 +190,10 @@ export interface UpdateEventTrackerDataDto {
   tracker: EventTrackerDto;
 }
 
+export interface UseEventTrackerHintDto {
+  usedHint: boolean;
+}
+
 export interface UpdateEventDataDto {
   event: EventDto;
   deleted: boolean;

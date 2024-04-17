@@ -241,19 +241,13 @@ class _GameplayMapState extends State<GameplayMap> {
    */
   void useHint() {
     if (numHintsLeft > 0 && hintCenter != null && startingHintCenter != null) {
-      numHintsLeft -= 1;
-
       // update event tracker with new hints left value
       var eventId = Provider.of<GroupModel>(context, listen: false).curEventId;
-      var tracker = Provider.of<TrackerModel>(context, listen: false)
-          .trackerByEventId(eventId ?? "");
-
-      if (eventId == null || tracker == null) {
-        displayToast(
-            "An error occurred while getting event tracker", Status.error);
+      if (eventId == null) {
+        displayToast("Could not get event", Status.error);
       } else {
-        tracker.partialUpdate(EventTrackerDto(
-            eventId: eventId, hintsUsed: (totalHints - numHintsLeft)));
+        Provider.of<TrackerModel>(context, listen: false)
+            .useHintForTracker(eventId);
       }
 
       // decreases radius by 0.33 upon each hint press

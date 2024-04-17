@@ -18,6 +18,7 @@ import {
   RequestEventLeaderDataDto,
   UpdateEventDataDto,
   RequestRecommendedEventsDto,
+  UseEventTrackerHintDto,
 } from './event.dto';
 import { RequestEventTrackerDataDto } from '../challenge/challenge.dto';
 import { OrganizationService } from '../organization/organization.service';
@@ -105,6 +106,19 @@ export class EventGateway {
     for (const tracker of trackers) {
       await this.eventService.emitUpdateEventTracker(tracker, user);
     }
+  }
+
+  @SubscribeMessage('useEventTrackerHint')
+  async useEventTrackerHint(
+    @CallingUser() user: User,
+    @MessageBody() data: UseEventTrackerHintDto,
+  ) {
+    const tracker = await this.eventService.useEventTrackerHint(user, data);
+    if (tracker) {
+      await this.eventService.emitUpdateEventTracker(tracker, user);
+      return;
+    }
+    await this.clientService.emitErrorData(user, 'Failed to track used hint!');
   }
 
   @SubscribeMessage('updateEventData')
