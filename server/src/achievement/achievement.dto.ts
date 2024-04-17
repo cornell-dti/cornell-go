@@ -6,7 +6,7 @@ export enum LocationType {
   WestCampus = 'WEST_CAMPUS',
   Collegetown = 'COLLEGETOWN',
   IthacaCommons = 'ITHACA_COMMONS',
-  Any = 'Any',
+  Any = 'ANY',
 }
 
 export enum AchievementType {

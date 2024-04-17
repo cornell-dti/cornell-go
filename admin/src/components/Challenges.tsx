@@ -197,7 +197,7 @@ function fromForm(
         case 6:
           return "ITHACA_COMMONS";
         default:
-          return "Any";
+          return "ANY";
       }
     })(),
     description: (form[3] as FreeEntryForm).value,

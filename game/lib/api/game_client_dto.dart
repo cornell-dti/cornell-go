@@ -27,7 +27,7 @@ enum AchievementLocationTypeDto {
   WEST_CAMPUS,
   COLLEGETOWN,
   ITHACA_COMMONS,
-  Any,
+  ANY,
 }
 
 enum AchievementAchievementTypeDto {
@@ -58,7 +58,7 @@ enum ChallengeLocationDto {
   WEST_CAMPUS,
   COLLEGETOWN,
   ITHACA_COMMONS,
-  Any,
+  ANY,
 }
 
 enum EventCategoryDto {
