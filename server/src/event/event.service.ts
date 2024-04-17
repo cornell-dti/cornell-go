@@ -390,6 +390,7 @@ export class EventService {
           : DifficultyMode.HARD,
       latitude: event.latitudeF,
       longitude: event.longitudeF,
+      category: event.category,
     };
 
     if (
@@ -420,7 +421,7 @@ export class EventService {
         description:
           assignData.description?.substring(0, 2048) ??
           defaultEventData.description,
-        category: defaultEventData.category,
+        category: assignData.category ?? defaultEventData.category,
         timeLimitation: assignData.timeLimitation,
         endTime: assignData.endTime ?? defaultEventData.endTime,
         indexable: assignData.indexable ?? defaultEventData.indexable,

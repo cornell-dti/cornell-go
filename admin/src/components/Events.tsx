@@ -136,7 +136,7 @@ function makeForm() {
 function fromForm(form: EntryForm[], id: string): EventDto {
   return {
     id,
-    requiredMembers: (form[2] as NumberEntryForm).value,
+    requiredMembers: (form[3] as NumberEntryForm).value,
     timeLimitation:
       (form[4] as OptionEntryForm).value === 0 ? "PERPETUAL" : "LIMITED_TIME",
     name: (form[0] as FreeEntryForm).value,
