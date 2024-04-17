@@ -39,7 +39,8 @@ type LoginEnrollmentTypeDto =
   | "UNDERGRADUATE"
   | "GRADUATE"
   | "FACULTY"
-  | "ALUMNI";
+  | "ALUMNI"
+  | "GUEST";
 
 type EventTimeLimitationDto = "LIMITED_TIME" | "PERPETUAL";
 
@@ -51,7 +52,8 @@ type UserEnrollmentTypeDto =
   | "UNDERGRADUATE"
   | "GRADUATE"
   | "FACULTY"
-  | "ALUMNI";
+  | "ALUMNI"
+  | "GUEST";
 
 type UserAuthTypeDto = "apple" | "google" | "device";
 
