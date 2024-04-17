@@ -161,6 +161,8 @@ class ApiClient extends ChangeNotifier {
         await _saveToken();
         _createSocket(false);
         return loginResponse;
+      } else {
+        print(loginResponse.body);
       }
       authenticated = false;
       _clientApi.disconnectedController.add(null);
