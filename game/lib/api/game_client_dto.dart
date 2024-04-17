@@ -48,6 +48,7 @@ enum LoginEnrollmentTypeDto {
   GRADUATE,
   FACULTY,
   ALUMNI,
+  GUEST,
 }
 
 enum EventTimeLimitationDto {
@@ -71,6 +72,7 @@ enum UserEnrollmentTypeDto {
   GRADUATE,
   FACULTY,
   ALUMNI,
+  GUEST,
 }
 
 enum UserAuthTypeDto {

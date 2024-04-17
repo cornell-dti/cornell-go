@@ -9,5 +9,5 @@ export interface LoginDto {
   username?: string;
   year?: string;
   aud?: 'android' | 'ios' | 'web';
-  enrollmentType: 'UNDERGRADUATE' | 'GRADUATE' | 'FACULTY' | 'ALUMNI';
+  enrollmentType: 'UNDERGRADUATE' | 'GRADUATE' | 'FACULTY' | 'ALUMNI' | 'GUEST';
 }
