@@ -81,8 +81,8 @@ class CompletedChallengesPage extends StatelessWidget {
                 var type =
                     event.challenges!.length > 1 ? "Journeys" : "Challenge";
 
-                const pictureList = <String>[];
-                const locationList = [];
+                var pictureList = <String>[];
+                var locationList = [];
                 for (var challengeId in event.challenges ?? []) {
                   var challenge = challengeModel.getChallengeById(challengeId);
                   if (challenge != null) {
