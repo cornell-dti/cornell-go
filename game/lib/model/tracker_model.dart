@@ -39,4 +39,16 @@ class TrackerModel extends ChangeNotifier {
       return null;
     }
   }
+
+  /** 
+   * Use a hint for the tracker associated with the given event id.
+   */
+  void useEventTrackerHint(String eventId) {
+    if (_trackers.containsKey(eventId)) {
+      _client.serverApi
+          ?.useEventTrackerHint(UseEventTrackerHintDto(usedHint: true));
+    } else {
+      return null;
+    }
+  }
 }

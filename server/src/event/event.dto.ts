@@ -42,6 +42,7 @@ export interface EventDto {
 export interface EventTrackerDto {
   eventId: string;
   isRanked?: boolean;
+  hintsUsed?: number;
   curChallengeId?: string;
   prevChallenges?: string[];
   prevChallengeDates?: string[];
@@ -50,6 +51,11 @@ export interface EventTrackerDto {
 /** DTO for updateEventTrackerData */
 export interface UpdateEventTrackerDataDto {
   tracker: EventTrackerDto;
+}
+
+/** DTO for useEventTrackerHint */
+export interface UseEventTrackerHintDto {
+  usedHint: boolean;
 }
 
 export interface UpdateEventDataDto {

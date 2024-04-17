@@ -39,7 +39,8 @@ type LoginEnrollmentTypeDto =
   | "UNDERGRADUATE"
   | "GRADUATE"
   | "FACULTY"
-  | "ALUMNI";
+  | "ALUMNI"
+  | "GUEST";
 
 type EventTimeLimitationDto = "LIMITED_TIME" | "PERPETUAL";
 
@@ -51,7 +52,8 @@ type UserEnrollmentTypeDto =
   | "UNDERGRADUATE"
   | "GRADUATE"
   | "FACULTY"
-  | "ALUMNI";
+  | "ALUMNI"
+  | "GUEST";
 
 type UserAuthTypeDto = "apple" | "google" | "device";
 
@@ -180,6 +182,7 @@ export interface EventDto {
 export interface EventTrackerDto {
   eventId: string;
   isRanked?: boolean;
+  hintsUsed?: number;
   curChallengeId?: string;
   prevChallenges?: string[];
   prevChallengeDates?: string[];
@@ -187,6 +190,10 @@ export interface EventTrackerDto {
 
 export interface UpdateEventTrackerDataDto {
   tracker: EventTrackerDto;
+}
+
+export interface UseEventTrackerHintDto {
+  usedHint: boolean;
 }
 
 export interface UpdateEventDataDto {

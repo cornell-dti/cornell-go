@@ -21,6 +21,8 @@ import {
   EventTrackerDto,
   UpdateEventDataDto,
   RequestRecommendedEventsDto,
+  UpdateEventTrackerDataDto,
+  UseEventTrackerHintDto,
 } from './event.dto';
 import { AppAbility, CaslAbilityFactory } from '../casl/casl-ability.factory';
 import { accessibleBy } from '@casl/prisma';
@@ -125,6 +127,7 @@ export class EventService {
     const progress = await this.prisma.eventTracker.create({
       data: {
         score: 0,
+        hintsUsed: 0,
         isRankedForEvent: true,
         event: { connect: { id: defaultEvId } },
         curChallenge: { connect: { id: closestChalId } },
@@ -160,6 +163,7 @@ export class EventService {
     const progress = await this.prisma.eventTracker.create({
       data: {
         score: 0,
+        hintsUsed: 0,
         isRankedForEvent: true,
         eventId: event.id,
         curChallengeId: closestChallenge.id,
@@ -292,6 +296,7 @@ export class EventService {
     return {
       eventId: tracker.eventId,
       isRanked: tracker.isRankedForEvent,
+      hintsUsed: tracker.hintsUsed,
       curChallengeId: tracker.curChallengeId,
       prevChallenges: completedChallenges.map(pc => pc.id),
       prevChallengeDates: completedChallenges.map(pc =>
@@ -312,6 +317,17 @@ export class EventService {
         prismaStore: this.prisma.eventTracker,
       },
     );
+  }
+
+  async useEventTrackerHint(user: User, data: UseEventTrackerHintDto) {
+    var evTracker = await this.getCurrentEventTrackerForUser(user);
+
+    evTracker = await this.prisma.eventTracker.update({
+      where: { id: evTracker.id },
+      data: { hintsUsed: evTracker.hintsUsed + 1 },
+    });
+    console.log('increased hints used for event tracker');
+    return evTracker;
   }
 
   async emitUpdateEventData(ev: EventBase, deleted: boolean, target?: User) {

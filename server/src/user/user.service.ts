@@ -59,7 +59,13 @@ export class UserService {
     authToken: string,
     enrollmentType: EnrollmentType,
   ) {
-    if (username == null) username = email?.split('@')[0];
+    if (username == null && authType == AuthType.GOOGLE) {
+      username = email?.split('@')[0];
+    } else if (authType == AuthType.DEVICE) {
+      const count = await this.prisma.user.count();
+      username = 'guest' + count;
+    }
+
     const defOrg = await this.orgService.getDefaultOrganization(
       authType == AuthType.GOOGLE
         ? OrganizationSpecialUsage.CORNELL_LOGIN
@@ -92,7 +98,7 @@ export class UserService {
     });
 
     await this.eventsService.createDefaultEventTracker(user, lat, long);
-    console.log(`User ${user.id} created!`);
+    console.log(`User ${user.id} created with username ${username}!`);
     await this.log.logEvent(SessionLogEvent.CREATE_USER, user.id, user.id);
     return user;
   }

@@ -64,6 +64,9 @@ class GameServerApi {
   void requestEventTrackerData(RequestEventTrackerDataDto dto) =>
       _invokeWithRefresh("requestEventTrackerData", dto.toJson());
 
+  void useEventTrackerHint(UseEventTrackerHintDto dto) =>
+      _invokeWithRefresh("useEventTrackerHint", dto.toJson());
+
   void updateEventData(UpdateEventDataDto dto) =>
       _invokeWithRefresh("updateEventData", dto.toJson());
 

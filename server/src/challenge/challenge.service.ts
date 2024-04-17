@@ -114,6 +114,7 @@ export class ChallengeService {
           connect: groupMembers.map(m => ({ id: m.id })),
         },
         trackerId: eventTracker.id,
+        hintsUsed: eventTracker.hintsUsed,
       },
     });
 
@@ -123,15 +124,18 @@ export class ChallengeService {
 
     const nextChallenge = await this.nextChallenge(curChallenge);
 
+    const totalScore = curChallenge.points - 25 * eventTracker.hintsUsed;
+
     await this.prisma.user.update({
       where: { id: user.id },
-      data: { score: { increment: curChallenge.points } },
+      data: { score: { increment: totalScore } },
     });
 
     await this.prisma.eventTracker.update({
       where: { id: eventTracker.id },
       data: {
-        score: { increment: curChallenge.points },
+        score: { increment: totalScore },
+        hintsUsed: 0,
         curChallenge: { connect: { id: nextChallenge.id } },
       },
     });
