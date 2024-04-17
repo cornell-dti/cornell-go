@@ -30,9 +30,10 @@ class _JourneysPageState extends State<JourneysPage> {
         builder: (
           BuildContext context,
         ) {
-          return FilterForm(onSubmit:handleFilterSubmit);
+          return FilterForm(onSubmit: handleFilterSubmit);
         });
   }
+
   // Callback function to receive updated state values from the child
   void handleFilterSubmit(List<String> a, List<String> b, String c) {
     setState(() {

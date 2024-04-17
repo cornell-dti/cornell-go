@@ -6,7 +6,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:async';
 import 'dart:math';
 
-
 class GameplayMap extends StatefulWidget {
   final GeoPoint targetLocation;
   final double awardingRadius;

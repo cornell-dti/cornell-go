@@ -1,23 +1,30 @@
 import 'package:flutter/material.dart';
 
 class FilterForm extends StatefulWidget {
-  final void Function(List<String>,List<String>,String) onSubmit;
+  final void Function(List<String>, List<String>, String) onSubmit;
   String? myStatus;
   List<String>? myLocations;
   List<String>? myCategories;
-  FilterForm({Key? key, required this.onSubmit,String? status,List<String>?locations, List<String>?categories}) : super(key: key) {
-    myStatus=status;
+  FilterForm(
+      {Key? key,
+      required this.onSubmit,
+      String? status,
+      List<String>? locations,
+      List<String>? categories})
+      : super(key: key) {
+    myStatus = status;
     myLocations = locations;
-      print ("Start of FilterForm Build: Selected status is " + myStatus.toString()  );
+    print(
+        "Start of FilterForm Build: Selected status is " + myStatus.toString());
   }
 
-  
   @override
   // State<FilterForm> createState() => _FilterFormState(status);
-State<FilterForm> createState() {
-      print ("Start of FilterFormState Build: Selected status is " + myStatus.toString()  );
-  return _FilterFormState(myStatus,myLocations,myCategories);
-}
+  State<FilterForm> createState() {
+    print("Start of FilterFormState Build: Selected status is " +
+        myStatus.toString());
+    return _FilterFormState(myStatus, myLocations, myCategories);
+  }
 }
 
 class _FilterFormState extends State<FilterForm> {
@@ -26,13 +33,14 @@ class _FilterFormState extends State<FilterForm> {
   List<String> selectedLocations = [];
   late String selectedStatus;
 
-_FilterFormState(String? status,List<String>?locations, List<String>?categories) {
-        print ("Start of FilterFormState : Selected status is " + status.toString()  );
+  _FilterFormState(
+      String? status, List<String>? locations, List<String>? categories) {
+    print("Start of FilterFormState : Selected status is " + status.toString());
 
-   selectedStatus = status ?? "Easy";
-   selectedLocations = locations??[];
-   selectedCategories=categories??[];
-}
+    selectedStatus = status ?? "Easy";
+    selectedLocations = locations ?? [];
+    selectedCategories = categories ?? [];
+  }
   List<String> categories = [
     'Food',
     'Nature',
@@ -42,7 +50,15 @@ _FilterFormState(String? status,List<String>?locations, List<String>?categories)
     'Dorm'
   ];
 
-  List<String> locations = ['ENG_QUAD', 'ARTS_QUAD', 'AG_QUAD','NORTH_CAMPUS','WEST_CAMPUS','COLLEGETOWN','ITHACA_COMMONS'];
+  List<String> locations = [
+    'ENG_QUAD',
+    'ARTS_QUAD',
+    'AG_QUAD',
+    'NORTH_CAMPUS',
+    'WEST_CAMPUS',
+    'COLLEGETOWN',
+    'ITHACA_COMMONS'
+  ];
   List<String> statuses = ['Easy', 'Normal', 'Hard'];
 
   // Define methods for updating the selected values
@@ -52,7 +68,7 @@ _FilterFormState(String? status,List<String>?locations, List<String>?categories)
     //   selectedLocations;
     //   selectedStatus;
     // });
-    widget.onSubmit(selectedCategories, selectedLocations,selectedStatus);
+    widget.onSubmit(selectedCategories, selectedLocations, selectedStatus);
 
     Navigator.pop(context);
   }
@@ -306,7 +322,7 @@ _FilterFormState(String? status,List<String>?locations, List<String>?categories)
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 20.0),
                   child: TextButton(
-                    onPressed:filterChallenges,
+                    onPressed: filterChallenges,
                     child: Text('See results'),
                     style: ElevatedButton.styleFrom(
                       foregroundColor: Color.fromARGB(255, 255, 255, 255),

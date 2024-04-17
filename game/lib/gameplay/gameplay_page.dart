@@ -5,7 +5,6 @@ import 'package:game/model/challenge_model.dart';
 import 'gameplay_map.dart';
 import 'package:provider/provider.dart';
 
-
 import 'dart:async';
 
 class GameplayPage extends StatefulWidget {

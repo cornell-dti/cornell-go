@@ -20,15 +20,15 @@ class ChallengesPage extends StatefulWidget {
 }
 
 class _ChallengesPageState extends State<ChallengesPage> {
-    List<String> selectedCategories = [];
+  List<String> selectedCategories = [];
   List<String> selectedLocations = [];
   String selectedStatus = 'Easy';
 
   // Callback function to receive updated state values from the child
   void handleFilterSubmit(List<String>? a, List<String>? b, String c) {
     setState(() {
-      selectedCategories = a??[];
-      selectedLocations = b??[];
+      selectedCategories = a ?? [];
+      selectedLocations = b ?? [];
       selectedStatus = c;
     });
   }
@@ -76,19 +76,17 @@ class _ChallengesPageState extends State<ChallengesPage> {
                       Container(
                         height: 30,
                         child: TextButton.icon(
-                        onPressed: () {
-                          showModalBottomSheet(
-                            context: context,
-                                    isScrollControlled: true,
-                            builder: (context) => FilterForm(
-                              onSubmit: handleFilterSubmit,
-                              status:selectedStatus,
-                              locations: selectedLocations,
-                              categories: selectedCategories
-
-                            ),
-                          );
-                        },
+                            onPressed: () {
+                              showModalBottomSheet(
+                                context: context,
+                                isScrollControlled: true,
+                                builder: (context) => FilterForm(
+                                    onSubmit: handleFilterSubmit,
+                                    status: selectedStatus,
+                                    locations: selectedLocations,
+                                    categories: selectedCategories),
+                              );
+                            },
                             icon: Icon(
                               Icons.filter_list_rounded,
                               color: Color.fromARGB(255, 0, 0, 0),
@@ -158,41 +156,47 @@ class _ChallengesPageState extends State<ChallengesPage> {
 
                     // print("Doing Event with now/endtime " + event.description.toString() + now.toString() + "/" + endtime.toString());
                     if (challenge == null) {
-                        // print("Challenge is null for event " + event.description.toString());
+                      // print("Challenge is null for event " + event.description.toString());
 
                       continue;
                     }
-                    final challengeLocation = challenge?.location?.toString() ?? "";
+                    final challengeLocation =
+                        challenge?.location?.toString() ?? "";
 
                     bool eventMatchesStatusSelection = false;
                     bool eventMatchesCategorySelection = true;
                     bool eventMatchesLocationSelection = false;
-                    if (selectedStatus == "All")  {
-                      eventMatchesStatusSelection= true; 
-                    }
-                    else if (selectedStatus == event.difficulty?.name.toString()) 
-                      eventMatchesStatusSelection= true; else eventMatchesStatusSelection=false;
+                    if (selectedStatus == "All") {
+                      eventMatchesStatusSelection = true;
+                    } else if (selectedStatus ==
+                        event.difficulty?.name.toString())
+                      eventMatchesStatusSelection = true;
+                    else
+                      eventMatchesStatusSelection = false;
 
-                    if (selectedLocations.length >0) {
-                      if (selectedLocations.contains(challengeLocation)) 
-                        eventMatchesLocationSelection= true; 
-                      else eventMatchesLocationSelection=false;
+                    if (selectedLocations.length > 0) {
+                      if (selectedLocations.contains(challengeLocation))
+                        eventMatchesLocationSelection = true;
+                      else
+                        eventMatchesLocationSelection = false;
                     } else
-                      eventMatchesLocationSelection=true;
+                      eventMatchesLocationSelection = true;
 
                     // if (selectedCategories.length >0) {
-                    //   if (selectedCategories.contains(challengeLocation)) 
-                    //     eventMatchesCategorySelection= true; 
+                    //   if (selectedCategories.contains(challengeLocation))
+                    //     eventMatchesCategorySelection= true;
                     //   else eventMatchesCategorySelection=false;
                     // } else
                     //   eventMatchesCategorySelection=true;
-
 
                     eventCells.add(
                       StreamBuilder(
                         stream:
                             Stream.fromFuture(Future.delayed(timeTillExpire)),
-                        builder: (stream, value) => timeTillExpire.isNegative || eventMatchesStatusSelection==false || eventMatchesCategorySelection==false || eventMatchesLocationSelection==false
+                        builder: (stream, value) => timeTillExpire.isNegative ||
+                                eventMatchesStatusSelection == false ||
+                                eventMatchesCategorySelection == false ||
+                                eventMatchesLocationSelection == false
                             ? Consumer<ApiClient>(
                                 builder: (context, apiClient, child) {
                                   if (event.id == groupModel.curEventId) {
@@ -248,6 +252,4 @@ class _ChallengesPageState extends State<ChallengesPage> {
           )),
     );
   }
-
-
 }
