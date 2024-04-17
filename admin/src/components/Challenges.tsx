@@ -118,22 +118,26 @@ function toForm(challenge: ChallengeDto) {
         "ITHACA_COMMONS",
         "Any",
       ],
-      value:
-        (challenge.location as string) === "ENG_QUAD"
-          ? 0
-          : (challenge.location as string) === "ARTS_QUAD"
-          ? 1
-          : (challenge.location as string) === "AG_QUAD"
-          ? 2
-          : (challenge.location as string) === "NORTH_CAMPUS"
-          ? 3
-          : (challenge.location as string) === "WEST_CAMPUS"
-          ? 4
-          : (challenge.location as string) === "COLLEGETOWN"
-          ? 5
-          : (challenge.location as string) === "ITHACA_COMMONS"
-          ? 6
-          : 7,
+      value: (() => {
+        switch (challenge.location as string) {
+          case "ENG_QUAD":
+            return 0;
+          case "ARTS_QUAD":
+            return 1;
+          case "AG_QUAD":
+            return 2;
+          case "NORTH_CAMPUS":
+            return 3;
+          case "WEST_CAMPUS":
+            return 4;
+          case "COLLEGETOWN":
+            return 5;
+          case "ITHACA_COMMONS":
+            return 6;
+          default:
+            return 7;
+        }
+      })(),
     },
     { name: "Name", characterLimit: 256, value: challenge.name ?? "" },
     {
@@ -176,22 +180,26 @@ function fromForm(
   return {
     id,
     name: (form[2] as FreeEntryForm).value,
-    location:
-      (form[1] as OptionEntryForm).value === 0
-        ? "ENG_QUAD"
-        : (form[1] as OptionEntryForm).value === 1
-        ? "ARTS_QUAD"
-        : (form[1] as OptionEntryForm).value === 2
-        ? "AG_QUAD"
-        : (form[1] as OptionEntryForm).value === 3
-        ? "NORTH_CAMPUS"
-        : (form[1] as OptionEntryForm).value === 4
-        ? "WEST_CAMPUS"
-        : (form[1] as OptionEntryForm).value === 5
-        ? "COLLEGETOWN"
-        : (form[1] as OptionEntryForm).value === 6
-        ? "ITHACA_COMMONS"
-        : "Any",
+    location: (() => {
+      switch ((form[1] as OptionEntryForm).value) {
+        case 0:
+          return "ENG_QUAD";
+        case 1:
+          return "ARTS_QUAD";
+        case 2:
+          return "AG_QUAD";
+        case 3:
+          return "NORTH_CAMPUS";
+        case 4:
+          return "WEST_CAMPUS";
+        case 5:
+          return "COLLEGETOWN";
+        case 6:
+          return "ITHACA_COMMONS";
+        default:
+          return "Any";
+      }
+    })(),
     description: (form[3] as FreeEntryForm).value,
     points: (form[4] as NumberEntryForm).value,
     imageUrl: (form[5] as FreeEntryForm).value,

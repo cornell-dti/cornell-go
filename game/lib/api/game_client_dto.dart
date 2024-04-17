@@ -50,17 +50,6 @@ enum LoginEnrollmentTypeDto {
   ALUMNI,
 }
 
-enum LocationTypeDto {
-  EngQuad,
-  ArtsQuad,
-  AgQuad,
-  NorthCampus,
-  WestCampus,
-  Collegetown,
-  IthacaCommons,
-  Any,
-}
-
 enum ChallengeLocationDto {
   ENG_QUAD,
   ARTS_QUAD,

@@ -7,7 +7,7 @@ import {
   EventTracker,
   SessionLogEvent,
   User,
-  LocationType,
+  // LocationType,
 } from '@prisma/client';
 import { ClientService } from '../client/client.service';
 import { EventService } from '../event/event.service';
@@ -15,7 +15,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import {
   ChallengeDto,
   UpdateChallengeDataDto,
-  LocationTypeDto,
+  // LocationType,
 } from './challenge.dto';
 import { AppAbility, CaslAbilityFactory } from '../casl/casl-ability.factory';
 import { accessibleBy } from '@casl/prisma';
@@ -225,7 +225,7 @@ export class ChallengeService {
     return {
       id: ch.id,
       name: ch.name,
-      location: ch.location as LocationTypeDto,
+      location: ch.location as LocationType,
       description: ch.description,
       points: ch.points,
       imageUrl: ch.imageUrl,
@@ -292,9 +292,7 @@ export class ChallengeService {
           challenge.imageUrl?.substring(0, 2048) ??
           defaultChallengeData.imageUrl,
         location:
-          LocationType[
-            challenge.location as String as keyof typeof LocationType
-          ] ?? defaultChallengeData.location,
+          (challenge.location as LocationType) ?? defaultChallengeData.location,
         points: challenge.points ?? 0,
         latitude: challenge.latF ?? defaultChallengeData.latitude,
         longitude: challenge.longF ?? defaultChallengeData.longitude,

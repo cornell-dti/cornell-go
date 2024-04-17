@@ -28,7 +28,7 @@ import { UpdateUserDataDto } from '../user/user.dto';
 import { UpdateEventDataDto } from '../event/event.dto';
 import {
   UpdateChallengeDataDto,
-  LocationTypeDto,
+  LocationType,
 } from '../challenge/challenge.dto';
 
 describe('OrganizationModule E2E', () => {
@@ -106,7 +106,7 @@ describe('OrganizationModule E2E', () => {
     exChal = (await challengeService.upsertChallengeFromDto(fullAbility, {
       id: '',
       linkedEventId: exEv.id,
-      location: LocationTypeDto['ARTS_QUAD' as keyof typeof LocationTypeDto],
+      location: LocationType.ArtsQuad,
     }))!;
 
     managerUser = await userService.register(

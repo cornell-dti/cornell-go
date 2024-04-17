@@ -41,16 +41,6 @@ type LoginEnrollmentTypeDto =
   | "FACULTY"
   | "ALUMNI";
 
-type LocationTypeDto =
-  | "EngQuad"
-  | "ArtsQuad"
-  | "AgQuad"
-  | "NorthCampus"
-  | "WestCampus"
-  | "Collegetown"
-  | "IthacaCommons"
-  | "Any";
-
 type ChallengeLocationDto =
   | "ENG_QUAD"
   | "ARTS_QUAD"

@@ -46,18 +46,22 @@ function EventCard(props: {
       ? "Normal"
       : "Hard";
 
-  const categoryType =
-    (props.event.category as string) === "FOOD"
-      ? "Food"
-      : (props.event.category as string) === "NATURE"
-      ? "Nature"
-      : (props.event.category as string) === "HISTORICAL"
-      ? "Historical"
-      : (props.event.category as string) === "CAFE"
-      ? "Cafe"
-      : (props.event.category as string) === "DININGHALL"
-      ? "Dining Hall"
-      : "Dorm";
+  const categoryType = (() => {
+    switch (props.event.category as string) {
+      case "FOOD":
+        return "Food";
+      case "NATURE":
+        return "Nature";
+      case "HISTORICAL":
+        return "Historical";
+      case "CAFE":
+        return "Cafe";
+      case "DININGHALL":
+        return "Dininghall";
+      default:
+        return "Dorm";
+    }
+  })();
 
   const affirmOfBool = (val: boolean) => (val ? "Yes" : "No");
 
@@ -137,18 +141,22 @@ function fromForm(form: EntryForm[], id: string): EventDto {
       (form[4] as OptionEntryForm).value === 0 ? "PERPETUAL" : "LIMITED_TIME",
     name: (form[0] as FreeEntryForm).value,
     description: (form[1] as FreeEntryForm).value,
-    category:
-      (form[2] as OptionEntryForm).value === 0
-        ? "FOOD"
-        : (form[2] as OptionEntryForm).value === 1
-        ? "NATURE"
-        : (form[2] as OptionEntryForm).value === 2
-        ? "HISTORICAL"
-        : (form[2] as OptionEntryForm).value === 3
-        ? "CAFE"
-        : (form[2] as OptionEntryForm).value === 4
-        ? "DININGHALL"
-        : "DORM",
+    category: (() => {
+      switch ((form[2] as OptionEntryForm).value) {
+        case 0:
+          return "FOOD";
+        case 1:
+          return "NATURE";
+        case 2:
+          return "HISTORICAL";
+        case 3:
+          return "CAFE";
+        case 4:
+          return "DININGHALL";
+        default:
+          return "DORM";
+      }
+    })(),
     indexable: (form[6] as OptionEntryForm).value === 1,
     endTime: (form[7] as DateEntryForm).date.toUTCString(),
     challenges: [],
@@ -171,18 +179,22 @@ function toForm(event: EventDto) {
     {
       name: "Category",
       options: ["FOOD", "NATURE", "HISTORICAL", "CAFE", "DININGHALL", "DORM"],
-      value:
-        (event.category as string) === "FOOD"
-          ? 0
-          : (event.category as string) === "NATURE"
-          ? 1
-          : (event.category as string) === "HISTORICAL"
-          ? 2
-          : (event.category as string) === "CAFE"
-          ? 3
-          : (event.category as string) === "DININGHALL"
-          ? 4
-          : 5,
+      value: (() => {
+        switch (event.category as string) {
+          case "FOOD":
+            return 0;
+          case "NATURE":
+            return 1;
+          case "HISTORICAL":
+            return 2;
+          case "CAFE":
+            return 3;
+          case "DININGHALL":
+            return 4;
+          default:
+            return 5;
+        }
+      })(),
     },
     {
       name: "Required Members",

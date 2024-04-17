@@ -3,7 +3,7 @@ export interface CompletedChallengeDto {
   challengeId: string;
 }
 
-export enum LocationTypeDto {
+export enum LocationType {
   EngQuad = 'ENG_QUAD',
   ArtsQuad = 'ARTS_QUAD',
   AgQuad = 'AG_QUAD',
@@ -17,7 +17,7 @@ export enum LocationTypeDto {
 export interface ChallengeDto {
   id: string;
   name?: string;
-  location?: LocationTypeDto;
+  location?: LocationType;
   description?: string;
   points?: number;
   imageUrl?: string;
