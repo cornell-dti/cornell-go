@@ -17,10 +17,6 @@ export class ServerApi {
     this.send("requestChallengeData", data);
   }
 
-  setCurrentChallenge(data: dto.SetCurrentChallengeDto) {
-    this.send("setCurrentChallenge", data);
-  }
-
   completedChallenge(data: dto.CompletedChallengeDto) {
     this.send("completedChallenge", data);
   }

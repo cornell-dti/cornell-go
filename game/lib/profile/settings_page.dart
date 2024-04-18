@@ -1,9 +1,8 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:velocity_x/velocity_x.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:game/utils/utility_functions.dart';
+import 'package:game/main.dart';
+import 'package:game/splash_page/splash_page.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -18,7 +17,9 @@ class SettingsPage extends StatelessWidget {
           leading: IconButton(
             icon: const Icon(Icons.navigate_before),
             color: Colors.white,
-            onPressed: () {},
+            onPressed: () {
+              Navigator.pop(context);
+            },
           ),
           title: const Text(
             'Settings',
@@ -146,7 +147,15 @@ class SettingsPage extends StatelessWidget {
                         ),
                       ),
                       child: TextButton(
-                        onPressed: () {},
+                        onPressed: () async => {
+                          await client.disconnect(),
+                          Navigator.pop(context),
+                          Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => SplashPageWidget())),
+                          displayToast("Signed out", Status.success)
+                        },
                         style: TextButton.styleFrom(
                             padding: EdgeInsets.only(left: 20.0),
                             alignment: Alignment.centerLeft,

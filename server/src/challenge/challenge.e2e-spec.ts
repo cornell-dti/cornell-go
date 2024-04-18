@@ -57,9 +57,6 @@ describe('ChallengeModule E2E', () => {
       ],
     }).compile();
 
-    const log = console.log;
-    console.log = function () {};
-
     challengeService = module.get<ChallengeService>(ChallengeService);
     prisma = module.get<PrismaService>(PrismaService);
     userService = module.get<UserService>(UserService);
@@ -89,8 +86,6 @@ describe('ChallengeModule E2E', () => {
     event = await prisma.eventBase.findUniqueOrThrow({
       where: { id: tracker.eventId },
     });
-
-    console.log = log;
   });
 
   it('should successfully find ChallengeService', async () => {
@@ -106,7 +101,9 @@ describe('ChallengeModule E2E', () => {
       let chal = await prisma.challenge.findFirstOrThrow({
         where: { id: tracker.curChallengeId },
       });
+
       await challengeService.completeChallenge(user, chal.id);
+
       const score2 = (
         await prisma.user.findFirstOrThrow({
           where: {
@@ -114,6 +111,7 @@ describe('ChallengeModule E2E', () => {
           },
         })
       ).score;
+
       const trackerScore2 = (
         await prisma.eventTracker.findFirstOrThrow({
           where: {
@@ -121,7 +119,9 @@ describe('ChallengeModule E2E', () => {
           },
         })
       ).score;
-      expect(score + 1).toEqual(score2);
+
+      expect(score + chal.points).toEqual(score2);
+      expect(trackerScore + chal.points).toEqual(trackerScore2);
       expect(
         await challengeService.isChallengeCompletedByUser(user, chal),
       ).toEqual(true);
@@ -130,12 +130,12 @@ describe('ChallengeModule E2E', () => {
 
   describe('Create and read functions', () => {
     it('should add a challenge to eventbase: upsertChallengeFromDto', async () => {
-      const chaldto: ChallengeDto = {
+      const chalDto: ChallengeDto = {
         id: '12345',
         name: 'test',
         location: ChallengeLocationDto.EngQuad,
         description: 'chal dto',
-        points: 50,
+        points: 1,
         imageUrl: 'url',
         latF: 70,
         longF: 70,
@@ -146,7 +146,7 @@ describe('ChallengeModule E2E', () => {
 
       const chal = await challengeService.upsertChallengeFromDto(
         fullAbility,
-        chaldto,
+        chalDto,
       );
 
       const findChal = await prisma.challenge.findFirstOrThrow({
@@ -176,12 +176,12 @@ describe('ChallengeModule E2E', () => {
       const chalById = await challengeService.getChallengeById(chal.id);
       expect(chalById).toEqual(chal);
 
-      const secondChalDTO: ChallengeDto = {
+      const secondChalDto: ChallengeDto = {
         id: '123',
         name: 'test',
         location: ChallengeLocationDto.Any,
         description: 'chal dto',
-        points: 50,
+        points: 1,
         imageUrl: 'update test',
         latF: 70,
         longF: 70,
@@ -190,7 +190,7 @@ describe('ChallengeModule E2E', () => {
         linkedEventId: event.id,
       };
 
-      await challengeService.upsertChallengeFromDto(fullAbility, secondChalDTO);
+      await challengeService.upsertChallengeFromDto(fullAbility, secondChalDto);
       const nextChal = await challengeService.nextChallenge(
         await prisma.challenge.findFirstOrThrow({
           where: { linkedEventId: event.id, eventIndex: 0 },
@@ -205,12 +205,12 @@ describe('ChallengeModule E2E', () => {
   describe('Update functions', () => {
     it('should update challenge from eventbase: upsertChallengeFromDto', async () => {
       const chalID = (await prisma.challenge.findFirstOrThrow()).id;
-      const chaldto: ChallengeDto = {
+      const chalDto: ChallengeDto = {
         id: chalID,
         name: 'test',
         location: ChallengeLocationDto.EngQuad,
         description: 'chal dto',
-        points: 50,
+        points: 1,
         imageUrl: 'update test',
         latF: 70,
         longF: 70,
@@ -218,7 +218,7 @@ describe('ChallengeModule E2E', () => {
         closeRadiusF: 2,
         linkedEventId: event.id,
       };
-      await challengeService.upsertChallengeFromDto(fullAbility, chaldto);
+      await challengeService.upsertChallengeFromDto(fullAbility, chalDto);
       const chal = await prisma.challenge.findFirstOrThrow({
         where: { id: chalID },
       });
@@ -255,20 +255,6 @@ describe('ChallengeModule E2E', () => {
       });
 
       expect(chalres).toEqual(null);*/
-    });
-  });
-
-  describe('setCurrentChallenge', () => {
-    it('should set challenge to current', async () => {
-      const chal = await prisma.challenge.findFirstOrThrow({
-        where: {
-          linkedEvent: event,
-        },
-      });
-
-      await challengeService.setCurrentChallenge(user, chal.id);
-      const tracker = await eventService.getCurrentEventTrackerForUser(user);
-      expect(tracker.curChallengeId).toEqual(chal.id);
     });
   });
 

@@ -8,6 +8,7 @@ import {
   User,
   EnrollmentType,
   EventBase,
+  PrevChallenge,
 } from '@prisma/client';
 import { ClientService } from '../client/client.service';
 import { EventService } from '../event/event.service';
@@ -58,7 +59,13 @@ export class UserService {
     authToken: string,
     enrollmentType: EnrollmentType,
   ) {
-    if (username == null) username = email?.split('@')[0];
+    if (username == null && authType == AuthType.GOOGLE) {
+      username = email?.split('@')[0];
+    } else if (authType == AuthType.DEVICE) {
+      const count = await this.prisma.user.count();
+      username = 'guest' + count;
+    }
+
     const defOrg = await this.orgService.getDefaultOrganization(
       authType == AuthType.GOOGLE
         ? OrganizationSpecialUsage.CORNELL_LOGIN
@@ -91,7 +98,7 @@ export class UserService {
     });
 
     await this.eventsService.createDefaultEventTracker(user, lat, long);
-    console.log(`User ${user.id} created!`);
+    console.log(`User ${user.id} created with username ${username}!`);
     await this.log.logEvent(SessionLogEvent.CREATE_USER, user.id, user.id);
     return user;
   }
@@ -119,7 +126,13 @@ export class UserService {
   }
 
   async deleteUser(ability: AppAbility, user: User) {
-    if (ability.cannot(Action.Delete, subject('User', user))) {
+    if (
+      (await this.prisma.user.count({
+        where: {
+          AND: [{ id: user.id }, accessibleBy(ability, Action.Delete).User],
+        },
+      })) < 1
+    ) {
       return;
     }
 
@@ -170,14 +183,16 @@ export class UserService {
     });
 
     const assignData = await this.abilityFactory.filterInaccessible(
+      userObj.id,
       {
         username: username,
         email: user.email,
         year: user.year,
       },
-      subject('User', userObj),
+      'User',
       ability,
       Action.Update,
+      this.prisma.user,
     );
 
     return await this.prisma.user.update({
@@ -193,6 +208,7 @@ export class UserService {
         eventTrackers: true,
         favorites: true,
         group: { select: { friendlyId: true } },
+        completedChallenges: true,
       },
     });
 
@@ -222,7 +238,6 @@ export class UserService {
    * @param user User to emit
    * @param deleted True if user was deleted
    * @param partial True if partial data is updated
-   * @param admin True if admin
    * @param client The User requesting the information
    */
   async emitUpdateUserData(
@@ -244,8 +259,9 @@ export class UserService {
       dto,
       {
         id: user.id,
-        subject: subject('User', user),
+        subject: 'User',
         dtoField: 'user',
+        prismaStore: this.prisma.user,
       },
     );
   }

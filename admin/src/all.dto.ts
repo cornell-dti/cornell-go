@@ -30,7 +30,8 @@ type LoginEnrollmentTypeDto =
   | "UNDERGRADUATE"
   | "GRADUATE"
   | "FACULTY"
-  | "ALUMNI";
+  | "ALUMNI"
+  | "GUEST";
 
 type ChallengeLocationDto =
   | "ENG_QUAD"
@@ -60,7 +61,8 @@ type UserEnrollmentTypeDto =
   | "UNDERGRADUATE"
   | "GRADUATE"
   | "FACULTY"
-  | "ALUMNI";
+  | "ALUMNI"
+  | "GUEST";
 
 type UserAuthTypeDto = "apple" | "google" | "device";
 

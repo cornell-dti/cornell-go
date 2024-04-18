@@ -48,6 +48,7 @@ enum LoginEnrollmentTypeDto {
   GRADUATE,
   FACULTY,
   ALUMNI,
+  GUEST,
 }
 
 enum ChallengeLocationDto {
@@ -91,6 +92,7 @@ enum UserEnrollmentTypeDto {
   GRADUATE,
   FACULTY,
   ALUMNI,
+  GUEST,
 }
 
 enum UserAuthTypeDto {
