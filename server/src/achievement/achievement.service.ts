@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import {
   $Enums,
   Achievement,
+  AchievementType,
   AchievementTracker,
   LocationType,
   PrismaClient,
@@ -16,9 +17,8 @@ import { Action } from '../casl/action.enum';
 import { subject } from '@casl/ability';
 import { defaultAchievementData } from '../organization/organization.service';
 import {
-  AchievementType,
+  AchievementTypeDto,
   AchievementDto,
-  LocationType as LocType,
   AchievementTrackerDto,
   UpdateAchievementDataDto,
 } from './achievement.dto';
@@ -54,58 +54,68 @@ export class AchievementService {
   /** upsert achievement */
   async upsertAchievementFromDto(
     ability: AppAbility,
-    achievement: AchievementDto,
+    achievement: AchievementDto
   ) {
     let ach = await this.prisma.achievement.findFirst({
       where: { id: achievement.id },
     });
 
-    if (
-      ach &&
-      (await this.prisma.achievement.findFirst({
-        select: { id: true },
+    const canUpdateOrg =
+      (await this.prisma.organization.count({
+        where: {
+          AND: [
+            { id: achievement.initialOrganizationId ?? '' },
+            accessibleBy(ability, Action.Update).Organization,
+          ],
+        },
+      })) > 0;
+    const canUpdateAch =
+      (await this.prisma.achievement.count({
         where: {
           AND: [
             accessibleBy(ability, Action.Update).Achievement,
-            { id: ach.id },
+            { id: ach?.id ?? '' },
           ],
         },
-      }))
-    ) {
-      const assignData = {
-        requiredPoints: achievement.requiredPoints,
-        name: achievement.name?.substring(0, 2048),
-        description: achievement.description?.substring(0, 2048),
-        imageUrl: achievement.imageUrl?.substring(0, 2048),
-        locationType: achievement.locationType as LocationType,
-        achievementType: achievement.achievementType as AchievementType,
-      };
+      })) > 0;
 
-      const data = await this.abilityFactory.filterInaccessible(
+    const assignData = {
+      requiredPoints: achievement.requiredPoints,
+      name: achievement.name?.substring(0, 2048),
+      description: achievement.description?.substring(0, 2048),
+      imageUrl: achievement.imageUrl?.substring(0, 2048),
+      locationType: achievement.locationType as LocationType,
+      achievementType: achievement.achievementType as AchievementTypeDto,
+    };
+
+    if (ach && canUpdateAch) {
+      const updateData = await this.abilityFactory.filterInaccessible(
+        ach.id,
         assignData,
-        subject('Achievement', ach),
+        'Achievement',
         ability,
         Action.Update,
+        this.prisma.achievement,
       );
 
       ach = await this.prisma.achievement.update({
         where: { id: ach.id },
-        data,
+        data: updateData,
       });
-    } else if (!ach && ability.can(Action.Create, 'Achievement')) {
+    } else if (!ach && canUpdateOrg) {
       const data = {
         name:
-          achievement.name?.substring(0, 2048) ?? defaultAchievementData.name,
+          assignData.name?.substring(0, 2048) ?? defaultAchievementData.name,
         description:
-          achievement.description?.substring(0, 2048) ??
+          assignData.description?.substring(0, 2048) ??
           defaultAchievementData.description,
         imageUrl:
-          achievement.imageUrl?.substring(0, 2048) ??
+          assignData.imageUrl?.substring(0, 2048) ??
           defaultAchievementData.imageUrl,
-        locationType: achievement.locationType as LocationType,
-        achievementType: achievement.achievementType as AchievementType,
-        eventIndex: achievement.eventId ?? 0, // check
-        requiredPoints: achievement.requiredPoints ?? 0,
+        locationType: assignData.locationType as LocationType,
+        achievementType: assignData.achievementType as AchievementTypeDto,
+        // eventIndex: assignData.eventId ?? 0, // check
+        requiredPoints: assignData.requiredPoints ?? 0,
       };
 
       ach = await this.prisma.achievement.create({
@@ -119,7 +129,7 @@ export class AchievementService {
     return ach;
   }
 
-  /** remove achievement by ID */
+  /** remove achievement by ID; return removal status */
   async removeAchievement(ability: AppAbility, achievementId: string) {
     const achievement = await this.prisma.achievement.findFirst({
       where: {
@@ -130,18 +140,19 @@ export class AchievementService {
       },
     });
 
-    if (!achievement) return;
-
-    await this.prisma.achievementTracker.delete({
-      where: {
-        id: achievementId,
-      },
-    });
-
-    await this.prisma.achievement.delete({
-      where: { id: achievementId },
-    });
-    console.log(`Deleted achievement ${achievementId}`);
+    if (achievement) {
+      await this.prisma.achievement.delete({
+        where: { id: achievementId },
+      });
+      await this.prisma.achievementTracker.delete({
+        where: {
+          id: achievementId,
+        },
+      }); //should this automatically delete?
+      console.log(`Deleted achievement ${achievementId}`);
+      return true;
+    }
+    return false;
   }
 
   /** emit & update data for an achievement */
@@ -163,12 +174,18 @@ export class AchievementService {
       dto,
       {
         id: achievement.id,
+        subject: 'Achievement',
         dtoField: 'achievement',
-        subject: subject('Achievement', achievement),
+        prismaStore: this.prisma.achievement,
       },
     );
   }
 
+  /**
+   * Converts an achievement from the database to a DTO
+   * @param ach event to get DTO for
+   * @returns an AchievementDTO for the event
+   */
   async dtoForAchievement(ach: Achievement): Promise<AchievementDto> {
     return {
       id: ach.id,
@@ -177,8 +194,30 @@ export class AchievementService {
       name: ach.name,
       description: ach.description,
       imageUrl: ach.imageUrl,
-      locationType: ach.locationType as LocType,
-      achievementType: ach.achievementType as AchievementType,
+      locationType: 
+        ach.locationType == 
+          LocationType.AG_QUAD ? 'AG_QUAD' 
+          : ach.locationType === LocationType.ENG_QUAD
+          ? "ENG_QUAD"
+          : ach.locationType === LocationType.ARTS_QUAD
+          ? "ARTS_QUAD"
+          : ach.locationType === LocationType.COLLEGETOWN
+          ? "COLLEGETOWN"
+          : ach.locationType === LocationType.ITHACA_COMMONS
+          ? "ITHACA_COMMONS"
+          : ach.locationType === LocationType.NORTH_CAMPUS
+          ? "NORTH_CAMPUS"
+          : ach.locationType === LocationType.WEST_CAMPUS
+          ? "WEST_CAMPUS"
+          : ach.locationType === LocationType.ANY
+          ? "ANY"
+          : "OTHER",
+      // achievementType: ach.achievementType as AchievementTypeDto,
+      achievementType: 
+        ach.achievementType === AchievementType.TOTAL_POINTS ? AchievementTypeDto.TotalPoints
+        : ach.achievementType === AchievementType.TOTAL_CHALLENGES ? AchievementTypeDto.TotalChallenges
+        : ach.achievementType === AchievementType.TOTAL_JOURNEYS ? AchievementTypeDto.TotalJourneys
+        : ach.achievementType === AchievementType.TOTAL_CHALLENGES_OR_JOURNEYS ? AchievementTypeDto.TotalChallengesOrJourneys
     };
   }
 

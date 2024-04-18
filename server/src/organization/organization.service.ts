@@ -6,7 +6,7 @@ import {
   TimeLimitationType,
   OrganizationSpecialUsage,
   User,
-  LocationType,s
+  LocationType,
   AchievementType
 } from '@prisma/client';
 import { ClientService } from '../client/client.service';

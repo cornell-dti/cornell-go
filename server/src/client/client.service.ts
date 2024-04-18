@@ -102,14 +102,6 @@ export class ClientService {
     } else {
       this.gateway.server.in(target).socketsJoin(resource.id);
 
-      const fieldList = Object.keys(
-        resource.dtoField ? (resource.dtoField as {}) : dto,
-      );
-
-      const options: PermittedFieldsOptions<AppAbility> = {
-        fieldsFrom: rule => rule.fields || fieldList,
-      };
-
       // Find all targeted users
       const users = await this.getAffectedUsers(target);
 
@@ -127,13 +119,11 @@ export class ClientService {
         if (Object.keys(accessibleObj).length === 0) continue;
 
         if (resource.dtoField) {
-          (dto as any)[resource.dtoField] = Object.fromEntries(
-            Object.entries(resource.dtoField as any).filter(([k, v]) =>
-              fields.includes(k),
-            ),
-          ) as any;
-
-          await this.sendEvent(users, event, dto);
+          const newDto = {
+            ...dto,
+            [resource.dtoField]: accessibleObj,
+          };
+          await this.sendEvent([user.id], event, newDto);
         } else {
           await this.sendEvent([user.id], event, accessibleObj);
         }

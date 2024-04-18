@@ -22,8 +22,6 @@ import { ClientModule } from '../client/client.module';
 import { AchievementDto, AchievementTrackerDto } from './achievement.dto';
 import { AppAbility, CaslAbilityFactory } from '../casl/casl-ability.factory';
 
-
-
 describe('AchievementModule E2E', () => {
   let app: INestApplication;
   let moduleRef: TestingModule;
@@ -69,7 +67,7 @@ describe('AchievementModule E2E', () => {
     eventService = module.get<EventService>(EventService);
     organizationService = module.get<OrganizationService>(OrganizationService);
     abilityFactory = module.get<CaslAbilityFactory>(CaslAbilityFactory);
-    
+
     user = await userService.register(
       'test@gmail.com',
       'test',
@@ -96,19 +94,20 @@ describe('AchievementModule E2E', () => {
 
   describe('Update functions', () => {
     it('should update an achievement: upsertAchievementFromDto', async () => {
-      const achID = (await prisma.achievement.findFirstOrThrow()).id;
-      const achDTO: AchievementDto = {
-        id: achID,
+      const achId = (await prisma.achievement.findFirstOrThrow()).id;
+      const achDto: AchievementDto = {
+        id: achId,
         name: 'test achievement',
-        description: 'chal dto',
+        description: 'achievements dto',
         requiredPoints: 50,
         imageUrl: 'update test',
       };
-      await achievementService.upsertAchievementFromDto(fullAbility, achDTO);
+      await achievementService.upsertAchievementFromDto(fullAbility, achDto);
       const ach = await prisma.achievement.findFirstOrThrow({
-        where: { id: achID },
+        where: { id: achId },
       });
-      expect(ach.imageUrl).toEqual('update test'); 
+      expect(ach.imageUrl).toEqual('update test');
+    });
   });
 
   describe('Delete functions', () => {
@@ -122,7 +121,4 @@ describe('AchievementModule E2E', () => {
       expect(achres).toEqual(null);
     });
   });
-
-
-
-};
+});

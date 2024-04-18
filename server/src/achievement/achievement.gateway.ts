@@ -43,11 +43,14 @@ export class AchievementGateway {
     @CallingUser() user: User,
     @MessageBody() data: RequestAchievementDataDto,
   ) {
-    const achievement =
-      await this.achievementService.getAchievementsByIdsForAbility(
-        ability,
-        data.achievements,
-      );
+    const achs = await this.achievementService.getAchievementsByIdsForAbility(
+      ability,
+      data.achievements,
+    );
+    console.log(achs.length);
+    for (const ach of achs) {
+      await this.achievementService.emitUpdateAchievementData(ach, false, user);
+    }
   }
 
   /**
@@ -64,20 +67,21 @@ export class AchievementGateway {
     @CallingUser() user: User,
     @MessageBody() data: UpdateAchievementDataDto,
   ) {
+    // TODO: need to change organizations when removing achievement
     const achievement = await this.achievementService.getAchievementFromId(
       data.achievement.id,
     );
 
-    if (!achievement && ability.cannot(Action.Create, 'Achievement')) {
-      await this.clientService.emitErrorData(
-        user,
-        'Permission denied for achievement update!',
-      );
-      return;
-    }
-
-    if (data.deleted && achievement) {
-      await this.achievementService.removeAchievement(ability, achievement.id);
+    if (data.deleted) {
+      if (
+        !achievement || !(await this.achievementService.removeAchievement(
+          ability,
+          achievement.id,
+        ))
+      ) {
+        await this.clientService.emitErrorData(user, 'Failed to delete event!');
+        return;
+      }
       await this.achievementService.emitUpdateAchievementData(
         achievement,
         true,
@@ -88,14 +92,20 @@ export class AchievementGateway {
           ability,
           data.achievement,
         );
-    }
 
-    if (!achievement) {
-      await this.clientService.emitErrorData(
-        user,
-        'Failed to update achievement!',
+      if (!achievement) {
+        await this.clientService.emitErrorData(
+          user,
+          'Failed to upsert achievement!',
+        );
+        return;
+      }
+
+      this.clientService.subscribe(user, achievement.id);
+      await this.achievementService.emitUpdateAchievementData(
+        achievement,
+        false,
       );
-      return;
     }
   }
 }
