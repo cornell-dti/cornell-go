@@ -38,6 +38,7 @@ export interface EventDto {
   latitudeF?: number;
 }
 
+/** DTO for PrevChallenge as used in EventTrackerDto */
 export interface PrevChallengeDto {
   challengeId: string;
   hintsUsed: number;

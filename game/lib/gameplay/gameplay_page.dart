@@ -166,7 +166,13 @@ class _GameplayPageState extends State<GameplayPage> {
                                       vertical: 4.0, horizontal: 8.0),
                                   child: Text(
                                       (event.challenges!.length > 1
-                                          ? "Journey"
+                                          ? "Journey " +
+                                              (tracker.prevChallenges.length +
+                                                      1)
+                                                  .toString() +
+                                              "/" +
+                                              event.challenges!.length
+                                                  .toString()
                                           : "Challenge"),
                                       style: TextStyle(
                                           fontSize: 14,
@@ -221,6 +227,13 @@ class _GameplayPageState extends State<GameplayPage> {
                                       "assets/icons/bearcoins.svg"),
                                   Text(
                                       ' ' +
+                                          ((tracker.hintsUsed > 0)
+                                              ? ((challenge.points ?? 0) -
+                                                          tracker.hintsUsed *
+                                                              25)
+                                                      .toString() +
+                                                  '/'
+                                              : '') +
                                           (challenge.points ?? 0).toString() +
                                           " PTS",
                                       style: TextStyle(

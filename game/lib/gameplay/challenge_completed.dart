@@ -93,6 +93,8 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
 
   @override
   Widget build(BuildContext context) {
+    final int hintsDeduction = 25;
+
     return Consumer5<ChallengeModel, EventModel, TrackerModel, ApiClient,
             GroupModel>(
         builder: (context, challengeModel, eventModel, trackerModel, apiClient,
@@ -123,10 +125,13 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
       var total_pts = 0;
       List<Widget> completedChallenges = [];
       for (PrevChallengeDto prevChal in (tracker.prevChallenges ?? [])) {
+        print(prevChal.dateCompleted.toString());
+        print(prevChal.hintsUsed);
         var completedChal =
             challengeModel.getChallengeById(prevChal.challengeId);
         if (completedChal == null) continue;
-        var pts = (completedChal.points ?? 0) - (prevChal.hintsUsed * 25);
+        var pts =
+            (completedChal.points ?? 0) - (prevChal.hintsUsed * hintsDeduction);
         total_pts += pts;
 
         completedChallenges.add(Container(
@@ -235,16 +240,14 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                           Spacer(),
                           Text(
                             "+ " +
-                                ((challenge.points ?? 0) -
-                                        (tracker.hintsUsed ?? 0) * 25)
-                                    .toString() +
+                                (challenge.points ?? 0).toString() +
                                 " points",
                             style:
                                 TextStyle(color: Colors.white, fontSize: 16.0),
                           ),
                         ],
                       )),
-                  if ((tracker.hintsUsed ?? 0) > 0)
+                  if (tracker.prevChallenges.last.hintsUsed > 0)
                     Container(
                         margin:
                             EdgeInsets.only(left: 30, bottom: 10, right: 30),
@@ -264,7 +267,7 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                             ),
                             Spacer(),
                             Text(
-                              "- 25 points",
+                              "- " + hintsDeduction.toString() + " points",
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 16.0,
@@ -272,7 +275,7 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                             ),
                           ],
                         )),
-                  if ((tracker.hintsUsed ?? 0) > 1)
+                  if (tracker.prevChallenges.last.hintsUsed > 1)
                     Container(
                         margin:
                             EdgeInsets.only(left: 30, bottom: 10, right: 30),
@@ -292,13 +295,13 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                             ),
                             Spacer(),
                             Text(
-                              "- 25 points",
+                              "- " + hintsDeduction.toString() + " points",
                               style: TextStyle(
                                   color: Colors.white, fontSize: 16.0),
                             ),
                           ],
                         )),
-                  if ((tracker.hintsUsed ?? 0) > 2)
+                  if ((tracker.prevChallenges.last.hintsUsed ?? 0) > 2)
                     Container(
                         margin:
                             EdgeInsets.only(left: 30, bottom: 10, right: 30),
@@ -318,7 +321,7 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                             ),
                             Spacer(),
                             Text(
-                              "- 25 points",
+                              "- " + hintsDeduction.toString() + " points",
                               style: TextStyle(
                                   color: Colors.white, fontSize: 16.0),
                             ),
@@ -332,7 +335,8 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                       ? "Total Points: " + total_pts.toString()
                       : "Points Earned: " +
                           ((challenge.points ?? 0) -
-                                  (tracker.hintsUsed ?? 0) * 25)
+                                  (tracker.prevChallenges.last.hintsUsed ?? 0) *
+                                      hintsDeduction)
                               .toString(),
                   style: TextStyle(
                     color: Colors.white,

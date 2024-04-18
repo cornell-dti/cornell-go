@@ -156,8 +156,7 @@ class _PreviewState extends State<Preview> {
                         child: Row(children: [
                           Icon(Icons.tour,
                               size: 24, color: Preview.purpleColor),
-                          Text(
-                              location, // should call new parameter; replace later
+                          Text(location,
                               style: TextStyle(
                                   fontSize: 20, color: Preview.purpleColor)),
                           SizedBox(width: 10),
@@ -371,7 +370,9 @@ class _PreviewState extends State<Preview> {
                                     builder: (context) => GameplayPage()));
                           },
                           child: Text(
-                            "Continue exploring",
+                            (numberCompleted == 0)
+                                ? "Let's Go!"
+                                : "Continue exploring",
                             style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 20,

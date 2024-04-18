@@ -36,7 +36,7 @@ export class EventService {
     private orgService: OrganizationService,
     private readonly prisma: PrismaService,
     private abilityFactory: CaslAbilityFactory,
-  ) { }
+  ) {}
 
   /** Get event by id */
   async getEventById(id: string) {
@@ -222,10 +222,12 @@ export class EventService {
   ) {
     const evs: EventBase[] = await this.prisma.$queryRaw`
       select * from "EventBase" ev 
-      where ev."id" in (select e."A" from "_eventOrgs" e inner join "_player" p on e."B" = p."A" and ${user.id
+      where ev."id" in (select e."A" from "_eventOrgs" e inner join "_player" p on e."B" = p."A" and ${
+        user.id
       } = p."B")
-      order by ((ev."latitude" - ${data.latitudeF})^2 + (ev."longitude" - ${data.longitudeF
-      })^2)
+      order by ((ev."latitude" - ${data.latitudeF})^2 + (ev."longitude" - ${
+      data.longitudeF
+    })^2)
       fetch first ${data.count ?? 4} rows only
     `;
     return evs;
@@ -270,8 +272,8 @@ export class EventService {
         ev.difficulty === DifficultyMode.EASY
           ? 'Easy'
           : ev.difficulty === DifficultyMode.NORMAL
-            ? 'Normal'
-            : 'Hard',
+          ? 'Normal'
+          : 'Hard',
       latitudeF: ev.latitude,
       longitudeF: ev.longitude,
     };
@@ -283,18 +285,10 @@ export class EventService {
    * @returns an EventTrackerDTO for the event tracker
    */
   async dtoForEventTracker(tracker: EventTracker): Promise<EventTrackerDto> {
-    const completedChallenges = await this.prisma.challenge.findMany({
-      where: {
-        completions: { some: { userId: tracker.userId } },
-        linkedEventId: tracker.eventId,
-      },
-      include: { completions: { where: { userId: tracker.userId } } },
-    });
-
     const prevChallenges = await this.prisma.prevChallenge.findMany({
       where: {
-        trackerId: tracker.id
-      }
+        trackerId: tracker.id,
+      },
     });
 
     return {
@@ -302,13 +296,11 @@ export class EventService {
       isRanked: tracker.isRankedForEvent,
       hintsUsed: tracker.hintsUsed,
       curChallengeId: tracker.curChallengeId,
-      prevChallenges: prevChallenges.map(pc => (
-        {
-          challengeId: pc.challengeId,
-          hintsUsed: pc.hintsUsed,
-          dateCompleted: pc.timestamp.toUTCString(),
-        }
-      )),
+      prevChallenges: prevChallenges.map(pc => ({
+        challengeId: pc.challengeId,
+        hintsUsed: pc.hintsUsed,
+        dateCompleted: pc.timestamp.toUTCString(),
+      })),
     };
   }
 
@@ -333,7 +325,6 @@ export class EventService {
       where: { id: evTracker.id },
       data: { hintsUsed: evTracker.hintsUsed + 1 },
     });
-    console.log('increased hints used for event tracker');
     return evTracker;
   }
 
@@ -445,8 +436,8 @@ export class EventService {
         (event.difficulty === 'Easy'
           ? DifficultyMode.EASY
           : event.difficulty === 'Normal'
-            ? DifficultyMode.NORMAL
-            : DifficultyMode.HARD),
+          ? DifficultyMode.NORMAL
+          : DifficultyMode.HARD),
       latitude: event.latitudeF,
       longitude: event.longitudeF,
     };
