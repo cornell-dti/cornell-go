@@ -36,7 +36,7 @@ export class EventService {
     private orgService: OrganizationService,
     private readonly prisma: PrismaService,
     private abilityFactory: CaslAbilityFactory,
-  ) {}
+  ) { }
 
   /** Get event by id */
   async getEventById(id: string) {
@@ -222,12 +222,10 @@ export class EventService {
   ) {
     const evs: EventBase[] = await this.prisma.$queryRaw`
       select * from "EventBase" ev 
-      where ev."id" in (select e."A" from "_eventOrgs" e inner join "_player" p on e."B" = p."A" and ${
-        user.id
+      where ev."id" in (select e."A" from "_eventOrgs" e inner join "_player" p on e."B" = p."A" and ${user.id
       } = p."B")
-      order by ((ev."latitude" - ${data.latitudeF})^2 + (ev."longitude" - ${
-      data.longitudeF
-    })^2)
+      order by ((ev."latitude" - ${data.latitudeF})^2 + (ev."longitude" - ${data.longitudeF
+      })^2)
       fetch first ${data.count ?? 4} rows only
     `;
     return evs;
@@ -272,8 +270,8 @@ export class EventService {
         ev.difficulty === DifficultyMode.EASY
           ? 'Easy'
           : ev.difficulty === DifficultyMode.NORMAL
-          ? 'Normal'
-          : 'Hard',
+            ? 'Normal'
+            : 'Hard',
       latitudeF: ev.latitude,
       longitudeF: ev.longitude,
     };
@@ -293,15 +291,24 @@ export class EventService {
       include: { completions: { where: { userId: tracker.userId } } },
     });
 
+    const prevChallenges = await this.prisma.prevChallenge.findMany({
+      where: {
+        trackerId: tracker.id
+      }
+    });
+
     return {
       eventId: tracker.eventId,
       isRanked: tracker.isRankedForEvent,
       hintsUsed: tracker.hintsUsed,
       curChallengeId: tracker.curChallengeId,
-      prevChallenges: completedChallenges.map(pc => pc.id),
-      prevChallengeDates: completedChallenges.map(pc =>
-        pc.completions[0].timestamp.toUTCString(),
-      ),
+      prevChallenges: prevChallenges.map(pc => (
+        {
+          challengeId: pc.challengeId,
+          hintsUsed: pc.hintsUsed,
+          dateCompleted: pc.timestamp.toUTCString(),
+        }
+      )),
     };
   }
 
@@ -438,8 +445,8 @@ export class EventService {
         (event.difficulty === 'Easy'
           ? DifficultyMode.EASY
           : event.difficulty === 'Normal'
-          ? DifficultyMode.NORMAL
-          : DifficultyMode.HARD),
+            ? DifficultyMode.NORMAL
+            : DifficultyMode.HARD),
       latitude: event.latitudeF,
       longitude: event.longitudeF,
     };

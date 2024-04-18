@@ -107,11 +107,11 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
       // if this event is a journey
       if ((event?.challenges?.length ?? 0) > 1)
         // determine whether the journey is done
-        journeyCompleted = (tracker.prevChallenges?.length ?? 0) ==
-            (event?.challenges?.length ?? 0);
+        journeyCompleted =
+            tracker.prevChallenges.length == (event?.challenges?.length ?? 0);
 
-      var challenge = challengeModel.getChallengeById(
-          tracker.prevChallenges![tracker.prevChallenges!.length - 1]);
+      var challenge = challengeModel
+          .getChallengeById(tracker.prevChallenges.last.challengeId);
 
       if (challenge == null) {
         return Scaffold(
@@ -122,10 +122,11 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
       // build list of completed challenge text fields to display later
       var total_pts = 0;
       List<Widget> completedChallenges = [];
-      for (String challengeId in (tracker.prevChallenges ?? [])) {
-        var completedChal = challengeModel.getChallengeById(challengeId);
+      for (PrevChallengeDto prevChal in (tracker.prevChallenges ?? [])) {
+        var completedChal =
+            challengeModel.getChallengeById(prevChal.challengeId);
         if (completedChal == null) continue;
-        var pts = completedChal.points ?? 0;
+        var pts = (completedChal.points ?? 0) - (prevChal.hintsUsed * 25);
         total_pts += pts;
 
         completedChallenges.add(Container(

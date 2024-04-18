@@ -827,71 +827,82 @@ class EventDto {
   late double? latitudeF;
 }
 
+class PrevChallengeDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['challengeId'] = challengeId;
+    fields['hintsUsed'] = hintsUsed;
+    fields['dateCompleted'] = dateCompleted;
+    return fields;
+  }
+
+  PrevChallengeDto.fromJson(Map<String, dynamic> fields) {
+    challengeId = fields["challengeId"];
+    hintsUsed = fields["hintsUsed"];
+    dateCompleted = fields["dateCompleted"];
+  }
+
+  void partialUpdate(PrevChallengeDto other) {
+    challengeId = other.challengeId;
+    hintsUsed = other.hintsUsed;
+    dateCompleted = other.dateCompleted;
+  }
+
+  PrevChallengeDto({
+    required this.challengeId,
+    required this.hintsUsed,
+    required this.dateCompleted,
+  });
+
+  late String challengeId;
+  late int hintsUsed;
+  late String dateCompleted;
+}
+
 class EventTrackerDto {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> fields = {};
     fields['eventId'] = eventId;
-    if (isRanked != null) {
-      fields['isRanked'] = isRanked;
-    }
-    if (hintsUsed != null) {
-      fields['hintsUsed'] = hintsUsed;
-    }
-    if (curChallengeId != null) {
-      fields['curChallengeId'] = curChallengeId;
-    }
-    if (prevChallenges != null) {
-      fields['prevChallenges'] = prevChallenges;
-    }
-    if (prevChallengeDates != null) {
-      fields['prevChallengeDates'] = prevChallengeDates;
-    }
+    fields['isRanked'] = isRanked;
+    fields['hintsUsed'] = hintsUsed;
+    fields['curChallengeId'] = curChallengeId;
+    fields['prevChallenges'] = prevChallenges!
+        .map<Map<String, dynamic>>((dynamic val) => val!.toJson())
+        .toList();
     return fields;
   }
 
   EventTrackerDto.fromJson(Map<String, dynamic> fields) {
     eventId = fields["eventId"];
-    isRanked = fields.containsKey('isRanked') ? (fields["isRanked"]) : null;
-    hintsUsed = fields.containsKey('hintsUsed') ? (fields["hintsUsed"]) : null;
-    curChallengeId = fields.containsKey('curChallengeId')
-        ? (fields["curChallengeId"])
-        : null;
-    prevChallenges = fields.containsKey('prevChallenges')
-        ? (List<String>.from(fields['prevChallenges']))
-        : null;
-    prevChallengeDates = fields.containsKey('prevChallengeDates')
-        ? (List<String>.from(fields['prevChallengeDates']))
-        : null;
+    isRanked = fields["isRanked"];
+    hintsUsed = fields["hintsUsed"];
+    curChallengeId = fields["curChallengeId"];
+    prevChallenges = fields["prevChallenges"]
+        .map<PrevChallengeDto>((dynamic val) => PrevChallengeDto.fromJson(val))
+        .toList();
   }
 
   void partialUpdate(EventTrackerDto other) {
     eventId = other.eventId;
-    isRanked = other.isRanked == null ? isRanked : other.isRanked;
-    hintsUsed = other.hintsUsed == null ? hintsUsed : other.hintsUsed;
-    curChallengeId =
-        other.curChallengeId == null ? curChallengeId : other.curChallengeId;
-    prevChallenges =
-        other.prevChallenges == null ? prevChallenges : other.prevChallenges;
-    prevChallengeDates = other.prevChallengeDates == null
-        ? prevChallengeDates
-        : other.prevChallengeDates;
+    isRanked = other.isRanked;
+    hintsUsed = other.hintsUsed;
+    curChallengeId = other.curChallengeId;
+    prevChallenges = other.prevChallenges;
   }
 
   EventTrackerDto({
     required this.eventId,
-    this.isRanked,
-    this.hintsUsed,
-    this.curChallengeId,
-    this.prevChallenges,
-    this.prevChallengeDates,
+    required this.isRanked,
+    required this.hintsUsed,
+    required this.curChallengeId,
+    required this.prevChallenges,
   });
 
   late String eventId;
-  late bool? isRanked;
-  late int? hintsUsed;
-  late String? curChallengeId;
-  late List<String>? prevChallenges;
-  late List<String>? prevChallengeDates;
+  late bool isRanked;
+  late int hintsUsed;
+  late String curChallengeId;
+  late List<PrevChallengeDto> prevChallenges;
 }
 
 class UpdateEventTrackerDataDto {

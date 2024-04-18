@@ -38,14 +38,19 @@ export interface EventDto {
   latitudeF?: number;
 }
 
+export interface PrevChallengeDto {
+  challengeId: string;
+  hintsUsed: number;
+  dateCompleted: string;
+}
+
 /** DTO for event tracker in updateEventTrackerData */
 export interface EventTrackerDto {
   eventId: string;
-  isRanked?: boolean;
-  hintsUsed?: number;
-  curChallengeId?: string;
-  prevChallenges?: string[];
-  prevChallengeDates?: string[];
+  isRanked: boolean;
+  hintsUsed: number;
+  curChallengeId: string;
+  prevChallenges: PrevChallengeDto[];
 }
 
 /** DTO for updateEventTrackerData */
