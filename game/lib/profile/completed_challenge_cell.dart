@@ -78,7 +78,7 @@ class _CompletedChallengeFullState extends State<CompletedChallengeFull> {
                   builder: (BuildContext context) {
                     return ClipRRect(
                       borderRadius: BorderRadius.circular(8),
-                      child: Image.asset(
+                      child: Image.network(
                         picture,
                         fit: BoxFit.cover,
                       ),
