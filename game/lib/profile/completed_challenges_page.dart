@@ -59,12 +59,11 @@ class CompletedChallengesPage extends StatelessWidget {
             if (tracker == null || event == null) {
               continue;
             }
-            if (tracker.prevChallengeDates!.length !=
-                event.challenges!.length) {
+            if (tracker.prevChallenges!.length != event.challenges!.length) {
               continue;
             }
 
-            var completedDate = tracker.prevChallengeDates!.last;
+            var completedDate = tracker.prevChallenges.last.dateCompleted;
             DateTime date =
                 DateFormat("E, d MMM y HH:mm:ss").parse(completedDate);
 
