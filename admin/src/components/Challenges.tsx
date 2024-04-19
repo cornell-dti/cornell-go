@@ -24,6 +24,7 @@ import {
 } from "./ListCard";
 import { SearchBar } from "./SearchBar";
 import { ServerDataContext } from "./ServerData";
+import { ChallengeLocationDto } from "../all.dto";
 
 const ChallengeImage = styled.div<{ url: string }>`
   width: calc(100% + 23px);
@@ -36,6 +37,17 @@ const ChallengeImage = styled.div<{ url: string }>`
     background-image: url(${'"' + props.url + '"'});
   `}
 `;
+
+const locationOptions = [
+  "ENG_QUAD",
+  "ARTS_QUAD",
+  "AG_QUAD",
+  "NORTH_CAMPUS",
+  "WEST_CAMPUS",
+  "COLLEGETOWN",
+  "ITHACA_COMMONS",
+  "ANY",
+];
 
 function ChallengeCard(props: {
   challenge: ChallengeDto;
@@ -78,16 +90,7 @@ function makeForm(): EntryForm[] {
     { name: "Location", latitude: 42.447546, longitude: -76.484593 },
     {
       name: "Location Description",
-      options: [
-        "ENG_QUAD",
-        "ARTS_QUAD",
-        "AG_QUAD",
-        "NORTH_CAMPUS",
-        "WEST_CAMPUS",
-        "COLLEGETOWN",
-        "ITHACA_COMMONS",
-        "Any",
-      ],
+      options: locationOptions,
       value: 0,
     },
     { name: "Name", characterLimit: 256, value: "" },
@@ -108,36 +111,11 @@ function toForm(challenge: ChallengeDto) {
     },
     {
       name: "Location Description",
-      options: [
-        "ENG_QUAD",
-        "ARTS_QUAD",
-        "AG_QUAD",
-        "NORTH_CAMPUS",
-        "WEST_CAMPUS",
-        "COLLEGETOWN",
-        "ITHACA_COMMONS",
-        "Any",
-      ],
-      value: (() => {
-        switch (challenge.location as string) {
-          case "ENG_QUAD":
-            return 0;
-          case "ARTS_QUAD":
-            return 1;
-          case "AG_QUAD":
-            return 2;
-          case "NORTH_CAMPUS":
-            return 3;
-          case "WEST_CAMPUS":
-            return 4;
-          case "COLLEGETOWN":
-            return 5;
-          case "ITHACA_COMMONS":
-            return 6;
-          default:
-            return 7;
-        }
-      })(),
+      options: locationOptions,
+      value:
+        challenge.location !== undefined
+          ? locationOptions.indexOf(challenge.location)
+          : 0,
     },
     { name: "Name", characterLimit: 256, value: challenge.name ?? "" },
     {
@@ -180,26 +158,9 @@ function fromForm(
   return {
     id,
     name: (form[2] as FreeEntryForm).value,
-    location: (() => {
-      switch ((form[1] as OptionEntryForm).value) {
-        case 0:
-          return "ENG_QUAD";
-        case 1:
-          return "ARTS_QUAD";
-        case 2:
-          return "AG_QUAD";
-        case 3:
-          return "NORTH_CAMPUS";
-        case 4:
-          return "WEST_CAMPUS";
-        case 5:
-          return "COLLEGETOWN";
-        case 6:
-          return "ITHACA_COMMONS";
-        default:
-          return "ANY";
-      }
-    })(),
+    location: locationOptions[
+      (form[1] as OptionEntryForm).value
+    ] as ChallengeLocationDto,
     description: (form[3] as FreeEntryForm).value,
     points: (form[4] as NumberEntryForm).value,
     imageUrl: (form[5] as FreeEntryForm).value,

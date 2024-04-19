@@ -24,6 +24,18 @@ import { ServerDataContext } from "./ServerData";
 import { compareTwoStrings } from "string-similarity";
 import { EventDto } from "../all.dto";
 import { AlertModal } from "./AlertModal";
+import { EventCategoryDto } from "../all.dto";
+
+const categoryOptions = [
+  "ENG_QUAD",
+  "ARTS_QUAD",
+  "AG_QUAD",
+  "NORTH_CAMPUS",
+  "WEST_CAMPUS",
+  "COLLEGETOWN",
+  "ITHACA_COMMONS",
+  "ANY",
+];
 
 function EventCard(props: {
   event: EventDto;
@@ -46,22 +58,9 @@ function EventCard(props: {
       ? "Normal"
       : "Hard";
 
-  const categoryType = (() => {
-    switch (props.event.category as string) {
-      case "FOOD":
-        return "Food";
-      case "NATURE":
-        return "Nature";
-      case "HISTORICAL":
-        return "Historical";
-      case "CAFE":
-        return "Cafe";
-      case "DININGHALL":
-        return "Dininghall";
-      default:
-        return "Dorm";
-    }
-  })();
+  let categoryInput = props.event.category as string;
+  const categoryType =
+    categoryInput[0] + categoryInput.substring(1).toLowerCase();
 
   const affirmOfBool = (val: boolean) => (val ? "Yes" : "No");
 
@@ -113,7 +112,7 @@ function makeForm() {
     { name: "Description", characterLimit: 2048, value: "" },
     {
       name: "Category",
-      options: ["FOOD", "NATURE", "HISTORICAL", "CAFE", "DININGHALL", "DORM"],
+      options: categoryOptions,
       value: 1,
     },
     { name: "Required Members", value: -1, min: -1, max: 99 },
@@ -141,22 +140,11 @@ function fromForm(form: EntryForm[], id: string): EventDto {
       (form[4] as OptionEntryForm).value === 0 ? "PERPETUAL" : "LIMITED_TIME",
     name: (form[0] as FreeEntryForm).value,
     description: (form[1] as FreeEntryForm).value,
-    category: (() => {
-      switch ((form[2] as OptionEntryForm).value) {
-        case 0:
-          return "FOOD";
-        case 1:
-          return "NATURE";
-        case 2:
-          return "HISTORICAL";
-        case 3:
-          return "CAFE";
-        case 4:
-          return "DININGHALL";
-        default:
-          return "DORM";
-      }
-    })(),
+
+    category: categoryOptions[
+      (form[2] as OptionEntryForm).value
+    ] as EventCategoryDto,
+
     indexable: (form[6] as OptionEntryForm).value === 1,
     endTime: (form[7] as DateEntryForm).date.toUTCString(),
     challenges: [],
@@ -166,6 +154,7 @@ function fromForm(form: EntryForm[], id: string): EventDto {
         : (form[5] as OptionEntryForm).value === 1
         ? "Normal"
         : "Hard",
+
     latitudeF: 0,
     longitudeF: 0,
   };
@@ -178,23 +167,11 @@ function toForm(event: EventDto) {
     { name: "Description", characterLimit: 2048, value: event.description },
     {
       name: "Category",
-      options: ["FOOD", "NATURE", "HISTORICAL", "CAFE", "DININGHALL", "DORM"],
-      value: (() => {
-        switch (event.category as string) {
-          case "FOOD":
-            return 0;
-          case "NATURE":
-            return 1;
-          case "HISTORICAL":
-            return 2;
-          case "CAFE":
-            return 3;
-          case "DININGHALL":
-            return 4;
-          default:
-            return 5;
-        }
-      })(),
+      options: categoryOptions,
+      value:
+        event.category !== undefined
+          ? categoryOptions.indexOf(event.category)
+          : 0,
     },
     {
       name: "Required Members",

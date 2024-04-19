@@ -33,7 +33,7 @@ type LoginEnrollmentTypeDto =
   | "ALUMNI"
   | "GUEST";
 
-type ChallengeLocationDto =
+export type ChallengeLocationDto =
   | "ENG_QUAD"
   | "ARTS_QUAD"
   | "AG_QUAD"
@@ -43,7 +43,7 @@ type ChallengeLocationDto =
   | "ITHACA_COMMONS"
   | "ANY";
 
-type EventCategoryDto =
+export type EventCategoryDto =
   | "FOOD"
   | "NATURE"
   | "HISTORICAL"
