@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:game/details_page/details_page.dart';
-import 'package:game/widget/lato_text.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class RegisterPageWidget extends StatefulWidget {
   GoogleSignInAccount? user = null;
@@ -43,25 +43,38 @@ class _RegisterPageWidgetState extends State<RegisterPageWidget> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Padding(
-        padding: const EdgeInsets.only(top: 50.0),
+        padding: const EdgeInsets.only(top: 50.0, left: 25, right: 25),
         child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  LatoText("Who are you", 24, Colors.black, FontWeight.w700)
-                ],
-                mainAxisAlignment: MainAxisAlignment.center,
-              ),
+              SvgPicture.asset("assets/icons/back.svg"),
+              SvgPicture.asset("assets/images/register_progress.svg"),
+              SizedBox(height: 40.0),
+              Text("Who are you?",
+                  style: TextStyle(
+                    color: Color.fromARGB(255, 71, 71, 71),
+                    fontSize: 24,
+                    fontWeight: FontWeight.w900,
+                  )),
+              SizedBox(height: 20.0),
               Column(
                   children: identityOptions.map((entry) {
                 return Padding(
                   padding: const EdgeInsets.only(top: 20.0),
-                  child: ElevatedButton(
+                  child: TextButton(
                       style: ButtonStyle(
+                          shape: MaterialStatePropertyAll<OutlinedBorder>(
+                              RoundedRectangleBorder(
+                                  side: BorderSide(
+                                      width: 2.0,
+                                      color: entry == _selectedOption
+                                          ? Color.fromARGB(255, 255, 170, 91)
+                                          : Color.fromARGB(255, 217, 217, 217)),
+                                  borderRadius: BorderRadius.circular(10.0))),
                           backgroundColor: entry == _selectedOption
-                              ? MaterialStatePropertyAll<Color>(Colors.black)
+                              ? MaterialStatePropertyAll<Color>(
+                                  Color.fromARGB(102, 255, 170, 91))
                               : MaterialStatePropertyAll<Color>(Colors.white)),
                       onPressed: () => {
                             setState(() {
@@ -69,35 +82,39 @@ class _RegisterPageWidgetState extends State<RegisterPageWidget> {
                             })
                           },
                       child: Container(
-                        width: 255,
-                        height: 53,
+                        width: 345,
+                        height: 50,
                         child: Align(
                           alignment: Alignment.center,
-                          child: LatoText(
-                              entry,
-                              16.0,
-                              entry != _selectedOption
-                                  ? Colors.black
-                                  : Colors.white,
-                              FontWeight.w600),
+                          child: Text(entry,
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              )),
                         ),
                       )),
                 );
               }).toList()),
-              SizedBox(
-                height: 100,
-              ),
-              ElevatedButton(
+              SizedBox(height: 150.0),
+              TextButton(
                 style: ButtonStyle(
-                    backgroundColor:
-                        MaterialStatePropertyAll<Color>(Colors.black)),
+                    shape: MaterialStatePropertyAll<OutlinedBorder>(
+                        RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10.0))),
+                    backgroundColor: MaterialStatePropertyAll<Color>(
+                        Color.fromARGB(255, 233, 87, 85))),
                 child: Container(
-                    width: 255,
-                    height: 53,
+                    width: 345,
+                    height: 50,
                     child: Align(
                       alignment: Alignment.center,
-                      child: LatoText(
-                          "Continue", 16.0, Colors.white, FontWeight.w600),
+                      child: Text("Continue",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          )),
                     )),
                 onPressed: () {
                   print(widget.user);

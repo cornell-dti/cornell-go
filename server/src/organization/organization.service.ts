@@ -7,7 +7,8 @@ import {
   OrganizationSpecialUsage,
   User,
   LocationType,
-  AchievementType
+  AchievementType,
+  EventCategoryType,
 } from '@prisma/client';
 import { ClientService } from '../client/client.service';
 import { v4 } from 'uuid';
@@ -23,6 +24,7 @@ export const defaultEventData = {
   description: 'Default Event',
   requiredMembers: 1,
   difficulty: DifficultyMode.NORMAL,
+  category: EventCategoryType.NATURE,
   timeLimitation: TimeLimitationType.PERPETUAL,
   indexable: true,
   endTime: new Date('2060'),
@@ -49,7 +51,8 @@ export const defaultAchievementData = {
   requiredPoints: 50,
   name: 'Default Achievement',
   description: 'Statue',
-  imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/5/5f/CentralAvenueCornell2.jpg',
+  imageUrl:
+    'https://upload.wikimedia.org/wikipedia/commons/5/5f/CentralAvenueCornell2.jpg',
   locationType: LocationType.ARTS_QUAD,
   achievementType: AchievementType.TOTAL_CHALLENGES,
 };

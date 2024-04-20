@@ -12,7 +12,11 @@ import {
 import { ClientService } from '../client/client.service';
 import { EventService } from '../event/event.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { ChallengeDto, UpdateChallengeDataDto } from './challenge.dto';
+import {
+  ChallengeDto,
+  UpdateChallengeDataDto,
+  ChallengeLocationDto,
+} from './challenge.dto';
 import { AppAbility, CaslAbilityFactory } from '../casl/casl-ability.factory';
 import { accessibleBy } from '@casl/prisma';
 import { Action } from '../casl/action.enum';
@@ -239,7 +243,7 @@ export class ChallengeService {
     return {
       id: ch.id,
       name: ch.name,
-      location: ch.location as string,
+      location: ch.location as ChallengeLocationDto,
       description: ch.description,
       points: ch.points,
       imageUrl: ch.imageUrl,
@@ -307,7 +311,6 @@ export class ChallengeService {
         _max: { eventIndex: true },
         where: { linkedEventId: challenge.linkedEventId },
       });
-
       const data = {
         name: challenge.name?.substring(0, 2048) ?? defaultChallengeData.name,
         description:
@@ -316,7 +319,8 @@ export class ChallengeService {
         imageUrl:
           challenge.imageUrl?.substring(0, 2048) ??
           defaultChallengeData.imageUrl,
-        location: challenge.location as LocationType,
+        location:
+          (challenge.location as LocationType) ?? defaultChallengeData.location,
         points: challenge.points ?? 0,
         latitude: challenge.latF ?? defaultChallengeData.latitude,
         longitude: challenge.longF ?? defaultChallengeData.longitude,

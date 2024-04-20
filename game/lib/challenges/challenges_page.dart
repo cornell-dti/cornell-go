@@ -162,7 +162,7 @@ class _ChallengesPageState extends State<ChallengesPage> {
                               )
                             : ChallengeCell(
                                 key: UniqueKey(),
-                                challenge.location ?? "",
+                                challenge.location?.name ?? "",
                                 challenge.name ?? "",
                                 Image.network(
                                     "https://picsum.photos/250?image=9"),
