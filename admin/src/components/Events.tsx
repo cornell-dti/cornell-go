@@ -91,8 +91,6 @@ function EventCard(props: {
           Category: <b>{categoryType}</b> <br />
           Publicly Visible: <b>{affirmOfBool(!!props.event.indexable)}</b>{" "}
           <br />
-          Latitude: <b>{props.event.latitudeF}</b>, Longitude:{" "}
-          <b>{props.event.longitudeF}</b> <br />
         </ListCardBody>
         <ListCardButtons>
           <HButton onClick={props.onDelete}>DELETE</HButton>
@@ -189,7 +187,7 @@ function toForm(event: EventDto) {
       options: ["Easy", "Normal", "Hard"],
       value:
         event.difficulty === "Easy"
-          ? 0
+          ? "Easy"
           : event.difficulty === "Normal"
           ? "Normal"
           : "Hard",
