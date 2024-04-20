@@ -55,8 +55,8 @@ function EventCard(props: {
     props.event.difficulty === "Easy"
       ? "Easy"
       : props.event.difficulty === "Normal"
-      ? "Normal"
-      : "Hard";
+        ? "Normal"
+        : "Hard";
 
   let categoryInput = props.event.category as string;
   const categoryType =
@@ -122,7 +122,7 @@ function makeForm() {
     {
       name: "Difficulty",
       options: ["Easy", "Normal", "Hard"],
-      value: 1,
+      value: 0,
     },
     { name: "Publicly Visible", options: ["No", "Yes"], value: 0 },
     { name: "Available Until", date: new Date("2050") },
@@ -150,8 +150,8 @@ function fromForm(form: EntryForm[], id: string): EventDto {
       (form[5] as OptionEntryForm).value === 0
         ? "Easy"
         : (form[5] as OptionEntryForm).value === 1
-        ? "Normal"
-        : "Hard",
+          ? "Normal"
+          : "Hard",
 
     latitudeF: 0,
     longitudeF: 0,
@@ -187,10 +187,10 @@ function toForm(event: EventDto) {
       options: ["Easy", "Normal", "Hard"],
       value:
         event.difficulty === "Easy"
-          ? "Easy"
+          ? 0
           : event.difficulty === "Normal"
-          ? "Normal"
-          : "Hard",
+            ? 1
+            : 2,
     },
     {
       name: "Publicly Visible",
