@@ -137,7 +137,6 @@ class _ChallengesPageState extends State<ChallengesPage> {
                     var complete =
                         (numberCompleted == event.challenges?.length);
                     var locationCount = event.challenges?.length ?? 0;
-                    var difficulty = event.difficulty?.name ?? "";
                     DateTime now = DateTime.now();
                     DateTime endtime = HttpDate.parse(event.endTime ?? "");
 
@@ -164,13 +163,13 @@ class _ChallengesPageState extends State<ChallengesPage> {
                                 )
                               : ChallengeCell(
                                   key: UniqueKey(),
-                                  challenge.location ?? "",
+                                  challenge.location?.name ?? "",
                                   challenge.name ?? "",
                                   Image.network(
                                       "https://picsum.photos/250?image=9"),
                                   complete,
                                   challenge.description ?? "",
-                                  difficulty?.toString() ?? "",
+                                  event.difficulty?.name ?? "",
                                   challenge.points ?? 0,
                                   event.id),
                         ),
