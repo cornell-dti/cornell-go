@@ -59,15 +59,20 @@ class CompletedChallengesPage extends StatelessWidget {
             if (tracker == null || event == null) {
               continue;
             }
-            if (tracker.prevChallenges!.length != event.challenges!.length) {
+            if (tracker.prevChallenges.length != event.challenges!.length) {
               continue;
             }
 
-            var completedDate = tracker.prevChallenges.last.dateCompleted;
-            DateTime date =
-                DateFormat("E, d MMM y HH:mm:ss").parse(completedDate);
-
-            completedEvents.add(Tuple2<DateTime, EventDto>(date, event));
+            try {
+              // prevChallenges.last will throw StateError if prevChallenges
+              // is empty, meaning the challenge was not completed properly
+              var completedDate = tracker.prevChallenges.last.dateCompleted;
+              DateTime date =
+                  DateFormat("E, d MMM y HH:mm:ss").parse(completedDate);
+              completedEvents.add(Tuple2<DateTime, EventDto>(date, event));
+            } catch (e) {
+              displayToast("Error with completing challenge", Status.error);
+            }
           }
           //Sort so that the most recent events are first
           completedEvents.sort((a, b) => b.item1.compareTo(a.item1));

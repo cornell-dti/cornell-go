@@ -130,10 +130,6 @@ describe('ChallengeModule E2E', () => {
     });
   });
 
-  /** describe groups your tests together you can nest groups together
-   * You can nest these groups in each other if you'd like
-   * it() should be used for the invidual unit tests
-   * expect() checks values  */
   describe('Create and read functions', () => {
     it('should add a challenge to eventbase: upsertChallengeFromDto', async () => {
       const chalDto: ChallengeDto = {

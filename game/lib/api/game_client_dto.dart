@@ -62,6 +62,15 @@ enum ChallengeLocationDto {
   ANY,
 }
 
+enum EventCategory {
+  FOOD,
+  NATURE,
+  HISTORICAL,
+  CAFE,
+  DININGHALL,
+  DORM,
+}
+
 enum EventCategoryDto {
   FOOD,
   NATURE,
@@ -956,28 +965,6 @@ class UpdateEventTrackerDataDto {
   });
 
   late EventTrackerDto tracker;
-}
-
-class UseEventTrackerHintDto {
-  Map<String, dynamic> toJson() {
-    Map<String, dynamic> fields = {};
-    fields['usedHint'] = usedHint;
-    return fields;
-  }
-
-  UseEventTrackerHintDto.fromJson(Map<String, dynamic> fields) {
-    usedHint = fields["usedHint"];
-  }
-
-  void partialUpdate(UseEventTrackerHintDto other) {
-    usedHint = other.usedHint;
-  }
-
-  UseEventTrackerHintDto({
-    required this.usedHint,
-  });
-
-  late bool usedHint;
 }
 
 class UpdateEventDataDto {

@@ -22,7 +22,6 @@ import {
   UpdateEventDataDto,
   RequestRecommendedEventsDto,
   UpdateEventTrackerDataDto,
-  UseEventTrackerHintDto,
   EventCategory,
 } from './event.dto';
 import { AppAbility, CaslAbilityFactory } from '../casl/casl-ability.factory';
@@ -320,7 +319,7 @@ export class EventService {
     );
   }
 
-  async useEventTrackerHint(user: User, data: UseEventTrackerHintDto) {
+  async useEventTrackerHint(user: User) {
     var evTracker = await this.getCurrentEventTrackerForUser(user);
 
     evTracker = await this.prisma.eventTracker.update({
