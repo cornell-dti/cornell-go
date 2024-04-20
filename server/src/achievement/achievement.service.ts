@@ -22,6 +22,7 @@ import {
   AchievementTrackerDto,
   UpdateAchievementDataDto,
 } from './achievement.dto';
+import { ChallengeLocationDto } from '../challenge/challenge.dto';
 
 @Injectable()
 export class AchievementService {
@@ -54,7 +55,7 @@ export class AchievementService {
   /** upsert achievement */
   async upsertAchievementFromDto(
     ability: AppAbility,
-    achievement: AchievementDto
+    achievement: AchievementDto,
   ) {
     let ach = await this.prisma.achievement.findFirst({
       where: { id: achievement.id },
@@ -194,30 +195,8 @@ export class AchievementService {
       name: ach.name,
       description: ach.description,
       imageUrl: ach.imageUrl,
-      locationType: 
-        ach.locationType == 
-          LocationType.AG_QUAD ? 'AG_QUAD' 
-          : ach.locationType === LocationType.ENG_QUAD
-          ? "ENG_QUAD"
-          : ach.locationType === LocationType.ARTS_QUAD
-          ? "ARTS_QUAD"
-          : ach.locationType === LocationType.COLLEGETOWN
-          ? "COLLEGETOWN"
-          : ach.locationType === LocationType.ITHACA_COMMONS
-          ? "ITHACA_COMMONS"
-          : ach.locationType === LocationType.NORTH_CAMPUS
-          ? "NORTH_CAMPUS"
-          : ach.locationType === LocationType.WEST_CAMPUS
-          ? "WEST_CAMPUS"
-          : ach.locationType === LocationType.ANY
-          ? "ANY"
-          : "OTHER",
-      // achievementType: ach.achievementType as AchievementTypeDto,
-      achievementType: 
-        ach.achievementType === AchievementType.TOTAL_POINTS ? AchievementTypeDto.TotalPoints
-        : ach.achievementType === AchievementType.TOTAL_CHALLENGES ? AchievementTypeDto.TotalChallenges
-        : ach.achievementType === AchievementType.TOTAL_JOURNEYS ? AchievementTypeDto.TotalJourneys
-        : ach.achievementType === AchievementType.TOTAL_CHALLENGES_OR_JOURNEYS ? AchievementTypeDto.TotalChallengesOrJourneys
+      locationType: ach.locationType as ChallengeLocationDto,
+      achievementType: ach.achievementType as AchievementTypeDto,
     };
   }
 

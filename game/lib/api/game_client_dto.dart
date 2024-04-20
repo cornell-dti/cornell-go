@@ -8,17 +8,6 @@ enum AchievementTypeDto {
   TotalChallengesOrJourneys,
 }
 
-enum AchievementLocationTypeDto {
-  ENG_QUAD,
-  ARTS_QUAD,
-  AG_QUAD,
-  NORTH_CAMPUS,
-  WEST_CAMPUS,
-  COLLEGETOWN,
-  ITHACA_COMMONS,
-  ANY,
-}
-
 enum AchievementAchievementTypeDto {
   TOTAL_POINTS,
   TOTAL_CHALLENGES,
@@ -49,6 +38,15 @@ enum ChallengeLocationDto {
   COLLEGETOWN,
   ITHACA_COMMONS,
   ANY,
+}
+
+enum EventCategory {
+  FOOD,
+  NATURE,
+  HISTORICAL,
+  CAFE,
+  DININGHALL,
+  DORM,
 }
 
 enum EventCategoryDto {
