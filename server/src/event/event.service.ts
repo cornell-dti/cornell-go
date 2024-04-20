@@ -21,6 +21,7 @@ import {
   EventTrackerDto,
   UpdateEventDataDto,
   RequestRecommendedEventsDto,
+  EventCategory,
 } from './event.dto';
 import { AppAbility, CaslAbilityFactory } from '../casl/casl-ability.factory';
 import { accessibleBy } from '@casl/prisma';
@@ -256,6 +257,7 @@ export class EventService {
       id: ev.id,
       name: ev.name,
       description: ev.description,
+      category: ev.category as EventCategory,
       timeLimitation:
         ev.timeLimitation == TimeLimitationType.LIMITED_TIME
           ? 'LIMITED_TIME'
@@ -426,6 +428,7 @@ export class EventService {
           : DifficultyMode.HARD),
       latitude: event.latitudeF,
       longitude: event.longitudeF,
+      category: event.category,
     };
 
     if (ev && canUpdateEv) {
@@ -450,6 +453,7 @@ export class EventService {
         description:
           assignData.description?.substring(0, 2048) ??
           defaultEventData.description,
+        category: assignData.category ?? defaultEventData.category,
         timeLimitation: assignData.timeLimitation,
         endTime: assignData.endTime ?? defaultEventData.endTime,
         indexable: assignData.indexable ?? defaultEventData.indexable,

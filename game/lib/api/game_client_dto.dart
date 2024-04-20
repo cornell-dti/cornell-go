@@ -26,8 +26,8 @@ enum AchievementLocationTypeDto {
   NORTH_CAMPUS,
   WEST_CAMPUS,
   COLLEGETOWN,
-  IthacaCommons,
-  Any,
+  ITHACA_COMMONS,
+  ANY,
 }
 
 enum AchievementAchievementTypeDto {
@@ -49,6 +49,26 @@ enum LoginEnrollmentTypeDto {
   FACULTY,
   ALUMNI,
   GUEST,
+}
+
+enum ChallengeLocationDto {
+  ENG_QUAD,
+  ARTS_QUAD,
+  AG_QUAD,
+  NORTH_CAMPUS,
+  WEST_CAMPUS,
+  COLLEGETOWN,
+  ITHACA_COMMONS,
+  ANY,
+}
+
+enum EventCategoryDto {
+  FOOD,
+  NATURE,
+  HISTORICAL,
+  CAFE,
+  DININGHALL,
+  DORM,
 }
 
 enum EventTimeLimitationDto {
@@ -299,7 +319,7 @@ class ChallengeDto {
       fields['name'] = name;
     }
     if (location != null) {
-      fields['location'] = location;
+      fields['location'] = location!.name;
     }
     if (description != null) {
       fields['description'] = description;
@@ -331,7 +351,9 @@ class ChallengeDto {
   ChallengeDto.fromJson(Map<String, dynamic> fields) {
     id = fields["id"];
     name = fields.containsKey('name') ? (fields["name"]) : null;
-    location = fields.containsKey('location') ? (fields["location"]) : null;
+    location = fields.containsKey('location')
+        ? (ChallengeLocationDto.values.byName(fields['location']))
+        : null;
     description =
         fields.containsKey('description') ? (fields["description"]) : null;
     points = fields.containsKey('points') ? (fields["points"]) : null;
@@ -381,7 +403,7 @@ class ChallengeDto {
 
   late String id;
   late String? name;
-  late String? location;
+  late ChallengeLocationDto? location;
   late String? description;
   late int? points;
   late String? imageUrl;
@@ -712,6 +734,9 @@ class EventDto {
     if (description != null) {
       fields['description'] = description;
     }
+    if (category != null) {
+      fields['category'] = category!.name;
+    }
     if (timeLimitation != null) {
       fields['timeLimitation'] = timeLimitation!.name;
     }
@@ -750,6 +775,9 @@ class EventDto {
     name = fields.containsKey('name') ? (fields["name"]) : null;
     description =
         fields.containsKey('description') ? (fields["description"]) : null;
+    category = fields.containsKey('category')
+        ? (EventCategoryDto.values.byName(fields['category']))
+        : null;
     timeLimitation = fields.containsKey('timeLimitation')
         ? (EventTimeLimitationDto.values.byName(fields['timeLimitation']))
         : null;
@@ -781,6 +809,7 @@ class EventDto {
         other.requiredMembers == null ? requiredMembers : other.requiredMembers;
     name = other.name == null ? name : other.name;
     description = other.description == null ? description : other.description;
+    category = other.category == null ? category : other.category;
     timeLimitation =
         other.timeLimitation == null ? timeLimitation : other.timeLimitation;
     endTime = other.endTime == null ? endTime : other.endTime;
@@ -801,6 +830,7 @@ class EventDto {
     this.requiredMembers,
     this.name,
     this.description,
+    this.category,
     this.timeLimitation,
     this.endTime,
     this.challenges,
@@ -816,6 +846,7 @@ class EventDto {
   late int? requiredMembers;
   late String? name;
   late String? description;
+  late EventCategoryDto? category;
   late EventTimeLimitationDto? timeLimitation;
   late String? endTime;
   late List<String>? challenges;
