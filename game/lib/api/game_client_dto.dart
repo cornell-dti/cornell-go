@@ -8,6 +8,17 @@ enum AchievementTypeDto {
   TotalChallengesOrJourneys,
 }
 
+enum AchievementLocationTypeDto {
+  ENG_QUAD,
+  ARTS_QUAD,
+  AG_QUAD,
+  NORTH_CAMPUS,
+  WEST_CAMPUS,
+  COLLEGETOWN,
+  ITHACA_COMMONS,
+  ANY,
+}
+
 enum AchievementAchievementTypeDto {
   TOTAL_POINTS,
   TOTAL_CHALLENGES,
@@ -108,7 +119,7 @@ class AchievementDto {
       fields['imageUrl'] = imageUrl;
     }
     if (locationType != null) {
-      fields['locationType'] = locationType;
+      fields['locationType'] = locationType!.name;
     }
     if (achievementType != null) {
       fields['achievementType'] = achievementType!.name;
@@ -129,8 +140,9 @@ class AchievementDto {
     description =
         fields.containsKey('description') ? (fields["description"]) : null;
     imageUrl = fields.containsKey('imageUrl') ? (fields["imageUrl"]) : null;
-    locationType =
-        fields.containsKey('locationType') ? (fields["locationType"]) : null;
+    locationType = fields.containsKey('locationType')
+        ? (AchievementLocationTypeDto.values.byName(fields['locationType']))
+        : null;
     achievementType = fields.containsKey('achievementType')
         ? (AchievementAchievementTypeDto.values
             .byName(fields['achievementType']))
@@ -175,7 +187,7 @@ class AchievementDto {
   late String? name;
   late String? description;
   late String? imageUrl;
-  late String? locationType;
+  late AchievementLocationTypeDto? locationType;
   late AchievementAchievementTypeDto? achievementType;
   late String? initialOrganizationId;
 }
