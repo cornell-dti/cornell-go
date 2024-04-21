@@ -60,7 +60,6 @@ export type EventCategoryDto =
   | "DININGHALL"
   | "DORM";
 
-
 type EventTimeLimitationDto = "LIMITED_TIME" | "PERPETUAL";
 
 type EventDifficultyDto = "Easy" | "Normal" | "Hard";

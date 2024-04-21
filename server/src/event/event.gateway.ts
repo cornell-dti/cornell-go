@@ -111,7 +111,7 @@ export class EventGateway {
   @SubscribeMessage('useEventTrackerHint')
   async useEventTrackerHint(
     @CallingUser() user: User,
-    @MessageBody() data: UseEventTrackerHintDto
+    @MessageBody() data: UseEventTrackerHintDto,
   ) {
     const tracker = await this.eventService.useEventTrackerHint(user);
     if (tracker) {
