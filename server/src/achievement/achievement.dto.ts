@@ -1,4 +1,4 @@
-export enum LocationType {
+export enum AchievementLocationType {
   EngQuad = 'ENG_QUAD',
   ArtsQuad = 'ARTS_QUAD',
   AgQuad = 'AG_QUAD',
@@ -23,7 +23,7 @@ export interface AchievementDto {
   name: string;
   description: string;
   imageUrl: string;
-  locationType: LocationType;
+  locationType: AchievementLocationType;
   achievementType: AchievementType;
   organizations: string[];
 }

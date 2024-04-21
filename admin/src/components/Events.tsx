@@ -27,14 +27,12 @@ import { AlertModal } from "./AlertModal";
 import { EventCategoryDto } from "../all.dto";
 
 const categoryOptions = [
-  "ENG_QUAD",
-  "ARTS_QUAD",
-  "AG_QUAD",
-  "NORTH_CAMPUS",
-  "WEST_CAMPUS",
-  "COLLEGETOWN",
-  "ITHACA_COMMONS",
-  "ANY",
+  "FOOD",
+  "NATURE",
+  "HISTORICAL",
+  "CAFE",
+  "DININGHALL",
+  "DORM",
 ];
 
 function EventCard(props: {
@@ -55,8 +53,8 @@ function EventCard(props: {
     props.event.difficulty === "Easy"
       ? "Easy"
       : props.event.difficulty === "Normal"
-        ? "Normal"
-        : "Hard";
+      ? "Normal"
+      : "Hard";
 
   let categoryInput = props.event.category as string;
   const categoryType =
@@ -150,8 +148,8 @@ function fromForm(form: EntryForm[], id: string): EventDto {
       (form[5] as OptionEntryForm).value === 0
         ? "Easy"
         : (form[5] as OptionEntryForm).value === 1
-          ? "Normal"
-          : "Hard",
+        ? "Normal"
+        : "Hard",
 
     latitudeF: 0,
     longitudeF: 0,
@@ -186,11 +184,7 @@ function toForm(event: EventDto) {
       name: "Difficulty",
       options: ["Easy", "Normal", "Hard"],
       value:
-        event.difficulty === "Easy"
-          ? 0
-          : event.difficulty === "Normal"
-            ? 1
-            : 2,
+        event.difficulty === "Easy" ? 0 : event.difficulty === "Normal" ? 1 : 2,
     },
     {
       name: "Publicly Visible",
