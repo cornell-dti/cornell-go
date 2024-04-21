@@ -6,6 +6,7 @@ import 'package:game/navigation_page/bottom_navbar.dart';
 import 'package:game/interests/interests_page.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:game/utils/utility_functions.dart';
+import 'package:game/gameplay/gameplay_page.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:game/details_page/dropdown_widget.dart';
 

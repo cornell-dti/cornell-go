@@ -40,7 +40,7 @@ class CompletedChallengeFull extends StatefulWidget {
 
 class _CompletedChallengeFullState extends State<CompletedChallengeFull> {
   final GlobalKey<CarouselSliderState> _carouselKey = GlobalKey();
-  int _currentIndex = 2;
+  int _currentIndex = 0;
 
   @override
   Widget build(BuildContext context) {

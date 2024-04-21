@@ -9,6 +9,7 @@ import {
   EntryForm,
   EntryModal,
   FreeEntryForm,
+  OptionEntryForm,
   MapEntryForm,
   NumberEntryForm,
 } from "./EntryModal";
@@ -23,6 +24,7 @@ import {
 } from "./ListCard";
 import { SearchBar } from "./SearchBar";
 import { ServerDataContext } from "./ServerData";
+import { ChallengeLocationDto } from "../all.dto";
 
 const ChallengeImage = styled.div<{ url: string }>`
   width: calc(100% + 23px);
@@ -35,6 +37,17 @@ const ChallengeImage = styled.div<{ url: string }>`
     background-image: url(${'"' + props.url + '"'});
   `}
 `;
+
+const locationOptions = [
+  "ENG_QUAD",
+  "ARTS_QUAD",
+  "AG_QUAD",
+  "NORTH_CAMPUS",
+  "WEST_CAMPUS",
+  "COLLEGETOWN",
+  "ITHACA_COMMONS",
+  "ANY",
+];
 
 function ChallengeCard(props: {
   challenge: ChallengeDto;
@@ -75,10 +88,14 @@ function ChallengeCard(props: {
 function makeForm(): EntryForm[] {
   return [
     { name: "Location", latitude: 42.447546, longitude: -76.484593 },
-    { name: "Location Description", characterLimit: 2048, value: "" },
+    {
+      name: "Location Description",
+      options: locationOptions,
+      value: 0,
+    },
     { name: "Name", characterLimit: 256, value: "" },
     { name: "Description", characterLimit: 2048, value: "" },
-    { name: "Points", characterLimit: 2048, min: 1, max: 1000, value: 50 },
+    { name: "Points", min: 1, max: 1000, value: 50 },
     { name: "Image URL", characterLimit: 2048, value: "" },
     { name: "Awarding Distance (meters)", min: 1, max: 1000, value: 1 },
     { name: "Close Distance (meters)", min: 1, max: 1000, value: 1 },
@@ -94,8 +111,11 @@ function toForm(challenge: ChallengeDto) {
     },
     {
       name: "Location Description",
-      characterLimit: 2048,
-      value: challenge.location ?? "",
+      options: locationOptions,
+      value:
+        challenge.location !== undefined
+          ? locationOptions.indexOf(challenge.location)
+          : 0,
     },
     { name: "Name", characterLimit: 256, value: challenge.name ?? "" },
     {
@@ -105,7 +125,6 @@ function toForm(challenge: ChallengeDto) {
     },
     {
       name: "Points",
-      characterLimit: 2048,
       min: 1,
       max: 1000,
       value: challenge.points ?? 0,
@@ -138,7 +157,9 @@ function fromForm(
   return {
     id,
     name: (form[2] as FreeEntryForm).value,
-    location: (form[1] as FreeEntryForm).value,
+    location: locationOptions[
+      (form[1] as OptionEntryForm).value
+    ] as ChallengeLocationDto,
     description: (form[3] as FreeEntryForm).value,
     points: (form[4] as NumberEntryForm).value,
     imageUrl: (form[5] as FreeEntryForm).value,

@@ -26,7 +26,10 @@ import { GroupGateway } from '../group/group.gateway';
 import { EventGateway } from '../event/event.gateway';
 import { UpdateUserDataDto } from '../user/user.dto';
 import { UpdateEventDataDto } from '../event/event.dto';
-import { UpdateChallengeDataDto } from '../challenge/challenge.dto';
+import {
+  UpdateChallengeDataDto,
+  ChallengeLocationDto,
+} from '../challenge/challenge.dto';
 
 type DtoLastCall<T> = [string[], string, T];
 
@@ -106,7 +109,7 @@ describe('OrganizationModule E2E', () => {
     exChal = (await challengeService.upsertChallengeFromDto(fullAbility, {
       id: '',
       linkedEventId: exEv.id,
-      location: 'ARTS_QUAD',
+      location: ChallengeLocationDto.ArtsQuad,
     }))!;
 
     managerUser = await userService.register(

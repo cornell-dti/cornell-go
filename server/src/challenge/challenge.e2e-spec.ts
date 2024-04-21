@@ -18,7 +18,7 @@ import { ClientService } from '../client/client.service';
 import { GroupService } from '../group/group.service';
 import { OrganizationService } from '../organization/organization.service';
 import { ClientModule } from '../client/client.module';
-import { ChallengeDto } from './challenge.dto';
+import { ChallengeDto, ChallengeLocationDto } from './challenge.dto';
 import { AppAbility, CaslAbilityFactory } from '../casl/casl-ability.factory';
 
 describe('ChallengeModule E2E', () => {
@@ -35,6 +35,8 @@ describe('ChallengeModule E2E', () => {
   let abilityFactory: CaslAbilityFactory;
   let fullAbility: AppAbility;
 
+  /** beforeAll runs before anything else, add new users and prerequesites to tests
+   * afterAll runs after all the tests, use it to remove lingering values in the database */
   beforeAll(async () => {
     moduleRef = await Test.createTestingModule({
       imports: [AppModule],
@@ -133,7 +135,7 @@ describe('ChallengeModule E2E', () => {
       const chalDto: ChallengeDto = {
         id: '12345',
         name: 'test',
-        location: 'ENG_QUAD',
+        location: ChallengeLocationDto.EngQuad,
         description: 'chal dto',
         points: 1,
         imageUrl: 'url',
@@ -179,7 +181,7 @@ describe('ChallengeModule E2E', () => {
       const secondChalDto: ChallengeDto = {
         id: '123',
         name: 'test',
-        location: 'ANY',
+        location: ChallengeLocationDto.Any,
         description: 'chal dto',
         points: 1,
         imageUrl: 'update test',
@@ -208,7 +210,7 @@ describe('ChallengeModule E2E', () => {
       const chalDto: ChallengeDto = {
         id: chalID,
         name: 'test',
-        location: 'ENG_QUAD',
+        location: ChallengeLocationDto.EngQuad,
         description: 'chal dto',
         points: 1,
         imageUrl: 'update test',

@@ -22,11 +22,21 @@ export interface RequestRecommendedEventsDto {
   count?: number;
 }
 
+export enum EventCategoryDto {
+  FOOD = 'FOOD',
+  NATURE = 'NATURE',
+  HISTORICAL = 'HISTORICAL',
+  CAFE = 'CAFE',
+  DININGHALL = 'DININGHALL',
+  DORM = 'DORM',
+}
+
 export interface EventDto {
   id: string;
   requiredMembers?: number;
   name?: string;
   description?: string;
+  category?: EventCategoryDto;
   timeLimitation?: 'LIMITED_TIME' | 'PERPETUAL';
   endTime?: string;
   challenges?: string[];
@@ -38,13 +48,20 @@ export interface EventDto {
   latitudeF?: number;
 }
 
+/** DTO for PrevChallenge as used in EventTrackerDto */
+export interface PrevChallengeDto {
+  challengeId: string;
+  hintsUsed: number;
+  dateCompleted: string;
+}
+
 /** DTO for event tracker in updateEventTrackerData */
 export interface EventTrackerDto {
   eventId: string;
-  isRanked?: boolean;
-  curChallengeId?: string;
-  prevChallenges?: string[];
-  prevChallengeDates?: string[];
+  isRanked: boolean;
+  hintsUsed: number;
+  curChallengeId: string;
+  prevChallenges: PrevChallengeDto[];
 }
 
 /** DTO for updateEventTrackerData */
@@ -56,3 +73,5 @@ export interface UpdateEventDataDto {
   event: EventDto;
   deleted: boolean;
 }
+
+export interface UseEventTrackerHintDto {}
