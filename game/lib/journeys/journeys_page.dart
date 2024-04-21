@@ -160,35 +160,36 @@ class _JourneysPageState extends State<JourneysPage> {
                     DateTime endtime = HttpDate.parse(event.endTime ?? "");
 
                     Duration timeTillExpire = endtime.difference(now);
-                    eventCells.add(
-                      StreamBuilder(
-                        stream:
-                            Stream.fromFuture(Future.delayed(timeTillExpire)),
-                        builder: (stream, value) => timeTillExpire.isNegative
-                            ? Consumer<ApiClient>(
-                                builder: (context, apiClient, child) {
-                                  if (event.id == groupModel.curEventId) {
-                                    apiClient.serverApi?.setCurrentEvent(
-                                        SetCurrentEventDto(eventId: ""));
-                                  }
-                                  return Container();
-                                },
-                              )
-                            : JourneyCell(
-                                key: UniqueKey(),
-                                event.name ?? "",
-                                friendlyLocation[location] ?? "",
-                                Image.network(
-                                    "https://picsum.photos/250?image=9"), // dummy data for now; should pass in thumbnail parameter
-                                event.description ?? "",
-                                locationCount,
-                                numberCompleted,
-                                complete,
-                                friendlyDifficulty[difficulty] ?? "",
-                                totalPoints, event.id,
-                              ),
-                      ),
-                    );
+                    if (!complete)
+                      eventCells.add(
+                        StreamBuilder(
+                          stream:
+                              Stream.fromFuture(Future.delayed(timeTillExpire)),
+                          builder: (stream, value) => timeTillExpire.isNegative
+                              ? Consumer<ApiClient>(
+                                  builder: (context, apiClient, child) {
+                                    if (event.id == groupModel.curEventId) {
+                                      apiClient.serverApi?.setCurrentEvent(
+                                          SetCurrentEventDto(eventId: ""));
+                                    }
+                                    return Container();
+                                  },
+                                )
+                              : JourneyCell(
+                                  key: UniqueKey(),
+                                  event.name ?? "",
+                                  friendlyLocation[location] ?? "",
+                                  Image.network(
+                                      "https://picsum.photos/250?image=9"), // dummy data for now; should pass in thumbnail parameter
+                                  event.description ?? "",
+                                  locationCount,
+                                  numberCompleted,
+                                  complete,
+                                  friendlyDifficulty[difficulty] ?? "",
+                                  totalPoints, event.id,
+                                ),
+                        ),
+                      );
                   }
                   return ListView.separated(
                     padding: const EdgeInsets.symmetric(horizontal: 3),
