@@ -21,7 +21,8 @@ import {
   EventTrackerDto,
   UpdateEventDataDto,
   RequestRecommendedEventsDto,
-  EventCategory,
+  UpdateEventTrackerDataDto,
+  EventCategoryDto,
 } from './event.dto';
 import { AppAbility, CaslAbilityFactory } from '../casl/casl-ability.factory';
 import { accessibleBy } from '@casl/prisma';
@@ -126,6 +127,7 @@ export class EventService {
     const progress = await this.prisma.eventTracker.create({
       data: {
         score: 0,
+        hintsUsed: 0,
         isRankedForEvent: true,
         event: { connect: { id: defaultEvId } },
         curChallenge: { connect: { id: closestChalId } },
@@ -161,6 +163,7 @@ export class EventService {
     const progress = await this.prisma.eventTracker.create({
       data: {
         score: 0,
+        hintsUsed: 0,
         isRankedForEvent: true,
         eventId: event.id,
         curChallengeId: closestChallenge.id,
@@ -257,7 +260,7 @@ export class EventService {
       id: ev.id,
       name: ev.name,
       description: ev.description,
-      category: ev.category as EventCategory,
+      category: ev.category as EventCategoryDto,
       timeLimitation:
         ev.timeLimitation == TimeLimitationType.LIMITED_TIME
           ? 'LIMITED_TIME'
@@ -283,22 +286,22 @@ export class EventService {
    * @returns an EventTrackerDTO for the event tracker
    */
   async dtoForEventTracker(tracker: EventTracker): Promise<EventTrackerDto> {
-    const completedChallenges = await this.prisma.challenge.findMany({
+    const prevChallenges = await this.prisma.prevChallenge.findMany({
       where: {
-        completions: { some: { userId: tracker.userId } },
-        linkedEventId: tracker.eventId,
+        trackerId: tracker.id,
       },
-      include: { completions: { where: { userId: tracker.userId } } },
     });
 
     return {
       eventId: tracker.eventId,
       isRanked: tracker.isRankedForEvent,
+      hintsUsed: tracker.hintsUsed,
       curChallengeId: tracker.curChallengeId,
-      prevChallenges: completedChallenges.map(pc => pc.id),
-      prevChallengeDates: completedChallenges.map(pc =>
-        pc.completions[0].timestamp.toUTCString(),
-      ),
+      prevChallenges: prevChallenges.map(pc => ({
+        challengeId: pc.challengeId,
+        hintsUsed: pc.hintsUsed,
+        dateCompleted: pc.timestamp.toUTCString(),
+      })),
     };
   }
 
@@ -314,6 +317,16 @@ export class EventService {
         prismaStore: this.prisma.eventTracker,
       },
     );
+  }
+
+  async useEventTrackerHint(user: User) {
+    var evTracker = await this.getCurrentEventTrackerForUser(user);
+
+    evTracker = await this.prisma.eventTracker.update({
+      where: { id: evTracker.id },
+      data: { hintsUsed: evTracker.hintsUsed + 1 },
+    });
+    return evTracker;
   }
 
   async emitUpdateEventData(ev: EventBase, deleted: boolean, target?: User) {
