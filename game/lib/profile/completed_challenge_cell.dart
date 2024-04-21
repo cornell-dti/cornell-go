@@ -81,6 +81,8 @@ class _CompletedChallengeFullState extends State<CompletedChallengeFull> {
                       child: Image.network(
                         picture,
                         fit: BoxFit.cover,
+                        width: 90,
+                        height: 90,
                       ),
                     );
                   },

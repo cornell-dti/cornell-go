@@ -166,7 +166,12 @@ class _ChallengesPageState extends State<ChallengesPage> {
                                   friendlyLocation[challenge.location] ?? "",
                                   event.name ?? "",
                                   Image.network(
-                                      "https://picsum.photos/250?image=9"),
+                                    challenge.imageUrl ??
+                                        "https://picsum.photos/250?image=9",
+                                    fit: BoxFit.cover,
+                                    width: 150,
+                                    height: 90,
+                                  ),
                                   complete,
                                   event.description ?? "",
                                   friendlyDifficulty[event.difficulty] ?? "",
