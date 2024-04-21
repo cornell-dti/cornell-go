@@ -22,7 +22,11 @@ import { SearchBar } from "./SearchBar";
 import { ServerDataContext } from "./ServerData";
 
 import { compareTwoStrings } from "string-similarity";
-import { EventDto } from "../all.dto";
+import {
+  EventDifficultyDto,
+  EventDto,
+  EventTimeLimitationDto,
+} from "../all.dto";
 import { AlertModal } from "./AlertModal";
 import { EventCategoryDto } from "../all.dto";
 
@@ -133,7 +137,9 @@ function fromForm(form: EntryForm[], id: string): EventDto {
     id,
     requiredMembers: (form[3] as NumberEntryForm).value,
     timeLimitation:
-      (form[4] as OptionEntryForm).value === 0 ? "PERPETUAL" : "LIMITED_TIME",
+      (form[4] as OptionEntryForm).value === 0
+        ? EventTimeLimitationDto.PERPETUAL
+        : EventTimeLimitationDto.LIMITED_TIME,
     name: (form[0] as FreeEntryForm).value,
     description: (form[1] as FreeEntryForm).value,
 
@@ -146,10 +152,10 @@ function fromForm(form: EntryForm[], id: string): EventDto {
     challenges: [],
     difficulty:
       (form[5] as OptionEntryForm).value === 0
-        ? "Easy"
+        ? EventDifficultyDto.Easy
         : (form[5] as OptionEntryForm).value === 1
-        ? "Normal"
-        : "Hard",
+        ? EventDifficultyDto.Normal
+        : EventDifficultyDto.Hard,
 
     latitudeF: 0,
     longitudeF: 0,
