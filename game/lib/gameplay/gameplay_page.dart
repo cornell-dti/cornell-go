@@ -11,6 +11,7 @@ import 'package:game/model/tracker_model.dart';
 import 'package:game/model/group_model.dart';
 import 'package:game/api/geopoint.dart';
 import 'package:game/navigation_page/home_navbar.dart';
+import 'package:game/utils/utility_functions.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:game/model/challenge_model.dart';
 import 'gameplay_map.dart';
@@ -40,17 +41,6 @@ class _GameplayPageState extends State<GameplayPage> {
   GeoPoint? currentLocation;
 
   late StreamSubscription<Position> positionStream;
-
-  final Map<String, String> friendlyLocation = {
-    "ENG_QUAD": "Eng Quad",
-    "ARTS_QUAD": "Arts Quad",
-    "AG_QUAD": "Ag Quad",
-    "NORTH_CAMPUS": "North Campus",
-    "WEST_CAMPUS": "West Campus",
-    "COLLEGETOWN": "Collegetown",
-    "ITHACA_COMMONS": "Ithaca Commons",
-    "ANY": "Cornell",
-  };
 
   @override
   void initState() {

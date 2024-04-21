@@ -224,7 +224,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         locationImage,
                         type,
                         formattedDate,
-                        difficultyToString[event.difficulty]!,
+                        friendlyDifficulty[event.difficulty]!,
                         totalPoints);
                   },
                   physics: BouncingScrollPhysics(),
