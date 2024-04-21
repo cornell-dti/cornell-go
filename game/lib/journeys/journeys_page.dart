@@ -10,6 +10,7 @@ import 'package:game/model/group_model.dart';
 import 'package:game/model/tracker_model.dart';
 import 'package:game/model/challenge_model.dart';
 import 'package:game/model/user_model.dart';
+import 'package:game/utils/utility_functions.dart';
 import 'package:provider/provider.dart';
 
 class JourneysPage extends StatefulWidget {
@@ -177,16 +178,16 @@ class _JourneysPageState extends State<JourneysPage> {
                               : JourneyCell(
                                   key: UniqueKey(),
                                   event.name ?? "",
-                                  location?.name ?? "",
+                                  friendlyLocation[location] ?? "",
                                   Image.network(
                                       "https://picsum.photos/250?image=9"), // dummy data for now; should pass in thumbnail parameter
                                   event.description ?? "",
                                   locationCount,
                                   numberCompleted,
                                   complete,
-                                  difficulty?.name ?? "",
-                                  totalPoints,
-                                  event.id),
+                                  friendlyDifficulty[difficulty] ?? "",
+                                  totalPoints, event.id,
+                                ),
                         ),
                       );
                   }

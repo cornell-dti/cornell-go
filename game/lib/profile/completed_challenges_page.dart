@@ -108,7 +108,7 @@ class CompletedChallengesPage extends StatelessWidget {
                   type: type,
                   date: DateFormat("MMMM d, y").format(date),
                   location: locationList[0],
-                  difficulty: difficultyToString[event.difficulty]!,
+                  difficulty: friendlyDifficulty[event.difficulty]!,
                   points: totalPoints,
                 );
               },
