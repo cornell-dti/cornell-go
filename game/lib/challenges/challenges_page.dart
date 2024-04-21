@@ -11,6 +11,7 @@ import 'package:game/model/event_model.dart';
 import 'package:game/model/group_model.dart';
 import 'package:game/model/tracker_model.dart';
 import 'package:game/model/user_model.dart';
+import 'package:game/utils/utility_functions.dart';
 import 'package:provider/provider.dart';
 import 'challenge_cell.dart';
 import 'package:game/journeys/filter_form.dart';
@@ -163,13 +164,13 @@ class _ChallengesPageState extends State<ChallengesPage> {
                                 )
                               : ChallengeCell(
                                   key: UniqueKey(),
-                                  challenge.location?.name ?? "",
-                                  challenge.name ?? "",
+                                  friendlyLocation[challenge.location] ?? "",
+                                  event.name ?? "",
                                   Image.network(
                                       "https://picsum.photos/250?image=9"),
                                   complete,
-                                  challenge.description ?? "",
-                                  event.difficulty?.name ?? "",
+                                  event.description ?? "",
+                                  friendlyDifficulty[event.difficulty] ?? "",
                                   challenge.points ?? 0,
                                   event.id),
                         ),
