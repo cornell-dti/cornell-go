@@ -24,24 +24,32 @@ Widget FirstPodium(context, int points, bool isUser) {
   return Center(
       child: Container(
           width: 106,
-          height: 112,
-          child:
-              Stack(alignment: FractionalOffset(0.5, 0.58), children: <Widget>[
+          height: 150,
+          child: Stack(children: <Widget>[
+            // SvgPicture.asset('assets/icons/gold_trophy.svg',
+            //     height: 20, width: 20),
             SvgPicture.asset(
               svgAssetPath,
               semanticsLabel: '1st Podium',
             ),
-
-            SizedBox(
-              width: 60,
-              height: 29,
-              child: FittedBox(
-                alignment: Alignment.center,
-                fit: BoxFit.scaleDown,
-                child: Text(points.toString() + " PTS", style: pointsStyle),
-              ),
+            Positioned(
+              bottom: 130,
+              child: SvgPicture.asset('assets/icons/gold_trophy.svg',
+                  height: 87, width: 80),
             ),
-            // Text(points.toString() + " PTS"
+            Positioned(
+              top: 68,
+              left: 22,
+              child: SizedBox(
+                width: 60,
+                height: 29,
+                child: FittedBox(
+                  alignment: Alignment.center,
+                  fit: BoxFit.scaleDown,
+                  child: Text(points.toString() + " PTS", style: pointsStyle),
+                ),
+              ),
+            )
           ])));
 }
 

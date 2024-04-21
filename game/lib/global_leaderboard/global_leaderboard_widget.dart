@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:game/api/game_client_dto.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/group_model.dart';
@@ -94,7 +95,8 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
 
                 return Container(
                   width: 328,
-                  height: 213,
+                  height:
+                      320, // TODO: This is how you chagne the hight of the podium cell
                   margin: EdgeInsets.only(top: 24, left: 25),
                   child: Row(children: [
                     Column(
@@ -110,14 +112,21 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
                     ),
                     SizedBox(width: 5),
                     Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         podiumList.length > 0
                             ? podiumCell(context, podiumList[0].username)
                             : podiumCell(context, ""),
-                        SizedBox(height: 12),
+                        // SizedBox(height: 12),
+                        SizedBox(height: 40),
+
+                        // Stack(
+                        //     alignment: FractionalOffset(0.5, 0.58),
+                        //     children: <Widget>[
                         FirstPodium(
                             context, podiumList[0].score, firstPodiumUser),
                       ],
+                      // ],
                     ),
                     SizedBox(width: 5),
                     Column(
@@ -134,7 +143,7 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
                   ]),
                 );
               }),
-              SizedBox(height: 5),
+              SizedBox(height: 100),
               //Leaderboard Container
               Expanded(
                 child: Padding(
