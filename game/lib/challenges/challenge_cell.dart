@@ -4,6 +4,8 @@ import 'package:game/preview/preview.dart';
 class ChallengeCell extends StatefulWidget {
   final String location;
   final String challengeName;
+  final double? challengeLat;
+  final double? challengeLong;
   final Image thumbnail;
   final bool isCompleted;
   final String description;
@@ -14,6 +16,8 @@ class ChallengeCell extends StatefulWidget {
   const ChallengeCell(
       this.location,
       this.challengeName,
+      this.challengeLat,
+      this.challengeLong,
       this.thumbnail,
       this.isCompleted,
       this.description,
@@ -27,6 +31,8 @@ class ChallengeCell extends StatefulWidget {
   State<StatefulWidget> createState() => _ChallengeCellState(
       location,
       challengeName,
+      challengeLat,
+      challengeLong,
       thumbnail,
       isCompleted,
       description,
@@ -38,6 +44,8 @@ class ChallengeCell extends StatefulWidget {
 class _ChallengeCellState extends State<ChallengeCell> {
   final String location;
   final String challengeName;
+  final double? challengeLat;
+  final double? challengeLong;
   final Image thumbnail;
   final bool isCompleted;
   final String description;
@@ -50,6 +58,8 @@ class _ChallengeCellState extends State<ChallengeCell> {
   _ChallengeCellState(
       this.location,
       this.challengeName,
+      this.challengeLat,
+      this.challengeLong,
       this.thumbnail,
       this.isCompleted,
       this.description,
@@ -70,8 +80,16 @@ class _ChallengeCellState extends State<ChallengeCell> {
             ),
             context: context,
             isScrollControlled: true,
-            builder: (context) => Preview(challengeName, description,
-                difficulty, points, PreviewType.CHALLENGE, location, eventId));
+            builder: (context) => Preview(
+                challengeName,
+                challengeLat,
+                challengeLong,
+                description,
+                difficulty,
+                points,
+                PreviewType.CHALLENGE,
+                location,
+                eventId));
       },
       child: Container(
         decoration: BoxDecoration(

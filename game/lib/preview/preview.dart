@@ -4,6 +4,10 @@ import 'package:game/gameplay/gameplay_page.dart';
 import 'package:provider/provider.dart';
 import 'package:game/api/game_client_dto.dart';
 
+import 'package:geolocator/geolocator.dart';
+import 'package:game/api/geopoint.dart';
+import 'dart:async';
+
 enum PreviewType { CHALLENGE, JOURNEY }
 
 /** Returns a preview of a challenge given the challenge name, description, 
@@ -11,6 +15,8 @@ enum PreviewType { CHALLENGE, JOURNEY }
  * both Challenges and Journeys. */
 class Preview extends StatefulWidget {
   final String challengeName;
+  final double? challengeLong;
+  final double? challengeLat;
   final String description;
   final String difficulty;
   final int points;
@@ -32,8 +38,16 @@ class Preview extends StatefulWidget {
   //Temporary image for now. Will have to change later
   final String imgPath = "assets/images/38582.jpg";
 
-  Preview(this.challengeName, this.description, this.difficulty, this.points,
-      this.type, this.location, this.eventId,
+  Preview(
+      this.challengeName,
+      this.challengeLat,
+      this.challengeLong,
+      this.description,
+      this.difficulty,
+      this.points,
+      this.type,
+      this.location,
+      this.eventId,
       {this.locationCount = 1,
       this.numberCompleted = 0,
       // required this.totalDistance,
@@ -43,6 +57,8 @@ class Preview extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => _PreviewState(
       challengeName,
+      challengeLat,
+      challengeLong,
       description,
       difficulty,
       points,
@@ -60,6 +76,8 @@ class Preview extends StatefulWidget {
  * challenge_on button */
 class _PreviewState extends State<Preview> {
   final String challengeName;
+  final double? challengeLong;
+  final double? challengeLat;
   final String description;
   final String difficulty;
   final int points;
@@ -80,8 +98,56 @@ class _PreviewState extends State<Preview> {
   //Temporary image for now. Will have to change later
   final String imgPath = "assets/images/38582.jpg";
 
+  // User's current location will fall back to _center when current location
+  // cannot be found
+  GeoPoint? currentLocation;
+  GeoPoint? targetLocation;
+
+  late StreamSubscription<Position> positionStream;
+
+  @override
+  void initState() {
+    startPositionStream();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    positionStream.cancel();
+    super.dispose();
+  }
+
+  /**
+   * Starts the user's current location streaming upon state initialization
+   * Sets the camera to center on user's location by default
+   */
+  void startPositionStream() async {
+    GeoPoint.current().then(
+      (location) {
+        currentLocation = location;
+      },
+    );
+
+    positionStream = Geolocator.getPositionStream(
+            locationSettings: GeoPoint.getLocationSettings())
+        .listen((Position? newPos) {
+      // prints user coordinates - useful for debugging
+      // print(newPos == null
+      //     ? 'Unknown'
+      //     : '${newPos.latitude.toString()}, ${newPos.longitude.toString()}');
+
+      if (newPos != null)
+        currentLocation =
+            GeoPoint(newPos.latitude, newPos.longitude, newPos.heading);
+
+      setState(() {});
+    });
+  }
+
   _PreviewState(
       this.challengeName,
+      this.challengeLat,
+      this.challengeLong,
       this.description,
       this.difficulty,
       this.points,
@@ -95,6 +161,25 @@ class _PreviewState extends State<Preview> {
       );
   @override
   Widget build(BuildContext context) {
+    if (challengeLat == null || challengeLong == null) {
+      return SizedBox(
+        height: MediaQuery.of(context).size.height * 0.75,
+        child: ClipRRect(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(20.0),
+            topRight: Radius.circular(20.0),
+          ),
+
+          //Overall Container
+          child: Container(
+              height: MediaQuery.of(context).size.height * 0.75,
+              width: MediaQuery.of(context).size.width,
+              color: Colors.white,
+              child: Text("Cannot find challenge lat and long")),
+        ),
+      );
+    }
+
     //The popup box
     return SizedBox(
         height: MediaQuery.of(context).size.height * 0.75,
@@ -163,8 +248,16 @@ class _PreviewState extends State<Preview> {
                           Icon(Icons.directions_walk,
                               size: 24, color: Preview.greyColor),
                           Text(
-                              "25" + // should call new parameter; replace later
-                                  "mi",
+                              ' ' +
+                                  (currentLocation != null
+                                      ? (currentLocation!.distanceTo(GeoPoint(
+                                                  challengeLat!,
+                                                  challengeLong!,
+                                                  0)) /
+                                              1609.34)
+                                          .toStringAsFixed(1)
+                                      : "?.?") +
+                                  " mi",
                               style: TextStyle(
                                   fontSize: 20, color: Preview.greyColor))
                         ]),

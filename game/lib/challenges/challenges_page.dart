@@ -211,6 +211,8 @@ class _ChallengesPageState extends State<ChallengesPage> {
                                   key: UniqueKey(),
                                   friendlyLocation[challenge.location] ?? "",
                                   event.name ?? "",
+                                  challenge.latF,
+                                  challenge.longF,
                                   Image.network(
                                       "https://picsum.photos/250?image=9"),
                                   complete,
@@ -227,20 +229,8 @@ class _ChallengesPageState extends State<ChallengesPage> {
 
                   return ListView.separated(
                     padding: const EdgeInsets.symmetric(horizontal: 3),
-                    itemCount: eventCells.length + 1,
+                    itemCount: eventCells.length,
                     itemBuilder: (context, index) {
-                      if (index == eventCells.length) {
-                        // Footer widget
-                        return Padding(
-                            padding: const EdgeInsets.only(bottom: 50.0),
-                            child: Center(
-                              child: Image(
-                                image: AssetImage('assets/images/go-logo.png'),
-                                width: 200,
-                                height: 200,
-                              ),
-                            ));
-                      }
                       return eventCells[index];
                     },
                     physics: BouncingScrollPhysics(),
