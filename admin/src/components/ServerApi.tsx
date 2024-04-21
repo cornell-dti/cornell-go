@@ -45,8 +45,8 @@ export class ServerApi {
     this.send("requestEventTrackerData", data);
   }
 
-  useEventTrackerHint() {
-    this.send("useEventTrackerHint", {});
+  useEventTrackerHint(data: dto.UseEventTrackerHintDto) {
+    this.send("useEventTrackerHint", data);
   }
 
   updateEventData(data: dto.UpdateEventDataDto) {

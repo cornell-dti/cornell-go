@@ -18,6 +18,7 @@ import {
   RequestEventLeaderDataDto,
   UpdateEventDataDto,
   RequestRecommendedEventsDto,
+  UseEventTrackerHintDto,
 } from './event.dto';
 import { RequestEventTrackerDataDto } from '../challenge/challenge.dto';
 import { OrganizationService } from '../organization/organization.service';
@@ -108,7 +109,10 @@ export class EventGateway {
   }
 
   @SubscribeMessage('useEventTrackerHint')
-  async useEventTrackerHint(@CallingUser() user: User) {
+  async useEventTrackerHint(
+    @CallingUser() user: User,
+    @MessageBody() data: UseEventTrackerHintDto
+  ) {
     const tracker = await this.eventService.useEventTrackerHint(user);
     if (tracker) {
       await this.eventService.emitUpdateEventTracker(tracker, user);

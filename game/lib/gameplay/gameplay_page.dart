@@ -201,7 +201,7 @@ class _GameplayPageState extends State<GameplayPage> {
                                   Text(
                                       ' ' +
                                           (friendlyLocation[
-                                                  challenge.location] ??
+                                                  challenge.location?.name] ??
                                               ""),
                                       style: TextStyle(
                                           fontSize: 12,

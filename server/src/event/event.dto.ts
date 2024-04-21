@@ -22,7 +22,7 @@ export interface RequestRecommendedEventsDto {
   count?: number;
 }
 
-export enum EventCategory {
+export enum EventCategoryDto {
   FOOD = 'FOOD',
   NATURE = 'NATURE',
   HISTORICAL = 'HISTORICAL',
@@ -36,7 +36,7 @@ export interface EventDto {
   requiredMembers?: number;
   name?: string;
   description?: string;
-  category?: EventCategory;
+  category?: EventCategoryDto;
   timeLimitation?: 'LIMITED_TIME' | 'PERPETUAL';
   endTime?: string;
   challenges?: string[];
@@ -73,3 +73,5 @@ export interface UpdateEventDataDto {
   event: EventDto;
   deleted: boolean;
 }
+
+export interface UseEventTrackerHintDto {}
