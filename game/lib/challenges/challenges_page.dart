@@ -22,14 +22,14 @@ class ChallengesPage extends StatefulWidget {
 class _ChallengesPageState extends State<ChallengesPage> {
   List<String> selectedCategories = [];
   List<String> selectedLocations = [];
-  String selectedStatus = 'Easy';
+  String selectedDifficulty = '';
 
   // Callback function to receive updated state values from the child
   void handleFilterSubmit(List<String>? a, List<String>? b, String c) {
     setState(() {
       selectedCategories = a ?? [];
       selectedLocations = b ?? [];
-      selectedStatus = c;
+      selectedDifficulty = c;
     });
   }
 
@@ -82,7 +82,7 @@ class _ChallengesPageState extends State<ChallengesPage> {
                                 isScrollControlled: true,
                                 builder: (context) => FilterForm(
                                     onSubmit: handleFilterSubmit,
-                                    status: selectedStatus,
+                                    difficulty: selectedDifficulty,
                                     locations: selectedLocations,
                                     categories: selectedCategories),
                               );
@@ -140,9 +140,8 @@ class _ChallengesPageState extends State<ChallengesPage> {
                     if (curEvent != null) events.add(curEvent);
                   }
                   for (EventDto event in events) {
-                    print(event);
                     var tracker = trackerModel.trackerByEventId(event.id);
-                    var numberCompleted = tracker?.prevChallenges?.length ?? 0;
+                    var numberCompleted = tracker?.prevChallenges.length ?? 0;
                     var complete =
                         (numberCompleted == event.challenges?.length);
                     var locationCount = event.challenges?.length ?? 0;
@@ -160,19 +159,17 @@ class _ChallengesPageState extends State<ChallengesPage> {
 
                       continue;
                     }
-                    final challengeLocation =
-                        challenge.location?.toString() ?? "";
+                    final challengeLocation = challenge.location?.name ?? "";
 
-                    bool eventMatchesStatusSelection = false;
-                    bool eventMatchesCategorySelection = true;
-                    bool eventMatchesLocationSelection = false;
-                    if (selectedStatus == "All") {
-                      eventMatchesStatusSelection = true;
-                    } else if (selectedStatus ==
-                        event.difficulty?.name.toString())
-                      eventMatchesStatusSelection = true;
+                    bool eventMatchesDifficultySelection;
+                    bool eventMatchesCategorySelection;
+                    bool eventMatchesLocationSelection;
+
+                    if (selectedDifficulty.length == 0 ||
+                        selectedDifficulty == event.difficulty?.name)
+                      eventMatchesDifficultySelection = true;
                     else
-                      eventMatchesStatusSelection = false;
+                      eventMatchesDifficultySelection = false;
 
                     if (selectedLocations.length > 0) {
                       if (selectedLocations.contains(challengeLocation))
@@ -182,42 +179,43 @@ class _ChallengesPageState extends State<ChallengesPage> {
                     } else
                       eventMatchesLocationSelection = true;
 
-                    // if (selectedCategories.length >0) {
-                    //   if (selectedCategories.contains(challengeLocation))
-                    //     eventMatchesCategorySelection= true;
-                    //   else eventMatchesCategorySelection=false;
-                    // } else
-                    //   eventMatchesCategorySelection=true;
+                    if (selectedCategories.length > 0) {
+                      if (selectedCategories.contains(event.category?.name))
+                        eventMatchesCategorySelection = true;
+                      else
+                        eventMatchesCategorySelection = false;
+                    } else
+                      eventMatchesCategorySelection = true;
                     if (!complete)
                       eventCells.add(
                         StreamBuilder(
                           stream:
                               Stream.fromFuture(Future.delayed(timeTillExpire)),
-                          builder: (stream, value) =>
-                              timeTillExpire.isNegative ||
-                                      eventMatchesStatusSelection == false ||
-                                      eventMatchesCategorySelection == false ||
-                                      eventMatchesLocationSelection == false
-                                  ? Consumer<ApiClient>(
-                                      builder: (context, apiClient, child) {
-                                        if (event.id == groupModel.curEventId) {
-                                          apiClient.serverApi?.setCurrentEvent(
-                                              SetCurrentEventDto(eventId: ""));
-                                        }
-                                        return Container();
-                                      },
-                                    )
-                                  : ChallengeCell(
-                                      key: UniqueKey(),
-                                      challenge.location?.name ?? "",
-                                      challenge.name ?? "",
-                                      Image.network(
-                                          "https://picsum.photos/250?image=9"),
-                                      complete,
-                                      challenge.description ?? "",
-                                      event.difficulty?.name ?? "",
-                                      challenge.points ?? 0,
-                                      event.id),
+                          builder: (stream, value) => timeTillExpire
+                                      .isNegative ||
+                                  eventMatchesDifficultySelection == false ||
+                                  eventMatchesCategorySelection == false ||
+                                  eventMatchesLocationSelection == false
+                              ? Consumer<ApiClient>(
+                                  builder: (context, apiClient, child) {
+                                    if (event.id == groupModel.curEventId) {
+                                      apiClient.serverApi?.setCurrentEvent(
+                                          SetCurrentEventDto(eventId: ""));
+                                    }
+                                    return Container();
+                                  },
+                                )
+                              : ChallengeCell(
+                                  key: UniqueKey(),
+                                  challenge.location?.name ?? "",
+                                  challenge.name ?? "",
+                                  Image.network(
+                                      "https://picsum.photos/250?image=9"),
+                                  complete,
+                                  challenge.description ?? "",
+                                  event.difficulty?.name ?? "",
+                                  challenge.points ?? 0,
+                                  event.id),
                         ),
                       );
                   }

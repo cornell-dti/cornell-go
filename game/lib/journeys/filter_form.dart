@@ -1,29 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:game/api/game_client_dto.dart';
 
 class FilterForm extends StatefulWidget {
   final void Function(List<String>, List<String>, String) onSubmit;
-  String? myStatus;
+  String? myDifficulty;
   List<String>? myLocations;
   List<String>? myCategories;
   FilterForm(
       {Key? key,
       required this.onSubmit,
-      String? status,
+      String? difficulty,
       List<String>? locations,
       List<String>? categories})
       : super(key: key) {
-    myStatus = status;
+    myDifficulty = difficulty;
     myLocations = locations;
-    print(
-        "Start of FilterForm Build: Selected status is " + myStatus.toString());
   }
 
   @override
   // State<FilterForm> createState() => _FilterFormState(status);
   State<FilterForm> createState() {
-    print("Start of FilterFormState Build: Selected status is " +
-        myStatus.toString());
-    return _FilterFormState(myStatus, myLocations, myCategories);
+    return _FilterFormState(myDifficulty, myLocations, myCategories);
   }
 }
 
@@ -31,35 +28,20 @@ class _FilterFormState extends State<FilterForm> {
   // Define variables for tracking the selected values
   List<String> selectedCategories = [];
   List<String> selectedLocations = [];
-  late String selectedStatus;
+  late String selectedDifficulty;
 
   _FilterFormState(
-      String? status, List<String>? locations, List<String>? categories) {
-    print("Start of FilterFormState : Selected status is " + status.toString());
-
-    selectedStatus = status ?? "Easy";
+      String? difficulty, List<String>? locations, List<String>? categories) {
+    selectedDifficulty = difficulty ?? '';
     selectedLocations = locations ?? [];
     selectedCategories = categories ?? [];
   }
-  List<String> categories = [
-    'Food',
-    'Nature',
-    'Historical',
-    'Cafe',
-    'Dining Hall',
-    'Dorm'
-  ];
 
-  List<String> locations = [
-    'ENG_QUAD',
-    'ARTS_QUAD',
-    'AG_QUAD',
-    'NORTH_CAMPUS',
-    'WEST_CAMPUS',
-    'COLLEGETOWN',
-    'ITHACA_COMMONS'
-  ];
-  List<String> statuses = ['Easy', 'Normal', 'Hard'];
+  List<EventCategoryDto> categories = EventCategoryDto.values;
+
+  List<ChallengeLocationDto> locations = ChallengeLocationDto.values;
+
+  List<EventDifficultyDto> difficulties = EventDifficultyDto.values;
 
   // Define methods for updating the selected values
   void filterChallenges() {
@@ -68,7 +50,7 @@ class _FilterFormState extends State<FilterForm> {
     //   selectedLocations;
     //   selectedStatus;
     // });
-    widget.onSubmit(selectedCategories, selectedLocations, selectedStatus);
+    widget.onSubmit(selectedCategories, selectedLocations, selectedDifficulty);
 
     Navigator.pop(context);
   }
@@ -89,9 +71,9 @@ class _FilterFormState extends State<FilterForm> {
     }
   }
 
-  void setStatus(String status) {
+  void setDifficulty(String diff) {
     setState(() {
-      selectedStatus = status;
+      selectedDifficulty = diff;
     });
   }
 
@@ -167,13 +149,14 @@ class _FilterFormState extends State<FilterForm> {
                       return ElevatedButton(
                         onPressed: () {
                           setState(() {
-                            toggleCategory(category);
+                            toggleCategory(category.name);
                           });
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: selectedCategories.contains(category)
-                              ? Color.fromARGB(255, 249, 237, 218)
-                              : Color.fromARGB(100, 210, 210, 210),
+                          backgroundColor:
+                              selectedCategories.contains(category.name)
+                                  ? Color.fromARGB(255, 249, 237, 218)
+                                  : Color.fromARGB(100, 210, 210, 210),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20.0),
                           ),
@@ -182,7 +165,7 @@ class _FilterFormState extends State<FilterForm> {
                         child: Padding(
                           padding: EdgeInsets.symmetric(vertical: 8.0),
                           child: Text(
-                            category,
+                            category.name,
                             style: TextStyle(
                               fontSize: 16.0,
                               color: Colors.black.withOpacity(0.6),
@@ -210,13 +193,14 @@ class _FilterFormState extends State<FilterForm> {
                       return ElevatedButton(
                         onPressed: () {
                           setState(() {
-                            toggleLocation(location);
+                            toggleLocation(location.name);
                           });
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: selectedLocations.contains(location)
-                              ? Color.fromARGB(255, 249, 237, 218)
-                              : Color.fromARGB(100, 210, 210, 210),
+                          backgroundColor:
+                              selectedLocations.contains(location.name)
+                                  ? Color.fromARGB(255, 249, 237, 218)
+                                  : Color.fromARGB(100, 210, 210, 210),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20.0),
                           ),
@@ -225,7 +209,7 @@ class _FilterFormState extends State<FilterForm> {
                         child: Padding(
                           padding: EdgeInsets.symmetric(vertical: 8.0),
                           child: Text(
-                            location,
+                            location.name,
                             style: TextStyle(
                               fontSize: 16.0,
                               color: Colors.black.withOpacity(0.6),
@@ -249,17 +233,18 @@ class _FilterFormState extends State<FilterForm> {
                   Wrap(
                     spacing: 4,
                     runSpacing: 4,
-                    children: statuses.map((status) {
+                    children: difficulties.map((diff) {
                       return ElevatedButton(
                         onPressed: () {
                           setState(() {
-                            setStatus(status);
+                            setDifficulty(diff.name);
                           });
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: selectedStatus.contains(status)
-                              ? Color.fromARGB(255, 249, 237, 218)
-                              : Color.fromARGB(100, 210, 210, 210),
+                          backgroundColor:
+                              selectedDifficulty.contains(diff.name)
+                                  ? Color.fromARGB(255, 249, 237, 218)
+                                  : Color.fromARGB(100, 210, 210, 210),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20.0),
                           ),
@@ -268,7 +253,7 @@ class _FilterFormState extends State<FilterForm> {
                         child: Padding(
                           padding: EdgeInsets.symmetric(vertical: 1.0),
                           child: Text(
-                            status,
+                            diff.name,
                             style: TextStyle(
                               fontSize: 16.0,
                               color: Colors.black.withOpacity(0.6),
@@ -306,7 +291,7 @@ class _FilterFormState extends State<FilterForm> {
                         setState(() {
                           selectedCategories = [];
                           selectedLocations = [];
-                          selectedStatus = 'All';
+                          selectedDifficulty = '';
                         });
                       },
                       child: Text('Clear'),
