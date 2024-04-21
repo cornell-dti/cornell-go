@@ -8,11 +8,11 @@ function genTsDtoFile(dtoDefs) {
   // OTHERWISE YOUR CHANGES MAY BE OVERWRITTEN!
   `;
     for (const [name, fields] of dtoDefs.enumDtos.entries()) {
-        tsCode += `type ${name} =`;
+        tsCode += `export enum ${name} {`;
         for (const field of fields) {
-            tsCode += `\n  | "${field}"`;
+            tsCode += `\n  ${field} = "${field}",`;
         }
-        tsCode += ";\n\n";
+        tsCode += "}\n\n";
     }
     for (const [name, propMap] of dtoDefs.baseDtos.entries()) {
         tsCode += `export interface ${name} {\n`;
