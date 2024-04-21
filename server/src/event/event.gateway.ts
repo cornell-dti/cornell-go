@@ -36,7 +36,7 @@ export class EventGateway {
     private clientService: ClientService,
     private eventService: EventService,
     private orgService: OrganizationService,
-  ) { }
+  ) {}
 
   /**
    * Subscribes to and emits all events that have an id within data.events
@@ -56,7 +56,6 @@ export class EventGateway {
     );
 
     for (const ev of evs) {
-
       await this.eventService.emitUpdateEventData(ev, false, user);
     }
   }
@@ -74,15 +73,13 @@ export class EventGateway {
 
     console.log(evs.length);
     for (const ev of evs) {
-
       if (ev.difficulty == data.difficulty[0]) {
         // if (ev.difficulty == "EASY") {
-        console.log("Ev is " + (<EventBase>ev).name.toString())
+        console.log('Ev is ' + (<EventBase>ev).name.toString());
         await this.eventService.emitUpdateEventData(ev, false, user);
       }
       // return ev;
     }
-
   }
 
   @SubscribeMessage('requestRecommendedEvents')

@@ -52,7 +52,7 @@ export class UserGateway {
     private groupService: GroupService,
     private eventService: EventService,
     private orgService: OrganizationService,
-  ) { }
+  ) {}
 
   private providerToAuthType(provider: string) {
     let type: AuthType = AuthType.NONE;

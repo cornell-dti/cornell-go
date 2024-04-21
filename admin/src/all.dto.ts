@@ -249,15 +249,15 @@ export interface UpdateEventDataDto {
   deleted: boolean;
 }
 
-export interface UseEventTrackerHintDto { }
+export interface UseEventTrackerHintDto {}
 
 export interface JoinGroupDto {
   groupId: string;
 }
 
-export interface LeaveGroupDto { }
+export interface LeaveGroupDto {}
 
-export interface RequestGroupDataDto { }
+export interface RequestGroupDataDto {}
 
 export interface SetCurrentEventDto {
   eventId: string;
@@ -310,7 +310,7 @@ export interface UpdateOrganizationDataDto {
   deleted: boolean;
 }
 
-export interface CloseAccountDto { }
+export interface CloseAccountDto {}
 
 export interface SetUsernameDto {
   newUsername: string;
@@ -347,7 +347,7 @@ export interface RequestUserDataDto {
   userId?: string;
 }
 
-export interface RequestAllUserDataDto { }
+export interface RequestAllUserDataDto {}
 
 export interface RequestFavoriteEventDataDto {
   isFavorite: boolean;
