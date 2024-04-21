@@ -176,6 +176,7 @@ model EventTracker {
   user                User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId              String
   score               Int
+  hintsUsed           Int
   isRankedForEvent    Boolean         @default(true)
   event               EventBase       @relation(fields: [eventId], references: [id], onDelete: Cascade)
   eventId             String
@@ -194,6 +195,7 @@ model PrevChallenge {
   challengeId  String
   tracker      EventTracker @relation(fields: [trackerId], references: [id], onDelete: Cascade)
   trackerId    String
+  hintsUsed    Int
   timestamp    DateTime     @default(now())
 }
 

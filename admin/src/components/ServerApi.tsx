@@ -53,6 +53,10 @@ export class ServerApi {
     this.send("requestEventTrackerData", data);
   }
 
+  useEventTrackerHint(data: dto.UseEventTrackerHintDto) {
+    this.send("useEventTrackerHint", data);
+  }
+
   updateEventData(data: dto.UpdateEventDataDto) {
     this.send("updateEventData", data);
   }

@@ -31,14 +31,12 @@ import { AlertModal } from "./AlertModal";
 import { EventCategoryDto } from "../all.dto";
 
 const categoryOptions = [
-  "ENG_QUAD",
-  "ARTS_QUAD",
-  "AG_QUAD",
-  "NORTH_CAMPUS",
-  "WEST_CAMPUS",
-  "COLLEGETOWN",
-  "ITHACA_COMMONS",
-  "ANY",
+  "FOOD",
+  "NATURE",
+  "HISTORICAL",
+  "CAFE",
+  "DININGHALL",
+  "DORM",
 ];
 
 function EventCard(props: {

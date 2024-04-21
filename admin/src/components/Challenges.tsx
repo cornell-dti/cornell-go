@@ -94,7 +94,7 @@ function makeForm(): EntryForm[] {
     },
     { name: "Name", characterLimit: 256, value: "" },
     { name: "Description", characterLimit: 2048, value: "" },
-    { name: "Points", characterLimit: 2048, min: 1, max: 1000, value: 50 },
+    { name: "Points", min: 1, max: 1000, value: 50 },
     { name: "Image URL", characterLimit: 2048, value: "" },
     { name: "Awarding Distance (meters)", min: 1, max: 1000, value: 1 },
     { name: "Close Distance (meters)", min: 1, max: 1000, value: 1 },
@@ -124,7 +124,6 @@ function toForm(challenge: ChallengeDto) {
     },
     {
       name: "Points",
-      characterLimit: 2048,
       min: 1,
       max: 1000,
       value: challenge.points ?? 0,
