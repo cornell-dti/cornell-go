@@ -74,7 +74,8 @@ export class AchievementGateway {
 
     if (data.deleted) {
       if (
-        !achievement || !(await this.achievementService.removeAchievement(
+        !achievement ||
+        !(await this.achievementService.removeAchievement(
           ability,
           achievement.id,
         ))
