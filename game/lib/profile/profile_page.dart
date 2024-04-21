@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:game/achievements/achievements_page.dart';
 import 'package:game/api/game_client_dto.dart';
 import 'package:game/model/challenge_model.dart';
 import 'package:game/model/event_model.dart';
@@ -143,7 +144,8 @@ class _ProfilePageState extends State<ProfilePage> {
                     TextButton(
                       onPressed: () {
                         // Handle button press, e.g., navigate to details page
-                        print('View Details button pressed');
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => AchievementsPage()));
                       },
                       child: Text(
                         'View Details →',
