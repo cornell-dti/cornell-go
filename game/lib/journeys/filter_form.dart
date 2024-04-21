@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:game/api/game_client_dto.dart';
+import 'package:game/utils/utility_functions.dart';
 
 class FilterForm extends StatefulWidget {
   final void Function(List<String>, List<String>, String) onSubmit;
@@ -15,6 +16,7 @@ class FilterForm extends StatefulWidget {
       : super(key: key) {
     myDifficulty = difficulty;
     myLocations = locations;
+    myCategories = categories;
   }
 
   @override
@@ -165,7 +167,7 @@ class _FilterFormState extends State<FilterForm> {
                         child: Padding(
                           padding: EdgeInsets.symmetric(vertical: 8.0),
                           child: Text(
-                            category.name,
+                            friendlyCategory[category] ?? '',
                             style: TextStyle(
                               fontSize: 16.0,
                               color: Colors.black.withOpacity(0.6),
@@ -209,7 +211,7 @@ class _FilterFormState extends State<FilterForm> {
                         child: Padding(
                           padding: EdgeInsets.symmetric(vertical: 8.0),
                           child: Text(
-                            location.name,
+                            friendlyLocation[location] ?? '',
                             style: TextStyle(
                               fontSize: 16.0,
                               color: Colors.black.withOpacity(0.6),
@@ -253,7 +255,7 @@ class _FilterFormState extends State<FilterForm> {
                         child: Padding(
                           padding: EdgeInsets.symmetric(vertical: 1.0),
                           child: Text(
-                            diff.name,
+                            friendlyDifficulty[diff] ?? '',
                             style: TextStyle(
                               fontSize: 16.0,
                               color: Colors.black.withOpacity(0.6),
