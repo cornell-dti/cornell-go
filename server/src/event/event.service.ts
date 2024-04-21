@@ -21,6 +21,8 @@ import {
   EventTrackerDto,
   UpdateEventDataDto,
   RequestRecommendedEventsDto,
+  UpdateEventTrackerDataDto,
+  EventCategoryDto,
 } from './event.dto';
 import { AppAbility, CaslAbilityFactory } from '../casl/casl-ability.factory';
 import { accessibleBy } from '@casl/prisma';
@@ -126,6 +128,7 @@ export class EventService {
     const progress = await this.prisma.eventTracker.create({
       data: {
         score: 0,
+        hintsUsed: 0,
         isRankedForEvent: true,
         event: { connect: { id: defaultEvId } },
         curChallenge: { connect: { id: closestChalId } },
@@ -161,6 +164,7 @@ export class EventService {
     const progress = await this.prisma.eventTracker.create({
       data: {
         score: 0,
+        hintsUsed: 0,
         isRankedForEvent: true,
         eventId: event.id,
         curChallengeId: closestChallenge.id,
@@ -240,6 +244,11 @@ export class EventService {
     });
   }
 
+  /**
+   * Converts an event from the database to a DTO
+   * @param ev event to get DTO for
+   * @returns an EventDTO for the event
+   */
   async dtoForEvent(ev: EventBase): Promise<EventDto> {
     const chals = await this.prisma.challenge.findMany({
       where: { linkedEventId: ev.id },
@@ -252,6 +261,7 @@ export class EventService {
       id: ev.id,
       name: ev.name,
       description: ev.description,
+      category: ev.category as EventCategoryDto,
       timeLimitation:
         ev.timeLimitation == TimeLimitationType.LIMITED_TIME
           ? 'LIMITED_TIME'
@@ -271,20 +281,28 @@ export class EventService {
     };
   }
 
+  /**
+   * Converts an event tracker from the database to a DTO
+   * @param tracker event tracker to get DTO for
+   * @returns an EventTrackerDTO for the event tracker
+   */
   async dtoForEventTracker(tracker: EventTracker): Promise<EventTrackerDto> {
-    const completedChallenges = await this.prisma.challenge.findMany({
-      where: { completions: { some: { userId: tracker.userId } } },
-      include: { completions: { where: { userId: tracker.userId } } },
+    const prevChallenges = await this.prisma.prevChallenge.findMany({
+      where: {
+        trackerId: tracker.id,
+      },
     });
 
     return {
       eventId: tracker.eventId,
       isRanked: tracker.isRankedForEvent,
+      hintsUsed: tracker.hintsUsed,
       curChallengeId: tracker.curChallengeId,
-      prevChallenges: completedChallenges.map(pc => pc.id),
-      prevChallengeDates: completedChallenges.map(pc =>
-        pc.completions[0].timestamp.toUTCString(),
-      ),
+      prevChallenges: prevChallenges.map(pc => ({
+        challengeId: pc.challengeId,
+        hintsUsed: pc.hintsUsed,
+        dateCompleted: pc.timestamp.toUTCString(),
+      })),
     };
   }
 
@@ -294,8 +312,22 @@ export class EventService {
       'updateEventTrackerData',
       target?.id ?? tracker.id,
       dto,
-      { id: dto.eventId, subject: 'EventTracker' },
+      {
+        id: tracker.id,
+        subject: 'EventTracker',
+        prismaStore: this.prisma.eventTracker,
+      },
     );
+  }
+
+  async useEventTrackerHint(user: User) {
+    var evTracker = await this.getCurrentEventTrackerForUser(user);
+
+    evTracker = await this.prisma.eventTracker.update({
+      where: { id: evTracker.id },
+      data: { hintsUsed: evTracker.hintsUsed + 1 },
+    });
+    return evTracker;
   }
 
   async emitUpdateEventData(ev: EventBase, deleted: boolean, target?: User) {
@@ -308,7 +340,12 @@ export class EventService {
       'updateEventData',
       target?.id ?? ev.id,
       dto,
-      { id: ev.id, subject: subject('EventBase', ev), dtoField: 'event' },
+      {
+        id: ev.id,
+        subject: 'EventBase',
+        dtoField: 'event',
+        prismaStore: this.prisma.eventBase,
+      },
     );
   }
 
@@ -366,9 +403,25 @@ export class EventService {
   async upsertEventFromDto(ability: AppAbility, event: EventDto) {
     let ev = await this.prisma.eventBase.findFirst({ where: { id: event.id } });
 
-    if (!ev && !event.initialOrganizationId) {
-      return null;
-    }
+    const canUpdateOrg =
+      (await this.prisma.organization.count({
+        where: {
+          AND: [
+            { id: event.initialOrganizationId ?? '' },
+            accessibleBy(ability, Action.Update).Organization,
+          ],
+        },
+      })) > 0;
+
+    const canUpdateEv =
+      (await this.prisma.eventBase.count({
+        where: {
+          AND: [
+            accessibleBy(ability, Action.Update).EventBase,
+            { id: ev?.id ?? '' },
+          ],
+        },
+      })) > 0;
 
     const assignData = {
       requiredMembers: event.requiredMembers,
@@ -379,39 +432,34 @@ export class EventService {
           ? TimeLimitationType.LIMITED_TIME
           : TimeLimitationType.PERPETUAL,
       endTime: event.endTime && new Date(event.endTime),
-      userFavorites: event.userFavorites,
       indexable: event.indexable,
       difficulty:
-        event.difficulty === 'Easy'
+        event.difficulty &&
+        (event.difficulty === 'Easy'
           ? DifficultyMode.EASY
           : event.difficulty === 'Normal'
           ? DifficultyMode.NORMAL
-          : DifficultyMode.HARD,
+          : DifficultyMode.HARD),
       latitude: event.latitudeF,
       longitude: event.longitudeF,
+      category: event.category,
     };
 
-    if (
-      ev &&
-      (await this.prisma.eventBase.findFirst({
-        select: { id: true },
-        where: {
-          AND: [accessibleBy(ability, Action.Update).EventBase, { id: ev.id }],
-        },
-      }))
-    ) {
+    if (ev && canUpdateEv) {
       const updateData = await this.abilityFactory.filterInaccessible(
+        ev.id,
         assignData,
-        subject('EventBase', ev),
+        'EventBase',
         ability,
         Action.Update,
+        this.prisma.eventBase,
       );
 
       ev = await this.prisma.eventBase.update({
         where: { id: ev.id },
         data: updateData,
       });
-    } else if (!ev && ability.can(Action.Create, 'Challenge')) {
+    } else if (!ev && canUpdateOrg) {
       const data = {
         requiredMembers:
           assignData.requiredMembers ?? defaultEventData.requiredMembers,
@@ -419,6 +467,7 @@ export class EventService {
         description:
           assignData.description?.substring(0, 2048) ??
           defaultEventData.description,
+        category: assignData.category ?? defaultEventData.category,
         timeLimitation: assignData.timeLimitation,
         endTime: assignData.endTime ?? defaultEventData.endTime,
         indexable: assignData.indexable ?? defaultEventData.indexable,
@@ -456,7 +505,7 @@ export class EventService {
     return ev;
   }
 
-  async removeEvent(eventId: string, ability: AppAbility) {
+  async removeEvent(ability: AppAbility, eventId: string) {
     if (
       await this.prisma.eventBase.findFirst({
         where: {
@@ -476,6 +525,8 @@ export class EventService {
       });
 
       console.log(`Deleted event ${eventId}`);
+      return true;
     }
+    return false;
   }
 }

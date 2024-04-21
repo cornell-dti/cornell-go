@@ -13,15 +13,11 @@ async function main() {
     rmSync("./postgres-data/pgdata", { recursive: true, force: true });
   }
 
-  console.log("Starting postgres server to set up database");
-  execSync("docker compose up -d --wait postgres");
-  chdir("./server");
-
-  console.log("Syncing prisma schema");
-  execSync("npx prisma db push --accept-data-loss --force-reset");
-
-  console.log("Stopping containers");
-  execSync("docker compose stop");
+  process.env[`DB_RESET`] = "true";
+  console.log("Setting up database through docker");
+  execSync(
+    "docker compose up --build --no-attach postgres --exit-code-from server"
+  );
 
   console.log("Successfully reset the database!");
 }

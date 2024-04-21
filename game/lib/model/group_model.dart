@@ -10,11 +10,8 @@ class GroupModel extends ChangeNotifier {
 
   GroupModel(ApiClient client) {
     client.clientApi.updateGroupDataStream.listen((event) {
-      //print(event);
       if (!(event.group is String)) {
         group = event.group;
-        client.serverApi?.setCurrentEvent(
-            SetCurrentEventDto(eventId: event.group.curEventId ?? ""));
         curEventId = event.group.curEventId;
         members.removeWhere((element) =>
             event.group.members?.any((mem) => mem.id == element.id) ?? false);

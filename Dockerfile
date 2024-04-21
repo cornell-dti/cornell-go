@@ -22,5 +22,6 @@ COPY server .
 RUN chmod +x ./start.sh
 RUN npx prisma generate
 RUN npm run build
+RUN npx crlf --set=LF ./start.sh
 
 ENTRYPOINT ./start.sh

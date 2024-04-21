@@ -24,6 +24,7 @@ enum EnrollmentType {
   GRADUATE
   FACULTY
   ALUMNI
+  GUEST
 }
 
 enum LocationType {
@@ -74,8 +75,10 @@ enum OrganizationSpecialUsage {
 
 model User {
   id                  String               @id() @default(uuid())
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt()
   subject             String               @default("User")
-  authToken           String
+  authToken           String               @unique
   authType            AuthType
   username            String
   year                String
@@ -101,6 +104,8 @@ model User {
 
 model Group {
   id         String    @id @default(uuid())
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt()
   subject    String    @default("Group")
   friendlyId String    @unique
   members    User[]    @relation("member")
@@ -112,6 +117,8 @@ model Group {
 
 model Challenge {
   id             String          @id @default(uuid()) @map("id")
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt()
   subject        String          @default("Challenge")
   linkedEvent    EventBase?      @relation("all", fields: [linkedEventId], references: [id], onDelete: Cascade)
   linkedEventId  String?
@@ -131,6 +138,8 @@ model Challenge {
 
 model EventBase {
   id              String             @id @default(uuid())
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt()
   subject         String             @default("EventBase")
   requiredMembers Int
   name            String
@@ -147,14 +156,27 @@ model EventBase {
   longitude       Float
   achievements    Achievement[]
   difficulty      DifficultyMode
+  category        EventCategoryType
+}
+
+enum EventCategoryType {
+  FOOD
+  NATURE
+  HISTORICAL
+  CAFE
+  DININGHALL
+  DORM
 }
 
 model EventTracker {
   id                  String          @id @default(uuid())
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt()
   subject             String          @default("EventTracker")
   user                User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId              String
   score               Int
+  hintsUsed           Int
   isRankedForEvent    Boolean         @default(true)
   event               EventBase       @relation(fields: [eventId], references: [id], onDelete: Cascade)
   eventId             String
@@ -173,11 +195,14 @@ model PrevChallenge {
   challengeId  String
   tracker      EventTracker @relation(fields: [trackerId], references: [id], onDelete: Cascade)
   trackerId    String
+  hintsUsed    Int
   timestamp    DateTime     @default(now())
 }
 
 model Organization {
   id           String                   @id @default(uuid())
+  createdAt    DateTime                 @default(now())
+  updatedAt    DateTime                 @updatedAt()
   subject      String                   @default("Organization")
   name         String
   accessCode   String
@@ -199,6 +224,8 @@ model SessionLogEntry {
 
 model Achievement {
   id              String               @id @default(uuid())
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt()
   subject         String               @default("Achievement")
   requiredPoints  Int
   name            String
@@ -213,6 +240,8 @@ model Achievement {
 
 model AchievementTracker {
   id            String      @id @default(uuid())
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt()
   subject       String      @default("AchievementTracker")
   user          User        @relation(fields: [userId], references: [id])
   progress      Int

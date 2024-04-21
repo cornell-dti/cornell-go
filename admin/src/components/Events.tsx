@@ -24,6 +24,16 @@ import { ServerDataContext } from "./ServerData";
 import { compareTwoStrings } from "string-similarity";
 import { EventDto } from "../all.dto";
 import { AlertModal } from "./AlertModal";
+import { EventCategoryDto } from "../all.dto";
+
+const categoryOptions = [
+  "FOOD",
+  "NATURE",
+  "HISTORICAL",
+  "CAFE",
+  "DININGHALL",
+  "DORM",
+];
 
 function EventCard(props: {
   event: EventDto;
@@ -45,6 +55,10 @@ function EventCard(props: {
       : props.event.difficulty === "Normal"
       ? "Normal"
       : "Hard";
+
+  let categoryInput = props.event.category as string;
+  const categoryType =
+    categoryInput[0] + categoryInput.substring(1).toLowerCase();
 
   const affirmOfBool = (val: boolean) => (val ? "Yes" : "No");
 
@@ -72,10 +86,9 @@ function EventCard(props: {
           Time Limitation: <b>{timeLimitation}</b> <br />
           Challenge Count: <b>{props.event.challenges?.length}</b> <br />
           Difficulty: <b>{difficultyMode}</b> <br />
+          Category: <b>{categoryType}</b> <br />
           Publicly Visible: <b>{affirmOfBool(!!props.event.indexable)}</b>{" "}
           <br />
-          Latitude: <b>{props.event.latitudeF}</b>, Longitude:{" "}
-          <b>{props.event.longitudeF}</b> <br />
         </ListCardBody>
         <ListCardButtons>
           <HButton onClick={props.onDelete}>DELETE</HButton>
@@ -88,10 +101,16 @@ function EventCard(props: {
   );
 }
 
+// Default Form Creation
 function makeForm() {
   return [
     { name: "Name", characterLimit: 256, value: "" },
     { name: "Description", characterLimit: 2048, value: "" },
+    {
+      name: "Category",
+      options: categoryOptions,
+      value: 1,
+    },
     { name: "Required Members", value: -1, min: -1, max: 99 },
     {
       name: "Time Limitation",
@@ -101,39 +120,55 @@ function makeForm() {
     {
       name: "Difficulty",
       options: ["Easy", "Normal", "Hard"],
-      value: 1,
+      value: 0,
     },
     { name: "Publicly Visible", options: ["No", "Yes"], value: 0 },
     { name: "Available Until", date: new Date("2050") },
   ] as EntryForm[];
 }
 
+// Form to DTO Conversion
 function fromForm(form: EntryForm[], id: string): EventDto {
   return {
     id,
-    requiredMembers: (form[2] as NumberEntryForm).value,
+    requiredMembers: (form[3] as NumberEntryForm).value,
     timeLimitation:
-      (form[3] as OptionEntryForm).value === 0 ? "PERPETUAL" : "LIMITED_TIME",
+      (form[4] as OptionEntryForm).value === 0 ? "PERPETUAL" : "LIMITED_TIME",
     name: (form[0] as FreeEntryForm).value,
     description: (form[1] as FreeEntryForm).value,
-    indexable: (form[5] as OptionEntryForm).value === 1,
-    endTime: (form[6] as DateEntryForm).date.toUTCString(),
+
+    category: categoryOptions[
+      (form[2] as OptionEntryForm).value
+    ] as EventCategoryDto,
+
+    indexable: (form[6] as OptionEntryForm).value === 1,
+    endTime: (form[7] as DateEntryForm).date.toUTCString(),
     challenges: [],
     difficulty:
-      (form[4] as OptionEntryForm).value === 0
+      (form[5] as OptionEntryForm).value === 0
         ? "Easy"
-        : (form[4] as OptionEntryForm).value === 1
+        : (form[5] as OptionEntryForm).value === 1
         ? "Normal"
         : "Hard",
+
     latitudeF: 0,
     longitudeF: 0,
   };
 }
 
+// DTO to Form Conversion
 function toForm(event: EventDto) {
   return [
     { name: "Name", characterLimit: 256, value: event.name },
     { name: "Description", characterLimit: 2048, value: event.description },
+    {
+      name: "Category",
+      options: categoryOptions,
+      value:
+        event.category !== undefined
+          ? categoryOptions.indexOf(event.category)
+          : 0,
+    },
     {
       name: "Required Members",
       value: event.requiredMembers,
@@ -149,11 +184,7 @@ function toForm(event: EventDto) {
       name: "Difficulty",
       options: ["Easy", "Normal", "Hard"],
       value:
-        event.difficulty === "Easy"
-          ? 0
-          : event.difficulty === "Normal"
-          ? "Normal"
-          : "Hard",
+        event.difficulty === "Easy" ? 0 : event.difficulty === "Normal" ? 1 : 2,
     },
     {
       name: "Publicly Visible",

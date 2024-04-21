@@ -1,16 +1,30 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/src/foundation/key.dart';
+import 'package:flutter/src/widgets/framework.dart';
+import 'package:flutter/src/widgets/placeholder.dart';
+import 'package:flutter/material.dart';
+import 'package:game/api/game_api.dart';
+import 'package:game/model/event_model.dart';
+import 'package:game/model/tracker_model.dart';
+import 'package:game/model/group_model.dart';
 import 'package:game/api/geopoint.dart';
+import 'package:game/navigation_page/home_navbar.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:game/model/challenge_model.dart';
 import 'gameplay_map.dart';
 import 'package:provider/provider.dart';
 
+import 'package:game/api/game_client_dto.dart';
+import 'package:game/progress_indicators/circular_progress_indicator.dart';
+import 'package:flutter/cupertino.dart';
+
+import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:async';
 
 class GameplayPage extends StatefulWidget {
-  final String challengeId;
-
-  const GameplayPage({Key? key, required this.challengeId}) : super(key: key);
+  const GameplayPage({Key? key}) : super(key: key);
 
   @override
   State<GameplayPage> createState() => _GameplayPageState();
@@ -28,10 +42,27 @@ class _GameplayPageState extends State<GameplayPage> {
 
   late StreamSubscription<Position> positionStream;
 
+  final Map<String, String> friendlyLocation = {
+    "ENG_QUAD": "Eng Quad",
+    "ARTS_QUAD": "Arts Quad",
+    "AG_QUAD": "Ag Quad",
+    "NORTH_CAMPUS": "North Campus",
+    "WEST_CAMPUS": "West Campus",
+    "COLLEGETOWN": "Collegetown",
+    "ITHACA_COMMONS": "Ithaca Commons",
+    "ANY": "Cornell",
+  };
+
   @override
   void initState() {
     startPositionStream();
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    positionStream.cancel();
+    super.dispose();
   }
 
   /**
@@ -63,8 +94,20 @@ class _GameplayPageState extends State<GameplayPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ChallengeModel>(builder: (context, challengeModel, _) {
-      var challenge = challengeModel.getChallengeById(widget.challengeId);
+    return Consumer5<ChallengeModel, EventModel, TrackerModel, ApiClient,
+            GroupModel>(
+        builder: (context, challengeModel, eventModel, trackerModel, apiClient,
+            groupModel, _) {
+      var eventId = groupModel.curEventId;
+      // print(eventId);
+      var event = eventModel.getEventById(eventId ?? "");
+      var tracker = trackerModel.trackerByEventId(eventId ?? "");
+      if (tracker == null) {
+        return CircularIndicator();
+      }
+
+      var challenge = challengeModel.getChallengeById(tracker.curChallengeId!);
+
       if (challenge == null) {
         return Scaffold(
           body: Text("No challenge data"),
@@ -79,11 +122,9 @@ class _GameplayPageState extends State<GameplayPage> {
           children: [
             //SafeArea to avoid notch overlap
             SafeArea(
+                bottom: false,
                 child: Container(
-                    padding: EdgeInsets.only(
-                      left: 32,
-                      right: 32,
-                    ),
+                    padding: EdgeInsets.only(left: 39, right: 39, bottom: 10),
                     child: Column(
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.center,
@@ -92,14 +133,29 @@ class _GameplayPageState extends State<GameplayPage> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 TextButton(
-                                  onPressed: () {
-                                    // Left button action
-                                  },
-                                  child: Text('Leave Game',
-                                      style: TextStyle(
-                                          fontSize: 14,
-                                          color: Color(0xFF835A7C))),
-                                ),
+                                    style: TextButton.styleFrom(
+                                        padding: EdgeInsets.zero,
+                                        minimumSize: Size(50, 30),
+                                        tapTargetSize:
+                                            MaterialTapTargetSize.shrinkWrap,
+                                        alignment: Alignment.centerLeft,
+                                        foregroundColor: Colors.grey),
+                                    onPressed: () {
+                                      // Left button action
+                                      Navigator.pop(context);
+                                    },
+                                    child: Row(children: [
+                                      SvgPicture.asset(
+                                          "assets/icons/backcarrot.svg"),
+                                      Text(
+                                          '  Leave ' +
+                                              (event!.challenges!.length > 1
+                                                  ? "Journey"
+                                                  : "Challenge"),
+                                          style: TextStyle(
+                                              fontSize: 14,
+                                              color: Color(0xFF835A7C)))
+                                    ])),
                                 Container(
                                   decoration: const BoxDecoration(
                                     color: Color(0xFFF1F1F1),
@@ -109,73 +165,83 @@ class _GameplayPageState extends State<GameplayPage> {
                                   ),
                                   padding: const EdgeInsets.symmetric(
                                       vertical: 4.0, horizontal: 8.0),
-                                  child: const Text('Challenge',
+                                  child: Text(
+                                      (event.challenges!.length > 1
+                                          ? "Journey " +
+                                              (tracker.prevChallenges.length +
+                                                      1)
+                                                  .toString() +
+                                              "/" +
+                                              event.challenges!.length
+                                                  .toString()
+                                          : "Challenge"),
                                       style: TextStyle(
                                           fontSize: 14,
                                           color: Color(0xFFA4A4A4))),
                                 ),
                               ]),
                           Container(
+                            margin: EdgeInsets.only(top: 16.45, bottom: 11),
                             alignment: Alignment.centerLeft,
                             child: Text(
-                              "Find the Location of ${challenge.description}",
+                              "Find the Location of ${challenge.description}!",
                               textAlign: TextAlign.left,
                               style: TextStyle(
                                   fontSize: 18, fontWeight: FontWeight.bold),
                             ),
                           ),
                           Container(
-                              margin: EdgeInsets.only(top: 15),
+                              // padding: EdgeInsets.only(left: 18, right: 18),
                               child: Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Text('Arts Quad',
-                                        style: TextStyle(
-                                            fontSize: 12,
-                                            color: Color(0xFF835A7C))),
-                                    Container(
-                                      decoration: const BoxDecoration(
-                                        color: Color(0xFFF9EDDA),
-                                        borderRadius: BorderRadius.all(
-                                          Radius.circular(15.0),
-                                        ),
-                                      ),
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 4.0, horizontal: 8.0),
-                                      child: const Text('Easy',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                          )),
-                                    ),
-                                    Container(
-                                      decoration: BoxDecoration(
-                                        border: Border.all(
-                                            color: Color(0xFFFFC737), width: 3),
-                                        color: Color(0xFFBD871F),
-                                        borderRadius: BorderRadius.all(
-                                          Radius.circular(15.0),
-                                        ),
-                                      ),
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 4.0, horizontal: 8.0),
-                                      child: Text('100 pts',
-                                          style: TextStyle(
-                                              fontSize: 12,
-                                              color: Color(0xFFF1F1F1))),
-                                    ),
-                                    Text(
-                                        (currentLocation != null
-                                                ? (currentLocation!.distanceTo(
-                                                            targetLocation) /
-                                                        1609.34)
-                                                    .toStringAsFixed(1)
-                                                : "0.0") +
-                                            ' Miles Away',
-                                        style: TextStyle(
-                                            fontSize: 12,
-                                            color: Color(0xFF58B171))),
-                                  ]))
+                                Row(children: [
+                                  SvgPicture.asset(
+                                      "assets/icons/locationpin.svg"),
+                                  Text(
+                                      ' ' +
+                                          (friendlyLocation[
+                                                  challenge.location?.name] ??
+                                              ""),
+                                      style: TextStyle(
+                                          fontSize: 12,
+                                          color: Color(0xFF835A7C)))
+                                ]),
+                                Row(children: [
+                                  SvgPicture.asset("assets/icons/feetpics.svg"),
+                                  Text(
+                                      ' ' +
+                                          (currentLocation != null
+                                              ? (currentLocation!.distanceTo(
+                                                          targetLocation) /
+                                                      1609.34)
+                                                  .toStringAsFixed(1)
+                                              : "?.?") +
+                                          ' Miles Away',
+                                      style: TextStyle(
+                                          fontSize: 12,
+                                          color: Color(0xFF58B171)))
+                                ]),
+                                Row(children: [
+                                  SvgPicture.asset(
+                                      "assets/icons/bearcoins.svg"),
+                                  Text(
+                                      ' ' +
+                                          ((tracker.hintsUsed > 0)
+                                              ? ((challenge.points ?? 0) -
+                                                          tracker.hintsUsed *
+                                                              25)
+                                                      .toString() +
+                                                  '/'
+                                              : '') +
+                                          (challenge.points ?? 0).toString() +
+                                          " PTS",
+                                      style: TextStyle(
+                                          fontSize: 12,
+                                          color: Color(0xFFFFC737)))
+                                ]),
+                              ]))
                         ]))),
             Expanded(
               child: Padding(
@@ -184,7 +250,7 @@ class _GameplayPageState extends State<GameplayPage> {
                     targetLocation: targetLocation,
                     awardingRadius: awardingRadius,
                     description: challenge.description ?? "",
-                    points: 100, // TODO: update after points is in backend
+                    points: challenge.points ?? 0,
                   )),
             ),
           ],

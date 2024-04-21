@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:game/preview/preview.dart';
 
-/** ChallengeCell was formerly named ChallengeCellNew.
-*/
 class ChallengeCell extends StatefulWidget {
   final String location;
   final String challengeName;
@@ -11,15 +9,30 @@ class ChallengeCell extends StatefulWidget {
   final String description;
   final String difficulty;
   final int points;
+  final String eventId;
 
-  const ChallengeCell(this.location, this.challengeName, this.thumbnail,
-      this.isCompleted, this.description, this.difficulty, this.points,
+  const ChallengeCell(
+      this.location,
+      this.challengeName,
+      this.thumbnail,
+      this.isCompleted,
+      this.description,
+      this.difficulty,
+      this.points,
+      this.eventId,
       {Key? key})
       : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => _ChallengeCellState(location,
-      challengeName, thumbnail, isCompleted, description, difficulty, points);
+  State<StatefulWidget> createState() => _ChallengeCellState(
+      location,
+      challengeName,
+      thumbnail,
+      isCompleted,
+      description,
+      difficulty,
+      points,
+      eventId);
 }
 
 class _ChallengeCellState extends State<ChallengeCell> {
@@ -30,20 +43,22 @@ class _ChallengeCellState extends State<ChallengeCell> {
   final String description;
   final String difficulty;
   final int points;
+  final String eventId;
   // newly added field
   // final int totalDistance;
 
   _ChallengeCellState(
-    this.location,
-    this.challengeName,
-    this.thumbnail,
-    this.isCompleted,
-    this.description,
-    this.difficulty,
-    this.points,
-    // newly added field
-    // this.totalDistance
-  );
+      this.location,
+      this.challengeName,
+      this.thumbnail,
+      this.isCompleted,
+      this.description,
+      this.difficulty,
+      this.points,
+      this.eventId
+      // newly added field
+      // this.totalDistance
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +71,7 @@ class _ChallengeCellState extends State<ChallengeCell> {
             context: context,
             isScrollControlled: true,
             builder: (context) => Preview(challengeName, description,
-                difficulty, points, previewType.challenge, location));
+                difficulty, points, PreviewType.CHALLENGE, location, eventId));
       },
       child: Container(
         decoration: BoxDecoration(

@@ -19,6 +19,7 @@ import {
   UpdateEventDataDto,
   RequestRecommendedEventsDto,
   RequestFilteredEventsDto,
+  UseEventTrackerHintDto,
 } from './event.dto';
 import { RequestEventTrackerDataDto } from '../challenge/challenge.dto';
 import { OrganizationService } from '../organization/organization.service';
@@ -35,7 +36,7 @@ export class EventGateway {
     private clientService: ClientService,
     private eventService: EventService,
     private orgService: OrganizationService,
-  ) {}
+  ) { }
 
   /**
    * Subscribes to and emits all events that have an id within data.events
@@ -53,8 +54,6 @@ export class EventGateway {
       ability,
       data.events,
     );
-
-    console.log(evs.length);
 
     for (const ev of evs) {
 
@@ -77,13 +76,13 @@ export class EventGateway {
     for (const ev of evs) {
 
       if (ev.difficulty == data.difficulty[0]) {
-      // if (ev.difficulty == "EASY") {
+        // if (ev.difficulty == "EASY") {
         console.log("Ev is " + (<EventBase>ev).name.toString())
         await this.eventService.emitUpdateEventData(ev, false, user);
-        }
+      }
       // return ev;
     }
-    
+
   }
 
   @SubscribeMessage('requestRecommendedEvents')
@@ -112,14 +111,6 @@ export class EventGateway {
       return;
     }
 
-    if (ability.cannot(Action.Read, subject('EventBase', ev))) {
-      await this.clientService.emitErrorData(
-        user,
-        'Permission to event leader data denied!',
-      );
-      return;
-    }
-
     await this.eventService.emitUpdateLeaderData(
       data.offset,
       Math.min(data.count, 1024),
@@ -138,8 +129,21 @@ export class EventGateway {
       data.trackedEvents,
     );
     for (const tracker of trackers) {
-      await this.eventService.emitUpdateEventTracker(tracker);
+      await this.eventService.emitUpdateEventTracker(tracker, user);
     }
+  }
+
+  @SubscribeMessage('useEventTrackerHint')
+  async useEventTrackerHint(
+    @CallingUser() user: User,
+    @MessageBody() data: UseEventTrackerHintDto,
+  ) {
+    const tracker = await this.eventService.useEventTrackerHint(user);
+    if (tracker) {
+      await this.eventService.emitUpdateEventTracker(tracker, user);
+      return;
+    }
+    await this.clientService.emitErrorData(user, 'Failed to track used hint!');
   }
 
   @SubscribeMessage('updateEventData')
@@ -150,19 +154,11 @@ export class EventGateway {
   ) {
     const ev = await this.eventService.getEventById(data.event.id);
 
-    if (
-      (!ev && ability.cannot(Action.Create, 'EventBase')) ||
-      (ev && ability.cannot(Action.Manage, subject('EventBase', ev)))
-    ) {
-      await this.clientService.emitErrorData(
-        user,
-        'Permission to update event denied!',
-      );
-      return;
-    }
-
     if (data.deleted && ev) {
-      await this.eventService.removeEvent(ev.id, ability);
+      if (!(await this.eventService.removeEvent(ability, ev.id))) {
+        await this.clientService.emitErrorData(user, 'Failed to delete event!');
+        return;
+      }
       await this.eventService.emitUpdateEventData(ev, true);
     } else {
       const ev = await this.eventService.upsertEventFromDto(

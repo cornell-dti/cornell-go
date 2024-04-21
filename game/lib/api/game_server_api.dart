@@ -43,9 +43,6 @@ class GameServerApi {
   void requestChallengeData(RequestChallengeDataDto dto) =>
       _invokeWithRefresh("requestChallengeData", dto.toJson());
 
-  void setCurrentChallenge(SetCurrentChallengeDto dto) =>
-      _invokeWithRefresh("setCurrentChallenge", dto.toJson());
-
   void completedChallenge(CompletedChallengeDto dto) =>
       _invokeWithRefresh("completedChallenge", dto.toJson());
 
@@ -69,6 +66,9 @@ class GameServerApi {
 
   void requestEventTrackerData(RequestEventTrackerDataDto dto) =>
       _invokeWithRefresh("requestEventTrackerData", dto.toJson());
+
+  void useEventTrackerHint(UseEventTrackerHintDto dto) =>
+      _invokeWithRefresh("useEventTrackerHint", dto.toJson());
 
   void updateEventData(UpdateEventDataDto dto) =>
       _invokeWithRefresh("updateEventData", dto.toJson());

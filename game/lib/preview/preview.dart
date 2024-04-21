@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:game/api/game_api.dart';
 import 'package:game/gameplay/gameplay_page.dart';
+import 'package:provider/provider.dart';
+import 'package:game/api/game_client_dto.dart';
 
-enum previewType { challenge, journey }
+enum PreviewType { CHALLENGE, JOURNEY }
 
 /** Returns a preview of a challenge given the challenge name, description, 
  * difficulty, points, and bonus points for challenge mode. Used for
@@ -11,11 +14,12 @@ class Preview extends StatefulWidget {
   final String description;
   final String difficulty;
   final int points;
-  final previewType type;
+  final PreviewType type;
 
   final int locationCount;
   final int numberCompleted;
   final String location;
+  final String eventId;
 
 // newly added parameters; need to implement higher up in hierarchy
   // final int
@@ -29,7 +33,7 @@ class Preview extends StatefulWidget {
   final String imgPath = "assets/images/38582.jpg";
 
   Preview(this.challengeName, this.description, this.difficulty, this.points,
-      this.type, this.location,
+      this.type, this.location, this.eventId,
       {this.locationCount = 1,
       this.numberCompleted = 0,
       // required this.totalDistance,
@@ -45,7 +49,8 @@ class Preview extends StatefulWidget {
       type,
       locationCount,
       numberCompleted,
-      location
+      location,
+      eventId
       // need to figure out newly added parameters; commented out for now
       // totalDistance,
       );
@@ -58,7 +63,7 @@ class _PreviewState extends State<Preview> {
   final String description;
   final String difficulty;
   final int points;
-  final previewType type;
+  final PreviewType type;
   // newly added parameter; need to implement higher up in hierarchy
   // final int
   //     totalDistance;
@@ -70,6 +75,7 @@ class _PreviewState extends State<Preview> {
   //fields unique to journeys
   final int locationCount;
   final int numberCompleted;
+  final String eventId;
 
   //Temporary image for now. Will have to change later
   final String imgPath = "assets/images/38582.jpg";
@@ -82,7 +88,8 @@ class _PreviewState extends State<Preview> {
       this.type,
       this.locationCount,
       this.numberCompleted,
-      this.location
+      this.location,
+      this.eventId
       // newly added; commented out for now
       // this.totalDistance,
       );
@@ -149,8 +156,7 @@ class _PreviewState extends State<Preview> {
                         child: Row(children: [
                           Icon(Icons.tour,
                               size: 24, color: Preview.purpleColor),
-                          Text(
-                              location, // should call new parameter; replace later
+                          Text(location,
                               style: TextStyle(
                                   fontSize: 20, color: Preview.purpleColor)),
                           SizedBox(width: 10),
@@ -269,7 +275,7 @@ class _PreviewState extends State<Preview> {
                           )
                         ]),
                   ),
-                  (type == previewType.journey)
+                  (type == PreviewType.JOURNEY)
                       ? Column(children: [
                           SizedBox(height: 5),
                           Padding(
@@ -353,16 +359,20 @@ class _PreviewState extends State<Preview> {
                                       borderRadius: BorderRadius.circular(10.0),
                                       side: BorderSide(color: backgroundRed)))),
                           onPressed: () {
-                            print("Unimplemented. Starting Challenge!");
+                            Provider.of<ApiClient>(context, listen: false)
+                                .serverApi
+                                ?.setCurrentEvent(
+                                    SetCurrentEventDto(eventId: eventId));
+                            print("setting current event to " + eventId);
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => GameplayPage(
-                                        challengeId:
-                                            "37714c5a-0c5b-47a4-a759-64f3a5fc21d8")));
+                                    builder: (context) => GameplayPage()));
                           },
                           child: Text(
-                            "Continue exploring",
+                            (numberCompleted == 0)
+                                ? "Let's Go!"
+                                : "Continue exploring",
                             style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 20,

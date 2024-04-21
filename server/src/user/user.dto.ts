@@ -1,3 +1,5 @@
+import { PrevChallenge } from '@prisma/client';
+
 /** DTO for closeAccount */
 export interface CloseAccountDto {}
 
@@ -56,7 +58,12 @@ export type UserAuthTypeDto = 'device' | 'apple' | 'google';
 export interface UserDto {
   id: string;
   username?: string;
-  enrollmentType?: 'UNDERGRADUATE' | 'GRADUATE' | 'FACULTY' | 'ALUMNI';
+  enrollmentType?:
+    | 'UNDERGRADUATE'
+    | 'GRADUATE'
+    | 'FACULTY'
+    | 'ALUMNI'
+    | 'GUEST';
   email?: string;
   year?: string;
   score?: number;

@@ -16,10 +16,13 @@ import 'package:game/model/event_model.dart';
 import 'package:game/model/group_model.dart';
 import 'package:game/model/tracker_model.dart';
 import 'package:game/model/user_model.dart';
+import 'package:game/navigation_page/bottom_navbar.dart';
 import 'package:game/splash_page/splash_page.dart';
 import 'package:game/widget/game_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:game/color_palette.dart';
+
+import 'dart:io' show Platform;
 
 const ENV_URL = String.fromEnvironment('API_URL', defaultValue: "");
 
@@ -33,7 +36,7 @@ void main() async {
   final GoogleMapsFlutterPlatform platform = GoogleMapsFlutterPlatform.instance;
   // should only apply to Android - needs to be tested for iOS
   if (platform is GoogleMapsFlutterAndroid) {
-    (platform).useAndroidViewSurface = true;
+    (platform as GoogleMapsFlutterAndroid).useAndroidViewSurface = true;
     initializeMapRenderer();
   }
   // load environment variables
@@ -110,8 +113,11 @@ class MyApp extends StatelessWidget {
           supportedLocales: const [Locale('en', '')],
           theme: ThemeData(
               fontFamily: 'Poppins', primarySwatch: ColorPalette.BigRed),
-          home: SplashPageWidget(),
-          // home: GameplayMap(),
+          home: StreamBuilder<bool>(
+              stream: Stream.fromFuture(client.tryRelog()),
+              builder: (stream, snapshot) => (snapshot.data == null)
+                  ? Container()
+                  : (snapshot.data! ? BottomNavBar() : SplashPageWidget())),
         )));
   }
 }

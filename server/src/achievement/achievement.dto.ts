@@ -1,12 +1,12 @@
-export enum LocationType {
+export enum AchievementLocationType {
   EngQuad = 'ENG_QUAD',
   ArtsQuad = 'ARTS_QUAD',
   AgQuad = 'AG_QUAD',
   NorthCampus = 'NORTH_CAMPUS',
   WestCampus = 'WEST_CAMPUS',
   Collegetown = 'COLLEGETOWN',
-  IthacaCommons = 'IthacaCommons',
-  Any = 'Any',
+  IthacaCommons = 'ITHACA_COMMONS',
+  Any = 'ANY',
 }
 
 export enum AchievementType {
@@ -23,7 +23,7 @@ export interface AchievementDto {
   name: string;
   description: string;
   imageUrl: string;
-  locationType: LocationType;
+  locationType: AchievementLocationType;
   achievementType: AchievementType;
   organizations: string[];
 }
