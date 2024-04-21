@@ -42,7 +42,7 @@ type LoginEnrollmentTypeDto =
   | "ALUMNI"
   | "GUEST";
 
-export type ChallengeLocationDto =
+type ChallengeLocationDto =
   | "ENG_QUAD"
   | "ARTS_QUAD"
   | "AG_QUAD"
@@ -52,7 +52,7 @@ export type ChallengeLocationDto =
   | "ITHACA_COMMONS"
   | "ANY";
 
-export type EventCategoryDto =
+type EventCategoryDto =
   | "FOOD"
   | "NATURE"
   | "HISTORICAL"
@@ -96,8 +96,8 @@ export interface AchievementTrackerDto {
 
 export interface LoginDto {
   idToken: string;
-  lat: number;
-  long: number;
+  latF: number;
+  longF: number;
   username?: string;
   year?: string;
   aud?: LoginAudDto;
