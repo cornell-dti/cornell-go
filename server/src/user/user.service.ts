@@ -169,7 +169,7 @@ export class UserService {
           .cleanProfanityIsh(
             user.username
               ?.substring(0, 128)
-              ?.replaceAll(/[^_A-z0-9]/g, ' ')
+              ?.replaceAll(/[^_A-Za-z0-9]/g, ' ')
               ?.replaceAll('_', ' '),
           )
           .replaceAll('*', '_')
