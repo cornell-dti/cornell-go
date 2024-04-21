@@ -132,7 +132,6 @@ class _ChallengesPageState extends State<ChallengesPage> {
                     if (curEvent != null) events.add(curEvent);
                   }
                   for (EventDto event in events) {
-                    print(event);
                     var tracker = trackerModel.trackerByEventId(event.id);
                     var numberCompleted = tracker?.prevChallenges?.length ?? 0;
                     var complete =

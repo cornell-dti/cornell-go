@@ -160,7 +160,6 @@ class _JourneysPageState extends State<JourneysPage> {
                     DateTime endtime = HttpDate.parse(event.endTime ?? "");
 
                     Duration timeTillExpire = endtime.difference(now);
-                    print(event.name);
                     eventCells.add(
                       StreamBuilder(
                         stream:
