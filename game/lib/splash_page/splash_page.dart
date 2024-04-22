@@ -13,6 +13,8 @@ class SplashPageWidget extends StatelessWidget {
   final scaffoldKey = GlobalKey<ScaffoldState>();
   @override
   Widget build(BuildContext context) {
+    final client = Provider.of<ApiClient>(context);
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
@@ -31,45 +33,61 @@ class SplashPageWidget extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Consumer<ApiClient>(
-                  builder: (context, apiClient, child) {
-                    return TextButton(
-                      style: ButtonStyle(
-                          backgroundColor:
-                              MaterialStatePropertyAll<Color>(Colors.white),
-                          fixedSize:
-                              MaterialStatePropertyAll<Size>(Size(250, 50)),
-                          shape: MaterialStatePropertyAll<OutlinedBorder>(
-                              RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10.0)))),
-                      onPressed: () async {
-                        final GoogleSignInAccount? account =
-                            await apiClient.connectGoogle();
-                        if (account == null) {
-                          displayToast("An error occured while signing you up.",
-                              Status.error);
-                        } else {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => RegisterPageWidget(
-                                  user: account, idToken: null),
-                            ),
-                          );
+                  builder: (context, apiClient, child) => StreamBuilder(
+                      stream: client.clientApi.connectedStream,
+                      builder: (context, connSnapshot) {
+                        if (connSnapshot.hasData) {
+                          print("Got conn");
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            print("Got conn2");
+                            Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => BottomNavBar()));
+                            displayToast("Signed in!", Status.success);
+                          });
                         }
-                      },
-                      child: Container(
-                        width: 255,
-                        height: 50,
-                        child: Align(
-                          alignment: Alignment.center,
-                          child: Text("Cornell Login",
-                              style: TextStyle(
-                                  color: Color.fromARGB(255, 93, 100, 112),
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w500)),
-                        ),
-                      ),
-                    );
-                  },
+
+                        return TextButton(
+                          style: ButtonStyle(
+                              backgroundColor:
+                                  MaterialStatePropertyAll<Color>(Colors.white),
+                              fixedSize:
+                                  MaterialStatePropertyAll<Size>(Size(250, 50)),
+                              shape: MaterialStatePropertyAll<OutlinedBorder>(
+                                  RoundedRectangleBorder(
+                                      borderRadius:
+                                          BorderRadius.circular(10.0)))),
+                          onPressed: () async {
+                            final GoogleSignInAccount? account =
+                                await apiClient.connectGoogle();
+                            if (account == null) {
+                              displayToast(
+                                  "An error occured while signing you up.",
+                                  Status.error);
+                            } else {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => RegisterPageWidget(
+                                      user: account, idToken: null),
+                                ),
+                              );
+                            }
+                          },
+                          child: Container(
+                            width: 255,
+                            height: 50,
+                            child: Align(
+                              alignment: Alignment.center,
+                              child: Text("Cornell Login",
+                                  style: TextStyle(
+                                      color: Color.fromARGB(255, 93, 100, 112),
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w500)),
+                            ),
+                          ),
+                        );
+                      }),
                 ),
                 SizedBox(height: 16),
                 Row(children: <Widget>[
@@ -96,8 +114,6 @@ class SplashPageWidget extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(10.0)))),
                     onPressed: () async {
                       final String? id = await getId();
-                      print("GOT ID");
-                      print(id);
                       final endpoint_string = API_URL + "/device-login";
                       final connectionResult = await client.connect(
                           id!, Uri.parse(endpoint_string), "GUEST", "", "");
@@ -105,15 +121,6 @@ class SplashPageWidget extends StatelessWidget {
                       if (connectionResult == null) {
                         displayToast("An error occurred while signing you up!",
                             Status.error);
-                      } else {
-                        //Connect to home page here.
-                        print("Connection result:");
-                        print(connectionResult.body);
-                        displayToast("Signed in!", Status.success);
-                        Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => BottomNavBar()));
                       }
                     },
                     child: Container(
