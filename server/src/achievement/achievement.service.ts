@@ -65,11 +65,13 @@ export class AchievementService {
       (await this.prisma.organization.count({
         where: {
           AND: [
-            { id: achievement.initialOrganizationId ?? '' },
             accessibleBy(ability, Action.Update).Organization,
+            { id: achievement.initialOrganizationId ?? '' },
           ],
         },
       })) > 0;
+    console.log(canUpdateOrg);
+
     const canUpdateAch =
       (await this.prisma.achievement.count({
         where: {
@@ -80,17 +82,16 @@ export class AchievementService {
         },
       })) > 0;
 
-    const assignData = {
-      requiredPoints: achievement.requiredPoints,
-      name: achievement.name?.substring(0, 2048),
-      description: achievement.description?.substring(0, 2048),
-      imageUrl: achievement.imageUrl?.substring(0, 2048),
-      locationType: achievement.locationType as LocationType,
-      achievementType: achievement.achievementType as AchievementTypeDto,
-    };
-
     if (ach && canUpdateAch) {
-      const updateData = await this.abilityFactory.filterInaccessible(
+      const assignData = {
+        requiredPoints: achievement.requiredPoints,
+        name: achievement.name?.substring(0, 2048),
+        description: achievement.description?.substring(0, 2048),
+        imageUrl: achievement.imageUrl?.substring(0, 2048),
+        locationType: achievement.locationType as LocationType,
+        achievementType: achievement.achievementType as AchievementTypeDto,
+      };
+      const data = await this.abilityFactory.filterInaccessible(
         ach.id,
         assignData,
         'Achievement',
@@ -101,22 +102,22 @@ export class AchievementService {
 
       ach = await this.prisma.achievement.update({
         where: { id: ach.id },
-        data: updateData,
+        data,
       });
     } else if (!ach && canUpdateOrg) {
       const data = {
         name:
-          assignData.name?.substring(0, 2048) ?? defaultAchievementData.name,
+          achievement.name?.substring(0, 2048) ?? defaultAchievementData.name,
         description:
-          assignData.description?.substring(0, 2048) ??
+          achievement.description?.substring(0, 2048) ??
           defaultAchievementData.description,
         imageUrl:
-          assignData.imageUrl?.substring(0, 2048) ??
+          achievement.imageUrl?.substring(0, 2048) ??
           defaultAchievementData.imageUrl,
-        locationType: assignData.locationType as LocationType,
-        achievementType: assignData.achievementType as AchievementTypeDto,
+        locationType: achievement.locationType as LocationType,
+        achievementType: achievement.achievementType as AchievementTypeDto,
         // eventIndex: assignData.eventId ?? 0, // check
-        requiredPoints: assignData.requiredPoints ?? 0,
+        requiredPoints: achievement.requiredPoints ?? 0,
       };
 
       ach = await this.prisma.achievement.create({
@@ -145,11 +146,6 @@ export class AchievementService {
       await this.prisma.achievement.delete({
         where: { id: achievementId },
       });
-      await this.prisma.achievementTracker.delete({
-        where: {
-          id: achievementId,
-        },
-      }); //should this automatically delete?
       console.log(`Deleted achievement ${achievementId}`);
       return true;
     }
@@ -200,50 +196,4 @@ export class AchievementService {
     };
   }
 
-  /** tracking functions; not yet completed */
-
-  // /** Creates an achievement tracker */
-  // async createAchievementTracker(user: User, achievementId: string) {
-  //   const existing = await this.prisma.achievementTracker.findFirst({
-  //     where: { userId: user.id, achievementId },
-  //   });
-
-  //   if (existing) return;
-
-  //   const progress = await this.prisma.achievementTracker.create({
-  //     data: {
-  //       userId: user.id,
-  //       progress: 0,
-  //       achievementId,
-  //     },
-  //   });
-
-  //   return progress;
-  // }
-
-  // // async getAchievementTrackerById
-
-  // async dtoForAchievementTracker(tracker: AchievementTracker): Promise<AchievementTrackerDto> {
-  //   return {
-  //     userId: tracker.userId,
-  //     progress: tracker.progress,
-  //     achievementId: tracker.achievementId,
-  //     dateComplete: tracker.dateComplete?.toISOString(),
-  //   };
-  // }
-
-  // /** Emits & updates an achievement tracker */
-  // async emitUpdateAchievementTracker(tracker: AchievementTracker, target?: User) {
-  //   const dto = await this.dtoForAchievementTracker(tracker);
-
-  //   await this.clientService.sendProtected(
-  //     'updateAchievementTrackerData',
-  //     target?.id ?? tracker.userId,
-  //     dto,
-  //     {
-  //       id: dto.achievementId,
-  //       subject: 'AchievementTracker',
-  //     },
-  //   );
-  // }
 }

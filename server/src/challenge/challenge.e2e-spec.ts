@@ -35,7 +35,7 @@ describe('ChallengeModule E2E', () => {
   let abilityFactory: CaslAbilityFactory;
   let fullAbility: AppAbility;
 
-  /** beforeAll runs before anything else, add new users and prerequesites to tests
+  /** beforeAll runs before anything else, add new users and prerequisites to tests
    * afterAll runs after all the tests, use it to remove lingering values in the database */
   beforeAll(async () => {
     moduleRef = await Test.createTestingModule({
