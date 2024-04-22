@@ -145,14 +145,14 @@ export class ServerApi {
   }
 
   onUpdateAchievementData(
-    callback: (data: dto.UpdateAchievementDataDto) => void,
+    callback: (data: dto.UpdateAchievementDataDto) => void
   ) {
     this.socket.removeAllListeners("updateAchievementData");
     this.socket.on("updateAchievementData", (data) => callback(data));
   }
 
   onUpdateAchievementTrackerData(
-    callback: (data: dto.AchievementTrackerDto) => void,
+    callback: (data: dto.AchievementTrackerDto) => void
   ) {
     this.socket.removeAllListeners("updateAchievementTrackerData");
     this.socket.on("updateAchievementTrackerData", (data) => callback(data));
@@ -184,7 +184,7 @@ export class ServerApi {
   }
 
   onUpdateOrganizationData(
-    callback: (data: dto.UpdateOrganizationDataDto) => void,
+    callback: (data: dto.UpdateOrganizationDataDto) => void
   ) {
     this.socket.removeAllListeners("updateOrganizationData");
     this.socket.on("updateOrganizationData", (data) => callback(data));

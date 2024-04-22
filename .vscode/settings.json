@@ -1,5 +1,7 @@
 {
   "typescript.preferences.importModuleSpecifier": "relative",
-  "githubPullRequests.ignoredPullRequestBranches": ["master"],
+  "githubPullRequests.ignoredPullRequestBranches": [
+    "master"
+  ],
   "typescript.tsdk": "node_modules/typescript/lib"
 }

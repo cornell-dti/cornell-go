@@ -1,5 +1,10 @@
 {
-  "ExpandedNodes": ["", "\\game", "\\game\\lib", "\\game\\test"],
+  "ExpandedNodes": [
+    "",
+    "\\game",
+    "\\game\\lib",
+    "\\game\\test"
+  ],
   "SelectedNode": "\\game\\lib\\main.dart",
   "PreviewInSolutionExplorer": false
 }

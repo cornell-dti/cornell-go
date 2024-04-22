@@ -14,9 +14,10 @@ const ModalBackground = styled.div<{ opacity: number }>`
   transition: opacity 0.15s;
   overflow-y: auto;
 
-  ${(props) => css`
-    opacity: ${props.opacity};
-  `}
+  ${(props) =>
+    css`
+      opacity: ${props.opacity};
+    `}
 `;
 
 const ModalLayout = styled.div`
@@ -96,7 +97,7 @@ export function Modal(props: {
           </ModalButtonPanel>
         </ModalLayout>
       </ModalBackground>,
-      document.getElementById("modal-root")!,
+      document.getElementById("modal-root")!
     );
   }
   return <></>;

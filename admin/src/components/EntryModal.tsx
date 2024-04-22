@@ -75,7 +75,7 @@ function OptionEntryFormBox(props: { form: OptionEntryForm }) {
         value={val}
         onChange={(e) =>
           setVal(
-            props.form.options[(props.form.value = e.target.selectedIndex)],
+            props.form.options[(props.form.value = e.target.selectedIndex)]
           )
         }
       >
@@ -111,7 +111,7 @@ function DateEntryFormBox(props: { form: DateEntryForm }) {
 
   useEffect(
     () => setVal(props.form.date.toISOString().slice(0, -1)),
-    [props.form],
+    [props.form]
   );
 
   return (
@@ -175,7 +175,7 @@ function DraggableMarker(props: {
         }
       },
     }),
-    [],
+    []
   );
 
   return (

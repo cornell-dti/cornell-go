@@ -76,7 +76,7 @@ function makeForm() {
 function fromForm(
   form: EntryForm[],
   id: string,
-  oldDto: OrganizationDto,
+  oldDto: OrganizationDto
 ): OrganizationDto {
   return {
     ...oldDto,
@@ -176,7 +176,7 @@ export function Organizations() {
         .sort(
           (a, b) =>
             compareTwoStrings(b.name ?? "", query) -
-            compareTwoStrings(a.name ?? "", query),
+            compareTwoStrings(a.name ?? "", query)
         )
         .map((org) => (
           <OrganizationCard
@@ -207,7 +207,7 @@ export function Organizations() {
                       characterLimit: 256,
                       value: "",
                     },
-                  ] as EntryForm[],
+                  ] as EntryForm[]
               );
               setOldDto(org);
               setAddManagerModalOpen(true);

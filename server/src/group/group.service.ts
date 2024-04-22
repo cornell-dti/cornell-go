@@ -281,8 +281,9 @@ export class GroupService {
 
     const memberDtos = await Promise.all(
       members.map(async mem => {
-        const tracker =
-          await this.eventService.getCurrentEventTrackerForUser(mem);
+        const tracker = await this.eventService.getCurrentEventTrackerForUser(
+          mem,
+        );
         return {
           id: mem.id,
           name: mem.username,
