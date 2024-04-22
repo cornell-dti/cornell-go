@@ -30,7 +30,7 @@ export interface UpdateAchievementDataDto {
   achievement: AchievementDto;
   deleted: boolean;
 }
-
+/** DTO for requestAchievementData */
 export interface RequestAchievementDataDto {
   achievements: string[];
 }

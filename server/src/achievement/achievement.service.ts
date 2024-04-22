@@ -70,7 +70,6 @@ export class AchievementService {
           ],
         },
       })) > 0;
-    console.log(canUpdateOrg);
 
     const canUpdateAch =
       (await this.prisma.achievement.count({

@@ -67,7 +67,6 @@ export class AchievementGateway {
     @CallingUser() user: User,
     @MessageBody() data: UpdateAchievementDataDto,
   ) {
-    // TODO: need to change organizations when removing achievement
     const achievement = await this.achievementService.getAchievementFromId(
       data.achievement.id,
     );

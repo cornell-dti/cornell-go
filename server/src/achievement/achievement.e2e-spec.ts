@@ -40,6 +40,9 @@ describe('AchievementModule E2E', () => {
   let fullAbility: AppAbility;
   let orgUsage: OrganizationSpecialUsage;
 
+  /** beforeAll runs before anything else. It adds new users and prerequisites.
+   * afterAll runs after all the tests. It removes lingering values in the database.
+   */
   beforeAll(async () => {
     moduleRef = await Test.createTestingModule({
       imports: [AppModule],
@@ -193,5 +196,14 @@ describe('AchievementModule E2E', () => {
       });
       expect(achres).toEqual(null);
     });
+  });
+
+  afterAll(async () => {
+    await prisma.user.delete({
+      where: {
+        id: user.id,
+      },
+    });
+    await app.close();
   });
 });
