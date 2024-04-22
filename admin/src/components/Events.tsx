@@ -57,8 +57,8 @@ function EventCard(props: {
     props.event.difficulty === "Easy"
       ? "Easy"
       : props.event.difficulty === "Normal"
-      ? "Normal"
-      : "Hard";
+        ? "Normal"
+        : "Hard";
 
   let categoryInput = props.event.category as string;
   const categoryType =
@@ -154,8 +154,8 @@ function fromForm(form: EntryForm[], id: string): EventDto {
       (form[5] as OptionEntryForm).value === 0
         ? EventDifficultyDto.Easy
         : (form[5] as OptionEntryForm).value === 1
-        ? EventDifficultyDto.Normal
-        : EventDifficultyDto.Hard,
+          ? EventDifficultyDto.Normal
+          : EventDifficultyDto.Hard,
 
     latitudeF: 0,
     longitudeF: 0,
@@ -284,14 +284,14 @@ export function Events() {
         serverData.organizations
           .get(serverData.selectedOrg)
           ?.events?.map((evId: string) => serverData.events.get(evId)!)
-          .filter((ev?: EventDto) => !!ev) ?? []
+          .filter((ev?: EventDto) => !!ev) ?? [],
       )
         .sort(
           (a: EventDto, b: EventDto) =>
             compareTwoStrings(b.name ?? "", query) -
             compareTwoStrings(a.name ?? "", query) +
             compareTwoStrings(b.description ?? "", query) -
-            compareTwoStrings(a.description ?? "", query)
+            compareTwoStrings(a.description ?? "", query),
         )
         .map((ev) => (
           <EventCard

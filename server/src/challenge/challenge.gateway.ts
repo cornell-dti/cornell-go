@@ -90,9 +90,8 @@ export class ChallengeGateway {
   ) {
     if (await this.challengeService.completeChallenge(user, data.challengeId)) {
       const group = await this.groupService.getGroupForUser(user);
-      const tracker = await this.eventService.getCurrentEventTrackerForUser(
-        user,
-      );
+      const tracker =
+        await this.eventService.getCurrentEventTrackerForUser(user);
 
       await this.groupService.emitUpdateGroupData(group, false);
       await this.eventService.emitUpdateEventTracker(tracker);

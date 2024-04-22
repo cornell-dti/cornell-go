@@ -19,16 +19,25 @@ const tsDtoCode = (0, tsgen_1.genTsDtoFile)(dtos);
 const tsApiCode = (0, tsgen_1.getAdminApiFile)(apis);
 const dartClientApiCode = (0, dartgen_1.getDartClientApiFile)(apis);
 const dartServerApiCode = (0, dartgen_1.getDartServerApiFile)(apis);
-(0, fs_1.writeFileSync)(flutterDtoPath, dartDtoCode, { encoding: "utf8", flag: "w" });
-(0, fs_1.writeFileSync)(adminDtoPath, tsDtoCode, { encoding: "utf8", flag: "w" });
-(0, fs_1.writeFileSync)(adminApiPath, tsApiCode, { encoding: "utf8", flag: "w" });
+(0, fs_1.writeFileSync)(flutterDtoPath, dartDtoCode, {
+  encoding: "utf8",
+  flag: "w",
+});
+(0, fs_1.writeFileSync)(adminDtoPath, tsDtoCode, {
+  encoding: "utf8",
+  flag: "w",
+});
+(0, fs_1.writeFileSync)(adminApiPath, tsApiCode, {
+  encoding: "utf8",
+  flag: "w",
+});
 (0, fs_1.writeFileSync)(flutterClientApiPath, dartClientApiCode, {
-    encoding: "utf8",
-    flag: "w",
+  encoding: "utf8",
+  flag: "w",
 });
 (0, fs_1.writeFileSync)(flutterServerApiPath, dartServerApiCode, {
-    encoding: "utf8",
-    flag: "w",
+  encoding: "utf8",
+  flag: "w",
 });
 (0, process_1.chdir)("./game");
 (0, child_process_1.execSync)("dart format lib");

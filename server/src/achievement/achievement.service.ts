@@ -195,5 +195,4 @@ export class AchievementService {
       achievementType: ach.achievementType as AchievementTypeDto,
     };
   }
-
 }

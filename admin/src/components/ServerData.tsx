@@ -52,7 +52,7 @@ export function ServerDataProvider(props: { children: ReactNode }) {
 
   const sock = useMemo(
     () => new ServerApi(connection.connection!),
-    [connection]
+    [connection],
   );
 
   const [serverData, setServerData] = useState(() => ({ ...defaultData }));
@@ -118,7 +118,7 @@ export function ServerDataProvider(props: { children: ReactNode }) {
         sock.updateOrganizationData({ organization: { id }, deleted: true });
       },
     }),
-    [serverData, setServerData, sock]
+    [serverData, setServerData, sock],
   );
 
   useEffect(() => {
@@ -142,13 +142,13 @@ export function ServerDataProvider(props: { children: ReactNode }) {
         sock.requestChallengeData({
           challenges:
             (data.event as EventDto).challenges?.filter(
-              (chal: string) => !(chal in oldChallenges)
+              (chal: string) => !(chal in oldChallenges),
             ) ?? [],
         });
 
         serverData.events.set(
           (data.event as EventDto).id,
-          data.event as EventDto
+          data.event as EventDto,
         );
       }
 
@@ -160,7 +160,7 @@ export function ServerDataProvider(props: { children: ReactNode }) {
       } else {
         serverData.challenges.set(
           (data.challenge as ChallengeDto).id,
-          data.challenge as ChallengeDto
+          data.challenge as ChallengeDto,
         );
       }
 
@@ -181,7 +181,7 @@ export function ServerDataProvider(props: { children: ReactNode }) {
       } else {
         serverData.groups.set(
           (data.group as GroupDto).id,
-          data.group as GroupDto
+          data.group as GroupDto,
         );
       }
 
@@ -193,18 +193,18 @@ export function ServerDataProvider(props: { children: ReactNode }) {
       } else {
         const oldEvents =
           serverData.organizations.get(
-            (data.organization as OrganizationDto).id
+            (data.organization as OrganizationDto).id,
           )?.events ?? [];
 
         sock.requestEventData({
           events: (data.organization as OrganizationDto).events?.filter(
-            (ev: string) => !(ev in oldEvents)
+            (ev: string) => !(ev in oldEvents),
           ),
         });
 
         serverData.organizations.set(
           (data.organization as OrganizationDto).id,
-          data.organization as OrganizationDto
+          data.organization as OrganizationDto,
         );
       }
 

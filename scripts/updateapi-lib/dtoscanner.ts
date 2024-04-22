@@ -17,7 +17,7 @@ export function getDtoDefinitions(): DtoDefs {
     const enums = file.getEnums();
 
     console.log(
-      `${file.getBaseName()}: ${enums.length} enums, ${interfs.length} DTOs`
+      `${file.getBaseName()}: ${enums.length} enums, ${interfs.length} DTOs`,
     );
 
     for (const enum_ of enums) {
@@ -78,7 +78,7 @@ export function getDtoDefinitions(): DtoDefs {
             enumName,
             propType
               .getUnionTypes()
-              .map((t) => t.getLiteralValue()?.toString() ?? "")
+              .map((t) => t.getLiteralValue()?.toString() ?? ""),
           );
 
           baseDto.set(propName, [
@@ -108,8 +108,8 @@ export function getDtoDefinitions(): DtoDefs {
               ? "ENUM_DTO[]"
               : "DEPENDENT_DTO[]"
             : isEnum
-            ? "ENUM_DTO"
-            : "DEPENDENT_DTO";
+              ? "ENUM_DTO"
+              : "DEPENDENT_DTO";
 
           baseDto.set(propName, [name, fieldType, isOptional]);
         }

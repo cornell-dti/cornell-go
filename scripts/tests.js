@@ -1,10 +1,18 @@
 const { execSync } = require("child_process");
-const { rmSync, existsSync, mkdirSync, readdirSync, lstatSync, copyFileSync } = require("fs");
+const {
+  rmSync,
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  lstatSync,
+  copyFileSync,
+} = require("fs");
 const path = require("path");
 
-function copyFolderSync(from, to) { // https://stackoverflow.com/questions/13786160/copy-folder-recursively-in-node-js
+function copyFolderSync(from, to) {
+  // https://stackoverflow.com/questions/13786160/copy-folder-recursively-in-node-js
   mkdirSync(to);
-  readdirSync(from).forEach(element => {
+  readdirSync(from).forEach((element) => {
     if (lstatSync(path.join(from, element)).isFile()) {
       copyFileSync(path.join(from, element), path.join(to, element));
     } else {
@@ -14,7 +22,7 @@ function copyFolderSync(from, to) { // https://stackoverflow.com/questions/13786
 }
 
 async function main() {
-  if (process.argv.length < 3 || !(["unit", "e2e"].includes(process.argv[2]))) {
+  if (process.argv.length < 3 || !["unit", "e2e"].includes(process.argv[2])) {
     console.log("USAGE: npm run tests -- <unit | e2e>");
     return;
   }
@@ -28,7 +36,9 @@ async function main() {
   if (testType === "UNIT") {
     try {
       console.log("Executing unit tests");
-      execSync(`docker compose up --no-deps --build server --exit-code-from server`);
+      execSync(
+        `docker compose up --no-deps --build server --exit-code-from server`,
+      );
       console.log("Tests ran successfully!");
     } catch (err) {
       console.log("Test execution failed!");
@@ -50,7 +60,9 @@ async function main() {
       console.log("Setting up test database");
       execSync("npm run dbreset");
       console.log("Executing e2e tests");
-      execSync(`docker compose up --build --no-attach postgres --exit-code-from server`);
+      execSync(
+        `docker compose up --build --no-attach postgres --exit-code-from server`,
+      );
       console.log("Tests ran successfully!");
     } catch (err) {
       console.log("Test execution failed!");
