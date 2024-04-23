@@ -1,10 +1,10 @@
 import { ChallengeLocationDto } from '../challenge/challenge.dto';
 
 export enum AchievementTypeDto {
-  TotalPoints = 'TOTAL_POINTS',
-  TotalChallenges = 'TOTAL_CHALLENGES',
-  TotalJourneys = 'TOTAL_JOURNEYS',
-  TotalChallengesOrJourneys = 'TOTAL_CHALLENGES_OR_JOURNEYS',
+  TOTAL_POINTS = 'TOTAL_POINTS',
+  TOTAL_CHALLENGES = 'TOTAL_CHALLENGES',
+  TOTAL_JOURNEYS = 'TOTAL_JOURNEYS',
+  TOTAL_CHALLENGES_OR_JOURNEYS = 'TOTAL_CHALLENGES_OR_JOURNEYS',
 }
 
 export interface AchievementDto {

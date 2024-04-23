@@ -114,8 +114,8 @@ describe('AchievementModule E2E', () => {
         description: 'ach dto',
         requiredPoints: 1,
         imageUrl: 'url',
-        locationType: ChallengeLocationDto.EngQuad,
-        achievementType: AchievementTypeDto.TotalChallengesOrJourneys,
+        locationType: ChallengeLocationDto.ENG_QUAD,
+        achievementType: AchievementTypeDto.TOTAL_CHALLENGES_OR_JOURNEYS,
         initialOrganizationId: orgId,
       };
 
@@ -166,8 +166,8 @@ describe('AchievementModule E2E', () => {
         description: 'ach dto',
         requiredPoints: 1,
         imageUrl: 'update test',
-        locationType: ChallengeLocationDto.EngQuad,
-        achievementType: AchievementTypeDto.TotalChallengesOrJourneys,
+        locationType: ChallengeLocationDto.ENG_QUAD,
+        achievementType: AchievementTypeDto.TOTAL_CHALLENGES_OR_JOURNEYS,
         initialOrganizationId: orgId,
       };
 

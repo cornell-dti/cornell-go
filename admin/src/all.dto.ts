@@ -2,10 +2,10 @@
 // IF YOU MODIFY THIS FILE, MAKE SURE TO ALSO MODIFY THE updateapi SCRIPT!
 // OTHERWISE YOUR CHANGES MAY BE OVERWRITTEN!
 export enum AchievementTypeDto {
-  TotalPoints = "TotalPoints",
-  TotalChallenges = "TotalChallenges",
-  TotalJourneys = "TotalJourneys",
-  TotalChallengesOrJourneys = "TotalChallengesOrJourneys",
+  TOTAL_POINTS = "TOTAL_POINTS",
+  TOTAL_CHALLENGES = "TOTAL_CHALLENGES",
+  TOTAL_JOURNEYS = "TOTAL_JOURNEYS",
+  TOTAL_CHALLENGES_OR_JOURNEYS = "TOTAL_CHALLENGES_OR_JOURNEYS",
 }
 
 export enum LoginAudDto {
@@ -23,14 +23,14 @@ export enum LoginEnrollmentTypeDto {
 }
 
 export enum ChallengeLocationDto {
-  EngQuad = "EngQuad",
-  ArtsQuad = "ArtsQuad",
-  AgQuad = "AgQuad",
-  NorthCampus = "NorthCampus",
-  WestCampus = "WestCampus",
-  Collegetown = "Collegetown",
-  IthacaCommons = "IthacaCommons",
-  Any = "Any",
+  ENG_QUAD = "ENG_QUAD",
+  ARTS_QUAD = "ARTS_QUAD",
+  AG_QUAD = "AG_QUAD",
+  NORTH_CAMPUS = "NORTH_CAMPUS",
+  WEST_CAMPUS = "WEST_CAMPUS",
+  COLLEGETOWN = "COLLEGETOWN",
+  ITHACA_COMMONS = "ITHACA_COMMONS",
+  ANY = "ANY",
 }
 
 export enum EventCategoryDto {

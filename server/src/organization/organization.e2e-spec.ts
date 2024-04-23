@@ -109,7 +109,7 @@ describe('OrganizationModule E2E', () => {
     exChal = (await challengeService.upsertChallengeFromDto(fullAbility, {
       id: '',
       linkedEventId: exEv.id,
-      location: ChallengeLocationDto.ArtsQuad,
+      location: ChallengeLocationDto.ARTS_QUAD,
     }))!;
 
     managerUser = await userService.register(

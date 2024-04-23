@@ -2,10 +2,10 @@
 // IF YOU MODIFY THIS FILE, MAKE SURE TO ALSO MODIFY THE updateapi SCRIPT!
 // OTHERWISE YOUR CHANGES MAY BE OVERWRITTEN!
 enum AchievementTypeDto {
-  TotalPoints,
-  TotalChallenges,
-  TotalJourneys,
-  TotalChallengesOrJourneys,
+  TOTAL_POINTS,
+  TOTAL_CHALLENGES,
+  TOTAL_JOURNEYS,
+  TOTAL_CHALLENGES_OR_JOURNEYS,
 }
 
 enum LoginAudDto {
@@ -23,14 +23,14 @@ enum LoginEnrollmentTypeDto {
 }
 
 enum ChallengeLocationDto {
-  EngQuad,
-  ArtsQuad,
-  AgQuad,
-  NorthCampus,
-  WestCampus,
-  Collegetown,
-  IthacaCommons,
-  Any,
+  ENG_QUAD,
+  ARTS_QUAD,
+  AG_QUAD,
+  NORTH_CAMPUS,
+  WEST_CAMPUS,
+  COLLEGETOWN,
+  ITHACA_COMMONS,
+  ANY,
 }
 
 enum EventCategoryDto {
