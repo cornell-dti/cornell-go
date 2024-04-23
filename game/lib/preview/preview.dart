@@ -3,6 +3,7 @@ import 'package:game/api/game_api.dart';
 import 'package:game/gameplay/gameplay_page.dart';
 import 'package:provider/provider.dart';
 import 'package:game/api/game_client_dto.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 enum PreviewType { CHALLENGE, JOURNEY }
 
@@ -97,30 +98,24 @@ class _PreviewState extends State<Preview> {
   Widget build(BuildContext context) {
     //The popup box
     return SizedBox(
-        height: MediaQuery.of(context).size.height * 0.75,
+        height: MediaQuery.of(context).size.height * 0.7,
         child: ClipRRect(
           borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20.0),
-            topRight: Radius.circular(20.0),
+            topLeft: Radius.circular(10.0),
+            topRight: Radius.circular(10.0),
           ),
 
           //Overall Container
           child: Container(
-              height: MediaQuery.of(context).size.height * 0.75,
-              width: MediaQuery.of(context).size.width,
               color: Colors.white,
               child: Column(
                 children: [
                   //Image
                   Container(
                     decoration: BoxDecoration(
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(3.0),
-                          topRight: Radius.circular(3.0),
-                        ),
                         image: DecorationImage(
                             image: AssetImage(imgPath), fit: BoxFit.cover)),
-                    height: 150,
+                    height: MediaQuery.of(context).size.height * 0.25,
                     alignment: Alignment.topCenter,
                     //drag bar icon
                     child: Row(
@@ -154,7 +149,7 @@ class _PreviewState extends State<Preview> {
                       child: Align(
                         alignment: Alignment.centerLeft,
                         child: Row(children: [
-                          Icon(Icons.tour,
+                          Icon(Icons.location_on,
                               size: 24, color: Preview.purpleColor),
                           Text(location,
                               style: TextStyle(
@@ -181,16 +176,20 @@ class _PreviewState extends State<Preview> {
                               color: Colors.black)),
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 25.0),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(description,
-                          style: TextStyle(
-                              // fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                              fontFamily: 'Poppins',
-                              color: Preview.greyColor)),
+                  Container(
+                    height: MediaQuery.of(context).size.height * 0.12,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 25.0, vertical: 8.0),
+                      child: Align(
+                        alignment: Alignment.topLeft,
+                        child: Text(description,
+                            style: TextStyle(
+                                // fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                                fontFamily: 'Poppins',
+                                color: Preview.greyColor)),
+                      ),
                     ),
                   ),
                   Padding(
@@ -228,7 +227,9 @@ class _PreviewState extends State<Preview> {
                                                   difficulty[0].toUpperCase() +
                                                       difficulty.substring(1),
                                                   style: TextStyle(
-                                                      fontSize: 12,
+                                                      fontSize: 16,
+                                                      fontWeight:
+                                                          FontWeight.w400,
                                                       color: Colors.black),
                                                 ),
                                               ),
@@ -241,32 +242,21 @@ class _PreviewState extends State<Preview> {
                                         child: Container(
                                           height: 36,
                                           alignment: Alignment.centerLeft,
-                                          child: Container(
-                                            child: Padding(
-                                              padding: const EdgeInsets.only(
-                                                  left: 8, right: 8),
-                                              child: Align(
-                                                alignment: Alignment.center,
-                                                child: Text(
-                                                  (points).toString() + "PTS",
-                                                  style: TextStyle(
-                                                      fontSize: 12,
-                                                      color: Colors.white),
-                                                ),
-                                              ),
+                                          child: Row(children: [
+                                            SvgPicture.asset(
+                                              "assets/icons/bearcoins.svg",
+                                              width: 40,
+                                              height: 40,
                                             ),
-                                            decoration: new BoxDecoration(
-                                              border: Border.all(
-                                                color: Color.fromARGB(
-                                                    255, 255, 199, 55),
-                                              ),
-                                              color: Color.fromARGB(
-                                                  255, 189, 135, 31),
-                                              borderRadius:
-                                                  BorderRadius.circular(16),
-                                              shape: BoxShape.rectangle,
-                                            ),
-                                          ),
+                                            Text(
+                                                ' ' +
+                                                    points.toString() +
+                                                    " PTS",
+                                                style: TextStyle(
+                                                    fontSize: 23,
+                                                    fontWeight: FontWeight.w500,
+                                                    color: Color(0xFFC17E19)))
+                                          ]),
                                         )),
                                   ],
                                 ),
