@@ -8,24 +8,6 @@ enum AchievementTypeDto {
   TotalChallengesOrJourneys,
 }
 
-enum AchievementLocationTypeDto {
-  ENG_QUAD,
-  ARTS_QUAD,
-  AG_QUAD,
-  NORTH_CAMPUS,
-  WEST_CAMPUS,
-  COLLEGETOWN,
-  ITHACA_COMMONS,
-  ANY,
-}
-
-enum AchievementAchievementTypeDto {
-  TOTAL_POINTS,
-  TOTAL_CHALLENGES,
-  TOTAL_JOURNEYS,
-  TOTAL_CHALLENGES_OR_JOURNEYS,
-}
-
 enum LoginAudDto {
   android,
   ios,
@@ -41,14 +23,14 @@ enum LoginEnrollmentTypeDto {
 }
 
 enum ChallengeLocationDto {
-  ENG_QUAD,
-  ARTS_QUAD,
-  AG_QUAD,
-  NORTH_CAMPUS,
-  WEST_CAMPUS,
-  COLLEGETOWN,
-  ITHACA_COMMONS,
-  ANY,
+  EngQuad,
+  ArtsQuad,
+  AgQuad,
+  NorthCampus,
+  WestCampus,
+  Collegetown,
+  IthacaCommons,
+  Any,
 }
 
 enum EventCategoryDto {
@@ -132,11 +114,10 @@ class AchievementDto {
         fields.containsKey('description') ? (fields["description"]) : null;
     imageUrl = fields.containsKey('imageUrl') ? (fields["imageUrl"]) : null;
     locationType = fields.containsKey('locationType')
-        ? (AchievementLocationTypeDto.values.byName(fields['locationType']))
+        ? (ChallengeLocationDto.values.byName(fields['locationType']))
         : null;
     achievementType = fields.containsKey('achievementType')
-        ? (AchievementAchievementTypeDto.values
-            .byName(fields['achievementType']))
+        ? (AchievementTypeDto.values.byName(fields['achievementType']))
         : null;
     initialOrganizationId = fields.containsKey('initialOrganizationId')
         ? (fields["initialOrganizationId"])
@@ -178,8 +159,8 @@ class AchievementDto {
   late String? name;
   late String? description;
   late String? imageUrl;
-  late AchievementLocationTypeDto? locationType;
-  late AchievementAchievementTypeDto? achievementType;
+  late ChallengeLocationDto? locationType;
+  late AchievementTypeDto? achievementType;
   late String? initialOrganizationId;
 }
 

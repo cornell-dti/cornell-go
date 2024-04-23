@@ -8,24 +8,6 @@ export enum AchievementTypeDto {
   TotalChallengesOrJourneys = "TotalChallengesOrJourneys",
 }
 
-export enum AchievementLocationTypeDto {
-  ENG_QUAD = "ENG_QUAD",
-  ARTS_QUAD = "ARTS_QUAD",
-  AG_QUAD = "AG_QUAD",
-  NORTH_CAMPUS = "NORTH_CAMPUS",
-  WEST_CAMPUS = "WEST_CAMPUS",
-  COLLEGETOWN = "COLLEGETOWN",
-  ITHACA_COMMONS = "ITHACA_COMMONS",
-  ANY = "ANY",
-}
-
-export enum AchievementAchievementTypeDto {
-  TOTAL_POINTS = "TOTAL_POINTS",
-  TOTAL_CHALLENGES = "TOTAL_CHALLENGES",
-  TOTAL_JOURNEYS = "TOTAL_JOURNEYS",
-  TOTAL_CHALLENGES_OR_JOURNEYS = "TOTAL_CHALLENGES_OR_JOURNEYS",
-}
-
 export enum LoginAudDto {
   android = "android",
   ios = "ios",
@@ -41,14 +23,14 @@ export enum LoginEnrollmentTypeDto {
 }
 
 export enum ChallengeLocationDto {
-  ENG_QUAD = "ENG_QUAD",
-  ARTS_QUAD = "ARTS_QUAD",
-  AG_QUAD = "AG_QUAD",
-  NORTH_CAMPUS = "NORTH_CAMPUS",
-  WEST_CAMPUS = "WEST_CAMPUS",
-  COLLEGETOWN = "COLLEGETOWN",
-  ITHACA_COMMONS = "ITHACA_COMMONS",
-  ANY = "ANY",
+  EngQuad = "EngQuad",
+  ArtsQuad = "ArtsQuad",
+  AgQuad = "AgQuad",
+  NorthCampus = "NorthCampus",
+  WestCampus = "WestCampus",
+  Collegetown = "Collegetown",
+  IthacaCommons = "IthacaCommons",
+  Any = "Any",
 }
 
 export enum EventCategoryDto {
@@ -97,8 +79,8 @@ export interface AchievementDto {
   name?: string;
   description?: string;
   imageUrl?: string;
-  locationType?: AchievementLocationTypeDto;
-  achievementType?: AchievementAchievementTypeDto;
+  locationType?: ChallengeLocationDto;
+  achievementType?: AchievementTypeDto;
   initialOrganizationId?: string;
 }
 
