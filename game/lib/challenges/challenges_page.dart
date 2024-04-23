@@ -48,27 +48,27 @@ class _ChallengesPageState extends State<ChallengesPage> {
             padding: EdgeInsets.all(30),
             child: Column(
               children: [
-                Container(
-                  height: 30,
-                  color: Color.fromARGB(51, 217, 217, 217),
-                  child: TextField(
-                    decoration: InputDecoration(
-                      prefixIcon: Icon(
-                        Icons.search,
-                        color: Color.fromARGB(204, 0, 0, 0),
-                        size: 12,
-                      ),
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(1.0))),
-                      labelText: "Search a challenge name, location, etc...",
-                      labelStyle: TextStyle(
-                        color: Color.fromARGB(76, 0, 0, 0),
-                        fontSize: 12,
-                        fontFamily: 'Lato',
-                      ),
-                    ),
-                  ),
-                ),
+                // Container(
+                //   height: 30,
+                //   color: Color.fromARGB(51, 217, 217, 217),
+                //   child: TextField(
+                //     decoration: InputDecoration(
+                //       prefixIcon: Icon(
+                //         Icons.search,
+                //         color: Color.fromARGB(204, 0, 0, 0),
+                //         size: 12,
+                //       ),
+                //       border: OutlineInputBorder(
+                //           borderRadius: BorderRadius.all(Radius.circular(1.0))),
+                //       labelText: "Search a challenge name, location, etc...",
+                //       labelStyle: TextStyle(
+                //         color: Color.fromARGB(76, 0, 0, 0),
+                //         fontSize: 12,
+                //         fontFamily: 'Lato',
+                //       ),
+                //     ),
+                //   ),
+                // ),
                 Container(
                   padding: EdgeInsets.only(top: 10, bottom: 10),
                   child: Row(
