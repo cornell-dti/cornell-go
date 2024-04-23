@@ -128,12 +128,13 @@ export class ChallengeGateway {
       data.challenge.id,
     );
 
-    if (data.deleted && challenge) {
+    if (data.deleted) {
       const ev = (await this.eventService.getEventById(
-        challenge.linkedEventId ?? '',
+        challenge?.linkedEventId ?? '',
       ))!;
 
       if (
+        !challenge ||
         !(await this.challengeService.removeChallenge(ability, challenge.id))
       ) {
         return;

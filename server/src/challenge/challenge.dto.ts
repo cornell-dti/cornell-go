@@ -4,14 +4,14 @@ export interface CompletedChallengeDto {
 }
 
 export enum ChallengeLocationDto {
-  EngQuad = 'ENG_QUAD',
-  ArtsQuad = 'ARTS_QUAD',
-  AgQuad = 'AG_QUAD',
-  NorthCampus = 'NORTH_CAMPUS',
-  WestCampus = 'WEST_CAMPUS',
-  Collegetown = 'COLLEGETOWN',
-  IthacaCommons = 'ITHACA_COMMONS',
-  Any = 'ANY',
+  ENG_QUAD = 'ENG_QUAD',
+  ARTS_QUAD = 'ARTS_QUAD',
+  AG_QUAD = 'AG_QUAD',
+  NORTH_CAMPUS = 'NORTH_CAMPUS',
+  WEST_CAMPUS = 'WEST_CAMPUS',
+  COLLEGETOWN = 'COLLEGETOWN',
+  ITHACA_COMMONS = 'ITHACA_COMMONS',
+  ANY = 'ANY',
 }
 
 export interface ChallengeDto {
