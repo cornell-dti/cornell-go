@@ -11,6 +11,7 @@ import 'package:game/model/challenge_model.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/group_model.dart';
 import 'package:game/model/tracker_model.dart';
+import 'package:game/model/achievement_model.dart';
 import 'package:game/model/user_model.dart';
 import 'package:provider/provider.dart';
 import 'package:game/journeys/filter_form.dart';
@@ -125,7 +126,18 @@ class _AchievementsPageState extends State<AchievementsPage> {
                             padding: const EdgeInsets.symmetric(horizontal: 3),
                             itemCount: eventCells.length,
                             itemBuilder: (context, index) {
-                              return eventCells[index];
+                              return ChallengeCell(
+                                  key: UniqueKey(),
+                                  eventData[index].location,
+                                  eventData[index].name,
+                                  eventData[index].lat,
+                                  eventData[index].long,
+                                  eventData[index].thumbnail,
+                                  eventData[index].complete,
+                                  eventData[index].description,
+                                  eventData[index].difficulty,
+                                  eventData[index].points,
+                                  eventData[index].eventId);
                             },
                             physics: BouncingScrollPhysics(),
                             separatorBuilder: (context, index) {
