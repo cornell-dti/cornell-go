@@ -24,6 +24,7 @@ services:
   server:
     ports:
       - "8080:80"
+      - "9229:9229"
     environment:
       NO_SSL: true
       DEVELOPMENT: true
@@ -35,6 +36,15 @@ services:
       postgres:
         condition: service_healthy
     build: .
+    develop:
+      watch:
+        - action: sync
+          path: ./server/
+          target: /app/server/
+          ignore:
+            - node_modules/
+        - action: rebuild
+          path: server/package.json
     networks:
       - reference
 networks:
