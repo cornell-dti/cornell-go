@@ -19,12 +19,18 @@ import {
 import { EventTrackerDto, UpdateEventDataDto } from '../event/event.dto';
 import { GroupInviteDto, UpdateGroupDataDto } from '../group/group.dto';
 import { UpdateOrganizationDataDto } from '../organization/organization.dto';
+import {
+  AchievementTrackerDto,
+  UpdateAchievementDataDto,
+} from '../achievement/achievement.dto';
 import { ExtractSubjectType } from '@casl/ability';
 
 export type ClientApiDef = {
   updateUserData: UpdateUserDataDto;
   updateErrorData: UpdateErrorDto;
   updateChallengeData: UpdateChallengeDataDto;
+  updateAchievementData: UpdateAchievementDataDto;
+  updateAchievementTrackerData: AchievementTrackerDto;
   updateEventTrackerData: EventTrackerDto;
   updateEventData: UpdateEventDataDto;
   updateLeaderData: UpdateLeaderDataDto;
@@ -98,7 +104,6 @@ export class ClientService {
       this.gateway.server.to(target).emit(event, dto);
     } else {
       this.gateway.server.in(target).socketsJoin(resource.id);
-
       // Find all targeted users
       const users = await this.getAffectedUsers(target);
 
@@ -106,7 +111,7 @@ export class ClientService {
         const ability = this.abilityFactory.createForUser(user);
         const accessibleObj = await this.abilityFactory.filterInaccessible(
           resource.id,
-          resource.dtoField ? (dto[resource.dtoField] as any) : dto,
+          resource.dtoField ? (dto as any)[resource.dtoField] : dto,
           resource.subject,
           ability,
           Action.Read,
