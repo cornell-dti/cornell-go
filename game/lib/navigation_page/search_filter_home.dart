@@ -39,7 +39,7 @@ class _SearchFilterBarState extends State<SearchFilterBar>
   void onSearchTextChanged(String? c) {
     setState(() {
       searchText = c ?? "";
-  });
+    });
   }
 
   @override
@@ -97,7 +97,7 @@ class _SearchFilterBarState extends State<SearchFilterBar>
                                     labelStyle: TextStyle(
                                       color: Color.fromARGB(76, 0, 0, 0),
                                       fontSize: 12,
-                                      fontFamily: 'Lato',
+                                      fontFamily: 'Poppins',
                                       backgroundColor:
                                           Color.fromARGB(255, 255, 248, 241),
                                     ),
