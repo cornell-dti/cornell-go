@@ -204,6 +204,7 @@ export class CaslAbilityFactory {
           },
         },
       },
+      eventIndex: { not: 0 }
     });
 
     can(Action.Manage, 'Challenge', {
