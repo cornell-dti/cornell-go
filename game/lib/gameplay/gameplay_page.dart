@@ -15,6 +15,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:game/model/challenge_model.dart';
 import 'gameplay_map.dart';
 import 'package:provider/provider.dart';
+
 import 'package:game/api/game_client_dto.dart';
 import 'package:game/progress_indicators/circular_progress_indicator.dart';
 import 'package:flutter/cupertino.dart';

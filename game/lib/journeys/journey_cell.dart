@@ -5,6 +5,8 @@ class JourneyCell extends StatefulWidget {
   final int locationCount;
   final String location;
   final String journeyName;
+  final double? challengeLong;
+  final double? challengeLat;
   final Image thumbnail;
   final String description;
   final int numberCompleted;
@@ -15,6 +17,8 @@ class JourneyCell extends StatefulWidget {
 
   const JourneyCell(
       this.journeyName,
+      this.challengeLat,
+      this.challengeLong,
       this.location,
       this.thumbnail,
       this.description,
@@ -30,6 +34,8 @@ class JourneyCell extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => _JourneyCellState(
       journeyName,
+      challengeLat,
+      challengeLong,
       location,
       thumbnail,
       description,
@@ -44,6 +50,8 @@ class JourneyCell extends StatefulWidget {
 class _JourneyCellState extends State<JourneyCell> {
   final int locationCount;
   final String journeyName;
+  final double? challengeLong;
+  final double? challengeLat;
   final String location;
   final Image thumbnail;
   final String description;
@@ -56,6 +64,8 @@ class _JourneyCellState extends State<JourneyCell> {
 
   _JourneyCellState(
     this.journeyName,
+    this.challengeLat,
+    this.challengeLong,
     this.location,
     this.thumbnail,
     this.description,
@@ -81,8 +91,8 @@ class _JourneyCellState extends State<JourneyCell> {
               builder: (
                 BuildContext context,
               ) =>
-                  Preview(journeyName, description, difficulty, points,
-                      PreviewType.JOURNEY, location, id,
+                  Preview(journeyName, challengeLat, challengeLong, description,
+                      difficulty, points, PreviewType.JOURNEY, location, id,
                       locationCount: locationCount,
                       numberCompleted: numberCompleted));
         },

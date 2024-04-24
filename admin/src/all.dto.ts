@@ -166,9 +166,11 @@ export interface UpdateErrorDto {
   message: string;
 }
 
-export interface RequestAllEventDataDto {
-  offset: number;
-  count: number;
+export interface RequestFilteredEventsDto {
+  difficulty: string[];
+  location: string[];
+  category: string[];
+  filterId: string[];
 }
 
 export interface RequestEventDataDto {

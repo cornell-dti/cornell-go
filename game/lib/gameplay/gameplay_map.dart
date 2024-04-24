@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:game/api/geopoint.dart';
 import 'package:geolocator/geolocator.dart';
@@ -18,9 +17,6 @@ import 'package:game/model/event_model.dart';
 import 'package:game/model/tracker_model.dart';
 import 'package:game/model/group_model.dart';
 import 'package:game/model/challenge_model.dart';
-
-import 'package:provider/provider.dart';
-import 'package:velocity_x/velocity_x.dart';
 
 class GameplayMap extends StatefulWidget {
   final GeoPoint targetLocation;

@@ -11,20 +11,11 @@ import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platf
 
 // api and widget imports
 import 'package:game/api/game_api.dart';
-import 'package:game/gameplay/gameplay_page.dart';
-import 'package:game/gameplay/gameplay_map.dart';
-import 'package:game/global_leaderboard/global_leaderboard_widget.dart';
-import 'package:game/journeys/journeys_page.dart';
 import 'package:game/model/challenge_model.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/group_model.dart';
 import 'package:game/model/tracker_model.dart';
 import 'package:game/model/user_model.dart';
-import 'package:game/profile/achievement_cell.dart';
-import 'package:game/profile/completed_cell.dart';
-import 'package:game/profile/profile_page.dart';
-import 'package:game/profile/settings_page.dart';
-import 'package:game/register_page/register_page.dart';
 import 'package:game/navigation_page/bottom_navbar.dart';
 import 'package:game/splash_page/splash_page.dart';
 import 'package:game/widget/game_widget.dart';

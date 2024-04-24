@@ -277,7 +277,7 @@ export function getDartServerApiFile(apiDefs: ApiDefs) {
     void _invokeWithRefresh(String ev, Map<String, dynamic> data) {
       _refreshEv = ev;
       _refreshDat = data;
-      print(ev);
+      //print(ev);
       _socket.emit(ev, data);
     }
   `;
