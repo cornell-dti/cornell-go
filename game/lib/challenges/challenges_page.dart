@@ -20,21 +20,22 @@ class ChallengesPage extends StatefulWidget {
   List<String>? myCategories;
   String? mySearchText;
 
-   ChallengesPage({Key? key, String? difficulty,
+  ChallengesPage(
+      {Key? key,
+      String? difficulty,
       List<String>? locations,
       List<String>? categories,
       String? searchText})
- : super(key: key)
-  {
+      : super(key: key) {
     myDifficulty = difficulty;
     myLocations = locations;
     myCategories = categories;
     mySearchText = searchText;
   }
- 
 
   @override
-  State<ChallengesPage> createState() => _ChallengesPageState(myDifficulty, myLocations, myCategories,mySearchText);
+  State<ChallengesPage> createState() => _ChallengesPageState(
+      myDifficulty, myLocations, myCategories, mySearchText);
 }
 
 class _ChallengesPageState extends State<ChallengesPage> {
@@ -42,13 +43,12 @@ class _ChallengesPageState extends State<ChallengesPage> {
   List<String> selectedLocations = [];
   String selectedDifficulty = '';
   String? mySearchText;
-  _ChallengesPageState(
-    String? difficulty, List<String>? locations, List<String>? categories,String? searchText) {
+  _ChallengesPageState(String? difficulty, List<String>? locations,
+      List<String>? categories, String? searchText) {
     selectedDifficulty = difficulty ?? '';
     selectedLocations = locations ?? [];
     selectedCategories = categories ?? [];
-        mySearchText = searchText ?? '';
-
+    mySearchText = searchText ?? '';
   }
 
   // // Callback function to receive updated state values from the child
@@ -187,32 +187,57 @@ class _ChallengesPageState extends State<ChallengesPage> {
                       continue;
                     }
                     final challengeLocation = challenge.location?.name ?? "";
+                    final challengeName = challenge.name ?? "";
 
-                    bool eventMatchesDifficultySelection;
-                    bool eventMatchesCategorySelection;
-                    bool eventMatchesLocationSelection;
+                    bool eventMatchesDifficultySelection = true;
+                    bool eventMatchesCategorySelection = true;
+                    bool eventMatchesLocationSelection = true;
+                    bool eventMatchesSearchText = true;
+                    String? searchTerm = widget.mySearchText;
 
-                    if (widget.myDifficulty?.length == 0 ||
-                        selectedDifficulty == event.difficulty?.name)
-                      eventMatchesDifficultySelection = true;
-                    else
-                      eventMatchesDifficultySelection = false;
+                    if (searchTerm?.length == 0) {
+                      eventMatchesSearchText = true;
+                      if (widget.myDifficulty?.length == 0 ||
+                          selectedDifficulty == event.difficulty?.name)
+                        eventMatchesDifficultySelection = true;
+                      else
+                        eventMatchesDifficultySelection = false;
 
-                    if (widget.myLocations?.isNotEmpty ?? false) {
-                      if (selectedLocations.contains(challengeLocation))
+                      if (widget.myLocations?.isNotEmpty ?? false) {
+                        if (selectedLocations.contains(challengeLocation))
+                          eventMatchesLocationSelection = true;
+                        else
+                          eventMatchesLocationSelection = false;
+                      } else
                         eventMatchesLocationSelection = true;
-                      else
-                        eventMatchesLocationSelection = false;
-                    } else
-                      eventMatchesLocationSelection = true;
 
-                    if (widget.myCategories?.isNotEmpty ?? false) {
-                      if (selectedCategories.contains(event.category?.name))
+                      if (widget.myCategories?.isNotEmpty ?? false) {
+                        if (selectedCategories.contains(event.category?.name))
+                          eventMatchesCategorySelection = true;
+                        else
+                          eventMatchesCategorySelection = false;
+                      } else
                         eventMatchesCategorySelection = true;
-                      else
-                        eventMatchesCategorySelection = false;
-                    } else
-                      eventMatchesCategorySelection = true;
+                    } else {
+                      if (challengeLocation != null &&
+                          searchTerm != null &&
+                          challengeLocation
+                              .toLowerCase()
+                              .contains(searchTerm.toLowerCase())) {
+                        eventMatchesSearchText = true;
+                      } else {
+                        eventMatchesSearchText = false;
+                        if (challengeName != null &&
+                            searchTerm != null &&
+                            challengeName
+                                .toLowerCase()
+                                .contains(searchTerm.toLowerCase())) {
+                          eventMatchesSearchText = true;
+                        } else
+                          eventMatchesSearchText = false;
+                      }
+                    }
+
                     if (!complete)
                       eventCells.add(
                         StreamBuilder(
@@ -220,9 +245,10 @@ class _ChallengesPageState extends State<ChallengesPage> {
                               Stream.fromFuture(Future.delayed(timeTillExpire)),
                           builder: (stream, value) => timeTillExpire
                                       .isNegative ||
-                                  eventMatchesDifficultySelection == false ||
-                                  eventMatchesCategorySelection == false ||
-                                  eventMatchesLocationSelection == false
+                                  (eventMatchesDifficultySelection == false ||
+                                      eventMatchesCategorySelection == false ||
+                                      eventMatchesLocationSelection == false) ||
+                                  eventMatchesSearchText == false
                               ? Consumer<ApiClient>(
                                   builder: (context, apiClient, child) {
                                     if (event.id == groupModel.curEventId) {

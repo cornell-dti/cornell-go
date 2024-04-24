@@ -10,7 +10,7 @@ class SearchFilterBar extends StatefulWidget {
   List<String>? myLocations;
   List<String>? myCategories;
   String? mySearchText;
-  
+
   // SearchFilterBar({Key? key}):{super(key:key};
   SearchFilterBar({Key? key}) : super(key: key);
 
@@ -31,8 +31,15 @@ class _SearchFilterBarState extends State<SearchFilterBar>
     setState(() {
       selectedCategories = a ?? [];
       selectedLocations = b ?? [];
-      selectedDifficulty = c;    });
-      // HomeNavBar.setState()
+      selectedDifficulty = c;
+    });
+    // HomeNavBar.setState()
+  }
+
+  void onSearchTextChanged(String? c) {
+    setState(() {
+      searchText = c ?? "";
+  });
   }
 
   @override
@@ -54,124 +61,133 @@ class _SearchFilterBarState extends State<SearchFilterBar>
             child: Padding(
                 padding: EdgeInsets.fromLTRB(0, 50, 0, 0),
                 child: Column(children: [
-                  // Container(
-                  //   height: 30,
-                  //   color: Color.fromARGB(51, 217, 217, 217),
-                  //   child: Container(
-                  //       decoration: BoxDecoration(
-                  //         color: Color.fromARGB(
-                  //             255, 255, 248, 241), // Background color
-                  //         borderRadius:
-                  //             BorderRadius.circular(8), // Rounded edges
-                  //       ),
-
-                  //       // color: Color.fromARGB(255, 255, 248, 241),
-                  //       child: SizedBox(
-                  //           width: 275,
-                  //           child: TextField(
-                  //             decoration: InputDecoration(
-                  //               prefixIcon: Icon(
-                  //                 Icons.search,
-                  //                 color: Color.fromARGB(204, 0, 0, 0),
-                  //                 size: 12,
-                  //               ),
-                  //               border: OutlineInputBorder(
-                  //                 borderRadius:
-                  //                     BorderRadius.circular(8), // Rounded edges
-                  //                 borderSide: BorderSide(
-                  //                     color: Colors
-                  //                         .transparent), // Transparent border
-                  //               ),
-                  //               labelText:
-                  //                   "Search a challenge name, location, etc...",
-                  //               labelStyle: TextStyle(
-                  //                 color: Color.fromARGB(76, 0, 0, 0),
-                  //                 fontSize: 12,
-                  //                 fontFamily: 'Lato',
-                  //                 backgroundColor:
-                  //                     Color.fromARGB(255, 255, 248, 241),
-                  //               ),
-                  //             ),
-                  //           ))),
-                  // ),
                   Container(
-                    width: 345,
-                    height: 45,
-                    padding: const EdgeInsets.only(
-                      top: 12,
-                      left: 16,
-                      right: 41,
-                      bottom: 12,
-                    ),
-                    clipBehavior: Clip.antiAlias,
-                    decoration: ShapeDecoration(
-                      color: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
+                      height: 45,
+                      color: Color.fromARGB(51, 217, 217, 217),
+                      child: Row(children: [
                         Container(
-                          width: 8.10,
-                          height: 18.10,
-                        decoration: BoxDecoration(
-                          image: DecorationImage(
-                            image: NetworkImage(
-                                "https://via.placeholder.com/18x18"),
-                            fit: BoxFit.fill,
-                          ),
-                        )),
-                        // SvgPicture.asset(
-                        //   'assets/icons/union.svg', // Replace with your SVG file path
-                        //   fit: BoxFit.cover,
-                        // ),
-                        const SizedBox(width: 10),
-                        Text(
-                          'Search a name, location, etc...',
-                          style: TextStyle(
-                            color: Color(0xFFB9B9B9),
-                            fontSize: 14,
-                            fontFamily: 'Poppins',
-                            fontWeight: FontWeight.w400,
-                            height: 0,
-                          ),
-                        ),
-                        Container(
-                          width: 36,
-                          height:
-                              36, // Set the desired height for the IconButton
-                          child: IconButton(
-                            icon: SvgPicture.asset(
-                              'assets/icons/Group 578.svg', // Path to your local SVG file
+                            decoration: BoxDecoration(
+                              color: Color.fromARGB(
+                                  255, 255, 248, 241), // Background color
+                              borderRadius:
+                                  BorderRadius.circular(30), // Rounded edges
                             ),
-                            onPressed: () {
-                              showModalBottomSheet(
-                                context: context,
-                                isScrollControlled: true,
-                                builder: (context) => FilterForm(
-                                    onSubmit: handleFilterSubmit,
-                                    difficulty: selectedDifficulty,
-                                    locations: selectedLocations,
-                                    categories: selectedCategories
+
+                            // color: Color.fromARGB(255, 255, 248, 241),
+                            child: SizedBox(
+                                width: 345,
+                                height: 45,
+                                child: TextField(
+                                  onSubmitted: onSearchTextChanged,
+                                  decoration: InputDecoration(
+                                    prefixIcon: Icon(
+                                      Icons.search,
+                                      color: Color.fromARGB(76, 0, 0, 0),
+                                      size: 12,
                                     ),
-                              );
-                            }
-                            // Action to perform when the icon is pressed
-                            ,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(
+                                          30), // Rounded edges
+                                      borderSide: BorderSide(
+                                          color: Colors
+                                              .transparent), // Transparent border
+                                    ),
+                                    labelText:
+                                        "Search a challenge name, location, etc...",
+                                    labelStyle: TextStyle(
+                                      color: Color.fromARGB(76, 0, 0, 0),
+                                      fontSize: 12,
+                                      fontFamily: 'Lato',
+                                      backgroundColor:
+                                          Color.fromARGB(255, 255, 248, 241),
+                                    ),
+                                  ),
+                                ))),
+                        Container(
+                            width: 36,
+                            height:
+                                36, // Set the desired height for the IconButton
+                            child: IconButton(
+                                icon: SvgPicture.asset(
+                                  'assets/icons/Group 578.svg', // Path to your local SVG file
+                                ),
+                                onPressed: () {
+                                  showModalBottomSheet(
+                                    context: context,
+                                    isScrollControlled: true,
+                                    builder: (context) => FilterForm(
+                                        onSubmit: handleFilterSubmit,
+                                        difficulty: selectedDifficulty,
+                                        locations: selectedLocations,
+                                        categories: selectedCategories),
+                                  );
+                                }))
+                      ])),
+                  // Container(
+                  //   width: 345,
+                  //   height: 45,
+                  //   padding: const EdgeInsets.only(
+                  //     top: 12,
+                  //     left: 16,
+                  //     right: 41,
+                  //     bottom: 12,
+                  //   ),
+                  //   clipBehavior: Clip.antiAlias,
+                  //   decoration: ShapeDecoration(
+                  //     color: Colors.white,
+                  //     shape: RoundedRectangleBorder(
+                  //       borderRadius: BorderRadius.circular(30),
+                  //     ),
+                  //   ),
+                  //   child: Row(
+                  //     mainAxisSize: MainAxisSize.min,
+                  //     mainAxisAlignment: MainAxisAlignment.start,
+                  //     crossAxisAlignment: CrossAxisAlignment.center,
+                  //     children: [
+                  //       Container(
+                  //           width: 8.10,
+                  //           height: 18.10,
+                  //           decoration: BoxDecoration(
+                  //             image: DecorationImage(
+                  //               image: NetworkImage(
+                  //                   "https://via.placeholder.com/18x18"),
+                  //               fit: BoxFit.fill,
+                  //             ),
+                  //           )),
+                  //       Container(
+                  //         width: 36,
+                  //         height:
+                  //             36, // Set the desired height for the IconButton
+                  //         child: IconButton(
+                  //           icon: SvgPicture.asset(
+                  //             'assets/icons/Group 578.svg', // Path to your local SVG file
+                  //           ),
+                  //           onPressed: () {
+                  //             showModalBottomSheet(
+                  //               context: context,
+                  //               isScrollControlled: true,
+                  //               builder: (context) => FilterForm(
+                  //                   onSubmit: handleFilterSubmit,
+                  //                   difficulty: selectedDifficulty,
+                  //                   locations: selectedLocations,
+                  //                   categories: selectedCategories),
+                  //             );
+                  //           }
+                  //           // Action to perform when the icon is pressed
+                  //           ,
+                  //         ),
+                  //       ),
+                  //     ],
+                  //   ),
+                  // ),
 
                   Container(
                       height: 600,
-                      child: HomeNavBar(difficulty:selectedDifficulty, locations:selectedLocations,
-                          categories:selectedCategories,searchText: searchText))
+                      child: HomeNavBar(
+                          difficulty: selectedDifficulty,
+                          locations: selectedLocations,
+                          categories: selectedCategories,
+                          searchText: searchText))
                 ]))));
   }
 }
