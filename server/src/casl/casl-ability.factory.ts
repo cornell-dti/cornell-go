@@ -151,6 +151,7 @@ export class CaslAbilityFactory {
         },
         {
           OR: [
+            { eventIndex: 0 },
             {
               completions: {
                 some: { userId: user.id },
@@ -195,21 +196,14 @@ export class CaslAbilityFactory {
     ];
 
     cannot(Action.Read, 'Challenge', latlongNames, {
-      AND: [
-        {
-          // names come from DTO
-          // hide lat long from users that do not have an active tracker which is their current event
-          activeTrackers: {
-            none: {
-              user: { id: user.id },
-              event: {
-                activeGroups: { some: { members: { some: { id: user.id } } } },
-              },
-            },
+      activeTrackers: {
+        none: {
+          user: { id: user.id },
+          event: {
+            activeGroups: { some: { members: { some: { id: user.id } } } },
           },
         },
-        { eventIndex: { not: 0 } },
-      ],
+      },
     });
 
     can(Action.Manage, 'Challenge', {
