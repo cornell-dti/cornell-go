@@ -104,7 +104,6 @@ export class ClientService {
       this.gateway.server.to(target).emit(event, dto);
     } else {
       this.gateway.server.in(target).socketsJoin(resource.id);
-
       // Find all targeted users
       const users = await this.getAffectedUsers(target);
 
