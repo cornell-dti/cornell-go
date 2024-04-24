@@ -37,9 +37,7 @@ class SplashPageWidget extends StatelessWidget {
                       stream: client.clientApi.connectedStream,
                       builder: (context, connSnapshot) {
                         if (connSnapshot.hasData) {
-                          print("Got conn");
                           WidgetsBinding.instance.addPostFrameCallback((_) {
-                            print("Got conn2");
                             Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(

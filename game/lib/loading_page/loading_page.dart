@@ -5,13 +5,14 @@ import 'package:game/splash_page/splash_page.dart';
 import 'package:provider/provider.dart';
 
 class LoadingPageWidget extends StatelessWidget {
-  Future<bool> relogResult;
-  LoadingPageWidget(Future<bool> relogResult, {Key? key})
-      : relogResult = relogResult,
-        super(key: key);
+  LoadingPageWidget({Key? key}) : super(key: key);
   final scaffoldKey = GlobalKey<ScaffoldState>();
+
   @override
   Widget build(BuildContext context) {
+    ApiClient client = Provider.of<ApiClient>(context);
+    Future<bool> relogResult = client.tryRelog();
+
     return Scaffold(
         backgroundColor: Colors.white,
         body: Center(

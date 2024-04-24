@@ -43,7 +43,6 @@ class _BottomNavBarState extends State<BottomNavBar> {
             if (snapshot.hasData) {
               print("Got disconn");
               WidgetsBinding.instance.addPostFrameCallback((_) {
-                print("Got disconn2");
                 Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(

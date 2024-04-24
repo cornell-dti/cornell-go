@@ -88,8 +88,6 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    final relogAttempt = client.tryRelog();
-
     return MultiProvider(
         providers: [
           ChangeNotifierProvider.value(value: client),
@@ -125,6 +123,6 @@ class MyApp extends StatelessWidget {
                 supportedLocales: const [Locale('en', '')],
                 theme: ThemeData(
                     fontFamily: 'Poppins', primarySwatch: ColorPalette.BigRed),
-                home: LoadingPageWidget(relogAttempt))));
+                home: LoadingPageWidget())));
   }
 }
