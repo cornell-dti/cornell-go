@@ -129,8 +129,8 @@ export class EventGateway {
   ) {
     const ev = await this.eventService.getEventById(data.event.id);
 
-    if (data.deleted && ev) {
-      if (!(await this.eventService.removeEvent(ability, ev.id))) {
+    if (data.deleted) {
+      if (!ev || !(await this.eventService.removeEvent(ability, ev.id))) {
         await this.clientService.emitErrorData(user, 'Failed to delete event!');
         return;
       }
