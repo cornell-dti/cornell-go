@@ -195,16 +195,21 @@ export class CaslAbilityFactory {
     ];
 
     cannot(Action.Read, 'Challenge', latlongNames, {
-      // names come from DTO
-      // hide lat long from users that do not have an active tracker which is their current event
-      activeTrackers: {
-        none: {
-          user: { id: user.id },
-          event: {
-            activeGroups: { some: { members: { some: { id: user.id } } } },
+      AND: [
+        {
+          // names come from DTO
+          // hide lat long from users that do not have an active tracker which is their current event
+          activeTrackers: {
+            none: {
+              user: { id: user.id },
+              event: {
+                activeGroups: { some: { members: { some: { id: user.id } } } },
+              },
+            },
           },
         },
-      },
+        { eventIndex: { not: 0 } },
+      ],
     });
 
     can(Action.Manage, 'Challenge', {
