@@ -40,6 +40,12 @@ class GameServerApi {
     _socket.emit(ev, data);
   }
 
+  void requestAchievementData(RequestAchievementDataDto dto) =>
+      _invokeWithRefresh("requestAchievementData", dto.toJson());
+
+  void updateAchievementData(UpdateAchievementDataDto dto) =>
+      _invokeWithRefresh("updateAchievementData", dto.toJson());
+
   void requestChallengeData(RequestChallengeDataDto dto) =>
       _invokeWithRefresh("requestChallengeData", dto.toJson());
 

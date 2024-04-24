@@ -52,22 +52,6 @@ function getDtoDefinitions() {
                         isOptional,
                     ]);
                 }
-                else if (propType.isUnion() ||
-                    propType.getArrayElementType()?.isUnion()) {
-                    // enum
-                    const enumName = interfName.replace("Dto", "") +
-                        propName[0].toUpperCase() +
-                        propName.substring(1) +
-                        "Dto";
-                    enumDtos.set(enumName, propType
-                        .getUnionTypes()
-                        .map((t) => t.getLiteralValue()?.toString() ?? ""));
-                    baseDto.set(propName, [
-                        enumName,
-                        propType.isArray() ? "ENUM_DTO[]" : "ENUM_DTO",
-                        isOptional,
-                    ]);
-                }
                 else if (propType.isInterface() ||
                     propType.getArrayElementType()?.isInterface() ||
                     propType.isEnum() ||
@@ -88,9 +72,26 @@ function getDtoDefinitions() {
                             : "DEPENDENT_DTO";
                     baseDto.set(propName, [name, fieldType, isOptional]);
                 }
+                else if (propType.isUnion() ||
+                    propType.getArrayElementType()?.isUnion()) {
+                    // enum
+                    const enumName = interfName.replace("Dto", "") +
+                        propName[0].toUpperCase() +
+                        propName.substring(1) +
+                        "Dto";
+                    enumDtos.set(enumName, propType
+                        .getUnionTypes()
+                        .map((t) => t.getLiteralValue()?.toString() ?? ""));
+                    baseDto.set(propName, [
+                        enumName,
+                        propType.isArray() ? "ENUM_DTO[]" : "ENUM_DTO",
+                        isOptional,
+                    ]);
+                }
             }
         }
     }
+    console.log(new Array(enumDtos.keys()), new Array(baseDtos.keys()));
     console.log();
     return { enumDtos, baseDtos };
 }
