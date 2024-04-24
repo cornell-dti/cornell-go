@@ -21,7 +21,8 @@ class HomeNavBar extends StatefulWidget {
   }
 
   @override
-  State<HomeNavBar> createState() => _HomeNavbarState(myDifficulty, myLocations, myCategories,mySearchText);
+  State<HomeNavBar> createState() =>
+      _HomeNavbarState(myDifficulty, myLocations, myCategories, mySearchText);
 }
 
 /// AnimationControllers can be created with `vsync: this` because of TickerProviderStateMixin.
@@ -31,13 +32,12 @@ class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
   List<String> selectedLocations = [];
   String? selectedDifficulty = '';
   String? mySearchText;
-  _HomeNavbarState(
-    String? difficulty, List<String>? locations, List<String>? categories,String? searchText) {
+  _HomeNavbarState(String? difficulty, List<String>? locations,
+      List<String>? categories, String? searchText) {
     selectedDifficulty = difficulty ?? '';
     selectedLocations = locations ?? [];
     selectedCategories = categories ?? [];
-        mySearchText = searchText ?? '';
-
+    mySearchText = searchText ?? '';
   }
 
   @override
@@ -69,10 +69,13 @@ class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
       ),
       body: TabBarView(
         controller: _tabController,
-        children:  <Widget>[
+        children: <Widget>[
           Center(
-            child: ChallengesPage(difficulty: selectedDifficulty,categories:selectedCategories, locations:selectedLocations, searchText: mySearchText)
-          ),
+              child: ChallengesPage(
+                  difficulty: widget.myDifficulty,
+                  categories: widget.myCategories,
+                  locations: widget.myLocations,
+                  searchText: widget.mySearchText)),
           Center(
             child: JourneysPage(),
           ),

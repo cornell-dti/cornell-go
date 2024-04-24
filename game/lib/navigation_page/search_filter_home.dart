@@ -32,6 +32,7 @@ class _SearchFilterBarState extends State<SearchFilterBar>
       selectedCategories = a ?? [];
       selectedLocations = b ?? [];
       selectedDifficulty = c;    });
+      // HomeNavBar.setState()
   }
 
   @override
@@ -114,21 +115,21 @@ class _SearchFilterBarState extends State<SearchFilterBar>
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        // Container(
-                        //   width: 8.10,
-                        //   height: 18.10,
-                        // decoration: BoxDecoration(
-                        //   image: DecorationImage(
-                        //     image: NetworkImage(
-                        //         "https://via.placeholder.com/18x18"),
-                        //     fit: BoxFit.fill,
-                        //   ),
+                        Container(
+                          width: 8.10,
+                          height: 18.10,
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                            image: NetworkImage(
+                                "https://via.placeholder.com/18x18"),
+                            fit: BoxFit.fill,
+                          ),
+                        )),
+                        // SvgPicture.asset(
+                        //   'assets/icons/union.svg', // Replace with your SVG file path
+                        //   fit: BoxFit.cover,
                         // ),
-                        SvgPicture.asset(
-                          'assets/icons/union.svg', // Replace with your SVG file path
-                          fit: BoxFit.cover,
-                        ),
-                        // const SizedBox(width: 10),
+                        const SizedBox(width: 10),
                         Text(
                           'Search a name, location, etc...',
                           style: TextStyle(

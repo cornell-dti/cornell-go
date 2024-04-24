@@ -192,13 +192,13 @@ class _ChallengesPageState extends State<ChallengesPage> {
                     bool eventMatchesCategorySelection;
                     bool eventMatchesLocationSelection;
 
-                    if (selectedDifficulty.length == 0 ||
+                    if (widget.myDifficulty?.length == 0 ||
                         selectedDifficulty == event.difficulty?.name)
                       eventMatchesDifficultySelection = true;
                     else
                       eventMatchesDifficultySelection = false;
 
-                    if (selectedLocations.length > 0) {
+                    if (widget.myLocations?.isNotEmpty ?? false) {
                       if (selectedLocations.contains(challengeLocation))
                         eventMatchesLocationSelection = true;
                       else
@@ -206,7 +206,7 @@ class _ChallengesPageState extends State<ChallengesPage> {
                     } else
                       eventMatchesLocationSelection = true;
 
-                    if (selectedCategories.length > 0) {
+                    if (widget.myCategories?.isNotEmpty ?? false) {
                       if (selectedCategories.contains(event.category?.name))
                         eventMatchesCategorySelection = true;
                       else
