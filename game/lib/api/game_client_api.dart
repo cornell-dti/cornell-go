@@ -23,6 +23,16 @@ class GameClientApi {
   Stream<UpdateChallengeDataDto> get updateChallengeDataStream =>
       _updateChallengeDataController.stream;
 
+  final _updateAchievementDataController =
+      StreamController<UpdateAchievementDataDto>.broadcast(sync: true);
+  Stream<UpdateAchievementDataDto> get updateAchievementDataStream =>
+      _updateAchievementDataController.stream;
+
+  final _updateAchievementTrackerDataController =
+      StreamController<AchievementTrackerDto>.broadcast(sync: true);
+  Stream<AchievementTrackerDto> get updateAchievementTrackerDataStream =>
+      _updateAchievementTrackerDataController.stream;
+
   final _updateEventTrackerDataController =
       StreamController<EventTrackerDto>.broadcast(sync: true);
   Stream<EventTrackerDto> get updateEventTrackerDataStream =>
@@ -84,6 +94,16 @@ class GameClientApi {
         "updateChallengeData",
         (data) => _updateChallengeDataController
             .add(UpdateChallengeDataDto.fromJson(data)));
+
+    sock.on(
+        "updateAchievementData",
+        (data) => _updateAchievementDataController
+            .add(UpdateAchievementDataDto.fromJson(data)));
+
+    sock.on(
+        "updateAchievementTrackerData",
+        (data) => _updateAchievementTrackerDataController
+            .add(AchievementTrackerDto.fromJson(data)));
 
     sock.on(
         "updateEventTrackerData",
