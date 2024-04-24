@@ -126,15 +126,6 @@ class _InterestsPageWidgetState extends State<InterestsPageWidget> {
                       if (connectionResult == null) {
                         displayToast("An error occurred while signing you up!",
                             Status.error);
-                      } else {
-                        //Connect to home page here.
-                        print("Connection result:");
-                        print(connectionResult.body);
-                        displayToast("Signed in!", Status.success);
-                        Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => BottomNavBar()));
                       }
                     }
                   },
