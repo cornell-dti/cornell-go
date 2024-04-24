@@ -67,9 +67,7 @@ export class UserService {
     }
 
     const defOrg = await this.orgService.getDefaultOrganization(
-      authType === AuthType.GOOGLE
-        ? OrganizationSpecialUsage.CORNELL_LOGIN
-        : OrganizationSpecialUsage.DEVICE_LOGIN,
+      OrganizationSpecialUsage.DEVICE_LOGIN,
     );
 
     const group: Group = await this.groupsService.createFromEvent(
@@ -100,6 +98,15 @@ export class UserService {
     await this.eventsService.createDefaultEventTracker(user, lat, long);
     console.log(`User ${user.id} created with username ${username}!`);
     await this.log.logEvent(SessionLogEvent.CREATE_USER, user.id, user.id);
+
+    if (authType === AuthType.GOOGLE) {
+      const allOrg = await this.orgService.getDefaultOrganization(
+        OrganizationSpecialUsage.CORNELL_LOGIN,
+      );
+
+      await this.orgService.joinOrganization(user, allOrg.accessCode);
+    }
+
     return user;
   }
 
