@@ -12,9 +12,6 @@ class GeoPoint {
   double get long => _long;
   double get heading => _heading;
 
-  static bool _isRequestingLocationPermissions = false;
-  static bool _isRequestingLocation = false;
-
   GeoPoint(
     double lat,
     double long,
@@ -25,38 +22,37 @@ class GeoPoint {
     _heading = heading;
   }
 
-  static Future<GeoPoint?> current() async {
+  static Future<GeoPoint> current() async {
     var serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    print("current");
     if (!serviceEnabled) {
+      print("Failed to enable location!!!!!!!!");
       // Location services are not enabled don't continue
       // accessing the position and request users of the
       // App to enable the location services.
       return Future.error('Location services are disabled.');
     }
 
-    if (_isRequestingLocationPermissions || _isRequestingLocation) {
-      //To handle the case where a request is already occuring.
-
-      return null;
-    }
-
     try {
-      _isRequestingLocationPermissions = true;
       var permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
+        print("permissions denied");
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied) {
+          print("permissions denied again");
           return Future.error('Location services are disabled.');
         }
       }
       if (permission == LocationPermission.deniedForever) {
         // Permissions are denied forever, handle appropriately.
+        print("permissions denied");
         return Future.error(
             'Location permissions are permanently denied, we cannot request permissions.');
       }
       final pos = await Geolocator.getCurrentPosition();
       return GeoPoint(pos.latitude, pos.longitude, pos.heading);
     } catch (e) {
+      print(e);
       return Future.error(e.toString());
     }
   }
