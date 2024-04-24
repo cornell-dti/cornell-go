@@ -180,13 +180,9 @@ class _JourneysPageState extends State<JourneysPage> {
                                   key: UniqueKey(),
                                   event.name ?? "",
                                   friendlyLocation[location] ?? "",
-                                  Image.network(
-                                    imageUrl ??
-                                        "https://picsum.photos/250?image=9",
-                                    fit: BoxFit.cover,
-                                    width: 150,
-                                    height: 90,
-                                  ), // dummy data for now; should pass in thumbnail parameter
+                                  imageUrl ??
+                                      "https://picsum.photos/250?image=9",
+                                  // dummy data for now; should pass in thumbnail parameter
                                   event.description ?? "",
                                   locationCount,
                                   numberCompleted,

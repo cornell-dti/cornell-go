@@ -12,6 +12,7 @@ enum PreviewType { CHALLENGE, JOURNEY }
 class Preview extends StatefulWidget {
   final String challengeName;
   final String description;
+  final String imgUrl;
   final String difficulty;
   final int points;
   final PreviewType type;
@@ -29,11 +30,8 @@ class Preview extends StatefulWidget {
   static Color purpleColor = Color.fromARGB(255, 131, 90, 124);
   static Color greyColor = Color.fromARGB(255, 110, 110, 110);
 
-  //Temporary image for now. Will have to change later
-  final String imgPath = "assets/images/38582.jpg";
-
-  Preview(this.challengeName, this.description, this.difficulty, this.points,
-      this.type, this.location, this.eventId,
+  Preview(this.challengeName, this.description, this.imgUrl, this.difficulty,
+      this.points, this.type, this.location, this.eventId,
       {this.locationCount = 1,
       this.numberCompleted = 0,
       // required this.totalDistance,
@@ -44,6 +42,7 @@ class Preview extends StatefulWidget {
   State<StatefulWidget> createState() => _PreviewState(
       challengeName,
       description,
+      imgUrl,
       difficulty,
       points,
       type,
@@ -61,6 +60,7 @@ class Preview extends StatefulWidget {
 class _PreviewState extends State<Preview> {
   final String challengeName;
   final String description;
+  final String imgUrl;
   final String difficulty;
   final int points;
   final PreviewType type;
@@ -77,12 +77,10 @@ class _PreviewState extends State<Preview> {
   final int numberCompleted;
   final String eventId;
 
-  //Temporary image for now. Will have to change later
-  final String imgPath = "assets/images/38582.jpg";
-
   _PreviewState(
       this.challengeName,
       this.description,
+      this.imgUrl,
       this.difficulty,
       this.points,
       this.type,
@@ -100,8 +98,8 @@ class _PreviewState extends State<Preview> {
         height: MediaQuery.of(context).size.height * 0.75,
         child: ClipRRect(
           borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20.0),
-            topRight: Radius.circular(20.0),
+            topLeft: Radius.circular(10.0),
+            topRight: Radius.circular(10.0),
           ),
 
           //Overall Container
@@ -112,39 +110,8 @@ class _PreviewState extends State<Preview> {
               child: Column(
                 children: [
                   //Image
-                  Container(
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(3.0),
-                          topRight: Radius.circular(3.0),
-                        ),
-                        image: DecorationImage(
-                            image: AssetImage(imgPath), fit: BoxFit.cover)),
-                    height: 150,
-                    alignment: Alignment.topCenter,
-                    //drag bar icon
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                            child: SizedBox(
-                                child: Align(
-                          alignment: Alignment(1.1, -1.1),
-                          child: Container(
-                            width: 48,
-                            height: 4,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.rectangle,
-                              color: Colors.white,
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(20.0)),
-                            ),
-                          ),
-                        )))
-                      ],
-                    ),
-                  ),
+                  Image.network(imgUrl,
+                      height: 200, width: 500, fit: BoxFit.cover),
                   SizedBox(height: 20),
 
                   // Row with starting location and distance
