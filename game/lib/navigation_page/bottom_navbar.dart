@@ -35,25 +35,18 @@ class _BottomNavBarState extends State<BottomNavBar> {
   Widget build(BuildContext context) {
     final client = Provider.of<ApiClient>(context);
 
+    if (client.serverApi == null) {
+      print("ServerApi == null");
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushReplacement(context,
+            MaterialPageRoute(builder: (context) => SplashPageWidget()));
+        displayToast("Signed out", Status.success);
+      });
+    }
+
     return Scaffold(
       body: Center(
-        child: StreamBuilder(
-          stream: client.clientApi.disconnectedStream,
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              print("Got disconn");
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => SplashPageWidget()));
-                displayToast("Signed out", Status.success);
-              });
-            }
-
-            return _widgetOptions.elementAt(_selectedIndex);
-          },
-        ),
+        child: _widgetOptions.elementAt(_selectedIndex),
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: [
