@@ -3,9 +3,16 @@ import 'package:game/journeys/journeys_page.dart';
 import 'package:game/challenges/challenges_page.dart';
 import 'package:game/journeys/filter_form.dart';
 import 'package:game/navigation_page/home_navbar.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class SearchFilterBar extends StatefulWidget {
-  const SearchFilterBar({super.key});
+  String? myDifficulty;
+  List<String>? myLocations;
+  List<String>? myCategories;
+  String? mySearchText;
+  
+  // SearchFilterBar({Key? key}):{super(key:key};
+  SearchFilterBar({Key? key}) : super(key: key);
 
   @override
   State<SearchFilterBar> createState() => _SearchFilterBarState();
@@ -17,14 +24,14 @@ class _SearchFilterBarState extends State<SearchFilterBar>
   List<String> selectedCategories = [];
   List<String> selectedLocations = [];
   String selectedDifficulty = '';
+  String searchText = '';
 
   // Callback function to receive updated state values from the child
   void handleFilterSubmit(List<String>? a, List<String>? b, String c) {
     setState(() {
       selectedCategories = a ?? [];
       selectedLocations = b ?? [];
-      selectedDifficulty = c;
-    });
+      selectedDifficulty = c;    });
   }
 
   @override
@@ -107,18 +114,21 @@ class _SearchFilterBarState extends State<SearchFilterBar>
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Container(
-                          width: 18.10,
-                          height: 18.10,
-                          decoration: BoxDecoration(
-                            image: DecorationImage(
-                              image: NetworkImage(
-                                  "https://via.placeholder.com/18x18"),
-                              fit: BoxFit.fill,
-                            ),
-                          ),
+                        // Container(
+                        //   width: 8.10,
+                        //   height: 18.10,
+                        // decoration: BoxDecoration(
+                        //   image: DecorationImage(
+                        //     image: NetworkImage(
+                        //         "https://via.placeholder.com/18x18"),
+                        //     fit: BoxFit.fill,
+                        //   ),
+                        // ),
+                        SvgPicture.asset(
+                          'assets/icons/union.svg', // Replace with your SVG file path
+                          fit: BoxFit.cover,
                         ),
-                        const SizedBox(width: 10),
+                        // const SizedBox(width: 10),
                         Text(
                           'Search a name, location, etc...',
                           style: TextStyle(
@@ -129,11 +139,15 @@ class _SearchFilterBarState extends State<SearchFilterBar>
                             height: 0,
                           ),
                         ),
-    Container(
-      height: 10, // Set the desired height for the IconButton
-      child: IconButton(
-        icon: Icon(Icons.arrow_forward), // Example icon image
-        onPressed: (){
+                        Container(
+                          width: 36,
+                          height:
+                              36, // Set the desired height for the IconButton
+                          child: IconButton(
+                            icon: SvgPicture.asset(
+                              'assets/icons/Group 578.svg', // Path to your local SVG file
+                            ),
+                            onPressed: () {
                               showModalBottomSheet(
                                 context: context,
                                 isScrollControlled: true,
@@ -141,18 +155,22 @@ class _SearchFilterBarState extends State<SearchFilterBar>
                                     onSubmit: handleFilterSubmit,
                                     difficulty: selectedDifficulty,
                                     locations: selectedLocations,
-                                    categories: selectedCategories),
+                                    categories: selectedCategories
+                                    ),
                               );
-                            } 
-          // Action to perform when the icon is pressed
-        ,
-      ),
-    ),
+                            }
+                            // Action to perform when the icon is pressed
+                            ,
+                          ),
+                        ),
                       ],
                     ),
                   ),
 
-                  Container(height: 600, child: HomeNavBar())
+                  Container(
+                      height: 600,
+                      child: HomeNavBar(difficulty:selectedDifficulty, locations:selectedLocations,
+                          categories:selectedCategories,searchText: searchText))
                 ]))));
   }
 }

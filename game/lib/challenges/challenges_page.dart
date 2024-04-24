@@ -15,25 +15,50 @@ import 'challenge_cell.dart';
 import 'package:game/journeys/filter_form.dart';
 
 class ChallengesPage extends StatefulWidget {
-  const ChallengesPage({Key? key}) : super(key: key);
+  String? myDifficulty;
+  List<String>? myLocations;
+  List<String>? myCategories;
+  String? mySearchText;
+
+   ChallengesPage({Key? key, String? difficulty,
+      List<String>? locations,
+      List<String>? categories,
+      String? searchText})
+ : super(key: key)
+  {
+    myDifficulty = difficulty;
+    myLocations = locations;
+    myCategories = categories;
+    mySearchText = searchText;
+  }
+ 
 
   @override
-  State<ChallengesPage> createState() => _ChallengesPageState();
+  State<ChallengesPage> createState() => _ChallengesPageState(myDifficulty, myLocations, myCategories,mySearchText);
 }
 
 class _ChallengesPageState extends State<ChallengesPage> {
   List<String> selectedCategories = [];
   List<String> selectedLocations = [];
   String selectedDifficulty = '';
+  String? mySearchText;
+  _ChallengesPageState(
+    String? difficulty, List<String>? locations, List<String>? categories,String? searchText) {
+    selectedDifficulty = difficulty ?? '';
+    selectedLocations = locations ?? [];
+    selectedCategories = categories ?? [];
+        mySearchText = searchText ?? '';
 
-  // Callback function to receive updated state values from the child
-  void handleFilterSubmit(List<String>? a, List<String>? b, String c) {
-    setState(() {
-      selectedCategories = a ?? [];
-      selectedLocations = b ?? [];
-      selectedDifficulty = c;
-    });
   }
+
+  // // Callback function to receive updated state values from the child
+  // void handleFilterSubmit(List<String>? a, List<String>? b, String c) {
+  //   setState(() {
+  //     selectedCategories = a ?? [];
+  //     selectedLocations = b ?? [];
+  //     selectedDifficulty = c;
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -69,54 +94,54 @@ class _ChallengesPageState extends State<ChallengesPage> {
                 //     ),
                 //   ),
                 // ),
-                Container(
-                  padding: EdgeInsets.only(top: 10, bottom: 10),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Container(
-                        height: 30,
-                        child: TextButton.icon(
-                            onPressed: () {
-                              showModalBottomSheet(
-                                context: context,
-                                isScrollControlled: true,
-                                builder: (context) => FilterForm(
-                                    onSubmit: handleFilterSubmit,
-                                    difficulty: selectedDifficulty,
-                                    locations: selectedLocations,
-                                    categories: selectedCategories),
-                              );
-                            },
-                            icon: Icon(
-                              Icons.filter_list_rounded,
-                              color: Color.fromARGB(255, 0, 0, 0),
-                              size: 20.0,
-                            ),
-                            style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all<Color>(
-                                  Color.fromARGB(153, 217, 217, 217)),
-                              padding: MaterialStateProperty.all(
-                                EdgeInsets.only(right: 16.0, left: 16.0),
-                              ),
-                              shape: MaterialStateProperty.all(
-                                  RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(3.0),
-                              )),
-                            ),
-                            label: Text(
-                              "Filter By",
-                              style: TextStyle(
-                                color: Color.fromARGB(255, 0, 0, 0),
-                                fontSize: 15,
-                                fontFamily: 'Inter',
-                              ),
-                            )),
-                      ),
-                    ],
-                  ),
-                ),
+                // Container(
+                //   padding: EdgeInsets.only(top: 10, bottom: 10),
+                //   child: Row(
+                //     mainAxisAlignment: MainAxisAlignment.start,
+                //     crossAxisAlignment: CrossAxisAlignment.center,
+                //     children: [
+                //       Container(
+                //         height: 30,
+                //         child: TextButton.icon(
+                //             onPressed: () {
+                //               showModalBottomSheet(
+                //                 context: context,
+                //                 isScrollControlled: true,
+                //                 builder: (context) => FilterForm(
+                //                     onSubmit: handleFilterSubmit,
+                //                     difficulty: selectedDifficulty,
+                //                     locations: selectedLocations,
+                //                     categories: selectedCategories),
+                //               );
+                //             },
+                //             icon: Icon(
+                //               Icons.filter_list_rounded,
+                //               color: Color.fromARGB(255, 0, 0, 0),
+                //               size: 20.0,
+                //             ),
+                //             style: ButtonStyle(
+                //               backgroundColor: MaterialStateProperty.all<Color>(
+                //                   Color.fromARGB(153, 217, 217, 217)),
+                //               padding: MaterialStateProperty.all(
+                //                 EdgeInsets.only(right: 16.0, left: 16.0),
+                //               ),
+                //               shape: MaterialStateProperty.all(
+                //                   RoundedRectangleBorder(
+                //                 borderRadius: BorderRadius.circular(3.0),
+                //               )),
+                //             ),
+                //             label: Text(
+                //               "Filter By",
+                //               style: TextStyle(
+                //                 color: Color.fromARGB(255, 0, 0, 0),
+                //                 fontSize: 15,
+                //                 fontFamily: 'Inter',
+                //               ),
+                //             )),
+                //       ),
+                //     ],
+                //   ),
+                // ),
                 Expanded(child: Consumer4<EventModel, GroupModel, TrackerModel,
                         ChallengeModel>(
                     builder: (context, myEventModel, groupModel, trackerModel,

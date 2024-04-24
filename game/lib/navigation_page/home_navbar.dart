@@ -3,15 +3,42 @@ import 'package:game/journeys/journeys_page.dart';
 import 'package:game/challenges/challenges_page.dart';
 
 class HomeNavBar extends StatefulWidget {
-  const HomeNavBar({super.key});
+  String? myDifficulty;
+  List<String>? myLocations;
+  List<String>? myCategories;
+  String? mySearchText;
+  HomeNavBar(
+      {Key? key,
+      String? difficulty,
+      List<String>? locations,
+      List<String>? categories,
+      String? searchText})
+      : super(key: key) {
+    myDifficulty = difficulty;
+    myLocations = locations;
+    myCategories = categories;
+    mySearchText = searchText;
+  }
 
   @override
-  State<HomeNavBar> createState() => _HomeNavbarState();
+  State<HomeNavBar> createState() => _HomeNavbarState(myDifficulty, myLocations, myCategories,mySearchText);
 }
 
 /// AnimationControllers can be created with `vsync: this` because of TickerProviderStateMixin.
 class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
   late TabController _tabController;
+  List<String> selectedCategories = [];
+  List<String> selectedLocations = [];
+  String? selectedDifficulty = '';
+  String? mySearchText;
+  _HomeNavbarState(
+    String? difficulty, List<String>? locations, List<String>? categories,String? searchText) {
+    selectedDifficulty = difficulty ?? '';
+    selectedLocations = locations ?? [];
+    selectedCategories = categories ?? [];
+        mySearchText = searchText ?? '';
+
+  }
 
   @override
   void initState() {
@@ -42,9 +69,9 @@ class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
       ),
       body: TabBarView(
         controller: _tabController,
-        children: const <Widget>[
+        children:  <Widget>[
           Center(
-            child: ChallengesPage(),
+            child: ChallengesPage(difficulty: selectedDifficulty,categories:selectedCategories, locations:selectedLocations, searchText: mySearchText)
           ),
           Center(
             child: JourneysPage(),
