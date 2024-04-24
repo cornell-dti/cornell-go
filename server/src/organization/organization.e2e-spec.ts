@@ -207,7 +207,7 @@ describe('OrganizationModule E2E', () => {
       expect(dto.user.username).toEqual('myNewUsername');
     });
 
-    it('Should not be able to see non-current challenge', async () => {
+    it('Should not be able to see non-current challenge lat long or name', async () => {
       await groupService.setCurrentEvent(managerUser, exEv.id);
 
       affectedUsers.push(managerUser);
@@ -215,7 +215,13 @@ describe('OrganizationModule E2E', () => {
         challenges: [defaultChal.id],
       });
 
-      expect(sendEventMock.mock.lastCall).toBeUndefined();
+      const [users, ev, dto]: DtoLastCall<UpdateChallengeDataDto> =
+        sendEventMock.mock.lastCall;
+
+      expect(ev).toEqual('updateChallengeData');
+      expect(dto.challenge.name).toBeUndefined();
+      expect(dto.challenge.latF).toBeUndefined();
+      expect(dto.challenge.longF).toBeUndefined();
     });
 
     it('Should be able to see current challenge lat long but not name', async () => {
