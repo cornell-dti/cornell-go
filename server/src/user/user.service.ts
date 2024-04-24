@@ -51,7 +51,7 @@ export class UserService {
   /** Registers a user using a certain authentication scheme */
   async register(
     email: string,
-    username: string,
+    username: string | undefined,
     year: string,
     lat: number,
     long: number,
@@ -59,15 +59,15 @@ export class UserService {
     authToken: string,
     enrollmentType: EnrollmentType,
   ) {
-    if (username == null && authType == AuthType.GOOGLE) {
-      username = email?.split('@')[0];
-    } else if (authType == AuthType.DEVICE) {
+    if (authType === AuthType.GOOGLE) {
+      username = username;
+    } else if (authType === AuthType.DEVICE) {
       const count = await this.prisma.user.count();
-      username = 'guest' + count;
+      username = 'guest' + (count + 10001);
     }
 
     const defOrg = await this.orgService.getDefaultOrganization(
-      authType == AuthType.GOOGLE
+      authType === AuthType.GOOGLE
         ? OrganizationSpecialUsage.CORNELL_LOGIN
         : OrganizationSpecialUsage.DEVICE_LOGIN,
     );
@@ -82,7 +82,7 @@ export class UserService {
         group: { connect: { id: group.id } },
         hostOf: { connect: { id: group.id } },
         memberOf: { connect: { id: defOrg.id } },
-        username,
+        username: username ?? email?.split('@')[0],
         year,
         email,
         authToken,
