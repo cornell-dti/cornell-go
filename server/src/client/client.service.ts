@@ -104,9 +104,12 @@ export class ClientService {
       this.gateway.server.to(target).emit(event, dto);
     } else {
       this.gateway.server.in(target).socketsJoin(resource.id);
+      // ^^^^ possible cause #2
 
       // Find all targeted users
       const users = await this.getAffectedUsers(target);
+
+      // ^^^^ possible cause #1
 
       for (const user of users) {
         const ability = this.abilityFactory.createForUser(user);
