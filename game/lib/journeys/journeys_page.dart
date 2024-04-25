@@ -14,7 +14,24 @@ import 'package:game/utils/utility_functions.dart';
 import 'package:provider/provider.dart';
 
 class JourneysPage extends StatefulWidget {
-  const JourneysPage({Key? key}) : super(key: key);
+  String? myDifficulty;
+  List<String>? myLocations;
+  List<String>? myCategories;
+  String? mySearchText;
+  // const JourneysPage({Key? key}) : super(key: key);
+
+  JourneysPage(
+      {Key? key,
+      String? difficulty,
+      List<String>? locations,
+      List<String>? categories,
+      String? searchText})
+      : super(key: key) {
+    myDifficulty = difficulty;
+    myLocations = locations;
+    myCategories = categories;
+    mySearchText = searchText;
+  }
 
   @override
   State<JourneysPage> createState() => _JourneysPageState();
@@ -59,68 +76,6 @@ class _JourneysPageState extends State<JourneysPage> {
             padding: EdgeInsets.all(16),
             child: Column(
               children: [
-                Container(
-                  height: 30,
-                  color: Color.fromARGB(51, 217, 217, 217),
-                  child: TextField(
-                    decoration: InputDecoration(
-                      prefixIcon: Icon(
-                        Icons.search,
-                        color: Color.fromARGB(204, 0, 0, 0),
-                        size: 12,
-                      ),
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(1.0))),
-                      labelText: "Search a challenge name, location, etc...",
-                      labelStyle: TextStyle(
-                        color: Color.fromARGB(76, 0, 0, 0),
-                        fontSize: 12,
-                        fontFamily: 'Lato',
-                      ),
-                    ),
-                  ),
-                ),
-                Container(
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 24.0, bottom: 24.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Container(
-                          height: 30,
-                          child: TextButton.icon(
-                              onPressed: openFilter,
-                              icon: Icon(
-                                Icons.filter_list_rounded,
-                                color: Color.fromARGB(255, 0, 0, 0),
-                                size: 20.0,
-                              ),
-                              style: ButtonStyle(
-                                backgroundColor:
-                                    MaterialStateProperty.all<Color>(
-                                        Color.fromARGB(153, 217, 217, 217)),
-                                padding: MaterialStateProperty.all(
-                                  EdgeInsets.only(right: 16.0, left: 16.0),
-                                ),
-                                shape: MaterialStateProperty.all(
-                                    RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(3.0),
-                                )),
-                              ),
-                              label: Text(
-                                "Filter By",
-                                style: TextStyle(
-                                  color: Color.fromARGB(255, 0, 0, 0),
-                                  fontSize: 15,
-                                  fontFamily: 'Inter',
-                                ),
-                              )),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
                 Expanded(child: Consumer4<EventModel, GroupModel, TrackerModel,
                         ChallengeModel>(
                     builder: (context, myEventModel, groupModel, trackerModel,
@@ -173,12 +128,73 @@ class _JourneysPageState extends State<JourneysPage> {
                     DateTime endtime = HttpDate.parse(event.endTime ?? "");
 
                     Duration timeTillExpire = endtime.difference(now);
+
+                    final challengeLocation = challenge.location?.name ?? "";
+                    final challengeName = challenge.name ?? "";
+
+                    bool eventMatchesDifficultySelection = true;
+                    bool eventMatchesCategorySelection = true;
+                    bool eventMatchesLocationSelection = true;
+                    bool eventMatchesSearchText = true;
+                    String? searchTerm = widget.mySearchText;
+
+                    if (searchTerm?.length == 0) {
+                      eventMatchesSearchText = true;
+                      if (widget.myDifficulty?.length == 0 ||
+                          widget.myDifficulty == event.difficulty?.name)
+                        eventMatchesDifficultySelection = true;
+                      else
+                        eventMatchesDifficultySelection = false;
+
+                      if (widget.myLocations?.isNotEmpty ?? false) {
+                        if (widget.myLocations?.contains(challengeLocation) ??
+                            false)
+                          eventMatchesLocationSelection = true;
+                        else
+                          eventMatchesLocationSelection = false;
+                      } else
+                        eventMatchesLocationSelection = true;
+
+                      if (widget.myCategories?.isNotEmpty ?? false) {
+                        if (widget.myCategories
+                                ?.contains(event.category?.name) ??
+                            false)
+                          eventMatchesCategorySelection = true;
+                        else
+                          eventMatchesCategorySelection = false;
+                      } else
+                        eventMatchesCategorySelection = true;
+                    } else {
+                      if (challengeLocation != null &&
+                          searchTerm != null &&
+                          challengeLocation
+                              .toLowerCase()
+                              .contains(searchTerm.toLowerCase())) {
+                        eventMatchesSearchText = true;
+                      } else {
+                        eventMatchesSearchText = false;
+                        if (challengeName != null &&
+                            searchTerm != null &&
+                            challengeName
+                                .toLowerCase()
+                                .contains(searchTerm.toLowerCase())) {
+                          eventMatchesSearchText = true;
+                        } else
+                          eventMatchesSearchText = false;
+                      }
+                    }
+
                     if (!complete)
                       eventCells.add(
                         StreamBuilder(
                           stream:
                               Stream.fromFuture(Future.delayed(timeTillExpire)),
-                          builder: (stream, value) => timeTillExpire.isNegative
+                          builder: (stream, value) => timeTillExpire
+                                      .isNegative ||
+                                  (eventMatchesDifficultySelection == false ||
+                                      eventMatchesCategorySelection == false ||
+                                      eventMatchesLocationSelection == false) ||
+                                  eventMatchesSearchText == false
                               ? Consumer<ApiClient>(
                                   builder: (context, apiClient, child) {
                                     if (event.id == groupModel.curEventId) {

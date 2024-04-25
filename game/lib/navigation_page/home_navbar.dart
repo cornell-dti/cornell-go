@@ -77,7 +77,10 @@ class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
                   locations: widget.myLocations,
                   searchText: widget.mySearchText)),
           Center(
-            child: JourneysPage(),
+            child: JourneysPage(difficulty: widget.myDifficulty,
+                  categories: widget.myCategories,
+                  locations: widget.myLocations,
+                  searchText: widget.mySearchText),
           ),
         ],
       ),
