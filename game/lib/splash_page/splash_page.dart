@@ -106,7 +106,6 @@ class SplashPageWidget extends StatelessWidget {
                           LoginEnrollmentTypeDto.GUEST,
                           "",
                           "");
-
                       if (connectionResult == null) {
                         displayToast("An error occurred while signing you up!",
                             Status.error);

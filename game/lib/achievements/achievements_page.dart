@@ -1,20 +1,42 @@
-import 'package:flutter/cupertino.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:game/achievements/achievement_cell.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/api/game_client_dto.dart';
 import 'package:game/model/challenge_model.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/group_model.dart';
+import 'package:game/utils/utility_functions.dart';
 import 'package:game/model/tracker_model.dart';
 import 'package:game/model/achievement_model.dart';
 import 'package:game/model/user_model.dart';
 import 'package:provider/provider.dart';
-import 'package:game/journeys/filter_form.dart';
+
+class AchievementCellDto {
+  AchievementCellDto({
+    required this.location,
+    required this.name,
+    required this.lat,
+    required this.long,
+    required this.thumbnail,
+    required this.complete,
+    required this.description,
+    required this.difficulty,
+    required this.points,
+    required this.eventId,
+  });
+  late String location;
+  late String name;
+  late double? lat;
+  late double? long;
+  late SvgPicture thumbnail;
+  late bool complete;
+  late String description;
+  late String difficulty;
+  late int points;
+  late String eventId;
+}
 
 class AchievementsPage extends StatefulWidget {
   const AchievementsPage({super.key});
@@ -24,6 +46,12 @@ class AchievementsPage extends StatefulWidget {
 }
 
 class _AchievementsPageState extends State<AchievementsPage> {
+  List<String> selectedCategories = [];
+  List<String> selectedLocations = [];
+  String selectedDifficulty = '';
+
+  List<AchievementCellDto> eventData = [];
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -46,11 +74,15 @@ class _AchievementsPageState extends State<AchievementsPage> {
                     padding: EdgeInsets.all(30),
                     child: Column(
                       children: [
-                        Expanded(child: Consumer4<EventModel, GroupModel,
-                                TrackerModel, ChallengeModel>(
-                            builder: (context, myEventModel, groupModel,
-                                trackerModel, challengeModel, child) {
-                          List<Widget> eventCells = [];
+                        Expanded(child: Consumer5<EventModel, GroupModel,
+                                TrackerModel, ChallengeModel, ApiClient>(
+                            builder: (context,
+                                myEventModel,
+                                groupModel,
+                                trackerModel,
+                                challengeModel,
+                                apiClient,
+                                child) {
                           if (myEventModel.searchResults == null) {
                             myEventModel.searchEvents(
                                 0,
@@ -70,12 +102,13 @@ class _AchievementsPageState extends State<AchievementsPage> {
                                 .getEventById(groupModel.curEventId ?? "");
                             if (curEvent != null) events.add(curEvent);
                           }
+                          eventData.clear();
+
                           for (EventDto event in events) {
-                            print(event);
                             var tracker =
                                 trackerModel.trackerByEventId(event.id);
                             var numberCompleted =
-                                tracker?.prevChallenges?.length ?? 0;
+                                tracker?.prevChallenges.length ?? 0;
                             var complete =
                                 (numberCompleted == event.challenges?.length);
                             var locationCount = event.challenges?.length ?? 0;
@@ -88,45 +121,72 @@ class _AchievementsPageState extends State<AchievementsPage> {
                             var challenge = challengeModel
                                 .getChallengeById(event.challenges?[0] ?? "");
 
-                            if (challenge == null) continue;
-                            if (!complete)
-                              eventCells.add(
-                                StreamBuilder(
-                                  stream: Stream.fromFuture(
-                                      Future.delayed(timeTillExpire)),
-                                  builder: (stream, value) => timeTillExpire
-                                          .isNegative
-                                      ? Consumer<ApiClient>(
-                                          builder: (context, apiClient, child) {
-                                            if (event.id ==
-                                                groupModel.curEventId) {
-                                              apiClient.serverApi
-                                                  ?.setCurrentEvent(
-                                                      SetCurrentEventDto(
-                                                          eventId: ""));
-                                            }
-                                            return Container();
-                                          },
-                                        )
-                                      : AchievementCell(
-                                          key: UniqueKey(),
-                                          challenge.location?.name ?? "",
-                                          challenge.name ?? "",
-                                          Image.network(
-                                              "https://picsum.photos/250?image=9"),
-                                          complete,
-                                          challenge.description ?? "",
-                                          event.difficulty?.name ?? "",
-                                          challenge.points ?? 0,
-                                          event.id),
-                                ),
-                              );
+                            // print("Doing Event with now/endtime " + event.description.toString() + now.toString() + "/" + endtime.toString());
+                            if (challenge == null) {
+                              // print("Challenge is null for event " + event.description.toString());
+
+                              continue;
+                            }
+                            final challengeLocation =
+                                challenge.location?.name ?? "";
+
+                            bool eventMatchesDifficultySelection;
+                            bool eventMatchesCategorySelection;
+                            bool eventMatchesLocationSelection;
+
+                            if (selectedDifficulty.length == 0 ||
+                                selectedDifficulty == event.difficulty?.name)
+                              eventMatchesDifficultySelection = true;
+                            else
+                              eventMatchesDifficultySelection = false;
+
+                            if (selectedLocations.length > 0) {
+                              if (selectedLocations.contains(challengeLocation))
+                                eventMatchesLocationSelection = true;
+                              else
+                                eventMatchesLocationSelection = false;
+                            } else
+                              eventMatchesLocationSelection = true;
+
+                            if (selectedCategories.length > 0) {
+                              if (selectedCategories
+                                  .contains(event.category?.name))
+                                eventMatchesCategorySelection = true;
+                              else
+                                eventMatchesCategorySelection = false;
+                            } else
+                              eventMatchesCategorySelection = true;
+                            if (!complete &&
+                                !timeTillExpire.isNegative &&
+                                eventMatchesDifficultySelection &&
+                                eventMatchesCategorySelection &&
+                                eventMatchesLocationSelection) {
+                              eventData.add(AchievementCellDto(
+                                location:
+                                    friendlyLocation[challenge.location] ?? "",
+                                name: event.name ?? "",
+                                lat: challenge.latF ?? null,
+                                long: challenge.longF ?? null,
+                                thumbnail: SvgPicture.asset(
+                                    "assets/icons/achievementsilver.svg"),
+                                complete: complete,
+                                description: event.description ?? "",
+                                difficulty:
+                                    friendlyDifficulty[event.difficulty] ?? "",
+                                points: challenge.points ?? 0,
+                                eventId: event.id,
+                              ));
+                            } else if (event.id == groupModel.curEventId) {
+                              apiClient.serverApi?.setCurrentEvent(
+                                  SetCurrentEventDto(eventId: ""));
+                            }
                           }
+
                           return ListView.separated(
                             padding: const EdgeInsets.symmetric(horizontal: 3),
-                            itemCount: eventCells.length,
+                            itemCount: eventData.length,
                             itemBuilder: (context, index) {
-                              return ChallengeCell(
+                              return AchievementCell(
                                   key: UniqueKey(),
                                   eventData[index].location,
                                   eventData[index].name,

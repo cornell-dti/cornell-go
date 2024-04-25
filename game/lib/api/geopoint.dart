@@ -24,7 +24,6 @@ class GeoPoint {
 
   static Future<GeoPoint> current() async {
     var serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    print("current");
     if (!serviceEnabled) {
       print("Failed to enable location!!!!!!!!");
       // Location services are not enabled don't continue

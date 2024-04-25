@@ -1,10 +1,40 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:game/preview/preview.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+
+class LoadingBar extends StatelessWidget {
+  final int totalTasks;
+  final int tasksFinished;
+
+  const LoadingBar(
+    this.tasksFinished,
+    this.totalTasks,
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: (totalTasks > 0 ? tasksFinished / totalTasks : 0) * 170,
+      height: 13,
+      alignment: Alignment.centerLeft,
+      child: Container(
+        decoration: new BoxDecoration(
+          color: Color.fromARGB(197, 237, 86, 86),
+          shape: BoxShape.rectangle,
+          borderRadius: BorderRadius.all(Radius.circular(16.0)),
+        ),
+      ),
+    );
+  }
+}
 
 class AchievementCell extends StatefulWidget {
   final String location;
   final String challengeName;
-  final Image thumbnail;
+  final double? challengeLat;
+  final double? challengeLong;
+  final SvgPicture thumbnail;
   final bool isCompleted;
   final String description;
   final String difficulty;
@@ -14,6 +44,8 @@ class AchievementCell extends StatefulWidget {
   const AchievementCell(
       this.location,
       this.challengeName,
+      this.challengeLat,
+      this.challengeLong,
       this.thumbnail,
       this.isCompleted,
       this.description,
@@ -27,6 +59,8 @@ class AchievementCell extends StatefulWidget {
   State<StatefulWidget> createState() => _AchievementCellState(
       location,
       challengeName,
+      challengeLat,
+      challengeLong,
       thumbnail,
       isCompleted,
       description,
@@ -38,7 +72,9 @@ class AchievementCell extends StatefulWidget {
 class _AchievementCellState extends State<AchievementCell> {
   final String location;
   final String challengeName;
-  final Image thumbnail;
+  final double? challengeLat;
+  final double? challengeLong;
+  final SvgPicture thumbnail;
   final bool isCompleted;
   final String description;
   final String difficulty;
@@ -50,6 +86,8 @@ class _AchievementCellState extends State<AchievementCell> {
   _AchievementCellState(
       this.location,
       this.challengeName,
+      this.challengeLat,
+      this.challengeLong,
       this.thumbnail,
       this.isCompleted,
       this.description,
@@ -70,10 +108,19 @@ class _AchievementCellState extends State<AchievementCell> {
             ),
             context: context,
             isScrollControlled: true,
-            builder: (context) => Preview(challengeName, description,
-                difficulty, points, PreviewType.CHALLENGE, location, eventId));
+            builder: (context) => Preview(
+                challengeName,
+                challengeLat,
+                challengeLong,
+                description,
+                difficulty,
+                points,
+                PreviewType.CHALLENGE,
+                location,
+                eventId));
       },
       child: Container(
+        padding: EdgeInsets.all(5),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(15),
@@ -85,42 +132,18 @@ class _AchievementCellState extends State<AchievementCell> {
             ),
           ],
         ),
-        height: 135.0,
-        child: Padding(
-          padding: EdgeInsets.all(16.0),
+        child: Container(
+          margin: EdgeInsets.all(10),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Padding(
-                padding: const EdgeInsets.only(right: 14),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.all(Radius.circular(4.6)),
-                  child: thumbnail,
-                ),
-              ),
+              Container(margin: EdgeInsets.only(right: 12), child: thumbnail),
               Expanded(
-                child: Column(
+                  child: Stack(children: [
+                Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Icon(Icons.location_on,
-                            size: 20, color: Color.fromARGB(255, 131, 90, 124)),
-                        Text(
-                          location,
-                          style: TextStyle(
-                            color: Color.fromARGB(255, 131, 90, 124),
-                            fontSize: 14,
-                            fontFamily: 'Poppins',
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(
-                      height: 4,
-                    ),
                     Text(
                       challengeName,
                       style: TextStyle(
@@ -130,55 +153,14 @@ class _AchievementCellState extends State<AchievementCell> {
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    SizedBox(
-                      height: 4,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Container(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: Color.fromARGB(255, 249, 237, 218),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            difficulty,
-                            style: TextStyle(
-                              color: Color.fromARGB(204, 0, 0, 0),
-                              fontSize: 14,
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 10),
-                        Container(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: Color.fromARGB(255, 255, 199, 55),
-                            ),
-                            color: Color.fromARGB(255, 189, 135, 31),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            points.toString() + "PTS",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
                   ],
                 ),
-              )
+                Align(
+                    alignment: Alignment.bottomLeft,
+                    child: Padding(
+                        padding: EdgeInsets.only(bottom: 10.0),
+                        child: LoadingBar(3, 4)))
+              ]))
             ],
           ),
         ),
