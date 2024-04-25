@@ -135,7 +135,7 @@ class ApiClient extends ChangeNotifier {
   Future<http.Response?> connectDevice(
       String enrollmentType, String year, String username) async {
     final String? id = await getId();
-    return connect(id!, _googleLoginUrl, enrollmentType, year, username,
+    return connect(id!, _deviceLoginUrl, enrollmentType, year, username,
         noRegister: false);
   }
 
