@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:game/api/game_client_api.dart';
 import 'package:game/api/game_server_api.dart';
+import 'package:game/utils/utility_functions.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
@@ -131,8 +132,31 @@ class ApiClient extends ChangeNotifier {
     return false;
   }
 
+  Future<http.Response?> connectDevice(
+      String enrollmentType, String year, String username) async {
+    final String? id = await getId();
+    return connect(id!, _googleLoginUrl, enrollmentType, year, username,
+        noRegister: false);
+  }
+
+  Future<http.Response?> connectGoogle(GoogleSignInAccount gAccount,
+      String enrollmentType, String year, String username) async {
+    final auth = await gAccount.authentication;
+    return connect(
+        auth.idToken ?? "", _googleLoginUrl, enrollmentType, year, username,
+        noRegister: false);
+  }
+
+  Future<http.Response?> connectGoogleNoRegister(
+      GoogleSignInAccount gAccount) async {
+    final auth = await gAccount.authentication;
+    return connect(auth.idToken ?? "", _googleLoginUrl, "", "", "",
+        noRegister: true);
+  }
+
   Future<http.Response?> connect(String idToken, Uri url, String enrollmentType,
-      String year, String username) async {
+      String year, String username,
+      {bool noRegister = false}) async {
     final pos = await GeoPoint.current();
     if (true) {
       final loginResponse = await http.post(url,
@@ -146,7 +170,8 @@ class ApiClient extends ChangeNotifier {
             "year": year,
             "username": username,
             "long": pos?.long.toString() ?? "0",
-            "aud": Platform.isIOS ? "ios" : "android"
+            "aud": Platform.isIOS ? "ios" : "android",
+            "noRegister": noRegister ? "true" : "false"
           }));
 
       if (loginResponse.statusCode == 201 && loginResponse.body != "") {
@@ -169,7 +194,7 @@ class ApiClient extends ChangeNotifier {
     return null;
   }
 
-  Future<GoogleSignInAccount?> connectGoogle() async {
+  Future<GoogleSignInAccount?> signinGoogle() async {
     final account = await _googleSignIn.signIn();
     return account;
   }

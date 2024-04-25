@@ -110,15 +110,8 @@ class _InterestsPageWidgetState extends State<InterestsPageWidget> {
                 TextButton(
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
-                      assert(widget.user != null || widget.idToken != null);
-                      final auth = await widget.user?.authentication;
-                      final idToken =
-                          widget.user != null ? auth?.idToken : widget.idToken;
-                      final endpoint_string = API_URL +
-                          (widget.user != null ? "/google" : "/device-login");
-                      final connectionResult = await client.connect(
-                          idToken!,
-                          Uri.parse(endpoint_string),
+                      final connectionResult = await client.connectGoogle(
+                          widget.user!,
                           this.widget.userType,
                           this.widget.year ?? "",
                           this.widget.username);

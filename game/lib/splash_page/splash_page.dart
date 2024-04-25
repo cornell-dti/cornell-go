@@ -53,18 +53,35 @@ class SplashPageWidget extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(10.0)))),
                       onPressed: () async {
                         final GoogleSignInAccount? account =
-                            await apiClient.connectGoogle();
+                            await apiClient.signinGoogle();
+
                         if (account == null) {
-                          displayToast("An error occured while signing you up.",
+                          displayToast(
+                              "An error occured while signing you into Google!",
                               Status.error);
-                        } else {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => RegisterPageWidget(
-                                  user: account, idToken: null),
-                            ),
-                          );
+                          return;
                         }
+
+                        if (!account.email.contains("@cornell.edu")) {
+                          displayToast(
+                              "Only Cornell-affiliated users may use Google Sign-in!",
+                              Status.error);
+                          return;
+                        }
+
+                        final gRelogResult =
+                            await apiClient.connectGoogleNoRegister(account);
+
+                        if (gRelogResult != null) {
+                          return;
+                        }
+
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => RegisterPageWidget(
+                                user: account, idToken: null),
+                          ),
+                        );
                       },
                       child: Container(
                         width: 255,
@@ -105,12 +122,8 @@ class SplashPageWidget extends StatelessWidget {
                             RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10.0)))),
                     onPressed: () async {
-                      final String? id = await getId();
-                      print("GOT ID");
-                      print(id);
-                      final endpoint_string = API_URL + "/device-login";
-                      final connectionResult = await client.connect(
-                          id!, Uri.parse(endpoint_string), "GUEST", "", "");
+                      final connectionResult =
+                          await client.connectDevice("GUEST", "", "");
 
                       if (connectionResult == null) {
                         displayToast("An error occurred while signing you up!",
