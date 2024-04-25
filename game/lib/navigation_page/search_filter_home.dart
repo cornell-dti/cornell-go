@@ -61,68 +61,63 @@ class _SearchFilterBarState extends State<SearchFilterBar>
             child: Padding(
                 padding: EdgeInsets.fromLTRB(0, 50, 0, 0),
                 child: Column(children: [
-                  Container(
-                      height: 45,
-                      color: Color.fromARGB(51, 217, 217, 217),
-                      child: Row(children: [
-                        Container(
-                            decoration: BoxDecoration(
-                              color: Color.fromARGB(
-                                  255, 255, 248, 241), // Background color
-                              borderRadius:
-                                  BorderRadius.circular(30), // Rounded edges
-                            ),
-
-                            // color: Color.fromARGB(255, 255, 248, 241),
-                            child: SizedBox(
-                                width: 345,
-                                height: 45,
-                                child: TextField(
-                                  onSubmitted: onSearchTextChanged,
-                                  decoration: InputDecoration(
-                                    prefixIcon: Icon(
-                                      Icons.search,
-                                      color: Color.fromARGB(76, 0, 0, 0),
-                                      size: 12,
-                                    ),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(
-                                          30), // Rounded edges
-                                      borderSide: BorderSide(
-                                          color: Colors
-                                              .transparent), // Transparent border
-                                    ),
-                                    labelText:
-                                        "Search a challenge name, location, etc...",
-                                    labelStyle: TextStyle(
-                                      color: Color.fromARGB(76, 0, 0, 0),
-                                      fontSize: 12,
-                                      fontFamily: 'Poppins',
-                                      backgroundColor:
-                                          Color.fromARGB(255, 255, 248, 241),
-                                    ),
-                                  ),
-                                ))),
-                        Container(
-                            width: 36,
-                            height:
-                                36, // Set the desired height for the IconButton
-                            child: IconButton(
-                                icon: SvgPicture.asset(
-                                  'assets/icons/Group 578.svg', // Path to your local SVG file
+                  Align(
+                      alignment: Alignment.center,
+                      child: Container(
+                          height: 45,
+                          // color: Color.fromARGB(51, 217, 217, 217),
+                          child: Row(children: [
+                            Container(
+                                decoration: BoxDecoration(
+                                  color: Color.fromARGB(
+                                      255, 255, 248, 241), // Background color
+                                  borderRadius: BorderRadius.circular(
+                                      30), // Rounded edges
                                 ),
-                                onPressed: () {
-                                  showModalBottomSheet(
-                                    context: context,
-                                    isScrollControlled: true,
-                                    builder: (context) => FilterForm(
-                                        onSubmit: handleFilterSubmit,
-                                        difficulty: selectedDifficulty,
-                                        locations: selectedLocations,
-                                        categories: selectedCategories),
-                                  );
-                                }))
-                      ])),
+
+                                // color: Color.fromARGB(255, 255, 248, 241),
+                                child: SizedBox(
+                                    width: 345,
+                                    height: 45,
+                                    child: TextField(
+                                      onSubmitted: onSearchTextChanged,
+                                      decoration: InputDecoration(
+                                        prefixIcon: Icon(
+                                          Icons.search,
+                                          color: Color.fromARGB(76, 0, 0, 0),
+                                          size: 20,
+                                        ),
+                                        labelText:
+                                            "Search a challenge name, location, etc...",
+                                        labelStyle: TextStyle(
+                                          // color: Color.fromARGB(76, 0, 0, 0),
+                                          color: Color(0xFFB9B9B9),
+                                          fontSize: 12,
+                                          fontFamily: 'Poppins',
+                                          backgroundColor: Color.fromARGB(
+                                              255, 255, 248, 241),
+                                        ),
+                                      ),
+                                    ))),
+                            Container(
+                                width: 40,
+                                height: 36,
+                                child: IconButton(
+                                    icon: SvgPicture.asset(
+                                      'assets/icons/Group 578.svg',
+                                    ),
+                                    onPressed: () {
+                                      showModalBottomSheet(
+                                        context: context,
+                                        isScrollControlled: true,
+                                        builder: (context) => FilterForm(
+                                            onSubmit: handleFilterSubmit,
+                                            difficulty: selectedDifficulty,
+                                            locations: selectedLocations,
+                                            categories: selectedCategories),
+                                      );
+                                    }))
+                          ]))),
                   // Container(
                   //   width: 345,
                   //   height: 45,
