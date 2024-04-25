@@ -59,9 +59,7 @@ export class UserService {
     authToken: string,
     enrollmentType: EnrollmentType,
   ) {
-    if (authType === AuthType.GOOGLE) {
-      username = username;
-    } else if (authType === AuthType.DEVICE) {
+    if (authType === AuthType.DEVICE) {
       const count = await this.prisma.user.count();
       username = 'guest' + (count + 10001);
     }
