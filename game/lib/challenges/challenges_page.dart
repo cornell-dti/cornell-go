@@ -1,16 +1,12 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/api/game_client_dto.dart';
 import 'package:game/model/challenge_model.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/group_model.dart';
 import 'package:game/model/tracker_model.dart';
-import 'package:game/model/user_model.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:provider/provider.dart';
 import 'challenge_cell.dart';
@@ -133,7 +129,7 @@ class _ChallengesPageState extends State<ChallengesPage> {
                   }
                   for (EventDto event in events) {
                     var tracker = trackerModel.trackerByEventId(event.id);
-                    var numberCompleted = tracker?.prevChallenges?.length ?? 0;
+                    var numberCompleted = tracker?.prevChallenges.length ?? 0;
                     var complete =
                         (numberCompleted == event.challenges?.length);
                     var locationCount = event.challenges?.length ?? 0;

@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:game/journeys/journeys_page.dart';
 import 'package:game/main.dart';
-import 'package:game/navigation_page/bottom_navbar.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:dropdown_button2/dropdown_button2.dart';
 
 class InterestsPageWidget extends StatefulWidget {
   InterestsPageWidget(

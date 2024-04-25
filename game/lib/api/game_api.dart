@@ -190,8 +190,10 @@ class ApiClient extends ChangeNotifier {
       print("Failed to connect to server!");
       return null;
     }
+    /*
     print("Failed to get location data!");
     return null;
+    */
   }
 
   Future<GoogleSignInAccount?> signinGoogle() async {

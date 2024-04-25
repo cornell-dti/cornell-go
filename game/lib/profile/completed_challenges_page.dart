@@ -4,7 +4,6 @@ import 'package:game/model/challenge_model.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/tracker_model.dart';
 import 'package:game/model/user_model.dart';
-import 'package:game/profile/profile_page.dart';
 import 'package:game/profile/completed_challenge_cell.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:intl/intl.dart';
@@ -47,8 +46,6 @@ class CompletedChallengesPage extends StatelessWidget {
               child: CircularProgressIndicator(),
             );
           }
-          var username = userModel.userData?.username;
-          var score = userModel.userData?.score;
 
           List<Tuple2<DateTime, EventDto>> completedEvents = [];
 

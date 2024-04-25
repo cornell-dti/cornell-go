@@ -1,10 +1,4 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:game/api/geopoint.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:game/gameplay/gameplay_page.dart';
 import 'package:game/navigation_page/bottom_navbar.dart';
 import 'package:game/progress_indicators/circular_progress_indicator.dart';
@@ -124,7 +118,7 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
       // build list of completed challenge text fields to display later
       var total_pts = 0;
       List<Widget> completedChallenges = [];
-      for (PrevChallengeDto prevChal in (tracker.prevChallenges ?? [])) {
+      for (PrevChallengeDto prevChal in (tracker.prevChallenges)) {
         print(prevChal.dateCompleted.toString());
         print(prevChal.hintsUsed);
         var completedChal =
@@ -206,7 +200,7 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                   Container(
                       padding: EdgeInsets.only(left: 30, bottom: 10),
                       alignment: Alignment.centerLeft,
-                      child: LoadingBar(tracker.prevChallenges?.length ?? 0,
+                      child: LoadingBar(tracker.prevChallenges.length,
                           event?.challenges?.length ?? 0)),
                 Container(
                   padding: EdgeInsets.only(left: 30, bottom: 10),
@@ -301,7 +295,7 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                             ),
                           ],
                         )),
-                  if ((tracker.prevChallenges.last.hintsUsed ?? 0) > 2)
+                  if ((tracker.prevChallenges.last.hintsUsed) > 2)
                     Container(
                         margin:
                             EdgeInsets.only(left: 30, bottom: 10, right: 30),
@@ -335,7 +329,7 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                       ? "Total Points: " + total_pts.toString()
                       : "Points Earned: " +
                           ((challenge.points ?? 0) -
-                                  (tracker.prevChallenges.last.hintsUsed ?? 0) *
+                                  (tracker.prevChallenges.last.hintsUsed) *
                                       hintsDeduction)
                               .toString(),
                   style: TextStyle(
