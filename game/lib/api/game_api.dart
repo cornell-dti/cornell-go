@@ -158,39 +158,40 @@ class ApiClient extends ChangeNotifier {
       String year, String username,
       {bool noRegister = false}) async {
     final pos = await GeoPoint.current();
-    if (true) {
-      final loginResponse = await http.post(url,
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-          },
-          body: jsonEncode(<String, String>{
-            "idToken": idToken,
-            "lat": pos?.lat.toString() ?? "0",
-            "enrollmentType": enrollmentType,
-            "year": year,
-            "username": username,
-            "long": pos?.long.toString() ?? "0",
-            "aud": Platform.isIOS ? "ios" : "android",
-            "noRegister": noRegister ? "true" : "false"
-          }));
-
-      if (loginResponse.statusCode == 201 && loginResponse.body != "") {
-        final responseBody = jsonDecode(loginResponse.body);
-        this._accessToken = responseBody["accessToken"];
-        this._refreshToken = responseBody["refreshToken"];
-        await _saveToken();
-        _createSocket(false);
-        return loginResponse;
-      } else {
-        print(loginResponse.body);
-      }
-      authenticated = false;
-      notifyListeners();
-
-      print("Failed to connect to server!");
-      return null;
-    }
     /*
+    if (post != null) { */
+    final loginResponse = await http.post(url,
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, String>{
+          "idToken": idToken,
+          "lat": pos?.lat.toString() ?? "0",
+          "enrollmentType": enrollmentType,
+          "year": year,
+          "username": username,
+          "long": pos?.long.toString() ?? "0",
+          "aud": Platform.isIOS ? "ios" : "android",
+          "noRegister": noRegister ? "true" : "false"
+        }));
+
+    if (loginResponse.statusCode == 201 && loginResponse.body != "") {
+      final responseBody = jsonDecode(loginResponse.body);
+      this._accessToken = responseBody["accessToken"];
+      this._refreshToken = responseBody["refreshToken"];
+      await _saveToken();
+      _createSocket(false);
+      return loginResponse;
+    } else {
+      print(loginResponse.body);
+    }
+    authenticated = false;
+    notifyListeners();
+
+    print("Failed to connect to server!");
+    return null;
+    /*
+    }
     print("Failed to get location data!");
     return null;
     */
