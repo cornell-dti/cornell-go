@@ -89,7 +89,7 @@ export class ClientService {
 
   async sendProtected<TDto extends {}>(
     event: keyof ClientApiDef,
-    target: string,
+    target: string | User,
     dto: ClientApiDef[typeof event] & TDto,
     resource?: {
       id: string;
@@ -100,12 +100,13 @@ export class ClientService {
       };
     },
   ) {
+    const room = target instanceof Object ? target.id : target;
     if (!resource) {
-      this.gateway.server.to(target).emit(event, dto);
+      this.gateway.server.to(room).emit(event, dto);
     } else {
-      this.gateway.server.in(target).socketsJoin(resource.id);
+      this.gateway.server.in(room).socketsJoin(resource.id);
       // Find all targeted users
-      const users = await this.getAffectedUsers(target);
+      const users = await this.getAffectedUsers(room);
 
       for (const user of users) {
         const ability = this.abilityFactory.createForUser(user);
@@ -125,9 +126,9 @@ export class ClientService {
             ...dto,
             [resource.dtoField]: accessibleObj,
           };
-          await this.sendEvent([user.id], event, newDto);
+          await this.sendEvent(['user/' + user.id], event, newDto);
         } else {
-          await this.sendEvent([user.id], event, accessibleObj);
+          await this.sendEvent(['user/' + user.id], event, accessibleObj);
         }
       }
     }

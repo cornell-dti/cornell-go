@@ -311,7 +311,7 @@ export class GroupService {
 
     await this.clientService.sendProtected(
       'updateGroupData',
-      target?.id ?? group.id,
+      target ?? group.id,
       dto,
       {
         id: group.id,

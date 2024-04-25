@@ -309,7 +309,7 @@ export class EventService {
     const dto = await this.dtoForEventTracker(tracker);
     await this.clientService.sendProtected(
       'updateEventTrackerData',
-      target?.id ?? tracker.id,
+      target ?? tracker.id,
       dto,
       {
         id: tracker.id,
@@ -337,7 +337,7 @@ export class EventService {
 
     await this.clientService.sendProtected(
       'updateEventData',
-      target?.id ?? ev.id,
+      target ?? ev.id,
       dto,
       {
         id: ev.id,

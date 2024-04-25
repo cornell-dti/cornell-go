@@ -187,7 +187,7 @@ export class OrganizationService {
 
     await this.clientService.sendProtected(
       'updateOrganizationData',
-      target?.id ?? organization.id,
+      target ?? organization.id,
       dto,
       {
         id: organization.id,

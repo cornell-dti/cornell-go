@@ -232,7 +232,7 @@ export class ChallengeService {
 
     await this.clientService.sendProtected(
       'updateChallengeData',
-      target?.id ?? challenge.id,
+      target ?? challenge.id,
       dto,
       {
         id: challenge.id,

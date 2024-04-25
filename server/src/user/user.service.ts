@@ -260,7 +260,7 @@ export class UserService {
 
     await this.clientService.sendProtected(
       'updateUserData',
-      target?.id ?? user.id,
+      target ?? user.id,
       dto,
       {
         id: user.id,
