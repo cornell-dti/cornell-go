@@ -68,6 +68,9 @@ describe('OrganizationModule E2E', () => {
   let exOrg: Organization;
   let exEv: EventBase;
   let exChal: Challenge;
+  let exEv2: EventBase;
+  let exChal1: Challenge;
+  let exChal2: Challenge;
 
   let sendEventMock: jest.SpyInstance<Promise<void>, [string[], string, any]>;
   let affectedUsers: User[] = [];
@@ -102,7 +105,7 @@ describe('OrganizationModule E2E', () => {
     }))!;
 
     exEv = (await eventService.upsertEventFromDto(fullAbility, {
-      id: '',
+      id: 'ev1',
       initialOrganizationId: exOrg.id,
     }))!;
 
@@ -110,6 +113,25 @@ describe('OrganizationModule E2E', () => {
       id: '',
       linkedEventId: exEv.id,
       location: ChallengeLocationDto.ARTS_QUAD,
+    }))!;
+
+    exEv2 = (await eventService.upsertEventFromDto(fullAbility, {
+      id: 'ev2',
+      initialOrganizationId: exOrg.id,
+    }))!;
+
+    exChal1 = (await challengeService.upsertChallengeFromDto(fullAbility, {
+      id: 'exchal1',
+      name: 'exchal1',
+      linkedEventId: exEv2.id,
+      location: ChallengeLocationDto.ARTS_QUAD,
+    }))!;
+
+    exChal2 = (await challengeService.upsertChallengeFromDto(fullAbility, {
+      id: 'exchal2',
+      name: 'exchal2',
+      linkedEventId: exEv2.id,
+      location: ChallengeLocationDto.ENG_QUAD,
     }))!;
 
     managerUser = await userService.register(
@@ -207,12 +229,29 @@ describe('OrganizationModule E2E', () => {
       expect(dto.user.username).toEqual('myNewUsername');
     });
 
-    it('Should not be able to see non-current challenge lat long or name', async () => {
-      await groupService.setCurrentEvent(managerUser, exEv.id);
+    it('Should be able to see non-current index = 0 challenge lat long, but not name', async () => {
+      await groupService.setCurrentEvent(managerUser, defaultEv.id);
 
       affectedUsers.push(managerUser);
       await chalGateway.requestChallengeData(managerAbility, managerUser, {
-        challenges: [defaultChal.id],
+        challenges: [exChal1.id],
+      });
+
+      const [users, ev, dto]: DtoLastCall<UpdateChallengeDataDto> =
+        sendEventMock.mock.lastCall;
+
+      expect(ev).toEqual('updateChallengeData');
+      expect(dto.challenge.name).toBeUndefined();
+      expect(dto.challenge.latF).toEqual(exChal.latitude);
+      expect(dto.challenge.longF).toEqual(exChal.longitude);
+    });
+
+    it('Should not be able to see non-current index > 0 challenge lat long or name', async () => {
+      await groupService.setCurrentEvent(managerUser, defaultEv.id);
+
+      affectedUsers.push(managerUser);
+      await chalGateway.requestChallengeData(managerAbility, managerUser, {
+        challenges: [exChal2.id],
       });
 
       const [users, ev, dto]: DtoLastCall<UpdateChallengeDataDto> =
@@ -240,7 +279,7 @@ describe('OrganizationModule E2E', () => {
       expect(dto.challenge.longF).toBeDefined();
     });
 
-    it('Should be able to see completed challenge name but not lat long', async () => {
+    it('Should be able to see completed challenge name lat and long', async () => {
       await groupService.setCurrentEvent(managerUser, defaultEv.id);
       await chalGateway.completedChallenge(managerUser, {
         challengeId: defaultChal.id,
@@ -257,8 +296,8 @@ describe('OrganizationModule E2E', () => {
 
       expect(ev).toEqual('updateChallengeData');
       expect(dto.challenge.name).toBeDefined();
-      expect(dto.challenge.latF).toBeUndefined();
-      expect(dto.challenge.longF).toBeUndefined();
+      expect(dto.challenge.latF).toBeDefined();
+      expect(dto.challenge.longF).toBeDefined();
     });
 
     it('Should not be able to set current event to event of not allowed org', async () => {
