@@ -43,6 +43,7 @@ final API_URL = ENV_URL == "" ? LOOPBACK : ENV_URL;
 
 void main() async {
   print(API_URL);
+
   final GoogleMapsFlutterPlatform platform = GoogleMapsFlutterPlatform.instance;
   // should only apply to Android - needs to be tested for iOS
   if (platform is GoogleMapsFlutterAndroid) {
