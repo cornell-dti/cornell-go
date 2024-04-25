@@ -1,10 +1,18 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 /**
- * This file contains the 6 possible podium widgets to appear in the leaderboard 
- * page. For each podium position (FirstPodium, SecndPodium, ThridPodium) there is a red and orange asset svg variation,
- * which is orange if that is the user's current spot and red otherwise.
+ * 'PodiumBlock' widget - Displays leaderboard podium 
+ * 
+ * This file contains a dynamic podium widget block to appear in the leaderboard 
+ * page. For each of the 4 possible podium positions (1st,2nd,3rd,Not in top 3) there is,
+ *  there is a differet image variation which highlights the corresponding podium in orange.
+ * 
+ * @param props - Contains:
+ * - 'position': Current position of user 
+ * - 'scoreList': Number of points for the top 3 users 
  */
 
 var pointsStyle = TextStyle(
@@ -15,97 +23,63 @@ var pointsStyle = TextStyle(
   height: 0,
 );
 
-Widget FirstPodium(context, int points, bool isUser) {
-  // Choosing whetehr podum is highlighted or not by isUser condition
-  String svgAssetPath = isUser
-      ? 'assets/icons/podium1highlighted.svg'
-      : 'assets/icons/podium1red.svg';
+Widget PodiumBlock(context, int position, List scoreList) {
+  Map<int, String> svgAssetPaths = {
+    0: 'assets/icons/blank_podiums.svg',
+    1: 'assets/icons/gold_podiums.svg',
+    2: 'assets/icons/silver_podiums.svg',
+    3: 'assets/icons/bronze_podiums.svg',
+  };
 
-  return Center(
-      child: Container(
-          width: 106,
-          height: 150,
-          child: Stack(children: <Widget>[
-            // SvgPicture.asset('assets/icons/gold_trophy.svg',
-            //     height: 20, width: 20),
-            SvgPicture.asset(
-              svgAssetPath,
-              semanticsLabel: '1st Podium',
-            ),
-            Positioned(
-              bottom: 130,
-              child: SvgPicture.asset('assets/icons/gold_trophy.svg',
-                  height: 87, width: 80),
-            ),
-            Positioned(
-              top: 68,
-              left: 22,
-              child: SizedBox(
-                width: 60,
-                height: 29,
-                child: FittedBox(
-                  alignment: Alignment.center,
-                  fit: BoxFit.scaleDown,
-                  child: Text(points.toString() + " PTS", style: pointsStyle),
-                ),
-              ),
-            )
-          ])));
-}
+  String svgAssetPath = svgAssetPaths[position] ?? svgAssetPaths[0]!;
 
-Widget SecondPodium(context, int points, bool isUser) {
-  String svgAssetPath = isUser
-      ? 'assets/icons/podium2highlighted.svg'
-      : 'assets/icons/podium2red.svg';
-
-  return Center(
-      child: Container(
-          width: 106,
-          height: 86,
-          child:
-              Stack(alignment: FractionalOffset(0.5, 0.63), children: <Widget>[
-            SvgPicture.asset(
-              svgAssetPath,
-              semanticsLabel: '2nd Podium',
-            ),
-
-            SizedBox(
-              width: 60,
-              height: 29,
-              child: FittedBox(
-                alignment: Alignment.center,
-                fit: BoxFit.scaleDown,
-                child: Text(points.toString() + " PTS", style: pointsStyle),
-              ),
-            ),
-            // Text(points.toString() + " PTS"
-          ])));
-}
-
-Widget ThirdPodium(context, int points, bool isUser) {
-  String svgAssetPath = isUser
-      ? 'assets/icons/podium3highlighted.svg'
-      : 'assets/icons/podium3red.svg';
-  return Center(
-      child: Container(
-          width: 106,
-          height: 62,
-          child:
-              Stack(alignment: FractionalOffset(0.5, 0.75), children: <Widget>[
-            SvgPicture.asset(
-              svgAssetPath,
-              semanticsLabel: '3rd Podium',
-            ),
-
-            SizedBox(
-              width: 60,
-              height: 29,
-              child: FittedBox(
-                alignment: Alignment.center,
-                fit: BoxFit.scaleDown,
-                child: Text(points.toString() + " PTS", style: pointsStyle),
-              ),
-            ),
-            // Text(points.toString() + " PTS"
-          ])));
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 10.0),
+    child: Stack(alignment: Alignment.bottomCenter, children: <Widget>[
+      SvgPicture.asset(
+        svgAssetPath,
+        width: 360,
+        height: 178,
+      ),
+      Positioned(
+        left: 27,
+        bottom: 12,
+        child: SizedBox(
+          width: 60,
+          height: 29,
+          child: FittedBox(
+            alignment: Alignment.center,
+            fit: BoxFit.scaleDown,
+            child: Text(scoreList[1].toString() + " PTS", style: pointsStyle),
+          ),
+        ),
+      ),
+      Positioned(
+        left: 150,
+        bottom: 25,
+        child: SizedBox(
+          width: 60,
+          height: 29,
+          child: FittedBox(
+            alignment: Alignment.center,
+            fit: BoxFit.scaleDown,
+            child: Text(scoreList[0].toString() + " PTS", style: pointsStyle),
+          ),
+        ),
+      ),
+      Positioned(
+        right: 27,
+        bottom: 6,
+        child: SizedBox(
+          width: 60,
+          height: 29,
+          child: FittedBox(
+            alignment: Alignment.center,
+            fit: BoxFit.scaleDown,
+            child: Text(scoreList[2].toString() + " PTS", style: pointsStyle),
+          ),
+        ),
+      )
+    ]),
+  );
 }

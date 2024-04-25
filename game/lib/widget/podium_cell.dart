@@ -29,15 +29,13 @@ Widget podiumCell(context, String name) {
         ),
         SizedBox(
           width: 80,
-          height: 38,
+          height: 20,
           child: Text(
             textAlign: TextAlign.center,
             name,
             style: nameStyle,
             // Allowing wrapping of the names in the podium
             overflow: TextOverflow.ellipsis,
-            softWrap: true,
-            maxLines: 2,
           ),
         )
       ]));

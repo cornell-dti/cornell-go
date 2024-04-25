@@ -1,4 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:game/api/game_client_dto.dart';
 import 'package:game/model/event_model.dart';
@@ -7,6 +9,7 @@ import 'package:game/model/user_model.dart';
 import 'package:game/global_leaderboard/podium_widgets.dart';
 import 'package:game/widget/leaderboard_cell.dart';
 import 'package:game/widget/podium_cell.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 
 /**
@@ -38,6 +41,9 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
       letterSpacing: 0.0,
     );
 
+    int playerPosition = 0;
+    var scoreList = [];
+
     return Scaffold(
         key: scaffoldKey,
         backgroundColor: Color.fromARGB(255, 255, 248, 241),
@@ -46,17 +52,20 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
           automaticallyImplyLeading: false,
           backgroundColor: Color.fromARGB(255, 237, 86, 86),
           flexibleSpace: FlexibleSpaceBar(
-              title: Text(
-                'Leaderboard',
-                style: leaderboardStyle,
+              title: Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Text(
+                  'Leaderboard',
+                  style: leaderboardStyle,
+                ),
               ),
               centerTitle: true),
           actions: [],
         ),
         body: Padding(
-          padding: const EdgeInsets.only(top: 0),
-          child: Column(
-            children: [
+            padding: const EdgeInsets.only(top: 0),
+            child: Center(
+                child: Column(children: [
               //Podium Container
               Consumer3<GroupModel, EventModel, UserModel>(builder:
                   (context, myGroupModel, myEventModel, myUserModel, child) {
@@ -84,140 +93,129 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
                 List<LeaderDto> podiumList = fullList.sublist(0, 3);
 
                 // Booleans representing whether the current player is in the podium for highlighting purposes
-                bool firstPodiumUser = podiumList.length > 0 &&
-                    podiumList[0].userId == myUserModel.userData?.id;
+                if (podiumList.length > 0 &&
+                    podiumList[0].userId == myUserModel.userData?.id) {
+                  playerPosition = 1;
+                }
 
-                bool secondPodiumUser = podiumList.length > 1 &&
-                    podiumList[1].userId == myUserModel.userData?.id;
+                if (podiumList.length > 1 &&
+                    podiumList[1].userId == myUserModel.userData?.id) {
+                  playerPosition = 2;
+                }
 
-                bool thirdPodiumUser = podiumList.length > 2 &&
-                    podiumList[2].userId == myUserModel.userData?.id;
+                if (podiumList.length > 2 &&
+                    podiumList[2].userId == myUserModel.userData?.id) {
+                  playerPosition = 3;
+                }
 
-                return Container(
-                  width: 328,
-                  height:
-                      320, // TODO: This is how you chagne the hight of the podium cell
-                  margin: EdgeInsets.only(top: 24, left: 25),
-                  child: Row(children: [
-                    Column(
-                      children: [
-                        SizedBox(height: 26),
-                        podiumList.length > 1
-                            ? podiumCell(context, podiumList[1].username)
-                            : podiumCell(context, ""),
-                        SizedBox(height: 12),
-                        SecondPodium(
-                            context, podiumList[1].score, secondPodiumUser),
-                      ],
+                scoreList = [
+                  podiumList[0].score,
+                  podiumList[1].score,
+                  podiumList[2].score
+                ];
+
+                return Column(
+                  children: [
+                    Container(
+                      height: 75,
+                      margin: EdgeInsets.only(top: 24),
+                      child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Transform.translate(
+                              offset: Offset(0, 40),
+                              child: podiumList.length > 1
+                                  ? podiumCell(context, podiumList[1].username)
+                                  : podiumCell(context, ""),
+                            ),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.only(left: 45, right: 45),
+                              child: podiumList.length > 0
+                                  ? podiumCell(context, podiumList[0].username)
+                                  : podiumCell(context, ""),
+                            ),
+                            Transform.translate(
+                              offset: Offset(0, 55),
+                              child: podiumList.length > 2
+                                  ? podiumCell(context, podiumList[2].username)
+                                  : podiumCell(context, ""),
+                            )
+                          ]),
                     ),
-                    SizedBox(width: 5),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        podiumList.length > 0
-                            ? podiumCell(context, podiumList[0].username)
-                            : podiumCell(context, ""),
-                        // SizedBox(height: 12),
-                        SizedBox(height: 40),
-
-                        // Stack(
-                        //     alignment: FractionalOffset(0.5, 0.58),
-                        //     children: <Widget>[
-                        FirstPodium(
-                            context, podiumList[0].score, firstPodiumUser),
-                      ],
-                      // ],
-                    ),
-                    SizedBox(width: 5),
-                    Column(
-                      children: [
-                        SizedBox(height: 50),
-                        podiumList.length > 2
-                            ? podiumCell(context, podiumList[2].username)
-                            : podiumCell(context, ""),
-                        SizedBox(height: 12),
-                        ThirdPodium(
-                            context, podiumList[2].score, thirdPodiumUser),
-                      ],
-                    ),
-                  ]),
+                    Padding(
+                        padding: const EdgeInsets.only(top: 20),
+                        child: PodiumBlock(context, playerPosition, scoreList)),
+                  ],
                 );
               }),
-              SizedBox(height: 100),
-              //Leaderboard Container
+
               Expanded(
-                child: Padding(
-                  padding:
-                      const EdgeInsets.only(left: 33.0, right: 8.0, top: 1.0),
-                  child: Consumer3<GroupModel, EventModel, UserModel>(
-                    builder: (context, myGroupModel, myEventModel, myUserModel,
-                        child) {
-                      // Use this line below to retrieve actual data
-                      final List<LeaderDto> list =
-                          myEventModel.getTopPlayersForEvent('', 1000);
-                      // Leaderboard starts at 4th position because first three already in podium
-                      int position = 4;
+                child: Consumer3<GroupModel, EventModel, UserModel>(
+                  builder: (context, myGroupModel, myEventModel, myUserModel,
+                      child) {
+                    // Use this line below to retrieve actual data
+                    final List<LeaderDto> list =
+                        myEventModel.getTopPlayersForEvent('', 1000);
+                    // Leaderboard starts at 4th position because first three already in podium
+                    int position = 4;
 
-                      list.sort((a, b) => b.score.compareTo(a.score));
+                    list.sort((a, b) => b.score.compareTo(a.score));
 
-                      return Container(
-                        width: 345.0,
-                        height: 446.0,
-                        decoration: BoxDecoration(
-                          color: Color.fromRGBO(255, 170, 91, 0.15),
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(10.0),
-                            topRight: Radius.circular(10.0),
-                          ),
+                    return Container(
+                      width: 360.0,
+                      height: 446.0,
+                      decoration: BoxDecoration(
+                        color: Color.fromRGBO(255, 170, 91, 0.15),
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(10.0),
+                          topRight: Radius.circular(10.0),
                         ),
-                        child: Container(
-                          width: 283.05,
-                          height: 432.0,
-                          child: ListView(
-                            shrinkWrap: true,
-                            scrollDirection: Axis.vertical,
-                            children: [
-                              for (LeaderDto user in list.skip(3))
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                      left: 30.95, right: 30.95, top: 16.0),
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.only(
-                                        topLeft: Radius.circular(10.0),
-                                        topRight: Radius.circular(10.0),
-                                        bottomLeft: Radius.circular(10.0),
-                                        bottomRight: Radius.circular(10.0),
+                      ),
+                      child: Container(
+                        width: 283.05,
+                        height: 432.0,
+                        child: ListView(
+                          shrinkWrap: true,
+                          scrollDirection: Axis.vertical,
+                          children: [
+                            for (LeaderDto user in list.skip(3))
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                    left: 30.95, right: 30.95, top: 16.0),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(10.0),
+                                      topRight: Radius.circular(10.0),
+                                      bottomLeft: Radius.circular(10.0),
+                                      bottomRight: Radius.circular(10.0),
+                                    ),
+                                    color: Colors.white,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Color(0x40000000),
+                                        offset: Offset(0.0, 1.745),
+                                        blurRadius: 6.989011764526367,
                                       ),
-                                      color: Colors.white,
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Color(0x40000000),
-                                          offset:
-                                              Offset(0.0, 1.7472529411315918),
-                                          blurRadius: 6.989011764526367,
-                                        ),
-                                      ],
-                                    ),
-                                    child: leaderBoardCell(
-                                      context,
-                                      user.username,
-                                      position++,
-                                      user.score,
-                                      user.userId == myUserModel.userData?.id,
-                                    ),
+                                    ],
+                                  ),
+                                  child: leaderBoardCell(
+                                    context,
+                                    user.username,
+                                    position++,
+                                    user.score,
+                                    user.userId == myUserModel.userData?.id,
                                   ),
                                 ),
-                            ],
-                          ),
+                              ),
+                          ],
                         ),
-                      );
-                    },
-                  ),
+                      ),
+                    );
+                  },
                 ),
               )
-            ],
-          ),
-        ));
+            ]))));
   }
 }
