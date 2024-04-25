@@ -21,7 +21,6 @@ import 'package:game/widget/game_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:game/color_palette.dart';
 
-
 const ENV_URL = String.fromEnvironment('API_URL', defaultValue: "");
 
 final storage = FlutterSecureStorage();
