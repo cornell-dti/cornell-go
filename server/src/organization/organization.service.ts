@@ -354,9 +354,11 @@ export class OrganizationService {
   }
 
   async joinOrganization(user: User, code: string) {
-    const org = await this.prisma.organization.findFirstOrThrow({
+    const org = await this.prisma.organization.findFirst({
       where: { accessCode: code },
     });
+
+    if (!org) return;
 
     await this.prisma.organization.update({
       where: { id: org.id },

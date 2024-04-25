@@ -23,6 +23,16 @@ To access the Google Maps in the CornellGo app, you need two Google Maps API Key
 docker compose up --build
 ```
 
+### Run project with backend hot reloading
+
+```
+docker compose watch
+
+If you want to see logging, run the following in a different terminal:
+docker compose logs --follow
+Or look at your docker desktop app
+```
+
 ### Start the container in the background
 
 ```

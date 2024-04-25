@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_config/flutter_config.dart';
+import 'package:game/loading_page/loading_page.dart';
 
 // imports for google maps
 import 'dart:io' show Platform;
@@ -104,20 +105,15 @@ class MyApp extends StatelessWidget {
         ],
         child: GameWidget(
             child: MaterialApp(
-          title: 'CornellGO!',
-          localizationsDelegates: [
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          supportedLocales: const [Locale('en', '')],
-          theme: ThemeData(
-              fontFamily: 'Poppins', primarySwatch: ColorPalette.BigRed),
-          home: StreamBuilder<bool>(
-              stream: Stream.fromFuture(client.tryRelog()),
-              builder: (stream, snapshot) => (snapshot.data == null)
-                  ? Container()
-                  : (snapshot.data! ? BottomNavBar() : SplashPageWidget())),
-        )));
+                title: 'CornellGO!',
+                localizationsDelegates: [
+                  GlobalMaterialLocalizations.delegate,
+                  GlobalWidgetsLocalizations.delegate,
+                  GlobalCupertinoLocalizations.delegate,
+                ],
+                supportedLocales: const [Locale('en', '')],
+                theme: ThemeData(
+                    fontFamily: 'Poppins', primarySwatch: ColorPalette.BigRed),
+                home: LoadingPageWidget())));
   }
 }
