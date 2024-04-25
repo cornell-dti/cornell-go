@@ -4,6 +4,13 @@ import 'package:flutter_svg/svg.dart';
 import 'package:game/details_page/dropdown_widget.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
+import 'package:game/api/game_client_dto.dart';
+import 'package:game/model/challenge_model.dart';
+import 'package:game/model/event_model.dart';
+import 'package:game/model/tracker_model.dart';
+import 'package:game/model/user_model.dart';
+import 'package:provider/provider.dart';
+
 class EditProfileWidget extends StatefulWidget {
   EditProfileWidget({
     Key? key,
@@ -74,6 +81,8 @@ class _EditProfileState extends State<EditProfileWidget> {
         width: 1.5,
       ),
     ),
+    fillColor: Colors.white,
+    filled: true,
   );
 
   List<String> _colleges = [
@@ -139,90 +148,105 @@ class _EditProfileState extends State<EditProfileWidget> {
           ),
           actions: [],
         ),
-        body: Center(child: LayoutBuilder(
-            builder: (BuildContext context, BoxConstraints constraints) {
-          return SizedBox(
-              width: constraints.maxWidth * 0.85,
-              child: Column(
-                  // crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.only(top: 30),
-                      child: SvgPicture.asset(
-                          "assets/images/yellow_bear_prof.svg",
-                          height: 115,
-                          width: 115),
-                    ),
-                    Container(
+        body: Center(
+            child: Consumer<UserModel>(builder: (context, userModel, child) {
+          String? myUsername = userModel.userData?.username;
+          String? myYear = userModel.userData?.year;
+          if (myYear != null && myYear.length == 0) {
+            myYear = null;
+          }
+          return LayoutBuilder(
+              builder: (BuildContext context, BoxConstraints constraints) {
+            return SizedBox(
+                width: constraints.maxWidth * 0.85,
+                child: Column(
+                    // crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Padding(
                         padding: EdgeInsets.only(top: 30),
-                        width: double.infinity,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Username *', style: headingStyle),
-                            SizedBox(height: 5),
-                            TextFormField(decoration: fieldDecoration)
-                          ],
-                        )),
-                    Container(
-                        padding: EdgeInsets.only(top: 15),
-                        width: double.infinity,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('College', style: headingStyle),
-                            SizedBox(height: 5),
-                            DropdownWidget(null, _colleges,
-                                notifyParent: (val) {})
-                          ],
-                        )),
-                    Container(
-                        padding: EdgeInsets.only(top: 15),
-                        width: double.infinity,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Major', style: headingStyle),
-                            SizedBox(height: 5),
-                            DropdownWidget(null,
-                                _college == null ? null : _majors[_college],
-                                notifyParent: (val) {})
-                          ],
-                        )),
-                    Container(
-                        padding: EdgeInsets.only(top: 15),
-                        width: double.infinity,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Graduation Year', style: headingStyle),
-                            SizedBox(height: 5),
-                            DropdownWidget(null, _years, notifyParent: (val) {})
-                          ],
-                        )),
-                    SizedBox(height: 100),
-                    TextButton(
-                      onPressed: () {},
-                      style: TextButton.styleFrom(
-                        backgroundColor: Color(0xFFB9B9B9),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 138, vertical: 16),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8)),
+                        child: SvgPicture.asset(
+                            "assets/images/yellow_bear_prof.svg",
+                            height: 115,
+                            width: 115),
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Update',
-                            style: buttonStyle,
-                          ),
-                        ],
-                      ),
-                    )
-                  ]));
+                      Container(
+                          padding: EdgeInsets.only(top: 30),
+                          width: double.infinity,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Username *', style: headingStyle),
+                              SizedBox(height: 5),
+                              TextFormField(
+                                decoration: fieldDecoration,
+                                initialValue: myUsername,
+                                onChanged: (value) => {myUsername = value},
+                              )
+                            ],
+                          )),
+                      Container(
+                          padding: EdgeInsets.only(top: 15),
+                          width: double.infinity,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('College', style: headingStyle),
+                              SizedBox(height: 5),
+                              DropdownWidget(null, _colleges,
+                                  notifyParent: (val) {})
+                            ],
+                          )),
+                      Container(
+                          padding: EdgeInsets.only(top: 15),
+                          width: double.infinity,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Major', style: headingStyle),
+                              SizedBox(height: 5),
+                              DropdownWidget(null,
+                                  _college == null ? null : _majors[_college],
+                                  notifyParent: (val) {})
+                            ],
+                          )),
+                      Container(
+                          padding: EdgeInsets.only(top: 15),
+                          width: double.infinity,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Graduation Year', style: headingStyle),
+                              SizedBox(height: 5),
+                              DropdownWidget(myYear, _years,
+                                  notifyParent: (val) {
+                                myYear = val;
+                              })
+                            ],
+                          )),
+                      SizedBox(height: 100),
+                      TextButton(
+                        onPressed: () {},
+                        style: TextButton.styleFrom(
+                          backgroundColor: Color(0xFFB9B9B9),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 138, vertical: 16),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8)),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Update',
+                              style: buttonStyle,
+                            ),
+                          ],
+                        ),
+                      )
+                    ]));
+          });
         })));
   }
 }

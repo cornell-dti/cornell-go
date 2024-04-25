@@ -47,6 +47,7 @@ class _DropdownWidgetState extends State<DropdownWidget> {
         )),
         buttonStyleData: ButtonStyleData(
           decoration: BoxDecoration(
+              color: Colors.white,
               border: Border.all(
                   width: 2.0, color: Color.fromARGB(255, 217, 217, 217)),
               borderRadius: BorderRadius.circular(10.0)),

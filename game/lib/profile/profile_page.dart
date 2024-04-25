@@ -40,6 +40,7 @@ class _ProfilePageState extends State<ProfilePage> {
             );
           }
           var username = userModel.userData?.username;
+          var isGuest = userModel.userData?.authType == UserAuthTypeDto.device;
           var score = userModel.userData?.score;
 
           List<Tuple2<DateTime, EventDto>> completedEvents = [];
@@ -119,7 +120,8 @@ class _ProfilePageState extends State<ProfilePage> {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => SettingsPage()));
+                                  builder: (context) =>
+                                      SettingsPage(!isGuest)));
                         }),
                   ),
                 ),
