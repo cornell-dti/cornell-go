@@ -52,7 +52,7 @@ class SettingsPage extends StatelessWidget {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => EditProfile()));
+                                  builder: (context) => EditProfileWidget()));
                         },
                         style: TextButton.styleFrom(
                             padding: EdgeInsets.only(left: 20.0),
