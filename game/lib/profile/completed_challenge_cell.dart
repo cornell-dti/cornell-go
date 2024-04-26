@@ -81,8 +81,8 @@ class _CompletedChallengeFullState extends State<CompletedChallengeFull> {
                       child: Image.network(
                         picture,
                         fit: BoxFit.cover,
-                        width: 90,
-                        height: 90,
+                        width: 390,
+                        height: 20,
                       ),
                     );
                   },
@@ -160,13 +160,13 @@ class _CompletedChallengeFullState extends State<CompletedChallengeFull> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    width: 345,
+                    width: 500,
                     height: 122,
                     color: Colors.white,
                     child: Padding(
                       padding: EdgeInsets.only(left: 16.0, top: 30.0),
                       child: Container(
-                        width: 242,
+                        width: 350,
                         height: 51,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -226,7 +226,7 @@ class _CompletedChallengeFullState extends State<CompletedChallengeFull> {
                             Row(
                               children: [
                                 Container(
-                                  width: 50,
+                                  width: 70,
                                   height: 29,
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 2, vertical: 4),
@@ -236,22 +236,16 @@ class _CompletedChallengeFullState extends State<CompletedChallengeFull> {
                                       borderRadius: BorderRadius.circular(20),
                                     ),
                                   ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        widget.difficulty,
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          fontFamily: 'Poppins',
-                                          fontWeight: FontWeight.w400,
-                                          height: 0,
-                                        ),
+                                  child: Center(
+                                    child: Text(
+                                      widget.difficulty,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontFamily: 'Poppins',
+                                        fontWeight: FontWeight.w400,
+                                        height: 0,
                                       ),
-                                    ],
+                                    ),
                                   ),
                                 ),
                                 SizedBox(width: 8),
@@ -269,22 +263,16 @@ class _CompletedChallengeFullState extends State<CompletedChallengeFull> {
                                       borderRadius: BorderRadius.circular(20),
                                     ),
                                   ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        widget.points.toString() + 'PTS',
-                                        style: TextStyle(
-                                            fontSize: 14,
-                                            fontFamily: 'Poppins',
-                                            fontWeight: FontWeight.w400,
-                                            height: 0,
-                                            color: Colors.white),
-                                      ),
-                                    ],
+                                  child: Center(
+                                    child: Text(
+                                      widget.points.toString() + 'PTS',
+                                      style: TextStyle(
+                                          fontSize: 14,
+                                          fontFamily: 'Poppins',
+                                          fontWeight: FontWeight.w400,
+                                          height: 0,
+                                          color: Colors.white),
+                                    ),
                                   ),
                                 ),
                               ],

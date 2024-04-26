@@ -47,8 +47,6 @@ class CompletedChallengesPage extends StatelessWidget {
               child: CircularProgressIndicator(),
             );
           }
-          var username = userModel.userData?.username;
-          var score = userModel.userData?.score;
 
           List<Tuple2<DateTime, EventDto>> completedEvents = [];
 
@@ -86,22 +84,17 @@ class CompletedChallengesPage extends StatelessWidget {
 
                 var pictureList = <String>[];
                 var locationList = [];
-                for (var challengeId in event.challenges ?? []) {
-                  var challenge = challengeModel.getChallengeById(challengeId);
-                  if (challenge != null) {
-                    pictureList.add(challenge.imageUrl!);
-                    locationList.add(challenge.location);
-                  }
-                }
-
-                //Calculate totalPoints.
                 var totalPoints = 0;
                 for (var challengeId in event.challenges ?? []) {
                   var challenge = challengeModel.getChallengeById(challengeId);
                   if (challenge != null) {
+                    pictureList.add(challenge.imageUrl!);
+                    locationList.add(
+                        friendlyLocation[challenge.location?.name ?? 'ANY']);
                     totalPoints += challenge.points ?? 0;
                   }
                 }
+
                 return CompletedChallengeFull(
                   name: event.name!,
                   pictures: pictureList,
