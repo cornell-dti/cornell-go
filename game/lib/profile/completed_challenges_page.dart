@@ -75,7 +75,7 @@ class CompletedChallengesPage extends StatelessWidget {
           //Sort so that the most recent events are first
           completedEvents.sort((a, b) => b.item1.compareTo(a.item1));
           final itemCount = completedEvents.length;
-          return ListView.separated(
+          return ListView.builder(
               itemBuilder: (context, index) {
                 var event = completedEvents[index].item2;
                 var date = completedEvents[index].item1;
@@ -105,7 +105,6 @@ class CompletedChallengesPage extends StatelessWidget {
                   points: totalPoints,
                 );
               },
-              separatorBuilder: (context, index) => const Divider(),
               itemCount: itemCount);
         }));
   }

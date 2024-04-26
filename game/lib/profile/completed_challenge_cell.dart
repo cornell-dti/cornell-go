@@ -1,5 +1,8 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:flutter/widgets.dart';
+import 'package:geolocator/geolocator.dart';
 
 /**
  * Widget that represents each completed challenge 
@@ -45,20 +48,22 @@ class _CompletedChallengeFullState extends State<CompletedChallengeFull> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.only(
+          left: 24.0, right: 24.0, top: 24.0, bottom: 5.0),
       child: Container(
-        width: 345,
-        height: 526,
+        width: MediaQuery.sizeOf(context).width * 0.9,
+        height: MediaQuery.sizeOf(context).height * 0.6,
         decoration: ShapeDecoration(
           color: Colors.white,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
         child: Stack(
+          alignment: Alignment.topCenter,
           children: [
             CarouselSlider(
               key: _carouselKey,
               options: CarouselOptions(
-                height: 526.0,
+                height: MediaQuery.sizeOf(context).height,
                 aspectRatio: 16 / 9,
                 viewportFraction: 1.0,
                 initialPage: 0,
@@ -89,73 +94,68 @@ class _CompletedChallengeFullState extends State<CompletedChallengeFull> {
                 );
               }).toList(),
             ),
-            Positioned(
-              top: 16,
-              left: 16,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 130,
-                        height: 31.58,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 2),
-                        decoration: ShapeDecoration(
-                          color: Colors.white.withOpacity(0.5),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Image.asset(
-                              locationVector,
-                              alignment: Alignment.centerLeft,
-                            ),
-                            Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 5)),
-                            Text(
-                              widget.location,
-                              style: TextStyle(
-                                color: Color(0xFF835A7C),
-                                fontSize: 16,
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w400,
-                                height: 0,
-                              ),
-                            ),
-                          ],
-                        ),
+                  // location type label
+                  Container(
+                    width: 130,
+                    height: 31.58,
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: ShapeDecoration(
+                      color: Colors.white.withOpacity(0.5),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                      SizedBox(width: 130),
-                      Container(
-                        padding:
-                            EdgeInsets.symmetric(vertical: 2, horizontal: 15),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.5),
-                          borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Image.asset(
+                          locationVector,
+                          alignment: Alignment.centerLeft,
                         ),
-                        child: Text(
-                          '${_currentIndex + 1}/${widget.pictures.length}',
+                        Padding(padding: EdgeInsets.symmetric(horizontal: 5)),
+                        Text(
+                          widget.location,
                           style: TextStyle(
-                            color: Colors.white,
+                            color: Color(0xFF835A7C),
                             fontSize: 16,
                             fontFamily: 'Poppins',
                             fontWeight: FontWeight.w400,
+                            height: 0,
                           ),
                         ),
+                      ],
+                    ),
+                  ),
+                  Spacer(),
+                  // carousel number tracker label thing
+                  Container(
+                    padding: EdgeInsets.symmetric(vertical: 2, horizontal: 15),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.5),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      '${_currentIndex + 1}/${widget.pictures.length}',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w400,
                       ),
-                    ],
-                  )
+                    ),
+                  ),
                 ],
               ),
             ),
             Positioned(
               bottom: 0,
+              left: 0,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

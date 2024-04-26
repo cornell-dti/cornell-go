@@ -331,6 +331,7 @@ class _PreviewState extends State<Preview> {
                                 ?.setCurrentEvent(
                                     SetCurrentEventDto(eventId: eventId));
                             print("setting current event to " + eventId);
+                            Navigator.pop(context);
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
