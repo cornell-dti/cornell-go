@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/widgets.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 /**
  * Widget that represents each completed challenge 
@@ -100,12 +101,11 @@ class _CompletedChallengeFullState extends State<CompletedChallengeFull> {
                 children: [
                   // location type label
                   Container(
-                    width: 130,
                     height: 31.58,
                     padding:
                         const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                     decoration: ShapeDecoration(
-                      color: Colors.white.withOpacity(0.5),
+                      color: Colors.white.withOpacity(0.7),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -249,32 +249,17 @@ class _CompletedChallengeFullState extends State<CompletedChallengeFull> {
                                   ),
                                 ),
                                 SizedBox(width: 8),
-                                Container(
-                                  width: 70,
-                                  height: 29,
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 0),
-                                  clipBehavior: Clip.antiAlias,
-                                  decoration: ShapeDecoration(
-                                    color: Color(0xFFC17E19),
-                                    shape: RoundedRectangleBorder(
-                                      side: BorderSide(
-                                          width: 3, color: Color(0xFFFFC737)),
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
+                                Row(children: [
+                                  SvgPicture.asset(
+                                    "assets/icons/bearcoins.svg",
+                                    width: 25,
                                   ),
-                                  child: Center(
-                                    child: Text(
-                                      widget.points.toString() + 'PTS',
+                                  Text(' ' + widget.points.toString() + " PTS",
                                       style: TextStyle(
-                                          fontSize: 14,
-                                          fontFamily: 'Poppins',
-                                          fontWeight: FontWeight.w400,
-                                          height: 0,
-                                          color: Colors.white),
-                                    ),
-                                  ),
-                                ),
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w500,
+                                          color: Color(0xFFC17E19)))
+                                ]),
                               ],
                             ),
                           ],

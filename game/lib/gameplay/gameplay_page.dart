@@ -130,7 +130,11 @@ class _GameplayPageState extends State<GameplayPage> {
                                         foregroundColor: Colors.grey),
                                     onPressed: () {
                                       // Left button action
-                                      Navigator.pop(context);
+                                      Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => HomeNavBar()),
+                                      );
                                     },
                                     child: Row(children: [
                                       SvgPicture.asset(

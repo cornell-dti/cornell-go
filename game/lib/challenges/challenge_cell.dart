@@ -154,7 +154,10 @@ class _ChallengeCellState extends State<ChallengeCell> {
                         ),
                         SizedBox(width: 10),
                         Row(children: [
-                          SvgPicture.asset("assets/icons/bearcoins.svg"),
+                          SvgPicture.asset(
+                            "assets/icons/bearcoins.svg",
+                            width: 25,
+                          ),
                           Text(' ' + points.toString() + " PTS",
                               style: TextStyle(
                                   fontSize: 16,

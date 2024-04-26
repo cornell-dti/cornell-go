@@ -136,9 +136,9 @@ final Map<EventDifficultyDto, String> friendlyDifficulty = {
 };
 
 final Map<String, String> friendlyLocation = {
-  "ENG_QUAD": "Eng Quad",
+  "ENG_QUAD": "Engineering Quad",
   "ARTS_QUAD": "Arts Quad",
-  "AG_QUAD": "Ag Quad",
+  "AG_QUAD": "Agriculture Quad",
   "NORTH_CAMPUS": "North Campus",
   "WEST_CAMPUS": "West Campus",
   "COLLEGETOWN": "Collegetown",
