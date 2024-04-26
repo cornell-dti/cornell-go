@@ -10,7 +10,7 @@ import 'package:game/model/event_model.dart';
 import 'package:game/model/tracker_model.dart';
 import 'package:game/model/group_model.dart';
 import 'package:game/api/geopoint.dart';
-import 'package:game/navigation_page/home_navbar.dart';
+import 'package:game/navigation_page/bottom_navbar.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:game/model/challenge_model.dart';
@@ -133,7 +133,8 @@ class _GameplayPageState extends State<GameplayPage> {
                                       Navigator.pushReplacement(
                                         context,
                                         MaterialPageRoute(
-                                            builder: (context) => HomeNavBar()),
+                                            builder: (context) =>
+                                                BottomNavBar()),
                                       );
                                     },
                                     child: Row(children: [
