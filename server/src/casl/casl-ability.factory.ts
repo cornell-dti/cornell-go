@@ -119,7 +119,7 @@ export class CaslAbilityFactory {
       return build();
     }
 
-    can(Action.Manage, 'User', ['enrollmentType', 'username', 'year'], {
+    can(Action.Manage, 'User', ['enrollmentType', 'username', 'college', 'major', 'year'], {
       id: user.id,
     });
 

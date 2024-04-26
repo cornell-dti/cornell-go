@@ -110,6 +110,11 @@ class _InterestsPageWidgetState extends State<InterestsPageWidget> {
                 TextButton(
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
+                      List<String> interests = [];
+                      for (int i = 0; i < _checked.length; i++) {
+                        if (_checked[i]) interests.add(_categories[i]);
+                      }
+
                       assert(widget.user != null || widget.idToken != null);
                       final auth = await widget.user?.authentication;
                       final idToken =
@@ -121,7 +126,10 @@ class _InterestsPageWidgetState extends State<InterestsPageWidget> {
                           Uri.parse(endpoint_string),
                           this.widget.userType,
                           this.widget.year ?? "",
-                          this.widget.username);
+                          this.widget.username,
+                          this.widget.college ?? "",
+                          this.widget.major ?? "",
+                          interests);
 
                       if (connectionResult == null) {
                         displayToast("An error occurred while signing you up!",

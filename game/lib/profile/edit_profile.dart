@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:game/details_page/dropdown_widget.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:game/progress_indicators/circular_progress_indicator.dart';
 
 import 'package:game/api/game_client_dto.dart';
 import 'package:game/model/challenge_model.dart';
@@ -14,28 +15,23 @@ import 'package:provider/provider.dart';
 class EditProfileWidget extends StatefulWidget {
   EditProfileWidget({
     Key? key,
-    // required String this.userType,
-    // required String? this.idToken,
-    // required GoogleSignInAccount? this.user
   }) : super(key: key);
-  // final scaffoldKey = GlobalKey<ScaffoldState>();
-  // final String userType;
-  // final String? idToken;
-  // final GoogleSignInAccount? user;
 
   @override
   _EditProfileState createState() => _EditProfileState();
 }
 
 class _EditProfileState extends State<EditProfileWidget> {
-  String _name = "";
-  String? _college = "Arts and Sciences";
   GoogleSignInAccount? user = null;
   @override
   void initState() {
     super.initState();
   }
 
+  String? myCollege;
+  String? myMajor;
+  String? myYear;
+  String? myUsername;
   final _formKey = GlobalKey<FormState>();
 
   var headingStyle = TextStyle(
@@ -126,6 +122,16 @@ class _EditProfileState extends State<EditProfileWidget> {
 
   @override
   Widget build(BuildContext context) {
+    myCollege = Provider.of<UserModel>(context, listen: true).userData?.college;
+    // define major dropdown separately as it depends on the state of myCollege
+    DropdownWidget majorDropdown = DropdownWidget(
+        // assigning UniqueKey will rebuild widget upon state change
+        key: UniqueKey(),
+        myMajor,
+        myCollege == null ? null : _majors[myCollege], notifyParent: (val) {
+      myMajor = val;
+    });
+
     return Scaffold(
         backgroundColor: Color.fromARGB(255, 255, 248, 241),
         appBar: AppBar(
@@ -150,11 +156,24 @@ class _EditProfileState extends State<EditProfileWidget> {
         ),
         body: Center(
             child: Consumer<UserModel>(builder: (context, userModel, child) {
-          String? myUsername = userModel.userData?.username;
-          String? myYear = userModel.userData?.year;
-          if (myYear != null && myYear.length == 0) {
+          if (userModel.userData == null) {
+            return CircularIndicator();
+          }
+
+          myUsername = userModel.userData?.username;
+          myYear = userModel.userData?.year;
+          if (myYear != null && myYear!.length == 0) {
             myYear = null;
           }
+          myCollege = userModel.userData?.college;
+          if (myCollege != null && myCollege!.length == 0) {
+            myCollege = null;
+          }
+          myMajor = userModel.userData?.major;
+          if (myMajor != null && myMajor!.length == 0) {
+            myMajor = null;
+          }
+
           return LayoutBuilder(
               builder: (BuildContext context, BoxConstraints constraints) {
             return SizedBox(
@@ -192,8 +211,12 @@ class _EditProfileState extends State<EditProfileWidget> {
                             children: [
                               Text('College', style: headingStyle),
                               SizedBox(height: 5),
-                              DropdownWidget(null, _colleges,
-                                  notifyParent: (val) {})
+                              DropdownWidget(myCollege, _colleges,
+                                  notifyParent: (val) {
+                                setState(() {
+                                  myCollege = val;
+                                });
+                              })
                             ],
                           )),
                       Container(
@@ -204,9 +227,8 @@ class _EditProfileState extends State<EditProfileWidget> {
                             children: [
                               Text('Major', style: headingStyle),
                               SizedBox(height: 5),
-                              DropdownWidget(null,
-                                  _college == null ? null : _majors[_college],
-                                  notifyParent: (val) {})
+                              // Changing key forces a rebuild of child widget
+                              majorDropdown
                             ],
                           )),
                       Container(
@@ -225,9 +247,13 @@ class _EditProfileState extends State<EditProfileWidget> {
                           )),
                       SizedBox(height: 100),
                       TextButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          userModel.updateUserData(userModel.userData?.id ?? "",
+                              myUsername, myCollege, myMajor, myYear);
+                        },
                         style: TextButton.styleFrom(
-                          backgroundColor: Color(0xFFB9B9B9),
+                          backgroundColor: Color(0xFFE95755),
+                          disabledBackgroundColor: Color(0xFFB9B9B9),
                           padding: const EdgeInsets.symmetric(
                               horizontal: 138, vertical: 16),
                           shape: RoundedRectangleBorder(

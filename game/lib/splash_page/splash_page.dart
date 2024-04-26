@@ -100,7 +100,13 @@ class SplashPageWidget extends StatelessWidget {
                       print(id);
                       final endpoint_string = API_URL + "/device-login";
                       final connectionResult = await client.connect(
-                          id!, Uri.parse(endpoint_string), "GUEST", "", "");
+                          id!,
+                          Uri.parse(endpoint_string),
+                          "GUEST",
+                          "",
+                          "",
+                          "",
+                          "", []);
 
                       if (connectionResult == null) {
                         displayToast("An error occurred while signing you up!",
