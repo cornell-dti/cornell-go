@@ -28,10 +28,13 @@ class _EditProfileState extends State<EditProfileWidget> {
     super.initState();
   }
 
-  String? myCollege;
-  String? myMajor;
-  String? myYear;
-  String? myUsername;
+  final majorDropdownKey = ValueNotifier<double>(0);
+  final updateButtonKey = ValueNotifier<double>(0);
+
+  String? newCollege;
+  String? newMajor;
+  String? newYear;
+  String? newUsername;
   final _formKey = GlobalKey<FormState>();
 
   var headingStyle = TextStyle(
@@ -122,16 +125,6 @@ class _EditProfileState extends State<EditProfileWidget> {
 
   @override
   Widget build(BuildContext context) {
-    myCollege = Provider.of<UserModel>(context, listen: true).userData?.college;
-    // define major dropdown separately as it depends on the state of myCollege
-    DropdownWidget majorDropdown = DropdownWidget(
-        // assigning UniqueKey will rebuild widget upon state change
-        key: UniqueKey(),
-        myMajor,
-        myCollege == null ? null : _majors[myCollege], notifyParent: (val) {
-      myMajor = val;
-    });
-
     return Scaffold(
         backgroundColor: Color.fromARGB(255, 255, 248, 241),
         appBar: AppBar(
@@ -160,18 +153,40 @@ class _EditProfileState extends State<EditProfileWidget> {
             return CircularIndicator();
           }
 
-          myUsername = userModel.userData?.username;
-          myYear = userModel.userData?.year;
-          if (myYear != null && myYear!.length == 0) {
-            myYear = null;
+          String? currUsername = userModel.userData?.username;
+          String? currYear = userModel.userData?.year;
+          String? currCollege = userModel.userData?.college;
+          String? currMajor = userModel.userData?.major;
+
+          newUsername = currUsername;
+          newYear = currYear;
+          if (newYear != null && newYear!.isEmpty) {
+            newYear = null;
           }
-          myCollege = userModel.userData?.college;
-          if (myCollege != null && myCollege!.length == 0) {
-            myCollege = null;
+          newCollege = currCollege;
+          if (newCollege != null && newCollege!.isEmpty) {
+            newCollege = null;
           }
-          myMajor = userModel.userData?.major;
-          if (myMajor != null && myMajor!.length == 0) {
-            myMajor = null;
+          newMajor = currMajor;
+          if (newMajor != null && newMajor!.isEmpty) {
+            newMajor = null;
+          }
+
+          bool fieldsChanged() {
+            if (newUsername == null ||
+                newCollege == null ||
+                newYear == null ||
+                newMajor == null) {
+              return false;
+            }
+            if (newUsername!.isEmpty) {
+              return false;
+            }
+            // return true if any of the fields are different
+            return (newUsername != currUsername ||
+                newYear != currYear ||
+                newMajor != currMajor ||
+                newCollege != currCollege);
           }
 
           return LayoutBuilder(
@@ -198,8 +213,11 @@ class _EditProfileState extends State<EditProfileWidget> {
                               SizedBox(height: 5),
                               TextFormField(
                                 decoration: fieldDecoration,
-                                initialValue: myUsername,
-                                onChanged: (value) => {myUsername = value},
+                                initialValue: newUsername,
+                                onChanged: (value) => {
+                                  newUsername = value,
+                                  updateButtonKey.value++
+                                },
                               )
                             ],
                           )),
@@ -211,12 +229,12 @@ class _EditProfileState extends State<EditProfileWidget> {
                             children: [
                               Text('College', style: headingStyle),
                               SizedBox(height: 5),
-                              DropdownWidget(myCollege, _colleges,
-                                  notifyParent: (val) {
-                                setState(() {
-                                  myCollege = val;
-                                });
-                              })
+                              DropdownWidget(newCollege, _colleges,
+                                  notifyParent: (val) => {
+                                        newCollege = val,
+                                        majorDropdownKey.value++,
+                                        updateButtonKey.value++
+                                      })
                             ],
                           )),
                       Container(
@@ -228,7 +246,26 @@ class _EditProfileState extends State<EditProfileWidget> {
                               Text('Major', style: headingStyle),
                               SizedBox(height: 5),
                               // Changing key forces a rebuild of child widget
-                              majorDropdown
+                              ValueListenableBuilder<double>(
+                                  valueListenable: majorDropdownKey,
+                                  builder: (BuildContext context,
+                                      double keyValue, Widget? child) {
+                                    return DropdownWidget(
+                                        // assigning UniqueKey will rebuild widget upon state change
+                                        key: ValueKey(keyValue),
+                                        (_majors[newCollege] == null ||
+                                                !_majors[newCollege]!
+                                                    .contains(newMajor))
+                                            ? null
+                                            : newMajor,
+                                        newCollege == null
+                                            ? null
+                                            : _majors[newCollege],
+                                        notifyParent: (val) => {
+                                              newMajor = val,
+                                              updateButtonKey.value++
+                                            });
+                                  })
                             ],
                           )),
                       Container(
@@ -239,38 +276,50 @@ class _EditProfileState extends State<EditProfileWidget> {
                             children: [
                               Text('Graduation Year', style: headingStyle),
                               SizedBox(height: 5),
-                              DropdownWidget(myYear, _years,
-                                  notifyParent: (val) {
-                                myYear = val;
-                              })
+                              DropdownWidget(newYear, _years,
+                                  notifyParent: (val) =>
+                                      {newYear = val, updateButtonKey.value++})
                             ],
                           )),
                       SizedBox(height: 100),
-                      TextButton(
-                        onPressed: () {
-                          userModel.updateUserData(userModel.userData?.id ?? "",
-                              myUsername, myCollege, myMajor, myYear);
-                        },
-                        style: TextButton.styleFrom(
-                          backgroundColor: Color(0xFFE95755),
-                          disabledBackgroundColor: Color(0xFFB9B9B9),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 138, vertical: 16),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8)),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Text(
-                              'Update',
-                              style: buttonStyle,
-                            ),
-                          ],
-                        ),
-                      )
+                      ValueListenableBuilder<double>(
+                          valueListenable: updateButtonKey,
+                          builder: (BuildContext context, double keyValue,
+                              Widget? child) {
+                            return TextButton(
+                              key: ValueKey(keyValue),
+                              onPressed: !fieldsChanged()
+                                  ? null
+                                  : () {
+                                      userModel.updateUserData(
+                                          userModel.userData?.id ?? "",
+                                          newUsername,
+                                          newCollege,
+                                          newMajor,
+                                          newYear);
+                                      setState(() {});
+                                    },
+                              style: TextButton.styleFrom(
+                                backgroundColor: Color(0xFFE95755),
+                                disabledBackgroundColor: Color(0xFFB9B9B9),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 138, vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8)),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    'Update',
+                                    style: buttonStyle,
+                                  ),
+                                ],
+                              ),
+                            );
+                          })
                     ]));
           });
         })));

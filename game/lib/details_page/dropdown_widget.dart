@@ -59,7 +59,7 @@ class _DropdownWidgetState extends State<DropdownWidget> {
           setState(() {
             value = newValue.toString();
           });
-          widget.notifyParent(value);
+          widget.notifyParent(newValue);
         },
         hint: Text(
           "Select one",
@@ -69,9 +69,6 @@ class _DropdownWidgetState extends State<DropdownWidget> {
               fontFamily: 'Poppins',
               fontSize: 16),
         ),
-        // items: _college == null
-        //     ? null
-        //     : _majors[_college]!.mapIndexed((major, idx) {
         items: menuOptions == null
             ? null
             : menuOptions!.mapIndexed((item, idx) {
