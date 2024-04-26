@@ -25,7 +25,6 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  final locationImage = "assets/images/38582.jpg";
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -158,12 +157,12 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               //To be replaced with real data
               achievementCell("Complete three challenges on the Arts quad", 4,
-                  6, locationImage),
+                  6, "assets/images/38582.jpg"),
               achievementCell(
                   "Complete three challenges on the Engineering quad",
                   4,
                   6,
-                  locationImage),
+                  "assets/images/38582.jpg"),
               //Completed Events
               Padding(
                 padding: const EdgeInsets.only(left: 24, right: 24.0),
@@ -210,13 +209,17 @@ class _ProfilePageState extends State<ProfilePage> {
 
                     //Calculate totalPoints.
                     var totalPoints = 0;
+                    var locationImage = "";
                     for (var challengeId in event.challenges ?? []) {
                       var challenge =
                           challengeModel.getChallengeById(challengeId);
+                      locationImage = challenge?.imageUrl ?? "";
+
                       if (challenge != null) {
                         totalPoints += challenge.points ?? 0;
                       }
                     }
+
                     return completedCell(
                         event.name!,
                         locationImage,

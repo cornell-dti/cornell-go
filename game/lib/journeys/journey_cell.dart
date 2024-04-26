@@ -5,7 +5,7 @@ class JourneyCell extends StatefulWidget {
   final int locationCount;
   final String location;
   final String journeyName;
-  final Image thumbnail;
+  final String imgUrl;
   final String description;
   final int numberCompleted;
   final bool isCompleted;
@@ -16,7 +16,7 @@ class JourneyCell extends StatefulWidget {
   const JourneyCell(
       this.journeyName,
       this.location,
-      this.thumbnail,
+      this.imgUrl,
       this.description,
       this.locationCount,
       this.numberCompleted,
@@ -31,7 +31,7 @@ class JourneyCell extends StatefulWidget {
   State<StatefulWidget> createState() => _JourneyCellState(
       journeyName,
       location,
-      thumbnail,
+      imgUrl,
       description,
       locationCount,
       numberCompleted,
@@ -45,7 +45,7 @@ class _JourneyCellState extends State<JourneyCell> {
   final int locationCount;
   final String journeyName;
   final String location;
-  final Image thumbnail;
+  final String imgUrl;
   final String description;
   final int numberCompleted;
   final bool isCompleted;
@@ -57,7 +57,7 @@ class _JourneyCellState extends State<JourneyCell> {
   _JourneyCellState(
     this.journeyName,
     this.location,
-    this.thumbnail,
+    this.imgUrl,
     this.description,
     this.locationCount,
     this.numberCompleted,
@@ -81,7 +81,7 @@ class _JourneyCellState extends State<JourneyCell> {
               builder: (
                 BuildContext context,
               ) =>
-                  Preview(journeyName, description, difficulty, points,
+                  Preview(journeyName, description, imgUrl, difficulty, points,
                       PreviewType.JOURNEY, location, id,
                       locationCount: locationCount,
                       numberCompleted: numberCompleted));
@@ -121,9 +121,8 @@ class _JourneyCellState extends State<JourneyCell> {
                           topLeft: Radius.circular(20),
                           topRight: Radius.circular(20)),
                       image: DecorationImage(
-                        fit: BoxFit.fill,
-                        image:
-                            NetworkImage("https://picsum.photos/250?image=9"),
+                        fit: BoxFit.cover,
+                        image: NetworkImage(imgUrl),
                       ),
                     )
                     // alignment:
