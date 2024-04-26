@@ -280,8 +280,8 @@ class _GameplayMapState extends State<GameplayMap> {
         useMaterial3: true,
         colorSchemeSeed: Colors.green[700],
       ),
-      home: Consumer2<GroupModel, TrackerModel>(
-          builder: (context, groupModel, trackerModel, child) {
+      home: Consumer3<GroupModel, TrackerModel, ChallengeModel>(
+          builder: (context, groupModel, trackerModel, challengeModel, child) {
         EventTrackerDto? tracker =
             trackerModel.trackerByEventId(groupModel.curEventId ?? "");
         if (tracker == null) {
@@ -289,6 +289,8 @@ class _GameplayMapState extends State<GameplayMap> {
         } else {
           numHintsLeft = totalHints - (tracker.hintsUsed ?? 0);
         }
+        var challenge =
+            challengeModel.getChallengeById(tracker!.curChallengeId);
         return Scaffold(
             body: Stack(
               alignment: Alignment.bottomCenter,
@@ -487,8 +489,9 @@ class _GameplayMapState extends State<GameplayMap> {
                             alignment: pictureAlign,
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(10),
-                              child: Image.asset(
-                                'assets/images/main-bg.jpeg',
+                              child: Image.network(
+                                challenge?.imageUrl ??
+                                    "https://picsum.photos/250?image=9",
                                 fit: BoxFit.cover,
                                 width: pictureWidth,
                                 height: pictureHeight,

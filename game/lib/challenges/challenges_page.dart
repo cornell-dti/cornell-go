@@ -165,8 +165,8 @@ class _ChallengesPageState extends State<ChallengesPage> {
                                   key: UniqueKey(),
                                   friendlyLocation[challenge.location] ?? "",
                                   event.name ?? "",
-                                  Image.network(
-                                      "https://picsum.photos/250?image=9"),
+                                  challenge.imageUrl ??
+                                      "https://picsum.photos/250?image=9",
                                   complete,
                                   event.description ?? "",
                                   friendlyDifficulty[event.difficulty] ?? "",
