@@ -133,7 +133,7 @@ export class AuthService {
         req.year ?? '2000',
         req.college ?? '',
         req.major ?? '',
-        req.interests?.split(",") ?? [],
+        req.interests?.split(',') ?? [],
         req.lat,
         req.long,
         authType,

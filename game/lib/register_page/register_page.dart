@@ -21,7 +21,6 @@ class _RegisterPageWidgetState extends State<RegisterPageWidget> {
   @override
   void initState() {
     super.initState();
-    _selectedOption = "Graduate Student";
   }
 
   final List<String> identityOptions = [

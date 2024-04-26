@@ -196,10 +196,6 @@ export class UserService {
       },
     });
 
-    console.log(user.college ?? "null");
-    console.log(user.major);
-    console.log(user.year);
-
     const assignData = await this.abilityFactory.filterInaccessible(
       userObj.id,
       {
@@ -214,10 +210,6 @@ export class UserService {
       Action.Update,
       this.prisma.user,
     );
-
-    console.log(assignData.college);
-    console.log(assignData.major);
-    console.log(assignData.year);
 
     return await this.prisma.user.update({
       where: { id: userObj.id },
