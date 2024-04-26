@@ -96,7 +96,6 @@ class _GameplayPageState extends State<GameplayPage> {
       }
 
       var challenge = challengeModel.getChallengeById(tracker.curChallengeId!);
-
       if (challenge == null) {
         return Scaffold(
           body: Text("No challenge data"),

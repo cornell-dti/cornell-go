@@ -13,6 +13,16 @@ class SplashPageWidget extends StatelessWidget {
   final scaffoldKey = GlobalKey<ScaffoldState>();
   @override
   Widget build(BuildContext context) {
+    final client = Provider.of<ApiClient>(context);
+
+    if (client.serverApi != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (context) => BottomNavBar()));
+        displayToast("Signed in!", Status.success);
+      });
+    }
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
@@ -105,15 +115,6 @@ class SplashPageWidget extends StatelessWidget {
                       if (connectionResult == null) {
                         displayToast("An error occurred while signing you up!",
                             Status.error);
-                      } else {
-                        //Connect to home page here.
-                        print("Connection result:");
-                        print(connectionResult.body);
-                        displayToast("Signed in!", Status.success);
-                        Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => BottomNavBar()));
                       }
                     },
                     child: Container(
