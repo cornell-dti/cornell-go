@@ -12,5 +12,5 @@ elif [ "$TESTING_E2E" = "true" ]; then
 elif [ "$DEVELOPMENT" = "false" ]; then 
   npm run start:prod;
 else 
-  npm run start;
+  npm run start:debug;
 fi

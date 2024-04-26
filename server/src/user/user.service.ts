@@ -52,7 +52,7 @@ export class UserService {
   /** Registers a user using a certain authentication scheme */
   async register(
     email: string,
-    username: string,
+    username: string | undefined,
     year: string,
     college: string,
     major: string,
@@ -63,17 +63,15 @@ export class UserService {
     authToken: string,
     enrollmentType: EnrollmentType,
   ) {
-    if (username == null && authType == AuthType.GOOGLE) {
-      username = email?.split('@')[0];
-    } else if (authType == AuthType.DEVICE) {
+    if (authType === AuthType.GOOGLE) {
+      username = username;
+    } else if (authType === AuthType.DEVICE) {
       const count = await this.prisma.user.count();
-      username = 'guest' + count;
+      username = 'guest' + (count + 10001);
     }
 
     const defOrg = await this.orgService.getDefaultOrganization(
-      authType == AuthType.GOOGLE
-        ? OrganizationSpecialUsage.CORNELL_LOGIN
-        : OrganizationSpecialUsage.DEVICE_LOGIN,
+      OrganizationSpecialUsage.DEVICE_LOGIN,
     );
 
     const group: Group = await this.groupsService.createFromEvent(
@@ -86,7 +84,7 @@ export class UserService {
         group: { connect: { id: group.id } },
         hostOf: { connect: { id: group.id } },
         memberOf: { connect: { id: defOrg.id } },
-        username,
+        username: username ?? email?.split('@')[0],
         year,
         college,
         major,
@@ -107,6 +105,15 @@ export class UserService {
     await this.eventsService.createDefaultEventTracker(user, lat, long);
     console.log(`User ${user.id} created with username ${username}!`);
     await this.log.logEvent(SessionLogEvent.CREATE_USER, user.id, user.id);
+
+    if (authType === AuthType.GOOGLE) {
+      const allOrg = await this.orgService.getDefaultOrganization(
+        OrganizationSpecialUsage.CORNELL_LOGIN,
+      );
+
+      await this.orgService.joinOrganization(user, allOrg.accessCode);
+    }
+
     return user;
   }
 
@@ -176,7 +183,7 @@ export class UserService {
           .cleanProfanityIsh(
             user.username
               ?.substring(0, 128)
-              ?.replaceAll(/[^_A-z0-9]/g, ' ')
+              ?.replaceAll(/[^_A-Za-z0-9]/g, ' ')
               ?.replaceAll('_', ' '),
           )
           .replaceAll('*', '_')

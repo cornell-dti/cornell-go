@@ -88,7 +88,6 @@ class ApiClient extends ChangeNotifier {
       _createSocket(true);
     } else {
       authenticated = false;
-      _clientApi.disconnectedController.add(null);
       _socket?.dispose();
       _socket = null;
       notifyListeners();
@@ -123,15 +122,11 @@ class ApiClient extends ChangeNotifier {
       _refreshToken = token;
       final access = await _refreshAccess(true);
       authenticated = access;
-      if (!access) {
-        _clientApi.disconnectedController.add(null);
-      }
       notifyListeners();
       return access;
     }
 
     authenticated = false;
-    _clientApi.disconnectedController.add(null);
     notifyListeners();
     return false;
   }
@@ -175,7 +170,6 @@ class ApiClient extends ChangeNotifier {
         print(loginResponse.body);
       }
       authenticated = false;
-      _clientApi.disconnectedController.add(null);
       notifyListeners();
 
       print("Failed to connect to server!");
@@ -201,7 +195,6 @@ class ApiClient extends ChangeNotifier {
     _socket = null;
 
     authenticated = false;
-    _clientApi.disconnectedController.add(null);
     notifyListeners();
   }
 }

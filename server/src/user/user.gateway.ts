@@ -73,7 +73,12 @@ export class UserGateway {
     @CallingUser() user: User,
     @MessageBody() data: RequestAllUserDataDto,
   ) {
-    const users = await this.userService.getAllUserData();
+    let users: User[] = [];
+    if (!user.administrator) {
+      users = [user];
+    } else {
+      users = await this.userService.getAllUserData();
+    }
 
     await Promise.all(
       users.map(

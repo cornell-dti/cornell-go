@@ -23,6 +23,16 @@ class GameClientApi {
   Stream<UpdateChallengeDataDto> get updateChallengeDataStream =>
       _updateChallengeDataController.stream;
 
+  final _updateAchievementDataController =
+      StreamController<UpdateAchievementDataDto>.broadcast(sync: true);
+  Stream<UpdateAchievementDataDto> get updateAchievementDataStream =>
+      _updateAchievementDataController.stream;
+
+  final _updateAchievementTrackerDataController =
+      StreamController<AchievementTrackerDto>.broadcast(sync: true);
+  Stream<AchievementTrackerDto> get updateAchievementTrackerDataStream =>
+      _updateAchievementTrackerDataController.stream;
+
   final _updateEventTrackerDataController =
       StreamController<EventTrackerDto>.broadcast(sync: true);
   Stream<EventTrackerDto> get updateEventTrackerDataStream =>
@@ -53,22 +63,22 @@ class GameClientApi {
   Stream<UpdateOrganizationDataDto> get updateOrganizationDataStream =>
       _updateOrganizationDataController.stream;
 
-  final _reconnectedController = StreamController<Null>.broadcast(sync: true);
-  Stream<Null> get reconnectedStream => _reconnectedController.stream;
+  final _reconnectedController = StreamController<bool>.broadcast(sync: true);
+  Stream<bool> get reconnectedStream => _reconnectedController.stream;
 
-  final _reconnectingController = StreamController<Null>.broadcast(sync: true);
-  Stream<Null> get reconnectingStream => _reconnectingController.stream;
+  final _reconnectingController = StreamController<bool>.broadcast(sync: true);
+  Stream<bool> get reconnectingStream => _reconnectingController.stream;
 
-  final _connectedController = StreamController<Null>.broadcast(sync: true);
-  Stream<Null> get connectedStream => _connectedController.stream;
+  final _connectedController = StreamController<bool>.broadcast(sync: true);
+  Stream<bool> get connectedStream => _connectedController.stream;
 
-  final disconnectedController = StreamController<Null>.broadcast(sync: true);
-  Stream<Null> get disconnectedStream => disconnectedController.stream;
+  final disconnectedController = StreamController<bool>.broadcast(sync: true);
+  Stream<bool> get disconnectedStream => disconnectedController.stream;
 
   void connectSocket(Socket sock) {
-    sock.onReconnect((data) => _reconnectingController.add(null));
-    sock.onReconnecting((data) => _reconnectedController.add(null));
-    sock.onDisconnect((data) => disconnectedController.add(null));
+    sock.onReconnect((data) => _reconnectedController.add(true));
+    sock.onReconnecting((data) => _reconnectingController.add(true));
+    sock.onDisconnect((data) => disconnectedController.add(true));
 
     sock.on(
         "updateUserData",
@@ -84,6 +94,16 @@ class GameClientApi {
         "updateChallengeData",
         (data) => _updateChallengeDataController
             .add(UpdateChallengeDataDto.fromJson(data)));
+
+    sock.on(
+        "updateAchievementData",
+        (data) => _updateAchievementDataController
+            .add(UpdateAchievementDataDto.fromJson(data)));
+
+    sock.on(
+        "updateAchievementTrackerData",
+        (data) => _updateAchievementTrackerDataController
+            .add(AchievementTrackerDto.fromJson(data)));
 
     sock.on(
         "updateEventTrackerData",
@@ -115,7 +135,7 @@ class GameClientApi {
         (data) => _updateOrganizationDataController
             .add(UpdateOrganizationDataDto.fromJson(data)));
 
-    _connectedController.add(null);
+    _connectedController.add(true);
   }
 
   GameClientApi() {}

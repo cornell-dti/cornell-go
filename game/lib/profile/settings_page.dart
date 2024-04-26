@@ -124,14 +124,8 @@ class SettingsPage extends StatelessWidget {
                         ),
                       ),
                       child: TextButton(
-                        onPressed: () async => {
-                          await client.disconnect(),
-                          Navigator.pop(context),
-                          Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => SplashPageWidget())),
-                          displayToast("Signed out", Status.success)
+                        onPressed: () async {
+                          await client.disconnect();
                         },
                         style: TextButton.styleFrom(
                             padding: EdgeInsets.only(left: 20.0),
