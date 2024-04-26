@@ -259,9 +259,11 @@ describe('OrganizationModule E2E', () => {
       await groupService.setCurrentEvent(basicUser, defaultEv.id);
 
       affectedUsers.push(basicUser);
-      expect(await chalGateway.requestChallengeData(basicAbility, basicUser, {
-        challenges: [exChal2.id],
-      })).toBeFalsy;
+      expect(
+        await chalGateway.requestChallengeData(basicAbility, basicUser, {
+          challenges: [exChal2.id],
+        }),
+      ).toBeFalsy;
     });
 
     it('Should be able to see current challenge lat long but not name', async () => {
