@@ -188,16 +188,10 @@ class _AchievementsPageState extends State<AchievementsPage> {
                             itemBuilder: (context, index) {
                               return AchievementCell(
                                   key: UniqueKey(),
-                                  eventData[index].location,
-                                  eventData[index].name,
-                                  eventData[index].lat,
-                                  eventData[index].long,
-                                  eventData[index].thumbnail,
-                                  eventData[index].complete,
                                   eventData[index].description,
-                                  eventData[index].difficulty,
-                                  eventData[index].points,
-                                  eventData[index].eventId);
+                                  eventData[index].thumbnail,
+                                  3,
+                                  4);
                             },
                             physics: BouncingScrollPhysics(),
                             separatorBuilder: (context, index) {

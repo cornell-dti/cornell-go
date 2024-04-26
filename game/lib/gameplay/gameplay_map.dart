@@ -407,7 +407,7 @@ class _GameplayMapState extends State<GameplayMap> {
                             shape: CircleBorder(),
                           ),
                           Positioned(
-                            top: -5,
+                            top: 0,
                             right: 0,
                             child: Container(
                               padding: EdgeInsets.all(5.0),
@@ -417,10 +417,9 @@ class _GameplayMapState extends State<GameplayMap> {
                                 boxShadow: [
                                   BoxShadow(
                                     color: Colors.black
-                                        .withOpacity(0.3), // Shadow color
-                                    blurRadius: 5, // Spread radius
-                                    offset: Offset(2,
-                                        2), // Shadow position, you can adjust this
+                                        .withOpacity(0.2), // Shadow color
+                                    blurRadius: 3, // Spread radius
+                                    // Shadow position, you can adjust this
                                   ),
                                 ],
                               ),
@@ -428,7 +427,7 @@ class _GameplayMapState extends State<GameplayMap> {
                                 numHintsLeft.toString(),
                                 style: TextStyle(
                                   color: Color.fromARGB(255, 131, 90, 124),
-                                  fontSize: 15,
+                                  fontSize: 14,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),

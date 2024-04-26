@@ -6,7 +6,7 @@ import 'package:game/model/challenge_model.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/tracker_model.dart';
 import 'package:game/model/user_model.dart';
-import 'package:game/profile/achievement_cell.dart';
+import 'package:game/achievements/achievement_cell.dart';
 import 'package:game/profile/completed_cell.dart';
 import 'package:game/profile/settings_page.dart';
 import 'package:game/utils/utility_functions.dart';
@@ -159,13 +159,21 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               ),
               //To be replaced with real data
-              achievementCell("Complete three challenges on the Arts quad", 4,
-                  6, locationImage),
-              achievementCell(
-                  "Complete three challenges on the Engineering quad",
-                  4,
-                  6,
-                  locationImage),
+              Padding(
+                  padding: EdgeInsets.only(left: 30, right: 30),
+                  child: Column(children: [
+                    AchievementCell(
+                        "Complete three challenges",
+                        SvgPicture.asset("assets/icons/achievementsilver.svg"),
+                        4,
+                        6),
+                    SizedBox(height: 10),
+                    AchievementCell(
+                        "Complete three challenges",
+                        SvgPicture.asset("assets/icons/achievementsilver.svg"),
+                        4,
+                        6),
+                  ])),
               //Completed Events
               Padding(
                 padding: const EdgeInsets.only(left: 24, right: 24.0),

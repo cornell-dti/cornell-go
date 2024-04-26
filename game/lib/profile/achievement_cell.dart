@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+@Deprecated('achievements/achievement_cell.dart')
 /**
  * Widget that represents each individual achievement
  * @param name: Name of the achievement

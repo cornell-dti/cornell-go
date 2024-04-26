@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:game/preview/preview.dart';
@@ -14,86 +15,94 @@ class LoadingBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: (totalTasks > 0 ? tasksFinished / totalTasks : 0) * 170,
-      height: 13,
-      alignment: Alignment.centerLeft,
-      child: Container(
-        decoration: new BoxDecoration(
-          color: Color.fromARGB(197, 237, 86, 86),
-          shape: BoxShape.rectangle,
-          borderRadius: BorderRadius.all(Radius.circular(16.0)),
+    return Row(
+      children: [
+        Container(
+            width: 200,
+            child: LayoutBuilder(
+                builder: (BuildContext context, BoxConstraints constraints) {
+              return Stack(children: [
+                Container(
+                  width: constraints.maxWidth,
+                  height: 13,
+                  alignment: Alignment.centerLeft,
+                  child: Container(
+                    decoration: new BoxDecoration(
+                      color: Color.fromARGB(255, 241, 241, 241),
+                      shape: BoxShape.rectangle,
+                      borderRadius: BorderRadius.all(Radius.circular(16.0)),
+                    ),
+                  ),
+                ),
+                Container(
+                  width: (totalTasks > 0 ? tasksFinished / totalTasks : 0) *
+                      constraints.maxWidth,
+                  height: 13,
+                  alignment: Alignment.centerLeft,
+                  child: Container(
+                    decoration: new BoxDecoration(
+                      color: Color.fromARGB(197, 237, 86, 86),
+                      shape: BoxShape.rectangle,
+                      borderRadius: BorderRadius.all(Radius.circular(16.0)),
+                    ),
+                  ),
+                ),
+                Container(
+                  height: 3,
+                  width: (totalTasks > 0 ? tasksFinished / totalTasks : 0) *
+                          constraints.maxWidth -
+                      16,
+                  margin: EdgeInsets.only(left: 8, top: 3),
+                  alignment: Alignment.centerLeft,
+                  decoration: new BoxDecoration(
+                    color: Color(0x99F3C6C6),
+                    shape: BoxShape.rectangle,
+                    borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                  ),
+                ),
+              ]);
+            })),
+        Padding(
+          padding: const EdgeInsets.only(left: 8.0),
+          child: SvgPicture.asset("assets/icons/location.svg"),
         ),
-      ),
+        Padding(
+          padding: const EdgeInsets.only(left: 8.0),
+          child: Text(
+            tasksFinished.toString() + "/" + totalTasks.toString(),
+          ),
+        ),
+      ],
     );
   }
 }
 
 class AchievementCell extends StatefulWidget {
-  final String location;
-  final String challengeName;
-  final double? challengeLat;
-  final double? challengeLong;
   final SvgPicture thumbnail;
-  final bool isCompleted;
   final String description;
-  final String difficulty;
-  final int points;
-  final String eventId;
+  final int tasksFinished;
+  final int totalTasks;
 
   const AchievementCell(
-      this.location,
-      this.challengeName,
-      this.challengeLat,
-      this.challengeLong,
-      this.thumbnail,
-      this.isCompleted,
-      this.description,
-      this.difficulty,
-      this.points,
-      this.eventId,
+      this.description, this.thumbnail, this.tasksFinished, this.totalTasks,
       {Key? key})
       : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => _AchievementCellState(
-      location,
-      challengeName,
-      challengeLat,
-      challengeLong,
-      thumbnail,
-      isCompleted,
-      description,
-      difficulty,
-      points,
-      eventId);
+  State<StatefulWidget> createState() =>
+      _AchievementCellState(description, thumbnail, tasksFinished, totalTasks);
 }
 
 class _AchievementCellState extends State<AchievementCell> {
-  final String location;
-  final String challengeName;
-  final double? challengeLat;
-  final double? challengeLong;
-  final SvgPicture thumbnail;
-  final bool isCompleted;
   final String description;
-  final String difficulty;
-  final int points;
-  final String eventId;
+  final SvgPicture thumbnail;
+  final int tasksFinished;
+  final int totalTasks;
   // newly added field
   // final int totalDistance;
 
   _AchievementCellState(
-      this.location,
-      this.challengeName,
-      this.challengeLat,
-      this.challengeLong,
-      this.thumbnail,
-      this.isCompleted,
-      this.description,
-      this.difficulty,
-      this.points,
-      this.eventId
+      this.description, this.thumbnail, this.tasksFinished, this.totalTasks
       // newly added field
       // this.totalDistance
       );
@@ -101,24 +110,7 @@ class _AchievementCellState extends State<AchievementCell> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () async {
-        await showModalBottomSheet(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(10.0)),
-            ),
-            context: context,
-            isScrollControlled: true,
-            builder: (context) => Preview(
-                challengeName,
-                challengeLat,
-                challengeLong,
-                description,
-                difficulty,
-                points,
-                PreviewType.CHALLENGE,
-                location,
-                eventId));
-      },
+      onTap: () async {},
       child: Container(
         padding: EdgeInsets.all(5),
         decoration: BoxDecoration(
@@ -134,33 +126,31 @@ class _AchievementCellState extends State<AchievementCell> {
         ),
         child: Container(
           margin: EdgeInsets.all(10),
+          height: 64,
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(margin: EdgeInsets.only(right: 12), child: thumbnail),
-              Expanded(
-                  child: Stack(children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      challengeName,
-                      style: TextStyle(
-                        color: Color.fromARGB(204, 0, 0, 0),
-                        fontSize: 16.5,
-                        fontFamily: 'Poppins',
-                        fontWeight: FontWeight.w600,
+              Container(
+                  width: 250,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.max,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        child: Text(
+                          description,
+                          style: TextStyle(
+                            color: Color.fromARGB(204, 0, 0, 0),
+                            fontSize: 16.5,
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                Align(
-                    alignment: Alignment.bottomLeft,
-                    child: Padding(
-                        padding: EdgeInsets.only(bottom: 10.0),
-                        child: LoadingBar(3, 4)))
-              ]))
+                      Spacer(),
+                      LoadingBar(3, 4),
+                    ],
+                  ))
             ],
           ),
         ),
