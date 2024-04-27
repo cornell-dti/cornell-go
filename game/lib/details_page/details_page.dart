@@ -4,7 +4,6 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:game/details_page/dropdown_widget.dart';
 
-
 class DetailsPageWidget extends StatefulWidget {
   DetailsPageWidget(
       {Key? key,

@@ -5,14 +5,12 @@ import 'package:game/splash_page/splash_page.dart';
 import 'package:provider/provider.dart';
 
 class LoadingPageWidget extends StatelessWidget {
-  LoadingPageWidget({Key? key}) : super(key: key);
+  final Future<bool> relogResult;
+  LoadingPageWidget(this.relogResult, {Key? key}) : super(key: key);
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
-    ApiClient client = Provider.of<ApiClient>(context);
-    Future<bool> relogResult = client.tryRelog();
-
     return Scaffold(
         backgroundColor: Colors.white,
         body: Center(
@@ -31,7 +29,7 @@ class LoadingPageWidget extends StatelessWidget {
                 });
               }
 
-              return SplashPageWidget();
+              return CircularProgressIndicator();
             },
           ),
         ));

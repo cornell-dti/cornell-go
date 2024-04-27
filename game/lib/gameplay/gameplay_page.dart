@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/model/event_model.dart';
