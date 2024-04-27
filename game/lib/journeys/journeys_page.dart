@@ -146,6 +146,7 @@ class _JourneysPageState extends State<JourneysPage> {
 
                     if (challenge == null) continue;
                     var location = challenge.location;
+                    var imageUrl = challenge.imageUrl;
 
                     for (var challengeId in event.challenges ?? []) {
                       var challenge =
@@ -178,8 +179,9 @@ class _JourneysPageState extends State<JourneysPage> {
                                   key: UniqueKey(),
                                   event.name ?? "",
                                   friendlyLocation[location] ?? "",
-                                  Image.network(
-                                      "https://picsum.photos/250?image=9"), // dummy data for now; should pass in thumbnail parameter
+                                  imageUrl ??
+                                      "https://picsum.photos/250?image=9",
+                                  // dummy data for now; should pass in thumbnail parameter
                                   event.description ?? "",
                                   locationCount,
                                   numberCompleted,

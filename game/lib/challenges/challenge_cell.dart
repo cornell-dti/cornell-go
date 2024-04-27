@@ -4,7 +4,7 @@ import 'package:game/preview/preview.dart';
 class ChallengeCell extends StatefulWidget {
   final String location;
   final String challengeName;
-  final Image thumbnail;
+  final String imgUrl;
   final bool isCompleted;
   final String description;
   final String difficulty;
@@ -14,7 +14,7 @@ class ChallengeCell extends StatefulWidget {
   const ChallengeCell(
       this.location,
       this.challengeName,
-      this.thumbnail,
+      this.imgUrl,
       this.isCompleted,
       this.description,
       this.difficulty,
@@ -27,7 +27,7 @@ class ChallengeCell extends StatefulWidget {
   State<StatefulWidget> createState() => _ChallengeCellState(
       location,
       challengeName,
-      thumbnail,
+      imgUrl,
       isCompleted,
       description,
       difficulty,
@@ -38,7 +38,7 @@ class ChallengeCell extends StatefulWidget {
 class _ChallengeCellState extends State<ChallengeCell> {
   final String location;
   final String challengeName;
-  final Image thumbnail;
+  final String imgUrl;
   final bool isCompleted;
   final String description;
   final String difficulty;
@@ -50,7 +50,7 @@ class _ChallengeCellState extends State<ChallengeCell> {
   _ChallengeCellState(
       this.location,
       this.challengeName,
-      this.thumbnail,
+      this.imgUrl,
       this.isCompleted,
       this.description,
       this.difficulty,
@@ -70,7 +70,7 @@ class _ChallengeCellState extends State<ChallengeCell> {
             ),
             context: context,
             isScrollControlled: true,
-            builder: (context) => Preview(challengeName, description,
+            builder: (context) => Preview(challengeName, description, imgUrl,
                 difficulty, points, PreviewType.CHALLENGE, location, eventId));
       },
       child: Container(
@@ -89,13 +89,14 @@ class _ChallengeCellState extends State<ChallengeCell> {
         child: Padding(
           padding: EdgeInsets.all(16.0),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Padding(
                 padding: const EdgeInsets.only(right: 14),
                 child: ClipRRect(
                   borderRadius: BorderRadius.all(Radius.circular(4.6)),
-                  child: thumbnail,
+                  child: Image.network(imgUrl,
+                      width: 100, height: 100, fit: BoxFit.cover),
                 ),
               ),
               Expanded(
