@@ -146,7 +146,7 @@ class _JourneysPageState extends State<JourneysPage> {
                         .getChallengeById(event.challenges?[0] ?? "");
 
                     if (challenge == null) continue;
-                    var location = challenge.location;
+                    var location = challenge.location?.name;
                     var imageUrl = challenge.imageUrl;
 
                     for (var challengeId in event.challenges ?? []) {

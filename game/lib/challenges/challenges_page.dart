@@ -163,7 +163,8 @@ class _ChallengesPageState extends State<ChallengesPage> {
                                 )
                               : ChallengeCell(
                                   key: UniqueKey(),
-                                  friendlyLocation[challenge.location] ?? "",
+                                  friendlyLocation[challenge.location?.name] ??
+                                      "",
                                   event.name ?? "",
                                   challenge.imageUrl ??
                                       "https://picsum.photos/250?image=9",

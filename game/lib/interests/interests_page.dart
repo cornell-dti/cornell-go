@@ -55,7 +55,11 @@ class _InterestsPageWidgetState extends State<InterestsPageWidget> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SvgPicture.asset("assets/icons/back.svg"),
+                TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: SvgPicture.asset("assets/icons/back.svg")),
                 SvgPicture.asset("assets/images/interests_progress.svg"),
                 SizedBox(height: 40.0),
                 Text("What are your interests?",
