@@ -182,8 +182,8 @@ describe('OrganizationModule E2E', () => {
         sendEventMock.mock.lastCall;
 
       expect(ev).toEqual('updateUserData');
-      expect(users).toContain(basicUser.id);
-      expect(users).not.toContain(managerUser.id);
+      expect(users).toContain('user/' + basicUser.id);
+      expect(users).not.toContain('user/' + managerUser.id);
 
       expect(dto.user.id).toEqual(basicUser.id);
       expect(dto.user.email).toEqual(basicUser.email);

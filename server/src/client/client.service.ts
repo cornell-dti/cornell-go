@@ -100,7 +100,7 @@ export class ClientService {
       };
     },
   ) {
-    const room = target instanceof Object ? target.id : target;
+    const room = target instanceof Object ? 'user/' + target.id : target;
     if (!resource) {
       this.gateway.server.to(room).emit(event, dto);
     } else {
