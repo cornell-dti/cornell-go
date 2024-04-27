@@ -164,7 +164,7 @@ class ApiClient extends ChangeNotifier {
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
-        body: jsonEncode(<String, String>{
+        body: jsonEncode(<String, dynamic>{
           "idToken": idToken,
           "lat": pos?.lat.toString() ?? "0",
           "enrollmentType": enrollmentType,
@@ -172,7 +172,7 @@ class ApiClient extends ChangeNotifier {
           "username": username,
           "long": pos?.long.toString() ?? "0",
           "aud": Platform.isIOS ? "ios" : "android",
-          "noRegister": noRegister ? "true" : "false"
+          "noRegister": noRegister
         }));
 
     if (loginResponse.statusCode == 201 && loginResponse.body != "") {
