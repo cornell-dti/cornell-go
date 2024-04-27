@@ -20,7 +20,7 @@ class ChallengeCellDto {
     required this.name,
     required this.lat,
     required this.long,
-    required this.thumbnail,
+    required this.imgUrl,
     required this.complete,
     required this.description,
     required this.difficulty,
@@ -31,7 +31,7 @@ class ChallengeCellDto {
   late String name;
   late double? lat;
   late double? long;
-  late Image thumbnail;
+  late String imgUrl;
   late bool complete;
   late String description;
   late String difficulty;
@@ -236,12 +236,13 @@ class _ChallengesPageState extends State<ChallengesPage> {
                             eventMatchesLocationSelection) {
                           eventData.add(ChallengeCellDto(
                             location:
-                                friendlyLocation[challenge.location] ?? "",
+                                friendlyLocation[challenge.location?.name] ??
+                                    "",
                             name: event.name ?? "",
                             lat: challenge.latF ?? null,
                             long: challenge.longF ?? null,
-                            thumbnail: Image.network(
-                                "https://picsum.photos/250?image=9"),
+                            imgUrl: challenge.imageUrl ??
+                                "https://picsum.photos/250?image=9",
                             complete: complete,
                             description: event.description ?? "",
                             difficulty:
@@ -265,7 +266,7 @@ class _ChallengesPageState extends State<ChallengesPage> {
                               eventData[index].name,
                               eventData[index].lat,
                               eventData[index].long,
-                              eventData[index].thumbnail,
+                              eventData[index].imgUrl,
                               eventData[index].complete,
                               eventData[index].description,
                               eventData[index].difficulty,

@@ -34,7 +34,7 @@ Widget completedCell(String name, String picture, String type, String date,
                 child: Image(
                   width: 80,
                   height: 80,
-                  image: AssetImage(picture),
+                  image: NetworkImage(picture),
                   fit: BoxFit.cover,
                 )),
           ),
