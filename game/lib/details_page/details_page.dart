@@ -100,7 +100,11 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SvgPicture.asset("assets/icons/back.svg"),
+                TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: SvgPicture.asset("assets/icons/back.svg")),
                 SvgPicture.asset("assets/images/details_progress.svg"),
                 SizedBox(height: 40.0),
                 Column(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:game/preview/preview.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class ChallengeCell extends StatefulWidget {
   final String location;
@@ -65,9 +66,6 @@ class _ChallengeCellState extends State<ChallengeCell> {
     return GestureDetector(
       onTap: () async {
         await showModalBottomSheet(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(10.0)),
-            ),
             context: context,
             isScrollControlled: true,
             builder: (context) => Preview(challengeName, description, imgUrl,
@@ -132,7 +130,7 @@ class _ChallengeCellState extends State<ChallengeCell> {
                       ),
                     ),
                     SizedBox(
-                      height: 4,
+                      height: 12,
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.start,
@@ -155,26 +153,17 @@ class _ChallengeCellState extends State<ChallengeCell> {
                           ),
                         ),
                         SizedBox(width: 10),
-                        Container(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: Color.fromARGB(255, 255, 199, 55),
-                            ),
-                            color: Color.fromARGB(255, 189, 135, 31),
-                            borderRadius: BorderRadius.circular(20),
+                        Row(children: [
+                          SvgPicture.asset(
+                            "assets/icons/bearcoins.svg",
+                            width: 25,
                           ),
-                          child: Text(
-                            points.toString() + "PTS",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
+                          Text(' ' + points.toString() + " PTS",
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: Color(0xFFC17E19)))
+                        ]),
                       ],
                     ),
                   ],
