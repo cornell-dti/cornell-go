@@ -36,14 +36,60 @@ class EventModel extends ChangeNotifier {
       if (event.users.length == 0) {
         return;
       }
-      final players = _topPlayers[event.eventId];
+      var players = _topPlayers[event.eventId];
+      if (players == null) {
+        players = [];
+        _topPlayers[event.eventId ?? ""] = players;
+      }
+
       for (int i = event.offset; i < event.users.length; i++) {
-        if (i < players!.length) {
+        if (i < players.length) {
           players[i] = event.users[i - event.offset];
         } else {
           players.add(event.users[i - event.offset]);
         }
       }
+
+      notifyListeners();
+    });
+
+    client.clientApi.updateUserDataStream.listen((event) {
+      if (event.user.username == null) return;
+
+      for (final playerList in _topPlayers.values) {
+        for (final player in playerList) {
+          if (player.userId == event.user.id) {
+            player.username = event.user.username!;
+            break;
+          }
+        }
+      }
+
+      notifyListeners();
+    });
+
+    client.clientApi.updateLeaderPositionStream.listen((event) {
+      final forEvent = _topPlayers[event.eventId];
+      final forGlobal = _topPlayers[""];
+
+      if (forEvent != null) {
+        forEvent
+            .firstWhere((element) => element.userId == event.playerId,
+                orElse: () => LeaderDto(userId: "", username: "", score: 0))
+            .score = event.newEventScore;
+
+        forEvent.sort((a, b) => b.score.compareTo(a.score));
+      }
+
+      if (forGlobal != null) {
+        forGlobal
+            .firstWhere((element) => element.userId == event.playerId,
+                orElse: () => LeaderDto(userId: "", username: "", score: 0))
+            .score = event.newTotalScore;
+
+        forGlobal.sort((a, b) => b.score.compareTo(a.score));
+      }
+
       notifyListeners();
     });
 
@@ -55,23 +101,14 @@ class EventModel extends ChangeNotifier {
     });
   }
 
-  List<LeaderDto> getTopPlayersForEvent(String eventId, int count) {
-    final topPlayers = _topPlayers[eventId];
+  List<LeaderDto>? getTopPlayersForEvent(String? eventId, int count) {
+    final topPlayers = _topPlayers[eventId ?? ""];
     final diff = count - (topPlayers?.length ?? 0);
     if (topPlayers == null) {
-      _topPlayers[eventId] = [];
+      _client.serverApi?.requestEventLeaderData(RequestEventLeaderDataDto(
+          offset: (topPlayers?.length ?? 0), count: diff, eventId: eventId));
     }
-    if (_topPlayers[eventId]?.length == 0) {
-      eventId.isEmpty
-          ? _client.serverApi?.requestGlobalLeaderData(
-              RequestGlobalLeaderDataDto(
-                  offset: (topPlayers?.length ?? 0), count: 1000))
-          : _client.serverApi?.requestEventLeaderData(RequestEventLeaderDataDto(
-              offset: (topPlayers?.length ?? 0),
-              count: diff,
-              eventId: eventId));
-    }
-    return topPlayers ?? [];
+    return topPlayers;
   }
 
   EventDto? getEventById(String id) {

@@ -1,7 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:game/api/game_client_dto.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:game/main.dart';
 import 'package:provider/provider.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/utils/utility_functions.dart';
@@ -15,14 +15,6 @@ class SplashPageWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final client = Provider.of<ApiClient>(context);
-
-    if (client.serverApi != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => BottomNavBar()));
-        displayToast("Signed in!", Status.success);
-      });
-    }
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -41,6 +33,22 @@ class SplashPageWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
+                StreamBuilder(
+                    stream: client.clientApi.connectedStream,
+                    builder: (context, snapshot) {
+                      if (client.serverApi != null) {
+                        print("ServerApi != null");
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => BottomNavBar()));
+                          displayToast("Signed in!", Status.success);
+                        });
+                      }
+
+                      return Container();
+                    }),
                 Consumer<ApiClient>(
                   builder: (context, apiClient, child) {
                     return TextButton(
@@ -54,18 +62,35 @@ class SplashPageWidget extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(10.0)))),
                       onPressed: () async {
                         final GoogleSignInAccount? account =
-                            await apiClient.connectGoogle();
+                            await apiClient.signinGoogle();
+
                         if (account == null) {
-                          displayToast("An error occured while signing you up.",
+                          displayToast(
+                              "An error occured while signing you into Google!",
                               Status.error);
-                        } else {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => RegisterPageWidget(
-                                  user: account, idToken: null),
-                            ),
-                          );
+                          return;
                         }
+
+                        if (!account.email.contains("@cornell.edu")) {
+                          displayToast(
+                              "Only Cornell-affiliated users may use Google Sign-in!",
+                              Status.error);
+                          return;
+                        }
+
+                        final gRelogResult =
+                            await apiClient.connectGoogleNoRegister(account);
+
+                        if (gRelogResult != null) {
+                          return;
+                        }
+
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => RegisterPageWidget(
+                                user: account, idToken: null),
+                          ),
+                        );
                       },
                       child: Container(
                         width: 255,
@@ -106,18 +131,8 @@ class SplashPageWidget extends StatelessWidget {
                             RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10.0)))),
                     onPressed: () async {
-                      final String? id = await getId();
-                      print("GOT ID");
-                      print(id);
-                      final endpoint_string = API_URL + "/device-login";
-                      final connectionResult = await client.connect(
-                          id!,
-                          Uri.parse(endpoint_string),
-                          LoginEnrollmentTypeDto.GUEST,
-                          "",
-                          "",
-                          "",
-                          "", []);
+                      final connectionResult = await client.connectDevice(
+                          "", LoginEnrollmentTypeDto.GUEST, "", "", "", []);
 
                       if (connectionResult == null) {
                         displayToast("An error occurred while signing you up!",

@@ -102,8 +102,9 @@ export interface RequestAchievementDataDto {
 
 export interface LoginDto {
   idToken: string;
-  latF: number;
-  longF: number;
+  noRegister: boolean;
+  latF?: number;
+  longF?: number;
   username?: string;
   year?: string;
   college?: string;
@@ -152,18 +153,6 @@ export interface SetCurrentChallengeDto {
   challengeId: string;
 }
 
-export interface LeaderDto {
-  userId: string;
-  username: string;
-  score: number;
-}
-
-export interface UpdateLeaderDataDto {
-  eventId: string;
-  offset: number;
-  users: LeaderDto[];
-}
-
 export interface UpdateErrorDto {
   id: string;
   message: string;
@@ -183,6 +172,25 @@ export interface RequestEventDataDto {
 export interface RequestEventLeaderDataDto {
   offset: number;
   count: number;
+  eventId?: string;
+}
+
+export interface LeaderDto {
+  userId: string;
+  username: string;
+  score: number;
+}
+
+export interface UpdateLeaderDataDto {
+  eventId?: string;
+  offset: number;
+  users: LeaderDto[];
+}
+
+export interface UpdateLeaderPositionDto {
+  playerId: string;
+  newTotalScore: number;
+  newEventScore: number;
   eventId: string;
 }
 
@@ -294,22 +302,6 @@ export interface UpdateOrganizationDataDto {
 }
 
 export interface CloseAccountDto {}
-
-export interface SetUsernameDto {
-  newUsername: string;
-}
-
-export interface SetCollegeDto {
-  newCollege: string;
-}
-
-export interface SetMajorDto {
-  newMajor: string;
-}
-
-export interface SetGraduationYearDto {
-  newYear: string;
-}
 
 export interface BanUserDto {
   userId: string;

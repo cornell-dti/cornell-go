@@ -7,7 +7,7 @@ import {
   EventTracker,
   User,
 } from '@prisma/client';
-import { LeaderDto, UpdateLeaderDataDto } from '../challenge/challenge.dto';
+import { LeaderDto, UpdateLeaderDataDto } from './event.dto';
 import { v4 } from 'uuid';
 import { ClientService } from '../client/client.service';
 import {
@@ -23,6 +23,7 @@ import {
   RequestRecommendedEventsDto,
   UpdateEventTrackerDataDto,
   EventCategoryDto,
+  UpdateLeaderPositionDto,
 } from './event.dto';
 import { AppAbility, CaslAbilityFactory } from '../casl/casl-ability.factory';
 import { accessibleBy } from '@casl/prisma';
@@ -310,7 +311,7 @@ export class EventService {
     const dto = await this.dtoForEventTracker(tracker);
     await this.clientService.sendProtected(
       'updateEventTrackerData',
-      target?.id ?? tracker.id,
+      target ?? tracker.id,
       dto,
       {
         id: tracker.id,
@@ -338,7 +339,7 @@ export class EventService {
 
     await this.clientService.sendProtected(
       'updateEventData',
-      target?.id ?? ev.id,
+      target ?? ev.id,
       dto,
       {
         id: ev.id,
@@ -346,6 +347,14 @@ export class EventService {
         dtoField: 'event',
         prismaStore: this.prisma.eventBase,
       },
+    );
+  }
+
+  async emitUpdateLeaderPosition(updateDto: UpdateLeaderPositionDto) {
+    await this.clientService.sendProtected(
+      'updateLeaderPosition',
+      null,
+      updateDto,
     );
   }
 
@@ -392,12 +401,12 @@ export class EventService {
     }
 
     const dto: UpdateLeaderDataDto = {
-      eventId: event?.id ?? '',
+      eventId: event?.id,
       offset,
       users: leaderData,
     };
 
-    await this.clientService.sendProtected('updateLeaderData', target.id, dto);
+    await this.clientService.sendProtected('updateLeaderData', target, dto);
   }
 
   async upsertEventFromDto(ability: AppAbility, event: EventDto) {

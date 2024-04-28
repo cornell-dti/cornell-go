@@ -105,7 +105,7 @@ export class UserGateway {
         );
       }
     } else {
-      await this.userService.emitUpdateUserData(user, false, false);
+      await this.userService.emitUpdateUserData(user, false, false, user);
     }
   }
 

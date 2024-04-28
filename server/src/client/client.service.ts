@@ -12,11 +12,13 @@ import { PermittedFieldsOptions, permittedFieldsOf } from '@casl/ability/extra';
 import { Action } from '../casl/action.enum';
 import { Subjects } from '@casl/prisma';
 import { UpdateUserDataDto } from '../user/user.dto';
+import { UpdateChallengeDataDto } from '../challenge/challenge.dto';
 import {
-  UpdateChallengeDataDto,
+  EventTrackerDto,
+  UpdateEventDataDto,
+  UpdateLeaderPositionDto,
   UpdateLeaderDataDto,
-} from '../challenge/challenge.dto';
-import { EventTrackerDto, UpdateEventDataDto } from '../event/event.dto';
+} from '../event/event.dto';
 import { GroupInviteDto, UpdateGroupDataDto } from '../group/group.dto';
 import { UpdateOrganizationDataDto } from '../organization/organization.dto';
 import {
@@ -37,6 +39,7 @@ export type ClientApiDef = {
   groupInvitation: GroupInviteDto;
   updateGroupData: UpdateGroupDataDto;
   updateOrganizationData: UpdateOrganizationDataDto;
+  updateLeaderPosition: UpdateLeaderPositionDto;
 };
 
 @Injectable()
@@ -65,7 +68,7 @@ export class ClientService {
       message,
     };
 
-    await this.sendProtected('updateErrorData', user.id, dto);
+    await this.sendProtected('updateErrorData', user, dto);
   }
 
   async getAffectedUsers(target: string) {
@@ -83,13 +86,22 @@ export class ClientService {
     return users;
   }
 
-  async sendEvent<TDto extends {}>(users: string[], event: string, dto: TDto) {
-    this.gateway.server.to(users).emit(event, dto);
+  async sendEvent<TDto extends {}>(
+    users: string[] | null,
+    event: string,
+    dto: TDto,
+  ) {
+    if (process.env.TESTING_E2E === 'true') {
+      return;
+    }
+
+    if (users) this.gateway.server.to(users).emit(event, dto);
+    else this.gateway.server.emit(event, dto);
   }
 
   async sendProtected<TDto extends {}>(
     event: keyof ClientApiDef,
-    target: string,
+    target: string | User | null,
     dto: ClientApiDef[typeof event] & TDto,
     resource?: {
       id: string;
@@ -100,12 +112,18 @@ export class ClientService {
       };
     },
   ) {
+    if (!target) {
+      this.sendEvent(null, event, dto);
+      return;
+    }
+
+    const room = target instanceof Object ? 'user/' + target.id : target;
     if (!resource) {
-      this.gateway.server.to(target).emit(event, dto);
+      this.gateway.server.to(room).emit(event, dto);
     } else {
-      this.gateway.server.in(target).socketsJoin(resource.id);
+      this.gateway.server.in(room).socketsJoin(resource.id);
       // Find all targeted users
-      const users = await this.getAffectedUsers(target);
+      const users = await this.getAffectedUsers(room);
 
       for (const user of users) {
         const ability = this.abilityFactory.createForUser(user);
@@ -125,9 +143,9 @@ export class ClientService {
             ...dto,
             [resource.dtoField]: accessibleObj,
           };
-          await this.sendEvent([user.id], event, newDto);
+          await this.sendEvent(['user/' + user.id], event, newDto);
         } else {
-          await this.sendEvent([user.id], event, accessibleObj);
+          await this.sendEvent(['user/' + user.id], event, accessibleObj);
         }
       }
     }

@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:game/profile/edit_profile.dart';
-import 'package:game/utils/utility_functions.dart';
 import 'package:game/main.dart';
-import 'package:game/splash_page/splash_page.dart';
-import 'package:game/profile/edit_profile.dart';
 
 class SettingsPage extends StatelessWidget {
   final bool isGuest;
