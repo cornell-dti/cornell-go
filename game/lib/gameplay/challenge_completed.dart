@@ -37,27 +37,54 @@ class LoadingBar extends StatelessWidget {
     double progress = num_completed / num_challenges;
     return Row(mainAxisSize: MainAxisSize.max, children: [
       Expanded(
-        flex: 8,
-        child: Container(
-          clipBehavior: Clip.hardEdge,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(15.0),
-          ),
-          height: 20.0,
-          width: double.infinity,
-          child: Stack(
-            alignment: Alignment.centerLeft,
-            children: [
-              Positioned.fill(
-                child: LinearProgressIndicator(
-                    value: progress,
-                    color: Color(0xE6ED5656),
-                    backgroundColor: Color(0xFFF1F1F1)),
+          flex: 8,
+          child: Stack(children: [
+            Container(
+              width: MediaQuery.sizeOf(context).width * 0.66,
+              height: 24,
+              alignment: Alignment.centerLeft,
+              child: Container(
+                decoration: new BoxDecoration(
+                  color: Color.fromARGB(255, 241, 241, 241),
+                  shape: BoxShape.rectangle,
+                  borderRadius: BorderRadius.all(Radius.circular(16.0)),
+                ),
               ),
-            ],
+            ),
+            Container(
+              width:
+                  (progress + 0.05) * MediaQuery.sizeOf(context).width * 0.66,
+              height: 24,
+              alignment: Alignment.centerLeft,
+              child: Container(
+                decoration: new BoxDecoration(
+                  color: Color(0xE6ED5656),
+                  shape: BoxShape.rectangle,
+                  borderRadius: BorderRadius.all(Radius.circular(16.0)),
+                ),
+              ),
+            ),
+          ])
+          // child: Container(
+          //   clipBehavior: Clip.hardEdge,
+          //   decoration: BoxDecoration(
+          //     borderRadius: BorderRadius.circular(15.0),
+          //   ),
+          //   height: 20.0,
+          //   width: double.infinity,
+          //   child: Stack(
+          //     alignment: Alignment.centerLeft,
+          //     children: [
+          //       Positioned.fill(
+          //         child: LinearProgressIndicator(
+          //             value: progress,
+          //             color: Color(0xE6ED5656),
+          //             backgroundColor: Color(0xFFF1F1F1)),
+          //       ),
+          //     ],
+          //   ),
+          // ),
           ),
-        ),
-      ),
       Expanded(
           flex: 2,
           child: Row(children: [
@@ -220,7 +247,7 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                       child: Row(
                         children: [
                           SvgPicture.asset(
-                            'assets/icons/locationCompleted.svg', // Replace with your SVG file path
+                            'assets/icons/locationCompleted.svg',
                             fit: BoxFit.cover,
                           ),
                           Text(

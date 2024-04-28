@@ -4,6 +4,11 @@ import 'package:game/gameplay/gameplay_page.dart';
 import 'package:provider/provider.dart';
 import 'package:game/api/game_client_dto.dart';
 
+import 'package:geolocator/geolocator.dart';
+import 'package:game/api/geopoint.dart';
+import 'dart:async';
+import 'package:flutter_svg/flutter_svg.dart';
+
 enum PreviewType { CHALLENGE, JOURNEY }
 
 /** Returns a preview of a challenge given the challenge name, description, 
@@ -11,12 +16,13 @@ enum PreviewType { CHALLENGE, JOURNEY }
  * both Challenges and Journeys. */
 class Preview extends StatefulWidget {
   final String challengeName;
+  final double? challengeLong;
+  final double? challengeLat;
   final String description;
   final String imgUrl;
   final String difficulty;
   final int points;
   final PreviewType type;
-
   final int locationCount;
   final int numberCompleted;
   final String location;
@@ -30,8 +36,20 @@ class Preview extends StatefulWidget {
   static Color purpleColor = Color.fromARGB(255, 131, 90, 124);
   static Color greyColor = Color.fromARGB(255, 110, 110, 110);
 
-  Preview(this.challengeName, this.description, this.imgUrl, this.difficulty,
-      this.points, this.type, this.location, this.eventId,
+  //Temporary image for now. Will have to change later
+  final String imgPath = "assets/images/38582.jpg";
+
+  Preview(
+      this.challengeName,
+      this.challengeLat,
+      this.challengeLong,
+      this.description,
+      this.imgUrl,
+      this.difficulty,
+      this.points,
+      this.type,
+      this.location,
+      this.eventId,
       {this.locationCount = 1,
       this.numberCompleted = 0,
       // required this.totalDistance,
@@ -41,6 +59,8 @@ class Preview extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => _PreviewState(
       challengeName,
+      challengeLat,
+      challengeLong,
       description,
       imgUrl,
       difficulty,
@@ -59,6 +79,8 @@ class Preview extends StatefulWidget {
  * challenge_on button */
 class _PreviewState extends State<Preview> {
   final String challengeName;
+  final double? challengeLong;
+  final double? challengeLat;
   final String description;
   final String imgUrl;
   final String difficulty;
@@ -77,8 +99,59 @@ class _PreviewState extends State<Preview> {
   final int numberCompleted;
   final String eventId;
 
+  //Temporary image for now. Will have to change later
+  final String imgPath = "assets/images/38582.jpg";
+
+  // User's current location will fall back to _center when current location
+  // cannot be found
+  GeoPoint? currentLocation;
+  GeoPoint? targetLocation;
+
+  late StreamSubscription<Position> positionStream;
+
+  @override
+  void initState() {
+    startPositionStream();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    positionStream.cancel();
+    super.dispose();
+  }
+
+  /**
+   * Starts the user's current location streaming upon state initialization
+   * Sets the camera to center on user's location by default
+   */
+  void startPositionStream() async {
+    GeoPoint.current().then(
+      (location) {
+        currentLocation = location;
+      },
+    );
+
+    positionStream = Geolocator.getPositionStream(
+            locationSettings: GeoPoint.getLocationSettings())
+        .listen((Position? newPos) {
+      // prints user coordinates - useful for debugging
+      // print(newPos == null
+      //     ? 'Unknown'
+      //     : '${newPos.latitude.toString()}, ${newPos.longitude.toString()}');
+
+      if (newPos != null)
+        currentLocation =
+            GeoPoint(newPos.latitude, newPos.longitude, newPos.heading);
+
+      setState(() {});
+    });
+  }
+
   _PreviewState(
       this.challengeName,
+      this.challengeLat,
+      this.challengeLong,
       this.description,
       this.imgUrl,
       this.difficulty,
@@ -93,6 +166,25 @@ class _PreviewState extends State<Preview> {
       );
   @override
   Widget build(BuildContext context) {
+    if (challengeLat == null || challengeLong == null) {
+      return SizedBox(
+        height: MediaQuery.of(context).size.height * 0.75,
+        child: ClipRRect(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(20.0),
+            topRight: Radius.circular(20.0),
+          ),
+
+          //Overall Container
+          child: Container(
+              height: MediaQuery.of(context).size.height * 0.75,
+              width: MediaQuery.of(context).size.width,
+              color: Colors.white,
+              child: Text("Cannot find challenge lat and long")),
+        ),
+      );
+    }
+
     //The popup box
     return SizedBox(
         height: MediaQuery.of(context).size.height * 0.75,
@@ -111,17 +203,19 @@ class _PreviewState extends State<Preview> {
                 children: [
                   //Image
                   Image.network(imgUrl,
-                      height: 200, width: 500, fit: BoxFit.cover),
+                      height: MediaQuery.of(context).size.height * 0.25,
+                      width: double.infinity,
+                      fit: BoxFit.cover),
                   SizedBox(height: 20),
 
                   // Row with starting location and distance
                   Padding(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 25.0, vertical: 5),
+                          horizontal: 20.0, vertical: 5),
                       child: Align(
                         alignment: Alignment.centerLeft,
                         child: Row(children: [
-                          Icon(Icons.tour,
+                          Icon(Icons.location_on,
                               size: 24, color: Preview.purpleColor),
                           Text(location,
                               style: TextStyle(
@@ -130,8 +224,18 @@ class _PreviewState extends State<Preview> {
                           Icon(Icons.directions_walk,
                               size: 24, color: Preview.greyColor),
                           Text(
-                              "25" + // should call new parameter; replace later
-                                  "mi",
+                              ' ' +
+                                  (currentLocation != null &&
+                                          challengeLat != null &&
+                                          challengeLong != null
+                                      ? (currentLocation!.distanceTo(GeoPoint(
+                                                  challengeLat!,
+                                                  challengeLong!,
+                                                  0)) /
+                                              1609.34)
+                                          .toStringAsFixed(1)
+                                      : "?.?") +
+                                  " mi",
                               style: TextStyle(
                                   fontSize: 20, color: Preview.greyColor))
                         ]),
@@ -148,16 +252,20 @@ class _PreviewState extends State<Preview> {
                               color: Colors.black)),
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 25.0),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(description,
-                          style: TextStyle(
-                              // fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                              fontFamily: 'Poppins',
-                              color: Preview.greyColor)),
+                  Container(
+                    height: MediaQuery.of(context).size.height * 0.12,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 25.0, vertical: 8.0),
+                      child: Align(
+                        alignment: Alignment.topLeft,
+                        child: Text(description,
+                            style: TextStyle(
+                                // fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                                fontFamily: 'Poppins',
+                                color: Preview.greyColor)),
+                      ),
                     ),
                   ),
                   Padding(
@@ -195,7 +303,9 @@ class _PreviewState extends State<Preview> {
                                                   difficulty[0].toUpperCase() +
                                                       difficulty.substring(1),
                                                   style: TextStyle(
-                                                      fontSize: 12,
+                                                      fontSize: 16,
+                                                      fontWeight:
+                                                          FontWeight.w400,
                                                       color: Colors.black),
                                                 ),
                                               ),
@@ -208,32 +318,18 @@ class _PreviewState extends State<Preview> {
                                         child: Container(
                                           height: 36,
                                           alignment: Alignment.centerLeft,
-                                          child: Container(
-                                            child: Padding(
-                                              padding: const EdgeInsets.only(
-                                                  left: 8, right: 8),
-                                              child: Align(
-                                                alignment: Alignment.center,
-                                                child: Text(
-                                                  (points).toString() + "PTS",
-                                                  style: TextStyle(
-                                                      fontSize: 12,
-                                                      color: Colors.white),
-                                                ),
-                                              ),
+                                          child: Row(children: [
+                                            SvgPicture.asset(
+                                              "assets/icons/bearcoins.svg",
+                                              width: 40,
+                                              height: 40,
                                             ),
-                                            decoration: new BoxDecoration(
-                                              border: Border.all(
-                                                color: Color.fromARGB(
-                                                    255, 255, 199, 55),
-                                              ),
-                                              color: Color.fromARGB(
-                                                  255, 189, 135, 31),
-                                              borderRadius:
-                                                  BorderRadius.circular(16),
-                                              shape: BoxShape.rectangle,
-                                            ),
-                                          ),
+                                            Text(points.toString() + " PTS",
+                                                style: TextStyle(
+                                                    fontSize: 23,
+                                                    fontWeight: FontWeight.w500,
+                                                    color: Color(0xFFC17E19)))
+                                          ]),
                                         )),
                                   ],
                                 ),
@@ -244,13 +340,12 @@ class _PreviewState extends State<Preview> {
                   ),
                   (type == PreviewType.JOURNEY)
                       ? Column(children: [
-                          SizedBox(height: 5),
                           Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 25),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 25, vertical: 5),
                               child: Stack(children: [
                                 Container(
-                                  width: 345,
+                                  width: MediaQuery.sizeOf(context).width * 0.9,
                                   height: 24,
                                   alignment: Alignment.centerLeft,
                                   child: Container(
@@ -266,7 +361,8 @@ class _PreviewState extends State<Preview> {
                                   width: (locationCount > 0
                                           ? numberCompleted / locationCount
                                           : 0) *
-                                      345,
+                                      MediaQuery.sizeOf(context).width *
+                                      0.9,
                                   height: 24,
                                   alignment: Alignment.centerLeft,
                                   child: Container(
@@ -279,7 +375,6 @@ class _PreviewState extends State<Preview> {
                                   ),
                                 ),
                               ])),
-                          // SizedBox(height: 30),
                           Padding(
                             padding: const EdgeInsets.only(
                                 left: 25, right: 25, bottom: 15, top: 3),
@@ -293,16 +388,18 @@ class _PreviewState extends State<Preview> {
                                             MainAxisAlignment.spaceBetween,
                                         children: [
                                           Spacer(),
-                                          Icon(Icons.location_on,
-                                              size: 15,
-                                              color: Preview.purpleColor),
+                                          SvgPicture.asset(
+                                              "assets/icons/pin.svg"),
                                           Text(
-                                              numberCompleted.toString() +
+                                              " " +
+                                                  numberCompleted.toString() +
                                                   "/" +
                                                   locationCount.toString(),
                                               style: TextStyle(
-                                                  fontSize: 15,
-                                                  color: Colors.black))
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: Color.fromARGB(
+                                                      255, 110, 110, 110)))
                                         ]),
                                   ),
                                 ),
@@ -315,7 +412,7 @@ class _PreviewState extends State<Preview> {
                     padding: EdgeInsets.symmetric(horizontal: 25),
                     child: SizedBox(
                         height: 50,
-                        width: 345,
+                        width: MediaQuery.sizeOf(context).width * 0.9,
                         child: TextButton(
                           style: ButtonStyle(
                               backgroundColor:

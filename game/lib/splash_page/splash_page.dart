@@ -121,8 +121,8 @@ class SplashPageWidget extends StatelessWidget {
                             RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10.0)))),
                     onPressed: () async {
-                      final connectionResult =
-                          await client.connectDevice("GUEST", "", "");
+                      final connectionResult = await client
+                          .connectDevice("GUEST", "", "", "", "", []);
 
                       if (connectionResult == null) {
                         displayToast("An error occurred while signing you up!",

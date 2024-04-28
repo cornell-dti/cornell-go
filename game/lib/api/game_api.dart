@@ -136,29 +136,48 @@ class ApiClient extends ChangeNotifier {
   }
 
   Future<http.Response?> connectDevice(
-      String enrollmentType, String year, String username) async {
+      String year,
+      String enrollmentType,
+      String username,
+      String college,
+      String major,
+      List<String> interests) async {
     final String? id = await getId();
     return connect(id!, _deviceLoginUrl, enrollmentType, year, username,
+        college, major, interests,
         noRegister: false);
   }
 
-  Future<http.Response?> connectGoogle(GoogleSignInAccount gAccount,
-      String enrollmentType, String year, String username) async {
+  Future<http.Response?> connectGoogle(
+      GoogleSignInAccount gAccount,
+      String year,
+      String enrollmentType,
+      String username,
+      String college,
+      String major,
+      List<String> interests) async {
     final auth = await gAccount.authentication;
-    return connect(
-        auth.idToken ?? "", _googleLoginUrl, enrollmentType, year, username,
+    return connect(auth.idToken ?? "", _googleLoginUrl, enrollmentType, year,
+        username, college, major, interests,
         noRegister: false);
   }
 
   Future<http.Response?> connectGoogleNoRegister(
       GoogleSignInAccount gAccount) async {
     final auth = await gAccount.authentication;
-    return connect(auth.idToken ?? "", _googleLoginUrl, "", "", "",
+    return connect(auth.idToken ?? "", _googleLoginUrl, "", "", "", "", "", [],
         noRegister: true);
   }
 
-  Future<http.Response?> connect(String idToken, Uri url, String enrollmentType,
-      String year, String username,
+  Future<http.Response?> connect(
+      String idToken,
+      Uri url,
+      String year,
+      String enrollmentType,
+      String username,
+      String college,
+      String major,
+      List<String> interests,
       {bool noRegister = false}) async {
     final pos = await GeoPoint.current();
     /*
@@ -173,6 +192,9 @@ class ApiClient extends ChangeNotifier {
           "enrollmentType": enrollmentType,
           "year": year,
           "username": username,
+          "college": college,
+          "major": major,
+          "interests": interests.join(","),
           "long": pos?.long.toString() ?? "0",
           "aud": Platform.isIOS ? "ios" : "android",
           "noRegister": noRegister

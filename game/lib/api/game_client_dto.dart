@@ -271,6 +271,15 @@ class LoginDto {
     if (year != null) {
       fields['year'] = year;
     }
+    if (college != null) {
+      fields['college'] = college;
+    }
+    if (major != null) {
+      fields['major'] = major;
+    }
+    if (interests != null) {
+      fields['interests'] = interests;
+    }
     if (aud != null) {
       fields['aud'] = aud!.name;
     }
@@ -285,6 +294,9 @@ class LoginDto {
     long = fields.containsKey('long') ? (fields["long"]) : null;
     username = fields.containsKey('username') ? (fields["username"]) : null;
     year = fields.containsKey('year') ? (fields["year"]) : null;
+    college = fields.containsKey('college') ? (fields["college"]) : null;
+    major = fields.containsKey('major') ? (fields["major"]) : null;
+    interests = fields.containsKey('interests') ? (fields["interests"]) : null;
     aud = fields.containsKey('aud')
         ? (LoginAudDto.values.byName(fields['aud']))
         : null;
@@ -299,6 +311,9 @@ class LoginDto {
     long = other.long == null ? long : other.long;
     username = other.username == null ? username : other.username;
     year = other.year == null ? year : other.year;
+    college = other.college == null ? college : other.college;
+    major = other.major == null ? major : other.major;
+    interests = other.interests == null ? interests : other.interests;
     aud = other.aud == null ? aud : other.aud;
     enrollmentType = other.enrollmentType;
   }
@@ -310,6 +325,9 @@ class LoginDto {
     this.long,
     this.username,
     this.year,
+    this.college,
+    this.major,
+    this.interests,
     this.aud,
     required this.enrollmentType,
   });
@@ -320,6 +338,9 @@ class LoginDto {
   late int? long;
   late String? username;
   late String? year;
+  late String? college;
+  late String? major;
+  late String? interests;
   late LoginAudDto? aud;
   late LoginEnrollmentTypeDto enrollmentType;
 }
@@ -591,31 +612,41 @@ class UpdateErrorDto {
   late String message;
 }
 
-class RequestAllEventDataDto {
+class RequestFilteredEventsDto {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> fields = {};
-    fields['offset'] = offset;
-    fields['count'] = count;
+    fields['difficulty'] = difficulty;
+    fields['location'] = location;
+    fields['category'] = category;
+    fields['filterId'] = filterId;
     return fields;
   }
 
-  RequestAllEventDataDto.fromJson(Map<String, dynamic> fields) {
-    offset = fields["offset"];
-    count = fields["count"];
+  RequestFilteredEventsDto.fromJson(Map<String, dynamic> fields) {
+    difficulty = List<String>.from(fields['difficulty']);
+    location = List<String>.from(fields['location']);
+    category = List<String>.from(fields['category']);
+    filterId = List<String>.from(fields['filterId']);
   }
 
-  void partialUpdate(RequestAllEventDataDto other) {
-    offset = other.offset;
-    count = other.count;
+  void partialUpdate(RequestFilteredEventsDto other) {
+    difficulty = other.difficulty;
+    location = other.location;
+    category = other.category;
+    filterId = other.filterId;
   }
 
-  RequestAllEventDataDto({
-    required this.offset,
-    required this.count,
+  RequestFilteredEventsDto({
+    required this.difficulty,
+    required this.location,
+    required this.category,
+    required this.filterId,
   });
 
-  late int offset;
-  late int count;
+  late List<String> difficulty;
+  late List<String> location;
+  late List<String> category;
+  late List<String> filterId;
 }
 
 class RequestEventDataDto {
@@ -1485,6 +1516,28 @@ class SetUsernameDto {
   late String newUsername;
 }
 
+class SetCollegeDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['newCollege'] = newCollege;
+    return fields;
+  }
+
+  SetCollegeDto.fromJson(Map<String, dynamic> fields) {
+    newCollege = fields["newCollege"];
+  }
+
+  void partialUpdate(SetCollegeDto other) {
+    newCollege = other.newCollege;
+  }
+
+  SetCollegeDto({
+    required this.newCollege,
+  });
+
+  late String newCollege;
+}
+
 class SetMajorDto {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> fields = {};
@@ -1712,6 +1765,15 @@ class UserDto {
     if (year != null) {
       fields['year'] = year;
     }
+    if (college != null) {
+      fields['college'] = college;
+    }
+    if (major != null) {
+      fields['major'] = major;
+    }
+    if (interests != null) {
+      fields['interests'] = interests;
+    }
     if (score != null) {
       fields['score'] = score;
     }
@@ -1741,6 +1803,11 @@ class UserDto {
         : null;
     email = fields.containsKey('email') ? (fields["email"]) : null;
     year = fields.containsKey('year') ? (fields["year"]) : null;
+    college = fields.containsKey('college') ? (fields["college"]) : null;
+    major = fields.containsKey('major') ? (fields["major"]) : null;
+    interests = fields.containsKey('interests')
+        ? (List<String>.from(fields['interests']))
+        : null;
     score = fields.containsKey('score') ? (fields["score"]) : null;
     isBanned = fields.containsKey('isBanned') ? (fields["isBanned"]) : null;
     groupId = fields.containsKey('groupId') ? (fields["groupId"]) : null;
@@ -1762,6 +1829,9 @@ class UserDto {
         other.enrollmentType == null ? enrollmentType : other.enrollmentType;
     email = other.email == null ? email : other.email;
     year = other.year == null ? year : other.year;
+    college = other.college == null ? college : other.college;
+    major = other.major == null ? major : other.major;
+    interests = other.interests == null ? interests : other.interests;
     score = other.score == null ? score : other.score;
     isBanned = other.isBanned == null ? isBanned : other.isBanned;
     groupId = other.groupId == null ? groupId : other.groupId;
@@ -1777,6 +1847,9 @@ class UserDto {
     this.enrollmentType,
     this.email,
     this.year,
+    this.college,
+    this.major,
+    this.interests,
     this.score,
     this.isBanned,
     this.groupId,
@@ -1790,6 +1863,9 @@ class UserDto {
   late UserEnrollmentTypeDto? enrollmentType;
   late String? email;
   late String? year;
+  late String? college;
+  late String? major;
+  late List<String>? interests;
   late int? score;
   late bool? isBanned;
   late String? groupId;

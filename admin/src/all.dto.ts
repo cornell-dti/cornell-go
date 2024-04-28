@@ -107,6 +107,9 @@ export interface LoginDto {
   long?: number;
   username?: string;
   year?: string;
+  college?: string;
+  major?: string;
+  interests?: string;
   aud?: LoginAudDto;
   enrollmentType: LoginEnrollmentTypeDto;
 }
@@ -155,9 +158,11 @@ export interface UpdateErrorDto {
   message: string;
 }
 
-export interface RequestAllEventDataDto {
-  offset: number;
-  count: number;
+export interface RequestFilteredEventsDto {
+  difficulty: string[];
+  location: string[];
+  category: string[];
+  filterId: string[];
 }
 
 export interface RequestEventDataDto {
@@ -302,6 +307,10 @@ export interface SetUsernameDto {
   newUsername: string;
 }
 
+export interface SetCollegeDto {
+  newCollege: string;
+}
+
 export interface SetMajorDto {
   newMajor: string;
 }
@@ -346,6 +355,9 @@ export interface UserDto {
   enrollmentType?: UserEnrollmentTypeDto;
   email?: string;
   year?: string;
+  college?: string;
+  major?: string;
+  interests?: string[];
   score?: number;
   isBanned?: boolean;
   groupId?: string;

@@ -21,6 +21,7 @@ import { AppAbility, CaslAbilityFactory } from '../casl/casl-ability.factory';
 import { Action } from '../casl/action.enum';
 import { subject } from '@casl/ability';
 import { accessibleBy } from '@casl/prisma';
+import { join } from 'path';
 
 @Injectable()
 export class UserService {
@@ -53,6 +54,9 @@ export class UserService {
     email: string,
     username: string | undefined,
     year: string,
+    college: string,
+    major: string,
+    interests: Array<string>,
     lat: number,
     long: number,
     authType: AuthType,
@@ -80,6 +84,9 @@ export class UserService {
         memberOf: { connect: { id: defOrg.id } },
         username: username ?? email?.split('@')[0],
         year,
+        college,
+        major,
+        interests,
         email,
         authToken,
         enrollmentType,
@@ -164,7 +171,7 @@ export class UserService {
   }
 
   /**
-   * Update a User's username, email, or year.
+   * Update a User's username, email, college, major, or year.
    * @param user User requiring an update.
    * @returns The new user after the update is made
    */
@@ -192,6 +199,8 @@ export class UserService {
       {
         username: username,
         email: user.email,
+        college: user.college,
+        major: user.major,
         year: user.year,
       },
       'User',
@@ -222,6 +231,8 @@ export class UserService {
       username: joinedUser.username,
       enrollmentType: joinedUser.enrollmentType,
       email: joinedUser.email,
+      college: joinedUser.college,
+      major: joinedUser.major,
       year: joinedUser.year,
       score: joinedUser.score,
       groupId: joinedUser.group.friendlyId,

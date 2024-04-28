@@ -9,6 +9,9 @@ export interface LoginDto {
   long?: number;
   username?: string;
   year?: string;
+  college?: string;
+  major?: string;
+  interests?: string;
   aud?: 'android' | 'ios' | 'web';
   enrollmentType: 'UNDERGRADUATE' | 'GRADUATE' | 'FACULTY' | 'ALUMNI' | 'GUEST';
 }

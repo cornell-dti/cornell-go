@@ -21,7 +21,6 @@ class _RegisterPageWidgetState extends State<RegisterPageWidget> {
   @override
   void initState() {
     super.initState();
-    _selectedOption = "Graduate Student";
   }
 
   final List<String> identityOptions = [
@@ -48,7 +47,11 @@ class _RegisterPageWidgetState extends State<RegisterPageWidget> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              SvgPicture.asset("assets/icons/back.svg"),
+              TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: SvgPicture.asset("assets/icons/back.svg")),
               SvgPicture.asset("assets/images/register_progress.svg"),
               SizedBox(height: 40.0),
               Text("Who are you?",

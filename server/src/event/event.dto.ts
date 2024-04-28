@@ -1,7 +1,9 @@
-/** DTO for requestAllEventData */
-export interface RequestAllEventDataDto {
-  offset: number;
-  count: number;
+/** DTO for RequestFilteredEvents */
+export interface RequestFilteredEventsDto {
+  difficulty: string[];
+  location: string[];
+  category: string[];
+  filterId: string[];
 }
 
 /** DTO for requestEventData */

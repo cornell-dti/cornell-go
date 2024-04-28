@@ -3,21 +3,6 @@ import { PrevChallenge } from '@prisma/client';
 /** DTO for closeAccount */
 export interface CloseAccountDto {}
 
-/** DTO for setUsername */
-export interface SetUsernameDto {
-  newUsername: string;
-}
-
-/** DTO for setMajor */
-export interface SetMajorDto {
-  newMajor: string;
-}
-
-/** DTO for setGraduationYear */
-export interface SetGraduationYearDto {
-  newYear: string;
-}
-
 export interface BanUserDto {
   userId: string;
   isBanned: boolean;
@@ -66,6 +51,9 @@ export interface UserDto {
     | 'GUEST';
   email?: string;
   year?: string;
+  college?: string;
+  major?: string;
+  interests?: string[];
   score?: number;
   isBanned?: boolean;
   groupId?: string;

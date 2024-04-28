@@ -51,7 +51,11 @@ class _InterestsPageWidgetState extends State<InterestsPageWidget> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SvgPicture.asset("assets/icons/back.svg"),
+                TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: SvgPicture.asset("assets/icons/back.svg")),
                 SvgPicture.asset("assets/images/interests_progress.svg"),
                 SizedBox(height: 40.0),
                 Text("What are your interests?",
@@ -106,11 +110,19 @@ class _InterestsPageWidgetState extends State<InterestsPageWidget> {
                 TextButton(
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
+                      List<String> interests = [];
+                      for (int i = 0; i < _checked.length; i++) {
+                        if (_checked[i]) interests.add(_categories[i]);
+                      }
+
                       final connectionResult = await client.connectGoogle(
                           widget.user!,
                           this.widget.userType,
                           this.widget.year ?? "",
-                          this.widget.username);
+                          this.widget.username,
+                          this.widget.college ?? "",
+                          this.widget.major ?? "",
+                          interests);
 
                       if (connectionResult == null) {
                         displayToast("An error occurred while signing you up!",

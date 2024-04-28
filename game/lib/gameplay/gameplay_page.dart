@@ -4,11 +4,14 @@ import 'package:game/model/event_model.dart';
 import 'package:game/model/tracker_model.dart';
 import 'package:game/model/group_model.dart';
 import 'package:game/api/geopoint.dart';
+import 'package:game/navigation_page/bottom_navbar.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:game/model/challenge_model.dart';
 import 'gameplay_map.dart';
 import 'package:provider/provider.dart';
+
+import 'package:game/api/game_client_dto.dart';
 import 'package:game/progress_indicators/circular_progress_indicator.dart';
 
 import 'package:flutter_svg/flutter_svg.dart';
@@ -122,7 +125,12 @@ class _GameplayPageState extends State<GameplayPage> {
                                         foregroundColor: Colors.grey),
                                     onPressed: () {
                                       // Left button action
-                                      Navigator.pop(context);
+                                      Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                BottomNavBar()),
+                                      );
                                     },
                                     child: Row(children: [
                                       SvgPicture.asset(
@@ -182,7 +190,7 @@ class _GameplayPageState extends State<GameplayPage> {
                                   Text(
                                       ' ' +
                                           (friendlyLocation[
-                                                  challenge.location?.name] ??
+                                                  challenge.location] ??
                                               ""),
                                       style: TextStyle(
                                           fontSize: 12,
