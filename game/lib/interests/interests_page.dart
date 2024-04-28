@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:game/api/game_client_dto.dart';
 import 'package:game/journeys/journeys_page.dart';
 import 'package:game/main.dart';
 import 'package:game/navigation_page/bottom_navbar.dart';
@@ -11,7 +12,7 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 class InterestsPageWidget extends StatefulWidget {
   InterestsPageWidget(
       {Key? key,
-      required String this.userType,
+      required LoginEnrollmentTypeDto this.userType,
       required String? this.idToken,
       required GoogleSignInAccount? this.user,
       required String this.username,
@@ -20,7 +21,7 @@ class InterestsPageWidget extends StatefulWidget {
       required String? this.year})
       : super(key: key);
   final scaffoldKey = GlobalKey<ScaffoldState>();
-  final String userType;
+  final LoginEnrollmentTypeDto userType;
   final String? idToken;
   final GoogleSignInAccount? user;
   final String username;

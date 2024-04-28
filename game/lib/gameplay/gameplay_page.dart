@@ -43,6 +43,17 @@ class _GameplayPageState extends State<GameplayPage> {
 
   late StreamSubscription<Position> positionStream;
 
+  final Map<String, String> friendlyLocation = {
+    "ENG_QUAD": "Eng Quad",
+    "ARTS_QUAD": "Arts Quad",
+    "AG_QUAD": "Ag Quad",
+    "NORTH_CAMPUS": "North Campus",
+    "WEST_CAMPUS": "West Campus",
+    "COLLEGETOWN": "Collegetown",
+    "ITHACA_COMMONS": "Ithaca Commons",
+    "ANY": "Cornell",
+  };
+
   @override
   void initState() {
     startPositionStream();
@@ -161,13 +172,7 @@ class _GameplayPageState extends State<GameplayPage> {
                                       vertical: 4.0, horizontal: 8.0),
                                   child: Text(
                                       (event.challenges!.length > 1
-                                          ? "Journey " +
-                                              (tracker.prevChallenges.length +
-                                                      1)
-                                                  .toString() +
-                                              "/" +
-                                              event.challenges!.length
-                                                  .toString()
+                                          ? "Journey"
                                           : "Challenge"),
                                       style: TextStyle(
                                           fontSize: 14,
@@ -222,13 +227,6 @@ class _GameplayPageState extends State<GameplayPage> {
                                       "assets/icons/bearcoins.svg"),
                                   Text(
                                       ' ' +
-                                          ((tracker.hintsUsed > 0)
-                                              ? ((challenge.points ?? 0) -
-                                                          tracker.hintsUsed *
-                                                              25)
-                                                      .toString() +
-                                                  '/'
-                                              : '') +
                                           (challenge.points ?? 0).toString() +
                                           " PTS",
                                       style: TextStyle(

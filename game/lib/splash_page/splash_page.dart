@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:game/api/game_client_dto.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:game/main.dart';
 import 'package:provider/provider.dart';
@@ -112,7 +113,7 @@ class SplashPageWidget extends StatelessWidget {
                       final connectionResult = await client.connect(
                           id!,
                           Uri.parse(endpoint_string),
-                          "GUEST",
+                          LoginEnrollmentTypeDto.GUEST,
                           "",
                           "",
                           "",

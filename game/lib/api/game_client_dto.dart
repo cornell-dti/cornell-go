@@ -258,8 +258,8 @@ class LoginDto {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> fields = {};
     fields['idToken'] = idToken;
-    fields['lat'] = lat;
-    fields['long'] = long;
+    fields['latF'] = latF;
+    fields['longF'] = longF;
     if (username != null) {
       fields['username'] = username;
     }
@@ -284,8 +284,8 @@ class LoginDto {
 
   LoginDto.fromJson(Map<String, dynamic> fields) {
     idToken = fields["idToken"];
-    lat = fields["lat"];
-    long = fields["long"];
+    latF = fields["latF"]!.toDouble();
+    longF = fields["longF"]!.toDouble();
     username = fields.containsKey('username') ? (fields["username"]) : null;
     year = fields.containsKey('year') ? (fields["year"]) : null;
     college = fields.containsKey('college') ? (fields["college"]) : null;
@@ -300,8 +300,8 @@ class LoginDto {
 
   void partialUpdate(LoginDto other) {
     idToken = other.idToken;
-    lat = other.lat;
-    long = other.long;
+    latF = other.latF;
+    longF = other.longF;
     username = other.username == null ? username : other.username;
     year = other.year == null ? year : other.year;
     college = other.college == null ? college : other.college;
@@ -313,8 +313,8 @@ class LoginDto {
 
   LoginDto({
     required this.idToken,
-    required this.lat,
-    required this.long,
+    required this.latF,
+    required this.longF,
     this.username,
     this.year,
     this.college,
@@ -325,8 +325,8 @@ class LoginDto {
   });
 
   late String idToken;
-  late int lat;
-  late int long;
+  late double latF;
+  late double longF;
   late String? username;
   late String? year;
   late String? college;
