@@ -9,7 +9,6 @@ import 'package:game/model/group_model.dart';
 import 'package:game/model/tracker_model.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:provider/provider.dart';
-import 'package:velocity_x/velocity_x.dart';
 import 'challenge_cell.dart';
 import 'package:game/journeys/filter_form.dart';
 

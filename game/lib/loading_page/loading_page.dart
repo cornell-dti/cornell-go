@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:game/api/game_api.dart';
 import 'package:game/navigation_page/bottom_navbar.dart';
 import 'package:game/splash_page/splash_page.dart';
-import 'package:provider/provider.dart';
 
 class LoadingPageWidget extends StatelessWidget {
   final Future<bool> relogResult;

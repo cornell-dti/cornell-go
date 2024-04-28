@@ -3,7 +3,6 @@
 // OTHERWISE YOUR CHANGES MAY BE OVERWRITTEN!
 
 import 'dart:async';
-import 'dart:convert';
 import 'package:game/api/game_client_dto.dart';
 import 'package:socket_io_client/socket_io_client.dart';
 
