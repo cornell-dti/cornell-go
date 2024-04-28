@@ -7,6 +7,7 @@ import {
   OrganizationSpecialUsage,
   User,
   LocationType,
+  AchievementType,
   EventCategoryType,
 } from '@prisma/client';
 import { ClientService } from '../client/client.service';
@@ -43,6 +44,17 @@ export const defaultChallengeData = {
   longitude: -76.48504614830019,
   awardingRadius: 50,
   closeRadius: 100,
+};
+
+export const defaultAchievementData = {
+  eventIndex: 0,
+  requiredPoints: 50,
+  name: 'Default Achievement',
+  description: 'Statue',
+  imageUrl:
+    'https://upload.wikimedia.org/wikipedia/commons/5/5f/CentralAvenueCornell2.jpg',
+  locationType: LocationType.ARTS_QUAD,
+  achievementType: AchievementType.TOTAL_CHALLENGES,
 };
 
 @Injectable()
@@ -342,9 +354,11 @@ export class OrganizationService {
   }
 
   async joinOrganization(user: User, code: string) {
-    const org = await this.prisma.organization.findFirstOrThrow({
+    const org = await this.prisma.organization.findFirst({
       where: { accessCode: code },
     });
+
+    if (!org) return;
 
     await this.prisma.organization.update({
       where: { id: org.id },

@@ -12,12 +12,13 @@ import { UserGuard } from '../auth/jwt-auth.guard';
 import { UseGuards } from '@nestjs/common';
 import { EventBase, TimeLimitationType, User } from '@prisma/client';
 import {
-  EventDto,
-  RequestAllEventDataDto,
+  // EventDto,
+  // RequestAllEventDataDto,
   RequestEventDataDto,
   RequestEventLeaderDataDto,
   UpdateEventDataDto,
   RequestRecommendedEventsDto,
+  RequestFilteredEventsDto,
   UseEventTrackerHintDto,
 } from './event.dto';
 import { RequestEventTrackerDataDto } from '../challenge/challenge.dto';
@@ -56,6 +57,24 @@ export class EventGateway {
 
     for (const ev of evs) {
       await this.eventService.emitUpdateEventData(ev, false, user);
+    }
+  }
+
+  @SubscribeMessage('requestFilteredEventIds')
+  async requestFilteredEventIds(
+    @UserAbility() ability: AppAbility,
+    @CallingUser() user: User,
+    @MessageBody() data: RequestFilteredEventsDto,
+  ) {
+    const evs = await this.eventService.getEventsByIdsForAbility(
+      ability,
+      data.filterId,
+    );
+
+    for (const ev of evs) {
+      if (ev.difficulty == data.difficulty[0]) {
+        await this.eventService.emitUpdateEventData(ev, false, user);
+      }
     }
   }
 
@@ -102,7 +121,6 @@ export class EventGateway {
       user,
       data.trackedEvents,
     );
-
     for (const tracker of trackers) {
       await this.eventService.emitUpdateEventTracker(tracker, user);
     }
@@ -129,8 +147,8 @@ export class EventGateway {
   ) {
     const ev = await this.eventService.getEventById(data.event.id);
 
-    if (data.deleted && ev) {
-      if (!(await this.eventService.removeEvent(ability, ev.id))) {
+    if (data.deleted) {
+      if (!ev || !(await this.eventService.removeEvent(ability, ev.id))) {
         await this.clientService.emitErrorData(user, 'Failed to delete event!');
         return;
       }

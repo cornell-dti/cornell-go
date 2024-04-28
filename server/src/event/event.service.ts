@@ -48,6 +48,7 @@ export class EventService {
     ability: AppAbility,
     ids?: string[],
   ): Promise<EventBase[]> {
+    // console.log("Ids are " + ids)
     return await this.prisma.eventBase.findMany({
       where: {
         AND: [
@@ -262,7 +263,7 @@ export class EventService {
       description: ev.description,
       category: ev.category as EventCategoryDto,
       timeLimitation:
-        ev.timeLimitation == TimeLimitationType.LIMITED_TIME
+        ev.timeLimitation === TimeLimitationType.LIMITED_TIME
           ? 'LIMITED_TIME'
           : 'PERPETUAL',
       endTime: ev.endTime.toUTCString(),

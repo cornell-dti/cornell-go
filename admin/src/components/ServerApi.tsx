@@ -13,6 +13,14 @@ export class ServerApi {
     this.socket.emit(ev, data);
   }
 
+  requestAchievementData(data: dto.RequestAchievementDataDto) {
+    this.send("requestAchievementData", data);
+  }
+
+  updateAchievementData(data: dto.UpdateAchievementDataDto) {
+    this.send("updateAchievementData", data);
+  }
+
   requestChallengeData(data: dto.RequestChallengeDataDto) {
     this.send("requestChallengeData", data);
   }
@@ -31,6 +39,10 @@ export class ServerApi {
 
   requestEventData(data: dto.RequestEventDataDto) {
     this.send("requestEventData", data);
+  }
+
+  requestFilteredEventIds(data: dto.RequestFilteredEventsDto) {
+    this.send("requestFilteredEventIds", data);
   }
 
   requestRecommendedEvents(data: dto.RequestRecommendedEventsDto) {
@@ -134,6 +146,20 @@ export class ServerApi {
   onUpdateChallengeData(callback: (data: dto.UpdateChallengeDataDto) => void) {
     this.socket.removeAllListeners("updateChallengeData");
     this.socket.on("updateChallengeData", (data) => callback(data));
+  }
+
+  onUpdateAchievementData(
+    callback: (data: dto.UpdateAchievementDataDto) => void
+  ) {
+    this.socket.removeAllListeners("updateAchievementData");
+    this.socket.on("updateAchievementData", (data) => callback(data));
+  }
+
+  onUpdateAchievementTrackerData(
+    callback: (data: dto.AchievementTrackerDto) => void
+  ) {
+    this.socket.removeAllListeners("updateAchievementTrackerData");
+    this.socket.on("updateAchievementTrackerData", (data) => callback(data));
   }
 
   onUpdateEventTrackerData(callback: (data: dto.EventTrackerDto) => void) {

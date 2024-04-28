@@ -69,6 +69,11 @@ describe('OrganizationModule E2E', () => {
   let exEv: EventBase;
   let exChal: Challenge;
 
+  let exOrg2: Organization;
+  let exEv2: EventBase;
+  let exChal1: Challenge;
+  let exChal2: Challenge;
+
   let sendEventMock: jest.SpyInstance<Promise<void>, [string[], string, any]>;
   let affectedUsers: User[] = [];
 
@@ -102,20 +107,46 @@ describe('OrganizationModule E2E', () => {
     }))!;
 
     exEv = (await eventService.upsertEventFromDto(fullAbility, {
-      id: '',
+      id: 'ev1',
       initialOrganizationId: exOrg.id,
     }))!;
 
     exChal = (await challengeService.upsertChallengeFromDto(fullAbility, {
       id: '',
       linkedEventId: exEv.id,
-      location: ChallengeLocationDto.ArtsQuad,
+      location: ChallengeLocationDto.ARTS_QUAD,
+    }))!;
+
+    exOrg2 = (await orgService.upsertOrganizationFromDto(fullAbility, {
+      id: '',
+    }))!;
+
+    exEv2 = (await eventService.upsertEventFromDto(fullAbility, {
+      id: 'ev2',
+      initialOrganizationId: exOrg2.id,
+    }))!;
+
+    exChal1 = (await challengeService.upsertChallengeFromDto(fullAbility, {
+      id: 'exchal1',
+      name: 'exchal1',
+      linkedEventId: exEv2.id,
+      location: ChallengeLocationDto.ARTS_QUAD,
+    }))!;
+
+    exChal2 = (await challengeService.upsertChallengeFromDto(fullAbility, {
+      id: 'exchal2',
+      name: 'exchal2',
+      linkedEventId: exEv2.id,
+      location: ChallengeLocationDto.ENG_QUAD,
     }))!;
 
     managerUser = await userService.register(
       'manager@cornell.edu',
       'manager',
       '2024',
+      'Engineering',
+      'Computer Science',
+      ['Nature'],
       0,
       0,
       AuthType.DEVICE,
@@ -127,6 +158,9 @@ describe('OrganizationModule E2E', () => {
       'basic@cornell.edu',
       'basic',
       '2024',
+      'Engineering',
+      'Computer Science',
+      ['Nature'],
       0,
       0,
       AuthType.DEVICE,
@@ -152,7 +186,10 @@ describe('OrganizationModule E2E', () => {
 
     managerGroup = await groupService.getGroupForUser(managerUser);
     basicGroup = await groupService.getGroupForUser(basicUser);
+    // add manager user as manager to first org
     await orgService.addManager(fullAbility, 'manager@cornell.edu', exOrg.id);
+    // add basic user as member of second org
+    await orgService.joinOrganization(basicUser, exOrg2.accessCode);
 
     managerAbility = abilityFactory.createForUser(managerUser);
     basicAbility = abilityFactory.createForUser(basicUser);
@@ -207,15 +244,32 @@ describe('OrganizationModule E2E', () => {
       expect(dto.user.username).toEqual('myNewUsername');
     });
 
-    it('Should not be able to see non-current challenge', async () => {
-      await groupService.setCurrentEvent(managerUser, exEv.id);
+    it('Should be able to see lat, long of first challenge in a non-current event', async () => {
+      await groupService.setCurrentEvent(basicUser, defaultEv.id);
 
-      affectedUsers.push(managerUser);
-      await chalGateway.requestChallengeData(managerAbility, managerUser, {
-        challenges: [defaultChal.id],
+      affectedUsers.push(basicUser);
+      await chalGateway.requestChallengeData(basicAbility, basicUser, {
+        challenges: [exChal1.id],
       });
 
-      expect(sendEventMock.mock.lastCall).toBeUndefined();
+      const [users, ev, dto]: DtoLastCall<UpdateChallengeDataDto> =
+        sendEventMock.mock.lastCall;
+
+      expect(ev).toEqual('updateChallengeData');
+      expect(dto.challenge.name).toBeUndefined();
+      expect(dto.challenge.latF).toEqual(exChal1.latitude);
+      expect(dto.challenge.longF).toEqual(exChal1.longitude);
+    });
+
+    it('Should not be able to see lat, long of second challenge in a non-current evnet', async () => {
+      await groupService.setCurrentEvent(basicUser, defaultEv.id);
+
+      affectedUsers.push(basicUser);
+      expect(
+        await chalGateway.requestChallengeData(basicAbility, basicUser, {
+          challenges: [exChal2.id],
+        }),
+      ).toBeFalsy;
     });
 
     it('Should be able to see current challenge lat long but not name', async () => {
@@ -234,7 +288,7 @@ describe('OrganizationModule E2E', () => {
       expect(dto.challenge.longF).toBeDefined();
     });
 
-    it('Should be able to see completed challenge name but not lat long', async () => {
+    it('Should be able to see completed challenge name lat and long', async () => {
       await groupService.setCurrentEvent(managerUser, defaultEv.id);
       await chalGateway.completedChallenge(managerUser, {
         challengeId: defaultChal.id,
@@ -251,8 +305,8 @@ describe('OrganizationModule E2E', () => {
 
       expect(ev).toEqual('updateChallengeData');
       expect(dto.challenge.name).toBeDefined();
-      expect(dto.challenge.latF).toBeUndefined();
-      expect(dto.challenge.longF).toBeUndefined();
+      expect(dto.challenge.latF).toBeDefined();
+      expect(dto.challenge.longF).toBeDefined();
     });
 
     it('Should not be able to set current event to event of not allowed org', async () => {

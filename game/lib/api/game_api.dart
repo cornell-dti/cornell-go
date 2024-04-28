@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:game/api/game_client_api.dart';
+import 'package:game/api/game_client_dto.dart';
 import 'package:game/api/game_server_api.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -88,7 +89,6 @@ class ApiClient extends ChangeNotifier {
       _createSocket(true);
     } else {
       authenticated = false;
-      _clientApi.disconnectedController.add(null);
       _socket?.dispose();
       _socket = null;
       notifyListeners();
@@ -123,36 +123,42 @@ class ApiClient extends ChangeNotifier {
       _refreshToken = token;
       final access = await _refreshAccess(true);
       authenticated = access;
-      if (!access) {
-        _clientApi.disconnectedController.add(null);
-      }
       notifyListeners();
       return access;
     }
 
     authenticated = false;
-    _clientApi.disconnectedController.add(null);
     notifyListeners();
     return false;
   }
 
-  Future<http.Response?> connect(String idToken, Uri url, String enrollmentType,
-      String year, String username) async {
+  Future<http.Response?> connect(
+      String idToken,
+      Uri url,
+      LoginEnrollmentTypeDto enrollmentType,
+      String year,
+      String username,
+      String college,
+      String major,
+      List<String> interests) async {
     final pos = await GeoPoint.current();
     if (true) {
+      final loginDto = LoginDto(
+          idToken: idToken,
+          latF: pos?.lat ?? 0,
+          longF: pos?.long ?? 0,
+          enrollmentType: enrollmentType,
+          username: username,
+          college: college,
+          major: major,
+          interests: interests.join(","),
+          aud: Platform.isIOS ? LoginAudDto.ios : LoginAudDto.android);
+
       final loginResponse = await http.post(url,
           headers: <String, String>{
             'Content-Type': 'application/json; charset=UTF-8',
           },
-          body: jsonEncode(<String, String>{
-            "idToken": idToken,
-            "lat": pos?.lat.toString() ?? "0",
-            "enrollmentType": enrollmentType,
-            "year": year,
-            "username": username,
-            "long": pos?.long.toString() ?? "0",
-            "aud": Platform.isIOS ? "ios" : "android"
-          }));
+          body: jsonEncode(loginDto.toJson()));
 
       if (loginResponse.statusCode == 201 && loginResponse.body != "") {
         final responseBody = jsonDecode(loginResponse.body);
@@ -165,7 +171,6 @@ class ApiClient extends ChangeNotifier {
         print(loginResponse.body);
       }
       authenticated = false;
-      _clientApi.disconnectedController.add(null);
       notifyListeners();
 
       print("Failed to connect to server!");
@@ -191,7 +196,6 @@ class ApiClient extends ChangeNotifier {
     _socket = null;
 
     authenticated = false;
-    _clientApi.disconnectedController.add(null);
     notifyListeners();
   }
 }

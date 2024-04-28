@@ -36,9 +36,15 @@ class GameServerApi {
   void _invokeWithRefresh(String ev, Map<String, dynamic> data) {
     _refreshEv = ev;
     _refreshDat = data;
-    print(ev);
+    //print(ev);
     _socket.emit(ev, data);
   }
+
+  void requestAchievementData(RequestAchievementDataDto dto) =>
+      _invokeWithRefresh("requestAchievementData", dto.toJson());
+
+  void updateAchievementData(UpdateAchievementDataDto dto) =>
+      _invokeWithRefresh("updateAchievementData", dto.toJson());
 
   void requestChallengeData(RequestChallengeDataDto dto) =>
       _invokeWithRefresh("requestChallengeData", dto.toJson());
@@ -54,6 +60,9 @@ class GameServerApi {
 
   void requestEventData(RequestEventDataDto dto) =>
       _invokeWithRefresh("requestEventData", dto.toJson());
+
+  void requestFilteredEventIds(RequestFilteredEventsDto dto) =>
+      _invokeWithRefresh("requestFilteredEventIds", dto.toJson());
 
   void requestRecommendedEvents(RequestRecommendedEventsDto dto) =>
       _invokeWithRefresh("requestRecommendedEvents", dto.toJson());

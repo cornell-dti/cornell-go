@@ -35,7 +35,7 @@ describe('ChallengeModule E2E', () => {
   let abilityFactory: CaslAbilityFactory;
   let fullAbility: AppAbility;
 
-  /** beforeAll runs before anything else, add new users and prerequesites to tests
+  /** beforeAll runs before anything else, add new users and prerequisites to tests
    * afterAll runs after all the tests, use it to remove lingering values in the database */
   beforeAll(async () => {
     moduleRef = await Test.createTestingModule({
@@ -71,6 +71,9 @@ describe('ChallengeModule E2E', () => {
       'test@gmail.com',
       'test',
       '2025',
+      'Engineering',
+      'Computer Science',
+      ['Nature'],
       0,
       0,
       AuthType.DEVICE,
@@ -135,7 +138,7 @@ describe('ChallengeModule E2E', () => {
       const chalDto: ChallengeDto = {
         id: '12345',
         name: 'test',
-        location: ChallengeLocationDto.EngQuad,
+        location: ChallengeLocationDto.ENG_QUAD,
         description: 'chal dto',
         points: 1,
         imageUrl: 'url',
@@ -181,7 +184,7 @@ describe('ChallengeModule E2E', () => {
       const secondChalDto: ChallengeDto = {
         id: '123',
         name: 'test',
-        location: ChallengeLocationDto.Any,
+        location: ChallengeLocationDto.ANY,
         description: 'chal dto',
         points: 1,
         imageUrl: 'update test',
@@ -210,7 +213,7 @@ describe('ChallengeModule E2E', () => {
       const chalDto: ChallengeDto = {
         id: chalID,
         name: 'test',
-        location: ChallengeLocationDto.EngQuad,
+        location: ChallengeLocationDto.ENG_QUAD,
         description: 'chal dto',
         points: 1,
         imageUrl: 'update test',

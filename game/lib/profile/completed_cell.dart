@@ -32,9 +32,9 @@ Widget completedCell(String name, String picture, String type, String date,
             child: ClipRRect(
                 borderRadius: BorderRadius.circular(20),
                 child: Image(
-                  width: 80,
-                  height: 80,
-                  image: AssetImage(picture),
+                  width: 64,
+                  height: 64,
+                  image: NetworkImage(picture),
                   fit: BoxFit.cover,
                 )),
           ),
@@ -64,73 +64,20 @@ Widget completedCell(String name, String picture, String type, String date,
                   ],
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
+                  padding: const EdgeInsets.only(top: 5.0),
                   child: Container(
                     width: 200,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          width: 80,
-                          height: 25,
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: Colors.purple, // Set the outline color
-                              width: 2.0, // Set the outline width
-                            ),
-                            borderRadius: BorderRadius.circular(
-                                15.0), // Set border radius
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              SvgPicture.asset(
-                                'assets/icons/flag.svg',
-                              ),
-                            ],
-                          ),
-                        ),
-                        Container(
-                          width: 50,
-                          height: 25,
-                          decoration: BoxDecoration(
-                            color: Color.fromRGBO(249, 236, 217, 1),
-                            borderRadius: BorderRadius.circular(
-                                20.0), // Set border radius
-                          ),
-                          child: Center(
-                            child: Text(
-                              difficulty,
-                              style: TextStyle(
-                                fontSize: 10,
-                              ),
-                            ),
-                          ),
-                        ),
-                        Container(
-                          width: 50,
-                          height: 25,
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: Color.fromRGBO(
-                                  189, 135, 31, 1), // Set the outline color
-                              width: 1.38, // Set the outline width
-                            ),
-                            color: Color.fromRGBO(255, 199, 55, 1),
-                            borderRadius: BorderRadius.circular(
-                                15.0), // Set border radius
-                          ),
-                          child: Center(
-                            child: Text(
-                              points.toString() + " PTS",
-                              style: TextStyle(
-                                fontSize: 10,
-                              ),
-                            ),
-                          ),
-                        )
-                      ],
-                    ),
+                    child: Row(children: [
+                      SvgPicture.asset(
+                        "assets/icons/bearcoins.svg",
+                        width: 20,
+                      ),
+                      Text(' ' + points.toString() + " PTS",
+                          style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xFFC17E19)))
+                    ]),
                   ),
                 ),
               ],

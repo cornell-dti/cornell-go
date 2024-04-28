@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:game/api/game_client_dto.dart';
 import 'package:game/journeys/journeys_page.dart';
 import 'package:game/main.dart';
 import 'package:game/navigation_page/bottom_navbar.dart';
@@ -11,7 +12,7 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 class InterestsPageWidget extends StatefulWidget {
   InterestsPageWidget(
       {Key? key,
-      required String this.userType,
+      required LoginEnrollmentTypeDto this.userType,
       required String? this.idToken,
       required GoogleSignInAccount? this.user,
       required String this.username,
@@ -20,7 +21,7 @@ class InterestsPageWidget extends StatefulWidget {
       required String? this.year})
       : super(key: key);
   final scaffoldKey = GlobalKey<ScaffoldState>();
-  final String userType;
+  final LoginEnrollmentTypeDto userType;
   final String? idToken;
   final GoogleSignInAccount? user;
   final String username;
@@ -55,7 +56,11 @@ class _InterestsPageWidgetState extends State<InterestsPageWidget> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SvgPicture.asset("assets/icons/back.svg"),
+                TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: SvgPicture.asset("assets/icons/back.svg")),
                 SvgPicture.asset("assets/images/interests_progress.svg"),
                 SizedBox(height: 40.0),
                 Text("What are your interests?",
@@ -110,6 +115,11 @@ class _InterestsPageWidgetState extends State<InterestsPageWidget> {
                 TextButton(
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
+                      List<String> interests = [];
+                      for (int i = 0; i < _checked.length; i++) {
+                        if (_checked[i]) interests.add(_categories[i]);
+                      }
+
                       assert(widget.user != null || widget.idToken != null);
                       final auth = await widget.user?.authentication;
                       final idToken =
@@ -121,20 +131,14 @@ class _InterestsPageWidgetState extends State<InterestsPageWidget> {
                           Uri.parse(endpoint_string),
                           this.widget.userType,
                           this.widget.year ?? "",
-                          this.widget.username);
+                          this.widget.username,
+                          this.widget.college ?? "",
+                          this.widget.major ?? "",
+                          interests);
 
                       if (connectionResult == null) {
                         displayToast("An error occurred while signing you up!",
                             Status.error);
-                      } else {
-                        //Connect to home page here.
-                        print("Connection result:");
-                        print(connectionResult.body);
-                        displayToast("Signed in!", Status.success);
-                        Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => BottomNavBar()));
                       }
                     }
                   },

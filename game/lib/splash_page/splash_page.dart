@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:game/api/game_client_dto.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:game/main.dart';
 import 'package:provider/provider.dart';
@@ -13,6 +14,16 @@ class SplashPageWidget extends StatelessWidget {
   final scaffoldKey = GlobalKey<ScaffoldState>();
   @override
   Widget build(BuildContext context) {
+    final client = Provider.of<ApiClient>(context);
+
+    if (client.serverApi != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (context) => BottomNavBar()));
+        displayToast("Signed in!", Status.success);
+      });
+    }
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
@@ -100,20 +111,17 @@ class SplashPageWidget extends StatelessWidget {
                       print(id);
                       final endpoint_string = API_URL + "/device-login";
                       final connectionResult = await client.connect(
-                          id!, Uri.parse(endpoint_string), "GUEST", "", "");
+                          id!,
+                          Uri.parse(endpoint_string),
+                          LoginEnrollmentTypeDto.GUEST,
+                          "",
+                          "",
+                          "",
+                          "", []);
 
                       if (connectionResult == null) {
                         displayToast("An error occurred while signing you up!",
                             Status.error);
-                      } else {
-                        //Connect to home page here.
-                        print("Connection result:");
-                        print(connectionResult.body);
-                        displayToast("Signed in!", Status.success);
-                        Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => BottomNavBar()));
                       }
                     },
                     child: Container(

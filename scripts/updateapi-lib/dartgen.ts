@@ -197,22 +197,22 @@ export function getDartClientApiFile(apiDefs: ApiDefs) {
   }
 
   dartCode += `
-    final _reconnectedController = StreamController<Null>.broadcast(sync: true);
-    Stream<Null> get reconnectedStream => _reconnectedController.stream;
+    final _reconnectedController = StreamController<bool>.broadcast(sync: true);
+    Stream<bool> get reconnectedStream => _reconnectedController.stream;
 
-    final _reconnectingController = StreamController<Null>.broadcast(sync: true);
-    Stream<Null> get reconnectingStream => _reconnectingController.stream;
+    final _reconnectingController = StreamController<bool>.broadcast(sync: true);
+    Stream<bool> get reconnectingStream => _reconnectingController.stream;
 
-    final _connectedController = StreamController<Null>.broadcast(sync: true);
-    Stream<Null> get connectedStream => _connectedController.stream;
+    final _connectedController = StreamController<bool>.broadcast(sync: true);
+    Stream<bool> get connectedStream => _connectedController.stream;
 
-    final disconnectedController = StreamController<Null>.broadcast(sync: true);
-    Stream<Null> get disconnectedStream => disconnectedController.stream;
+    final disconnectedController = StreamController<bool>.broadcast(sync: true);
+    Stream<bool> get disconnectedStream => disconnectedController.stream;
 
     void connectSocket(Socket sock) {
-      sock.onReconnect((data) => _reconnectingController.add(null));
-      sock.onReconnecting((data) => _reconnectedController.add(null));
-      sock.onDisconnect((data) => disconnectedController.add(null));
+      sock.onReconnect((data) => _reconnectedController.add(true));
+      sock.onReconnecting((data) => _reconnectingController.add(true));
+      sock.onDisconnect((data) => disconnectedController.add(true));
 
   `;
 
@@ -227,7 +227,7 @@ export function getDartClientApiFile(apiDefs: ApiDefs) {
   }
 
   dartCode += `
-      _connectedController.add(null);
+      _connectedController.add(true);
     }
 
     GameClientApi() {}
@@ -277,7 +277,7 @@ export function getDartServerApiFile(apiDefs: ApiDefs) {
     void _invokeWithRefresh(String ev, Map<String, dynamic> data) {
       _refreshEv = ev;
       _refreshDat = data;
-      print(ev);
+      //print(ev);
       _socket.emit(ev, data);
     }
   `;

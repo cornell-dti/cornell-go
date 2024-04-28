@@ -129,8 +129,28 @@ Text LatoText(String text, double fs, Color color, FontWeight fw) {
               color: color, fontWeight: FontWeight.bold, fontSize: fs)));
 }
 
-final Map<EventDifficultyDto, String> difficultyToString = {
+final Map<EventDifficultyDto, String> friendlyDifficulty = {
   EventDifficultyDto.Easy: "Easy",
   EventDifficultyDto.Normal: "Normal",
   EventDifficultyDto.Hard: "Hard",
+};
+
+final Map<ChallengeLocationDto, String> friendlyLocation = {
+  ChallengeLocationDto.ENG_QUAD: "Eng Quad",
+  ChallengeLocationDto.ARTS_QUAD: "Arts Quad",
+  ChallengeLocationDto.AG_QUAD: "Ag Quad",
+  ChallengeLocationDto.NORTH_CAMPUS: "North Campus",
+  ChallengeLocationDto.WEST_CAMPUS: "West Campus",
+  ChallengeLocationDto.COLLEGETOWN: "Collegetown",
+  ChallengeLocationDto.ITHACA_COMMONS: "Ithaca Commons",
+  ChallengeLocationDto.ANY: "Cornell",
+};
+
+final Map<EventCategoryDto, String> friendlyCategory = {
+  EventCategoryDto.CAFE: "Cafe",
+  EventCategoryDto.DININGHALL: "Dining Hall",
+  EventCategoryDto.DORM: "Dorm",
+  EventCategoryDto.FOOD: "Food",
+  EventCategoryDto.HISTORICAL: "Historical",
+  EventCategoryDto.NATURE: "Nature",
 };

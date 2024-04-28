@@ -1,7 +1,7 @@
 import { useContext, useState } from "react";
 import { compareTwoStrings } from "string-similarity";
 import styled, { css } from "styled-components";
-import { ChallengeDto } from "../all.dto";
+import { ChallengeDto, ChallengeLocationDto } from "../all.dto";
 import { moveDown, moveUp } from "../ordering";
 import { AlertModal } from "./AlertModal";
 import { DeleteModal } from "./DeleteModal";
@@ -24,7 +24,6 @@ import {
 } from "./ListCard";
 import { SearchBar } from "./SearchBar";
 import { ServerDataContext } from "./ServerData";
-import { ChallengeLocationDto } from "../all.dto";
 
 const ChallengeImage = styled.div<{ url: string }>`
   width: calc(100% + 23px);
@@ -38,15 +37,15 @@ const ChallengeImage = styled.div<{ url: string }>`
   `}
 `;
 
-const locationOptions = [
-  "ENG_QUAD",
-  "ARTS_QUAD",
-  "AG_QUAD",
-  "NORTH_CAMPUS",
-  "WEST_CAMPUS",
-  "COLLEGETOWN",
-  "ITHACA_COMMONS",
-  "ANY",
+const locationOptions: ChallengeLocationDto[] = [
+  ChallengeLocationDto.ENG_QUAD,
+  ChallengeLocationDto.ARTS_QUAD,
+  ChallengeLocationDto.AG_QUAD,
+  ChallengeLocationDto.NORTH_CAMPUS,
+  ChallengeLocationDto.WEST_CAMPUS,
+  ChallengeLocationDto.COLLEGETOWN,
+  ChallengeLocationDto.ITHACA_COMMONS,
+  ChallengeLocationDto.ANY,
 ];
 
 function ChallengeCard(props: {
@@ -90,7 +89,7 @@ function makeForm(): EntryForm[] {
     { name: "Location", latitude: 42.447546, longitude: -76.484593 },
     {
       name: "Location Description",
-      options: locationOptions,
+      options: locationOptions as string[],
       value: 0,
     },
     { name: "Name", characterLimit: 256, value: "" },
@@ -132,7 +131,7 @@ function toForm(challenge: ChallengeDto) {
     {
       name: "Image URL",
       characterLimit: 2048,
-      value: challenge.imageUrl ?? "",
+      value: challenge.imageUrl ?? "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png",
     },
     {
       name: "Awarding Distance (meters)",
@@ -157,9 +156,7 @@ function fromForm(
   return {
     id,
     name: (form[2] as FreeEntryForm).value,
-    location: locationOptions[
-      (form[1] as OptionEntryForm).value
-    ] as ChallengeLocationDto,
+    location: locationOptions[(form[1] as OptionEntryForm).value],
     description: (form[3] as FreeEntryForm).value,
     points: (form[4] as NumberEntryForm).value,
     imageUrl: (form[5] as FreeEntryForm).value,
