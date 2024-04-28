@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:game/achievements/achievements_page.dart';
 import 'package:game/api/game_client_dto.dart';
 import 'package:game/model/challenge_model.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/tracker_model.dart';
 import 'package:game/model/user_model.dart';
-import 'package:game/profile/achievement_cell.dart';
+import 'package:game/achievements/achievement_cell.dart';
 import 'package:game/profile/completed_cell.dart';
 import 'package:game/profile/settings_page.dart';
 import 'package:game/utils/utility_functions.dart';
@@ -143,7 +144,8 @@ class _ProfilePageState extends State<ProfilePage> {
                     TextButton(
                       onPressed: () {
                         // Handle button press, e.g., navigate to details page
-                        print('View Details button pressed');
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => AchievementsPage()));
                       },
                       child: Text(
                         'View Details →',
@@ -157,13 +159,21 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               ),
               //To be replaced with real data
-              achievementCell("Complete three challenges on the Arts quad", 4,
-                  6, "assets/images/38582.jpg"),
-              achievementCell(
-                  "Complete three challenges on the Engineering quad",
-                  4,
-                  6,
-                  "assets/images/38582.jpg"),
+              Padding(
+                  padding: EdgeInsets.only(left: 30, right: 30),
+                  child: Column(children: [
+                    AchievementCell(
+                        "Complete three challenges",
+                        SvgPicture.asset("assets/icons/achievementsilver.svg"),
+                        4,
+                        6),
+                    SizedBox(height: 10),
+                    AchievementCell(
+                        "Complete three challenges",
+                        SvgPicture.asset("assets/icons/achievementsilver.svg"),
+                        4,
+                        6),
+                  ])),
               //Completed Events
               Padding(
                 padding: const EdgeInsets.only(left: 24, right: 24.0),
