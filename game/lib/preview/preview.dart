@@ -225,7 +225,9 @@ class _PreviewState extends State<Preview> {
                               size: 24, color: Preview.greyColor),
                           Text(
                               ' ' +
-                                  (currentLocation != null
+                                  (currentLocation != null &&
+                                          challengeLat != null &&
+                                          challengeLong != null
                                       ? (currentLocation!.distanceTo(GeoPoint(
                                                   challengeLat!,
                                                   challengeLong!,

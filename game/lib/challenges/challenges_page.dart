@@ -241,7 +241,7 @@ class _ChallengesPageState extends State<ChallengesPage> {
                             lat: challenge.latF ?? null,
                             long: challenge.longF ?? null,
                             imgUrl: challenge.imageUrl ??
-                                "https://picsum.photos/250?image=9",
+                                "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png",
                             complete: complete,
                             description: event.description ?? "",
                             difficulty:

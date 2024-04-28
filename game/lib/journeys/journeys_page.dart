@@ -226,8 +226,8 @@ class _JourneysPageState extends State<JourneysPage> {
                             name: event.name ?? "",
                             lat: challenge.latF ?? null,
                             long: challenge.longF ?? null,
-                            imgUrl:
-                                imageUrl ?? "https://picsum.photos/250?image=9",
+                            imgUrl: imageUrl ??
+                                "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png",
                             complete: complete,
                             locationCount: locationCount,
                             numberCompleted: numberCompleted,

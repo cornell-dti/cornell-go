@@ -214,7 +214,8 @@ class _ProfilePageState extends State<ProfilePage> {
                     for (var challengeId in event.challenges ?? []) {
                       var challenge =
                           challengeModel.getChallengeById(challengeId);
-                      locationImage = challenge?.imageUrl ?? "";
+                      locationImage = challenge?.imageUrl ??
+                          "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png";
 
                       if (challenge != null) {
                         totalPoints += challenge.points ?? 0;

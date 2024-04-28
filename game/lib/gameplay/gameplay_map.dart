@@ -482,7 +482,7 @@ class _GameplayMapState extends State<GameplayMap> {
                           borderRadius: BorderRadius.circular(10),
                           child: Image.network(
                             challenge?.imageUrl ??
-                                "https://picsum.photos/250?image=9",
+                                "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png",
                             fit: BoxFit.cover,
                             width: pictureWidth,
                             height: pictureHeight,

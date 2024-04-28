@@ -71,14 +71,10 @@ export class EventGateway {
       data.filterId,
     );
 
-    console.log(evs.length);
     for (const ev of evs) {
       if (ev.difficulty == data.difficulty[0]) {
-        // if (ev.difficulty == "EASY") {
-        console.log('Ev is ' + (<EventBase>ev).name.toString());
         await this.eventService.emitUpdateEventData(ev, false, user);
       }
-      // return ev;
     }
   }
 
