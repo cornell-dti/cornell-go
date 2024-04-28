@@ -48,8 +48,10 @@ export function ServerConnectionProvider(props: { children: ReactNode }) {
             lat: 1,
             long: 1,
             username: "guest",
+            college: "Arts and Sciences",
             major: "Computer Science",
             year: "2025",
+            interests: "",
             aud: "web",
             enrollmentType: "UNDERGRADUATE",
           });
