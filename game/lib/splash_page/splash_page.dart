@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:game/api/game_client_dto.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 import 'package:game/api/game_api.dart';
@@ -121,8 +122,8 @@ class SplashPageWidget extends StatelessWidget {
                             RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10.0)))),
                     onPressed: () async {
-                      final connectionResult = await client
-                          .connectDevice("GUEST", "", "", "", "", []);
+                      final connectionResult = await client.connectDevice(
+                          "", LoginEnrollmentTypeDto.GUEST, "", "", "", []);
 
                       if (connectionResult == null) {
                         displayToast("An error occurred while signing you up!",

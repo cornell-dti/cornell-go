@@ -145,9 +145,7 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
       // build list of completed challenge text fields to display later
       var total_pts = 0;
       List<Widget> completedChallenges = [];
-      for (PrevChallengeDto prevChal in (tracker.prevChallenges)) {
-        print(prevChal.dateCompleted.toString());
-        print(prevChal.hintsUsed);
+      for (PrevChallengeDto prevChal in tracker.prevChallenges) {
         var completedChal =
             challengeModel.getChallengeById(prevChal.challengeId);
         if (completedChal == null) continue;

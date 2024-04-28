@@ -76,6 +76,9 @@ class _ChallengeCellState extends State<ChallengeCell> {
     return GestureDetector(
       onTap: () async {
         await showModalBottomSheet(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(10.0)),
+            ),
             context: context,
             isScrollControlled: true,
             builder: (context) => Preview(

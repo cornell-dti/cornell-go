@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:game/api/game_client_api.dart';
+import 'package:game/api/game_client_dto.dart';
 import 'package:game/api/game_server_api.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -137,13 +138,13 @@ class ApiClient extends ChangeNotifier {
 
   Future<http.Response?> connectDevice(
       String year,
-      String enrollmentType,
+      LoginEnrollmentTypeDto enrollmentType,
       String username,
       String college,
       String major,
       List<String> interests) async {
     final String? id = await getId();
-    return connect(id!, _deviceLoginUrl, enrollmentType, year, username,
+    return connect(id!, _deviceLoginUrl, year, enrollmentType, username,
         college, major, interests,
         noRegister: false);
   }
@@ -151,13 +152,13 @@ class ApiClient extends ChangeNotifier {
   Future<http.Response?> connectGoogle(
       GoogleSignInAccount gAccount,
       String year,
-      String enrollmentType,
+      LoginEnrollmentTypeDto enrollmentType,
       String username,
       String college,
       String major,
       List<String> interests) async {
     final auth = await gAccount.authentication;
-    return connect(auth.idToken ?? "", _googleLoginUrl, enrollmentType, year,
+    return connect(auth.idToken ?? "", _googleLoginUrl, year, enrollmentType,
         username, college, major, interests,
         noRegister: false);
   }
@@ -165,7 +166,8 @@ class ApiClient extends ChangeNotifier {
   Future<http.Response?> connectGoogleNoRegister(
       GoogleSignInAccount gAccount) async {
     final auth = await gAccount.authentication;
-    return connect(auth.idToken ?? "", _googleLoginUrl, "", "", "", "", "", [],
+    return connect(auth.idToken ?? "", _googleLoginUrl, "",
+        LoginEnrollmentTypeDto.GUEST, "", "", "", [],
         noRegister: true);
   }
 
@@ -173,32 +175,33 @@ class ApiClient extends ChangeNotifier {
       String idToken,
       Uri url,
       String year,
-      String enrollmentType,
+      LoginEnrollmentTypeDto enrollmentType,
       String username,
       String college,
       String major,
       List<String> interests,
       {bool noRegister = false}) async {
     final pos = await GeoPoint.current();
+
+    final loginDto = LoginDto(
+        idToken: idToken,
+        latF: pos.lat,
+        enrollmentType: enrollmentType,
+        year: year,
+        username: username,
+        college: college,
+        major: major,
+        interests: interests.join(","),
+        longF: pos.long,
+        aud: Platform.isIOS ? LoginAudDto.ios : LoginAudDto.android,
+        noRegister: noRegister);
     /*
     if (post != null) { */
     final loginResponse = await http.post(url,
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
-        body: jsonEncode(<String, dynamic>{
-          "idToken": idToken,
-          "lat": pos?.lat.toString() ?? "0",
-          "enrollmentType": enrollmentType,
-          "year": year,
-          "username": username,
-          "college": college,
-          "major": major,
-          "interests": interests.join(","),
-          "long": pos?.long.toString() ?? "0",
-          "aud": Platform.isIOS ? "ios" : "android",
-          "noRegister": noRegister
-        }));
+        body: jsonEncode(loginDto.toJson()));
 
     if (loginResponse.statusCode == 201 && loginResponse.body != "") {
       final responseBody = jsonDecode(loginResponse.body);

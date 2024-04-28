@@ -5,8 +5,8 @@
 export interface LoginDto {
   idToken: string;
   noRegister: boolean;
-  lat?: number;
-  long?: number;
+  latF?: number;
+  longF?: number;
   username?: string;
   year?: string;
   college?: string;
