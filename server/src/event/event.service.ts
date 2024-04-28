@@ -171,6 +171,8 @@ export class EventService {
       },
     });
 
+    
+
     return progress;
   }
 

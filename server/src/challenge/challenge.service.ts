@@ -8,9 +8,12 @@ import {
   SessionLogEvent,
   User,
   LocationType,
+  Achievement,
+  AchievementTracker,
 } from '@prisma/client';
 import { ClientService } from '../client/client.service';
 import { EventService } from '../event/event.service';
+import { AchievementService } from '../achievement/achievement.service';
 import { PrismaService } from '../prisma/prisma.service';
 import {
   ChallengeDto,
@@ -29,6 +32,7 @@ export class ChallengeService {
     private log: SessionLogService,
     private readonly prisma: PrismaService,
     private eventService: EventService,
+    private achievementService: AchievementService,
     private clientService: ClientService,
     private abilityFactory: CaslAbilityFactory,
   ) {}
@@ -88,6 +92,7 @@ export class ChallengeService {
   }
 
   /** Progress user through challenges, ensuring challengeId is current */
+  // async completeChallenge(user: User, challengeId: string, ability: AppAbility) {
   async completeChallenge(user: User, challengeId: string) {
     const groupMembers = await this.prisma.user.findMany({
       where: { groupId: user.groupId },
@@ -95,6 +100,9 @@ export class ChallengeService {
 
     const eventTracker: EventTracker =
       await this.eventService.getCurrentEventTrackerForUser(user);
+
+    // const achievementTracker : AchievementTracker = 
+    //   await this.achievementService.getAchievementsByIdsForAbility(user.ability, [eventTracker.id]);
 
     const alreadyDone =
       (await this.prisma.prevChallenge.count({
@@ -149,6 +157,20 @@ export class ChallengeService {
       challengeId,
       user.id,
     );
+
+    // check if the challenge is part of a journey
+    const isJourney = (await this.prisma.prevChallenge.count({
+      where: {
+        userId: user.id,
+        challengeId: eventTracker.curChallengeId,
+        trackerId: eventTracker.id,
+      },
+    })) === (await this.prisma.eventTracker.count({
+      where: { id: eventTracker.id }, // CHECK
+    }));      
+
+    await this.achievementService.checkAchievementProgress(user, challengeId, isJourney);
+    
 
     return true;
   }
