@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:game/navigation_page/bottom_navbar.dart';
+import 'package:game/splash_page/splash_page.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:game/api/geopoint.dart';
 import 'package:geolocator/geolocator.dart';
@@ -272,13 +273,6 @@ class _GameplayMapState extends State<GameplayMap> {
     //           ? CircularIndicator()
     final client = Provider.of<ApiClient>(context);
 
-    if (client.serverApi != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => BottomNavBar()));
-        displayToast("Signed in!", Status.success);
-      });
-    }
     return MaterialApp(
       theme: ThemeData(
         useMaterial3: true,
@@ -299,6 +293,21 @@ class _GameplayMapState extends State<GameplayMap> {
             body: Stack(
           alignment: Alignment.bottomCenter,
           children: [
+            StreamBuilder(
+                stream: client.clientApi.disconnectedStream,
+                builder: ((context, snapshot) {
+                  if (client.serverApi == null) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => SplashPageWidget()));
+                      displayToast("Lost connection!", Status.success);
+                    });
+                  }
+
+                  return Container();
+                })),
             Listener(
               onPointerDown: (e) {
                 cancelRecenterCamera();

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:game/api/game_client_dto.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -14,14 +15,6 @@ class SplashPageWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final client = Provider.of<ApiClient>(context);
-
-    if (client.serverApi != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => BottomNavBar()));
-        displayToast("Signed in!", Status.success);
-      });
-    }
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -40,6 +33,22 @@ class SplashPageWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
+                StreamBuilder(
+                    stream: client.clientApi.connectedStream,
+                    builder: (context, snapshot) {
+                      if (client.serverApi != null) {
+                        print("ServerApi != null");
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => BottomNavBar()));
+                          displayToast("Signed in!", Status.success);
+                        });
+                      }
+
+                      return Container();
+                    }),
                 Consumer<ApiClient>(
                   builder: (context, apiClient, child) {
                     return TextButton(
