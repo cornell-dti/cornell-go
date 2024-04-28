@@ -126,8 +126,6 @@ class _GameplayMapState extends State<GameplayMap> {
 
     GeoPoint.current().then(
       (location) {
-        print("Getting loco");
-        print(location);
         currentLocation = location;
       },
     );
@@ -164,7 +162,6 @@ class _GameplayMapState extends State<GameplayMap> {
       );
       setState(() {});
     });
-    print("position stream true");
     return true;
   }
 
@@ -511,7 +508,6 @@ class _GameplayMapState extends State<GameplayMap> {
 
   /** Returns whether the user is at the challenge location */
   bool checkArrived() {
-    print(currentLocation);
     return currentLocation!.distanceTo(widget.targetLocation) <=
         widget.awardingRadius;
   }

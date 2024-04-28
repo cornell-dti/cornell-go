@@ -426,7 +426,6 @@ class _PreviewState extends State<Preview> {
                                 .serverApi
                                 ?.setCurrentEvent(
                                     SetCurrentEventDto(eventId: eventId));
-                            print("setting current event to " + eventId);
                             Navigator.pop(context);
                             Navigator.push(
                                 context,
