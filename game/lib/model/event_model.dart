@@ -70,7 +70,7 @@ class EventModel extends ChangeNotifier {
 
     client.clientApi.updateLeaderPositionStream.listen((event) {
       final forEvent = _topPlayers[event.eventId];
-      final forFull = _topPlayers[""];
+      final forGlobal = _topPlayers[""];
 
       if (forEvent != null) {
         forEvent
@@ -81,13 +81,13 @@ class EventModel extends ChangeNotifier {
         forEvent.sort((a, b) => b.score.compareTo(a.score));
       }
 
-      if (forFull != null) {
-        forFull
+      if (forGlobal != null) {
+        forGlobal
             .firstWhere((element) => element.userId == event.playerId,
                 orElse: () => LeaderDto(userId: "", username: "", score: 0))
             .score = event.newTotalScore;
 
-        forFull.sort((a, b) => b.score.compareTo(a.score));
+        forGlobal.sort((a, b) => b.score.compareTo(a.score));
       }
 
       notifyListeners();
