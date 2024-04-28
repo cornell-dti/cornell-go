@@ -7,7 +7,7 @@ import 'package:game/utils/utility_functions.dart';
  * they are on the podium.
  * @param name: the name of the user
  */
-Widget podiumCell(context, String name) {
+Widget podiumCell(context, String name, bool isUser) {
   var nameStyle = TextStyle(
     color: Color(0xFF1E1E1E),
     fontSize: 14,
@@ -24,8 +24,12 @@ Widget podiumCell(context, String name) {
           width: 49.128,
           height: 49.128,
           decoration: BoxDecoration(
-              color: constructColorFromUserName(name),
-              borderRadius: BorderRadius.circular(49.128)),
+            color: constructColorFromUserName(name),
+            borderRadius: BorderRadius.circular(49.128),
+            border: isUser
+                ? Border.all(color: Color.fromRGBO(255, 170, 91, 1), width: 2.5)
+                : null,
+          ),
         ),
         SizedBox(
           width: 80,

@@ -23,63 +23,138 @@ var pointsStyle = TextStyle(
   height: 0,
 );
 
-Widget PodiumBlock(context, int position, List scoreList) {
-  Map<int, String> svgAssetPaths = {
-    0: 'assets/icons/blank_podiums.svg',
-    1: 'assets/icons/gold_podiums.svg',
-    2: 'assets/icons/silver_podiums.svg',
-    3: 'assets/icons/bronze_podiums.svg',
-  };
+Widget FirstPodium(context, int points, bool isUser) {
+  // Choosing whetehr podum is highlighted or not by isUser condition
+  String svgAssetPath = isUser
+      ? 'assets/icons/podium1highlighted.svg'
+      : 'assets/icons/podium1red.svg';
 
-  String svgAssetPath = svgAssetPaths[position] ?? svgAssetPaths[0]!;
-
-  return Padding(
-    padding: const EdgeInsets.only(bottom: 10.0),
+  return Align(
+    alignment: Alignment.bottomCenter,
     child: Stack(alignment: Alignment.bottomCenter, children: <Widget>[
       SvgPicture.asset(
-        svgAssetPath,
-        width: 360,
-        height: 178,
+        width: MediaQuery.sizeOf(context).width * 0.25,
+        isUser
+            ? 'assets/icons/podium1user.svg'
+            : 'assets/icons/podium1blank.svg',
+        semanticsLabel: '1st Podium',
       ),
       Positioned(
-        left: 27,
-        bottom: 12,
-        child: SizedBox(
-          width: 60,
+        bottom: MediaQuery.sizeOf(context).height * 0.025,
+        child: Container(
+          width: 68,
           height: 29,
-          child: FittedBox(
-            alignment: Alignment.center,
-            fit: BoxFit.scaleDown,
-            child: Text(scoreList[1].toString() + " PTS", style: pointsStyle),
+          padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
+          decoration: ShapeDecoration(
+            color: Color.fromRGBO(234, 177, 17, 1),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+          ),
+          child: Center(
+            child: Text(
+              points.toString() + " PTS",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.w400,
+                height: 0,
+              ),
+            ),
           ),
         ),
       ),
+    ]),
+  );
+}
+
+Widget SecondPodium(context, int points, bool isUser) {
+  String svgAssetPath = isUser
+      ? 'assets/icons/podium2highlighted.svg'
+      : 'assets/icons/podium2red.svg';
+
+  return Align(
+    alignment: Alignment.bottomCenter,
+    child: Stack(alignment: Alignment.bottomCenter, children: <Widget>[
+      SvgPicture.asset(
+        width: MediaQuery.sizeOf(context).width * 0.25,
+        isUser
+            ? 'assets/icons/podium2user.svg'
+            : 'assets/icons/podium2blank.svg',
+        semanticsLabel: '2nd Podium',
+      ),
       Positioned(
-        left: 150,
-        bottom: 25,
-        child: SizedBox(
-          width: 60,
+        bottom: MediaQuery.sizeOf(context).height * 0.01,
+        child: Container(
+          width: 68,
           height: 29,
-          child: FittedBox(
-            alignment: Alignment.center,
-            fit: BoxFit.scaleDown,
-            child: Text(scoreList[0].toString() + " PTS", style: pointsStyle),
+          padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
+          decoration: ShapeDecoration(
+            color: Color.fromRGBO(171, 173, 173, 1),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+          ),
+          child: Center(
+            child: Text(
+              points.toString() + " PTS",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.w400,
+                height: 0,
+              ),
+            ),
           ),
         ),
       ),
+    ]),
+  );
+}
+
+Widget ThirdPodium(context, int points, bool isUser) {
+  String svgAssetPath = isUser
+      ? 'assets/icons/podium3highlighted.svg'
+      : 'assets/icons/podium3red.svg';
+
+  return Align(
+    alignment: Alignment.bottomCenter,
+    child: Stack(alignment: Alignment.bottomCenter, children: <Widget>[
+      SvgPicture.asset(
+        width: MediaQuery.sizeOf(context).width * 0.25,
+        isUser
+            ? 'assets/icons/podium3user.svg'
+            : 'assets/icons/podium3blank.svg',
+        semanticsLabel: '3rd Podium',
+      ),
       Positioned(
-        right: 27,
-        bottom: 6,
-        child: SizedBox(
-          width: 60,
+        bottom: MediaQuery.sizeOf(context).height * 0.005,
+        child: Container(
+          width: 68,
           height: 29,
-          child: FittedBox(
-            alignment: Alignment.center,
-            fit: BoxFit.scaleDown,
-            child: Text(scoreList[2].toString() + " PTS", style: pointsStyle),
+          padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
+          decoration: ShapeDecoration(
+            color: Color.fromRGBO(219, 120, 42, 1),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+          ),
+          child: Center(
+            child: Text(
+              points.toString() + " PTS",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.w400,
+                height: 0,
+              ),
+            ),
           ),
         ),
-      )
+      ),
     ]),
   );
 }
