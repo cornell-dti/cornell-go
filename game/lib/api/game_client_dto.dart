@@ -26,8 +26,11 @@ enum ChallengeLocationDto {
   ENG_QUAD,
   ARTS_QUAD,
   AG_QUAD,
+  CENTRAL_CAMPUS,
   NORTH_CAMPUS,
   WEST_CAMPUS,
+  CORNELL_ATHLETICS,
+  VET_SCHOOL,
   COLLEGETOWN,
   ITHACA_COMMONS,
   ANY,
@@ -1442,94 +1445,6 @@ class CloseAccountDto {
   void partialUpdate(CloseAccountDto other) {}
 
   CloseAccountDto();
-}
-
-class SetUsernameDto {
-  Map<String, dynamic> toJson() {
-    Map<String, dynamic> fields = {};
-    fields['newUsername'] = newUsername;
-    return fields;
-  }
-
-  SetUsernameDto.fromJson(Map<String, dynamic> fields) {
-    newUsername = fields["newUsername"];
-  }
-
-  void partialUpdate(SetUsernameDto other) {
-    newUsername = other.newUsername;
-  }
-
-  SetUsernameDto({
-    required this.newUsername,
-  });
-
-  late String newUsername;
-}
-
-class SetCollegeDto {
-  Map<String, dynamic> toJson() {
-    Map<String, dynamic> fields = {};
-    fields['newCollege'] = newCollege;
-    return fields;
-  }
-
-  SetCollegeDto.fromJson(Map<String, dynamic> fields) {
-    newCollege = fields["newCollege"];
-  }
-
-  void partialUpdate(SetCollegeDto other) {
-    newCollege = other.newCollege;
-  }
-
-  SetCollegeDto({
-    required this.newCollege,
-  });
-
-  late String newCollege;
-}
-
-class SetMajorDto {
-  Map<String, dynamic> toJson() {
-    Map<String, dynamic> fields = {};
-    fields['newMajor'] = newMajor;
-    return fields;
-  }
-
-  SetMajorDto.fromJson(Map<String, dynamic> fields) {
-    newMajor = fields["newMajor"];
-  }
-
-  void partialUpdate(SetMajorDto other) {
-    newMajor = other.newMajor;
-  }
-
-  SetMajorDto({
-    required this.newMajor,
-  });
-
-  late String newMajor;
-}
-
-class SetGraduationYearDto {
-  Map<String, dynamic> toJson() {
-    Map<String, dynamic> fields = {};
-    fields['newYear'] = newYear;
-    return fields;
-  }
-
-  SetGraduationYearDto.fromJson(Map<String, dynamic> fields) {
-    newYear = fields["newYear"];
-  }
-
-  void partialUpdate(SetGraduationYearDto other) {
-    newYear = other.newYear;
-  }
-
-  SetGraduationYearDto({
-    required this.newYear,
-  });
-
-  late String newYear;
 }
 
 class BanUserDto {

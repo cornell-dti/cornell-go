@@ -219,10 +219,10 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                 Container(
                   padding: EdgeInsets.only(bottom: 15),
                   child: Text(
-                    "You've found the " + (challenge.description ?? "") + "!",
+                    challenge.description ?? "NO DESCRIPTION",
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 16.0,
+                      fontSize: 14.0,
                       fontWeight: FontWeight.w500,
                     ),
                   ),

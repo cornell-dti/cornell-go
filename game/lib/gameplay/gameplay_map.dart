@@ -24,14 +24,12 @@ import 'package:game/model/challenge_model.dart';
 class GameplayMap extends StatefulWidget {
   final GeoPoint targetLocation;
   final double awardingRadius;
-  final String description;
   final int points;
 
   const GameplayMap(
       {Key? key,
       required this.targetLocation,
       required this.awardingRadius,
-      required this.description,
       required this.points})
       : super(key: key);
 
@@ -219,8 +217,8 @@ class _GameplayMapState extends State<GameplayMap> {
    */
   BitmapDescriptor currentLocationIcon = BitmapDescriptor.defaultMarker;
   void setCustomMarkerIcon() {
-    BitmapDescriptor.fromAssetImage(
-            ImageConfiguration.empty, "assets/icons/userlocation.png")
+    BitmapDescriptor.fromAssetImage(ImageConfiguration(devicePixelRatio: 0.2),
+            "assets/icons/userlocation.png")
         .then(
       (icon) {
         currentLocationIcon = icon;
@@ -258,6 +256,37 @@ class _GameplayMapState extends State<GameplayMap> {
       hintCenter = GeoPoint(newLat, newLong, 0);
       // updates the widget's state, causing it to rebuild
       setState(() {});
+    }
+  }
+
+  String? challengeName;
+  // Used when user presses I've Arrived when they are within the awarding
+  // radius. Messages the backend to complete the current challenge and update
+  // event trackers.
+  void completeChallenge() {
+    var eventId = Provider.of<GroupModel>(context, listen: false).curEventId;
+    var event = Provider.of<EventModel>(context, listen: false)
+        .getEventById(eventId ?? "");
+    var tracker = Provider.of<TrackerModel>(context, listen: false)
+        .trackerByEventId(eventId ?? "");
+
+    if (tracker == null) {
+      displayToast(
+          "An error occurred while getting event tracker", Status.error);
+    } else {
+      var challenge = Provider.of<ChallengeModel>(context, listen: false)
+          .getChallengeById(tracker.curChallengeId);
+      if (challenge == null) {
+        displayToast("An error occurred while getting challenge", Status.error);
+      } else {
+        Provider.of<ApiClient>(context, listen: false)
+            .serverApi
+            ?.completedChallenge(
+                CompletedChallengeDto(challengeId: challenge.id));
+        setState(() {
+          challengeName = challenge.name;
+        });
+      }
     }
   }
 
@@ -319,6 +348,7 @@ class _GameplayMapState extends State<GameplayMap> {
                     position: currentLocation == null
                         ? _center
                         : LatLng(currentLocation!.lat, currentLocation!.long),
+                    anchor: Offset(0.5, 0.5),
                     rotation:
                         currentLocation == null ? 0 : currentLocation!.heading,
                   ),
@@ -357,6 +387,8 @@ class _GameplayMapState extends State<GameplayMap> {
                       color: Color(0xFFFFFFFF)),
                 ),
                 onPressed: () {
+                  bool hasArrived = checkArrived();
+                  if (hasArrived) completeChallenge();
                   showDialog(
                     context: context,
                     builder: (context) {
@@ -367,7 +399,7 @@ class _GameplayMapState extends State<GameplayMap> {
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(
                                 10), // Same as the Dialog's shape
-                            child: displayDialogue(),
+                            child: displayDialogue(hasArrived),
                           ),
                         ),
                       );
@@ -399,7 +431,7 @@ class _GameplayMapState extends State<GameplayMap> {
                         ),
                         // num hints left counter
                         Positioned(
-                          top: -5,
+                          top: 0,
                           right: 0,
                           child: Container(
                             padding: EdgeInsets.all(5.0),
@@ -512,8 +544,8 @@ class _GameplayMapState extends State<GameplayMap> {
         widget.awardingRadius;
   }
 
-  Container displayDialogue() {
-    return checkArrived()
+  Container displayDialogue(bool hasArrived) {
+    return hasArrived
         ? Container(
             // margin: EdgeInsetsDirectional.only(start: 50, end: 50),
             color: Colors.white,
@@ -532,7 +564,7 @@ class _GameplayMapState extends State<GameplayMap> {
                 Container(
                     margin: EdgeInsets.only(bottom: 10),
                     child: Text(
-                      "You've arrived at ${widget.description}!",
+                      "You've arrived at ${challengeName ?? ""}!",
                       style:
                           TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
                     )),
@@ -544,86 +576,30 @@ class _GameplayMapState extends State<GameplayMap> {
                   child: SvgPicture.asset('assets/images/arrived.svg',
                       fit: BoxFit.cover),
                 ),
-                Row(children: [
-                  ElevatedButton(
-                      onPressed: () => Navigator.pop(context, false),
-                      style: ButtonStyle(
-                        shape:
-                            MaterialStateProperty.all<RoundedRectangleBorder>(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                                7.3), // Adjust the radius as needed
-                          ),
-                        ),
-                        side: MaterialStateProperty.all<BorderSide>(
-                          BorderSide(
-                            color: Color.fromARGB(
-                                255, 237, 86, 86), // Specify the border color
-                            width: 2.0, // Specify the border width
-                          ),
-                        ),
-                        backgroundColor:
-                            MaterialStateProperty.all<Color>(Colors.white),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => ChallengeCompletedPage()),
+                    );
+                  },
+                  style: ButtonStyle(
+                    padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
+                        EdgeInsets.only(left: 15, right: 15)),
+                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(
+                            7.3), // Adjust the radius as needed
                       ),
-                      child: Text("Leave",
-                          style: TextStyle(
-                              color: Color.fromARGB(255, 237, 86, 86)))),
-                  Spacer(),
-                  ElevatedButton(
-                    onPressed: () {
-                      var eventId =
-                          Provider.of<GroupModel>(context, listen: false)
-                              .curEventId;
-                      var event =
-                          Provider.of<EventModel>(context, listen: false)
-                              .getEventById(eventId ?? "");
-                      var tracker =
-                          Provider.of<TrackerModel>(context, listen: false)
-                              .trackerByEventId(eventId ?? "");
-
-                      if (tracker == null) {
-                        displayToast(
-                            "An error occurred while getting event tracker",
-                            Status.error);
-                      } else {
-                        var challenge =
-                            Provider.of<ChallengeModel>(context, listen: false)
-                                .getChallengeById(tracker.curChallengeId!);
-                        if (challenge == null) {
-                          displayToast(
-                              "An error occurred while getting challenge",
-                              Status.error);
-                        } else {
-                          Provider.of<ApiClient>(context, listen: false)
-                              .serverApi
-                              ?.completedChallenge(CompletedChallengeDto(
-                                  challengeId: challenge.id));
-                        }
-                      }
-
-                      Navigator.pop(context);
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => ChallengeCompletedPage()),
-                      );
-                    },
-                    style: ButtonStyle(
-                      padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
-                          EdgeInsets.only(left: 15, right: 15)),
-                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                        RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                              7.3), // Adjust the radius as needed
-                        ),
-                      ),
-                      backgroundColor: MaterialStateProperty.all<Color>(
-                          Color.fromARGB(255, 237, 86, 86)),
                     ),
-                    child: Text("Point Breakdown",
-                        style: TextStyle(color: Colors.white)),
+                    backgroundColor: MaterialStateProperty.all<Color>(
+                        Color.fromARGB(255, 237, 86, 86)),
                   ),
-                ])
+                  child: Text("Point Breakdown",
+                      style: TextStyle(color: Colors.white)),
+                )
               ],
             ),
           )

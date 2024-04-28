@@ -13,7 +13,7 @@ import 'package:game/utils/utility_functions.dart';
 import 'package:intl/intl.dart' hide TextDirection;
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
-import 'package:game/profile/completed_challenges_page.dart';
+import 'package:game/profile/completed_feed.dart';
 
 /**
  * The profile page of the app that is rendered for the user's profile
@@ -189,8 +189,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) =>
-                                    CompletedChallengesPage()));
+                                builder: (context) => CompletedFeedWidget()));
                       },
                       child: Text(
                         'View More →',

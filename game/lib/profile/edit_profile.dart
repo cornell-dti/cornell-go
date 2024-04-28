@@ -214,9 +214,9 @@ class _EditProfileState extends State<EditProfileWidget> {
                               TextFormField(
                                 decoration: fieldDecoration,
                                 initialValue: newUsername,
-                                onChanged: (value) => {
-                                  newUsername = value,
-                                  updateButtonKey.value++
+                                onChanged: (value) {
+                                  newUsername = value;
+                                  updateButtonKey.value++;
                                 },
                               )
                             ],
@@ -230,11 +230,11 @@ class _EditProfileState extends State<EditProfileWidget> {
                               Text('College', style: headingStyle),
                               SizedBox(height: 5),
                               DropdownWidget(newCollege, _colleges,
-                                  notifyParent: (val) => {
-                                        newCollege = val,
-                                        majorDropdownKey.value++,
-                                        updateButtonKey.value++
-                                      })
+                                  notifyParent: (val) {
+                                newCollege = val;
+                                majorDropdownKey.value++;
+                                updateButtonKey.value++;
+                              })
                             ],
                           )),
                       Container(
@@ -261,10 +261,10 @@ class _EditProfileState extends State<EditProfileWidget> {
                                         newCollege == null
                                             ? null
                                             : _majors[newCollege],
-                                        notifyParent: (val) => {
-                                              newMajor = val,
-                                              updateButtonKey.value++
-                                            });
+                                        notifyParent: (val) {
+                                      newMajor = val;
+                                      updateButtonKey.value++;
+                                    });
                                   })
                             ],
                           )),
@@ -277,8 +277,10 @@ class _EditProfileState extends State<EditProfileWidget> {
                               Text('Graduation Year', style: headingStyle),
                               SizedBox(height: 5),
                               DropdownWidget(newYear, _years,
-                                  notifyParent: (val) =>
-                                      {newYear = val, updateButtonKey.value++})
+                                  notifyParent: (val) {
+                                newYear = val;
+                                updateButtonKey.value++;
+                              })
                             ],
                           )),
                       SizedBox(height: 100),

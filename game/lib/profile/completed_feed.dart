@@ -5,7 +5,7 @@ import 'package:game/model/event_model.dart';
 import 'package:game/model/tracker_model.dart';
 import 'package:game/model/user_model.dart';
 import 'package:game/profile/profile_page.dart';
-import 'package:game/profile/completed_challenge_cell.dart';
+import 'package:game/profile/completed_feed_cell.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -13,7 +13,7 @@ import 'package:tuple/tuple.dart';
 
 /* The page view of all the completed challenges */
 
-class CompletedChallengesPage extends StatelessWidget {
+class CompletedFeedWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -88,10 +88,9 @@ class CompletedChallengesPage extends StatelessWidget {
                 for (var challengeId in event.challenges ?? []) {
                   var challenge = challengeModel.getChallengeById(challengeId);
                   if (challenge != null) {
-                    pictureList.add(challenge.imageUrl ??
-                        "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png");
-                    locationList
-                        .add(friendlyLocation[challenge.location ?? 'ANY']);
+                    pictureList.add(challenge.imageUrl!);
+                    locationList.add(
+                        friendlyLocation[challenge.location?.name ?? 'ANY']);
                     totalPoints += challenge.points ?? 0;
                   }
                 }

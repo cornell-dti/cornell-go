@@ -43,17 +43,6 @@ class _GameplayPageState extends State<GameplayPage> {
 
   late StreamSubscription<Position> positionStream;
 
-  final Map<String, String> friendlyLocation = {
-    "ENG_QUAD": "Eng Quad",
-    "ARTS_QUAD": "Arts Quad",
-    "AG_QUAD": "Ag Quad",
-    "NORTH_CAMPUS": "North Campus",
-    "WEST_CAMPUS": "West Campus",
-    "COLLEGETOWN": "Collegetown",
-    "ITHACA_COMMONS": "Ithaca Commons",
-    "ANY": "Cornell",
-  };
-
   @override
   void initState() {
     startPositionStream();
@@ -183,10 +172,10 @@ class _GameplayPageState extends State<GameplayPage> {
                             margin: EdgeInsets.only(top: 16.45, bottom: 11),
                             alignment: Alignment.centerLeft,
                             child: Text(
-                              "Find the Location of ${challenge.description}!",
+                              challenge.description ?? "NO DESCRIPTION",
                               textAlign: TextAlign.left,
                               style: TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.bold),
+                                  fontSize: 16, fontWeight: FontWeight.bold),
                             ),
                           ),
                           Container(
@@ -241,7 +230,6 @@ class _GameplayPageState extends State<GameplayPage> {
                   child: GameplayMap(
                     targetLocation: targetLocation,
                     awardingRadius: awardingRadius,
-                    description: challenge.description ?? "",
                     points: challenge.points ?? 0,
                   )),
             ),

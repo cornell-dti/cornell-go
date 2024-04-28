@@ -41,8 +41,11 @@ const locationOptions: ChallengeLocationDto[] = [
   ChallengeLocationDto.ENG_QUAD,
   ChallengeLocationDto.ARTS_QUAD,
   ChallengeLocationDto.AG_QUAD,
+  ChallengeLocationDto.CENTRAL_CAMPUS,
   ChallengeLocationDto.NORTH_CAMPUS,
   ChallengeLocationDto.WEST_CAMPUS,
+  ChallengeLocationDto.CORNELL_ATHLETICS,
+  ChallengeLocationDto.VET_SCHOOL,
   ChallengeLocationDto.COLLEGETOWN,
   ChallengeLocationDto.ITHACA_COMMONS,
   ChallengeLocationDto.ANY,
@@ -131,7 +134,9 @@ function toForm(challenge: ChallengeDto) {
     {
       name: "Image URL",
       characterLimit: 2048,
-      value: challenge.imageUrl ?? "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png",
+      value:
+        challenge.imageUrl ??
+        "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png",
     },
     {
       name: "Awarding Distance (meters)",
@@ -242,7 +247,7 @@ export function Challenges() {
         <CenterText>Select an event to view challenges</CenterText>
       ) : serverData.events.get(serverData.selectedEvent) ? (
         serverData.events.get(serverData.selectedEvent)?.challenges?.length ===
-          0 && <CenterText>No challenges in event</CenterText>
+        0 && <CenterText>No challenges in event</CenterText>
       ) : (
         <CenterText>Error getting challenges</CenterText>
       )}
@@ -253,9 +258,9 @@ export function Challenges() {
           query === ""
             ? 0
             : compareTwoStrings(b.name ?? "", query) -
-              compareTwoStrings(a.name ?? "", query) +
-              compareTwoStrings(b.description ?? "", query) -
-              compareTwoStrings(a.description ?? "", query)
+            compareTwoStrings(a.name ?? "", query) +
+            compareTwoStrings(b.description ?? "", query) -
+            compareTwoStrings(a.description ?? "", query)
         )
         .map((chal: ChallengeDto) => (
           <ChallengeCard
