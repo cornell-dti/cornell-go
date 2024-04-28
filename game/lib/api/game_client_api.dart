@@ -63,6 +63,11 @@ class GameClientApi {
   Stream<UpdateOrganizationDataDto> get updateOrganizationDataStream =>
       _updateOrganizationDataController.stream;
 
+  final _updateLeaderPositionController =
+      StreamController<UpdateLeaderPositionDto>.broadcast(sync: true);
+  Stream<UpdateLeaderPositionDto> get updateLeaderPositionStream =>
+      _updateLeaderPositionController.stream;
+
   final _reconnectedController = StreamController<bool>.broadcast(sync: true);
   Stream<bool> get reconnectedStream => _reconnectedController.stream;
 
@@ -134,6 +139,11 @@ class GameClientApi {
         "updateOrganizationData",
         (data) => _updateOrganizationDataController
             .add(UpdateOrganizationDataDto.fromJson(data)));
+
+    sock.on(
+        "updateLeaderPosition",
+        (data) => _updateLeaderPositionController
+            .add(UpdateLeaderPositionDto.fromJson(data)));
 
     _connectedController.add(true);
   }

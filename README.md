@@ -60,6 +60,12 @@ npx prisma studio
 npm run updateapi
 ```
 
+### Format all code files
+
+```
+npm run formatall
+```
+
 ### Start the frontend (for debugging)
 
 ```

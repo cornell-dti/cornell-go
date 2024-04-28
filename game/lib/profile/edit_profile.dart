@@ -1,14 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:game/details_page/dropdown_widget.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:game/progress_indicators/circular_progress_indicator.dart';
 
-import 'package:game/api/game_client_dto.dart';
-import 'package:game/model/challenge_model.dart';
-import 'package:game/model/event_model.dart';
-import 'package:game/model/tracker_model.dart';
 import 'package:game/model/user_model.dart';
 import 'package:provider/provider.dart';
 
@@ -35,7 +30,6 @@ class _EditProfileState extends State<EditProfileWidget> {
   String? newMajor;
   String? newYear;
   String? newUsername;
-  final _formKey = GlobalKey<FormState>();
 
   var headingStyle = TextStyle(
     color: Colors.black.withOpacity(0.8),

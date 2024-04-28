@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:game/api/game_client_dto.dart';
-import 'package:game/journeys/journeys_page.dart';
 import 'package:game/main.dart';
-import 'package:game/navigation_page/bottom_navbar.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:dropdown_button2/dropdown_button2.dart';
 
 class InterestsPageWidget extends StatefulWidget {
   InterestsPageWidget(
@@ -120,17 +116,10 @@ class _InterestsPageWidgetState extends State<InterestsPageWidget> {
                         if (_checked[i]) interests.add(_categories[i]);
                       }
 
-                      assert(widget.user != null || widget.idToken != null);
-                      final auth = await widget.user?.authentication;
-                      final idToken =
-                          widget.user != null ? auth?.idToken : widget.idToken;
-                      final endpoint_string = API_URL +
-                          (widget.user != null ? "/google" : "/device-login");
-                      final connectionResult = await client.connect(
-                          idToken!,
-                          Uri.parse(endpoint_string),
-                          this.widget.userType,
+                      final connectionResult = await client.connectGoogle(
+                          widget.user!,
                           this.widget.year ?? "",
+                          this.widget.userType,
                           this.widget.username,
                           this.widget.college ?? "",
                           this.widget.major ?? "",

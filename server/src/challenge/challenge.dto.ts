@@ -50,17 +50,3 @@ export interface RequestEventTrackerDataDto {
 export interface SetCurrentChallengeDto {
   challengeId: string;
 }
-
-/** DTO for user in updateLeaderData */
-export interface LeaderDto {
-  userId: string;
-  username: string;
-  score: number;
-}
-
-/** DTO for updateLeaderData */
-export interface UpdateLeaderDataDto {
-  eventId: string;
-  offset: number;
-  users: LeaderDto[];
-}

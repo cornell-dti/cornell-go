@@ -27,7 +27,10 @@ describe('EventModule E2E', () => {
   let moduleRef: TestingModule;
 
   let fullAbility: AppAbility;
-  let sendEventMock: jest.SpyInstance<Promise<void>, [string[], string, any]>;
+  let sendEventMock: jest.SpyInstance<
+    Promise<void>,
+    [string[] | null, string, any]
+  >;
 
   let chalGateway: ChallengeGateway;
   let evGateway: EventGateway;

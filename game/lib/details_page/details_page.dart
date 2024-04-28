@@ -1,17 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:game/api/game_client_dto.dart';
-import 'package:game/journeys/journeys_page.dart';
-import 'package:game/main.dart';
-import 'package:game/navigation_page/bottom_navbar.dart';
 import 'package:game/interests/interests_page.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:game/utils/utility_functions.dart';
-import 'package:game/gameplay/gameplay_page.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:game/details_page/dropdown_widget.dart';
-
-import 'package:velocity_x/velocity_x.dart';
 
 class DetailsPageWidget extends StatefulWidget {
   DetailsPageWidget(

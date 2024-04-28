@@ -126,7 +126,8 @@ export class AuthService {
     let user = await this.userService.byAuth(authType, idToken.id);
     const isDevWhileDevice =
       process.env.DEVELOPMENT === 'true' || authType !== AuthType.DEVICE;
-    if (!user) {
+
+    if (!user && !req.noRegister) {
       user = await this.userService.register(
         idToken.email,
         req.username,
@@ -134,8 +135,8 @@ export class AuthService {
         req.college ?? '',
         req.major ?? '',
         req.interests?.split(',') ?? [],
-        req.latF,
-        req.longF,
+        req.latF ?? 0,
+        req.longF ?? 0,
         authType,
         idToken.id,
         req.enrollmentType,

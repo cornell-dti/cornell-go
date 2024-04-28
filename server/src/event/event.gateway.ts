@@ -95,8 +95,11 @@ export class EventGateway {
     @CallingUser() user: User,
     @MessageBody() data: RequestEventLeaderDataDto,
   ) {
-    const ev = await this.eventService.getEventById(data.eventId);
-    if (!ev) {
+    const ev = data.eventId
+      ? await this.eventService.getEventById(data.eventId)
+      : null;
+
+    if (!ev && data.eventId) {
       await this.clientService.emitErrorData(
         user,
         'Cannot find requested event!',

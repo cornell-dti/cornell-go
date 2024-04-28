@@ -9,7 +9,6 @@ import 'package:game/model/event_model.dart';
 import 'package:game/model/group_model.dart';
 import 'package:game/model/tracker_model.dart';
 import 'package:game/model/challenge_model.dart';
-import 'package:game/model/user_model.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:provider/provider.dart';
 
@@ -168,7 +167,6 @@ class _JourneysPageState extends State<JourneysPage> {
                             TrackerModel, ChallengeModel, ApiClient>(
                         builder: (context, myEventModel, groupModel,
                             trackerModel, challengeModel, apiClient, child) {
-                      List<Widget> eventCells = [];
                       if (myEventModel.searchResults == null) {
                         myEventModel.searchEvents(
                             0,
@@ -193,7 +191,7 @@ class _JourneysPageState extends State<JourneysPage> {
                       for (EventDto event in events) {
                         var tracker = trackerModel.trackerByEventId(event.id);
                         var numberCompleted =
-                            tracker?.prevChallenges?.length ?? 0;
+                            tracker?.prevChallenges.length ?? 0;
                         var complete =
                             (numberCompleted == event.challenges?.length);
                         var locationCount = event.challenges?.length ?? 0;
