@@ -12,14 +12,12 @@ import { PermittedFieldsOptions, permittedFieldsOf } from '@casl/ability/extra';
 import { Action } from '../casl/action.enum';
 import { Subjects } from '@casl/prisma';
 import { UpdateUserDataDto } from '../user/user.dto';
-import {
-  UpdateChallengeDataDto,
-  UpdateLeaderDataDto,
-} from '../challenge/challenge.dto';
+import { UpdateChallengeDataDto } from '../challenge/challenge.dto';
 import {
   EventTrackerDto,
   UpdateEventDataDto,
   UpdateLeaderPositionDto,
+  UpdateLeaderDataDto,
 } from '../event/event.dto';
 import { GroupInviteDto, UpdateGroupDataDto } from '../group/group.dto';
 import { UpdateOrganizationDataDto } from '../organization/organization.dto';

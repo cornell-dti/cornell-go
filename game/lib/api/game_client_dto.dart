@@ -564,74 +564,6 @@ class SetCurrentChallengeDto {
   late String challengeId;
 }
 
-class LeaderDto {
-  Map<String, dynamic> toJson() {
-    Map<String, dynamic> fields = {};
-    fields['userId'] = userId;
-    fields['username'] = username;
-    fields['score'] = score;
-    return fields;
-  }
-
-  LeaderDto.fromJson(Map<String, dynamic> fields) {
-    userId = fields["userId"];
-    username = fields["username"];
-    score = fields["score"];
-  }
-
-  void partialUpdate(LeaderDto other) {
-    userId = other.userId;
-    username = other.username;
-    score = other.score;
-  }
-
-  LeaderDto({
-    required this.userId,
-    required this.username,
-    required this.score,
-  });
-
-  late String userId;
-  late String username;
-  late int score;
-}
-
-class UpdateLeaderDataDto {
-  Map<String, dynamic> toJson() {
-    Map<String, dynamic> fields = {};
-    fields['eventId'] = eventId;
-    fields['offset'] = offset;
-    fields['users'] = users!
-        .map<Map<String, dynamic>>((dynamic val) => val!.toJson())
-        .toList();
-    return fields;
-  }
-
-  UpdateLeaderDataDto.fromJson(Map<String, dynamic> fields) {
-    eventId = fields["eventId"];
-    offset = fields["offset"];
-    users = fields["users"]
-        .map<LeaderDto>((dynamic val) => LeaderDto.fromJson(val))
-        .toList();
-  }
-
-  void partialUpdate(UpdateLeaderDataDto other) {
-    eventId = other.eventId;
-    offset = other.offset;
-    users = other.users;
-  }
-
-  UpdateLeaderDataDto({
-    required this.eventId,
-    required this.offset,
-    required this.users,
-  });
-
-  late String eventId;
-  late int offset;
-  late List<LeaderDto> users;
-}
-
 class UpdateErrorDto {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> fields = {};
@@ -717,31 +649,103 @@ class RequestEventLeaderDataDto {
     Map<String, dynamic> fields = {};
     fields['offset'] = offset;
     fields['count'] = count;
-    fields['eventId'] = eventId;
+    if (eventId != null) {
+      fields['eventId'] = eventId;
+    }
     return fields;
   }
 
   RequestEventLeaderDataDto.fromJson(Map<String, dynamic> fields) {
     offset = fields["offset"];
     count = fields["count"];
-    eventId = fields["eventId"];
+    eventId = fields.containsKey('eventId') ? (fields["eventId"]) : null;
   }
 
   void partialUpdate(RequestEventLeaderDataDto other) {
     offset = other.offset;
     count = other.count;
-    eventId = other.eventId;
+    eventId = other.eventId == null ? eventId : other.eventId;
   }
 
   RequestEventLeaderDataDto({
     required this.offset,
     required this.count,
-    required this.eventId,
+    this.eventId,
   });
 
   late int offset;
   late int count;
-  late String eventId;
+  late String? eventId;
+}
+
+class LeaderDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['userId'] = userId;
+    fields['username'] = username;
+    fields['score'] = score;
+    return fields;
+  }
+
+  LeaderDto.fromJson(Map<String, dynamic> fields) {
+    userId = fields["userId"];
+    username = fields["username"];
+    score = fields["score"];
+  }
+
+  void partialUpdate(LeaderDto other) {
+    userId = other.userId;
+    username = other.username;
+    score = other.score;
+  }
+
+  LeaderDto({
+    required this.userId,
+    required this.username,
+    required this.score,
+  });
+
+  late String userId;
+  late String username;
+  late int score;
+}
+
+class UpdateLeaderDataDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    if (eventId != null) {
+      fields['eventId'] = eventId;
+    }
+    fields['offset'] = offset;
+    fields['users'] = users!
+        .map<Map<String, dynamic>>((dynamic val) => val!.toJson())
+        .toList();
+    return fields;
+  }
+
+  UpdateLeaderDataDto.fromJson(Map<String, dynamic> fields) {
+    eventId = fields.containsKey('eventId') ? (fields["eventId"]) : null;
+    offset = fields["offset"];
+    users = fields["users"]
+        .map<LeaderDto>((dynamic val) => LeaderDto.fromJson(val))
+        .toList();
+  }
+
+  void partialUpdate(UpdateLeaderDataDto other) {
+    eventId = other.eventId == null ? eventId : other.eventId;
+    offset = other.offset;
+    users = other.users;
+  }
+
+  UpdateLeaderDataDto({
+    this.eventId,
+    required this.offset,
+    required this.users,
+  });
+
+  late String? eventId;
+  late int offset;
+  late List<LeaderDto> users;
 }
 
 class UpdateLeaderPositionDto {

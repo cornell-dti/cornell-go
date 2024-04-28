@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/api/game_client_dto.dart';
-import 'package:velocity_x/velocity_x.dart';
 
 class EventModel extends ChangeNotifier {
   Map<String, EventDto> _events = {};
@@ -40,7 +39,7 @@ class EventModel extends ChangeNotifier {
       var players = _topPlayers[event.eventId];
       if (players == null) {
         players = [];
-        _topPlayers[event.eventId] = players;
+        _topPlayers[event.eventId ?? ""] = players;
       }
 
       for (int i = event.offset; i < event.users.length; i++) {
@@ -50,6 +49,7 @@ class EventModel extends ChangeNotifier {
           players.add(event.users[i - event.offset]);
         }
       }
+
       notifyListeners();
     });
 
@@ -86,18 +86,12 @@ class EventModel extends ChangeNotifier {
     });
   }
 
-  List<LeaderDto>? getTopPlayersForEvent(String eventId, int count) {
-    final topPlayers = _topPlayers[eventId];
+  List<LeaderDto>? getTopPlayersForEvent(String? eventId, int count) {
+    final topPlayers = _topPlayers[eventId ?? ""];
     final diff = count - (topPlayers?.length ?? 0);
-    if (_topPlayers[eventId]?.length == 0) {
-      eventId.isEmpty
-          ? _client.serverApi?.requestGlobalLeaderData(
-              RequestGlobalLeaderDataDto(
-                  offset: (topPlayers?.length ?? 0), count: 1000))
-          : _client.serverApi?.requestEventLeaderData(RequestEventLeaderDataDto(
-              offset: (topPlayers?.length ?? 0),
-              count: diff,
-              eventId: eventId));
+    if (topPlayers == null) {
+      _client.serverApi?.requestEventLeaderData(RequestEventLeaderDataDto(
+          offset: (topPlayers?.length ?? 0), count: diff, eventId: eventId));
     }
     return topPlayers;
   }

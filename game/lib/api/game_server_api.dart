@@ -52,9 +52,6 @@ class GameServerApi {
   void completedChallenge(CompletedChallengeDto dto) =>
       _invokeWithRefresh("completedChallenge", dto.toJson());
 
-  void requestGlobalLeaderData(RequestGlobalLeaderDataDto dto) =>
-      _invokeWithRefresh("requestGlobalLeaderData", dto.toJson());
-
   void updateChallengeData(UpdateChallengeDataDto dto) =>
       _invokeWithRefresh("updateChallengeData", dto.toJson());
 

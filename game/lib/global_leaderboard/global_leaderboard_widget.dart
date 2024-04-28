@@ -38,8 +38,7 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
     );
 
     final eventModel = Provider.of<EventModel>(context);
-
-    List<LeaderDto>? playerList = eventModel.getTopPlayersForEvent('', 1000);
+    List<LeaderDto>? playerList = eventModel.getTopPlayersForEvent(null, 1000);
 
     return Scaffold(
         key: scaffoldKey,
@@ -63,7 +62,11 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
               //Podium Container
               Consumer3<GroupModel, EventModel, UserModel>(builder:
                   (context, myGroupModel, myEventModel, myUserModel, child) {
-                if (playerList == null) return Container();
+                if (playerList == null)
+                  return Padding(
+                    padding: EdgeInsets.all(12),
+                    child: CircularProgressIndicator(),
+                  );
 
                 //Loading in the lists and then creating podiumList of top 3
                 LeaderDto empty = LeaderDto(
@@ -142,8 +145,7 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
                   child: Consumer3<GroupModel, EventModel, UserModel>(
                     builder: (context, myGroupModel, myEventModel, myUserModel,
                         child) {
-                      if (playerList == null)
-                        return CircularProgressIndicator();
+                      if (playerList == null) return Container();
 
                       // Leaderboard starts at 4th position because first three already in podium
                       int position = 4;

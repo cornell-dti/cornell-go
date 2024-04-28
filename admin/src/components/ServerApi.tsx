@@ -29,10 +29,6 @@ export class ServerApi {
     this.send("completedChallenge", data);
   }
 
-  requestGlobalLeaderData(data: dto.RequestGlobalLeaderDataDto) {
-    this.send("requestGlobalLeaderData", data);
-  }
-
   updateChallengeData(data: dto.UpdateChallengeDataDto) {
     this.send("updateChallengeData", data);
   }

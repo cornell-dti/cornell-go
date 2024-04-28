@@ -7,7 +7,7 @@ import {
   EventTracker,
   User,
 } from '@prisma/client';
-import { LeaderDto, UpdateLeaderDataDto } from '../challenge/challenge.dto';
+import { LeaderDto, UpdateLeaderDataDto } from './event.dto';
 import { v4 } from 'uuid';
 import { ClientService } from '../client/client.service';
 import {
@@ -400,7 +400,7 @@ export class EventService {
     }
 
     const dto: UpdateLeaderDataDto = {
-      eventId: event?.id ?? '',
+      eventId: event?.id,
       offset,
       users: leaderData,
     };

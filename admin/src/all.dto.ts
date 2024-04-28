@@ -150,18 +150,6 @@ export interface SetCurrentChallengeDto {
   challengeId: string;
 }
 
-export interface LeaderDto {
-  userId: string;
-  username: string;
-  score: number;
-}
-
-export interface UpdateLeaderDataDto {
-  eventId: string;
-  offset: number;
-  users: LeaderDto[];
-}
-
 export interface UpdateErrorDto {
   id: string;
   message: string;
@@ -179,7 +167,19 @@ export interface RequestEventDataDto {
 export interface RequestEventLeaderDataDto {
   offset: number;
   count: number;
-  eventId: string;
+  eventId?: string;
+}
+
+export interface LeaderDto {
+  userId: string;
+  username: string;
+  score: number;
+}
+
+export interface UpdateLeaderDataDto {
+  eventId?: string;
+  offset: number;
+  users: LeaderDto[];
 }
 
 export interface UpdateLeaderPositionDto {

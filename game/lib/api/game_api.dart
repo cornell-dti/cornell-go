@@ -56,6 +56,7 @@ class ApiClient extends ChangeNotifier {
         IO.OptionBuilder()
             .setTransports(["websocket"])
             .disableAutoConnect()
+            .disableReconnection()
             .setAuth({'token': _accessToken})
             .build());
 
@@ -63,6 +64,7 @@ class ApiClient extends ChangeNotifier {
       _serverApi = null;
       notifyListeners();
     });
+
     socket.onConnect((data) {
       _socket = socket;
 
@@ -75,6 +77,7 @@ class ApiClient extends ChangeNotifier {
 
       notifyListeners();
     });
+
     socket.onConnectError((data) {
       connectionFailed = true;
       notifyListeners();
