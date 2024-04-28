@@ -95,10 +95,6 @@ Widget achievementCell(
                     ]),
                     Padding(
                       padding: const EdgeInsets.only(left: 8.0),
-                      child: SvgPicture.asset("assets/icons/location.svg"),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 8.0),
                       child: Text(
                         tasksFinished.toString() + "/" + totalTasks.toString(),
                       ),

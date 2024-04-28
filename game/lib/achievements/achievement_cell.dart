@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:game/preview/preview.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -64,10 +65,6 @@ class LoadingBar extends StatelessWidget {
             })),
         Padding(
           padding: const EdgeInsets.only(left: 8.0),
-          child: SvgPicture.asset("assets/icons/location.svg"),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(left: 8.0),
           child: Text(
             tasksFinished.toString() + "/" + totalTasks.toString(),
           ),
@@ -130,27 +127,29 @@ class _AchievementCellState extends State<AchievementCell> {
           child: Row(
             children: [
               Container(margin: EdgeInsets.only(right: 12), child: thumbnail),
-              Container(
-                  width: 250,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.max,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        child: Text(
-                          description,
-                          style: TextStyle(
-                            color: Color.fromARGB(204, 0, 0, 0),
-                            fontSize: 16.5,
-                            fontFamily: 'Poppins',
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+              Column(
+                mainAxisSize: MainAxisSize.max,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      description,
+                      style: TextStyle(
+                        color: Color.fromARGB(204, 0, 0, 0),
+                        fontSize: 14,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w500,
                       ),
-                      Spacer(),
-                      LoadingBar(3, 4),
-                    ],
-                  ))
+                    ),
+                  ),
+                  Spacer(),
+                  Align(
+                      alignment: Alignment.bottomCenter,
+                      child: LoadingBar(3, 4)),
+                ],
+              )
             ],
           ),
         ),

@@ -171,16 +171,15 @@ class _PreviewState extends State<Preview> {
         height: MediaQuery.of(context).size.height * 0.75,
         child: ClipRRect(
           borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20.0),
-            topRight: Radius.circular(20.0),
+            topLeft: Radius.circular(10.0),
+            topRight: Radius.circular(10.0),
           ),
-
           //Overall Container
           child: Container(
               height: MediaQuery.of(context).size.height * 0.75,
               width: MediaQuery.of(context).size.width,
               color: Colors.white,
-              child: Text("Cannot find challenge lat and long")),
+              child: Text("Error: Cannot find challenge lat and long")),
         ),
       );
     }

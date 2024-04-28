@@ -75,6 +75,7 @@ export class EventGateway {
       if (ev.difficulty == data.difficulty[0]) {
         await this.eventService.emitUpdateEventData(ev, false, user);
       }
+    }
   }
 
   @SubscribeMessage('requestRecommendedEvents')
