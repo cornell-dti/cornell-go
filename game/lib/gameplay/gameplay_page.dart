@@ -171,7 +171,7 @@ class _GameplayPageState extends State<GameplayPage> {
                             margin: EdgeInsets.only(top: 16.45, bottom: 11),
                             alignment: Alignment.centerLeft,
                             child: Text(
-                              "Find the Location of ${challenge.description}!",
+                              challenge.description ?? "NO DESCRIPTION",
                               textAlign: TextAlign.left,
                               style: TextStyle(
                                   fontSize: 18, fontWeight: FontWeight.bold),
