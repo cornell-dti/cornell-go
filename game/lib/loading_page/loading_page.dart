@@ -27,10 +27,8 @@ class LoadingPageWidget extends StatelessWidget {
                           builder: (context) => snapshot.data!
                               ? BottomNavBar()
                               : SplashPageWidget()));
-                  ;
                 });
               }
-
               return SplashPageWidget();
             },
           ),

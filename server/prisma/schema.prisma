@@ -82,6 +82,9 @@ model User {
   authType            AuthType
   username            String
   year                String
+  college             String
+  major               String
+  interests           String[]
   email               String
   hashedRefreshToken  String
   administrator       Boolean
