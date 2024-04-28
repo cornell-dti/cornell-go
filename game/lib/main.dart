@@ -109,7 +109,9 @@ class MyApp extends StatelessWidget {
                 ],
                 supportedLocales: const [Locale('en', '')],
                 theme: ThemeData(
-                    fontFamily: 'Poppins', primarySwatch: ColorPalette.BigRed),
+                    fontFamily: 'Poppins',
+                    primarySwatch: ColorPalette.BigRed,
+                    useMaterial3: false),
                 home: LoadingPageWidget(client.tryRelog()))));
   }
 }

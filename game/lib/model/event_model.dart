@@ -53,6 +53,21 @@ class EventModel extends ChangeNotifier {
       notifyListeners();
     });
 
+    client.clientApi.updateUserDataStream.listen((event) {
+      if (event.user.username == null) return;
+
+      for (final playerList in _topPlayers.values) {
+        for (final player in playerList) {
+          if (player.userId == event.user.id) {
+            player.username = event.user.username!;
+            break;
+          }
+        }
+      }
+
+      notifyListeners();
+    });
+
     client.clientApi.updateLeaderPositionStream.listen((event) {
       final forEvent = _topPlayers[event.eventId];
       final forFull = _topPlayers[""];
