@@ -392,7 +392,7 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                           SvgPicture.asset("assets/icons/forwardcarrot.svg")
                         ]),
                         onPressed: () {
-                          Navigator.push(
+                          Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
                                   builder: (context) => BottomNavBar()));
@@ -413,7 +413,7 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                                       10), // button's shape,
                                 ),
                               ),
-                              onPressed: () => Navigator.push(
+                              onPressed: () => Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) => BottomNavBar())),
@@ -487,7 +487,7 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                       journeyPage = true;
                       setState(() {});
                     } else {
-                      Navigator.push(
+                      Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
                               builder: (context) => BottomNavBar()));
