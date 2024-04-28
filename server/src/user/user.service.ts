@@ -61,7 +61,7 @@ export class UserService {
   ) {
     if (authType === AuthType.DEVICE) {
       const count = await this.prisma.user.count();
-      username = 'guest' + (count + 10001);
+      username = 'guest' + (count + 921);
     }
 
     const defOrg = await this.orgService.getDefaultOrganization(

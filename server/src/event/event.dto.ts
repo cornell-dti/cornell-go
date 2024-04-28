@@ -16,6 +16,13 @@ export interface RequestEventLeaderDataDto {
   eventId: string;
 }
 
+export interface UpdateLeaderPositionDto {
+  playerId: string;
+  newTotalScore: number;
+  newEventScore: number;
+  eventId: string;
+}
+
 export interface RequestRecommendedEventsDto {
   latitudeF: number;
   longitudeF: number;

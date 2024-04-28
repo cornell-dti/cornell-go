@@ -37,6 +37,10 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
       letterSpacing: 0.0,
     );
 
+    final eventModel = Provider.of<EventModel>(context);
+
+    List<LeaderDto>? playerList = eventModel.getTopPlayersForEvent('', 1000);
+
     return Scaffold(
         key: scaffoldKey,
         backgroundColor: Color.fromARGB(255, 255, 248, 241),
@@ -59,28 +63,23 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
               //Podium Container
               Consumer3<GroupModel, EventModel, UserModel>(builder:
                   (context, myGroupModel, myEventModel, myUserModel, child) {
-                //Loading in the lists and then creating podiumList of top 3
-                final List<LeaderDto> list =
-                    myEventModel.getTopPlayersForEvent('', 1000);
+                if (playerList == null) return Container();
 
-                list.sort((a, b) => b.score.compareTo(a.score));
+                //Loading in the lists and then creating podiumList of top 3
                 LeaderDto empty = LeaderDto(
                   userId: " ",
                   username: " ",
                   score: 0,
                 );
 
-                // Creating list to be displayed within the podium (filled with empty users if lists length is less than 3)
-                List<LeaderDto> fullList = List.from(list);
-
-                int iterTillFull = 3 - fullList.length;
-                if (fullList.length < 3) {
+                int iterTillFull = 3 - playerList.length;
+                if (playerList.length < 3) {
                   for (int i = 0; i < iterTillFull; i++) {
-                    fullList.add(empty);
+                    playerList.add(empty);
                   }
                 }
 
-                List<LeaderDto> podiumList = fullList.sublist(0, 3);
+                List<LeaderDto> podiumList = playerList.sublist(0, 3);
 
                 // Booleans representing whether the current player is in the podium for highlighting purposes
                 bool firstPodiumUser = podiumList.length > 0 &&
@@ -143,13 +142,11 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
                   child: Consumer3<GroupModel, EventModel, UserModel>(
                     builder: (context, myGroupModel, myEventModel, myUserModel,
                         child) {
-                      // Use this line below to retrieve actual data
-                      final List<LeaderDto> list =
-                          myEventModel.getTopPlayersForEvent('', 1000);
+                      if (playerList == null)
+                        return CircularProgressIndicator();
+
                       // Leaderboard starts at 4th position because first three already in podium
                       int position = 4;
-
-                      list.sort((a, b) => b.score.compareTo(a.score));
 
                       return Container(
                         width: 345.0,
@@ -168,7 +165,7 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
                             shrinkWrap: true,
                             scrollDirection: Axis.vertical,
                             children: [
-                              for (LeaderDto user in list.skip(3))
+                              for (LeaderDto user in playerList.skip(3))
                                 Padding(
                                   padding: const EdgeInsets.only(
                                       left: 30.95, right: 30.95, top: 16.0),

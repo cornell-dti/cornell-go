@@ -208,7 +208,7 @@ class AchievementTrackerDto {
 class UpdateAchievementDataDto {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> fields = {};
-    fields['achievement'] = achievement.toJson();
+    fields['achievement'] = achievement!.toJson();
     fields['deleted'] = deleted;
     return fields;
   }
@@ -274,7 +274,7 @@ class LoginDto {
     if (aud != null) {
       fields['aud'] = aud!.name;
     }
-    fields['enrollmentType'] = enrollmentType.name;
+    fields['enrollmentType'] = enrollmentType!.name;
     return fields;
   }
 
@@ -496,7 +496,7 @@ class RequestChallengeDataDto {
 class UpdateChallengeDataDto {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> fields = {};
-    fields['challenge'] = challenge.toJson();
+    fields['challenge'] = challenge!.toJson();
     fields['deleted'] = deleted;
     return fields;
   }
@@ -601,7 +601,7 @@ class UpdateLeaderDataDto {
     Map<String, dynamic> fields = {};
     fields['eventId'] = eventId;
     fields['offset'] = offset;
-    fields['users'] = users
+    fields['users'] = users!
         .map<Map<String, dynamic>>((dynamic val) => val!.toJson())
         .toList();
     return fields;
@@ -741,6 +741,43 @@ class RequestEventLeaderDataDto {
 
   late int offset;
   late int count;
+  late String eventId;
+}
+
+class UpdateLeaderPositionDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['playerId'] = playerId;
+    fields['newTotalScore'] = newTotalScore;
+    fields['newEventScore'] = newEventScore;
+    fields['eventId'] = eventId;
+    return fields;
+  }
+
+  UpdateLeaderPositionDto.fromJson(Map<String, dynamic> fields) {
+    playerId = fields["playerId"];
+    newTotalScore = fields["newTotalScore"];
+    newEventScore = fields["newEventScore"];
+    eventId = fields["eventId"];
+  }
+
+  void partialUpdate(UpdateLeaderPositionDto other) {
+    playerId = other.playerId;
+    newTotalScore = other.newTotalScore;
+    newEventScore = other.newEventScore;
+    eventId = other.eventId;
+  }
+
+  UpdateLeaderPositionDto({
+    required this.playerId,
+    required this.newTotalScore,
+    required this.newEventScore,
+    required this.eventId,
+  });
+
+  late String playerId;
+  late int newTotalScore;
+  late int newEventScore;
   late String eventId;
 }
 
@@ -954,7 +991,7 @@ class EventTrackerDto {
     fields['isRanked'] = isRanked;
     fields['hintsUsed'] = hintsUsed;
     fields['curChallengeId'] = curChallengeId;
-    fields['prevChallenges'] = prevChallenges
+    fields['prevChallenges'] = prevChallenges!
         .map<Map<String, dynamic>>((dynamic val) => val!.toJson())
         .toList();
     return fields;
@@ -996,7 +1033,7 @@ class EventTrackerDto {
 class UpdateEventTrackerDataDto {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> fields = {};
-    fields['tracker'] = tracker.toJson();
+    fields['tracker'] = tracker!.toJson();
     return fields;
   }
 
@@ -1018,7 +1055,7 @@ class UpdateEventTrackerDataDto {
 class UpdateEventDataDto {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> fields = {};
-    fields['event'] = event.toJson();
+    fields['event'] = event!.toJson();
     fields['deleted'] = deleted;
     return fields;
   }
@@ -1223,7 +1260,7 @@ class GroupDto {
 class UpdateGroupDataDto {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> fields = {};
-    fields['group'] = group.toJson();
+    fields['group'] = group!.toJson();
     fields['deleted'] = deleted;
     return fields;
   }
@@ -1385,7 +1422,7 @@ class RequestOrganizationDataDto {
 class UpdateOrganizationDataDto {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> fields = {};
-    fields['organization'] = organization.toJson();
+    fields['organization'] = organization!.toJson();
     fields['deleted'] = deleted;
     return fields;
   }
@@ -1518,7 +1555,7 @@ class BanUserDto {
 class SetAuthToOAuthDto {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> fields = {};
-    fields['provider'] = provider.name;
+    fields['provider'] = provider!.name;
     fields['authId'] = authId;
     return fields;
   }
@@ -1760,7 +1797,7 @@ class UserDto {
 class UpdateUserDataDto {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> fields = {};
-    fields['user'] = user.toJson();
+    fields['user'] = user!.toJson();
     fields['deleted'] = deleted;
     return fields;
   }

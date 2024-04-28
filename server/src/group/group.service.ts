@@ -335,7 +335,7 @@ export class GroupService {
     if (targetUser) {
       await this.clientService.sendProtected(
         'groupInvitation',
-        targetUser.id,
+        targetUser,
         dto,
       );
     } else {

@@ -9,13 +9,20 @@ class LoadingPageWidget extends StatelessWidget {
   LoadingPageWidget(this.relogResult, {Key? key}) : super(key: key);
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
+  Future<bool> awaitRelogResult() async {
+    final result = await relogResult;
+    // Wait, so we can allow the serverApi to notifyListeners() first
+    await Future.delayed(Durations.medium1);
+    return result;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: Colors.white,
         body: Center(
           child: StreamBuilder(
-            stream: Stream.fromFuture(relogResult),
+            stream: Stream.fromFuture(awaitRelogResult()),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 WidgetsBinding.instance.addPostFrameCallback((_) {

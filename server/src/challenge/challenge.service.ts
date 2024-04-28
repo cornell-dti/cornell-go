@@ -130,12 +130,12 @@ export class ChallengeService {
 
     const totalScore = curChallenge.points - 25 * eventTracker.hintsUsed;
 
-    await this.prisma.user.update({
+    const newUser = await this.prisma.user.update({
       where: { id: user.id },
       data: { score: { increment: totalScore } },
     });
 
-    await this.prisma.eventTracker.update({
+    const newEvTracker = await this.prisma.eventTracker.update({
       where: { id: eventTracker.id },
       data: {
         score: { increment: totalScore },
@@ -149,6 +149,13 @@ export class ChallengeService {
       challengeId,
       user.id,
     );
+
+    await this.eventService.emitUpdateLeaderPosition({
+      playerId: newUser.id,
+      newTotalScore: newUser.score,
+      newEventScore: newEvTracker.score,
+      eventId: newEvTracker.eventId,
+    });
 
     return true;
   }

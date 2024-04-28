@@ -189,4 +189,11 @@ export class ServerApi {
     this.socket.removeAllListeners("updateOrganizationData");
     this.socket.on("updateOrganizationData", (data) => callback(data));
   }
+
+  onUpdateLeaderPosition(
+    callback: (data: dto.UpdateLeaderPositionDto) => void
+  ) {
+    this.socket.removeAllListeners("updateLeaderPosition");
+    this.socket.on("updateLeaderPosition", (data) => callback(data));
+  }
 }

@@ -23,6 +23,7 @@ import {
   RequestRecommendedEventsDto,
   UpdateEventTrackerDataDto,
   EventCategoryDto,
+  UpdateLeaderPositionDto,
 } from './event.dto';
 import { AppAbility, CaslAbilityFactory } from '../casl/casl-ability.factory';
 import { accessibleBy } from '@casl/prisma';
@@ -348,6 +349,14 @@ export class EventService {
     );
   }
 
+  async emitUpdateLeaderPosition(updateDto: UpdateLeaderPositionDto) {
+    await this.clientService.sendProtected(
+      'updateLeaderPosition',
+      null,
+      updateDto,
+    );
+  }
+
   async emitUpdateLeaderData(
     offset: number,
     count: number,
@@ -396,7 +405,7 @@ export class EventService {
       users: leaderData,
     };
 
-    await this.clientService.sendProtected('updateLeaderData', target.id, dto);
+    await this.clientService.sendProtected('updateLeaderData', target, dto);
   }
 
   async upsertEventFromDto(ability: AppAbility, event: EventDto) {
