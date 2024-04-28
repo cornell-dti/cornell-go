@@ -25,12 +25,14 @@ class GameplayMap extends StatefulWidget {
   final GeoPoint targetLocation;
   final double awardingRadius;
   final int points;
+  final int startingHints;
 
   const GameplayMap(
       {Key? key,
       required this.targetLocation,
       required this.awardingRadius,
-      required this.points})
+      required this.points,
+      required this.startingHints})
       : super(key: key);
 
   @override
@@ -58,8 +60,8 @@ class _GameplayMapState extends State<GameplayMap> {
   int numHintsLeft = 10;
   GeoPoint? startingHintCenter;
   GeoPoint? hintCenter;
-  double startingHintRadius = 100.0;
-  double hintRadius = 100.0;
+  double defaultHintRadius = 100.0;
+  double? hintRadius;
 
   // whether the picture is expanded over the map
   bool isExpanded = false;
@@ -69,7 +71,7 @@ class _GameplayMapState extends State<GameplayMap> {
     super.initState();
     setCustomMarkerIcon();
     streamStarted = startPositionStream();
-    setStartingHintCenter();
+    setStartingHintCircle();
   }
 
   @override
@@ -87,13 +89,24 @@ class _GameplayMapState extends State<GameplayMap> {
   /**
    * Sets a center for the hint circle by random such that
    * the entire circle encompasses the awarding area denoted by
-   * widget.targetLocation and widget.awardingRadius
+   * widget.targetLocation and widget.awardingRadius.
+   * 
+   * Sets the radius for the hint circle based on the number of
+   * hints used for this challenge already.
    */
-  void setStartingHintCenter() {
+  void setStartingHintCircle() {
+    hintRadius = defaultHintRadius -
+        (defaultHintRadius - widget.awardingRadius) *
+            0.33 *
+            widget.startingHints;
+    if (hintRadius == null) {
+      hintRadius = defaultHintRadius;
+    }
+
     Random _random = Random();
 
     // Calculate the max distance between the centers of the circles in meters
-    double maxDistance = startingHintRadius - widget.awardingRadius;
+    double maxDistance = hintRadius! - widget.awardingRadius;
     // Center for hint circle can be up to maxDistance away from targetLocation
     // Generate random angle
     double angle = _random.nextDouble() * 2 * pi;
@@ -246,8 +259,8 @@ class _GameplayMapState extends State<GameplayMap> {
 
       // decreases radius by 0.33 upon each hint press
       // after 3 hints, hint radius will equal that of the awarding radius
-      double newRadius =
-          hintRadius - (startingHintRadius - widget.awardingRadius) * 0.33;
+      double newRadius = (hintRadius ?? defaultHintRadius) -
+          (defaultHintRadius - widget.awardingRadius) * 0.33;
       double newLat = hintCenter!.lat -
           (startingHintCenter!.lat - widget.targetLocation.lat) * 0.33;
       double newLong = hintCenter!.long -
@@ -315,7 +328,7 @@ class _GameplayMapState extends State<GameplayMap> {
         if (tracker == null) {
           displayToast("Error getting event tracker", Status.error);
         } else {
-          numHintsLeft = totalHints - (tracker.hintsUsed ?? 0);
+          numHintsLeft = totalHints - tracker.hintsUsed;
         }
         var challenge =
             challengeModel.getChallengeById(tracker!.curChallengeId);
@@ -359,7 +372,7 @@ class _GameplayMapState extends State<GameplayMap> {
                     center: hintCenter != null
                         ? LatLng(hintCenter!.lat, hintCenter!.long)
                         : _center,
-                    radius: hintRadius,
+                    radius: (hintRadius ?? defaultHintRadius),
                     strokeColor: Color.fromARGB(80, 30, 41, 143),
                     strokeWidth: 2,
                     fillColor: Color.fromARGB(80, 83, 134, 237),
