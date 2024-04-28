@@ -135,13 +135,22 @@ final Map<EventDifficultyDto, String> friendlyDifficulty = {
   EventDifficultyDto.Hard: "Hard",
 };
 
-final Map<String, String> friendlyLocation = {
-  "ENG_QUAD": "Engineering Quad",
-  "ARTS_QUAD": "Arts Quad",
-  "AG_QUAD": "Agriculture Quad",
-  "NORTH_CAMPUS": "North Campus",
-  "WEST_CAMPUS": "West Campus",
-  "COLLEGETOWN": "Collegetown",
-  "ITHACA_COMMONS": "Ithaca Commons",
-  "ANY": "Cornell",
+final Map<ChallengeLocationDto, String> friendlyLocation = {
+  ChallengeLocationDto.ENG_QUAD: "Eng Quad",
+  ChallengeLocationDto.ARTS_QUAD: "Arts Quad",
+  ChallengeLocationDto.AG_QUAD: "Ag Quad",
+  ChallengeLocationDto.NORTH_CAMPUS: "North Campus",
+  ChallengeLocationDto.WEST_CAMPUS: "West Campus",
+  ChallengeLocationDto.COLLEGETOWN: "Collegetown",
+  ChallengeLocationDto.ITHACA_COMMONS: "Ithaca Commons",
+  ChallengeLocationDto.ANY: "Cornell",
+};
+
+final Map<EventCategoryDto, String> friendlyCategory = {
+  EventCategoryDto.CAFE: "Cafe",
+  EventCategoryDto.DININGHALL: "Dining Hall",
+  EventCategoryDto.DORM: "Dorm",
+  EventCategoryDto.FOOD: "Food",
+  EventCategoryDto.HISTORICAL: "Historical",
+  EventCategoryDto.NATURE: "Nature",
 };

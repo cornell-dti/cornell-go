@@ -671,31 +671,41 @@ class UpdateErrorDto {
   late String message;
 }
 
-class RequestAllEventDataDto {
+class RequestFilteredEventsDto {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> fields = {};
-    fields['offset'] = offset;
-    fields['count'] = count;
+    fields['difficulty'] = difficulty;
+    fields['location'] = location;
+    fields['category'] = category;
+    fields['filterId'] = filterId;
     return fields;
   }
 
-  RequestAllEventDataDto.fromJson(Map<String, dynamic> fields) {
-    offset = fields["offset"];
-    count = fields["count"];
+  RequestFilteredEventsDto.fromJson(Map<String, dynamic> fields) {
+    difficulty = List<String>.from(fields['difficulty']);
+    location = List<String>.from(fields['location']);
+    category = List<String>.from(fields['category']);
+    filterId = List<String>.from(fields['filterId']);
   }
 
-  void partialUpdate(RequestAllEventDataDto other) {
-    offset = other.offset;
-    count = other.count;
+  void partialUpdate(RequestFilteredEventsDto other) {
+    difficulty = other.difficulty;
+    location = other.location;
+    category = other.category;
+    filterId = other.filterId;
   }
 
-  RequestAllEventDataDto({
-    required this.offset,
-    required this.count,
+  RequestFilteredEventsDto({
+    required this.difficulty,
+    required this.location,
+    required this.category,
+    required this.filterId,
   });
 
-  late int offset;
-  late int count;
+  late List<String> difficulty;
+  late List<String> location;
+  late List<String> category;
+  late List<String> filterId;
 }
 
 class RequestEventDataDto {

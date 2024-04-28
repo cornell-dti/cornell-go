@@ -21,9 +21,6 @@ import 'package:game/model/tracker_model.dart';
 import 'package:game/model/group_model.dart';
 import 'package:game/model/challenge_model.dart';
 
-import 'package:provider/provider.dart';
-import 'package:velocity_x/velocity_x.dart';
-
 class GameplayMap extends StatefulWidget {
   final GeoPoint targetLocation;
   final double awardingRadius;
@@ -485,7 +482,7 @@ class _GameplayMapState extends State<GameplayMap> {
                           borderRadius: BorderRadius.circular(10),
                           child: Image.network(
                             challenge?.imageUrl ??
-                                "https://picsum.photos/250?image=9",
+                                "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png",
                             fit: BoxFit.cover,
                             width: pictureWidth,
                             height: pictureHeight,

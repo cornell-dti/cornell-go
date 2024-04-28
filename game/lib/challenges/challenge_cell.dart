@@ -5,6 +5,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 class ChallengeCell extends StatefulWidget {
   final String location;
   final String challengeName;
+  final double? challengeLat;
+  final double? challengeLong;
   final String imgUrl;
   final bool isCompleted;
   final String description;
@@ -15,6 +17,8 @@ class ChallengeCell extends StatefulWidget {
   const ChallengeCell(
       this.location,
       this.challengeName,
+      this.challengeLat,
+      this.challengeLong,
       this.imgUrl,
       this.isCompleted,
       this.description,
@@ -28,6 +32,8 @@ class ChallengeCell extends StatefulWidget {
   State<StatefulWidget> createState() => _ChallengeCellState(
       location,
       challengeName,
+      challengeLat,
+      challengeLong,
       imgUrl,
       isCompleted,
       description,
@@ -39,6 +45,8 @@ class ChallengeCell extends StatefulWidget {
 class _ChallengeCellState extends State<ChallengeCell> {
   final String location;
   final String challengeName;
+  final double? challengeLat;
+  final double? challengeLong;
   final String imgUrl;
   final bool isCompleted;
   final String description;
@@ -51,6 +59,8 @@ class _ChallengeCellState extends State<ChallengeCell> {
   _ChallengeCellState(
       this.location,
       this.challengeName,
+      this.challengeLat,
+      this.challengeLong,
       this.imgUrl,
       this.isCompleted,
       this.description,
@@ -68,8 +78,17 @@ class _ChallengeCellState extends State<ChallengeCell> {
         await showModalBottomSheet(
             context: context,
             isScrollControlled: true,
-            builder: (context) => Preview(challengeName, description, imgUrl,
-                difficulty, points, PreviewType.CHALLENGE, location, eventId));
+            builder: (context) => Preview(
+                challengeName,
+                challengeLat,
+                challengeLong,
+                description,
+                imgUrl,
+                difficulty,
+                points,
+                PreviewType.CHALLENGE,
+                location,
+                eventId));
       },
       child: Container(
         decoration: BoxDecoration(
@@ -146,9 +165,9 @@ class _ChallengeCellState extends State<ChallengeCell> {
                             difficulty,
                             style: TextStyle(
                               color: Color.fromARGB(204, 0, 0, 0),
-                              fontSize: 14,
+                              fontSize: 10,
                               fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w600,
+                              fontWeight: FontWeight.w300,
                             ),
                           ),
                         ),

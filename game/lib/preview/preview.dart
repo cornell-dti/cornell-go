@@ -3,6 +3,10 @@ import 'package:game/api/game_api.dart';
 import 'package:game/gameplay/gameplay_page.dart';
 import 'package:provider/provider.dart';
 import 'package:game/api/game_client_dto.dart';
+
+import 'package:geolocator/geolocator.dart';
+import 'package:game/api/geopoint.dart';
+import 'dart:async';
 import 'package:flutter_svg/flutter_svg.dart';
 
 enum PreviewType { CHALLENGE, JOURNEY }
@@ -12,12 +16,13 @@ enum PreviewType { CHALLENGE, JOURNEY }
  * both Challenges and Journeys. */
 class Preview extends StatefulWidget {
   final String challengeName;
+  final double? challengeLong;
+  final double? challengeLat;
   final String description;
   final String imgUrl;
   final String difficulty;
   final int points;
   final PreviewType type;
-
   final int locationCount;
   final int numberCompleted;
   final String location;
@@ -31,8 +36,20 @@ class Preview extends StatefulWidget {
   static Color purpleColor = Color.fromARGB(255, 131, 90, 124);
   static Color greyColor = Color.fromARGB(255, 110, 110, 110);
 
-  Preview(this.challengeName, this.description, this.imgUrl, this.difficulty,
-      this.points, this.type, this.location, this.eventId,
+  //Temporary image for now. Will have to change later
+  final String imgPath = "assets/images/38582.jpg";
+
+  Preview(
+      this.challengeName,
+      this.challengeLat,
+      this.challengeLong,
+      this.description,
+      this.imgUrl,
+      this.difficulty,
+      this.points,
+      this.type,
+      this.location,
+      this.eventId,
       {this.locationCount = 1,
       this.numberCompleted = 0,
       // required this.totalDistance,
@@ -42,6 +59,8 @@ class Preview extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => _PreviewState(
       challengeName,
+      challengeLat,
+      challengeLong,
       description,
       imgUrl,
       difficulty,
@@ -60,6 +79,8 @@ class Preview extends StatefulWidget {
  * challenge_on button */
 class _PreviewState extends State<Preview> {
   final String challengeName;
+  final double? challengeLong;
+  final double? challengeLat;
   final String description;
   final String imgUrl;
   final String difficulty;
@@ -78,8 +99,59 @@ class _PreviewState extends State<Preview> {
   final int numberCompleted;
   final String eventId;
 
+  //Temporary image for now. Will have to change later
+  final String imgPath = "assets/images/38582.jpg";
+
+  // User's current location will fall back to _center when current location
+  // cannot be found
+  GeoPoint? currentLocation;
+  GeoPoint? targetLocation;
+
+  late StreamSubscription<Position> positionStream;
+
+  @override
+  void initState() {
+    startPositionStream();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    positionStream.cancel();
+    super.dispose();
+  }
+
+  /**
+   * Starts the user's current location streaming upon state initialization
+   * Sets the camera to center on user's location by default
+   */
+  void startPositionStream() async {
+    GeoPoint.current().then(
+      (location) {
+        currentLocation = location;
+      },
+    );
+
+    positionStream = Geolocator.getPositionStream(
+            locationSettings: GeoPoint.getLocationSettings())
+        .listen((Position? newPos) {
+      // prints user coordinates - useful for debugging
+      // print(newPos == null
+      //     ? 'Unknown'
+      //     : '${newPos.latitude.toString()}, ${newPos.longitude.toString()}');
+
+      if (newPos != null)
+        currentLocation =
+            GeoPoint(newPos.latitude, newPos.longitude, newPos.heading);
+
+      setState(() {});
+    });
+  }
+
   _PreviewState(
       this.challengeName,
+      this.challengeLat,
+      this.challengeLong,
       this.description,
       this.imgUrl,
       this.difficulty,
@@ -94,10 +166,28 @@ class _PreviewState extends State<Preview> {
       );
   @override
   Widget build(BuildContext context) {
+    if (challengeLat == null || challengeLong == null) {
+      return SizedBox(
+        height: MediaQuery.of(context).size.height * 0.75,
+        child: ClipRRect(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(20.0),
+            topRight: Radius.circular(20.0),
+          ),
+
+          //Overall Container
+          child: Container(
+              height: MediaQuery.of(context).size.height * 0.75,
+              width: MediaQuery.of(context).size.width,
+              color: Colors.white,
+              child: Text("Cannot find challenge lat and long")),
+        ),
+      );
+    }
+
     //The popup box
     return SizedBox(
-        height: MediaQuery.of(context).size.height *
-            (widget.type == PreviewType.CHALLENGE ? 0.7 : 0.75),
+        height: MediaQuery.of(context).size.height * 0.75,
         child: ClipRRect(
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(10.0),
@@ -106,6 +196,8 @@ class _PreviewState extends State<Preview> {
 
           //Overall Container
           child: Container(
+              height: MediaQuery.of(context).size.height * 0.75,
+              width: MediaQuery.of(context).size.width,
               color: Colors.white,
               child: Column(
                 children: [
@@ -132,8 +224,18 @@ class _PreviewState extends State<Preview> {
                           Icon(Icons.directions_walk,
                               size: 24, color: Preview.greyColor),
                           Text(
-                              "25" + // should call new parameter; replace later
-                                  "mi",
+                              ' ' +
+                                  (currentLocation != null &&
+                                          challengeLat != null &&
+                                          challengeLong != null
+                                      ? (currentLocation!.distanceTo(GeoPoint(
+                                                  challengeLat!,
+                                                  challengeLong!,
+                                                  0)) /
+                                              1609.34)
+                                          .toStringAsFixed(1)
+                                      : "?.?") +
+                                  " mi",
                               style: TextStyle(
                                   fontSize: 20, color: Preview.greyColor))
                         ]),
