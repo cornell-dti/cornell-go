@@ -31,7 +31,7 @@ import {
   ChallengeLocationDto,
 } from '../challenge/challenge.dto';
 
-type DtoLastCall<T> = [string[], string, T];
+type DtoLastCall<T> = [string[] | null, string, T];
 
 describe('OrganizationModule E2E', () => {
   let app: INestApplication;
@@ -74,7 +74,10 @@ describe('OrganizationModule E2E', () => {
   let exChal1: Challenge;
   let exChal2: Challenge;
 
-  let sendEventMock: jest.SpyInstance<Promise<void>, [string[], string, any]>;
+  let sendEventMock: jest.SpyInstance<
+    Promise<void>,
+    [string[] | null, string, any]
+  >;
   let affectedUsers: User[] = [];
 
   beforeAll(async () => {

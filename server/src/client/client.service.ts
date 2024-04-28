@@ -91,6 +91,10 @@ export class ClientService {
     event: string,
     dto: TDto,
   ) {
+    if (process.env.TESTING_E2E === 'true') {
+      return;
+    }
+
     if (users) this.gateway.server.to(users).emit(event, dto);
     else this.gateway.server.emit(event, dto);
   }
