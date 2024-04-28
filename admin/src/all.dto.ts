@@ -106,6 +106,9 @@ export interface LoginDto {
   longF: number;
   username?: string;
   year?: string;
+  college?: string;
+  major?: string;
+  interests?: string;
   aud?: LoginAudDto;
   enrollmentType: LoginEnrollmentTypeDto;
 }
@@ -296,6 +299,10 @@ export interface SetUsernameDto {
   newUsername: string;
 }
 
+export interface SetCollegeDto {
+  newCollege: string;
+}
+
 export interface SetMajorDto {
   newMajor: string;
 }
@@ -340,6 +347,9 @@ export interface UserDto {
   enrollmentType?: UserEnrollmentTypeDto;
   email?: string;
   year?: string;
+  college?: string;
+  major?: string;
+  interests?: string[];
   score?: number;
   isBanned?: boolean;
   groupId?: string;

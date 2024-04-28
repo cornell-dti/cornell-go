@@ -10,7 +10,6 @@ import 'package:game/model/tracker_model.dart';
 import 'package:game/model/user_model.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:provider/provider.dart';
-import 'package:velocity_x/velocity_x.dart';
 import 'challenge_cell.dart';
 import 'package:game/journeys/filter_form.dart';
 
@@ -20,7 +19,7 @@ class ChallengeCellDto {
     required this.name,
     required this.lat,
     required this.long,
-    required this.thumbnail,
+    required this.imgUrl,
     required this.complete,
     required this.description,
     required this.difficulty,
@@ -31,7 +30,7 @@ class ChallengeCellDto {
   late String name;
   late double? lat;
   late double? long;
-  late Image thumbnail;
+  late String imgUrl;
   late bool complete;
   late String description;
   late String difficulty;
@@ -240,8 +239,8 @@ class _ChallengesPageState extends State<ChallengesPage> {
                             name: event.name ?? "",
                             lat: challenge.latF ?? null,
                             long: challenge.longF ?? null,
-                            thumbnail: Image.network(
-                                "https://picsum.photos/250?image=9"),
+                            imgUrl: challenge.imageUrl ??
+                                "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png",
                             complete: complete,
                             description: event.description ?? "",
                             difficulty:
@@ -265,7 +264,7 @@ class _ChallengesPageState extends State<ChallengesPage> {
                               eventData[index].name,
                               eventData[index].lat,
                               eventData[index].long,
-                              eventData[index].thumbnail,
+                              eventData[index].imgUrl,
                               eventData[index].complete,
                               eventData[index].description,
                               eventData[index].difficulty,

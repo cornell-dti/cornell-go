@@ -89,7 +89,6 @@ class ApiClient extends ChangeNotifier {
       _createSocket(true);
     } else {
       authenticated = false;
-      _clientApi.disconnectedController.add(null);
       _socket?.dispose();
       _socket = null;
       notifyListeners();
@@ -124,15 +123,11 @@ class ApiClient extends ChangeNotifier {
       _refreshToken = token;
       final access = await _refreshAccess(true);
       authenticated = access;
-      if (!access) {
-        _clientApi.disconnectedController.add(null);
-      }
       notifyListeners();
       return access;
     }
 
     authenticated = false;
-    _clientApi.disconnectedController.add(null);
     notifyListeners();
     return false;
   }
@@ -142,7 +137,10 @@ class ApiClient extends ChangeNotifier {
       Uri url,
       LoginEnrollmentTypeDto enrollmentType,
       String year,
-      String username) async {
+      String username,
+      String college,
+      String major,
+      List<String> interests) async {
     final pos = await GeoPoint.current();
     if (true) {
       final loginDto = LoginDto(
@@ -151,6 +149,9 @@ class ApiClient extends ChangeNotifier {
           longF: pos?.long ?? 0,
           enrollmentType: enrollmentType,
           username: username,
+          college: college,
+          major: major,
+          interests: interests.join(","),
           aud: Platform.isIOS ? LoginAudDto.ios : LoginAudDto.android);
 
       final loginResponse = await http.post(url,
@@ -170,7 +171,6 @@ class ApiClient extends ChangeNotifier {
         print(loginResponse.body);
       }
       authenticated = false;
-      _clientApi.disconnectedController.add(null);
       notifyListeners();
 
       print("Failed to connect to server!");
@@ -196,7 +196,6 @@ class ApiClient extends ChangeNotifier {
     _socket = null;
 
     authenticated = false;
-    _clientApi.disconnectedController.add(null);
     notifyListeners();
   }
 }

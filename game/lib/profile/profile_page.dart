@@ -26,7 +26,6 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  final locationImage = "assets/images/38582.jpg";
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -41,6 +40,7 @@ class _ProfilePageState extends State<ProfilePage> {
             );
           }
           var username = userModel.userData?.username;
+          var isGuest = userModel.userData?.authType == UserAuthTypeDto.device;
           var score = userModel.userData?.score;
 
           List<Tuple2<DateTime, EventDto>> completedEvents = [];
@@ -120,7 +120,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => SettingsPage()));
+                                  builder: (context) => SettingsPage(isGuest)));
                         }),
                   ),
                 ),
@@ -220,13 +220,18 @@ class _ProfilePageState extends State<ProfilePage> {
 
                     //Calculate totalPoints.
                     var totalPoints = 0;
+                    var locationImage = "";
                     for (var challengeId in event.challenges ?? []) {
                       var challenge =
                           challengeModel.getChallengeById(challengeId);
+                      locationImage = challenge?.imageUrl ??
+                          "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png";
+
                       if (challenge != null) {
                         totalPoints += challenge.points ?? 0;
                       }
                     }
+
                     return completedCell(
                         event.name!,
                         locationImage,

@@ -19,7 +19,7 @@ class JourneyCellDto {
     required this.name,
     required this.lat,
     required this.long,
-    required this.thumbnail,
+    required this.imgUrl,
     required this.complete,
     required this.locationCount,
     required this.numberCompleted,
@@ -32,7 +32,7 @@ class JourneyCellDto {
   late String name;
   late double? lat;
   late double? long;
-  late Image thumbnail;
+  late String imgUrl;
   late bool complete;
   late int locationCount;
   late int numberCompleted;
@@ -205,6 +205,8 @@ class _JourneysPageState extends State<JourneysPage> {
                             .getChallengeById(event.challenges?[0] ?? "");
 
                         if (challenge == null) continue;
+                        var location = challenge.location?.name;
+                        var imageUrl = challenge.imageUrl;
 
                         for (var challengeId in event.challenges ?? []) {
                           var challenge =
@@ -224,8 +226,8 @@ class _JourneysPageState extends State<JourneysPage> {
                             name: event.name ?? "",
                             lat: challenge.latF ?? null,
                             long: challenge.longF ?? null,
-                            thumbnail: Image.network(
-                                "https://picsum.photos/250?image=9"),
+                            imgUrl: imageUrl ??
+                                "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png",
                             complete: complete,
                             locationCount: locationCount,
                             numberCompleted: numberCompleted,
@@ -250,7 +252,7 @@ class _JourneysPageState extends State<JourneysPage> {
                               eventData[index].lat,
                               eventData[index].long,
                               eventData[index].location,
-                              eventData[index].thumbnail,
+                              eventData[index].imgUrl,
                               eventData[index].description,
                               eventData[index].locationCount,
                               eventData[index].numberCompleted,

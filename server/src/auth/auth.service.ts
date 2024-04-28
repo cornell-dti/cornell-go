@@ -129,8 +129,11 @@ export class AuthService {
     if (!user) {
       user = await this.userService.register(
         idToken.email,
-        req.username ?? '',
-        req.year ?? '',
+        req.username,
+        req.year ?? '2000',
+        req.college ?? '',
+        req.major ?? '',
+        req.interests?.split(',') ?? [],
         req.latF,
         req.longF,
         authType,
