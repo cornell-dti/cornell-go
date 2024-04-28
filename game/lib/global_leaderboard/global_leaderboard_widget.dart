@@ -156,17 +156,15 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
                       topRight: Radius.circular(10.0),
                     ),
                   ),
-                  child: Container(
-                    width: 283.05,
-                    height: 432.0,
-                    child: ListView(
-                      shrinkWrap: true,
-                      scrollDirection: Axis.vertical,
-                      children: [
-                        for (LeaderDto user in list.skip(3))
-                          Padding(
-                            padding: const EdgeInsets.only(
-                                left: 30.95, right: 30.95, top: 16.0),
+                  child: ListView(
+                    shrinkWrap: true,
+                    scrollDirection: Axis.vertical,
+                    children: [
+                      for (LeaderDto user in list.skip(3))
+                        Align(
+                          alignment: Alignment.center,
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 16),
                             child: Container(
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.only(
@@ -193,8 +191,8 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
                               ),
                             ),
                           ),
-                      ],
-                    ),
+                        ),
+                    ],
                   ),
                 );
               },
