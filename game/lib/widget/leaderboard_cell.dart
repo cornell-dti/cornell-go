@@ -49,8 +49,8 @@ Widget leaderBoardCell(
         padding: const EdgeInsets.symmetric(horizontal: 13),
         child: ClipRRect(
           child: Container(
-            width: 304,
-            height: 68,
+            width: MediaQuery.sizeOf(context).width * 0.65,
+            height: MediaQuery.sizeOf(context).height * 0.075,
             child: Row(
               children: [
                 Row(
