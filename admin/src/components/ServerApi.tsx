@@ -41,6 +41,10 @@ export class ServerApi {
     this.send("requestEventData", data);
   }
 
+  requestFilteredEventIds(data: dto.RequestFilteredEventsDto) {
+    this.send("requestFilteredEventIds", data);
+  }
+
   requestRecommendedEvents(data: dto.RequestRecommendedEventsDto) {
     this.send("requestRecommendedEvents", data);
   }

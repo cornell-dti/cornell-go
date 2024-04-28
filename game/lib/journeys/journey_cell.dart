@@ -7,6 +7,8 @@ class JourneyCell extends StatefulWidget {
   final int locationCount;
   final String location;
   final String journeyName;
+  final double? challengeLong;
+  final double? challengeLat;
   final String imgUrl;
   final String description;
   final int numberCompleted;
@@ -17,6 +19,8 @@ class JourneyCell extends StatefulWidget {
 
   const JourneyCell(
       this.journeyName,
+      this.challengeLat,
+      this.challengeLong,
       this.location,
       this.imgUrl,
       this.description,
@@ -32,6 +36,8 @@ class JourneyCell extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => _JourneyCellState(
       journeyName,
+      challengeLat,
+      challengeLong,
       location,
       imgUrl,
       description,
@@ -46,6 +52,8 @@ class JourneyCell extends StatefulWidget {
 class _JourneyCellState extends State<JourneyCell> {
   final int locationCount;
   final String journeyName;
+  final double? challengeLong;
+  final double? challengeLat;
   final String location;
   final String imgUrl;
   final String description;
@@ -58,6 +66,8 @@ class _JourneyCellState extends State<JourneyCell> {
 
   _JourneyCellState(
     this.journeyName,
+    this.challengeLat,
+    this.challengeLong,
     this.location,
     this.imgUrl,
     this.description,
@@ -83,8 +93,17 @@ class _JourneyCellState extends State<JourneyCell> {
             builder: (
               BuildContext context,
             ) =>
-                Preview(journeyName, description, imgUrl, difficulty, points,
-                    PreviewType.JOURNEY, location, id,
+                Preview(
+                    journeyName,
+                    challengeLat,
+                    challengeLong,
+                    description,
+                    imgUrl,
+                    difficulty,
+                    points,
+                    PreviewType.JOURNEY,
+                    location,
+                    id,
                     locationCount: locationCount,
                     numberCompleted: numberCompleted));
       },
@@ -250,10 +269,9 @@ class _JourneyCellState extends State<JourneyCell> {
                               ),
                             ),
                             Container(
-                              width: ((locationCount > 0
-                                          ? numberCompleted / locationCount
-                                          : 0) +
-                                      0.05) *
+                              width: (locationCount > 0
+                                      ? numberCompleted / locationCount
+                                      : 0) *
                                   MediaQuery.sizeOf(context).width *
                                   0.66,
                               height: 20,

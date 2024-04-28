@@ -1,30 +1,62 @@
 import 'package:flutter/material.dart';
+import 'package:game/api/game_client_dto.dart';
+import 'package:game/utils/utility_functions.dart';
 
 class FilterForm extends StatefulWidget {
-  const FilterForm({Key? key}) : super(key: key);
+  final void Function(List<String>, List<String>, String) onSubmit;
+  String? myDifficulty;
+  List<String>? myLocations;
+  List<String>? myCategories;
+  FilterForm(
+      {Key? key,
+      required this.onSubmit,
+      String? difficulty,
+      List<String>? locations,
+      List<String>? categories})
+      : super(key: key) {
+    myDifficulty = difficulty;
+    myLocations = locations;
+    myCategories = categories;
+  }
 
   @override
-  State<FilterForm> createState() => _FilterFormState();
+  // State<FilterForm> createState() => _FilterFormState(status);
+  State<FilterForm> createState() {
+    return _FilterFormState(myDifficulty, myLocations, myCategories);
+  }
 }
 
 class _FilterFormState extends State<FilterForm> {
   // Define variables for tracking the selected values
   List<String> selectedCategories = [];
   List<String> selectedLocations = [];
-  String selectedStatus = 'Easy';
+  late String selectedDifficulty;
 
-  List<String> categories = [
-    'Food',
-    'Nature',
-    'Historical',
-    'Cafe',
-    'Dining Hall',
-    'Dorm'
-  ];
-  List<String> locations = ['Location 1', 'Location 2', 'Location 3'];
-  List<String> statuses = ['Easy', 'Medium', 'Hard'];
+  _FilterFormState(
+      String? difficulty, List<String>? locations, List<String>? categories) {
+    selectedDifficulty = difficulty ?? '';
+    selectedLocations = locations ?? [];
+    selectedCategories = categories ?? [];
+  }
+
+  List<EventCategoryDto> categories = EventCategoryDto.values;
+
+  List<ChallengeLocationDto> locations = ChallengeLocationDto.values;
+
+  List<EventDifficultyDto> difficulties = EventDifficultyDto.values;
 
   // Define methods for updating the selected values
+  void filterChallenges() {
+    // setState(() {
+    //   selectedCategories;
+    //   selectedLocations;
+    //   selectedStatus;
+    // });
+    widget.onSubmit(selectedCategories, selectedLocations, selectedDifficulty);
+
+    Navigator.pop(context);
+  }
+
   void toggleCategory(String category) {
     if (selectedCategories.contains(category)) {
       selectedCategories.remove(category);
@@ -41,9 +73,9 @@ class _FilterFormState extends State<FilterForm> {
     }
   }
 
-  void setStatus(String status) {
+  void setDifficulty(String diff) {
     setState(() {
-      selectedStatus = status;
+      selectedDifficulty = diff;
     });
   }
 
@@ -119,13 +151,14 @@ class _FilterFormState extends State<FilterForm> {
                       return ElevatedButton(
                         onPressed: () {
                           setState(() {
-                            toggleCategory(category);
+                            toggleCategory(category.name);
                           });
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: selectedCategories.contains(category)
-                              ? Color.fromARGB(255, 249, 237, 218)
-                              : Color.fromARGB(100, 210, 210, 210),
+                          backgroundColor:
+                              selectedCategories.contains(category.name)
+                                  ? Color.fromARGB(255, 249, 237, 218)
+                                  : Color.fromARGB(100, 210, 210, 210),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20.0),
                           ),
@@ -134,7 +167,7 @@ class _FilterFormState extends State<FilterForm> {
                         child: Padding(
                           padding: EdgeInsets.symmetric(vertical: 8.0),
                           child: Text(
-                            category,
+                            friendlyCategory[category] ?? '',
                             style: TextStyle(
                               fontSize: 16.0,
                               color: Colors.black.withOpacity(0.6),
@@ -162,13 +195,14 @@ class _FilterFormState extends State<FilterForm> {
                       return ElevatedButton(
                         onPressed: () {
                           setState(() {
-                            toggleLocation(location);
+                            toggleLocation(location.name);
                           });
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: selectedLocations.contains(location)
-                              ? Color.fromARGB(255, 249, 237, 218)
-                              : Color.fromARGB(100, 210, 210, 210),
+                          backgroundColor:
+                              selectedLocations.contains(location.name)
+                                  ? Color.fromARGB(255, 249, 237, 218)
+                                  : Color.fromARGB(100, 210, 210, 210),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20.0),
                           ),
@@ -177,7 +211,7 @@ class _FilterFormState extends State<FilterForm> {
                         child: Padding(
                           padding: EdgeInsets.symmetric(vertical: 8.0),
                           child: Text(
-                            location,
+                            friendlyLocation[location] ?? '',
                             style: TextStyle(
                               fontSize: 16.0,
                               color: Colors.black.withOpacity(0.6),
@@ -201,26 +235,27 @@ class _FilterFormState extends State<FilterForm> {
                   Wrap(
                     spacing: 4,
                     runSpacing: 4,
-                    children: statuses.map((status) {
+                    children: difficulties.map((diff) {
                       return ElevatedButton(
                         onPressed: () {
                           setState(() {
-                            setStatus(status);
+                            setDifficulty(diff.name);
                           });
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: selectedStatus.contains(status)
-                              ? Color.fromARGB(255, 249, 237, 218)
-                              : Color.fromARGB(100, 210, 210, 210),
+                          backgroundColor:
+                              selectedDifficulty.contains(diff.name)
+                                  ? Color.fromARGB(255, 249, 237, 218)
+                                  : Color.fromARGB(100, 210, 210, 210),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20.0),
                           ),
                           elevation: 0,
                         ),
                         child: Padding(
-                          padding: EdgeInsets.symmetric(vertical: 8.0),
+                          padding: EdgeInsets.symmetric(vertical: 1.0),
                           child: Text(
-                            status,
+                            friendlyDifficulty[diff] ?? '',
                             style: TextStyle(
                               fontSize: 16.0,
                               color: Colors.black.withOpacity(0.6),
@@ -233,7 +268,7 @@ class _FilterFormState extends State<FilterForm> {
                 ],
               ),
             ),
-            Padding(padding: EdgeInsets.symmetric(vertical: 40.0)),
+            Padding(padding: EdgeInsets.symmetric(vertical: 20.0)),
             Container(
               width: 600,
               decoration: ShapeDecoration(
@@ -246,7 +281,7 @@ class _FilterFormState extends State<FilterForm> {
                 ),
               ),
             ),
-            Padding(padding: EdgeInsets.symmetric(vertical: 20.0)),
+            Padding(padding: EdgeInsets.symmetric(vertical: 5.0)),
             Row(
               // padding: EdgeInsets.symmetric(vertical: 30),
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -258,7 +293,7 @@ class _FilterFormState extends State<FilterForm> {
                         setState(() {
                           selectedCategories = [];
                           selectedLocations = [];
-                          selectedStatus = 'All';
+                          selectedDifficulty = '';
                         });
                       },
                       child: Text('Clear'),
@@ -274,9 +309,7 @@ class _FilterFormState extends State<FilterForm> {
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 20.0),
                   child: TextButton(
-                    onPressed: () {
-                      // TODO: Implement apply filters button
-                    },
+                    onPressed: filterChallenges,
                     child: Text('See results'),
                     style: ElevatedButton.styleFrom(
                       foregroundColor: Color.fromARGB(255, 255, 255, 255),

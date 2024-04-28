@@ -88,9 +88,10 @@ class CompletedChallengesPage extends StatelessWidget {
                 for (var challengeId in event.challenges ?? []) {
                   var challenge = challengeModel.getChallengeById(challengeId);
                   if (challenge != null) {
-                    pictureList.add(challenge.imageUrl!);
-                    locationList.add(
-                        friendlyLocation[challenge.location?.name ?? 'ANY']);
+                    pictureList.add(challenge.imageUrl ??
+                        "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png");
+                    locationList
+                        .add(friendlyLocation[challenge.location ?? 'ANY']);
                     totalPoints += challenge.points ?? 0;
                   }
                 }
