@@ -22,6 +22,22 @@
           }
         },
         {
+          "client_id": "757523123677-mdis2048vo39u7bjg7rjtm9r28a1tsto.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cornellgo.CornellGO",
+            "certificate_hash": "48942102c610163af43caab359452832e7bdc189"
+          }
+        },
+        {
+          "client_id": "757523123677-s7lm7n8b1vmppnh92pige13uvp722jma.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cornellgo.CornellGO",
+            "certificate_hash": "e8ec9df2de92f3ff018926aba9448be15c464a4e"
+          }
+        },
+        {
           "client_id": "757523123677-2nv6haiqnvklhb134cgg5qe8bia4du4q.apps.googleusercontent.com",
           "client_type": 3
         }
