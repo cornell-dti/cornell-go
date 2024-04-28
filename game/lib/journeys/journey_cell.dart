@@ -269,10 +269,9 @@ class _JourneyCellState extends State<JourneyCell> {
                               ),
                             ),
                             Container(
-                              width: ((locationCount > 0
-                                          ? numberCompleted / locationCount
-                                          : 0) +
-                                      0.05) *
+                              width: (locationCount > 0
+                                      ? numberCompleted / locationCount
+                                      : 0) *
                                   MediaQuery.sizeOf(context).width *
                                   0.66,
                               height: 20,

@@ -89,8 +89,8 @@ class CompletedChallengesPage extends StatelessWidget {
                   var challenge = challengeModel.getChallengeById(challengeId);
                   if (challenge != null) {
                     pictureList.add(challenge.imageUrl!);
-                    locationList.add(
-                        friendlyLocation[challenge.location?.name ?? 'ANY']);
+                    locationList
+                        .add(friendlyLocation[challenge.location ?? 'ANY']);
                     totalPoints += challenge.points ?? 0;
                   }
                 }

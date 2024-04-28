@@ -190,8 +190,8 @@ class _PreviewState extends State<Preview> {
         height: MediaQuery.of(context).size.height * 0.75,
         child: ClipRRect(
           borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20.0),
-            topRight: Radius.circular(20.0),
+            topLeft: Radius.circular(10.0),
+            topRight: Radius.circular(10.0),
           ),
 
           //Overall Container

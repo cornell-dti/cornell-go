@@ -236,8 +236,7 @@ class _ChallengesPageState extends State<ChallengesPage> {
                             eventMatchesLocationSelection) {
                           eventData.add(ChallengeCellDto(
                             location:
-                                friendlyLocation[challenge.location?.name] ??
-                                    "",
+                                friendlyLocation[challenge.location] ?? "",
                             name: event.name ?? "",
                             lat: challenge.latF ?? null,
                             long: challenge.longF ?? null,
