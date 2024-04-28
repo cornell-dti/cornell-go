@@ -68,7 +68,10 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
         final List<LeaderDto>? list =
             myEventModel.getTopPlayersForEvent('', 1000);
 
-        if (list == null) return CircularProgressIndicator();
+        if (list == null)
+          return Center(
+            child: CircularProgressIndicator(),
+          );
 
         LeaderDto empty = LeaderDto(
           userId: " ",
