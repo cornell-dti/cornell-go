@@ -131,8 +131,15 @@ class ApiClient extends ChangeNotifier {
     return false;
   }
 
-  Future<http.Response?> connect(String idToken, Uri url, String enrollmentType,
-      String year, String username) async {
+  Future<http.Response?> connect(
+      String idToken,
+      Uri url,
+      String enrollmentType,
+      String year,
+      String username,
+      String college,
+      String major,
+      List<String> interests) async {
     final pos = await GeoPoint.current();
     if (true) {
       final loginResponse = await http.post(url,
@@ -145,6 +152,9 @@ class ApiClient extends ChangeNotifier {
             "enrollmentType": enrollmentType,
             "year": year,
             "username": username,
+            "college": college,
+            "major": major,
+            "interests": interests.join(","),
             "long": pos?.long.toString() ?? "0",
             "aud": Platform.isIOS ? "ios" : "android"
           }));

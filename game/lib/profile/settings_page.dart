@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:game/profile/edit_profile.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:game/main.dart';
 import 'package:game/splash_page/splash_page.dart';
+import 'package:game/profile/edit_profile.dart';
 
 class SettingsPage extends StatelessWidget {
-  const SettingsPage({super.key});
+  final bool isGuest;
+  const SettingsPage(this.isGuest, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -38,72 +41,47 @@ class SettingsPage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     SizedBox(height: 20),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.only(
-                          topRight: Radius.circular(10),
-                          topLeft: Radius.circular(10),
+                    if (!isGuest)
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.only(
+                            topRight: Radius.circular(10),
+                            topLeft: Radius.circular(10),
+                          ),
                         ),
-                      ),
-                      child: TextButton(
-                        onPressed: () {},
-                        style: TextButton.styleFrom(
-                            padding: EdgeInsets.only(left: 20.0),
-                            alignment: Alignment.centerLeft,
-                            fixedSize: Size(constraints.maxWidth, 60)),
-                        child: Row(
-                          children: [
-                            Padding(
-                              padding: EdgeInsets.only(right: 20.0),
-                              child: SvgPicture.asset(
-                                'assets/icons/head.svg',
+                        child: TextButton(
+                          onPressed: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => EditProfileWidget()));
+                          },
+                          style: TextButton.styleFrom(
+                              padding: EdgeInsets.only(left: 20.0),
+                              alignment: Alignment.centerLeft,
+                              fixedSize: Size(constraints.maxWidth, 60)),
+                          child: Row(
+                            children: [
+                              Padding(
+                                padding: EdgeInsets.only(right: 20.0),
+                                child: SvgPicture.asset(
+                                  'assets/icons/head.svg',
+                                ),
                               ),
-                            ),
-                            Text(
-                              'Edit Profile',
-                              textAlign: TextAlign.left,
-                              style: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 16,
-                                  color: Colors.black),
-                            )
-                          ],
+                              Text(
+                                'Edit Profile',
+                                textAlign: TextAlign.left,
+                                style: TextStyle(
+                                    fontFamily: 'Poppins',
+                                    fontSize: 16,
+                                    color: Colors.black),
+                              )
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                    Divider(height: 1),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                      ),
-                      child: TextButton(
-                        onPressed: () {},
-                        style: TextButton.styleFrom(
-                            padding: EdgeInsets.only(left: 20.0),
-                            alignment: Alignment.centerLeft,
-                            fixedSize: Size(constraints.maxWidth, 60)),
-                        child: Row(
-                          children: [
-                            Padding(
-                              padding: EdgeInsets.only(right: 20.0),
-                              child: SvgPicture.asset(
-                                'assets/icons/bell.svg',
-                              ),
-                            ),
-                            Text(
-                              'Notifications',
-                              textAlign: TextAlign.left,
-                              style: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 16,
-                                  color: Colors.black),
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                    Divider(height: 1),
+                    if (!isGuest) Divider(height: 1),
                     Container(
                       decoration: BoxDecoration(
                         color: Colors.white,

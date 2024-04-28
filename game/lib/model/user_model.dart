@@ -7,8 +7,9 @@ import 'package:game/api/game_client_dto.dart';
  */
 class UserModel extends ChangeNotifier {
   UserDto? userData;
+  ApiClient _client;
 
-  UserModel(ApiClient client) {
+  UserModel(ApiClient client) : _client = client {
     /**
      * Stream that listens to updates on the user data.
      */
@@ -23,5 +24,17 @@ class UserModel extends ChangeNotifier {
       userData = null;
       client.serverApi?.requestUserData(RequestUserDataDto());
     });
+  }
+
+  void updateUserData(String id, String? username, String? college,
+      String? major, String? year) {
+    _client.serverApi?.updateUserData(UpdateUserDataDto(
+        user: UserDto(
+            id: id,
+            username: username,
+            college: college,
+            major: major,
+            year: year),
+        deleted: false));
   }
 }
