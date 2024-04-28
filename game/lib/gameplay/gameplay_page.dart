@@ -1,9 +1,3 @@
-import 'dart:math';
-
-import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:flutter/material.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/model/event_model.dart';
@@ -11,15 +5,12 @@ import 'package:game/model/tracker_model.dart';
 import 'package:game/model/group_model.dart';
 import 'package:game/api/geopoint.dart';
 import 'package:game/navigation_page/bottom_navbar.dart';
-import 'package:game/utils/utility_functions.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:game/model/challenge_model.dart';
 import 'gameplay_map.dart';
 import 'package:provider/provider.dart';
 
-import 'package:game/api/game_client_dto.dart';
 import 'package:game/progress_indicators/circular_progress_indicator.dart';
-import 'package:flutter/cupertino.dart';
 
 import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:async';
@@ -107,7 +98,8 @@ class _GameplayPageState extends State<GameplayPage> {
         return CircularIndicator();
       }
 
-      var challenge = challengeModel.getChallengeById(tracker.curChallengeId!);
+      var challenge = challengeModel.getChallengeById(tracker.curChallengeId);
+
       if (challenge == null) {
         return Scaffold(
           body: Text("No challenge data"),
@@ -183,7 +175,7 @@ class _GameplayPageState extends State<GameplayPage> {
                             margin: EdgeInsets.only(top: 16.45, bottom: 11),
                             alignment: Alignment.centerLeft,
                             child: Text(
-                              "Find the Location of ${challenge.description}!",
+                              challenge.description ?? "NO DESCRIPTION",
                               textAlign: TextAlign.left,
                               style: TextStyle(
                                   fontSize: 18, fontWeight: FontWeight.bold),

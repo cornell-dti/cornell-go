@@ -63,11 +63,9 @@ export class UserService {
     authToken: string,
     enrollmentType: EnrollmentType,
   ) {
-    if (authType === AuthType.GOOGLE) {
-      username = username;
-    } else if (authType === AuthType.DEVICE) {
+    if (authType === AuthType.DEVICE) {
       const count = await this.prisma.user.count();
-      username = 'guest' + (count + 10001);
+      username = 'guest' + (count + 921);
     }
 
     const defOrg = await this.orgService.getDefaultOrganization(
@@ -273,7 +271,7 @@ export class UserService {
 
     await this.clientService.sendProtected(
       'updateUserData',
-      target?.id ?? user.id,
+      target ?? user.id,
       dto,
       {
         id: user.id,

@@ -65,10 +65,14 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
       body: Consumer3<GroupModel, EventModel, UserModel>(
           builder: (context, myGroupModel, myEventModel, myUserModel, child) {
         //Loading in the lists and then creating podiumList of top 3
-        final List<LeaderDto> list =
+        final List<LeaderDto>? list =
             myEventModel.getTopPlayersForEvent('', 1000);
 
-        list.sort((a, b) => b.score.compareTo(a.score));
+        if (list == null)
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+
         LeaderDto empty = LeaderDto(
           userId: " ",
           username: " ",

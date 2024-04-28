@@ -29,10 +29,6 @@ export class ServerApi {
     this.send("completedChallenge", data);
   }
 
-  requestGlobalLeaderData(data: dto.RequestGlobalLeaderDataDto) {
-    this.send("requestGlobalLeaderData", data);
-  }
-
   updateChallengeData(data: dto.UpdateChallengeDataDto) {
     this.send("updateChallengeData", data);
   }
@@ -192,5 +188,12 @@ export class ServerApi {
   ) {
     this.socket.removeAllListeners("updateOrganizationData");
     this.socket.on("updateOrganizationData", (data) => callback(data));
+  }
+
+  onUpdateLeaderPosition(
+    callback: (data: dto.UpdateLeaderPositionDto) => void
+  ) {
+    this.socket.removeAllListeners("updateLeaderPosition");
+    this.socket.on("updateLeaderPosition", (data) => callback(data));
   }
 }

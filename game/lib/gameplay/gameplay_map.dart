@@ -1,7 +1,6 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
+import 'package:game/navigation_page/bottom_navbar.dart';
+import 'package:game/splash_page/splash_page.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:game/api/geopoint.dart';
 import 'package:geolocator/geolocator.dart';
@@ -9,14 +8,12 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:async';
 import 'dart:math';
 import 'package:game/gameplay/challenge_completed.dart';
-import 'package:game/progress_indicators/circular_progress_indicator.dart';
 import 'package:game/utils/utility_functions.dart';
 
 // for backend connection
 import 'package:provider/provider.dart';
 import 'package:game/api/game_client_dto.dart';
 import 'package:game/api/game_api.dart';
-import 'package:game/model/event_model.dart';
 import 'package:game/model/tracker_model.dart';
 import 'package:game/model/group_model.dart';
 import 'package:game/model/challenge_model.dart';
@@ -274,6 +271,8 @@ class _GameplayMapState extends State<GameplayMap> {
     //     builder: (context, AsyncSnapshot<bool> snapshot) {
     //       return !snapshot.hasData
     //           ? CircularIndicator()
+    final client = Provider.of<ApiClient>(context);
+
     return MaterialApp(
       theme: ThemeData(
         useMaterial3: true,
@@ -286,7 +285,7 @@ class _GameplayMapState extends State<GameplayMap> {
         if (tracker == null) {
           displayToast("Error getting event tracker", Status.error);
         } else {
-          numHintsLeft = totalHints - (tracker.hintsUsed ?? 0);
+          numHintsLeft = totalHints - (tracker.hintsUsed);
         }
         var challenge =
             challengeModel.getChallengeById(tracker!.curChallengeId);
@@ -294,6 +293,21 @@ class _GameplayMapState extends State<GameplayMap> {
             body: Stack(
           alignment: Alignment.bottomCenter,
           children: [
+            StreamBuilder(
+                stream: client.clientApi.disconnectedStream,
+                builder: ((context, snapshot) {
+                  if (client.serverApi == null) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => SplashPageWidget()));
+                      displayToast("Lost connection!", Status.success);
+                    });
+                  }
+
+                  return Container();
+                })),
             Listener(
               onPointerDown: (e) {
                 cancelRecenterCamera();
@@ -574,9 +588,6 @@ class _GameplayMapState extends State<GameplayMap> {
                       var eventId =
                           Provider.of<GroupModel>(context, listen: false)
                               .curEventId;
-                      var event =
-                          Provider.of<EventModel>(context, listen: false)
-                              .getEventById(eventId ?? "");
                       var tracker =
                           Provider.of<TrackerModel>(context, listen: false)
                               .trackerByEventId(eventId ?? "");
@@ -588,7 +599,7 @@ class _GameplayMapState extends State<GameplayMap> {
                       } else {
                         var challenge =
                             Provider.of<ChallengeModel>(context, listen: false)
-                                .getChallengeById(tracker.curChallengeId!);
+                                .getChallengeById(tracker.curChallengeId);
                         if (challenge == null) {
                           displayToast(
                               "An error occurred while getting challenge",

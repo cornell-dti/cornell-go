@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:game/api/game_client_api.dart';
 import 'package:game/api/game_client_dto.dart';
 import 'package:game/api/game_server_api.dart';
+import 'package:game/utils/utility_functions.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
@@ -56,6 +57,7 @@ class ApiClient extends ChangeNotifier {
         IO.OptionBuilder()
             .setTransports(["websocket"])
             .disableAutoConnect()
+            .disableReconnection()
             .setAuth({'token': _accessToken})
             .build());
 
@@ -63,6 +65,7 @@ class ApiClient extends ChangeNotifier {
       _serverApi = null;
       notifyListeners();
     });
+
     socket.onConnect((data) {
       _socket = socket;
 
@@ -75,6 +78,7 @@ class ApiClient extends ChangeNotifier {
 
       notifyListeners();
     });
+
     socket.onConnectError((data) {
       connectionFailed = true;
       notifyListeners();
@@ -132,55 +136,96 @@ class ApiClient extends ChangeNotifier {
     return false;
   }
 
-  Future<http.Response?> connect(
-      String idToken,
-      Uri url,
-      LoginEnrollmentTypeDto enrollmentType,
+  Future<http.Response?> connectDevice(
       String year,
+      LoginEnrollmentTypeDto enrollmentType,
       String username,
       String college,
       String major,
       List<String> interests) async {
+    final String? id = await getId();
+    return connect(id!, _deviceLoginUrl, year, enrollmentType, username,
+        college, major, interests,
+        noRegister: false);
+  }
+
+  Future<http.Response?> connectGoogle(
+      GoogleSignInAccount gAccount,
+      String year,
+      LoginEnrollmentTypeDto enrollmentType,
+      String username,
+      String college,
+      String major,
+      List<String> interests) async {
+    final auth = await gAccount.authentication;
+    return connect(auth.idToken ?? "", _googleLoginUrl, year, enrollmentType,
+        username, college, major, interests,
+        noRegister: false);
+  }
+
+  Future<http.Response?> connectGoogleNoRegister(
+      GoogleSignInAccount gAccount) async {
+    final auth = await gAccount.authentication;
+    return connect(auth.idToken ?? "", _googleLoginUrl, "",
+        LoginEnrollmentTypeDto.GUEST, "", "", "", [],
+        noRegister: true);
+  }
+
+  Future<http.Response?> connect(
+      String idToken,
+      Uri url,
+      String year,
+      LoginEnrollmentTypeDto enrollmentType,
+      String username,
+      String college,
+      String major,
+      List<String> interests,
+      {bool noRegister = false}) async {
     final pos = await GeoPoint.current();
-    if (true) {
-      final loginDto = LoginDto(
-          idToken: idToken,
-          latF: pos?.lat ?? 0,
-          longF: pos?.long ?? 0,
-          enrollmentType: enrollmentType,
-          username: username,
-          college: college,
-          major: major,
-          interests: interests.join(","),
-          aud: Platform.isIOS ? LoginAudDto.ios : LoginAudDto.android);
 
-      final loginResponse = await http.post(url,
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-          },
-          body: jsonEncode(loginDto.toJson()));
+    final loginDto = LoginDto(
+        idToken: idToken,
+        latF: pos.lat,
+        enrollmentType: enrollmentType,
+        year: year,
+        username: username,
+        college: college,
+        major: major,
+        interests: interests.join(","),
+        longF: pos.long,
+        aud: Platform.isIOS ? LoginAudDto.ios : LoginAudDto.android,
+        noRegister: noRegister);
+    /*
+    if (post != null) { */
+    final loginResponse = await http.post(url,
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(loginDto.toJson()));
 
-      if (loginResponse.statusCode == 201 && loginResponse.body != "") {
-        final responseBody = jsonDecode(loginResponse.body);
-        this._accessToken = responseBody["accessToken"];
-        this._refreshToken = responseBody["refreshToken"];
-        await _saveToken();
-        _createSocket(false);
-        return loginResponse;
-      } else {
-        print(loginResponse.body);
-      }
-      authenticated = false;
-      notifyListeners();
+    if (loginResponse.statusCode == 201 && loginResponse.body != "") {
+      final responseBody = jsonDecode(loginResponse.body);
+      this._accessToken = responseBody["accessToken"];
+      this._refreshToken = responseBody["refreshToken"];
+      await _saveToken();
+      _createSocket(false);
+      return loginResponse;
+    } else {
+      print(loginResponse.body);
+    }
+    authenticated = false;
+    notifyListeners();
 
-      print("Failed to connect to server!");
-      return null;
+    print("Failed to connect to server!");
+    return null;
+    /*
     }
     print("Failed to get location data!");
     return null;
+    */
   }
 
-  Future<GoogleSignInAccount?> connectGoogle() async {
+  Future<GoogleSignInAccount?> signinGoogle() async {
     final account = await _googleSignIn.signIn();
     return account;
   }

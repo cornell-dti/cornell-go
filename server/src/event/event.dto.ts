@@ -15,6 +15,27 @@ export interface RequestEventDataDto {
 export interface RequestEventLeaderDataDto {
   offset: number;
   count: number;
+  eventId?: string;
+}
+
+/** DTO for user in updateLeaderData */
+export interface LeaderDto {
+  userId: string;
+  username: string;
+  score: number;
+}
+
+/** DTO for updateLeaderData */
+export interface UpdateLeaderDataDto {
+  eventId?: string;
+  offset: number;
+  users: LeaderDto[];
+}
+
+export interface UpdateLeaderPositionDto {
+  playerId: string;
+  newTotalScore: number;
+  newEventScore: number;
   eventId: string;
 }
 

@@ -9,8 +9,6 @@ import 'package:game/model/event_model.dart';
 import 'package:game/model/group_model.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:game/model/tracker_model.dart';
-import 'package:game/model/achievement_model.dart';
-import 'package:game/model/user_model.dart';
 import 'package:provider/provider.dart';
 
 class AchievementCellDto {

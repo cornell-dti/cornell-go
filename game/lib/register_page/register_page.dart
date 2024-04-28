@@ -5,8 +5,8 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class RegisterPageWidget extends StatefulWidget {
-  GoogleSignInAccount? user = null;
-  String? idToken = null;
+  final GoogleSignInAccount? user;
+  final String? idToken;
   RegisterPageWidget(
       {Key? key,
       required GoogleSignInAccount? this.user,

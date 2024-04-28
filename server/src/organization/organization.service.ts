@@ -87,10 +87,11 @@ export class OrganizationService {
   }
 
   // TODO: maybe move this to event.service in the future?
-  async makeDefaultEvent(orgId?: string) {
+  async makeDefaultEvent(orgId?: string, name?: string) {
     const ev = await this.prisma.eventBase.create({
       data: {
         ...defaultEventData,
+        ...(name ? { name } : {}),
         usedIn: orgId ? { connect: { id: orgId } } : undefined,
       },
     });
@@ -120,7 +121,12 @@ export class OrganizationService {
     });
 
     if (defaultOrg === null) {
-      const ev = await this.makeDefaultEvent();
+      const ev = await this.makeDefaultEvent(
+        undefined,
+        usage === OrganizationSpecialUsage.CORNELL_LOGIN
+          ? 'Cornell Event'
+          : 'Everyone Event',
+      );
 
       defaultOrg = await this.prisma.organization.create({
         data: {
@@ -187,7 +193,7 @@ export class OrganizationService {
 
     await this.clientService.sendProtected(
       'updateOrganizationData',
-      target?.id ?? organization.id,
+      target ?? organization.id,
       dto,
       {
         id: organization.id,
