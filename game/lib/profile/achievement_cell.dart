@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
+@Deprecated('achievements/achievement_cell.dart')
 /**
  * Widget that represents each individual achievement
  * @param name: Name of the achievement
@@ -92,10 +92,6 @@ Widget achievementCell(
                         ),
                       ),
                     ]),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 8.0),
-                      child: SvgPicture.asset("assets/icons/location.svg"),
-                    ),
                     Padding(
                       padding: const EdgeInsets.only(left: 8.0),
                       child: Text(

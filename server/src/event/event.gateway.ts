@@ -12,12 +12,13 @@ import { UserGuard } from '../auth/jwt-auth.guard';
 import { UseGuards } from '@nestjs/common';
 import { EventBase, TimeLimitationType, User } from '@prisma/client';
 import {
-  EventDto,
-  RequestAllEventDataDto,
+  // EventDto,
+  // RequestAllEventDataDto,
   RequestEventDataDto,
   RequestEventLeaderDataDto,
   UpdateEventDataDto,
   RequestRecommendedEventsDto,
+  RequestFilteredEventsDto,
   UseEventTrackerHintDto,
 } from './event.dto';
 import { RequestEventTrackerDataDto } from '../challenge/challenge.dto';
@@ -59,6 +60,24 @@ export class EventGateway {
     }
   }
 
+  @SubscribeMessage('requestFilteredEventIds')
+  async requestFilteredEventIds(
+    @UserAbility() ability: AppAbility,
+    @CallingUser() user: User,
+    @MessageBody() data: RequestFilteredEventsDto,
+  ) {
+    const evs = await this.eventService.getEventsByIdsForAbility(
+      ability,
+      data.filterId,
+    );
+
+    for (const ev of evs) {
+      if (ev.difficulty == data.difficulty[0]) {
+        await this.eventService.emitUpdateEventData(ev, false, user);
+      }
+    }
+  }
+
   @SubscribeMessage('requestRecommendedEvents')
   async requestRecommendedEvents(
     @CallingUser() user: User,
@@ -76,8 +95,11 @@ export class EventGateway {
     @CallingUser() user: User,
     @MessageBody() data: RequestEventLeaderDataDto,
   ) {
-    const ev = await this.eventService.getEventById(data.eventId);
-    if (!ev) {
+    const ev = data.eventId
+      ? await this.eventService.getEventById(data.eventId)
+      : null;
+
+    if (!ev && data.eventId) {
       await this.clientService.emitErrorData(
         user,
         'Cannot find requested event!',
@@ -102,7 +124,6 @@ export class EventGateway {
       user,
       data.trackedEvents,
     );
-
     for (const tracker of trackers) {
       await this.eventService.emitUpdateEventTracker(tracker, user);
     }

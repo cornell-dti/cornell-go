@@ -63,22 +63,27 @@ class GameClientApi {
   Stream<UpdateOrganizationDataDto> get updateOrganizationDataStream =>
       _updateOrganizationDataController.stream;
 
-  final _reconnectedController = StreamController<Null>.broadcast(sync: true);
-  Stream<Null> get reconnectedStream => _reconnectedController.stream;
+  final _updateLeaderPositionController =
+      StreamController<UpdateLeaderPositionDto>.broadcast(sync: true);
+  Stream<UpdateLeaderPositionDto> get updateLeaderPositionStream =>
+      _updateLeaderPositionController.stream;
 
-  final _reconnectingController = StreamController<Null>.broadcast(sync: true);
-  Stream<Null> get reconnectingStream => _reconnectingController.stream;
+  final _reconnectedController = StreamController<bool>.broadcast(sync: true);
+  Stream<bool> get reconnectedStream => _reconnectedController.stream;
 
-  final _connectedController = StreamController<Null>.broadcast(sync: true);
-  Stream<Null> get connectedStream => _connectedController.stream;
+  final _reconnectingController = StreamController<bool>.broadcast(sync: true);
+  Stream<bool> get reconnectingStream => _reconnectingController.stream;
 
-  final disconnectedController = StreamController<Null>.broadcast(sync: true);
-  Stream<Null> get disconnectedStream => disconnectedController.stream;
+  final _connectedController = StreamController<bool>.broadcast(sync: true);
+  Stream<bool> get connectedStream => _connectedController.stream;
+
+  final disconnectedController = StreamController<bool>.broadcast(sync: true);
+  Stream<bool> get disconnectedStream => disconnectedController.stream;
 
   void connectSocket(Socket sock) {
-    sock.onReconnect((data) => _reconnectingController.add(null));
-    sock.onReconnecting((data) => _reconnectedController.add(null));
-    sock.onDisconnect((data) => disconnectedController.add(null));
+    sock.onReconnect((data) => _reconnectedController.add(true));
+    sock.onReconnecting((data) => _reconnectingController.add(true));
+    sock.onDisconnect((data) => disconnectedController.add(true));
 
     sock.on(
         "updateUserData",
@@ -135,7 +140,12 @@ class GameClientApi {
         (data) => _updateOrganizationDataController
             .add(UpdateOrganizationDataDto.fromJson(data)));
 
-    _connectedController.add(null);
+    sock.on(
+        "updateLeaderPosition",
+        (data) => _updateLeaderPositionController
+            .add(UpdateLeaderPositionDto.fromJson(data)));
+
+    _connectedController.add(true);
   }
 
   GameClientApi() {}

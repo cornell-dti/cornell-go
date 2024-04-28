@@ -4,10 +4,14 @@
  */
 export interface LoginDto {
   idToken: string;
-  lat: number;
-  long: number;
+  noRegister: boolean;
+  latF?: number;
+  longF?: number;
   username?: string;
   year?: string;
+  college?: string;
+  major?: string;
+  interests?: string;
   aud?: 'android' | 'ios' | 'web';
   enrollmentType: 'UNDERGRADUATE' | 'GRADUATE' | 'FACULTY' | 'ALUMNI' | 'GUEST';
 }

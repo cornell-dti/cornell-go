@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:game/api/game_client_dto.dart';
 import 'package:game/details_page/details_page.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class RegisterPageWidget extends StatefulWidget {
-  GoogleSignInAccount? user = null;
-  String? idToken = null;
+  final GoogleSignInAccount? user;
+  final String? idToken;
   RegisterPageWidget(
       {Key? key,
       required GoogleSignInAccount? this.user,
@@ -21,21 +22,13 @@ class _RegisterPageWidgetState extends State<RegisterPageWidget> {
   @override
   void initState() {
     super.initState();
-    _selectedOption = "Graduate Student";
   }
 
-  final List<String> identityOptions = [
-    "Undergraduate Student",
-    "Graduate Student",
-    "Faculty/Staff",
-    "Alumni"
-  ];
-
-  Map<String, String> map1 = {
-    "Undergraduate Student": "UNDERGRADUATE",
-    "Graduate Student": "GRADUATE",
-    "Faculty/Staff": "FACULTY",
-    "Alumni": "ALUMNI"
+  Map<String, LoginEnrollmentTypeDto> entryToEnrollmentType = {
+    "Undergraduate Student": LoginEnrollmentTypeDto.UNDERGRADUATE,
+    "Graduate Student": LoginEnrollmentTypeDto.GRADUATE,
+    "Faculty/Staff": LoginEnrollmentTypeDto.FACULTY,
+    "Alumni": LoginEnrollmentTypeDto.ALUMNI
   };
 
   @override
@@ -48,7 +41,11 @@ class _RegisterPageWidgetState extends State<RegisterPageWidget> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              SvgPicture.asset("assets/icons/back.svg"),
+              TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: SvgPicture.asset("assets/icons/back.svg")),
               SvgPicture.asset("assets/images/register_progress.svg"),
               SizedBox(height: 40.0),
               Text("Who are you?",
@@ -59,7 +56,7 @@ class _RegisterPageWidgetState extends State<RegisterPageWidget> {
                   )),
               SizedBox(height: 20.0),
               Column(
-                  children: identityOptions.map((entry) {
+                  children: entryToEnrollmentType.keys.map((name) {
                 return Padding(
                   padding: const EdgeInsets.only(top: 20.0),
                   child: TextButton(
@@ -68,17 +65,17 @@ class _RegisterPageWidgetState extends State<RegisterPageWidget> {
                               RoundedRectangleBorder(
                                   side: BorderSide(
                                       width: 2.0,
-                                      color: entry == _selectedOption
+                                      color: name == _selectedOption
                                           ? Color.fromARGB(255, 255, 170, 91)
                                           : Color.fromARGB(255, 217, 217, 217)),
                                   borderRadius: BorderRadius.circular(10.0))),
-                          backgroundColor: entry == _selectedOption
+                          backgroundColor: name == _selectedOption
                               ? MaterialStatePropertyAll<Color>(
                                   Color.fromARGB(102, 255, 170, 91))
                               : MaterialStatePropertyAll<Color>(Colors.white)),
                       onPressed: () => {
                             setState(() {
-                              _selectedOption = entry;
+                              _selectedOption = name;
                             })
                           },
                       child: Container(
@@ -86,7 +83,7 @@ class _RegisterPageWidgetState extends State<RegisterPageWidget> {
                         height: 50,
                         child: Align(
                           alignment: Alignment.center,
-                          child: Text(entry,
+                          child: Text(name,
                               style: TextStyle(
                                 color: Colors.black,
                                 fontSize: 16,
@@ -122,7 +119,7 @@ class _RegisterPageWidgetState extends State<RegisterPageWidget> {
                   Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (context) => DetailsPageWidget(
-                        userType: map1[_selectedOption]!,
+                        userType: entryToEnrollmentType[_selectedOption]!,
                         user: widget.user,
                         idToken: widget.idToken,
                       ),

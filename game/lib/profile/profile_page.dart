@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:game/achievements/achievements_page.dart';
 import 'package:game/api/game_client_dto.dart';
 import 'package:game/model/challenge_model.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/tracker_model.dart';
 import 'package:game/model/user_model.dart';
-import 'package:game/profile/achievement_cell.dart';
+import 'package:game/achievements/achievement_cell.dart';
 import 'package:game/profile/completed_cell.dart';
 import 'package:game/profile/settings_page.dart';
 import 'package:game/utils/utility_functions.dart';
@@ -25,7 +26,6 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  final locationImage = "assets/images/38582.jpg";
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,6 +40,7 @@ class _ProfilePageState extends State<ProfilePage> {
             );
           }
           var username = userModel.userData?.username;
+          var isGuest = userModel.userData?.authType == UserAuthTypeDto.device;
           var score = userModel.userData?.score;
 
           List<Tuple2<DateTime, EventDto>> completedEvents = [];
@@ -119,7 +120,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => SettingsPage()));
+                                  builder: (context) => SettingsPage(isGuest)));
                         }),
                   ),
                 ),
@@ -143,7 +144,8 @@ class _ProfilePageState extends State<ProfilePage> {
                     TextButton(
                       onPressed: () {
                         // Handle button press, e.g., navigate to details page
-                        print('View Details button pressed');
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => AchievementsPage()));
                       },
                       child: Text(
                         'View Details →',
@@ -157,13 +159,21 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               ),
               //To be replaced with real data
-              achievementCell("Complete three challenges on the Arts quad", 4,
-                  6, locationImage),
-              achievementCell(
-                  "Complete three challenges on the Engineering quad",
-                  4,
-                  6,
-                  locationImage),
+              Padding(
+                  padding: EdgeInsets.only(left: 30, right: 30),
+                  child: Column(children: [
+                    AchievementCell(
+                        "Complete three challenges",
+                        SvgPicture.asset("assets/icons/achievementsilver.svg"),
+                        4,
+                        6),
+                    SizedBox(height: 10),
+                    AchievementCell(
+                        "Complete three challenges",
+                        SvgPicture.asset("assets/icons/achievementsilver.svg"),
+                        4,
+                        6),
+                  ])),
               //Completed Events
               Padding(
                 padding: const EdgeInsets.only(left: 24, right: 24.0),
@@ -210,13 +220,18 @@ class _ProfilePageState extends State<ProfilePage> {
 
                     //Calculate totalPoints.
                     var totalPoints = 0;
+                    var locationImage = "";
                     for (var challengeId in event.challenges ?? []) {
                       var challenge =
                           challengeModel.getChallengeById(challengeId);
+                      locationImage = challenge?.imageUrl ??
+                          "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png";
+
                       if (challenge != null) {
                         totalPoints += challenge.points ?? 0;
                       }
                     }
+
                     return completedCell(
                         event.name!,
                         locationImage,

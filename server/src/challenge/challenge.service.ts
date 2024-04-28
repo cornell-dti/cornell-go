@@ -101,7 +101,7 @@ export class ChallengeService {
     const eventTracker: EventTracker =
       await this.eventService.getCurrentEventTrackerForUser(user);
 
-    // const achievementTracker : AchievementTracker = 
+    // const achievementTracker : AchievementTracker =
     //   await this.achievementService.getAchievementsByIdsForAbility(user.ability, [eventTracker.id]);
 
     const alreadyDone =
@@ -138,12 +138,12 @@ export class ChallengeService {
 
     const totalScore = curChallenge.points - 25 * eventTracker.hintsUsed;
 
-    await this.prisma.user.update({
+    const newUser = await this.prisma.user.update({
       where: { id: user.id },
       data: { score: { increment: totalScore } },
     });
 
-    await this.prisma.eventTracker.update({
+    const newEvTracker = await this.prisma.eventTracker.update({
       where: { id: eventTracker.id },
       data: {
         score: { increment: totalScore },
@@ -159,18 +159,30 @@ export class ChallengeService {
     );
 
     // check if the challenge is part of a journey
-    const isJourney = (await this.prisma.prevChallenge.count({
-      where: {
-        userId: user.id,
-        challengeId: eventTracker.curChallengeId,
-        trackerId: eventTracker.id,
-      },
-    })) === (await this.prisma.eventTracker.count({
-      where: { id: eventTracker.id }, // CHECK
-    }));      
+    const isJourney =
+      (await this.prisma.prevChallenge.count({
+        where: {
+          userId: user.id,
+          challengeId: eventTracker.curChallengeId,
+          trackerId: eventTracker.id,
+        },
+      })) ===
+      (await this.prisma.eventTracker.count({
+        where: { id: eventTracker.id }, // CHECK
+      }));
 
-    await this.achievementService.checkAchievementProgress(user, challengeId, isJourney);
-    
+    await this.achievementService.checkAchievementProgress(
+      user,
+      challengeId,
+      isJourney,
+    );
+
+    await this.eventService.emitUpdateLeaderPosition({
+      playerId: newUser.id,
+      newTotalScore: newUser.score,
+      newEventScore: newEvTracker.score,
+      eventId: newEvTracker.eventId,
+    });
 
     return true;
   }
@@ -254,7 +266,7 @@ export class ChallengeService {
 
     await this.clientService.sendProtected(
       'updateChallengeData',
-      target?.id ?? challenge.id,
+      target ?? challenge.id,
       dto,
       {
         id: challenge.id,

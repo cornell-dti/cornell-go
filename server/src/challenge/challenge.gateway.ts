@@ -105,19 +105,6 @@ export class ChallengeGateway {
     }
   }
 
-  @SubscribeMessage('requestGlobalLeaderData')
-  async requestGlobalLeaderData(
-    @CallingUser() user: User,
-    @MessageBody() data: RequestGlobalLeaderDataDto,
-  ) {
-    await this.eventService.emitUpdateLeaderData(
-      data.offset,
-      Math.min(data.count, 1024),
-      null,
-      user,
-    );
-  }
-
   @SubscribeMessage('updateChallengeData')
   async updateChallengeData(
     @UserAbility() ability: AppAbility,

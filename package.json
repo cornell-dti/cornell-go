@@ -11,6 +11,7 @@
     "tests:e2e": "node ./scripts/tests.js e2e",
     "setup": "node ./scripts/setup.js",
     "updateapi": "node ./scripts/updateapi.js",
+    "formatall": "node ./scripts/formatall.js",
     "compilescripts": "tsc scripts/updateapi.ts --target es2021 --moduleResolution nodenext --module nodenext"
   },
   "devDependencies": {

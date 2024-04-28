@@ -1,26 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:game/journeys/journeys_page.dart';
-import 'package:game/main.dart';
-import 'package:game/navigation_page/bottom_navbar.dart';
+import 'package:game/api/game_client_dto.dart';
 import 'package:game/interests/interests_page.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:game/utils/utility_functions.dart';
-import 'package:game/gameplay/gameplay_page.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:game/details_page/dropdown_widget.dart';
-
-import 'package:velocity_x/velocity_x.dart';
 
 class DetailsPageWidget extends StatefulWidget {
   DetailsPageWidget(
       {Key? key,
-      required String this.userType,
+      required LoginEnrollmentTypeDto this.userType,
       required String? this.idToken,
       required GoogleSignInAccount? this.user})
       : super(key: key);
   final scaffoldKey = GlobalKey<ScaffoldState>();
-  final String userType;
+  final LoginEnrollmentTypeDto userType;
   final String? idToken;
   final GoogleSignInAccount? user;
 
@@ -30,7 +23,9 @@ class DetailsPageWidget extends StatefulWidget {
 
 class _DetailsPageWidgetState extends State<DetailsPageWidget> {
   String _name = "";
-  String? _college = "Arts and Sciences";
+  String? _college;
+  String? _major;
+  String? _year;
   GoogleSignInAccount? user = null;
   @override
   void initState() {
@@ -38,9 +33,6 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
   }
 
   final _formKey = GlobalKey<FormState>();
-
-  DropdownWidget collegeDropdown =
-      DropdownWidget(null, null, notifyParent: (val) {});
 
   List<String> _colleges = [
     "Agriculture and Life Sciences",
@@ -58,13 +50,7 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
     // "Weill Cornell Medicine"
   ];
 
-  DropdownWidget yearDropdown =
-      DropdownWidget(null, null, notifyParent: (val) {});
-
   List<String> _years = ["2024", "2025", "2026", "2027"];
-
-  DropdownWidget majorDropdown =
-      DropdownWidget(null, null, notifyParent: (val) {});
 
   Map<String, List<String>> _majors = {
     "Agriculture and Life Sciences": [],
@@ -91,6 +77,17 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
 
   @override
   Widget build(BuildContext context) {
+    // define major dropdown separately as it depends on the state of _college
+    DropdownWidget majorDropdown = DropdownWidget(
+      // assigning UniqueKey will rebuild widget upon state change
+      key: UniqueKey(),
+      null,
+      _college == null ? null : _majors[_college],
+      notifyParent: (val) {
+        _major = val;
+      },
+    );
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Padding(
@@ -100,7 +97,11 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SvgPicture.asset("assets/icons/back.svg"),
+                TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: SvgPicture.asset("assets/icons/back.svg")),
                 SvgPicture.asset("assets/images/details_progress.svg"),
                 SizedBox(height: 40.0),
                 Column(
@@ -169,7 +170,7 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
                         )),
-                    collegeDropdown = DropdownWidget(
+                    DropdownWidget(
                       null,
                       _colleges,
                       notifyParent: (val) => {
@@ -189,11 +190,7 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
                         )),
-                    majorDropdown = DropdownWidget(
-                      null,
-                      _college == null ? null : _majors[_college],
-                      notifyParent: (val) {},
-                    )
+                    majorDropdown
                   ],
                 ),
                 SizedBox(height: 20),
@@ -205,10 +202,12 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
                         )),
-                    yearDropdown = DropdownWidget(
+                    DropdownWidget(
                       null,
                       _years,
-                      notifyParent: (val) {},
+                      notifyParent: (val) {
+                        _year = val;
+                      },
                     )
                   ],
                 ),
@@ -223,9 +222,9 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
                             user: widget.user,
                             idToken: widget.idToken,
                             username: _name,
-                            college: collegeDropdown.value,
-                            major: majorDropdown.value,
-                            year: yearDropdown.value,
+                            college: _college,
+                            major: _major,
+                            year: _year,
                           ),
                         ),
                       );

@@ -27,7 +27,10 @@ describe('EventModule E2E', () => {
   let moduleRef: TestingModule;
 
   let fullAbility: AppAbility;
-  let sendEventMock: jest.SpyInstance<Promise<void>, [string[], string, any]>;
+  let sendEventMock: jest.SpyInstance<
+    Promise<void>,
+    [string[] | null, string, any]
+  >;
 
   let chalGateway: ChallengeGateway;
   let evGateway: EventGateway;
@@ -80,6 +83,9 @@ describe('EventModule E2E', () => {
       'player1@cornell.edu',
       'player1',
       '2024',
+      'Engineering',
+      'Computer Science',
+      ['Nature'],
       0,
       0,
       AuthType.DEVICE,

@@ -208,7 +208,7 @@ class AchievementTrackerDto {
 class UpdateAchievementDataDto {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> fields = {};
-    fields['achievement'] = achievement!.toJson();
+    fields['achievement'] = achievement.toJson();
     fields['deleted'] = deleted;
     return fields;
   }
@@ -258,27 +258,45 @@ class LoginDto {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> fields = {};
     fields['idToken'] = idToken;
-    fields['lat'] = lat;
-    fields['long'] = long;
+    fields['noRegister'] = noRegister;
+    if (latF != null) {
+      fields['latF'] = latF;
+    }
+    if (longF != null) {
+      fields['longF'] = longF;
+    }
     if (username != null) {
       fields['username'] = username;
     }
     if (year != null) {
       fields['year'] = year;
     }
+    if (college != null) {
+      fields['college'] = college;
+    }
+    if (major != null) {
+      fields['major'] = major;
+    }
+    if (interests != null) {
+      fields['interests'] = interests;
+    }
     if (aud != null) {
       fields['aud'] = aud!.name;
     }
-    fields['enrollmentType'] = enrollmentType!.name;
+    fields['enrollmentType'] = enrollmentType.name;
     return fields;
   }
 
   LoginDto.fromJson(Map<String, dynamic> fields) {
     idToken = fields["idToken"];
-    lat = fields["lat"];
-    long = fields["long"];
+    noRegister = fields["noRegister"];
+    latF = fields.containsKey('latF') ? (fields["latF"]!.toDouble()) : null;
+    longF = fields.containsKey('longF') ? (fields["longF"]!.toDouble()) : null;
     username = fields.containsKey('username') ? (fields["username"]) : null;
     year = fields.containsKey('year') ? (fields["year"]) : null;
+    college = fields.containsKey('college') ? (fields["college"]) : null;
+    major = fields.containsKey('major') ? (fields["major"]) : null;
+    interests = fields.containsKey('interests') ? (fields["interests"]) : null;
     aud = fields.containsKey('aud')
         ? (LoginAudDto.values.byName(fields['aud']))
         : null;
@@ -288,29 +306,41 @@ class LoginDto {
 
   void partialUpdate(LoginDto other) {
     idToken = other.idToken;
-    lat = other.lat;
-    long = other.long;
+    noRegister = other.noRegister;
+    latF = other.latF == null ? latF : other.latF;
+    longF = other.longF == null ? longF : other.longF;
     username = other.username == null ? username : other.username;
     year = other.year == null ? year : other.year;
+    college = other.college == null ? college : other.college;
+    major = other.major == null ? major : other.major;
+    interests = other.interests == null ? interests : other.interests;
     aud = other.aud == null ? aud : other.aud;
     enrollmentType = other.enrollmentType;
   }
 
   LoginDto({
     required this.idToken,
-    required this.lat,
-    required this.long,
+    required this.noRegister,
+    this.latF,
+    this.longF,
     this.username,
     this.year,
+    this.college,
+    this.major,
+    this.interests,
     this.aud,
     required this.enrollmentType,
   });
 
   late String idToken;
-  late int lat;
-  late int long;
+  late bool noRegister;
+  late double? latF;
+  late double? longF;
   late String? username;
   late String? year;
+  late String? college;
+  late String? major;
+  late String? interests;
   late LoginAudDto? aud;
   late LoginEnrollmentTypeDto enrollmentType;
 }
@@ -487,7 +517,7 @@ class RequestChallengeDataDto {
 class UpdateChallengeDataDto {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> fields = {};
-    fields['challenge'] = challenge!.toJson();
+    fields['challenge'] = challenge.toJson();
     fields['deleted'] = deleted;
     return fields;
   }
@@ -555,6 +585,130 @@ class SetCurrentChallengeDto {
   late String challengeId;
 }
 
+class UpdateErrorDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['id'] = id;
+    fields['message'] = message;
+    return fields;
+  }
+
+  UpdateErrorDto.fromJson(Map<String, dynamic> fields) {
+    id = fields["id"];
+    message = fields["message"];
+  }
+
+  void partialUpdate(UpdateErrorDto other) {
+    id = other.id;
+    message = other.message;
+  }
+
+  UpdateErrorDto({
+    required this.id,
+    required this.message,
+  });
+
+  late String id;
+  late String message;
+}
+
+class RequestFilteredEventsDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['difficulty'] = difficulty;
+    fields['location'] = location;
+    fields['category'] = category;
+    fields['filterId'] = filterId;
+    return fields;
+  }
+
+  RequestFilteredEventsDto.fromJson(Map<String, dynamic> fields) {
+    difficulty = List<String>.from(fields['difficulty']);
+    location = List<String>.from(fields['location']);
+    category = List<String>.from(fields['category']);
+    filterId = List<String>.from(fields['filterId']);
+  }
+
+  void partialUpdate(RequestFilteredEventsDto other) {
+    difficulty = other.difficulty;
+    location = other.location;
+    category = other.category;
+    filterId = other.filterId;
+  }
+
+  RequestFilteredEventsDto({
+    required this.difficulty,
+    required this.location,
+    required this.category,
+    required this.filterId,
+  });
+
+  late List<String> difficulty;
+  late List<String> location;
+  late List<String> category;
+  late List<String> filterId;
+}
+
+class RequestEventDataDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    if (events != null) {
+      fields['events'] = events;
+    }
+    return fields;
+  }
+
+  RequestEventDataDto.fromJson(Map<String, dynamic> fields) {
+    events = fields.containsKey('events')
+        ? (List<String>.from(fields['events']))
+        : null;
+  }
+
+  void partialUpdate(RequestEventDataDto other) {
+    events = other.events == null ? events : other.events;
+  }
+
+  RequestEventDataDto({
+    this.events,
+  });
+
+  late List<String>? events;
+}
+
+class RequestEventLeaderDataDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['offset'] = offset;
+    fields['count'] = count;
+    if (eventId != null) {
+      fields['eventId'] = eventId;
+    }
+    return fields;
+  }
+
+  RequestEventLeaderDataDto.fromJson(Map<String, dynamic> fields) {
+    offset = fields["offset"];
+    count = fields["count"];
+    eventId = fields.containsKey('eventId') ? (fields["eventId"]) : null;
+  }
+
+  void partialUpdate(RequestEventLeaderDataDto other) {
+    offset = other.offset;
+    count = other.count;
+    eventId = other.eventId == null ? eventId : other.eventId;
+  }
+
+  RequestEventLeaderDataDto({
+    required this.offset,
+    required this.count,
+    this.eventId,
+  });
+
+  late int offset;
+  late int count;
+  late String? eventId;
+}
+
 class LeaderDto {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> fields = {};
@@ -590,16 +744,18 @@ class LeaderDto {
 class UpdateLeaderDataDto {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> fields = {};
-    fields['eventId'] = eventId;
+    if (eventId != null) {
+      fields['eventId'] = eventId;
+    }
     fields['offset'] = offset;
-    fields['users'] = users!
+    fields['users'] = users
         .map<Map<String, dynamic>>((dynamic val) => val!.toJson())
         .toList();
     return fields;
   }
 
   UpdateLeaderDataDto.fromJson(Map<String, dynamic> fields) {
-    eventId = fields["eventId"];
+    eventId = fields.containsKey('eventId') ? (fields["eventId"]) : null;
     offset = fields["offset"];
     users = fields["users"]
         .map<LeaderDto>((dynamic val) => LeaderDto.fromJson(val))
@@ -607,131 +763,56 @@ class UpdateLeaderDataDto {
   }
 
   void partialUpdate(UpdateLeaderDataDto other) {
-    eventId = other.eventId;
+    eventId = other.eventId == null ? eventId : other.eventId;
     offset = other.offset;
     users = other.users;
   }
 
   UpdateLeaderDataDto({
-    required this.eventId,
+    this.eventId,
     required this.offset,
     required this.users,
   });
 
-  late String eventId;
+  late String? eventId;
   late int offset;
   late List<LeaderDto> users;
 }
 
-class UpdateErrorDto {
+class UpdateLeaderPositionDto {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> fields = {};
-    fields['id'] = id;
-    fields['message'] = message;
-    return fields;
-  }
-
-  UpdateErrorDto.fromJson(Map<String, dynamic> fields) {
-    id = fields["id"];
-    message = fields["message"];
-  }
-
-  void partialUpdate(UpdateErrorDto other) {
-    id = other.id;
-    message = other.message;
-  }
-
-  UpdateErrorDto({
-    required this.id,
-    required this.message,
-  });
-
-  late String id;
-  late String message;
-}
-
-class RequestAllEventDataDto {
-  Map<String, dynamic> toJson() {
-    Map<String, dynamic> fields = {};
-    fields['offset'] = offset;
-    fields['count'] = count;
-    return fields;
-  }
-
-  RequestAllEventDataDto.fromJson(Map<String, dynamic> fields) {
-    offset = fields["offset"];
-    count = fields["count"];
-  }
-
-  void partialUpdate(RequestAllEventDataDto other) {
-    offset = other.offset;
-    count = other.count;
-  }
-
-  RequestAllEventDataDto({
-    required this.offset,
-    required this.count,
-  });
-
-  late int offset;
-  late int count;
-}
-
-class RequestEventDataDto {
-  Map<String, dynamic> toJson() {
-    Map<String, dynamic> fields = {};
-    if (events != null) {
-      fields['events'] = events;
-    }
-    return fields;
-  }
-
-  RequestEventDataDto.fromJson(Map<String, dynamic> fields) {
-    events = fields.containsKey('events')
-        ? (List<String>.from(fields['events']))
-        : null;
-  }
-
-  void partialUpdate(RequestEventDataDto other) {
-    events = other.events == null ? events : other.events;
-  }
-
-  RequestEventDataDto({
-    this.events,
-  });
-
-  late List<String>? events;
-}
-
-class RequestEventLeaderDataDto {
-  Map<String, dynamic> toJson() {
-    Map<String, dynamic> fields = {};
-    fields['offset'] = offset;
-    fields['count'] = count;
+    fields['playerId'] = playerId;
+    fields['newTotalScore'] = newTotalScore;
+    fields['newEventScore'] = newEventScore;
     fields['eventId'] = eventId;
     return fields;
   }
 
-  RequestEventLeaderDataDto.fromJson(Map<String, dynamic> fields) {
-    offset = fields["offset"];
-    count = fields["count"];
+  UpdateLeaderPositionDto.fromJson(Map<String, dynamic> fields) {
+    playerId = fields["playerId"];
+    newTotalScore = fields["newTotalScore"];
+    newEventScore = fields["newEventScore"];
     eventId = fields["eventId"];
   }
 
-  void partialUpdate(RequestEventLeaderDataDto other) {
-    offset = other.offset;
-    count = other.count;
+  void partialUpdate(UpdateLeaderPositionDto other) {
+    playerId = other.playerId;
+    newTotalScore = other.newTotalScore;
+    newEventScore = other.newEventScore;
     eventId = other.eventId;
   }
 
-  RequestEventLeaderDataDto({
-    required this.offset,
-    required this.count,
+  UpdateLeaderPositionDto({
+    required this.playerId,
+    required this.newTotalScore,
+    required this.newEventScore,
     required this.eventId,
   });
 
-  late int offset;
-  late int count;
+  late String playerId;
+  late int newTotalScore;
+  late int newEventScore;
   late String eventId;
 }
 
@@ -945,7 +1026,7 @@ class EventTrackerDto {
     fields['isRanked'] = isRanked;
     fields['hintsUsed'] = hintsUsed;
     fields['curChallengeId'] = curChallengeId;
-    fields['prevChallenges'] = prevChallenges!
+    fields['prevChallenges'] = prevChallenges
         .map<Map<String, dynamic>>((dynamic val) => val!.toJson())
         .toList();
     return fields;
@@ -987,7 +1068,7 @@ class EventTrackerDto {
 class UpdateEventTrackerDataDto {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> fields = {};
-    fields['tracker'] = tracker!.toJson();
+    fields['tracker'] = tracker.toJson();
     return fields;
   }
 
@@ -1009,7 +1090,7 @@ class UpdateEventTrackerDataDto {
 class UpdateEventDataDto {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> fields = {};
-    fields['event'] = event!.toJson();
+    fields['event'] = event.toJson();
     fields['deleted'] = deleted;
     return fields;
   }
@@ -1214,7 +1295,7 @@ class GroupDto {
 class UpdateGroupDataDto {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> fields = {};
-    fields['group'] = group!.toJson();
+    fields['group'] = group.toJson();
     fields['deleted'] = deleted;
     return fields;
   }
@@ -1376,7 +1457,7 @@ class RequestOrganizationDataDto {
 class UpdateOrganizationDataDto {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> fields = {};
-    fields['organization'] = organization!.toJson();
+    fields['organization'] = organization.toJson();
     fields['deleted'] = deleted;
     return fields;
   }
@@ -1413,72 +1494,6 @@ class CloseAccountDto {
   CloseAccountDto();
 }
 
-class SetUsernameDto {
-  Map<String, dynamic> toJson() {
-    Map<String, dynamic> fields = {};
-    fields['newUsername'] = newUsername;
-    return fields;
-  }
-
-  SetUsernameDto.fromJson(Map<String, dynamic> fields) {
-    newUsername = fields["newUsername"];
-  }
-
-  void partialUpdate(SetUsernameDto other) {
-    newUsername = other.newUsername;
-  }
-
-  SetUsernameDto({
-    required this.newUsername,
-  });
-
-  late String newUsername;
-}
-
-class SetMajorDto {
-  Map<String, dynamic> toJson() {
-    Map<String, dynamic> fields = {};
-    fields['newMajor'] = newMajor;
-    return fields;
-  }
-
-  SetMajorDto.fromJson(Map<String, dynamic> fields) {
-    newMajor = fields["newMajor"];
-  }
-
-  void partialUpdate(SetMajorDto other) {
-    newMajor = other.newMajor;
-  }
-
-  SetMajorDto({
-    required this.newMajor,
-  });
-
-  late String newMajor;
-}
-
-class SetGraduationYearDto {
-  Map<String, dynamic> toJson() {
-    Map<String, dynamic> fields = {};
-    fields['newYear'] = newYear;
-    return fields;
-  }
-
-  SetGraduationYearDto.fromJson(Map<String, dynamic> fields) {
-    newYear = fields["newYear"];
-  }
-
-  void partialUpdate(SetGraduationYearDto other) {
-    newYear = other.newYear;
-  }
-
-  SetGraduationYearDto({
-    required this.newYear,
-  });
-
-  late String newYear;
-}
-
 class BanUserDto {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> fields = {};
@@ -1509,7 +1524,7 @@ class BanUserDto {
 class SetAuthToOAuthDto {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> fields = {};
-    fields['provider'] = provider!.name;
+    fields['provider'] = provider.name;
     fields['authId'] = authId;
     return fields;
   }
@@ -1662,6 +1677,15 @@ class UserDto {
     if (year != null) {
       fields['year'] = year;
     }
+    if (college != null) {
+      fields['college'] = college;
+    }
+    if (major != null) {
+      fields['major'] = major;
+    }
+    if (interests != null) {
+      fields['interests'] = interests;
+    }
     if (score != null) {
       fields['score'] = score;
     }
@@ -1691,6 +1715,11 @@ class UserDto {
         : null;
     email = fields.containsKey('email') ? (fields["email"]) : null;
     year = fields.containsKey('year') ? (fields["year"]) : null;
+    college = fields.containsKey('college') ? (fields["college"]) : null;
+    major = fields.containsKey('major') ? (fields["major"]) : null;
+    interests = fields.containsKey('interests')
+        ? (List<String>.from(fields['interests']))
+        : null;
     score = fields.containsKey('score') ? (fields["score"]) : null;
     isBanned = fields.containsKey('isBanned') ? (fields["isBanned"]) : null;
     groupId = fields.containsKey('groupId') ? (fields["groupId"]) : null;
@@ -1712,6 +1741,9 @@ class UserDto {
         other.enrollmentType == null ? enrollmentType : other.enrollmentType;
     email = other.email == null ? email : other.email;
     year = other.year == null ? year : other.year;
+    college = other.college == null ? college : other.college;
+    major = other.major == null ? major : other.major;
+    interests = other.interests == null ? interests : other.interests;
     score = other.score == null ? score : other.score;
     isBanned = other.isBanned == null ? isBanned : other.isBanned;
     groupId = other.groupId == null ? groupId : other.groupId;
@@ -1727,6 +1759,9 @@ class UserDto {
     this.enrollmentType,
     this.email,
     this.year,
+    this.college,
+    this.major,
+    this.interests,
     this.score,
     this.isBanned,
     this.groupId,
@@ -1740,6 +1775,9 @@ class UserDto {
   late UserEnrollmentTypeDto? enrollmentType;
   late String? email;
   late String? year;
+  late String? college;
+  late String? major;
+  late List<String>? interests;
   late int? score;
   late bool? isBanned;
   late String? groupId;
@@ -1751,7 +1789,7 @@ class UserDto {
 class UpdateUserDataDto {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> fields = {};
-    fields['user'] = user!.toJson();
+    fields['user'] = user.toJson();
     fields['deleted'] = deleted;
     return fields;
   }

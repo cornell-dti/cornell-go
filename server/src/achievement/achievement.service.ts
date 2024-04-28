@@ -170,7 +170,7 @@ export class AchievementService {
 
     await this.clientService.sendProtected(
       'updateAchievementData',
-      target?.id ?? achievement.id,
+      target ?? achievement.id,
       dto,
       {
         id: achievement.id,
