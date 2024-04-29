@@ -34,7 +34,7 @@ export class AchievementService {
 
   /** get an achievement by its ID */
   async getAchievementFromId(id: string) {
-    return await this.prisma.achievement.findFirstOrThrow({ where: { id } });
+    return await this.prisma.achievement.findFirst({ where: { id } });
   }
 
   /** get list of achievements by IDs, based on ability */
@@ -71,6 +71,16 @@ export class AchievementService {
         },
       })) > 0;
 
+    const canUpdateEv =
+      (await this.prisma.eventBase.count({
+        where: {
+          AND: [
+            accessibleBy(ability, Action.Update).EventBase,
+            { id: achievement.eventId ?? '' },
+          ],
+        },
+      })) > 0;
+
     const canUpdateAch =
       (await this.prisma.achievement.count({
         where: {
@@ -89,6 +99,10 @@ export class AchievementService {
         imageUrl: achievement.imageUrl?.substring(0, 2048),
         locationType: achievement.locationType as LocationType,
         achievementType: achievement.achievementType as AchievementTypeDto,
+        linkedEventId:
+          achievement.eventId && achievement.eventId !== '' && canUpdateEv
+            ? achievement.eventId
+            : null,
       };
       const data = await this.abilityFactory.filterInaccessible(
         ach.id,
@@ -115,8 +129,7 @@ export class AchievementService {
           defaultAchievementData.imageUrl,
         locationType: achievement.locationType as LocationType,
         achievementType: achievement.achievementType as AchievementTypeDto,
-        // eventIndex: assignData.eventId ?? 0, // check
-        requiredPoints: achievement.requiredPoints ?? 0,
+        requiredPoints: achievement.requiredPoints ?? 1,
         organizations: { connect: { id: achievement.initialOrganizationId } },
       };
 

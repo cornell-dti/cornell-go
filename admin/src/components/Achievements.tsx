@@ -60,7 +60,7 @@ function AchiemementCard(props: {
           {props.achievement.name}
           <ButtonSizer>
             <HButton onClick={props.onSelect} float="right">
-              {props.achievement.eventId ? "LINK EVENT" : "UNLINK EVENT"}
+              {props.achievement.eventId ? "UNLINK EVENT" : "LINK EVENT"}
             </HButton>
           </ButtonSizer>
         </ListCardTitle>
@@ -68,13 +68,12 @@ function AchiemementCard(props: {
           {props.achievement.description}
         </ListCardDescription>
         <ListCardBody>
-          Id: <b>{props.achievement.id}</b>
+          Id: <b>{props.achievement.id}</b> <br />
           Required Points/Event Completions:{" "}
           <b>{props.achievement.requiredPoints}</b> <br />
-          Linked Event ID: <b>{props.achievement.eventId}</b> <br />
+          Linked Event ID: <b>{props.achievement.eventId ?? "NONE"}</b> <br />
           Location Type: <b>{props.achievement.locationType}</b> <br />
           Achievement Type: <b>{props.achievement.achievementType}</b> <br />
-          <br />
         </ListCardBody>
         <ListCardButtons>
           <HButton onClick={props.onDelete}>DELETE</HButton>
@@ -115,7 +114,7 @@ function fromForm(form: EntryForm[], id: string): AchievementDto {
     description: (form[1] as FreeEntryForm).value,
     locationType: locationOptions[(form[2] as OptionEntryForm).value],
     achievementType: achievementOptions[(form[3] as OptionEntryForm).value],
-    requiredPoints: (form[3] as NumberEntryForm).value,
+    requiredPoints: (form[4] as NumberEntryForm).value,
   };
 }
 
@@ -176,7 +175,7 @@ export function Achievements() {
         isOpen={isCreateModalOpen}
         entryButtonText="CREATE"
         onEntry={() => {
-          serverData.updateEvent({
+          serverData.updateAchievement({
             ...fromForm(form, ""),
             initialOrganizationId: serverData.selectedOrg,
           });
@@ -192,10 +191,10 @@ export function Achievements() {
         isOpen={isEditModalOpen}
         entryButtonText="EDIT"
         onEntry={() => {
-          const { challenges } = serverData.events.get(currentId)!;
-          serverData.updateEvent({
+          const oldAchievement = serverData.achievements.get(currentId)!;
+          serverData.updateAchievement({
+            ...oldAchievement,
             ...fromForm(form, currentId),
-            challenges,
           });
           setEditModalOpen(false);
         }}
@@ -205,11 +204,11 @@ export function Achievements() {
         form={form}
       />
       <DeleteModal
-        objectName={serverData.events.get(currentId)?.name ?? ""}
+        objectName={serverData.achievements.get(currentId)?.name ?? ""}
         isOpen={isDeleteModalOpen}
         onClose={() => setDeleteModalOpen(false)}
         onDelete={() => {
-          serverData.deleteEvent(currentId);
+          serverData.deleteAchievement(currentId);
           setDeleteModalOpen(false);
         }}
       />
@@ -227,12 +226,12 @@ export function Achievements() {
       {serverData.selectedOrg === "" ? (
         <CenterText>Select an organization to view achievements</CenterText>
       ) : serverData.organizations.get(serverData.selectedOrg) ? (
-        serverData.organizations?.get(serverData.selectedOrg)?.events
+        serverData.organizations?.get(serverData.selectedOrg)?.achivements
           ?.length === 0 && (
           <CenterText>No achievements in organization</CenterText>
         )
       ) : (
-        <CenterText>Error getting events</CenterText>
+        <CenterText>Error getting achievements</CenterText>
       )}
       {Array.from<AchievementDto>(
         serverData.organizations
@@ -254,6 +253,15 @@ export function Achievements() {
             key={ach.id}
             achievement={ach}
             onSelect={() => {
+              if (ach.eventId) {
+                serverData.updateAchievement({
+                  ...ach,
+                  eventId: "",
+                });
+
+                return;
+              }
+
               if (serverData.selectedEvent === "") {
                 setLinkedModalOpen(true);
               } else {

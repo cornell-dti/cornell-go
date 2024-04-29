@@ -126,7 +126,6 @@ describe('AchievementModule E2E', () => {
         fullAbility,
         achDto,
       );
-      console.log(ach);
 
       const findAch = await prisma.achievement.findFirstOrThrow({
         where: { id: ach!.id },
@@ -155,7 +154,7 @@ describe('AchievementModule E2E', () => {
     it('should update an achievement: upsertAchievementFromDto', async () => {
       const achId = (await prisma.achievement.findFirstOrThrow()).id;
       const test = (await achievementService.getAchievementFromId(achId))
-        .imageUrl;
+        ?.imageUrl;
       console.log('before: ' + test);
       const orgUsage = OrganizationSpecialUsage;
       const orgId = (
@@ -180,7 +179,7 @@ describe('AchievementModule E2E', () => {
       });
       const testAfterUpdate = (
         await achievementService.getAchievementFromId(achId)
-      ).imageUrl;
+      )?.imageUrl;
       console.log('after: ' + testAfterUpdate);
 
       expect(ach.imageUrl).toEqual('update test');

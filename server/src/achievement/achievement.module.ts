@@ -6,6 +6,7 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { AchievementGateway } from './achievement.gateway';
 import { AchievementService } from './achievement.service';
 import { CaslModule } from '../casl/casl.module';
+import { OrganizationModule } from '../organization/organization.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { CaslModule } from '../casl/casl.module';
     EventModule,
     PrismaModule,
     CaslModule,
+    OrganizationModule,
   ],
   exports: [AchievementService],
   providers: [AchievementGateway, AchievementService],

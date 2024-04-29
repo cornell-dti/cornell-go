@@ -143,7 +143,7 @@ export function ServerDataProvider(props: { children: ReactNode }) {
       if (data.deleted) {
         serverData.achievements.delete(data.achievement.id);
       } else {
-        serverData.challenges.set(
+        serverData.achievements.set(
           (data.achievement as AchievementDto).id,
           data.achievement as AchievementDto
         );
@@ -218,11 +218,24 @@ export function ServerDataProvider(props: { children: ReactNode }) {
             (data.organization as OrganizationDto).id
           )?.events ?? [];
 
+        const oldAchievements =
+          serverData.organizations.get(
+            (data.organization as OrganizationDto).id
+          )?.achivements ?? [];
+
         sock.requestEventData({
           events: (data.organization as OrganizationDto).events?.filter(
             (ev: string) => !(ev in oldEvents)
           ),
         });
+
+        if (data.organization.achivements) {
+          sock.requestAchievementData({
+            achievements: data.organization.achivements?.filter(
+              (achId) => !(achId in oldAchievements)
+            ),
+          });
+        }
 
         serverData.organizations.set(
           (data.organization as OrganizationDto).id,
