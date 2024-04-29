@@ -360,7 +360,8 @@ export class AchievementService {
         },
       });
 
-      await this.emitUpdateAchievementTracker(achTracker, user);
+      await this.clientService.subscribe(user, achTracker.id);
+      await this.emitUpdateAchievementTracker(achTracker);
     }
   }
 }
