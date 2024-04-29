@@ -72,6 +72,7 @@ describe('AchievementModule E2E', () => {
     console.log = function () {};
 
     achievementService = module.get<AchievementService>(AchievementService);
+    challengeService = module.get<ChallengeService>(ChallengeService);
     prisma = module.get<PrismaService>(PrismaService);
     userService = module.get<UserService>(UserService);
     eventService = module.get<EventService>(EventService);

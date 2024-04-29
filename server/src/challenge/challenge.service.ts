@@ -158,8 +158,8 @@ export class ChallengeService {
       user.id,
     );
 
-    // check if the challenge is part of a journey
-    const isJourney =
+    // check if the completed challenge is completing a journey
+    const isJourneyCompleted =
       (await this.prisma.prevChallenge.count({
         where: {
           userId: user.id,
@@ -167,14 +167,14 @@ export class ChallengeService {
           trackerId: eventTracker.id,
         },
       })) ===
-      (await this.prisma.eventTracker.count({
-        where: { id: eventTracker.id }, // CHECK
+      (await this.prisma.challenge.count({
+        where: { linkedEventId: eventTracker.eventId },
       }));
 
     await this.achievementService.checkAchievementProgress(
       user,
       challengeId,
-      isJourney,
+      isJourneyCompleted,
     );
 
     await this.eventService.emitUpdateLeaderPosition({
