@@ -13,6 +13,7 @@ import {
   GroupDto,
   UserDto,
   OrganizationDto,
+  AchievementDto,
 } from "../all.dto";
 
 import { ServerApi } from "./ServerApi";
@@ -21,6 +22,7 @@ import { ServerConnectionContext } from "./ServerConnection";
 /**  object to store user data fetched from server */
 const defaultData = {
   events: new Map<string, EventDto>(),
+  achievements: new Map<string, AchievementDto>(),
   challenges: new Map<string, ChallengeDto>(),
   organizations: new Map<string, OrganizationDto>(),
   users: new Map<string, UserDto>(),
@@ -33,6 +35,8 @@ const defaultData = {
   setAdminStatus(id: string, granted: boolean) {},
   updateChallenge(challenge: ChallengeDto) {},
   deleteChallenge(id: string) {},
+  updateAchievement(achievement: AchievementDto) {},
+  deleteAchievement(id: string) {},
   updateEvent(event: EventDto) {},
   deleteEvent(id: string) {},
   updateOrganization(organization: OrganizationDto) {},
@@ -89,6 +93,12 @@ export function ServerDataProvider(props: { children: ReactNode }) {
       deleteEvent(id: string) {
         sock.updateEventData({ event: { id }, deleted: true });
       },
+      updateAchievement(achievement: AchievementDto) {
+        sock.updateAchievementData({ achievement, deleted: false });
+      },
+      deleteAchievement(id: string) {
+        sock.updateAchievementData({ achievement: { id }, deleted: true });
+      },
       deleteError(id: string) {
         serverData.errors.delete(id);
         setTimeout(() => setServerData({ ...serverData }), 0);
@@ -129,6 +139,18 @@ export function ServerDataProvider(props: { children: ReactNode }) {
 
   /** Update defaultData object when ServerApi websocket receives a response */
   useEffect(() => {
+    sock.onUpdateAchievementData((data) => {
+      if (data.deleted) {
+        serverData.achievements.delete(data.achievement.id);
+      } else {
+        serverData.challenges.set(
+          (data.achievement as AchievementDto).id,
+          data.achievement as AchievementDto
+        );
+      }
+
+      setTimeout(() => setServerData({ ...serverData }), 0);
+    });
     sock.onUpdateEventData((data) => {
       if (data.deleted) {
         serverData.events.delete(data.event.id);

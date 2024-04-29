@@ -117,6 +117,7 @@ export class AchievementService {
         achievementType: achievement.achievementType as AchievementTypeDto,
         // eventIndex: assignData.eventId ?? 0, // check
         requiredPoints: achievement.requiredPoints ?? 0,
+        organizations: { connect: { id: achievement.initialOrganizationId } },
       };
 
       ach = await this.prisma.achievement.create({

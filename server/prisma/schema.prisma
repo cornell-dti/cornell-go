@@ -213,6 +213,7 @@ model Organization {
   managers     User[]                   @relation("orgManager")
   events       EventBase[]              @relation("eventOrgs")
   specialUsage OrganizationSpecialUsage
+  achievements Achievement[]
 }
 
 model SessionLogEntry {
@@ -239,6 +240,7 @@ model Achievement {
   locationType    LocationType
   achievementType AchievementType
   trackers        AchievementTracker[]
+  organizations   Organization[]
 }
 
 model AchievementTracker {
