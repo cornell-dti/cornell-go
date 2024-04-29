@@ -21,24 +21,11 @@ class HomeNavBar extends StatefulWidget {
   }
 
   @override
-  State<HomeNavBar> createState() =>
-      _HomeNavbarState(myDifficulty, myLocations, myCategories, mySearchText);
+  State<HomeNavBar> createState() => _HomeNavbarState();
 }
 
-/// AnimationControllers can be created with `vsync: this` because of TickerProviderStateMixin.
 class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
   late TabController _tabController;
-  List<String> selectedCategories = [];
-  List<String> selectedLocations = [];
-  String? selectedDifficulty = '';
-  String? mySearchText;
-  _HomeNavbarState(String? difficulty, List<String>? locations,
-      List<String>? categories, String? searchText) {
-    selectedDifficulty = difficulty ?? '';
-    selectedLocations = locations ?? [];
-    selectedCategories = categories ?? [];
-    mySearchText = searchText ?? '';
-  }
 
   @override
   void initState() {
@@ -49,39 +36,54 @@ class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: new PreferredSize(
-        preferredSize: const Size.fromHeight(50.0),
-        child: AppBar(
-          backgroundColor: Color(0xFFED5656),
-          titleTextStyle: TextStyle(fontSize: 25, fontWeight: FontWeight.w500),
-          bottom: TabBar(
-            dividerColor: Color.fromARGB(255, 0, 0, 0),
-            indicatorColor: Color(0xFFFFFFFF),
-            controller: _tabController,
-            tabs: const <Widget>[
-              Tab(text: 'Challenges'),
-              Tab(
-                text: 'Journeys',
+      appBar: AppBar(
+        backgroundColor: Color(0xFFED5656),
+        titleTextStyle: TextStyle(fontSize: 25, fontWeight: FontWeight.w500),
+        bottom: TabBar(
+          controller: _tabController,
+          indicator: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(
+                color: Colors.yellow,
+                width: 2.0,
               ),
-            ],
+            ),
           ),
+          overlayColor: MaterialStateProperty.resolveWith<Color?>(
+            //transparent when clicked -- double check with designers
+            (Set<MaterialState> states) {
+              if (states.contains(MaterialState.pressed)) {
+                return Colors.transparent;
+              }
+              return null;
+            },
+          ),
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.black.withOpacity(0.5),
+          tabs: const <Widget>[
+            Tab(text: 'Challenges'),
+            Tab(text: 'Journeys'),
+          ],
         ),
       ),
       body: TabBarView(
         controller: _tabController,
         children: <Widget>[
           Center(
-              child: ChallengesPage(
-                  difficulty: widget.myDifficulty,
-                  categories: widget.myCategories,
-                  locations: widget.myLocations,
-                  searchText: widget.mySearchText)),
+            child: ChallengesPage(
+              difficulty: widget.myDifficulty,
+              categories: widget.myCategories,
+              locations: widget.myLocations,
+              searchText: widget.mySearchText,
+            ),
+          ),
           Center(
             child: JourneysPage(
-                difficulty: widget.myDifficulty,
-                categories: widget.myCategories,
-                locations: widget.myLocations,
-                searchText: widget.mySearchText),
+              difficulty: widget.myDifficulty,
+              categories: widget.myCategories,
+              locations: widget.myLocations,
+              searchText: widget.mySearchText,
+            ),
           ),
         ],
       ),
