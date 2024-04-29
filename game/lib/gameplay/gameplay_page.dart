@@ -98,7 +98,8 @@ class _GameplayPageState extends State<GameplayPage> {
         return CircularIndicator();
       }
 
-      var challenge = challengeModel.getChallengeById(tracker.curChallengeId);
+      var challenge =
+          challengeModel.getChallengeById(tracker.curChallengeId ?? "");
 
       if (challenge == null) {
         return Scaffold(
