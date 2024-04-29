@@ -7,13 +7,13 @@ class HomeNavBar extends StatefulWidget {
   List<String>? myLocations;
   List<String>? myCategories;
   String? mySearchText;
-  HomeNavBar(
-      {Key? key,
-      String? difficulty,
-      List<String>? locations,
-      List<String>? categories,
-      String? searchText})
-      : super(key: key) {
+  HomeNavBar({
+    Key? key,
+    String? difficulty,
+    List<String>? locations,
+    List<String>? categories,
+    String? searchText,
+  }) : super(key: key) {
     myDifficulty = difficulty;
     myLocations = locations;
     myCategories = categories;
@@ -36,34 +36,37 @@ class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Color(0xFFED5656),
-        titleTextStyle: TextStyle(fontSize: 25, fontWeight: FontWeight.w500),
-        bottom: TabBar(
-          controller: _tabController,
-          indicator: BoxDecoration(
-            border: Border(
-              bottom: BorderSide(
-                color: Colors.yellow,
-                width: 2.0,
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(50.0),
+        child: AppBar(
+          backgroundColor: Color(0xFFED5656),
+          titleTextStyle: TextStyle(fontSize: 25, fontWeight: FontWeight.w500),
+          bottom: TabBar(
+            controller: _tabController,
+            indicator: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: Colors.yellow,
+                  width: 2.0,
+                ),
               ),
             ),
+            overlayColor: MaterialStateProperty.resolveWith<Color?>(
+              //transparent when clicked -- double check with designers
+              (Set<MaterialState> states) {
+                if (states.contains(MaterialState.pressed)) {
+                  return Colors.transparent;
+                }
+                return null;
+              },
+            ),
+            labelColor: Colors.white,
+            unselectedLabelColor: Colors.black.withOpacity(0.5),
+            tabs: const <Widget>[
+              Tab(text: 'Challenges'),
+              Tab(text: 'Journeys'),
+            ],
           ),
-          overlayColor: MaterialStateProperty.resolveWith<Color?>(
-            //transparent when clicked -- double check with designers
-            (Set<MaterialState> states) {
-              if (states.contains(MaterialState.pressed)) {
-                return Colors.transparent;
-              }
-              return null;
-            },
-          ),
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.black.withOpacity(0.5),
-          tabs: const <Widget>[
-            Tab(text: 'Challenges'),
-            Tab(text: 'Journeys'),
-          ],
         ),
       ),
       body: TabBarView(
