@@ -362,17 +362,20 @@ export class ChallengeService {
 
     if (!challenge) return false;
 
+    // checks for any eventTracker entries that reference the challenge
     const usedTrackers = await this.prisma.eventTracker.findMany({
       where: {
         curChallengeId: challengeId,
       },
     });
 
+    // finds replacement challenge within the same event as the one being deleted
     const replacementChal = await this.prisma.challenge.findFirstOrThrow({
       where: { linkedEventId: challenge.linkedEventId },
       select: { id: true },
     });
 
+    // updates all affected trackers to reference the replacement challenge
     for (const tracker of usedTrackers) {
       await this.prisma.eventTracker.update({
         where: { id: tracker.id },
