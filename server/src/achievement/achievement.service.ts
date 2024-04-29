@@ -33,7 +33,6 @@ export class AchievementService {
     private readonly prisma: PrismaService,
     private clientService: ClientService,
     private abilityFactory: CaslAbilityFactory,
-    // private orgService: OrganizationService,
   ) {}
 
   /** get an achievement by its ID */
@@ -248,7 +247,6 @@ export class AchievementService {
   async dtoForAchievementTracker(
     tracker: AchievementTracker,
   ): Promise<AchievementTrackerDto> {
-    const achievement = await this.getAchievementFromId(tracker.achievementId);
     return {
       userId: tracker.userId,
       progress: tracker.progress,
@@ -277,125 +275,7 @@ export class AchievementService {
   }
 
   /** checks for all achievements associated with a user for a given completed challenge. */
-  async checkAchievementProgress(
-    user: User,
-    challengeId: string,
-    isJourneyCompleted: boolean,
-  ) {
-    // find challenge corresponding to challengeId
-    const curChallenge = await this.prisma.challenge.findUniqueOrThrow({
-      where: { id: challengeId },
-      include: {linkedEvent: true}
-    });
-
-    const ability = await this.abilityFactory.createForUser(user);
-
-
-    // find all achievements associated with the challenge that are accessible
-    // by user and have incomplete trackers; joins tracker to resulting query
-    const achs = await this.prisma.achievement.findMany({
-      where: {
-        OR: [
-          // { linkedEventId: challengeId }, // achievements linked to the specific event of the challenge
-          { linkedEventId: curChallenge.linkedEventId }, // achievements linked to the specific event of the challenge
-          { linkedEventId: null }, // achievements not linked to any specific event
-          { achievementType : AchievementType.},
-          { locationType : LocationType.ANY }, 
-        ],
-        AND: [
-          accessibleBy(ability, Action.Read).Achievement,
-          // {locationType: curChallenge.location},
-        ],
-        trackers: {
-          every: { // 
-            OR: [
-              { userId: { not: user.id } },  // Trackers not belonging to the user
-              { dateComplete: { not: null } }  // Trackers that are completed
-            ]
-          },
-        },
-      },
-      include: {
-        trackers: {
-          where: {
-            userId: user.id,
-            dateComplete: null, // trackers for achievements that are not complete
-          },
-        },
-      },
-    });
-
-    // iterate through each achievement and update progress
-    for (const achId in achs) {
-      // find tracker associated with ach
-      let tracker = await this.prisma.achievementTracker.findFirst({
-        where: {
-          userId: user.id,
-          achievementId: achId,
-        },
-      });
-
-      // if tracker doesn't exist, create a new tracker associated with ach
-      if (tracker == null) {
-        tracker = await this.createAchievementTracker(user, achId);
-      }
-
-      // update tracker with new progress; complete tracker if necessary
-      const ach = await this.getAchievementFromId(achId);
-
-      const journeyOrChalAchShouldProgress =
-        ach.achievementType ===
-          AchievementTypeDto.TOTAL_CHALLENGES_OR_JOURNEYS ||
-        (isJourneyCompleted &&
-          ach.achievementType === AchievementTypeDto.TOTAL_JOURNEYS) ||
-        (!isJourneyCompleted &&
-          ach.achievementType === AchievementTypeDto.TOTAL_CHALLENGES);
-
-          
-      if (ach.achievementType === AchievementTypeDto.TOTAL_POINTS) {
-        const updatedTracker = await this.prisma.achievementTracker.update({
-          where: { id: tracker.id },
-          data: {
-            progress: {
-              increment: curChallenge.points // increment tracker progress by points of current challenge
-            }
-          },
-        });
-        if (tracker.progress >= ach.requiredPoints) {
-          // ach is newly completed; update tracker with completion date
-          await this.prisma.achievementTracker.update({
-            where: { id: tracker.id },
-            data: {
-              dateComplete: new Date() // add new date
-            }
-          });
-        }
-      } else if (journeyOrChalAchShouldProgress) {
-        const updatedTracker = await this.prisma.achievementTracker.update({
-          where: { id: tracker.id },
-          data: {
-            progress: {
-              increment: 1 // increment tracker progress by 1
-            }
-          },
-        });
-        if (updatedTracker.progress >= ach.requiredPoints) {
-          await this.prisma.achievementTracker.update({
-            where: { id: tracker.id },
-            data: {
-              dateComplete: new Date() // add new date
-            }
-          });
-        }
-      }
-
-      await this.prisma.achievementTracker.update({
-        where: { id: tracker.id },
-        data: {
-          progress: tracker.progress,
-          dateComplete: tracker.dateComplete,
-        },
-      });
-    }
+  async checkAchievementProgress(user: User, eventId: string) {
+    
   }
 }

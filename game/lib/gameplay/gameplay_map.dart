@@ -282,13 +282,14 @@ class _GameplayMapState extends State<GameplayMap> {
           builder: (context, groupModel, trackerModel, challengeModel, child) {
         EventTrackerDto? tracker =
             trackerModel.trackerByEventId(groupModel.curEventId ?? "");
-        if (tracker == null) {
+        if (tracker?.curChallengeId == null) {
           displayToast("Error getting event tracker", Status.error);
         } else {
-          numHintsLeft = totalHints - (tracker.hintsUsed);
+          numHintsLeft = totalHints - (tracker!.hintsUsed);
         }
         var challenge =
-            challengeModel.getChallengeById(tracker!.curChallengeId);
+            challengeModel.getChallengeById(tracker?.curChallengeId ?? "");
+
         return Scaffold(
             body: Stack(
           alignment: Alignment.bottomCenter,
@@ -585,32 +586,9 @@ class _GameplayMapState extends State<GameplayMap> {
                   Spacer(),
                   ElevatedButton(
                     onPressed: () {
-                      var eventId =
-                          Provider.of<GroupModel>(context, listen: false)
-                              .curEventId;
-                      var tracker =
-                          Provider.of<TrackerModel>(context, listen: false)
-                              .trackerByEventId(eventId ?? "");
-
-                      if (tracker == null) {
-                        displayToast(
-                            "An error occurred while getting event tracker",
-                            Status.error);
-                      } else {
-                        var challenge =
-                            Provider.of<ChallengeModel>(context, listen: false)
-                                .getChallengeById(tracker.curChallengeId);
-                        if (challenge == null) {
-                          displayToast(
-                              "An error occurred while getting challenge",
-                              Status.error);
-                        } else {
-                          Provider.of<ApiClient>(context, listen: false)
-                              .serverApi
-                              ?.completedChallenge(CompletedChallengeDto(
-                                  challengeId: challenge.id));
-                        }
-                      }
+                      Provider.of<ApiClient>(context, listen: false)
+                          .serverApi
+                          ?.completedChallenge(CompletedChallengeDto());
 
                       Navigator.pop(context);
                       Navigator.pushReplacement(

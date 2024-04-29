@@ -25,6 +25,7 @@ import { accessibleBy } from '@casl/prisma';
 import { Action } from '../casl/action.enum';
 import { subject } from '@casl/ability';
 import { defaultChallengeData } from '../organization/organization.service';
+import { connect } from 'http2';
 
 @Injectable()
 export class ChallengeService {
@@ -80,20 +81,23 @@ export class ChallengeService {
   }
 
   /** Get next challenge in a sequence of challenges */
-  async nextChallenge(chal: Challenge) {
-    return (
-      (await this.prisma.challenge.findFirst({
-        where: {
-          eventIndex: chal.eventIndex + 1,
-          linkedEventId: chal.linkedEventId,
-        },
-      })) ?? chal
-    );
+  async nextChallenge(evTracker: EventTracker) {
+    const nextChal = await this.prisma.challenge.findFirst({
+      where: {
+        linkedEventId: evTracker.id,
+        completions: { none: { userId: evTracker.userId } },
+      },
+      orderBy: {
+        eventIndex: 'asc',
+      },
+    });
+
+    return nextChal;
   }
 
   /** Progress user through challenges, ensuring challengeId is current */
   // async completeChallenge(user: User, challengeId: string, ability: AppAbility) {
-  async completeChallenge(user: User, challengeId: string) {
+  async completeChallenge(user: User) {
     const groupMembers = await this.prisma.user.findMany({
       where: { groupId: user.groupId },
     });
@@ -101,8 +105,7 @@ export class ChallengeService {
     const eventTracker: EventTracker =
       await this.eventService.getCurrentEventTrackerForUser(user);
 
-    // const achievementTracker : AchievementTracker =
-    //   await this.achievementService.getAchievementsByIdsForAbility(user.ability, [eventTracker.id]);
+    if (!eventTracker.curChallengeId) return false;
 
     const alreadyDone =
       (await this.prisma.prevChallenge.count({
@@ -114,14 +117,14 @@ export class ChallengeService {
       })) > 0;
 
     // Ensure that the correct challenge is marked complete
-    if (challengeId !== eventTracker.curChallengeId || alreadyDone) {
+    if (alreadyDone) {
       return false;
     }
 
     await this.prisma.prevChallenge.create({
       data: {
         userId: user.id,
-        challengeId: eventTracker.curChallengeId,
+        challengeId: eventTracker.curChallengeId!,
         participants: {
           connect: groupMembers.map(m => ({ id: m.id })),
         },
@@ -134,7 +137,7 @@ export class ChallengeService {
       where: { id: eventTracker.curChallengeId },
     });
 
-    const nextChallenge = await this.nextChallenge(curChallenge);
+    const nextChallenge = await this.nextChallenge(eventTracker);
 
     const totalScore = curChallenge.points - 25 * eventTracker.hintsUsed;
 
@@ -148,34 +151,31 @@ export class ChallengeService {
       data: {
         score: { increment: totalScore },
         hintsUsed: 0,
-        curChallenge: { connect: { id: nextChallenge.id } },
+        curChallengeId: nextChallenge?.id,
       },
     });
 
     await this.log.logEvent(
       SessionLogEvent.COMPLETE_CHALLENGE,
-      challengeId,
+      curChallenge.id,
       user.id,
     );
 
     // check if the completed challenge is completing a journey
     const isJourneyCompleted =
-      (await this.prisma.prevChallenge.count({
-        where: {
-          userId: user.id,
-          challengeId: eventTracker.curChallengeId,
-          trackerId: eventTracker.id,
-        },
-      })) ===
       (await this.prisma.challenge.count({
-        where: { linkedEventId: eventTracker.eventId },
-      }));
+        where: {
+          linkedEvent: { id: eventTracker.eventId },
+          completions: { none: { userId: user.id } },
+        },
+      })) === 0;
 
-    await this.achievementService.checkAchievementProgress(
-      user,
-      challengeId,
-      isJourneyCompleted,
-    );
+    if (isJourneyCompleted) {
+      await this.achievementService.checkAchievementProgress(
+        user,
+        eventTracker.eventId,
+      );
+    }
 
     await this.eventService.emitUpdateLeaderPosition({
       playerId: newUser.id,
@@ -211,46 +211,6 @@ export class ChallengeService {
       },
     });
   }
-
-  // Disabled for now
-  /*
-  async setCurrentChallenge(user: User, challengeId: string) {
-    const group = await this.prisma.group.findUniqueOrThrow({
-      where: { id: user.groupId },
-      include: { curEvent: true, members: true },
-    });
-
-    const isChallengeValid = await this.eventService.isChallengeInEvent(
-      challengeId,
-      group.curEventId,
-    );
-
-    if (!isChallengeValid) {
-      return false;
-    }
-
-    const eventTracker: EventTracker =
-      await this.eventService.getCurrentEventTrackerForUser(user);
-
-    const challenge = await this.getChallengeById(challengeId);
-
-    if (!challenge) return false;
-
-    await this.prisma.eventTracker.update({
-      where: { id: eventTracker.id },
-      data: {
-        curChallengeId: challenge.id,
-      },
-    });
-
-    await this.log.logEvent(
-      SessionLogEvent.SET_CHALLENGE,
-      challengeId,
-      user.id,
-    );
-
-    return true;
-  }*/
 
   async emitUpdateChallengeData(
     challenge: Challenge,
@@ -378,6 +338,8 @@ export class ChallengeService {
       return null;
     }
 
+    await this.eventService.fixEventTrackers(chal.linkedEventId ?? undefined);
+
     return chal;
   }
 
@@ -396,36 +358,15 @@ export class ChallengeService {
 
     if (!challenge) return false;
 
-    // checks for any eventTracker entries that reference the challenge
-    const usedTrackers = await this.prisma.eventTracker.findMany({
-      where: {
-        curChallengeId: challengeId,
-      },
-    });
-
-    // finds replacement challenge within the same event as the one being deleted
-    const replacementChal = await this.prisma.challenge.findFirstOrThrow({
-      where: { linkedEventId: challenge.linkedEventId },
-      select: { id: true },
-    });
-
-    // updates all affected trackers to reference the replacement challenge
-    for (const tracker of usedTrackers) {
-      await this.prisma.eventTracker.update({
-        where: { id: tracker.id },
-        data: {
-          curChallenge: {
-            connect: { id: replacementChal.id },
-          },
-        },
-      });
-    }
-
     await this.prisma.challenge.delete({
       where: {
         id: challengeId,
       },
     });
+
+    await this.eventService.fixEventTrackers(
+      challenge.linkedEventId ?? undefined,
+    );
 
     console.log(`Deleted challenge ${challengeId}`);
     return true;

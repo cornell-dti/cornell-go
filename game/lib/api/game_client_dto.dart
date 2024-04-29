@@ -205,6 +205,28 @@ class AchievementTrackerDto {
   late String? dateComplete;
 }
 
+class UpdateAchievementTrackerDataDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['tracker'] = tracker!.toJson();
+    return fields;
+  }
+
+  UpdateAchievementTrackerDataDto.fromJson(Map<String, dynamic> fields) {
+    tracker = AchievementTrackerDto.fromJson(fields['tracker']);
+  }
+
+  void partialUpdate(UpdateAchievementTrackerDataDto other) {
+    tracker = other.tracker;
+  }
+
+  UpdateAchievementTrackerDataDto({
+    required this.tracker,
+  });
+
+  late AchievementTrackerDto tracker;
+}
+
 class UpdateAchievementDataDto {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> fields = {};
@@ -370,23 +392,14 @@ class RefreshTokenDto {
 class CompletedChallengeDto {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> fields = {};
-    fields['challengeId'] = challengeId;
     return fields;
   }
 
-  CompletedChallengeDto.fromJson(Map<String, dynamic> fields) {
-    challengeId = fields["challengeId"];
-  }
+  CompletedChallengeDto.fromJson(Map<String, dynamic> fields) {}
 
-  void partialUpdate(CompletedChallengeDto other) {
-    challengeId = other.challengeId;
-  }
+  void partialUpdate(CompletedChallengeDto other) {}
 
-  CompletedChallengeDto({
-    required this.challengeId,
-  });
-
-  late String challengeId;
+  CompletedChallengeDto();
 }
 
 class ChallengeDto {
@@ -1025,7 +1038,9 @@ class EventTrackerDto {
     fields['eventId'] = eventId;
     fields['isRanked'] = isRanked;
     fields['hintsUsed'] = hintsUsed;
-    fields['curChallengeId'] = curChallengeId;
+    if (curChallengeId != null) {
+      fields['curChallengeId'] = curChallengeId;
+    }
     fields['prevChallenges'] = prevChallenges!
         .map<Map<String, dynamic>>((dynamic val) => val!.toJson())
         .toList();
@@ -1036,7 +1051,9 @@ class EventTrackerDto {
     eventId = fields["eventId"];
     isRanked = fields["isRanked"];
     hintsUsed = fields["hintsUsed"];
-    curChallengeId = fields["curChallengeId"];
+    curChallengeId = fields.containsKey('curChallengeId')
+        ? (fields["curChallengeId"])
+        : null;
     prevChallenges = fields["prevChallenges"]
         .map<PrevChallengeDto>((dynamic val) => PrevChallengeDto.fromJson(val))
         .toList();
@@ -1046,7 +1063,8 @@ class EventTrackerDto {
     eventId = other.eventId;
     isRanked = other.isRanked;
     hintsUsed = other.hintsUsed;
-    curChallengeId = other.curChallengeId;
+    curChallengeId =
+        other.curChallengeId == null ? curChallengeId : other.curChallengeId;
     prevChallenges = other.prevChallenges;
   }
 
@@ -1054,14 +1072,14 @@ class EventTrackerDto {
     required this.eventId,
     required this.isRanked,
     required this.hintsUsed,
-    required this.curChallengeId,
+    this.curChallengeId,
     required this.prevChallenges,
   });
 
   late String eventId;
   late bool isRanked;
   late int hintsUsed;
-  late String curChallengeId;
+  late String? curChallengeId;
   late List<PrevChallengeDto> prevChallenges;
 }
 

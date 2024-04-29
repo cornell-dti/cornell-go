@@ -91,6 +91,10 @@ export interface AchievementTrackerDto {
   dateComplete?: string;
 }
 
+export interface UpdateAchievementTrackerDataDto {
+  tracker: AchievementTrackerDto;
+}
+
 export interface UpdateAchievementDataDto {
   achievement: AchievementDto;
   deleted: boolean;
@@ -118,9 +122,7 @@ export interface RefreshTokenDto {
   refreshToken: string;
 }
 
-export interface CompletedChallengeDto {
-  challengeId: string;
-}
+export interface CompletedChallengeDto {}
 
 export interface ChallengeDto {
   id: string;
@@ -227,7 +229,7 @@ export interface EventTrackerDto {
   eventId: string;
   isRanked: boolean;
   hintsUsed: number;
-  curChallengeId: string;
+  curChallengeId?: string;
   prevChallenges: PrevChallengeDto[];
 }
 
