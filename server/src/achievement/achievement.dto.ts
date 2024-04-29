@@ -26,6 +26,11 @@ export interface AchievementTrackerDto {
   dateComplete?: string;
 }
 
+/** DTO for updateAchievementTrackerData */
+export interface UpdateAchievementTrackerDataDto {
+  tracker: AchievementTrackerDto;
+}
+
 export interface UpdateAchievementDataDto {
   achievement: AchievementDto;
   deleted: boolean;

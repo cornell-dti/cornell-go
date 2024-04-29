@@ -20,6 +20,7 @@ import { OrganizationService } from '../organization/organization.service';
 import { ClientModule } from '../client/client.module';
 import { ChallengeDto, ChallengeLocationDto } from './challenge.dto';
 import { AppAbility, CaslAbilityFactory } from '../casl/casl-ability.factory';
+import { AchievementService } from '../achievement/achievement.service';
 
 describe('ChallengeModule E2E', () => {
   let app: INestApplication;
@@ -55,6 +56,7 @@ describe('ChallengeModule E2E', () => {
         ClientService,
         GroupService,
         OrganizationService,
+        AchievementService,
         CaslAbilityFactory,
       ],
     }).compile();
