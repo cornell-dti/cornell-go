@@ -7,8 +7,10 @@ import 'package:game/model/challenge_model.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/group_model.dart';
 import 'package:game/model/tracker_model.dart';
+import 'package:game/model/user_model.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:provider/provider.dart';
+import 'package:velocity_x/velocity_x.dart';
 import 'challenge_cell.dart';
 import 'package:game/journeys/filter_form.dart';
 
@@ -153,29 +155,16 @@ class _ChallengesPageState extends State<ChallengesPage> {
                         ],
                       ),
                     ),
-                    Expanded(child: Consumer5<EventModel, GroupModel,
+                    Expanded(child: Consumer6<UserModel, EventModel, GroupModel,
                             TrackerModel, ChallengeModel, ApiClient>(
-                        builder: (context, myEventModel, groupModel,
+                        builder: (context, userModel, myEventModel, groupModel,
                             trackerModel, challengeModel, apiClient, child) {
-                      if (myEventModel.searchResults == null) {
-                        myEventModel.searchEvents(
-                            0,
-                            1000,
-                            [
-                              EventTimeLimitationDto.PERPETUAL,
-                              EventTimeLimitationDto.LIMITED_TIME
-                            ],
-                            false,
-                            false,
-                            false);
-                      }
-                      final events = myEventModel.searchResults ?? [];
-                      if (!events.any(
-                          (element) => element.id == groupModel.curEventId)) {
-                        final curEvent = myEventModel
-                            .getEventById(groupModel.curEventId ?? "");
-                        if (curEvent != null) events.add(curEvent);
-                      }
+                      final allowedEventIds = userModel.getAvailableEventIds();
+                      final events = allowedEventIds
+                          .map((id) => myEventModel.getEventById(id))
+                          .filter((element) => element != null)
+                          .map((e) => e!)
+                          .toList();
                       eventData.clear();
 
                       for (EventDto event in events) {
