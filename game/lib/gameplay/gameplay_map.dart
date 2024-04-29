@@ -1,4 +1,7 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:game/navigation_page/bottom_navbar.dart';
 import 'package:game/splash_page/splash_page.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -9,6 +12,7 @@ import 'dart:async';
 import 'dart:math';
 import 'package:game/gameplay/challenge_completed.dart';
 import 'package:game/utils/utility_functions.dart';
+import 'dart:ui' as ui;
 
 // for backend connection
 import 'package:provider/provider.dart';
@@ -66,8 +70,8 @@ class _GameplayMapState extends State<GameplayMap> {
 
   @override
   void initState() {
-    super.initState();
     setCustomMarkerIcon();
+    super.initState();
     streamStarted = startPositionStream();
     setStartingHintCircle();
   }
@@ -222,19 +226,25 @@ class _GameplayMapState extends State<GameplayMap> {
     });
   }
 
+  Future<Uint8List> getBytesFromAsset(String path, int width) async {
+    ByteData data = await rootBundle.load(path);
+    ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(),
+        targetWidth: width, targetHeight: width);
+    ui.FrameInfo fi = await codec.getNextFrame();
+    return (await fi.image.toByteData(format: ui.ImageByteFormat.png))!
+        .buffer
+        .asUint8List();
+  }
+
   /** 
    * Sets the custom user location icon, which is called upon
    * initializing the state
    */
   BitmapDescriptor currentLocationIcon = BitmapDescriptor.defaultMarker;
-  void setCustomMarkerIcon() {
-    BitmapDescriptor.fromAssetImage(ImageConfiguration(size: Size(20, 20)),
-            "assets/icons/userlocation.png")
-        .then(
-      (icon) {
-        currentLocationIcon = icon;
-      },
-    );
+  void setCustomMarkerIcon() async {
+    Uint8List newMarker =
+        await getBytesFromAsset('assets/icons/userlocation.png', 200);
+    currentLocationIcon = BitmapDescriptor.fromBytes(newMarker);
     setState(() {});
   }
 
