@@ -196,7 +196,6 @@ class _ChallengesPageState extends State<ChallengesPage> {
                         // print("Doing Event with now/endtime " + event.description.toString() + now.toString() + "/" + endtime.toString());
                         if (challenge == null) {
                           // print("Challenge is null for event " + event.description.toString());
-
                           continue;
                         }
                         final challengeLocation =

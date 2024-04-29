@@ -9,7 +9,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:game/model/challenge_model.dart';
 import 'gameplay_map.dart';
 import 'package:provider/provider.dart';
-
+import 'package:game/utils/utility_functions.dart';
 import 'package:game/progress_indicators/circular_progress_indicator.dart';
 
 import 'package:flutter_svg/flutter_svg.dart';
@@ -97,6 +97,7 @@ class _GameplayPageState extends State<GameplayPage> {
 
       GeoPoint targetLocation = GeoPoint(challenge.latF!, challenge.longF!, 0);
       double awardingRadius = challenge.awardingRadiusF!;
+      int startingHintsUsed = tracker.hintsUsed;
 
       return Scaffold(
         body: Column(
@@ -223,6 +224,7 @@ class _GameplayPageState extends State<GameplayPage> {
                     targetLocation: targetLocation,
                     awardingRadius: awardingRadius,
                     points: challenge.points ?? 0,
+                    startingHintsUsed: startingHintsUsed,
                   )),
             ),
           ],

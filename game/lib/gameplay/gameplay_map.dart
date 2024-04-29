@@ -16,20 +16,21 @@ import 'package:game/api/game_client_dto.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/model/tracker_model.dart';
 import 'package:game/model/group_model.dart';
+import 'package:game/model/event_model.dart';
 import 'package:game/model/challenge_model.dart';
 
 class GameplayMap extends StatefulWidget {
   final GeoPoint targetLocation;
   final double awardingRadius;
   final int points;
-  final int startingHints;
+  final int startingHintsUsed;
 
   const GameplayMap(
       {Key? key,
       required this.targetLocation,
       required this.awardingRadius,
       required this.points,
-      required this.startingHints})
+      required this.startingHintsUsed})
       : super(key: key);
 
   @override
@@ -95,7 +96,7 @@ class _GameplayMapState extends State<GameplayMap> {
     hintRadius = defaultHintRadius -
         (defaultHintRadius - widget.awardingRadius) *
             0.33 *
-            widget.startingHints;
+            (totalHints - widget.startingHintsUsed);
     if (hintRadius == null) {
       hintRadius = defaultHintRadius;
     }
@@ -227,7 +228,7 @@ class _GameplayMapState extends State<GameplayMap> {
    */
   BitmapDescriptor currentLocationIcon = BitmapDescriptor.defaultMarker;
   void setCustomMarkerIcon() {
-    BitmapDescriptor.fromAssetImage(ImageConfiguration(devicePixelRatio: 0.2),
+    BitmapDescriptor.fromAssetImage(ImageConfiguration(size: Size(20, 20)),
             "assets/icons/userlocation.png")
         .then(
       (icon) {
@@ -603,29 +604,31 @@ class _GameplayMapState extends State<GameplayMap> {
                   child: SvgPicture.asset('assets/images/arrived.svg',
                       fit: BoxFit.cover),
                 ),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => ChallengeCompletedPage()),
-                    );
-                  },
-                  style: ButtonStyle(
-                    padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
-                        EdgeInsets.only(left: 15, right: 15)),
-                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                            7.3), // Adjust the radius as needed
+                Center(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => ChallengeCompletedPage()),
+                      );
+                    },
+                    style: ButtonStyle(
+                      padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
+                          EdgeInsets.only(left: 15, right: 15)),
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                              7.3), // Adjust the radius as needed
+                        ),
                       ),
+                      backgroundColor: MaterialStateProperty.all<Color>(
+                          Color.fromARGB(255, 237, 86, 86)),
                     ),
-                    backgroundColor: MaterialStateProperty.all<Color>(
-                        Color.fromARGB(255, 237, 86, 86)),
+                    child: Text("Point Breakdown",
+                        style: TextStyle(color: Colors.white)),
                   ),
-                  child: Text("Point Breakdown",
-                      style: TextStyle(color: Colors.white)),
                 )
               ],
             ),
