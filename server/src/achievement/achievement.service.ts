@@ -264,7 +264,7 @@ export class AchievementService {
 
     await this.clientService.sendProtected(
       'updateAchievementTrackerData',
-      target?.id ?? tracker.userId,
+      target ?? tracker.id,
       dto,
       {
         id: dto.achievementId,
