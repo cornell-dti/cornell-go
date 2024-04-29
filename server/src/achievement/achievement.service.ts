@@ -276,6 +276,91 @@ export class AchievementService {
 
   /** checks for all achievements associated with a user for a given completed challenge. */
   async checkAchievementProgress(user: User, eventId: string) {
-    
+    const ability = this.abilityFactory.createForUser(user);
+
+    const isJourney = await this.prisma.challenge.count({
+      where: { linkedEventId: eventId },
+    });
+
+    const locations = (
+      await this.prisma.challenge.findMany({
+        distinct: ['location'],
+        select: { location: true },
+      })
+    ).map(l => l.location);
+
+    const uncompletedAchs = await this.prisma.achievement.findMany({
+      where: {
+        AND: [
+          accessibleBy(ability, Action.Read).Achievement,
+          {
+            // must either be for all events or for this one
+            OR: [{ linkedEventId: null }, { linkedEventId: eventId }],
+          },
+          {
+            // must either be any location of one of the ones here
+            OR: [
+              { locationType: { in: locations } },
+              { locationType: LocationType.ANY },
+            ],
+          },
+          {
+            // must either be both challenge + journey achievement
+            // total points achievement
+            // or journey/challenge achievement depending on what was completed
+            OR: [
+              { achievementType: AchievementType.TOTAL_CHALLENGES_OR_JOURNEYS },
+              { achievementType: AchievementType.TOTAL_POINTS },
+              {
+                achievementType: isJourney
+                  ? AchievementType.TOTAL_JOURNEYS
+                  : AchievementType.TOTAL_CHALLENGES,
+              },
+            ],
+          },
+          {
+            // Only find non-completed achievements
+            trackers: {
+              none: {
+                userId: user.id,
+                dateComplete: null,
+              },
+            },
+          },
+        ],
+      },
+      include: {
+        trackers: true,
+      },
+    });
+
+    for (const ach of uncompletedAchs) {
+      let achTracker: AchievementTracker;
+      if (ach.trackers.length === 0) {
+        // create tracker since it doesn't exist
+        achTracker = await this.prisma.achievementTracker.create({
+          data: {
+            userId: user.id,
+            achievementId: ach.id,
+            progress: 0,
+          },
+        });
+      } else {
+        achTracker = ach.trackers[0];
+      }
+
+      achTracker = await this.prisma.achievementTracker.update({
+        where: { id: achTracker.id },
+        data: {
+          progress: { increment: 1 },
+          dateComplete:
+            achTracker.progress + 1 >= ach.requiredPoints
+              ? new Date()
+              : undefined,
+        },
+      });
+
+      await this.emitUpdateAchievementTracker(achTracker, user);
+    }
   }
 }

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:game/navigation_page/bottom_navbar.dart';
 import 'package:game/splash_page/splash_page.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:game/api/geopoint.dart';
