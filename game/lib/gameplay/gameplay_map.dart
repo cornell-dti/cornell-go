@@ -62,7 +62,7 @@ class _GameplayMapState extends State<GameplayMap> {
   int numHintsLeft = 10;
   GeoPoint? startingHintCenter;
   GeoPoint? hintCenter;
-  double defaultHintRadius = 100.0;
+  double defaultHintRadius = 200.0;
   double? hintRadius;
 
   // whether the picture is expanded over the map
@@ -97,13 +97,15 @@ class _GameplayMapState extends State<GameplayMap> {
    * hints used for this challenge already.
    */
   void setStartingHintCircle() {
+    print(widget.startingHintsUsed);
     hintRadius = defaultHintRadius -
         (defaultHintRadius - widget.awardingRadius) *
             0.33 *
-            (totalHints - widget.startingHintsUsed);
+            widget.startingHintsUsed;
     if (hintRadius == null) {
       hintRadius = defaultHintRadius;
     }
+    print(hintRadius);
 
     Random _random = Random();
 

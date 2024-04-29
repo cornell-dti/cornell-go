@@ -186,7 +186,7 @@ class _GameplayPageState extends State<GameplayPage> {
                                                   challenge.location] ??
                                               ""),
                                       style: TextStyle(
-                                          fontSize: 12,
+                                          fontSize: 13,
                                           color: Color(0xFF835A7C)))
                                 ]),
                                 Row(children: [
@@ -201,7 +201,7 @@ class _GameplayPageState extends State<GameplayPage> {
                                               : "?.?") +
                                           ' Miles Away',
                                       style: TextStyle(
-                                          fontSize: 12,
+                                          fontSize: 13,
                                           color: Color(0xFF58B171)))
                                 ]),
                                 Row(children: [
@@ -209,11 +209,16 @@ class _GameplayPageState extends State<GameplayPage> {
                                       "assets/icons/bearcoins.svg"),
                                   Text(
                                       ' ' +
+                                          ((challenge.points ?? 0) -
+                                                  startingHintsUsed * 25)
+                                              .toString() +
+                                          '/' +
                                           (challenge.points ?? 0).toString() +
                                           " PTS",
                                       style: TextStyle(
-                                          fontSize: 12,
-                                          color: Color(0xFFFFC737)))
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w500,
+                                          color: Color(0xFFC17E19)))
                                 ]),
                               ]))
                         ]))),
