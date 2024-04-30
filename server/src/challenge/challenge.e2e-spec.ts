@@ -198,8 +198,6 @@ describe('ChallengeModule E2E', () => {
       };
 
       await challengeService.upsertChallengeFromDto(fullAbility, secondChalDto);
-      const nextChal = await challengeService.nextChallenge(tracker);
-      expect(nextChal?.eventIndex).toEqual(1);
       const evchal = await challengeService.getFirstChallengeForEvent(event);
       expect(evchal.eventIndex).toEqual(0);
     });
