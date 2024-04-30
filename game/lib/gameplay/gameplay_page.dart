@@ -97,7 +97,7 @@ class _GameplayPageState extends State<GameplayPage> {
 
       GeoPoint targetLocation = GeoPoint(challenge.latF!, challenge.longF!, 0);
       double awardingRadius = challenge.awardingRadiusF!;
-      int startingHintsUsed = tracker.hintsUsed;
+      int hintsUsed = tracker.hintsUsed;
 
       return Scaffold(
         body: Column(
@@ -182,8 +182,7 @@ class _GameplayPageState extends State<GameplayPage> {
                                       "assets/icons/locationpin.svg"),
                                   Text(
                                       ' ' +
-                                          (friendlyLocation[
-                                                  challenge.location] ??
+                                          (abbrevLocation[challenge.location] ??
                                               ""),
                                       style: TextStyle(
                                           fontSize: 13,
@@ -199,7 +198,7 @@ class _GameplayPageState extends State<GameplayPage> {
                                                       1609.34)
                                                   .toStringAsFixed(1)
                                               : "?.?") +
-                                          ' Miles Away',
+                                          ' Mi Away',
                                       style: TextStyle(
                                           fontSize: 13,
                                           color: Color(0xFF58B171)))
@@ -209,10 +208,12 @@ class _GameplayPageState extends State<GameplayPage> {
                                       "assets/icons/bearcoins.svg"),
                                   Text(
                                       ' ' +
-                                          ((challenge.points ?? 0) -
-                                                  startingHintsUsed * 25)
-                                              .toString() +
-                                          '/' +
+                                          (hintsUsed > 0
+                                              ? ((challenge.points ?? 0) -
+                                                          hintsUsed * 25)
+                                                      .toString() +
+                                                  '/'
+                                              : '') +
                                           (challenge.points ?? 0).toString() +
                                           " PTS",
                                       style: TextStyle(
@@ -229,7 +230,7 @@ class _GameplayPageState extends State<GameplayPage> {
                     targetLocation: targetLocation,
                     awardingRadius: awardingRadius,
                     points: challenge.points ?? 0,
-                    startingHintsUsed: startingHintsUsed,
+                    startingHintsUsed: hintsUsed,
                   )),
             ),
           ],

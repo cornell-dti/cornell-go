@@ -157,6 +157,10 @@ export class ChallengeService {
       eventId: newEvTracker.eventId,
     });
 
+    const updatedChal = await this.getChallengeById(challengeId);
+    if(updatedChal != null)
+      await this.emitUpdateChallengeData(updatedChal, false);
+
     return true;
   }
 

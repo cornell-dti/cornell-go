@@ -333,8 +333,10 @@ class _GameplayMapState extends State<GameplayMap> {
         useMaterial3: true,
         colorSchemeSeed: Colors.green[700],
       ),
-      home: Consumer3<GroupModel, TrackerModel, ChallengeModel>(
-          builder: (context, groupModel, trackerModel, challengeModel, child) {
+      home: Consumer5<EventModel, GroupModel, TrackerModel, ChallengeModel,
+              ApiClient>(
+          builder: (context, eventModel, groupModel, trackerModel,
+              challengeModel, apiClient, child) {
         EventTrackerDto? tracker =
             trackerModel.trackerByEventId(groupModel.curEventId ?? "");
         if (tracker == null) {
@@ -343,7 +345,8 @@ class _GameplayMapState extends State<GameplayMap> {
           numHintsLeft = totalHints - tracker.hintsUsed;
         }
         var challenge =
-            challengeModel.getChallengeById(tracker!.curChallengeId);
+            challengeModel.getChallengeById(tracker?.curChallengeId ?? '');
+
         return Scaffold(
             body: Stack(
           alignment: Alignment.bottomCenter,
@@ -428,9 +431,21 @@ class _GameplayMapState extends State<GameplayMap> {
                 ),
                 onPressed: () {
                   bool hasArrived = checkArrived();
-                  if (hasArrived) completeChallenge();
+                  if (hasArrived) {
+                    if (challenge == null) {
+                      displayToast("An error occurred while getting challenge",
+                          Status.error);
+                    } else {
+                      apiClient.serverApi?.completedChallenge(
+                          CompletedChallengeDto(challengeId: challenge.id));
+                      setState(() {
+                        challengeName = challenge.name;
+                      });
+                    }
+                  }
                   showDialog(
                     context: context,
+                    barrierDismissible: !hasArrived,
                     builder: (context) {
                       return Container(
                         margin: EdgeInsetsDirectional.only(start: 10, end: 10),
