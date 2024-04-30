@@ -84,7 +84,7 @@ class _FilterFormState extends State<FilterForm> {
     BuildContext context,
   ) {
     return FractionallySizedBox(
-      heightFactor: 0.9,
+      heightFactor: 0.8,
       child: Container(
         child: ListView(
           children: [
