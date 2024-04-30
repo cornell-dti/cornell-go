@@ -91,10 +91,6 @@ export interface AchievementTrackerDto {
   dateComplete?: string;
 }
 
-export interface UpdateAchievementTrackerDataDto {
-  tracker: AchievementTrackerDto;
-}
-
 export interface UpdateAchievementDataDto {
   achievement: AchievementDto;
   deleted: boolean;
@@ -102,6 +98,10 @@ export interface UpdateAchievementDataDto {
 
 export interface RequestAchievementDataDto {
   achievements: string[];
+}
+
+export interface RequestAchievementTrackerDataDto {
+  achievements?: string[];
 }
 
 export interface LoginDto {

@@ -4,12 +4,14 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:game/achievements/achievement_cell.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/api/game_client_dto.dart';
+import 'package:game/model/achievement_model.dart';
 import 'package:game/model/challenge_model.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/group_model.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:game/model/tracker_model.dart';
 import 'package:provider/provider.dart';
+import 'package:velocity_x/velocity_x.dart';
 
 class AchievementCellDto {
   AchievementCellDto({
@@ -48,8 +50,6 @@ class _AchievementsPageState extends State<AchievementsPage> {
   List<String> selectedLocations = [];
   String selectedDifficulty = '';
 
-  List<AchievementCellDto> eventData = [];
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -72,124 +72,30 @@ class _AchievementsPageState extends State<AchievementsPage> {
                     padding: EdgeInsets.all(30),
                     child: Column(
                       children: [
-                        Expanded(child: Consumer5<EventModel, GroupModel,
-                                TrackerModel, ChallengeModel, ApiClient>(
-                            builder: (context,
-                                myEventModel,
-                                groupModel,
-                                trackerModel,
-                                challengeModel,
-                                apiClient,
-                                child) {
-                          if (myEventModel.searchResults == null) {
-                            myEventModel.searchEvents(
-                                0,
-                                1000,
-                                [
-                                  EventTimeLimitationDto.PERPETUAL,
-                                  EventTimeLimitationDto.LIMITED_TIME
-                                ],
-                                false,
-                                false,
-                                false);
-                          }
-                          final events = myEventModel.searchResults ?? [];
-                          if (!events.any((element) =>
-                              element.id == groupModel.curEventId)) {
-                            final curEvent = myEventModel
-                                .getEventById(groupModel.curEventId ?? "");
-                            if (curEvent != null) events.add(curEvent);
-                          }
-                          eventData.clear();
+                        Expanded(child: Consumer2<AchievementModel, ApiClient>(
+                            builder: (context, achModel, apiClient, child) {
+                          final achTrackers = achModel.getAchievementTrackers();
 
-                          for (EventDto event in events) {
-                            var tracker =
-                                trackerModel.trackerByEventId(event.id);
-                            var numberCompleted =
-                                tracker?.prevChallenges.length ?? 0;
-                            var complete =
-                                (numberCompleted == event.challenges?.length);
-                            var locationCount = event.challenges?.length ?? 0;
-                            DateTime now = DateTime.now();
-                            DateTime endtime =
-                                HttpDate.parse(event.endTime ?? "");
-
-                            Duration timeTillExpire = endtime.difference(now);
-                            if (locationCount != 1) continue;
-                            var challenge = challengeModel
-                                .getChallengeById(event.challenges?[0] ?? "");
-
-                            // print("Doing Event with now/endtime " + event.description.toString() + now.toString() + "/" + endtime.toString());
-                            if (challenge == null) {
-                              // print("Challenge is null for event " + event.description.toString());
-
-                              continue;
-                            }
-                            final challengeLocation =
-                                challenge.location?.name ?? "";
-
-                            bool eventMatchesDifficultySelection;
-                            bool eventMatchesCategorySelection;
-                            bool eventMatchesLocationSelection;
-
-                            if (selectedDifficulty.length == 0 ||
-                                selectedDifficulty == event.difficulty?.name)
-                              eventMatchesDifficultySelection = true;
-                            else
-                              eventMatchesDifficultySelection = false;
-
-                            if (selectedLocations.length > 0) {
-                              if (selectedLocations.contains(challengeLocation))
-                                eventMatchesLocationSelection = true;
-                              else
-                                eventMatchesLocationSelection = false;
-                            } else
-                              eventMatchesLocationSelection = true;
-
-                            if (selectedCategories.length > 0) {
-                              if (selectedCategories
-                                  .contains(event.category?.name))
-                                eventMatchesCategorySelection = true;
-                              else
-                                eventMatchesCategorySelection = false;
-                            } else
-                              eventMatchesCategorySelection = true;
-                            if (!complete &&
-                                !timeTillExpire.isNegative &&
-                                eventMatchesDifficultySelection &&
-                                eventMatchesCategorySelection &&
-                                eventMatchesLocationSelection) {
-                              eventData.add(AchievementCellDto(
-                                location:
-                                    friendlyLocation[challenge.location] ?? "",
-                                name: event.name ?? "",
-                                lat: challenge.latF ?? null,
-                                long: challenge.longF ?? null,
-                                thumbnail: SvgPicture.asset(
-                                    "assets/icons/achievementsilver.svg"),
-                                complete: complete,
-                                description: event.description ?? "",
-                                difficulty:
-                                    friendlyDifficulty[event.difficulty] ?? "",
-                                points: challenge.points ?? 0,
-                                eventId: event.id,
-                              ));
-                            } else if (event.id == groupModel.curEventId) {
-                              apiClient.serverApi?.setCurrentEvent(
-                                  SetCurrentEventDto(eventId: ""));
-                            }
-                          }
+                          final achList = achTrackers
+                              .map((e) => (
+                                    e,
+                                    achModel.getAchievementById(e.achievementId)
+                                  ))
+                              .filter((e) => e.$2 != null)
+                              .map((e) => (e.$1, e.$2!))
+                              .toList();
 
                           return ListView.separated(
                             padding: const EdgeInsets.symmetric(horizontal: 3),
-                            itemCount: eventData.length,
+                            itemCount: achList.length,
                             itemBuilder: (context, index) {
                               return AchievementCell(
                                   key: UniqueKey(),
-                                  eventData[index].description,
-                                  eventData[index].thumbnail,
-                                  3,
-                                  4);
+                                  achList[index].$2.description ?? "",
+                                  SvgPicture.asset(
+                                      "assets/icons/achievementsilver.svg"),
+                                  achList[index].$1.progress,
+                                  achList[index].$2.requiredPoints ?? 0);
                             },
                             physics: BouncingScrollPhysics(),
                             separatorBuilder: (context, index) {

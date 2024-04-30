@@ -244,6 +244,15 @@ export class AchievementService {
     });
   }
 
+  async getAchievementTrackersForUser(user: User, achievementIds?: string[]) {
+    return await this.prisma.achievementTracker.findMany({
+      where: {
+        userId: user.id,
+        achievementId: achievementIds ? { in: achievementIds } : undefined,
+      },
+    });
+  }
+
   async dtoForAchievementTracker(
     tracker: AchievementTracker,
   ): Promise<AchievementTrackerDto> {
@@ -267,7 +276,7 @@ export class AchievementService {
       target ?? tracker.id,
       dto,
       {
-        id: dto.achievementId,
+        id: tracker.id,
         subject: 'AchievementTracker',
         prismaStore: this.prisma.achievementTracker,
       },

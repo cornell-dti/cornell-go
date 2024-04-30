@@ -205,28 +205,6 @@ class AchievementTrackerDto {
   late String? dateComplete;
 }
 
-class UpdateAchievementTrackerDataDto {
-  Map<String, dynamic> toJson() {
-    Map<String, dynamic> fields = {};
-    fields['tracker'] = tracker!.toJson();
-    return fields;
-  }
-
-  UpdateAchievementTrackerDataDto.fromJson(Map<String, dynamic> fields) {
-    tracker = AchievementTrackerDto.fromJson(fields['tracker']);
-  }
-
-  void partialUpdate(UpdateAchievementTrackerDataDto other) {
-    tracker = other.tracker;
-  }
-
-  UpdateAchievementTrackerDataDto({
-    required this.tracker,
-  });
-
-  late AchievementTrackerDto tracker;
-}
-
 class UpdateAchievementDataDto {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> fields = {};
@@ -274,6 +252,33 @@ class RequestAchievementDataDto {
   });
 
   late List<String> achievements;
+}
+
+class RequestAchievementTrackerDataDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    if (achievements != null) {
+      fields['achievements'] = achievements;
+    }
+    return fields;
+  }
+
+  RequestAchievementTrackerDataDto.fromJson(Map<String, dynamic> fields) {
+    achievements = fields.containsKey('achievements')
+        ? (List<String>.from(fields['achievements']))
+        : null;
+  }
+
+  void partialUpdate(RequestAchievementTrackerDataDto other) {
+    achievements =
+        other.achievements == null ? achievements : other.achievements;
+  }
+
+  RequestAchievementTrackerDataDto({
+    this.achievements,
+  });
+
+  late List<String>? achievements;
 }
 
 class LoginDto {

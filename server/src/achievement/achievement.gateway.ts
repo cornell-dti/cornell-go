@@ -13,6 +13,7 @@ import {
   AchievementDto,
   AchievementTrackerDto,
   RequestAchievementDataDto,
+  RequestAchievementTrackerDataDto,
   UpdateAchievementDataDto,
 } from './achievement.dto';
 import { AchievementService } from './achievement.service';
@@ -34,7 +35,6 @@ export class AchievementGateway {
 
   /**
    * request achievements by list of ids
-   * update achievement with a dto
    * @param user
    * @param data
    */
@@ -52,6 +52,28 @@ export class AchievementGateway {
 
     for (const ach of achs) {
       await this.achievementService.emitUpdateAchievementData(ach, false, user);
+    }
+  }
+
+  /**
+   * request achievement trackers by list of ids
+   * @param user
+   * @param data
+   */
+
+  @SubscribeMessage('requestAchievementTrackerData')
+  async requestAchievementTrackerData(
+    @UserAbility() ability: AppAbility,
+    @CallingUser() user: User,
+    @MessageBody() data: RequestAchievementTrackerDataDto,
+  ) {
+    const achs = await this.achievementService.getAchievementTrackersForUser(
+      user,
+      data.achievements,
+    );
+
+    for (const ach of achs) {
+      await this.achievementService.emitUpdateAchievementTracker(ach, user);
     }
   }
 

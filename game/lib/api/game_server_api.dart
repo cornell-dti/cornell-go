@@ -43,6 +43,9 @@ class GameServerApi {
   void requestAchievementData(RequestAchievementDataDto dto) =>
       _invokeWithRefresh("requestAchievementData", dto.toJson());
 
+  void requestAchievementTrackerData(RequestAchievementTrackerDataDto dto) =>
+      _invokeWithRefresh("requestAchievementTrackerData", dto.toJson());
+
   void updateAchievementData(UpdateAchievementDataDto dto) =>
       _invokeWithRefresh("updateAchievementData", dto.toJson());
 
