@@ -376,10 +376,5 @@ export class OrganizationService {
       where: { id: org.id },
       data: { members: { connect: { id: user.id } } },
     });
-
-    await this.prisma.user.update({
-      where: { id: user.id },
-      data: { memberOf: { connect: { id: org.id } } },
-    });
   }
 }

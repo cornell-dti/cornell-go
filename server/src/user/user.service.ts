@@ -68,12 +68,12 @@ export class UserService {
       username = 'guest' + (count + 921);
     }
 
-    const defOrg = await this.orgService.getDefaultOrganization(
+    const allOrg = await this.orgService.getDefaultOrganization(
       OrganizationSpecialUsage.DEVICE_LOGIN,
     );
 
     const group: Group = await this.groupsService.createFromEvent(
-      await this.orgService.getDefaultEvent(defOrg),
+      await this.orgService.getDefaultEvent(allOrg),
     );
 
     const user: User = await this.prisma.user.create({
@@ -81,7 +81,7 @@ export class UserService {
         score: 0,
         group: { connect: { id: group.id } },
         hostOf: { connect: { id: group.id } },
-        memberOf: { connect: { id: defOrg.id } },
+        memberOf: { connect: { id: allOrg.id } },
         username: username ?? email?.split('@')[0],
         year,
         college,
@@ -105,11 +105,11 @@ export class UserService {
     await this.log.logEvent(SessionLogEvent.CREATE_USER, user.id, user.id);
 
     if (authType === AuthType.GOOGLE) {
-      const allOrg = await this.orgService.getDefaultOrganization(
+      const cornellOrg = await this.orgService.getDefaultOrganization(
         OrganizationSpecialUsage.CORNELL_LOGIN,
       );
 
-      await this.orgService.joinOrganization(user, allOrg.accessCode);
+      await this.orgService.joinOrganization(user, cornellOrg.accessCode);
     }
 
     return user;
