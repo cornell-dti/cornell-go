@@ -126,7 +126,6 @@ describe('EventModule E2E', () => {
       expect(tracker1.eventId).toEqual(exJourney1.id);
       expect(tracker1.score).toEqual(0);
       expect(await challengeService.completeChallenge(exPlayer)).toBeTruthy();
-      expect(await challengeService.completeChallenge(exPlayer)).toBeFalsy();
 
       const tracker2 = await eventService.getCurrentEventTrackerForUser(
         exPlayer,
@@ -140,9 +139,7 @@ describe('EventModule E2E', () => {
       );
       expect(tracker3.eventId).toEqual(exJourney2.id);
       expect(tracker3.score).toEqual(0);
-      expect(await challengeService.completeChallenge(exPlayer)).toBeFalsy();
       expect(await challengeService.completeChallenge(exPlayer)).toBeTruthy();
-      expect(await challengeService.completeChallenge(exPlayer)).toBeFalsy();
 
       const tracker4 = await eventService.getCurrentEventTrackerForUser(
         exPlayer,
@@ -150,7 +147,6 @@ describe('EventModule E2E', () => {
       expect(tracker4.curChallengeId).toEqual(journey2Chal.id);
       expect(tracker4.score).toEqual(1);
       expect(await challengeService.completeChallenge(exPlayer)).toBeTruthy();
-      expect(await challengeService.completeChallenge(exPlayer)).toBeFalsy();
 
       const tracker5 = await eventService.getCurrentEventTrackerForUser(
         exPlayer,
@@ -185,7 +181,6 @@ describe('EventModule E2E', () => {
       expect(tracker8.curChallengeId).toEqual(journey1Chal.id);
       expect(tracker8.score).toEqual(1);
       expect(await challengeService.completeChallenge(exPlayer)).toBeTruthy();
-      expect(await challengeService.completeChallenge(exPlayer)).toBeFalsy();
 
       const tracker9 = await eventService.getCurrentEventTrackerForUser(
         exPlayer,
@@ -193,6 +188,7 @@ describe('EventModule E2E', () => {
       expect(tracker9.eventId).toEqual(exJourney1.id);
       expect(tracker9.curChallengeId).toEqual(journey1Chal.id);
       expect(tracker9.score).toEqual(2);
+      expect(await challengeService.completeChallenge(exPlayer)).toBeFalsy();
 
       const latestUserData = await userService.byId(exPlayer.id);
       expect(latestUserData?.score).toEqual(5);

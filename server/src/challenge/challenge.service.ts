@@ -124,7 +124,7 @@ export class ChallengeService {
     await this.prisma.prevChallenge.create({
       data: {
         userId: user.id,
-        challengeId: eventTracker.curChallengeId!,
+        challengeId: eventTracker.curChallengeId,
         participants: {
           connect: groupMembers.map(m => ({ id: m.id })),
         },
