@@ -41,7 +41,7 @@ describe('AchievementModule E2E', () => {
   let abilityFactory: CaslAbilityFactory;
   let fullAbility: AppAbility;
   let orgUsage: OrganizationSpecialUsage;
-  let challengeService : ChallengeService;
+  let challengeService: ChallengeService;
 
   /** beforeAll runs before anything else. It adds new users and prerequisites.
    * afterAll runs after all the tests. It removes lingering values in the database.
@@ -137,14 +137,16 @@ describe('AchievementModule E2E', () => {
       });
 
       if (ach) {
-        tracker = await achievementService.createAchievementTracker(user, ach.id);
+        tracker = await achievementService.createAchievementTracker(
+          user,
+          ach.id,
+        );
         console.log(tracker);
       }
 
       expect(findAch.description).toEqual('ach dto');
       expect(tracker.progress).toEqual(0);
       expect(tracker.dateComplete).toEqual(null);
-      
     });
 
     it('should read achievements: getAchievementFromId, getAchievementsByIdsForAbility', async () => {
@@ -205,7 +207,7 @@ describe('AchievementModule E2E', () => {
       // Assuming a challenge completion would update an existing tracker
       const initialProgress = tracker.progress;
       await challengeService.completeChallenge(user, 'challengeId');
-  
+
       const updatedTracker = await prisma.achievementTracker.findUnique({
         where: { id: tracker.id },
       });
@@ -238,12 +240,16 @@ describe('AchievementModule E2E', () => {
       const ach = await prisma.achievement.findFirstOrThrow({
         where: { id: achId },
       });
-  
+
       expect(ach).toBeDefined();
-  
+
       // Simulate challenge completion
-      await achievementService.checkAchievementProgress(user, 'event123', false);
-  
+      await achievementService.checkAchievementProgress(
+        user,
+        'event123',
+        false,
+      );
+
       // Check if tracker was created
       const tracker = await prisma.achievementTracker.findFirst({
         where: { achievementId: ach.id, userId: user.id },
@@ -274,7 +280,7 @@ describe('AchievementModule E2E', () => {
     it('should mark tracker as complete when achievement criteria are met', async () => {
       // Complete a challenge that gives the final point needed
       await challengeService.completeChallenge(user, 'event123');
-    
+
       const completedTracker = await prisma.achievementTracker.findUnique({
         where: { id: tracker.id },
       });
@@ -282,7 +288,6 @@ describe('AchievementModule E2E', () => {
       expect(completedTracker!.dateComplete).not.toBeNull();
     });
   });
-
 
   describe('Delete functions', () => {
     it('should remove achievement: removeAchievement', async () => {

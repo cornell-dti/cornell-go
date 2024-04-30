@@ -260,7 +260,7 @@ export interface GroupMemberDto {
   id: string;
   name: string;
   points: number;
-  curChallengeId: string;
+  curChallengeId?: string;
 }
 
 export interface GroupDto {
