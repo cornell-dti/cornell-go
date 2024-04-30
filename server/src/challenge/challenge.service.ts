@@ -84,15 +84,13 @@ export class ChallengeService {
   async nextChallenge(evTracker: EventTracker) {
     const nextChal = await this.prisma.challenge.findFirst({
       where: {
-        linkedEventId: evTracker.id,
+        linkedEventId: evTracker.eventId,
         completions: { none: { userId: evTracker.userId } },
       },
       orderBy: {
         eventIndex: 'asc',
       },
     });
-
-    console.log(nextChal?.eventIndex);
 
     return nextChal;
   }
@@ -139,8 +137,6 @@ export class ChallengeService {
       where: { id: eventTracker.curChallengeId },
     });
 
-    console.log(curChallenge.eventIndex);
-
     const nextChallenge = await this.nextChallenge(eventTracker);
 
     const deltaScore = curChallenge.points - 25 * eventTracker.hintsUsed;
@@ -155,7 +151,7 @@ export class ChallengeService {
       data: {
         score: { increment: deltaScore },
         hintsUsed: 0,
-        curChallengeId: nextChallenge?.id,
+        curChallengeId: nextChallenge?.id ?? null,
       },
     });
 
