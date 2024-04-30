@@ -139,17 +139,17 @@ export class ChallengeService {
 
     const nextChallenge = await this.nextChallenge(eventTracker);
 
-    const totalScore = curChallenge.points - 25 * eventTracker.hintsUsed;
+    const deltaScore = curChallenge.points - 25 * eventTracker.hintsUsed;
 
     const newUser = await this.prisma.user.update({
       where: { id: user.id },
-      data: { score: { increment: totalScore } },
+      data: { score: { increment: deltaScore } },
     });
 
     const newEvTracker = await this.prisma.eventTracker.update({
       where: { id: eventTracker.id },
       data: {
-        score: { increment: totalScore },
+        score: { increment: deltaScore },
         hintsUsed: 0,
         curChallengeId: nextChallenge?.id,
       },
@@ -173,7 +173,8 @@ export class ChallengeService {
     if (isJourneyCompleted) {
       await this.achievementService.checkAchievementProgress(
         user,
-        eventTracker.eventId,
+        eventTracker,
+        deltaScore,
       );
     }
 

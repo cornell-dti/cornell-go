@@ -8,6 +8,7 @@ import {
   LocationType,
   PrismaClient,
   User,
+  EventTracker,
 } from '@prisma/client';
 import { ClientService } from '../client/client.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -284,11 +285,15 @@ export class AchievementService {
   }
 
   /** checks for all achievements associated with a user for a given completed challenge. */
-  async checkAchievementProgress(user: User, eventId: string) {
+  async checkAchievementProgress(
+    user: User,
+    evTracker: EventTracker,
+    pointsAdded: number,
+  ) {
     const ability = this.abilityFactory.createForUser(user);
 
     const isJourney = await this.prisma.challenge.count({
-      where: { linkedEventId: eventId },
+      where: { linkedEventId: evTracker.eventId },
     });
 
     const locations = (
@@ -304,7 +309,7 @@ export class AchievementService {
           accessibleBy(ability, Action.Read).Achievement,
           {
             // must either be for all events or for this one
-            OR: [{ linkedEventId: null }, { linkedEventId: eventId }],
+            OR: [{ linkedEventId: null }, { linkedEventId: evTracker.eventId }],
           },
           {
             // must either be any location of one of the ones here
@@ -330,7 +335,7 @@ export class AchievementService {
           {
             // Only find non-completed achievements
             trackers: {
-              none: {
+              some: {
                 userId: user.id,
                 dateComplete: null,
               },
@@ -339,7 +344,11 @@ export class AchievementService {
         ],
       },
       include: {
-        trackers: true,
+        trackers: {
+          where: {
+            userId: user.id,
+          },
+        },
       },
     });
 
@@ -352,22 +361,31 @@ export class AchievementService {
             userId: user.id,
             achievementId: ach.id,
             progress: 0,
+            dateComplete: null,
           },
         });
       } else {
         achTracker = ach.trackers[0];
       }
 
-      achTracker = await this.prisma.achievementTracker.update({
-        where: { id: achTracker.id },
-        data: {
-          progress: { increment: 1 },
-          dateComplete:
-            achTracker.progress + 1 >= ach.requiredPoints
-              ? new Date()
-              : undefined,
-        },
-      });
+      // In case the above completion check fails
+      if (achTracker.progress < ach.requiredPoints) {
+        const deltaProgress =
+          ach.achievementType === AchievementType.TOTAL_POINTS
+            ? pointsAdded
+            : 1;
+
+        achTracker = await this.prisma.achievementTracker.update({
+          where: { id: achTracker.id },
+          data: {
+            progress: { increment: deltaProgress },
+            dateComplete:
+              achTracker.progress + deltaProgress >= ach.requiredPoints
+                ? new Date()
+                : null,
+          },
+        });
+      }
 
       await this.clientService.subscribe(user, achTracker.id);
       await this.emitUpdateAchievementTracker(achTracker);

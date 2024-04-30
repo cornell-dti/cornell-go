@@ -143,7 +143,7 @@ class _AchievementCellState extends State<AchievementCell> {
                   Spacer(),
                   Align(
                       alignment: Alignment.bottomCenter,
-                      child: LoadingBar(3, 4)),
+                      child: LoadingBar(this.tasksFinished, this.totalTasks)),
                 ],
               )
             ],
