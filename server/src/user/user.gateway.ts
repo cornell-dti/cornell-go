@@ -86,6 +86,8 @@ export class UserGateway {
           await this.userService.emitUpdateUserData(us, false, false, user),
       ),
     );
+
+    return users.length;
   }
 
   @SubscribeMessage('requestUserData')
@@ -103,10 +105,13 @@ export class UserGateway {
           user,
           'Error requesting user by id',
         );
+        return false;
       }
     } else {
       await this.userService.emitUpdateUserData(user, false, false, user);
     }
+
+    return true;
   }
 
   @SubscribeMessage('updateUserData')
@@ -125,6 +130,7 @@ export class UserGateway {
       const user = await this.userService.updateUser(ability, data.user);
       await this.userService.emitUpdateUserData(user, false, true);
     }
+    return true;
   }
 
   @SubscribeMessage('setAuthToDevice')
@@ -133,6 +139,7 @@ export class UserGateway {
     @MessageBody() data: SetAuthToDeviceDto,
   ) {
     await this.userService.setAuthType(user, AuthType.DEVICE, data.deviceId);
+    return true;
   }
 
   @SubscribeMessage('setAuthToOAuth')
@@ -145,17 +152,20 @@ export class UserGateway {
       this.providerToAuthType(data.provider),
       data.authId,
     );
+    return true;
   }
 
   @SubscribeMessage('banUser')
   async banUser(@CallingUser() user: User, @MessageBody() data: BanUserDto) {
     if (user.administrator) {
       const user = await this.userService.byId(data.userId);
-      if (!!user) {
+      if (user) {
         const us = await this.userService.banUser(user, data.isBanned);
         await this.userService.emitUpdateUserData(us, false, false);
+        return true;
       }
     }
+    return false;
   }
 
   @SubscribeMessage('addManager')
@@ -167,6 +177,7 @@ export class UserGateway {
     const org = await this.orgService.getOrganizationById(data.organizationId);
 
     if (
+      !org ||
       !(await this.orgService.addManager(
         ability,
         data.email,
@@ -180,6 +191,7 @@ export class UserGateway {
     const manager = await this.userService.byEmail(data.email);
     await this.clientService.subscribe(manager, org.id);
     await this.orgService.emitUpdateOrganizationData(org, false);
+    return manager.id;
   }
 
   @SubscribeMessage('joinOrganization')
@@ -187,12 +199,19 @@ export class UserGateway {
     @CallingUser() user: User,
     @MessageBody() data: JoinOrganizationDto,
   ) {
-    await this.orgService.joinOrganization(user, data.accessCode);
+    const success = await this.orgService.joinOrganization(
+      user,
+      data.accessCode,
+    );
+
+    if (!success) return false;
 
     const org = await this.orgService.getOrganizationByCode(data.accessCode);
     await this.orgService.emitUpdateOrganizationData(org, false);
 
     await this.userService.emitUpdateUserData(user, false, false);
+
+    return true;
   }
 
   @SubscribeMessage('closeAccount')
@@ -205,5 +224,6 @@ export class UserGateway {
     await this.userService.setAuthType(user, AuthType.NONE, user.authToken);
     await this.userService.deleteUser(ability, user);
     await this.groupService.emitUpdateGroupData(group, false);
+    return true;
   }
 }

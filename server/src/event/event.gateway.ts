@@ -58,6 +58,8 @@ export class EventGateway {
     for (const ev of evs) {
       await this.eventService.emitUpdateEventData(ev, false, user);
     }
+
+    return evs.length;
   }
 
   @SubscribeMessage('requestFilteredEventIds')
@@ -76,6 +78,8 @@ export class EventGateway {
         await this.eventService.emitUpdateEventData(ev, false, user);
       }
     }
+
+    return evs.length;
   }
 
   @SubscribeMessage('requestRecommendedEvents')
@@ -87,6 +91,8 @@ export class EventGateway {
     for (const ev of evs) {
       await this.eventService.emitUpdateEventData(ev, false, user);
     }
+
+    return evs.length;
   }
 
   @SubscribeMessage('requestEventLeaderData')
@@ -113,6 +119,8 @@ export class EventGateway {
       ev,
       user,
     );
+
+    return Math.min(data.count, 1024);
   }
 
   @SubscribeMessage('requestEventTrackerData')
@@ -127,6 +135,8 @@ export class EventGateway {
     for (const tracker of trackers) {
       await this.eventService.emitUpdateEventTracker(tracker, user);
     }
+
+    return trackers.length;
   }
 
   @SubscribeMessage('useEventTrackerHint')
@@ -137,9 +147,10 @@ export class EventGateway {
     const tracker = await this.eventService.useEventTrackerHint(user);
     if (tracker) {
       await this.eventService.emitUpdateEventTracker(tracker, user);
-      return;
+      return true;
     }
     await this.clientService.emitErrorData(user, 'Failed to track used hint!');
+    return false;
   }
 
   @SubscribeMessage('updateEventData')
@@ -148,7 +159,7 @@ export class EventGateway {
     @CallingUser() user: User,
     @MessageBody() data: UpdateEventDataDto,
   ) {
-    const ev = await this.eventService.getEventById(data.event.id);
+    let ev = await this.eventService.getEventById(data.event.id);
 
     if (data.deleted) {
       if (!ev || !(await this.eventService.removeEvent(ability, ev.id))) {
@@ -157,10 +168,7 @@ export class EventGateway {
       }
       await this.eventService.emitUpdateEventData(ev, true);
     } else {
-      const ev = await this.eventService.upsertEventFromDto(
-        ability,
-        data.event,
-      );
+      ev = await this.eventService.upsertEventFromDto(ability, data.event);
 
       if (!ev) {
         await this.clientService.emitErrorData(user, 'Failed to upsert event!');
@@ -175,5 +183,7 @@ export class EventGateway {
       await this.orgService.emitUpdateOrganizationData(org, false);
       await this.eventService.emitUpdateEventData(ev, false);
     }
+
+    return ev.id;
   }
 }

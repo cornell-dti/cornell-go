@@ -39,6 +39,7 @@ export class GroupGateway {
   ) {
     const group = await this.groupService.getGroupForUser(user);
     await this.groupService.emitUpdateGroupData(group, false, user);
+    return true;
   }
 
   @SubscribeMessage('joinGroup')
@@ -48,6 +49,7 @@ export class GroupGateway {
   ) {
     const oldGroup = await this.groupService.joinGroup(user, data.groupId);
     await this.groupService.updateGroupMembers(user, oldGroup);
+    return true;
   }
 
   @SubscribeMessage('leaveGroup')
@@ -57,6 +59,7 @@ export class GroupGateway {
   ) {
     const oldGroup = await this.groupService.leaveGroup(user);
     await this.groupService.updateGroupMembers(user, oldGroup);
+    return true;
   }
 
   /**
@@ -70,9 +73,14 @@ export class GroupGateway {
     @CallingUser() user: User,
     @MessageBody() data: SetCurrentEventDto,
   ) {
-    await this.groupService.setCurrentEvent(user, data.eventId);
-    const group = await this.groupService.getGroupForUser(user);
-    await this.groupService.emitUpdateGroupData(group, false, user);
+    const success = await this.groupService.setCurrentEvent(user, data.eventId);
+
+    if (success) {
+      const group = await this.groupService.getGroupForUser(user);
+      await this.groupService.emitUpdateGroupData(group, false, user);
+    }
+
+    return success;
   }
 
   @SubscribeMessage('updateGroupData')
@@ -87,7 +95,7 @@ export class GroupGateway {
         user,
         'This group does not exist!',
       );
-      return;
+      return false;
     }
 
     if (data.deleted) {
@@ -100,6 +108,8 @@ export class GroupGateway {
       this.clientService.subscribe(user, group.id);
       await this.groupService.emitUpdateGroupData(group, false);
     }
+
+    return true;
   }
 
   @SubscribeMessage('sendGroupInvite')
@@ -109,5 +119,6 @@ export class GroupGateway {
   ) {
     const group = await this.groupService.getGroupForUser(user);
     await this.groupService.emitGroupInvite(group, data.targetUsername, user);
+    return true;
   }
 }

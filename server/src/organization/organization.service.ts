@@ -153,7 +153,7 @@ export class OrganizationService {
   }
 
   async getOrganizationById(id: string) {
-    return await this.prisma.organization.findFirstOrThrow({ where: { id } });
+    return await this.prisma.organization.findFirst({ where: { id } });
   }
 
   async getOrganizationByCode(accessCode: string) {
@@ -364,7 +364,7 @@ export class OrganizationService {
       where: { accessCode: code },
     });
 
-    if (!org) return;
+    if (!org) return false;
 
     await this.prisma.organization.update({
       where: { id: org.id },
@@ -375,5 +375,6 @@ export class OrganizationService {
       where: { id: user.id },
       data: { memberOf: { connect: { id: org.id } } },
     });
+    return true;
   }
 }

@@ -51,6 +51,8 @@ export class AchievementGateway {
     for (const ach of achs) {
       await this.achievementService.emitUpdateAchievementData(ach, false, user);
     }
+
+    return achs.length;
   }
 
   /**
@@ -107,5 +109,7 @@ export class AchievementGateway {
         false,
       );
     }
+
+    return achievement.id;
   }
 }

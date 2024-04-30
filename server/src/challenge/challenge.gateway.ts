@@ -56,6 +56,8 @@ export class ChallengeGateway {
     for (const chal of challenges) {
       await this.challengeService.emitUpdateChallengeData(chal, false, user);
     }
+
+    return challenges.length;
   }
 
   // Disabled for now to prevent any cheating
@@ -102,7 +104,10 @@ export class ChallengeGateway {
         user,
         'Challenge could not be completed',
       );
+      return false;
     }
+
+    return true;
   }
 
   @SubscribeMessage('updateChallengeData')
@@ -111,7 +116,7 @@ export class ChallengeGateway {
     @CallingUser() user: User,
     @MessageBody() data: UpdateChallengeDataDto,
   ) {
-    const challenge = await this.challengeService.getChallengeById(
+    let challenge = await this.challengeService.getChallengeById(
       data.challenge.id,
     );
 
@@ -130,7 +135,7 @@ export class ChallengeGateway {
       await this.challengeService.emitUpdateChallengeData(challenge, true);
       await this.eventService.emitUpdateEventData(ev, false);
     } else {
-      const challenge = await this.challengeService.upsertChallengeFromDto(
+      challenge = await this.challengeService.upsertChallengeFromDto(
         ability,
         data.challenge,
       );
@@ -152,5 +157,7 @@ export class ChallengeGateway {
         await this.eventService.emitUpdateEventData(ev, false);
       }
     }
+
+    return challenge.id;
   }
 }
