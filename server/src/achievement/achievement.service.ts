@@ -145,6 +145,7 @@ export class AchievementService {
     } else {
       return null;
     }
+    if (ach) this.createAchievementTrackers(undefined, ach);
     return ach;
   }
 
@@ -358,20 +359,7 @@ export class AchievementService {
     });
 
     for (const ach of uncompletedAchs) {
-      let achTracker: AchievementTracker;
-      if (ach.trackers.length === 0) {
-        // create tracker since it doesn't exist
-        achTracker = await this.prisma.achievementTracker.create({
-          data: {
-            userId: user.id,
-            achievementId: ach.id,
-            progress: 0,
-            dateComplete: null,
-          },
-        });
-      } else {
-        achTracker = ach.trackers[0];
-      }
+      let achTracker = ach.trackers[0];
 
       // In case the above completion check fails
       if (achTracker.progress < ach.requiredPoints) {
@@ -391,7 +379,7 @@ export class AchievementService {
           },
         });
 
-        if (achTracker.progress >= ach.requiredPoints) {
+        if (achTracker.progress > ach.requiredPoints) {
           achTracker = await this.prisma.achievementTracker.update({
             where: { id: achTracker.id },
             data: {
@@ -403,6 +391,49 @@ export class AchievementService {
         await this.clientService.subscribe(user, achTracker.id);
         await this.emitUpdateAchievementTracker(achTracker);
       }
+    }
+  }
+
+  async createAchievementTrackers(user?: User, achievement?: Achievement) {
+    if (user) {
+      const ability = this.abilityFactory.createForUser(user);
+
+      const achsWithoutTrackers = await this.prisma.achievement.findMany({
+        where: {
+          id: achievement?.id,
+          AND: [accessibleBy(ability).Achievement],
+          trackers: { none: { userId: user.id } },
+        },
+      });
+
+      await this.prisma.achievementTracker.createMany({
+        data: achsWithoutTrackers.map(ach => ({
+          userId: user.id,
+          progress: 0,
+          achievementId: ach.id,
+        })),
+      });
+    } else if (achievement) {
+      const usersWithoutTrackers = await this.prisma.user.findMany({
+        where: {
+          memberOf: {
+            some: { achievements: { some: { id: achievement.id } } },
+          },
+          achievementTrackers: {
+            none: { achievementId: achievement.id },
+          },
+        },
+      });
+
+      await this.prisma.achievementTracker.createMany({
+        data: usersWithoutTrackers.map(usr => ({
+          userId: usr.id,
+          progress: 0,
+          achievementId: achievement.id,
+        })),
+      });
+    } else {
+      throw 'Cannot create all possible achievement trackers in one call!';
     }
   }
 }

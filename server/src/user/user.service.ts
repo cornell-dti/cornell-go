@@ -22,6 +22,7 @@ import { Action } from '../casl/action.enum';
 import { subject } from '@casl/ability';
 import { accessibleBy } from '@casl/prisma';
 import { join } from 'path';
+import { AchievementService } from '../achievement/achievement.service';
 
 @Injectable()
 export class UserService {
@@ -34,6 +35,7 @@ export class UserService {
     private orgService: OrganizationService,
     private clientService: ClientService,
     private abilityFactory: CaslAbilityFactory,
+    private achievementService: AchievementService,
   ) {}
 
   /** Find a user by their authentication token */
@@ -111,6 +113,8 @@ export class UserService {
 
       await this.orgService.joinOrganization(user, cornellOrg.accessCode);
     }
+
+    await this.achievementService.createAchievementTrackers(user);
 
     return user;
   }
