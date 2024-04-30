@@ -3,13 +3,27 @@ import 'package:game/journeys/journeys_page.dart';
 import 'package:game/challenges/challenges_page.dart';
 
 class HomeNavBar extends StatefulWidget {
-  const HomeNavBar({super.key});
+  String? myDifficulty;
+  List<String>? myLocations;
+  List<String>? myCategories;
+  String? mySearchText;
+  HomeNavBar({
+    Key? key,
+    String? difficulty,
+    List<String>? locations,
+    List<String>? categories,
+    String? searchText,
+  }) : super(key: key) {
+    myDifficulty = difficulty;
+    myLocations = locations;
+    myCategories = categories;
+    mySearchText = searchText;
+  }
 
   @override
   State<HomeNavBar> createState() => _HomeNavbarState();
 }
 
-/// AnimationControllers can be created with `vsync: this` because of TickerProviderStateMixin.
 class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
   late TabController _tabController;
 
@@ -22,19 +36,50 @@ class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: new PreferredSize(
-        preferredSize: const Size.fromHeight(50.0),
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(50.0),
         child: AppBar(
           backgroundColor: Color(0xFFED5656),
           titleTextStyle: TextStyle(fontSize: 25, fontWeight: FontWeight.w500),
           bottom: TabBar(
-            dividerColor: Color.fromARGB(255, 0, 0, 0),
-            indicatorColor: Color(0xFFFFFFFF),
             controller: _tabController,
+            indicator: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: Colors.yellow,
+                  width: 2.0,
+                ),
+              ),
+            ),
+            overlayColor: MaterialStateProperty.resolveWith<Color?>(
+              //transparent when clicked -- double check with designers
+              (Set<MaterialState> states) {
+                if (states.contains(MaterialState.pressed)) {
+                  return Colors.transparent;
+                }
+                return null;
+              },
+            ),
+            labelColor: Colors.white,
+            unselectedLabelColor: Colors.black.withOpacity(0.5),
             tabs: const <Widget>[
-              Tab(text: 'Challenges'),
               Tab(
-                text: 'Journeys',
+                child: Padding(
+                  padding: EdgeInsets.only(bottom: 20),
+                  child: Text(
+                    'Challenges',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ),
+              Tab(
+                child: Padding(
+                  padding: EdgeInsets.only(bottom: 20),
+                  child: Text(
+                    'Journeys',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  ),
+                ),
               ),
             ],
           ),
@@ -42,12 +87,22 @@ class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
       ),
       body: TabBarView(
         controller: _tabController,
-        children: const <Widget>[
+        children: <Widget>[
           Center(
-            child: ChallengesPage(),
+            child: ChallengesPage(
+              difficulty: widget.myDifficulty,
+              categories: widget.myCategories,
+              locations: widget.myLocations,
+              searchText: widget.mySearchText,
+            ),
           ),
           Center(
-            child: JourneysPage(),
+            child: JourneysPage(
+              difficulty: widget.myDifficulty,
+              categories: widget.myCategories,
+              locations: widget.myLocations,
+              searchText: widget.mySearchText,
+            ),
           ),
         ],
       ),
