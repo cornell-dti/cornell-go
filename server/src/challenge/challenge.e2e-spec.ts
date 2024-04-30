@@ -106,10 +106,10 @@ describe('ChallengeModule E2E', () => {
       const trackerScore = tracker.score;
 
       let chal = await prisma.challenge.findFirstOrThrow({
-        where: { id: tracker.curChallengeId },
+        where: { id: tracker.curChallengeId! },
       });
 
-      await challengeService.completeChallenge(user, chal.id);
+      await challengeService.completeChallenge(user);
 
       const score2 = (
         await prisma.user.findFirstOrThrow({
@@ -198,12 +198,8 @@ describe('ChallengeModule E2E', () => {
       };
 
       await challengeService.upsertChallengeFromDto(fullAbility, secondChalDto);
-      const nextChal = await challengeService.nextChallenge(
-        await prisma.challenge.findFirstOrThrow({
-          where: { linkedEventId: event.id, eventIndex: 0 },
-        }),
-      );
-      expect(nextChal.eventIndex).toEqual(1);
+      const nextChal = await challengeService.nextChallenge(tracker);
+      expect(nextChal?.eventIndex).toEqual(1);
       const evchal = await challengeService.getFirstChallengeForEvent(event);
       expect(evchal.eventIndex).toEqual(0);
     });

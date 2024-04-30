@@ -63,6 +63,7 @@ describe('AchievementModule E2E', () => {
         EventService,
         ClientService,
         GroupService,
+        ChallengeService,
         OrganizationService,
         CaslAbilityFactory,
       ],
