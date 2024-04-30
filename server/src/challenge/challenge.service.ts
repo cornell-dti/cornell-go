@@ -158,7 +158,7 @@ export class ChallengeService {
     });
 
     const updatedChal = await this.getChallengeById(challengeId);
-    if(updatedChal != null)
+    if (updatedChal != null)
       await this.emitUpdateChallengeData(updatedChal, false);
 
     return true;
