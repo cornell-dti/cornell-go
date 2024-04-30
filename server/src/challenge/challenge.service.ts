@@ -92,6 +92,8 @@ export class ChallengeService {
       },
     });
 
+    console.log(nextChal?.eventIndex);
+
     return nextChal;
   }
 
@@ -136,6 +138,8 @@ export class ChallengeService {
     const curChallenge = await this.prisma.challenge.findUniqueOrThrow({
       where: { id: eventTracker.curChallengeId },
     });
+
+    console.log(curChallenge.eventIndex);
 
     const nextChallenge = await this.nextChallenge(eventTracker);
 
