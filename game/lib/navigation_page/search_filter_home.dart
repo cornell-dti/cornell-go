@@ -54,10 +54,12 @@ class _SearchFilterBarState extends State<SearchFilterBar>
         color: Color(0xFFED5656),
         width: double.infinity,
         height: double.infinity,
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(0, 50, 0, 0),
+        child: Container(
+          // padding: EdgeInsets.only(top: 50),
+          height: MediaQuery.sizeOf(context).height * 0.175,
           child: Column(
             children: [
+              Spacer(),
               Stack(
                 children: [
                   Container(
@@ -118,7 +120,7 @@ class _SearchFilterBarState extends State<SearchFilterBar>
               Column(
                 children: [
                   Container(
-                    height: 627,
+                    height: MediaQuery.sizeOf(context).height * 0.825,
                     child: HomeNavBar(
                       difficulty: selectedDifficulty,
                       locations: selectedLocations,

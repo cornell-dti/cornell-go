@@ -63,8 +63,24 @@ class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
             labelColor: Colors.white,
             unselectedLabelColor: Colors.black.withOpacity(0.5),
             tabs: const <Widget>[
-              Tab(text: 'Challenges'),
-              Tab(text: 'Journeys'),
+              Tab(
+                child: Padding(
+                  padding: EdgeInsets.only(bottom: 20),
+                  child: Text(
+                    'Challenges',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ),
+              Tab(
+                child: Padding(
+                  padding: EdgeInsets.only(bottom: 20),
+                  child: Text(
+                    'Journeys',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
