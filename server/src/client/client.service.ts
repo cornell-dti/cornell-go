@@ -81,6 +81,9 @@ export class ClientService {
   }
 
   async getAffectedUsers(target: string) {
+    if (process.env.TESTING_E2E === 'true') {
+      return [];
+    }
     // Get list of targeted sockets
     const socks = await this.gateway.server.in(target).fetchSockets();
 
