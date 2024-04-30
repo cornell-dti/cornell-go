@@ -118,7 +118,7 @@ class _SearchFilterBarState extends State<SearchFilterBar>
               Column(
                 children: [
                   Container(
-                    height: 628,
+                    height: 627,
                     child: HomeNavBar(
                       difficulty: selectedDifficulty,
                       locations: selectedLocations,

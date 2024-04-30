@@ -21,7 +21,6 @@ import {
   UpdateEventDataDto,
   RequestRecommendedEventsDto,
   RequestFilteredEventsDto,
-  RequestFilteredEventsDto,
   UseEventTrackerHintDto,
 } from './event.dto';
 import { RequestEventTrackerDataDto } from '../challenge/challenge.dto';
