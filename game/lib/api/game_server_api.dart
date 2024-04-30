@@ -3,22 +3,23 @@
 // OTHERWISE YOUR CHANGES MAY BE OVERWRITTEN!
 
 import 'dart:async';
+import 'dart:convert';
 import 'package:game/api/game_client_dto.dart';
 import 'package:socket_io_client/socket_io_client.dart';
 
 class GameServerApi {
   final Future<bool> Function() _refreshAccess;
-  Socket _socket;
 
   String _refreshEv = "";
   dynamic _refreshDat = "";
+  dynamic _refreshResolver = (arg) {};
 
   GameServerApi(Socket socket, Future<bool> Function() refresh)
       : _refreshAccess = refresh,
         _socket = socket {
     _socket.onError((data) async {
       if (await _refreshAccess()) {
-        _socket.emit(_refreshEv, _refreshDat);
+        _socket.emitWithAck(_refreshEv, _refreshDat, ack: _refreshResolver);
       }
     });
   }
@@ -27,101 +28,74 @@ class GameServerApi {
     _socket = socket;
     _socket.onError((data) async {
       if (await _refreshAccess()) {
-        _socket.emit(_refreshEv, _refreshDat);
+        _socket.emitWithAck(_refreshEv, _refreshDat, ack: _refreshResolver);
       }
     });
   }
 
-  void _invokeWithRefresh(String ev, Map<String, dynamic> data) {
+  Future<dynamic> _invokeWithRefresh(String ev, Map<String, dynamic> data) {
+    Completer<dynamic> completer = Completer();
+
+    final completionFunc = (arg) {
+      if (completer.isCompleted) {
+        return;
+      }
+
+      completer.complete(arg);
+    };
+
+    Future.delayed(Duration(seconds: 2))
+        .then((value) => completer.complete(null));
+
     _refreshEv = ev;
     _refreshDat = data;
-    //print(ev);
-    _socket.emit(ev, data);
+    _refreshResolver = completionFunc;
+
+    print(ev);
+    _socket.emitWithAck(ev, data, ack: completionFunc);
+
+    return completer.future;
   }
 
-  void requestAchievementData(RequestAchievementDataDto dto) =>
+  Future<int?> requestAchievementData(RequestAchievementDataDto dto) =>
       _invokeWithRefresh("requestAchievementData", dto.toJson());
 
-  void updateAchievementData(UpdateAchievementDataDto dto) =>
+  Future<String?> updateAchievementData(UpdateAchievementDataDto dto) =>
       _invokeWithRefresh("updateAchievementData", dto.toJson());
 
-  void requestChallengeData(RequestChallengeDataDto dto) =>
+  Future<int?> requestChallengeData(RequestChallengeDataDto dto) =>
       _invokeWithRefresh("requestChallengeData", dto.toJson());
 
-  void completedChallenge(CompletedChallengeDto dto) =>
-      _invokeWithRefresh("completedChallenge", dto.toJson());
-
-  void updateChallengeData(UpdateChallengeDataDto dto) =>
+  Future<String?> updateChallengeData(UpdateChallengeDataDto dto) =>
       _invokeWithRefresh("updateChallengeData", dto.toJson());
 
-  void requestEventData(RequestEventDataDto dto) =>
+  Future<int?> requestEventData(RequestEventDataDto dto) =>
       _invokeWithRefresh("requestEventData", dto.toJson());
 
-  void requestFilteredEventIds(RequestFilteredEventsDto dto) =>
+  Future<int?> requestFilteredEventIds(RequestFilteredEventsDto dto) =>
       _invokeWithRefresh("requestFilteredEventIds", dto.toJson());
 
-  void requestRecommendedEvents(RequestRecommendedEventsDto dto) =>
+  Future<int?> requestRecommendedEvents(RequestRecommendedEventsDto dto) =>
       _invokeWithRefresh("requestRecommendedEvents", dto.toJson());
 
-  void requestEventLeaderData(RequestEventLeaderDataDto dto) =>
+  Future<int?> requestEventLeaderData(RequestEventLeaderDataDto dto) =>
       _invokeWithRefresh("requestEventLeaderData", dto.toJson());
 
-  void requestEventTrackerData(RequestEventTrackerDataDto dto) =>
+  Future<int?> requestEventTrackerData(RequestEventTrackerDataDto dto) =>
       _invokeWithRefresh("requestEventTrackerData", dto.toJson());
 
-  void useEventTrackerHint(UseEventTrackerHintDto dto) =>
-      _invokeWithRefresh("useEventTrackerHint", dto.toJson());
-
-  void updateEventData(UpdateEventDataDto dto) =>
+  Future<String?> updateEventData(UpdateEventDataDto dto) =>
       _invokeWithRefresh("updateEventData", dto.toJson());
 
-  void requestGroupData(RequestGroupDataDto dto) =>
-      _invokeWithRefresh("requestGroupData", dto.toJson());
-
-  void joinGroup(JoinGroupDto dto) =>
-      _invokeWithRefresh("joinGroup", dto.toJson());
-
-  void leaveGroup(LeaveGroupDto dto) =>
-      _invokeWithRefresh("leaveGroup", dto.toJson());
-
-  void setCurrentEvent(SetCurrentEventDto dto) =>
-      _invokeWithRefresh("setCurrentEvent", dto.toJson());
-
-  void updateGroupData(UpdateGroupDataDto dto) =>
-      _invokeWithRefresh("updateGroupData", dto.toJson());
-
-  void sendGroupInvite(SendGroupInviteDto dto) =>
-      _invokeWithRefresh("sendGroupInvite", dto.toJson());
-
-  void requestOrganizationData(RequestOrganizationDataDto dto) =>
+  Future<int?> requestOrganizationData(RequestOrganizationDataDto dto) =>
       _invokeWithRefresh("requestOrganizationData", dto.toJson());
 
-  void updateOrganizationData(UpdateOrganizationDataDto dto) =>
+  Future<String?> updateOrganizationData(UpdateOrganizationDataDto dto) =>
       _invokeWithRefresh("updateOrganizationData", dto.toJson());
 
-  void requestAllUserData(RequestAllUserDataDto dto) =>
+  Future<int?> requestAllUserData(RequestAllUserDataDto dto) =>
       _invokeWithRefresh("requestAllUserData", dto.toJson());
 
-  void requestUserData(RequestUserDataDto dto) =>
-      _invokeWithRefresh("requestUserData", dto.toJson());
-
-  void updateUserData(UpdateUserDataDto dto) =>
-      _invokeWithRefresh("updateUserData", dto.toJson());
-
-  void setAuthToDevice(SetAuthToDeviceDto dto) =>
-      _invokeWithRefresh("setAuthToDevice", dto.toJson());
-
-  void setAuthToOAuth(SetAuthToOAuthDto dto) =>
-      _invokeWithRefresh("setAuthToOAuth", dto.toJson());
-
-  void banUser(BanUserDto dto) => _invokeWithRefresh("banUser", dto.toJson());
-
-  void addManager(AddManagerDto dto) =>
-      _invokeWithRefresh("addManager", dto.toJson());
-
-  void joinOrganization(JoinOrganizationDto dto) =>
-      _invokeWithRefresh("joinOrganization", dto.toJson());
-
-  void closeAccount(CloseAccountDto dto) =>
-      _invokeWithRefresh("closeAccount", dto.toJson());
+  Future<String?> addManager(AddManagerDto dto) async =>
+      await _invokeWithRefresh("addManager", dto.toJson());
 }

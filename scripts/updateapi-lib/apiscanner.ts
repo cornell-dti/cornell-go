@@ -10,6 +10,7 @@ export function getApiDefinitions() {
 
   const apiDefs: ApiDefs = {
     serverEntrypoints: new Map(),
+    serverAcks: new Map(),
     clientEntrypoints: new Map(),
   };
 
@@ -48,6 +49,49 @@ export function getApiDefinitions() {
           .getParameterOrThrow((param) => !!param.getDecorator("MessageBody"))
           .getType()
           .getText();
+
+        if (!func.getReturnType().getText().startsWith("Promise")) {
+          console.log(
+            `Function ${ev} does not return a promise/is not async! Skipping...`
+          );
+          continue;
+        }
+
+        let ackType = func.getReturnType().getTypeArguments()[0];
+
+        if (ackType.isUnion()) {
+          const unionTypes = ackType.getUnionTypes();
+          if (unionTypes.length > 2) {
+            console.log(
+              `Function ${ev} has more than 1 union type! Must be in the form <number|boolean|string> | <undefined | null>! Skipping...`
+            );
+            continue;
+          }
+
+          ackType =
+            unionTypes[0].isNull() || unionTypes[0].isUndefined()
+              ? unionTypes[1]
+              : unionTypes[0];
+        }
+
+        const ackTypeName = ackType.isString()
+          ? "string"
+          : ackType.isNumber()
+          ? "number"
+          : ackType.isBoolean()
+          ? "boolean"
+          : null;
+
+        console.log(ev, ackType.getText());
+
+        if (!ackTypeName) {
+          console.log(
+            `Function ${ev} does not return one of number, boolean, or string! Skipping...`
+          );
+          continue;
+        }
+
+        apiDefs.serverAcks.set(ev, ackTypeName);
 
         if (dto.includes(".")) {
           dto = dto.split(".").pop()!;

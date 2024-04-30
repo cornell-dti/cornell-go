@@ -250,41 +250,59 @@ export function getDartServerApiFile(apiDefs: ApiDefs) {
   
   class GameServerApi {
     final Future<bool> Function() _refreshAccess;
-    Socket _socket;
-  
-    String _refreshEv = "";
-    dynamic _refreshDat = "";
-  
-    GameServerApi(Socket socket, Future<bool> Function() refresh)
-        : _refreshAccess = refresh,
-          _socket = socket {
-      _socket.onError((data) async {
-        if (await _refreshAccess()) {
-          _socket.emit(_refreshEv, _refreshDat);
-        }
-      });
-    }
-  
-    void replaceSocket(Socket socket) {
-      _socket = socket;
-      _socket.onError((data) async {
-        if (await _refreshAccess()) {
-          _socket.emit(_refreshEv, _refreshDat);
-        }
-      });
-    }
-  
-    void _invokeWithRefresh(String ev, Map<String, dynamic> data) {
-      _refreshEv = ev;
-      _refreshDat = data;
-      //print(ev);
-      _socket.emit(ev, data);
-    }
+    
+  String _refreshEv = "";
+  dynamic _refreshDat = "";
+  dynamic _refreshResolver = (arg) {};
+
+  GameServerApi(Socket socket, Future<bool> Function() refresh)
+      : _refreshAccess = refresh,
+        _socket = socket {
+    _socket.onError((data) async {
+      if (await _refreshAccess()) {
+        _socket.emitWithAck(_refreshEv, _refreshDat, ack: _refreshResolver);
+      }
+    });
+  }
+
+  void replaceSocket(Socket socket) {
+    _socket = socket;
+    _socket.onError((data) async {
+      if (await _refreshAccess()) {
+        _socket.emitWithAck(_refreshEv, _refreshDat, ack: _refreshResolver);
+      }
+    });
+  }
+
+  Future<dynamic> _invokeWithRefresh(String ev, Map<String, dynamic> data) {
+    Completer<dynamic> completer = Completer();
+
+    final completionFunc = (arg) {
+      if (completer.isCompleted) {
+        return;
+      }
+
+      completer.complete(arg);
+    };
+
+    Future.delayed(Duration(seconds: 2))
+        .then((value) => completer.complete(null));
+
+    _refreshEv = ev;
+    _refreshDat = data;
+    _refreshResolver = completionFunc;
+
+    print(ev);
+    _socket.emitWithAck(ev, data, ack: completionFunc);
+
+    return completer.future;
+  }
   `;
 
   for (const [ev, dto] of apiDefs.serverEntrypoints.entries()) {
+    const ackType = toDartType(apiDefs.serverAcks.get(ev)!, "x");
     dartCode += `
-      void ${ev}(${dto} dto) => _invokeWithRefresh(
+      Future<${ackType}?> ${ev}(${dto} dto) async => await _invokeWithRefresh(
         "${ev}", dto.toJson());
 
     `;
