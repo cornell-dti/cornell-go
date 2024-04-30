@@ -44,7 +44,24 @@ class JourneyCellDto {
 }
 
 class JourneysPage extends StatefulWidget {
-  const JourneysPage({Key? key}) : super(key: key);
+  String? myDifficulty;
+  List<String>? myLocations;
+  List<String>? myCategories;
+  String? mySearchText;
+  // const JourneysPage({Key? key}) : super(key: key);
+
+  JourneysPage(
+      {Key? key,
+      String? difficulty,
+      List<String>? locations,
+      List<String>? categories,
+      String? searchText})
+      : super(key: key) {
+    myDifficulty = difficulty;
+    myLocations = locations;
+    myCategories = categories;
+    mySearchText = searchText;
+  }
 
   @override
   State<JourneysPage> createState() => _JourneysPageState();
@@ -80,191 +97,182 @@ class _JourneysPageState extends State<JourneysPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: BoxDecoration(
-          color: Color.fromARGB(255, 255, 248, 241), // Background color
-        ),
-        child: Center(
-          child: Padding(
-            padding: EdgeInsets.all(16),
-            child: Stack(
-              children: [
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Image(
-                    image: AssetImage('assets/images/go-logo.png'),
-                    width: MediaQuery.of(context).size.width / 3,
-                    height: MediaQuery.of(context).size.height / 3,
-                  ),
+        body: Container(
+      width: double.infinity,
+      height: double.infinity,
+      decoration: BoxDecoration(
+        color: Color.fromARGB(255, 255, 248, 241), // Background color
+      ),
+      child: Center(
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child: Stack(
+            children: [
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: Image(
+                  image: AssetImage('assets/images/go-logo.png'),
+                  width: MediaQuery.of(context).size.width / 3,
+                  height: MediaQuery.of(context).size.height / 3,
                 ),
-                Column(
-                  children: [
-                    Container(
-                      height: 30,
-                      color: Color.fromARGB(51, 217, 217, 217),
-                      child: TextField(
-                        decoration: InputDecoration(
-                          prefixIcon: Icon(
-                            Icons.search,
-                            color: Color.fromARGB(204, 0, 0, 0),
-                            size: 12,
-                          ),
-                          border: OutlineInputBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(1.0))),
-                          labelText:
-                              "Search a challenge name, location, etc...",
-                          labelStyle: TextStyle(
-                            color: Color.fromARGB(76, 0, 0, 0),
-                            fontSize: 12,
-                            fontFamily: 'Lato',
-                          ),
-                        ),
-                      ),
-                    ),
-                    Container(
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 24.0, bottom: 24.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Container(
-                              height: 30,
-                              child: TextButton.icon(
-                                  onPressed: openFilter,
-                                  icon: Icon(
-                                    Icons.filter_list_rounded,
-                                    color: Color.fromARGB(255, 0, 0, 0),
-                                    size: 20.0,
-                                  ),
-                                  style: ButtonStyle(
-                                    backgroundColor:
-                                        MaterialStateProperty.all<Color>(
-                                            Color.fromARGB(153, 217, 217, 217)),
-                                    padding: MaterialStateProperty.all(
-                                      EdgeInsets.only(right: 16.0, left: 16.0),
-                                    ),
-                                    shape: MaterialStateProperty.all(
-                                        RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(3.0),
-                                    )),
-                                  ),
-                                  label: Text(
-                                    "Filter By",
-                                    style: TextStyle(
-                                      color: Color.fromARGB(255, 0, 0, 0),
-                                      fontSize: 15,
-                                      fontFamily: 'Inter',
-                                    ),
-                                  )),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Expanded(child: Consumer6<UserModel, EventModel, GroupModel,
-                            TrackerModel, ChallengeModel, ApiClient>(
-                        builder: (context, userModel, myEventModel, groupModel,
-                            trackerModel, challengeModel, apiClient, child) {
-                      final allowedEventIds = userModel.getAvailableEventIds();
+              ),
+              Column(
+                children: [
+                  Expanded(child: Consumer6<UserModel, EventModel, GroupModel,
+                          TrackerModel, ChallengeModel, ApiClient>(
+                      builder: (context, userModel, myEventModel, groupModel,
+                          trackerModel, challengeModel, apiClient, child) {
+                    final allowedEventIds = userModel.getAvailableEventIds();
 
-                      final events = allowedEventIds
-                          .map((id) => myEventModel.getEventById(id))
-                          .filter((element) => element != null)
-                          .map((e) => e!)
-                          .toList();
+                    final events = allowedEventIds
+                        .map((id) => myEventModel.getEventById(id))
+                        .filter((element) => element != null)
+                        .map((e) => e!)
+                        .toList();
+                    eventData.clear();
 
-                      eventData.clear();
+                    for (EventDto event in events) {
+                      var tracker = trackerModel.trackerByEventId(event.id);
+                      var numberCompleted = tracker?.prevChallenges.length ?? 0;
+                      var complete =
+                          (numberCompleted == event.challenges?.length);
+                      var locationCount = event.challenges?.length ?? 0;
 
-                      for (EventDto event in events) {
-                        var tracker = trackerModel.trackerByEventId(event.id);
-                        var numberCompleted =
-                            tracker?.prevChallenges.length ?? 0;
-                        var complete =
-                            (numberCompleted == event.challenges?.length);
-                        var locationCount = event.challenges?.length ?? 0;
+                      if (locationCount < 2) continue;
+                      var totalPoints = 0;
 
-                        if (locationCount < 2) continue;
-                        var totalPoints = 0;
+                      var challenge = challengeModel
+                          .getChallengeById(event.challenges?[0] ?? "");
 
-                        var challenge = challengeModel
-                            .getChallengeById(event.challenges?[0] ?? "");
+                      if (challenge == null) continue;
+                      var location = challenge.location?.name;
+                      var imageUrl = challenge.imageUrl;
 
-                        if (challenge == null) continue;
-                        var location = challenge.location?.name;
-                        var imageUrl = challenge.imageUrl;
-
-                        for (var challengeId in event.challenges ?? []) {
-                          var challenge =
-                              challengeModel.getChallengeById(challengeId);
-                          if (challenge != null) {
-                            totalPoints += challenge.points ?? 0;
-                          }
-                        }
-                        DateTime now = DateTime.now();
-                        DateTime endtime = HttpDate.parse(event.endTime ?? "");
-
-                        Duration timeTillExpire = endtime.difference(now);
-                        if (!complete && !timeTillExpire.isNegative) {
-                          eventData.add(JourneyCellDto(
-                            location:
-                                friendlyLocation[challenge.location] ?? "",
-                            name: event.name ?? "",
-                            lat: challenge.latF ?? null,
-                            long: challenge.longF ?? null,
-                            imgUrl: imageUrl ??
-                                "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png",
-                            complete: complete,
-                            locationCount: locationCount,
-                            numberCompleted: numberCompleted,
-                            description: event.description ?? "",
-                            difficulty:
-                                friendlyDifficulty[event.difficulty] ?? "",
-                            points: totalPoints,
-                            eventId: event.id,
-                          ));
-                        } else if (event.id == groupModel.curEventId) {
-                          apiClient.serverApi?.setCurrentEvent(
-                              SetCurrentEventDto(eventId: ""));
+                      for (var challengeId in event.challenges ?? []) {
+                        var challenge =
+                            challengeModel.getChallengeById(challengeId);
+                        if (challenge != null) {
+                          totalPoints += challenge.points ?? 0;
                         }
                       }
-                      return ListView.separated(
-                        padding: const EdgeInsets.symmetric(horizontal: 3),
-                        itemCount: eventData.length,
-                        itemBuilder: (context, index) {
-                          return JourneyCell(
-                              key: UniqueKey(),
-                              eventData[index].name,
-                              eventData[index].lat,
-                              eventData[index].long,
-                              eventData[index].location,
-                              eventData[index].imgUrl,
-                              eventData[index].description,
-                              eventData[index].locationCount,
-                              eventData[index].numberCompleted,
-                              eventData[index].complete,
-                              eventData[index].difficulty,
-                              eventData[index].points,
-                              eventData[index].eventId);
-                        },
-                        physics: BouncingScrollPhysics(),
-                        separatorBuilder: (context, index) {
-                          return SizedBox(height: 10);
-                        },
-                      );
-                    }))
-                  ],
-                ),
-              ],
-            ),
+                      DateTime now = DateTime.now();
+                      DateTime endtime = HttpDate.parse(event.endTime ?? "");
+
+                      Duration timeTillExpire = endtime.difference(now);
+
+                      final challengeLocation = challenge.location?.name ?? "";
+                      final challengeName = challenge.name ?? "";
+
+                      bool eventMatchesDifficultySelection = true;
+                      bool eventMatchesCategorySelection = true;
+                      bool eventMatchesLocationSelection = true;
+                      bool eventMatchesSearchText = true;
+                      String? searchTerm = widget.mySearchText;
+
+                      if (searchTerm?.length == 0) {
+                        eventMatchesSearchText = true;
+                        if (widget.myDifficulty?.length == 0 ||
+                            widget.myDifficulty == event.difficulty?.name)
+                          eventMatchesDifficultySelection = true;
+                        else
+                          eventMatchesDifficultySelection = false;
+
+                        if (widget.myLocations?.isNotEmpty ?? false) {
+                          if (widget.myLocations?.contains(challengeLocation) ??
+                              false)
+                            eventMatchesLocationSelection = true;
+                          else
+                            eventMatchesLocationSelection = false;
+                        } else
+                          eventMatchesLocationSelection = true;
+
+                        if (widget.myCategories?.isNotEmpty ?? false) {
+                          if (widget.myCategories
+                                  ?.contains(event.category?.name) ??
+                              false)
+                            eventMatchesCategorySelection = true;
+                          else
+                            eventMatchesCategorySelection = false;
+                        } else
+                          eventMatchesCategorySelection = true;
+                      } else {
+                        if (searchTerm != null &&
+                            challengeLocation
+                                .toLowerCase()
+                                .contains(searchTerm.toLowerCase())) {
+                          eventMatchesSearchText = true;
+                        } else {
+                          eventMatchesSearchText = false;
+                          if (searchTerm != null &&
+                              challengeName
+                                  .toLowerCase()
+                                  .contains(searchTerm.toLowerCase())) {
+                            eventMatchesSearchText = true;
+                          } else
+                            eventMatchesSearchText = false;
+                        }
+                      }
+
+                      if (!complete &&
+                          !timeTillExpire.isNegative &&
+                          eventMatchesDifficultySelection &&
+                          eventMatchesCategorySelection &&
+                          eventMatchesLocationSelection &&
+                          eventMatchesSearchText) {
+                        eventData.add(JourneyCellDto(
+                          location: friendlyLocation[challenge.location] ?? "",
+                          name: event.name ?? "",
+                          lat: challenge.latF ?? null,
+                          long: challenge.longF ?? null,
+                          imgUrl: imageUrl ??
+                              "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png",
+                          complete: complete,
+                          locationCount: locationCount,
+                          numberCompleted: numberCompleted,
+                          description: event.description ?? "",
+                          difficulty:
+                              friendlyDifficulty[event.difficulty] ?? "",
+                          points: totalPoints,
+                          eventId: event.id,
+                        ));
+                      } else if (event.id == groupModel.curEventId) {
+                        apiClient.serverApi
+                            ?.setCurrentEvent(SetCurrentEventDto(eventId: ""));
+                      }
+                    }
+                    return ListView.separated(
+                      padding: const EdgeInsets.symmetric(horizontal: 3),
+                      itemCount: eventData.length,
+                      itemBuilder: (context, index) {
+                        return JourneyCell(
+                            key: UniqueKey(),
+                            eventData[index].name,
+                            eventData[index].lat,
+                            eventData[index].long,
+                            eventData[index].location,
+                            eventData[index].imgUrl,
+                            eventData[index].description,
+                            eventData[index].locationCount,
+                            eventData[index].numberCompleted,
+                            eventData[index].complete,
+                            eventData[index].difficulty,
+                            eventData[index].points,
+                            eventData[index].eventId);
+                      },
+                      physics: BouncingScrollPhysics(),
+                      separatorBuilder: (context, index) {
+                        return SizedBox(height: 10);
+                      },
+                    );
+                  }))
+                ],
+              ),
+            ],
           ),
           // ],
         ),
         // ),
       ),
-    );
+    ));
   }
 }

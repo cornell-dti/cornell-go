@@ -40,36 +40,52 @@ class ChallengeCellDto {
 }
 
 class ChallengesPage extends StatefulWidget {
-  const ChallengesPage({Key? key}) : super(key: key);
+  String? myDifficulty;
+  List<String>? myLocations;
+  List<String>? myCategories;
+  String? mySearchText;
+
+  ChallengesPage(
+      {Key? key,
+      String? difficulty,
+      List<String>? locations,
+      List<String>? categories,
+      String? searchText})
+      : super(key: key) {
+    myDifficulty = difficulty;
+    myLocations = locations;
+    myCategories = categories;
+    mySearchText = searchText;
+  }
 
   @override
-  State<ChallengesPage> createState() => _ChallengesPageState();
+  State<ChallengesPage> createState() => _ChallengesPageState(
+      myDifficulty, myLocations, myCategories, mySearchText);
 }
 
 class _ChallengesPageState extends State<ChallengesPage> {
   List<String> selectedCategories = [];
   List<String> selectedLocations = [];
   String selectedDifficulty = '';
-
+  String? mySearchText;
   List<ChallengeCellDto> eventData = [];
 
-  // Callback function to receive updated state values from the child
-  void handleFilterSubmit(List<String>? a, List<String>? b, String c) {
-    setState(() {
-      selectedCategories = a ?? [];
-      selectedLocations = b ?? [];
-      selectedDifficulty = c;
-    });
+  _ChallengesPageState(String? difficulty, List<String>? locations,
+      List<String>? categories, String? searchText) {
+    selectedDifficulty = difficulty ?? '';
+    selectedLocations = locations ?? [];
+    selectedCategories = categories ?? [];
+    mySearchText = searchText ?? '';
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-          decoration: BoxDecoration(
-            color: Color.fromARGB(255, 255, 248, 241),
-          ),
-          child: Padding(
+        decoration: BoxDecoration(
+          color: Color.fromARGB(255, 255, 248, 241),
+        ),
+        child: Padding(
             padding: EdgeInsets.all(30),
             child: Stack(
               children: [
@@ -83,78 +99,6 @@ class _ChallengesPageState extends State<ChallengesPage> {
                 ),
                 Column(
                   children: [
-                    Container(
-                      height: 30,
-                      color: Color.fromARGB(51, 217, 217, 217),
-                      child: TextField(
-                        decoration: InputDecoration(
-                          prefixIcon: Icon(
-                            Icons.search,
-                            color: Color.fromARGB(204, 0, 0, 0),
-                            size: 12,
-                          ),
-                          border: OutlineInputBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(1.0))),
-                          labelText:
-                              "Search a challenge name, location, etc...",
-                          labelStyle: TextStyle(
-                            color: Color.fromARGB(76, 0, 0, 0),
-                            fontSize: 12,
-                            fontFamily: 'Lato',
-                          ),
-                        ),
-                      ),
-                    ),
-                    Container(
-                      padding: EdgeInsets.only(top: 10, bottom: 10),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Container(
-                            height: 30,
-                            child: TextButton.icon(
-                                onPressed: () {
-                                  showModalBottomSheet(
-                                    context: context,
-                                    isScrollControlled: true,
-                                    builder: (context) => FilterForm(
-                                        onSubmit: handleFilterSubmit,
-                                        difficulty: selectedDifficulty,
-                                        locations: selectedLocations,
-                                        categories: selectedCategories),
-                                  );
-                                },
-                                icon: Icon(
-                                  Icons.filter_list_rounded,
-                                  color: Color.fromARGB(255, 0, 0, 0),
-                                  size: 20.0,
-                                ),
-                                style: ButtonStyle(
-                                  backgroundColor:
-                                      MaterialStateProperty.all<Color>(
-                                          Color.fromARGB(153, 217, 217, 217)),
-                                  padding: MaterialStateProperty.all(
-                                    EdgeInsets.only(right: 16.0, left: 16.0),
-                                  ),
-                                  shape: MaterialStateProperty.all(
-                                      RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(3.0),
-                                  )),
-                                ),
-                                label: Text(
-                                  "Filter By",
-                                  style: TextStyle(
-                                    color: Color.fromARGB(255, 0, 0, 0),
-                                    fontSize: 15,
-                                    fontFamily: 'Inter',
-                                  ),
-                                )),
-                          ),
-                        ],
-                      ),
-                    ),
                     Expanded(child: Consumer6<UserModel, EventModel, GroupModel,
                             TrackerModel, ChallengeModel, ApiClient>(
                         builder: (context, userModel, myEventModel, groupModel,
@@ -165,6 +109,7 @@ class _ChallengesPageState extends State<ChallengesPage> {
                           .filter((element) => element != null)
                           .map((e) => e!)
                           .toList();
+
                       eventData.clear();
 
                       for (EventDto event in events) {
@@ -191,44 +136,77 @@ class _ChallengesPageState extends State<ChallengesPage> {
                         final challengeLocation =
                             challenge.location?.name ?? "";
 
-                        bool eventMatchesDifficultySelection;
-                        bool eventMatchesCategorySelection;
-                        bool eventMatchesLocationSelection;
+                        bool eventMatchesDifficultySelection = true;
+                        bool eventMatchesCategorySelection = true;
+                        bool eventMatchesLocationSelection = true;
+                        bool eventMatchesSearchText = true;
+                        String? searchTerm = widget.mySearchText;
 
-                        if (selectedDifficulty.length == 0 ||
-                            selectedDifficulty == event.difficulty?.name)
+                        if (widget.myDifficulty?.length == 0 ||
+                            widget.myDifficulty == event.difficulty?.name)
                           eventMatchesDifficultySelection = true;
                         else
                           eventMatchesDifficultySelection = false;
 
-                        if (selectedLocations.length > 0) {
-                          if (selectedLocations.contains(challengeLocation))
+                        if (widget.myLocations?.isNotEmpty ?? false) {
+                          if (widget.myLocations?.contains(challengeLocation) ??
+                              false)
                             eventMatchesLocationSelection = true;
                           else
                             eventMatchesLocationSelection = false;
                         } else
                           eventMatchesLocationSelection = true;
 
-                        if (selectedCategories.length > 0) {
-                          if (selectedCategories.contains(event.category?.name))
+                        if (widget.myCategories?.isNotEmpty ?? false) {
+                          if (widget.myCategories
+                                  ?.contains(event.category?.name) ??
+                              false)
                             eventMatchesCategorySelection = true;
                           else
                             eventMatchesCategorySelection = false;
                         } else
                           eventMatchesCategorySelection = true;
+
+                        if (searchTerm?.length == 0) {
+                          eventMatchesSearchText = true;
+                        } else {
+                          // search term length > 0
+                          if (searchTerm != null &&
+                              challengeLocation
+                                  .toLowerCase()
+                                  .contains(searchTerm.toLowerCase())) {
+                            eventMatchesSearchText = true;
+                          } else {
+                            eventMatchesSearchText = false;
+                            if (searchTerm != null &&
+                                (event.name ?? "")
+                                    .toLowerCase()
+                                    .contains(searchTerm.toLowerCase())) {
+                              eventMatchesSearchText = true;
+                            } else
+                              eventMatchesSearchText = false;
+                          }
+                        }
+
+                        var imageUrl = challenge.imageUrl;
+                        if (imageUrl == null || imageUrl.length == 0) {
+                          imageUrl =
+                              "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png";
+                        }
+
                         if (!complete &&
                             !timeTillExpire.isNegative &&
                             eventMatchesDifficultySelection &&
                             eventMatchesCategorySelection &&
-                            eventMatchesLocationSelection) {
+                            eventMatchesLocationSelection &&
+                            eventMatchesSearchText) {
                           eventData.add(ChallengeCellDto(
                             location:
                                 friendlyLocation[challenge.location] ?? "",
                             name: event.name ?? "",
                             lat: challenge.latF ?? null,
                             long: challenge.longF ?? null,
-                            imgUrl: challenge.imageUrl ??
-                                "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png",
+                            imgUrl: imageUrl,
                             complete: complete,
                             description: event.description ?? "",
                             difficulty:
@@ -241,6 +219,10 @@ class _ChallengesPageState extends State<ChallengesPage> {
                               SetCurrentEventDto(eventId: ""));
                         }
                       }
+
+                      // eventCells.forEach((Widget anEventCell) {
+                      //   print("AnEventCell is " + anEventCell.toString());
+                      // });
 
                       return ListView.separated(
                         padding: const EdgeInsets.symmetric(horizontal: 3),
@@ -268,8 +250,8 @@ class _ChallengesPageState extends State<ChallengesPage> {
                   ],
                 ),
               ],
-            ),
-          )),
+            )),
+      ),
     );
   }
 }
