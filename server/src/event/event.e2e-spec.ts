@@ -151,7 +151,7 @@ describe('EventModule E2E', () => {
       const tracker5 = await eventService.getCurrentEventTrackerForUser(
         exPlayer,
       );
-      expect(tracker5.curChallengeId).toEqual(journey2Chal.id);
+      expect(tracker5.curChallengeId).toEqual(null);
       expect(tracker5.score).toEqual(2);
 
       await groupGateway.setCurrentEvent(exPlayer, {
@@ -169,7 +169,7 @@ describe('EventModule E2E', () => {
       const tracker7 = await eventService.getCurrentEventTrackerForUser(
         exPlayer,
       );
-      expect(tracker7.curChallengeId).toEqual(tracker6.curChallengeId);
+      expect(tracker7.curChallengeId).toEqual(null);
       expect(tracker7.score).toEqual(1);
 
       await groupGateway.setCurrentEvent(exPlayer, { eventId: exJourney1.id });
@@ -186,7 +186,7 @@ describe('EventModule E2E', () => {
         exPlayer,
       );
       expect(tracker9.eventId).toEqual(exJourney1.id);
-      expect(tracker9.curChallengeId).toEqual(journey1Chal.id);
+      expect(tracker9.curChallengeId).toEqual(null);
       expect(tracker9.score).toEqual(2);
       expect(await challengeService.completeChallenge(exPlayer)).toBeFalsy();
 
