@@ -74,16 +74,7 @@ class _AchievementsPageState extends State<AchievementsPage> {
                       children: [
                         Expanded(child: Consumer2<AchievementModel, ApiClient>(
                             builder: (context, achModel, apiClient, child) {
-                          final achTrackers = achModel.getAchievementTrackers();
-
-                          final achList = achTrackers
-                              .map((e) => (
-                                    e,
-                                    achModel.getAchievementById(e.achievementId)
-                                  ))
-                              .filter((e) => e.$2 != null)
-                              .map((e) => (e.$1, e.$2!))
-                              .toList();
+                          final achList = achModel.getAvailableTrackerPairs();
 
                           return ListView.separated(
                             padding: const EdgeInsets.symmetric(horizontal: 3),

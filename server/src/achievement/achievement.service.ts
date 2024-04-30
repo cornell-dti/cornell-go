@@ -334,12 +334,17 @@ export class AchievementService {
           },
           {
             // Only find non-completed achievements
-            trackers: {
-              some: {
-                userId: user.id,
-                dateComplete: null,
+            OR: [
+              {
+                trackers: {
+                  some: {
+                    userId: user.id,
+                    dateComplete: null,
+                  },
+                },
               },
-            },
+              { trackers: { none: { userId: user.id } } },
+            ],
           },
         ],
       },
@@ -385,10 +390,10 @@ export class AchievementService {
                 : null,
           },
         });
-      }
 
-      await this.clientService.subscribe(user, achTracker.id);
-      await this.emitUpdateAchievementTracker(achTracker);
+        await this.clientService.subscribe(user, achTracker.id);
+        await this.emitUpdateAchievementTracker(achTracker);
+      }
     }
   }
 }

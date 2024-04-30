@@ -55,4 +55,14 @@ class AchievementModel extends ChangeNotifier {
   List<AchievementTrackerDto> getAchievementTrackers() {
     return _trackersByAchId.valuesList();
   }
+
+  List<(AchievementTrackerDto, AchievementDto)> getAvailableTrackerPairs() {
+    final achTrackers = getAchievementTrackers();
+
+    return achTrackers
+        .map((e) => (e, getAchievementById(e.achievementId)))
+        .filter((e) => e.$2 != null)
+        .map((e) => (e.$1, e.$2!))
+        .toList();
+  }
 }
