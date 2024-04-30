@@ -4,7 +4,6 @@ import 'package:game/model/challenge_model.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/tracker_model.dart';
 import 'package:game/model/user_model.dart';
-import 'package:game/profile/profile_page.dart';
 import 'package:game/profile/completed_challenge_cell.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:intl/intl.dart';
@@ -47,8 +46,6 @@ class CompletedChallengesPage extends StatelessWidget {
               child: CircularProgressIndicator(),
             );
           }
-          var username = userModel.userData?.username;
-          var score = userModel.userData?.score;
 
           List<Tuple2<DateTime, EventDto>> completedEvents = [];
 
@@ -77,7 +74,7 @@ class CompletedChallengesPage extends StatelessWidget {
           //Sort so that the most recent events are first
           completedEvents.sort((a, b) => b.item1.compareTo(a.item1));
           final itemCount = completedEvents.length;
-          return ListView.separated(
+          return ListView.builder(
               itemBuilder: (context, index) {
                 var event = completedEvents[index].item2;
                 var date = completedEvents[index].item1;
@@ -86,22 +83,18 @@ class CompletedChallengesPage extends StatelessWidget {
 
                 var pictureList = <String>[];
                 var locationList = [];
-                for (var challengeId in event.challenges ?? []) {
-                  var challenge = challengeModel.getChallengeById(challengeId);
-                  if (challenge != null) {
-                    pictureList.add(challenge.imageUrl!);
-                    locationList.add(challenge.location);
-                  }
-                }
-
-                //Calculate totalPoints.
                 var totalPoints = 0;
                 for (var challengeId in event.challenges ?? []) {
                   var challenge = challengeModel.getChallengeById(challengeId);
                   if (challenge != null) {
+                    pictureList.add(challenge.imageUrl ??
+                        "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png");
+                    locationList
+                        .add(friendlyLocation[challenge.location ?? 'ANY']);
                     totalPoints += challenge.points ?? 0;
                   }
                 }
+
                 return CompletedChallengeFull(
                   name: event.name!,
                   pictures: pictureList,
@@ -112,7 +105,6 @@ class CompletedChallengesPage extends StatelessWidget {
                   points: totalPoints,
                 );
               },
-              separatorBuilder: (context, index) => const Divider(),
               itemCount: itemCount);
         }));
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_config/flutter_config.dart';
+import 'package:game/loading_page/loading_page.dart';
 
 // imports for google maps
 import 'dart:io' show Platform;
@@ -22,8 +23,6 @@ import 'package:game/widget/game_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:game/color_palette.dart';
 
-import 'dart:io' show Platform;
-
 const ENV_URL = String.fromEnvironment('API_URL', defaultValue: "");
 
 final storage = FlutterSecureStorage();
@@ -36,7 +35,7 @@ void main() async {
   final GoogleMapsFlutterPlatform platform = GoogleMapsFlutterPlatform.instance;
   // should only apply to Android - needs to be tested for iOS
   if (platform is GoogleMapsFlutterAndroid) {
-    (platform as GoogleMapsFlutterAndroid).useAndroidViewSurface = true;
+    (platform).useAndroidViewSurface = true;
     initializeMapRenderer();
   }
   // load environment variables
@@ -104,20 +103,17 @@ class MyApp extends StatelessWidget {
         ],
         child: GameWidget(
             child: MaterialApp(
-          title: 'CornellGO!',
-          localizationsDelegates: [
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          supportedLocales: const [Locale('en', '')],
-          theme: ThemeData(
-              fontFamily: 'Poppins', primarySwatch: ColorPalette.BigRed),
-          home: StreamBuilder<bool>(
-              stream: Stream.fromFuture(client.tryRelog()),
-              builder: (stream, snapshot) => (snapshot.data == null)
-                  ? Container()
-                  : (snapshot.data! ? BottomNavBar() : SplashPageWidget())),
-        )));
+                title: 'CornellGO!',
+                localizationsDelegates: [
+                  GlobalMaterialLocalizations.delegate,
+                  GlobalWidgetsLocalizations.delegate,
+                  GlobalCupertinoLocalizations.delegate,
+                ],
+                supportedLocales: const [Locale('en', '')],
+                theme: ThemeData(
+                    fontFamily: 'Poppins',
+                    primarySwatch: ColorPalette.BigRed,
+                    useMaterial3: false),
+                home: LoadingPageWidget(client.tryRelog()))));
   }
 }

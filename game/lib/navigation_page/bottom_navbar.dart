@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:game/api/game_api.dart';
 import 'package:game/global_leaderboard/global_leaderboard_widget.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:game/profile/profile_page.dart';
+import 'package:game/splash_page/splash_page.dart';
+import 'package:game/utils/utility_functions.dart';
+import 'package:provider/provider.dart';
 import 'home_navbar.dart';
 import 'search_filter_home.dart';
 
@@ -30,9 +34,26 @@ class _BottomNavBarState extends State<BottomNavBar> {
 
   @override
   Widget build(BuildContext context) {
+    final client = Provider.of<ApiClient>(context);
+
     return Scaffold(
       body: Center(
-        child: _widgetOptions.elementAt(_selectedIndex),
+        child: StreamBuilder(
+            stream: client.clientApi.disconnectedStream,
+            builder: (context, snapshot) {
+              if (client.serverApi == null) {
+                print("ServerApi == null");
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => SplashPageWidget()));
+                  displayToast("Signed out", Status.success);
+                });
+              }
+
+              return _widgetOptions.elementAt(_selectedIndex);
+            }),
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: [

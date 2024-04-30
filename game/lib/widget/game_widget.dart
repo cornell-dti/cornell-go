@@ -81,7 +81,8 @@ class _GameWidgetState extends State<GameWidget> {
                     gameModel.challengeId = curChallenge.id;
                     gameModel.description = curChallenge.description ?? "";
                     gameModel.name = curChallenge.name ?? "";
-                    gameModel.imageUrl = curChallenge.imageUrl ?? "";
+                    gameModel.imageUrl = curChallenge.imageUrl ??
+                        "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png";
                   }
 
                   if (serviceStatus == ServiceStatus.disabled ||

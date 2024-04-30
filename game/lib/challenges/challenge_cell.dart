@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:game/preview/preview.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class ChallengeCell extends StatefulWidget {
   final String location;
   final String challengeName;
-  final Image thumbnail;
+  final double? challengeLat;
+  final double? challengeLong;
+  final String imgUrl;
   final bool isCompleted;
   final String description;
   final String difficulty;
@@ -14,7 +17,9 @@ class ChallengeCell extends StatefulWidget {
   const ChallengeCell(
       this.location,
       this.challengeName,
-      this.thumbnail,
+      this.challengeLat,
+      this.challengeLong,
+      this.imgUrl,
       this.isCompleted,
       this.description,
       this.difficulty,
@@ -27,7 +32,9 @@ class ChallengeCell extends StatefulWidget {
   State<StatefulWidget> createState() => _ChallengeCellState(
       location,
       challengeName,
-      thumbnail,
+      challengeLat,
+      challengeLong,
+      imgUrl,
       isCompleted,
       description,
       difficulty,
@@ -38,7 +45,9 @@ class ChallengeCell extends StatefulWidget {
 class _ChallengeCellState extends State<ChallengeCell> {
   final String location;
   final String challengeName;
-  final Image thumbnail;
+  final double? challengeLat;
+  final double? challengeLong;
+  final String imgUrl;
   final bool isCompleted;
   final String description;
   final String difficulty;
@@ -50,7 +59,9 @@ class _ChallengeCellState extends State<ChallengeCell> {
   _ChallengeCellState(
       this.location,
       this.challengeName,
-      this.thumbnail,
+      this.challengeLat,
+      this.challengeLong,
+      this.imgUrl,
       this.isCompleted,
       this.description,
       this.difficulty,
@@ -70,8 +81,17 @@ class _ChallengeCellState extends State<ChallengeCell> {
             ),
             context: context,
             isScrollControlled: true,
-            builder: (context) => Preview(challengeName, description,
-                difficulty, points, PreviewType.CHALLENGE, location, eventId));
+            builder: (context) => Preview(
+                challengeName,
+                challengeLat,
+                challengeLong,
+                description,
+                imgUrl,
+                difficulty,
+                points,
+                PreviewType.CHALLENGE,
+                location,
+                eventId));
       },
       child: Container(
         decoration: BoxDecoration(
@@ -89,13 +109,14 @@ class _ChallengeCellState extends State<ChallengeCell> {
         child: Padding(
           padding: EdgeInsets.all(16.0),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Padding(
                 padding: const EdgeInsets.only(right: 14),
                 child: ClipRRect(
                   borderRadius: BorderRadius.all(Radius.circular(4.6)),
-                  child: thumbnail,
+                  child: Image.network(imgUrl,
+                      width: 100, height: 100, fit: BoxFit.cover),
                 ),
               ),
               Expanded(
@@ -131,7 +152,7 @@ class _ChallengeCellState extends State<ChallengeCell> {
                       ),
                     ),
                     SizedBox(
-                      height: 4,
+                      height: 12,
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.start,
@@ -154,26 +175,17 @@ class _ChallengeCellState extends State<ChallengeCell> {
                           ),
                         ),
                         SizedBox(width: 10),
-                        Container(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: Color.fromARGB(255, 255, 199, 55),
-                            ),
-                            color: Color.fromARGB(255, 189, 135, 31),
-                            borderRadius: BorderRadius.circular(20),
+                        Row(children: [
+                          SvgPicture.asset(
+                            "assets/icons/bearcoins.svg",
+                            width: 25,
                           ),
-                          child: Text(
-                            points.toString() + "PTS",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
+                          Text(' ' + points.toString() + " PTS",
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: Color(0xFFC17E19)))
+                        ]),
                       ],
                     ),
                   ],

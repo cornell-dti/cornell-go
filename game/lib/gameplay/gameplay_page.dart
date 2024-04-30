@@ -1,17 +1,10 @@
-import 'dart:math';
-
-import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:flutter/material.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/tracker_model.dart';
 import 'package:game/model/group_model.dart';
 import 'package:game/api/geopoint.dart';
-import 'package:game/navigation_page/home_navbar.dart';
-import 'package:game/utils/utility_functions.dart';
+import 'package:game/navigation_page/bottom_navbar.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:game/model/challenge_model.dart';
 import 'gameplay_map.dart';
@@ -19,7 +12,6 @@ import 'package:provider/provider.dart';
 
 import 'package:game/api/game_client_dto.dart';
 import 'package:game/progress_indicators/circular_progress_indicator.dart';
-import 'package:flutter/cupertino.dart';
 
 import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:async';
@@ -42,6 +34,17 @@ class _GameplayPageState extends State<GameplayPage> {
   GeoPoint? currentLocation;
 
   late StreamSubscription<Position> positionStream;
+
+  final Map<String, String> friendlyLocation = {
+    "ENG_QUAD": "Eng Quad",
+    "ARTS_QUAD": "Arts Quad",
+    "AG_QUAD": "Ag Quad",
+    "NORTH_CAMPUS": "North Campus",
+    "WEST_CAMPUS": "West Campus",
+    "COLLEGETOWN": "Collegetown",
+    "ITHACA_COMMONS": "Ithaca Commons",
+    "ANY": "Cornell",
+  };
 
   @override
   void initState() {
@@ -96,7 +99,7 @@ class _GameplayPageState extends State<GameplayPage> {
         return CircularIndicator();
       }
 
-      var challenge = challengeModel.getChallengeById(tracker.curChallengeId!);
+      var challenge = challengeModel.getChallengeById(tracker.curChallengeId);
 
       if (challenge == null) {
         return Scaffold(
@@ -132,7 +135,12 @@ class _GameplayPageState extends State<GameplayPage> {
                                         foregroundColor: Colors.grey),
                                     onPressed: () {
                                       // Left button action
-                                      Navigator.pop(context);
+                                      Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                BottomNavBar()),
+                                      );
                                     },
                                     child: Row(children: [
                                       SvgPicture.asset(
@@ -157,13 +165,7 @@ class _GameplayPageState extends State<GameplayPage> {
                                       vertical: 4.0, horizontal: 8.0),
                                   child: Text(
                                       (event.challenges!.length > 1
-                                          ? "Journey " +
-                                              (tracker.prevChallenges.length +
-                                                      1)
-                                                  .toString() +
-                                              "/" +
-                                              event.challenges!.length
-                                                  .toString()
+                                          ? "Journey"
                                           : "Challenge"),
                                       style: TextStyle(
                                           fontSize: 14,
@@ -174,7 +176,7 @@ class _GameplayPageState extends State<GameplayPage> {
                             margin: EdgeInsets.only(top: 16.45, bottom: 11),
                             alignment: Alignment.centerLeft,
                             child: Text(
-                              "Find the Location of ${challenge.description}!",
+                              challenge.description ?? "NO DESCRIPTION",
                               textAlign: TextAlign.left,
                               style: TextStyle(
                                   fontSize: 18, fontWeight: FontWeight.bold),
@@ -218,13 +220,6 @@ class _GameplayPageState extends State<GameplayPage> {
                                       "assets/icons/bearcoins.svg"),
                                   Text(
                                       ' ' +
-                                          ((tracker.hintsUsed > 0)
-                                              ? ((challenge.points ?? 0) -
-                                                          tracker.hintsUsed *
-                                                              25)
-                                                      .toString() +
-                                                  '/'
-                                              : '') +
                                           (challenge.points ?? 0).toString() +
                                           " PTS",
                                       style: TextStyle(

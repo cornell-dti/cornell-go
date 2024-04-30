@@ -131,7 +131,9 @@ function toForm(challenge: ChallengeDto) {
     {
       name: "Image URL",
       characterLimit: 2048,
-      value: challenge.imageUrl ?? "",
+      value:
+        challenge.imageUrl ??
+        "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png",
     },
     {
       name: "Awarding Distance (meters)",

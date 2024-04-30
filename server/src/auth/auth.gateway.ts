@@ -15,7 +15,7 @@ export class AuthGateway implements OnGatewayConnection {
     const user = await this.authService.userByToken(token);
     if (user) {
       client.data['userId'] = user.id;
-      client.join(user.id);
+      client.join('user/' + user.id);
     } else {
       client.disconnect(true);
     }

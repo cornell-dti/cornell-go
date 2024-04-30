@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:game/navigation_page/bottom_navbar.dart';
+import 'package:game/splash_page/splash_page.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:game/api/geopoint.dart';
 import 'package:geolocator/geolocator.dart';
@@ -6,14 +8,12 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:async';
 import 'dart:math';
 import 'package:game/gameplay/challenge_completed.dart';
-import 'package:game/progress_indicators/circular_progress_indicator.dart';
 import 'package:game/utils/utility_functions.dart';
 
 // for backend connection
 import 'package:provider/provider.dart';
 import 'package:game/api/game_client_dto.dart';
 import 'package:game/api/game_api.dart';
-import 'package:game/model/event_model.dart';
 import 'package:game/model/tracker_model.dart';
 import 'package:game/model/group_model.dart';
 import 'package:game/model/challenge_model.dart';
@@ -271,239 +271,250 @@ class _GameplayMapState extends State<GameplayMap> {
     //     builder: (context, AsyncSnapshot<bool> snapshot) {
     //       return !snapshot.hasData
     //           ? CircularIndicator()
+    final client = Provider.of<ApiClient>(context);
+
     return MaterialApp(
       theme: ThemeData(
         useMaterial3: true,
         colorSchemeSeed: Colors.green[700],
       ),
-      home: Consumer2<GroupModel, TrackerModel>(
-          builder: (context, groupModel, trackerModel, child) {
+      home: Consumer3<GroupModel, TrackerModel, ChallengeModel>(
+          builder: (context, groupModel, trackerModel, challengeModel, child) {
         EventTrackerDto? tracker =
             trackerModel.trackerByEventId(groupModel.curEventId ?? "");
         if (tracker == null) {
           displayToast("Error getting event tracker", Status.error);
         } else {
-          numHintsLeft = totalHints - (tracker.hintsUsed ?? 0);
+          numHintsLeft = totalHints - (tracker.hintsUsed);
         }
+        var challenge =
+            challengeModel.getChallengeById(tracker!.curChallengeId);
         return Scaffold(
             body: Stack(
-              alignment: Alignment.bottomCenter,
-              children: [
-                Listener(
-                  onPointerDown: (e) {
-                    cancelRecenterCamera();
-                  },
-                  child: GoogleMap(
-                    onMapCreated: _onMapCreated,
-                    compassEnabled: false,
-                    myLocationButtonEnabled: false,
-                    zoomControlsEnabled: false,
-                    myLocationEnabled: false,
-                    mapToolbarEnabled: false,
-                    mapType: MapType.normal,
-                    initialCameraPosition: CameraPosition(
-                      target: currentLocation == null
-                          ? _center
-                          : LatLng(currentLocation!.lat, currentLocation!.lat),
-                      zoom: 11,
-                    ),
-                    markers: {
-                      Marker(
-                        markerId: const MarkerId("currentLocation"),
-                        icon: currentLocationIcon,
-                        position: currentLocation == null
-                            ? _center
-                            : LatLng(
-                                currentLocation!.lat, currentLocation!.long),
-                        rotation: currentLocation == null
-                            ? 0
-                            : currentLocation!.heading,
-                      ),
-                    },
-                    circles: {
-                      Circle(
-                        circleId: CircleId("hintCircle"),
-                        center: hintCenter != null
-                            ? LatLng(hintCenter!.lat, hintCenter!.long)
-                            : _center,
-                        radius: hintRadius,
-                        strokeColor: Color.fromARGB(80, 30, 41, 143),
-                        strokeWidth: 2,
-                        fillColor: Color.fromARGB(80, 83, 134, 237),
-                      )
-                    },
+          alignment: Alignment.bottomCenter,
+          children: [
+            StreamBuilder(
+                stream: client.clientApi.disconnectedStream,
+                builder: ((context, snapshot) {
+                  if (client.serverApi == null) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => SplashPageWidget()));
+                      displayToast("Lost connection!", Status.success);
+                    });
+                  }
+
+                  return Container();
+                })),
+            Listener(
+              onPointerDown: (e) {
+                cancelRecenterCamera();
+              },
+              child: GoogleMap(
+                onMapCreated: _onMapCreated,
+                compassEnabled: false,
+                myLocationButtonEnabled: false,
+                zoomControlsEnabled: false,
+                myLocationEnabled: false,
+                mapToolbarEnabled: false,
+                mapType: MapType.normal,
+                initialCameraPosition: CameraPosition(
+                  target: currentLocation == null
+                      ? _center
+                      : LatLng(currentLocation!.lat, currentLocation!.lat),
+                  zoom: 11,
+                ),
+                markers: {
+                  Marker(
+                    markerId: const MarkerId("currentLocation"),
+                    icon: currentLocationIcon,
+                    position: currentLocation == null
+                        ? _center
+                        : LatLng(currentLocation!.lat, currentLocation!.long),
+                    rotation:
+                        currentLocation == null ? 0 : currentLocation!.heading,
+                  ),
+                },
+                circles: {
+                  Circle(
+                    circleId: CircleId("hintCircle"),
+                    center: hintCenter != null
+                        ? LatLng(hintCenter!.lat, hintCenter!.long)
+                        : _center,
+                    radius: hintRadius,
+                    strokeColor: Color.fromARGB(80, 30, 41, 143),
+                    strokeWidth: 2,
+                    fillColor: Color.fromARGB(80, 83, 134, 237),
+                  )
+                },
+              ),
+            ),
+            Container(
+              margin: EdgeInsets.only(bottom: 70),
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color.fromARGB(255, 237, 86, 86),
+                  padding:
+                      EdgeInsets.only(right: 15, left: 15, top: 10, bottom: 10),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10), // button's shape
                   ),
                 ),
-                Container(
-                  margin: EdgeInsets.only(bottom: 70),
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color.fromARGB(255, 237, 86, 86),
-                      padding: EdgeInsets.only(
-                          right: 15, left: 15, top: 10, bottom: 10),
-                      shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(10), // button's shape
-                      ),
-                    ),
-                    child: Text(
-                      "I've Arrived!",
-                      style: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 21,
-                          fontWeight: FontWeight.w400,
-                          color: Color(0xFFFFFFFF)),
-                    ),
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) {
-                          return Container(
-                            color: Colors.white
-                                .withOpacity(0.3), // Adjust opacity as needed
-                            width: MediaQuery.of(context).size.width,
-                            height: MediaQuery.of(context).size.height,
-                            child: Container(
-                              margin: EdgeInsetsDirectional.only(
-                                  start: 10, end: 10),
-                              child: Dialog(
-                                elevation: 16, //arbitrary large number
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(
-                                      10), // Same as the Dialog's shape
-                                  child: displayDialogue(),
-                                ),
-                              ),
-                            ),
-                          );
-                        },
+                child: Text(
+                  "I've Arrived!",
+                  style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 21,
+                      fontWeight: FontWeight.w400,
+                      color: Color(0xFFFFFFFF)),
+                ),
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return Container(
+                        margin: EdgeInsetsDirectional.only(start: 10, end: 10),
+                        child: Dialog(
+                          elevation: 16, //arbitrary large number
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(
+                                10), // Same as the Dialog's shape
+                            child: displayDialogue(),
+                          ),
+                        ),
                       );
                     },
-                  ),
-                ),
-              ],
+                  );
+                },
+              ),
             ),
-            floatingActionButton: Stack(
-              alignment: AlignmentDirectional.topEnd,
-              children: [
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.only(bottom: 15.0, right: 10.0),
-                      child: Stack(
-                        children: [
-                          FloatingActionButton.extended(
-                            onPressed: useHint,
-                            label: SvgPicture.asset("assets/icons/maphint.svg",
-                                colorFilter: ColorFilter.mode(
-                                    Color.fromARGB(255, 131, 90, 124),
-                                    BlendMode.srcIn)),
-                            backgroundColor: Color.fromARGB(255, 255, 255, 255),
-                            shape: CircleBorder(),
-                          ),
-                          Positioned(
-                            top: -5,
-                            right: 0,
-                            child: Container(
-                              padding: EdgeInsets.all(5.0),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.white,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black
-                                        .withOpacity(0.3), // Shadow color
-                                    blurRadius: 5, // Spread radius
-                                    offset: Offset(2,
-                                        2), // Shadow position, you can adjust this
-                                  ),
-                                ],
-                              ),
-                              child: Text(
-                                numHintsLeft.toString(),
-                                style: TextStyle(
-                                  color: Color.fromARGB(255, 131, 90, 124),
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.bold,
+            Positioned(
+              bottom: 0,
+              right: 10,
+              child: Column(
+                children: [
+                  Container(
+                    padding: EdgeInsets.only(bottom: 15.0),
+                    child: Stack(
+                      children: [
+                        // hint button
+                        FloatingActionButton.extended(
+                          onPressed: useHint,
+                          label: SvgPicture.asset("assets/icons/maphint.svg",
+                              colorFilter: ColorFilter.mode(
+                                  numHintsLeft == 0
+                                      ? Color.fromARGB(255, 217, 217, 217)
+                                      : Color.fromARGB(255, 131, 90, 124),
+                                  BlendMode.srcIn)),
+                          backgroundColor: Color.fromARGB(255, 255, 255, 255),
+                          shape: CircleBorder(),
+                        ),
+                        // num hints left counter
+                        Positioned(
+                          top: -5,
+                          right: 0,
+                          child: Container(
+                            padding: EdgeInsets.all(5.0),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.3),
+                                  blurRadius: 5,
                                 ),
+                              ],
+                            ),
+                            child: Text(
+                              numHintsLeft.toString(),
+                              style: TextStyle(
+                                color: numHintsLeft == 0
+                                    ? Color.fromARGB(255, 217, 217, 217)
+                                    : Color.fromARGB(255, 131, 90, 124),
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.only(bottom: 150.0),
-                      child: FloatingActionButton.extended(
-                        onPressed: recenterCamera,
-                        label: SvgPicture.asset("assets/icons/maprecenter.svg",
-                            colorFilter: ColorFilter.mode(
-                                Color.fromARGB(255, 131, 90, 124),
-                                BlendMode.srcIn)),
-                        backgroundColor: Color.fromARGB(255, 255, 255, 255),
-                        shape: CircleBorder(),
-                      ),
-                    ),
-                  ],
-                ),
-                Padding(
-                  // expandable image in top right of map
-                  padding: EdgeInsets.only(left: 10.0, right: 10, top: 40.0),
-                  child: GestureDetector(
-                    onTap: () {
-                      isExpanded
-                          ? setState(() {
-                              isExpanded = false;
-                              pictureHeight = 80.0;
-                              pictureWidth = 80.0;
-                              pictureIcon = SvgPicture.asset(
-                                  "assets/icons/mapexpand.svg");
-                              pictureAlign = Alignment.topRight;
-                            })
-                          : setState(() {
-                              isExpanded = true;
-                              pictureHeight =
-                                  MediaQuery.of(context).size.height * 0.6;
-                              pictureWidth =
-                                  MediaQuery.of(context).size.width * 0.85;
-                              pictureIcon =
-                                  SvgPicture.asset("assets/icons/mapexit.svg");
-                              pictureAlign = Alignment.topCenter;
-                            });
-                    },
-                    child: AnimatedContainer(
-                      duration: Duration(milliseconds: 50),
-                      width: pictureWidth,
-                      height: pictureHeight,
-                      child: Stack(
-                        children: [
-                          Container(
-                            alignment: pictureAlign,
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(10),
-                              child: Image.asset(
-                                'assets/images/main-bg.jpeg',
-                                fit: BoxFit.cover,
-                                width: pictureWidth,
-                                height: pictureHeight,
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.all(4.0),
-                            child: Container(
-                                alignment: Alignment.topRight,
-                                child: pictureIcon),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
+                  Padding(
+                    padding: EdgeInsets.only(bottom: 150.0),
+                    child: FloatingActionButton.extended(
+                      onPressed: recenterCamera,
+                      label: SvgPicture.asset("assets/icons/maprecenter.svg",
+                          colorFilter: ColorFilter.mode(
+                              Color.fromARGB(255, 131, 90, 124),
+                              BlendMode.srcIn)),
+                      backgroundColor: Color.fromARGB(255, 255, 255, 255),
+                      shape: CircleBorder(),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Positioned(
+              // expandable image in top right of map
+              // padding: EdgeInsets.only(left: 10.0, right: 10, top: 0.0),
+              top: MediaQuery.of(context).size.width * 0.05,
+              right: MediaQuery.of(context).size.width * 0.05,
+              child: GestureDetector(
+                onTap: () {
+                  isExpanded
+                      ? setState(() {
+                          isExpanded = false;
+                          pictureHeight = 80.0;
+                          pictureWidth = 80.0;
+                          pictureIcon =
+                              SvgPicture.asset("assets/icons/mapexpand.svg");
+                          pictureAlign = Alignment.topRight;
+                        })
+                      : setState(() {
+                          isExpanded = true;
+                          pictureHeight =
+                              MediaQuery.of(context).size.height * 0.6;
+                          pictureWidth =
+                              MediaQuery.of(context).size.width * 0.90;
+                          pictureIcon =
+                              SvgPicture.asset("assets/icons/mapexit.svg");
+                          pictureAlign = Alignment.topCenter;
+                        });
+                },
+                child: AnimatedContainer(
+                  duration: Duration(milliseconds: 100),
+                  width: pictureWidth,
+                  height: pictureHeight,
+                  child: Stack(
+                    children: [
+                      Container(
+                        alignment: pictureAlign,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Image.network(
+                            challenge?.imageUrl ??
+                                "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png",
+                            fit: BoxFit.cover,
+                            width: pictureWidth,
+                            height: pictureHeight,
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.all(4.0),
+                        child: Container(
+                            alignment: Alignment.topRight, child: pictureIcon),
+                      ),
+                    ],
+                  ),
                 ),
-              ],
-            ));
+              ),
+            ),
+          ],
+        ));
       }),
     );
     // });
@@ -577,9 +588,6 @@ class _GameplayMapState extends State<GameplayMap> {
                       var eventId =
                           Provider.of<GroupModel>(context, listen: false)
                               .curEventId;
-                      var event =
-                          Provider.of<EventModel>(context, listen: false)
-                              .getEventById(eventId ?? "");
                       var tracker =
                           Provider.of<TrackerModel>(context, listen: false)
                               .trackerByEventId(eventId ?? "");
@@ -591,7 +599,7 @@ class _GameplayMapState extends State<GameplayMap> {
                       } else {
                         var challenge =
                             Provider.of<ChallengeModel>(context, listen: false)
-                                .getChallengeById(tracker.curChallengeId!);
+                                .getChallengeById(tracker.curChallengeId);
                         if (challenge == null) {
                           displayToast(
                               "An error occurred while getting challenge",
