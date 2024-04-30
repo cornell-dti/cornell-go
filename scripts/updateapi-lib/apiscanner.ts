@@ -59,7 +59,7 @@ export function getApiDefinitions() {
 
         let ackType = func.getReturnType().getTypeArguments()[0];
 
-        if (ackType.isUnion()) {
+        if (ackType.isUnion() && !ackType.isBoolean() && !ackType.isNumber()) {
           const unionTypes = ackType.getUnionTypes();
           if (unionTypes.length > 2) {
             console.log(
@@ -74,24 +74,16 @@ export function getApiDefinitions() {
               : unionTypes[0];
         }
 
-        const ackTypeName = ackType.isString()
-          ? "string"
-          : ackType.isNumber()
-          ? "number"
-          : ackType.isBoolean()
-          ? "boolean"
-          : null;
-
-        console.log(ev, ackType.getText());
-
-        if (!ackTypeName) {
+        if (
+          !(ackType.isString() || ackType.isNumber() || ackType.isBoolean())
+        ) {
           console.log(
             `Function ${ev} does not return one of number, boolean, or string! Skipping...`
           );
           continue;
         }
 
-        apiDefs.serverAcks.set(ev, ackTypeName);
+        apiDefs.serverAcks.set(ev, ackType.getText());
 
         if (dto.includes(".")) {
           dto = dto.split(".").pop()!;

@@ -25,6 +25,10 @@ export class ServerApi {
     this.send("requestChallengeData", data);
   }
 
+  completedChallenge(data: dto.CompletedChallengeDto) {
+    this.send("completedChallenge", data);
+  }
+
   updateChallengeData(data: dto.UpdateChallengeDataDto) {
     this.send("updateChallengeData", data);
   }
@@ -49,8 +53,36 @@ export class ServerApi {
     this.send("requestEventTrackerData", data);
   }
 
+  useEventTrackerHint(data: dto.UseEventTrackerHintDto) {
+    this.send("useEventTrackerHint", data);
+  }
+
   updateEventData(data: dto.UpdateEventDataDto) {
     this.send("updateEventData", data);
+  }
+
+  requestGroupData(data: dto.RequestGroupDataDto) {
+    this.send("requestGroupData", data);
+  }
+
+  joinGroup(data: dto.JoinGroupDto) {
+    this.send("joinGroup", data);
+  }
+
+  leaveGroup(data: dto.LeaveGroupDto) {
+    this.send("leaveGroup", data);
+  }
+
+  setCurrentEvent(data: dto.SetCurrentEventDto) {
+    this.send("setCurrentEvent", data);
+  }
+
+  updateGroupData(data: dto.UpdateGroupDataDto) {
+    this.send("updateGroupData", data);
+  }
+
+  sendGroupInvite(data: dto.SendGroupInviteDto) {
+    this.send("sendGroupInvite", data);
   }
 
   requestOrganizationData(data: dto.RequestOrganizationDataDto) {
@@ -65,8 +97,36 @@ export class ServerApi {
     this.send("requestAllUserData", data);
   }
 
+  requestUserData(data: dto.RequestUserDataDto) {
+    this.send("requestUserData", data);
+  }
+
+  updateUserData(data: dto.UpdateUserDataDto) {
+    this.send("updateUserData", data);
+  }
+
+  setAuthToDevice(data: dto.SetAuthToDeviceDto) {
+    this.send("setAuthToDevice", data);
+  }
+
+  setAuthToOAuth(data: dto.SetAuthToOAuthDto) {
+    this.send("setAuthToOAuth", data);
+  }
+
+  banUser(data: dto.BanUserDto) {
+    this.send("banUser", data);
+  }
+
   addManager(data: dto.AddManagerDto) {
     this.send("addManager", data);
+  }
+
+  joinOrganization(data: dto.JoinOrganizationDto) {
+    this.send("joinOrganization", data);
+  }
+
+  closeAccount(data: dto.CloseAccountDto) {
+    this.send("closeAccount", data);
   }
 
   onUpdateUserData(callback: (data: dto.UpdateUserDataDto) => void) {
