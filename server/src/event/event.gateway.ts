@@ -179,8 +179,11 @@ export class EventGateway {
         data.event.initialOrganizationId!,
       );
 
+      if (org) {
+        await this.orgService.emitUpdateOrganizationData(org, false);
+      }
+
       this.clientService.subscribe(user, ev.id);
-      await this.orgService.emitUpdateOrganizationData(org, false);
       await this.eventService.emitUpdateEventData(ev, false);
     }
 
