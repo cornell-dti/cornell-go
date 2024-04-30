@@ -400,9 +400,11 @@ export class AchievementService {
 
       const achsWithoutTrackers = await this.prisma.achievement.findMany({
         where: {
-          id: achievement?.id,
-          AND: [accessibleBy(ability).Achievement],
-          trackers: { none: { userId: user.id } },
+          AND: [
+            { id: achievement?.id },
+            accessibleBy(ability).Achievement,
+            { trackers: { none: { userId: user.id } } },
+          ],
         },
       });
 
