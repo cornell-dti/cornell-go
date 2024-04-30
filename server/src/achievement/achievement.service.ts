@@ -391,6 +391,15 @@ export class AchievementService {
           },
         });
 
+        if (achTracker.progress >= ach.requiredPoints) {
+          achTracker = await this.prisma.achievementTracker.update({
+            where: { id: achTracker.id },
+            data: {
+              progress: { set: ach.requiredPoints },
+            },
+          });
+        }
+
         await this.clientService.subscribe(user, achTracker.id);
         await this.emitUpdateAchievementTracker(achTracker);
       }
