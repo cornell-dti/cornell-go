@@ -11,8 +11,6 @@ class EventModel extends ChangeNotifier {
 
   EventModel(ApiClient client) : _client = client {
     client.clientApi.updateEventDataStream.listen((event) {
-      client.serverApi?.completedChallenge(CompletedChallengeDto());
-
       if (!event.deleted) {
         //initialize searchResults if null
         searchResults = searchResults ?? [];
