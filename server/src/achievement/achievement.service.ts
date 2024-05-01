@@ -293,9 +293,10 @@ export class AchievementService {
   ) {
     const ability = this.abilityFactory.createForUser(user);
 
-    const isJourney = await this.prisma.challenge.count({
-      where: { linkedEventId: evTracker.eventId },
-    });
+    const isJourney =
+      (await this.prisma.challenge.count({
+        where: { linkedEventId: evTracker.eventId },
+      })) > 1;
 
     const locations = (
       await this.prisma.challenge.findMany({

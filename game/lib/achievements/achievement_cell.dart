@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -46,9 +48,11 @@ class LoadingBar extends StatelessWidget {
                 ),
                 Container(
                   height: 3,
-                  width: (totalTasks > 0 ? tasksFinished / totalTasks : 0) *
-                          constraints.maxWidth -
-                      16,
+                  width: max(
+                      (totalTasks > 0 ? tasksFinished / totalTasks : 0) *
+                              constraints.maxWidth -
+                          16,
+                      0),
                   margin: EdgeInsets.only(left: 8, top: 3),
                   alignment: Alignment.centerLeft,
                   decoration: new BoxDecoration(
