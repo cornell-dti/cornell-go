@@ -221,12 +221,14 @@ export function Events() {
   const [isEditModalOpen, setEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectModalOpen, setSelectModalOpen] = useState(false);
+
   const [isCopyModalOpen, setCopyModalOpen] = useState(false);
-  const [form, setForm] = useState(() => makeForm());
   const [copyForm, setCopyForm] = useState(() => ({
     form: makeCopyForm([], 0),
     orgIds: [] as string[],
   }));
+
+  const [form, setForm] = useState(() => makeForm());
   const [currentId, setCurrentId] = useState("");
   const [query, setQuery] = useState("");
   const selectedOrg = serverData.organizations.get(serverData.selectedOrg);
