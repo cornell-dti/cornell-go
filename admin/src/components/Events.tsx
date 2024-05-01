@@ -208,7 +208,7 @@ function toForm(event: EventDto) {
 function makeCopyForm(orgOptions: string[], initialIndex: number) {
   return [
     {
-      name: "Org",
+      name: "Target Organization",
       options: orgOptions,
       value: initialIndex,
     },
@@ -273,12 +273,15 @@ export function Events() {
       />
       <EntryModal
         title="Copy Event"
-        isOpen={isEditModalOpen}
+        isOpen={isCopyModalOpen}
         entryButtonText="COPY"
         onEntry={async () => {
           const ev = serverData.events.get(currentId)!;
           const evId = await serverData.updateEvent({
             ...ev,
+            challenges: [],
+            initialOrganizationId:
+              copyForm.orgIds[(copyForm.form[0] as OptionEntryForm).value],
             id: "",
           });
           if (!evId) {
@@ -298,7 +301,7 @@ export function Events() {
         onCancel={() => {
           setCopyModalOpen(false);
         }}
-        form={form}
+        form={copyForm.form}
       />
       <DeleteModal
         objectName={serverData.events.get(currentId)?.name ?? ""}

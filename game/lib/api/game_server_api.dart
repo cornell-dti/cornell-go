@@ -61,6 +61,10 @@ class GameServerApi {
   Future<int?> requestAchievementData(RequestAchievementDataDto dto) async =>
       await _invokeWithRefresh("requestAchievementData", dto.toJson());
 
+  Future<int?> requestAchievementTrackerData(
+          RequestAchievementTrackerDataDto dto) async =>
+      await _invokeWithRefresh("requestAchievementTrackerData", dto.toJson());
+
   Future<String?> updateAchievementData(UpdateAchievementDataDto dto) async =>
       await _invokeWithRefresh("updateAchievementData", dto.toJson());
 

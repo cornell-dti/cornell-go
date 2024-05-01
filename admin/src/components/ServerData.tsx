@@ -45,18 +45,26 @@ const defaultData = {
   async deleteEvent(id: string): Promise<string | undefined> {
     return undefined;
   },
+  async updateAchievement(
+    achievement: AchievementDto
+  ): Promise<string | undefined> {
+    return undefined;
+  },
+  async deleteAchievement(id: string): Promise<string | undefined> {
+    return undefined;
+  },
   async updateOrganization(
     organization: OrganizationDto
   ): Promise<string | undefined> {
+    return undefined;
+  },
+  async deleteOrganization(id: string): Promise<string | undefined> {
     return undefined;
   },
   async addManager(
     email: string,
     orgniazationId: string
   ): Promise<string | undefined> {
-    return undefined;
-  },
-  async deleteOrganization(id: string): Promise<string | undefined> {
     return undefined;
   },
   deleteError(id: string) {},
@@ -119,10 +127,13 @@ export function ServerDataProvider(props: { children: ReactNode }) {
         return sock.updateEventData({ event: { id }, deleted: true });
       },
       updateAchievement(achievement: AchievementDto) {
-        sock.updateAchievementData({ achievement, deleted: false });
+        return sock.updateAchievementData({ achievement, deleted: false });
       },
       deleteAchievement(id: string) {
-        sock.updateAchievementData({ achievement: { id }, deleted: true });
+        return sock.updateAchievementData({
+          achievement: { id },
+          deleted: true,
+        });
       },
       deleteError(id: string) {
         serverData.errors.delete(id);
