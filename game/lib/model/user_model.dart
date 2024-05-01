@@ -16,8 +16,11 @@ class UserModel extends ChangeNotifier {
      */
     client.clientApi.updateUserDataStream.listen((event) {
       if (userData == null) userData = event.user;
-
+      print("user data updated. tracked events before: " +
+          (userData?.trackedEvents?.length ?? 0).toString());
       userData?.partialUpdate(event.user);
+      print("tracked events after: " +
+          (userData?.trackedEvents?.length ?? 0).toString());
       notifyListeners();
     });
 
