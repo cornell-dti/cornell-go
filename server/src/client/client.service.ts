@@ -51,14 +51,23 @@ export class ClientService {
   ) {}
 
   public subscribe(user: User, resourceId: string) {
+    if (process.env.TESTING_E2E === 'true') {
+      return;
+    }
     this.gateway.server.in(user.id).socketsJoin(resourceId);
   }
 
   public unsubscribe(user: User, resourceId: string) {
+    if (process.env.TESTING_E2E === 'true') {
+      return;
+    }
     this.gateway.server.in(user.id).socketsLeave(resourceId);
   }
 
   public unsubscribeAll(resourceId: string) {
+    if (process.env.TESTING_E2E === 'true') {
+      return;
+    }
     this.gateway.server.socketsLeave([resourceId]);
   }
 
@@ -72,6 +81,9 @@ export class ClientService {
   }
 
   async getAffectedUsers(target: string) {
+    if (process.env.TESTING_E2E === 'true') {
+      return [];
+    }
     // Get list of targeted sockets
     const socks = await this.gateway.server.in(target).fetchSockets();
 
@@ -119,9 +131,13 @@ export class ClientService {
 
     const room = target instanceof Object ? 'user/' + target.id : target;
     if (!resource) {
-      this.gateway.server.to(room).emit(event, dto);
+      if (process.env.TESTING_E2E !== 'true') {
+        this.gateway.server.to(room).emit(event, dto);
+      }
     } else {
-      this.gateway.server.in(room).socketsJoin(resource.id);
+      if (process.env.TESTING_E2E !== 'true') {
+        this.gateway.server.in(room).socketsJoin(resource.id);
+      }
       // Find all targeted users
       const users = await this.getAffectedUsers(room);
 

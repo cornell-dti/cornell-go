@@ -1,12 +1,14 @@
 import 'package:flutter/foundation.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/api/game_client_dto.dart';
+import 'package:velocity_x/velocity_x.dart';
 
 /**
  * This file represents the model for the achievements. Whenever a achievement is updated, added or deleted from the backend, the model is updated and notifies the Consumer so that the front end can be modified. 
  */
 class AchievementModel extends ChangeNotifier {
   Map<String, AchievementDto> _achievementsById = {};
+  Map<String, AchievementTrackerDto> _trackersByAchId = {};
   ApiClient _client;
 
   AchievementModel(ApiClient client) : _client = client {
@@ -23,8 +25,44 @@ class AchievementModel extends ChangeNotifier {
     });
 
     client.clientApi.connectedStream.listen((event) {
+      client.serverApi
+          ?.requestAchievementTrackerData(RequestAchievementTrackerDataDto());
+
+      notifyListeners();
+    });
+
+    client.clientApi.updateAchievementTrackerDataStream.listen((event) {
+      _trackersByAchId[event.achievementId] = event;
+      notifyListeners();
+    });
+
+    client.clientApi.connectedStream.listen((event) {
       _achievementsById.clear();
       notifyListeners();
     });
+  }
+
+  AchievementDto? getAchievementById(String id) {
+    if (_achievementsById.containsKey(id)) {
+      return _achievementsById[id];
+    } else {
+      _client.serverApi?.requestAchievementData(
+          RequestAchievementDataDto(achievements: [id]));
+      return null;
+    }
+  }
+
+  List<AchievementTrackerDto> getAchievementTrackers() {
+    return _trackersByAchId.valuesList();
+  }
+
+  List<(AchievementTrackerDto, AchievementDto)> getAvailableTrackerPairs() {
+    final achTrackers = getAchievementTrackers();
+
+    return achTrackers
+        .map((e) => (e, getAchievementById(e.achievementId)))
+        .filter((e) => e.$2 != null)
+        .map((e) => (e.$1, e.$2!))
+        .toList();
   }
 }

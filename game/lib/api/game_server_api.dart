@@ -3,6 +3,7 @@
 // OTHERWISE YOUR CHANGES MAY BE OVERWRITTEN!
 
 import 'dart:async';
+import 'dart:convert';
 import 'package:game/api/game_client_dto.dart';
 import 'package:socket_io_client/socket_io_client.dart';
 
@@ -41,6 +42,9 @@ class GameServerApi {
 
   void requestAchievementData(RequestAchievementDataDto dto) =>
       _invokeWithRefresh("requestAchievementData", dto.toJson());
+
+  void requestAchievementTrackerData(RequestAchievementTrackerDataDto dto) =>
+      _invokeWithRefresh("requestAchievementTrackerData", dto.toJson());
 
   void updateAchievementData(UpdateAchievementDataDto dto) =>
       _invokeWithRefresh("updateAchievementData", dto.toJson());

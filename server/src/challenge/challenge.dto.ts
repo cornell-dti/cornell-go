@@ -1,7 +1,5 @@
 /** DTO for completedChallenge */
-export interface CompletedChallengeDto {
-  challengeId: string;
-}
+export interface CompletedChallengeDto {}
 
 export enum ChallengeLocationDto {
   ENG_QUAD = 'ENG_QUAD',

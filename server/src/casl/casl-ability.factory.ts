@@ -145,6 +145,10 @@ export class CaslAbilityFactory {
 
     can(Action.Read, 'AchievementTracker', { userId: user.id });
 
+    can(Action.Manage, 'Achievement', {
+      organizations: { some: { managers: { some: { id: user.id } } } },
+    });
+
     // Read challenges that belong to events you're allowed to access
     // And you must have completed them or are in the process
     can(Action.Read, 'Challenge', undefined, {
