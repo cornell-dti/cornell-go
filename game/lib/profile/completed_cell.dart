@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:velocity_x/velocity_x.dart';
 
 /**
  * Widget that represents each individual completed journey or challenge
@@ -11,7 +12,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
  */
 Widget completedCell(String name, String picture, String type, String date,
-    String difficulty, int points) {
+    String difficulty, int totalHintsUsed, int points) {
   return Container(
       width: 345,
       height: 88,
@@ -72,7 +73,12 @@ Widget completedCell(String name, String picture, String type, String date,
                         "assets/icons/bearcoins.svg",
                         width: 20,
                       ),
-                      Text(' ' + points.toString() + " PTS",
+                      Text(
+                          ' ' +
+                              (points - totalHintsUsed * 25).toString() +
+                              "/" +
+                              points.toString() +
+                              " PTS",
                           style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w500,

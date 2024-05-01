@@ -46,7 +46,7 @@ class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
             indicator: BoxDecoration(
               border: Border(
                 bottom: BorderSide(
-                  color: Colors.yellow,
+                  color: Color(0xFFFFAA5B),
                   width: 2.0,
                 ),
               ),

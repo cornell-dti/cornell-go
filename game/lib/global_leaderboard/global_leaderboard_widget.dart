@@ -136,8 +136,8 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
           SizedBox(height: MediaQuery.sizeOf(context).height * 0.01),
           Expanded(
             child: Container(
-              width: 360.0,
-              height: 446.0,
+              width: MediaQuery.sizeOf(context).width * 0.88,
+              height: MediaQuery.sizeOf(context).height * 0.5,
               decoration: BoxDecoration(
                 color: Color.fromRGBO(255, 170, 91, 0.15),
                 borderRadius: BorderRadius.only(

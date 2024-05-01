@@ -323,11 +323,18 @@ class _PreviewState extends State<Preview> {
                                               width: 40,
                                               height: 40,
                                             ),
-                                            Text(points.toString() + " PTS",
-                                                style: TextStyle(
-                                                    fontSize: 23,
-                                                    fontWeight: FontWeight.w500,
-                                                    color: Color(0xFFC17E19)))
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                  left: 4),
+                                              child: Text(
+                                                  points.toString() + " PTS",
+                                                  style: TextStyle(
+                                                      fontSize: 20,
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                      color:
+                                                          Color(0xFFC17E19))),
+                                            )
                                           ]),
                                         )),
                                   ],

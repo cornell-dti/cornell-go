@@ -372,7 +372,8 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
         journeyPage
             ? Container(
                 alignment: Alignment.bottomCenter,
-                margin: EdgeInsets.all(40),
+                margin: EdgeInsets.only(
+                    bottom: MediaQuery.sizeOf(context).height * 0.15),
                 child: journeyCompleted
                     ? ElevatedButton(
                         style: ElevatedButton.styleFrom(
@@ -462,7 +463,8 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
               )
             : Container(
                 alignment: Alignment.bottomCenter,
-                margin: EdgeInsets.only(bottom: 40),
+                margin: EdgeInsets.only(
+                    bottom: MediaQuery.sizeOf(context).height * 0.05),
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color.fromARGB(255, 237, 86, 86),
