@@ -117,8 +117,44 @@ class SettingsPage extends StatelessWidget {
                     Container(
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.all(
-                          Radius.circular(10),
+                        borderRadius: BorderRadius.only(
+                          topRight: Radius.circular(10),
+                          topLeft: Radius.circular(10),
+                        ),
+                      ),
+                      child: TextButton(
+                        onPressed: () {},
+                        style: TextButton.styleFrom(
+                            padding: EdgeInsets.only(left: 20.0),
+                            alignment: Alignment.centerLeft,
+                            fixedSize: Size(constraints.maxWidth, 60)),
+                        child: Row(
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.only(right: 20.0),
+                              child: SvgPicture.asset(
+                                'assets/icons/head.svg',
+                              ),
+                            ),
+                            Text(
+                              'Join Organization',
+                              textAlign: TextAlign.left,
+                              style: TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: 16,
+                                  color: Colors.black),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                    Divider(height: 1),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.only(
+                          bottomRight: Radius.circular(10),
+                          bottomLeft: Radius.circular(10),
                         ),
                       ),
                       child: TextButton(

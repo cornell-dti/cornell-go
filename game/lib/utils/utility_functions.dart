@@ -1,3 +1,5 @@
+import 'dart:html';
+
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:game/api/game_api.dart';
@@ -25,6 +27,40 @@ Future<void> showAlert(String message, context) async {
             child: const Text('OK'),
             onPressed: () {
               Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
+TextEditingController _textFieldController = TextEditingController();
+
+Future<void> _displayTextInputDialog(BuildContext context, FunctionStringCallback onOk) async {
+  _textFieldController.clear();
+
+  return showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: Text('TextField in Dialog'),
+        content: TextField(
+          controller: _textFieldController,
+          decoration: InputDecoration(hintText: "Text Field in Dialog"),
+        ),
+        actions: <Widget>[
+          TextButton(
+            child: Text('CANCEL'),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+          TextButton(
+            child: Text('OK'),
+            onPressed: () {
+              onOk(_textFieldController.text)
+              Navigator.pop(context);
             },
           ),
         ],
