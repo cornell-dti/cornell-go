@@ -131,7 +131,15 @@ export class CaslAbilityFactory {
     can(
       Action.Read,
       'User',
-      ['email', 'groupId', 'id', 'score', 'trackedEvents', 'favorites', 'authType'],
+      [
+        'email',
+        'groupId',
+        'id',
+        'score',
+        'trackedEvents',
+        'favorites',
+        'authType',
+      ],
       {
         id: user.id,
       },
