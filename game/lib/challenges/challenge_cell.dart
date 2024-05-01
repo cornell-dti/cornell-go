@@ -168,7 +168,7 @@ class _ChallengeCellState extends State<ChallengeCell> {
                             difficulty,
                             style: TextStyle(
                               color: Color.fromARGB(204, 0, 0, 0),
-                              fontSize: 10,
+                              fontSize: 14,
                               fontFamily: 'Poppins',
                               fontWeight: FontWeight.w300,
                             ),

@@ -14,7 +14,7 @@ import 'package:game/utils/utility_functions.dart';
 import 'package:intl/intl.dart' hide TextDirection;
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
-import 'package:game/profile/completed_challenges_page.dart';
+import 'package:game/profile/completed_feed.dart';
 import 'package:velocity_x/velocity_x.dart';
 
 /**
@@ -203,8 +203,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) =>
-                                    CompletedChallengesPage()));
+                                builder: (context) => CompletedFeedWidget()));
                       },
                       child: Text(
                         'View More →',

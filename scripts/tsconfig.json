@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "types": ["node"],
+    "declaration": true,
+    "target": "es2021",
+    "rootDir": ".",
+    "moduleResolution": "nodenext",
+    "module": "nodenext"
+  }
+}

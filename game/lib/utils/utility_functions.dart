@@ -33,6 +33,41 @@ Future<void> showAlert(String message, context) async {
   );
 }
 
+TextEditingController _textFieldController = TextEditingController();
+
+Future<void> displayTextInputDialog(
+    BuildContext context, String text, String hintText, dynamic onOk) async {
+  _textFieldController.clear();
+
+  return showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: Text(text),
+        content: TextField(
+          controller: _textFieldController,
+          decoration: InputDecoration(hintText: hintText),
+        ),
+        actions: <Widget>[
+          TextButton(
+            child: Text('CANCEL'),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+          TextButton(
+            child: Text('OK'),
+            onPressed: () {
+              onOk(_textFieldController.text);
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
 Future<String?> getId() async {
   var deviceInfo = DeviceInfoPlugin();
   if (Platform.isIOS) {
@@ -139,10 +174,27 @@ final Map<ChallengeLocationDto, String> friendlyLocation = {
   ChallengeLocationDto.ENG_QUAD: "Engineering Quad",
   ChallengeLocationDto.ARTS_QUAD: "Arts Quad",
   ChallengeLocationDto.AG_QUAD: "Ag Quad",
+  ChallengeLocationDto.CENTRAL_CAMPUS: "Central Campus",
   ChallengeLocationDto.NORTH_CAMPUS: "North Campus",
   ChallengeLocationDto.WEST_CAMPUS: "West Campus",
+  ChallengeLocationDto.CORNELL_ATHLETICS: "Cornell Athletics",
+  ChallengeLocationDto.VET_SCHOOL: "Vet School",
   ChallengeLocationDto.COLLEGETOWN: "Collegetown",
   ChallengeLocationDto.ITHACA_COMMONS: "Ithaca Commons",
+  ChallengeLocationDto.ANY: "Cornell",
+};
+
+final Map<ChallengeLocationDto, String> abbrevLocation = {
+  ChallengeLocationDto.ENG_QUAD: "Eng Quad",
+  ChallengeLocationDto.ARTS_QUAD: "Arts Quad",
+  ChallengeLocationDto.AG_QUAD: "Ag Quad",
+  ChallengeLocationDto.CENTRAL_CAMPUS: "Central Campus",
+  ChallengeLocationDto.NORTH_CAMPUS: "North Campus",
+  ChallengeLocationDto.WEST_CAMPUS: "West Campus",
+  ChallengeLocationDto.CORNELL_ATHLETICS: "Athletics",
+  ChallengeLocationDto.VET_SCHOOL: "Vet School",
+  ChallengeLocationDto.COLLEGETOWN: "Collegetown",
+  ChallengeLocationDto.ITHACA_COMMONS: "Commons",
   ChallengeLocationDto.ANY: "Cornell",
 };
 

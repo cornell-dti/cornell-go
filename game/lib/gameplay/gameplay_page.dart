@@ -9,6 +9,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:game/model/challenge_model.dart';
 import 'gameplay_map.dart';
 import 'package:provider/provider.dart';
+import 'package:game/utils/utility_functions.dart';
 
 import 'package:game/api/game_client_dto.dart';
 import 'package:game/progress_indicators/circular_progress_indicator.dart';
@@ -34,17 +35,6 @@ class _GameplayPageState extends State<GameplayPage> {
   GeoPoint? currentLocation;
 
   late StreamSubscription<Position> positionStream;
-
-  final Map<String, String> friendlyLocation = {
-    "ENG_QUAD": "Eng Quad",
-    "ARTS_QUAD": "Arts Quad",
-    "AG_QUAD": "Ag Quad",
-    "NORTH_CAMPUS": "North Campus",
-    "WEST_CAMPUS": "West Campus",
-    "COLLEGETOWN": "Collegetown",
-    "ITHACA_COMMONS": "Ithaca Commons",
-    "ANY": "Cornell",
-  };
 
   @override
   void initState() {
@@ -99,8 +89,8 @@ class _GameplayPageState extends State<GameplayPage> {
         return CircularIndicator();
       }
 
-      var challenge =
-          challengeModel.getChallengeById(tracker.curChallengeId ?? "");
+      var challenge = challengeModel.getChallengeById(
+          tracker.curChallengeId ?? tracker.prevChallenges.last.challengeId);
 
       if (challenge == null) {
         return Scaffold(
@@ -108,8 +98,12 @@ class _GameplayPageState extends State<GameplayPage> {
         );
       }
 
-      GeoPoint targetLocation = GeoPoint(challenge.latF!, challenge.longF!, 0);
-      double awardingRadius = challenge.awardingRadiusF!;
+      GeoPoint? targetLocation;
+      if (challenge.latF != null && challenge.longF != null) {
+        targetLocation = GeoPoint(challenge.latF!, challenge.longF!, 0);
+      }
+      double awardingRadius = challenge.awardingRadiusF ?? 0;
+      int hintsUsed = tracker.hintsUsed;
 
       return Scaffold(
         body: Column(
@@ -180,7 +174,7 @@ class _GameplayPageState extends State<GameplayPage> {
                               challenge.description ?? "NO DESCRIPTION",
                               textAlign: TextAlign.left,
                               style: TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.bold),
+                                  fontSize: 16, fontWeight: FontWeight.bold),
                             ),
                           ),
                           Container(
@@ -194,26 +188,26 @@ class _GameplayPageState extends State<GameplayPage> {
                                       "assets/icons/locationpin.svg"),
                                   Text(
                                       ' ' +
-                                          (friendlyLocation[
-                                                  challenge.location] ??
+                                          (abbrevLocation[challenge.location] ??
                                               ""),
                                       style: TextStyle(
-                                          fontSize: 12,
+                                          fontSize: 13,
                                           color: Color(0xFF835A7C)))
                                 ]),
                                 Row(children: [
                                   SvgPicture.asset("assets/icons/feetpics.svg"),
                                   Text(
                                       ' ' +
-                                          (currentLocation != null
+                                          (currentLocation != null &&
+                                                  targetLocation != null
                                               ? (currentLocation!.distanceTo(
                                                           targetLocation) /
                                                       1609.34)
                                                   .toStringAsFixed(1)
                                               : "?.?") +
-                                          ' Miles Away',
+                                          ' Mi Away',
                                       style: TextStyle(
-                                          fontSize: 12,
+                                          fontSize: 13,
                                           color: Color(0xFF58B171)))
                                 ]),
                                 Row(children: [
@@ -221,22 +215,30 @@ class _GameplayPageState extends State<GameplayPage> {
                                       "assets/icons/bearcoins.svg"),
                                   Text(
                                       ' ' +
+                                          (hintsUsed > 0
+                                              ? ((challenge.points ?? 0) -
+                                                          hintsUsed * 25)
+                                                      .toString() +
+                                                  '/'
+                                              : '') +
                                           (challenge.points ?? 0).toString() +
                                           " PTS",
                                       style: TextStyle(
-                                          fontSize: 12,
-                                          color: Color(0xFFFFC737)))
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w500,
+                                          color: Color(0xFFC17E19)))
                                 ]),
                               ]))
                         ]))),
             Expanded(
               child: Padding(
-                  padding: EdgeInsets.only(top: 20),
+                  padding: EdgeInsets.only(top: 10),
                   child: GameplayMap(
-                    targetLocation: targetLocation,
+                    challengeId: challenge.id,
+                    targetLocation: (targetLocation ?? _center),
                     awardingRadius: awardingRadius,
-                    description: challenge.description ?? "",
                     points: challenge.points ?? 0,
+                    startingHintsUsed: hintsUsed,
                   )),
             ),
           ],

@@ -33,20 +33,53 @@ const defaultData = {
   selectEvent(id: string) {},
   selectOrg(id: string) {},
   setAdminStatus(id: string, granted: boolean) {},
-  updateChallenge(challenge: ChallengeDto) {},
-  deleteChallenge(id: string) {},
-  updateAchievement(achievement: AchievementDto) {},
-  deleteAchievement(id: string) {},
-  updateEvent(event: EventDto) {},
-  deleteEvent(id: string) {},
-  updateOrganization(organization: OrganizationDto) {},
-  addManager(email: string, orgniazationId: string) {},
-  deleteOrganization(id: string) {},
+  async updateChallenge(challenge: ChallengeDto): Promise<string | undefined> {
+    return undefined;
+  },
+  async deleteChallenge(id: string): Promise<string | undefined> {
+    return undefined;
+  },
+  async updateEvent(event: EventDto): Promise<string | undefined> {
+    return undefined;
+  },
+  async deleteEvent(id: string): Promise<string | undefined> {
+    return undefined;
+  },
+  async updateAchievement(
+    achievement: AchievementDto
+  ): Promise<string | undefined> {
+    return undefined;
+  },
+  async deleteAchievement(id: string): Promise<string | undefined> {
+    return undefined;
+  },
+  async updateOrganization(
+    organization: OrganizationDto
+  ): Promise<string | undefined> {
+    return undefined;
+  },
+  async deleteOrganization(id: string): Promise<string | undefined> {
+    return undefined;
+  },
+  async addManager(
+    email: string,
+    orgniazationId: string
+  ): Promise<string | undefined> {
+    return undefined;
+  },
   deleteError(id: string) {},
-  updateUser(user: UserDto) {},
-  deleteUser(id: string) {},
-  updateGroup(event: GroupDto) {},
-  deleteGroup(id: string) {},
+  async updateUser(user: UserDto): Promise<boolean | undefined> {
+    return undefined;
+  },
+  async deleteUser(id: string): Promise<boolean | undefined> {
+    return undefined;
+  },
+  async updateGroup(event: GroupDto): Promise<boolean | undefined> {
+    return undefined;
+  },
+  async deleteGroup(id: string): Promise<boolean | undefined> {
+    return undefined;
+  },
 };
 
 export const ServerDataContext = createContext(defaultData);
@@ -82,50 +115,56 @@ export function ServerDataProvider(props: { children: ReactNode }) {
         });
       },
       updateChallenge(challenge: ChallengeDto) {
-        sock.updateChallengeData({ challenge, deleted: false });
+        return sock.updateChallengeData({ challenge, deleted: false });
       },
       deleteChallenge(id: string) {
-        sock.updateChallengeData({ challenge: { id }, deleted: true });
+        return sock.updateChallengeData({ challenge: { id }, deleted: true });
       },
       updateEvent(event: EventDto) {
-        sock.updateEventData({ event: event, deleted: false });
+        return sock.updateEventData({ event: event, deleted: false });
       },
       deleteEvent(id: string) {
-        sock.updateEventData({ event: { id }, deleted: true });
+        return sock.updateEventData({ event: { id }, deleted: true });
       },
       updateAchievement(achievement: AchievementDto) {
-        sock.updateAchievementData({ achievement, deleted: false });
+        return sock.updateAchievementData({ achievement, deleted: false });
       },
       deleteAchievement(id: string) {
-        sock.updateAchievementData({ achievement: { id }, deleted: true });
+        return sock.updateAchievementData({
+          achievement: { id },
+          deleted: true,
+        });
       },
       deleteError(id: string) {
         serverData.errors.delete(id);
         setTimeout(() => setServerData({ ...serverData }), 0);
       },
       updateUser(user: UserDto) {
-        sock.updateUserData({ user, deleted: false });
+        return sock.updateUserData({ user, deleted: false });
       },
       deleteUser(id: string) {
-        sock.updateUserData({ user: { id }, deleted: true });
+        return sock.updateUserData({ user: { id }, deleted: true });
       },
       updateGroup(group: GroupDto) {
-        sock.updateGroupData({ group, deleted: false });
+        return sock.updateGroupData({ group, deleted: false });
       },
       deleteGroup(id: string) {
-        sock.updateGroupData({ group: { id }, deleted: true });
+        return sock.updateGroupData({ group: { id }, deleted: true });
       },
       updateOrganization(organization: OrganizationDto) {
-        sock.updateOrganizationData({
+        return sock.updateOrganizationData({
           organization,
           deleted: false,
         });
       },
       addManager(email: string, organizationId: string) {
-        sock.addManager({ email, organizationId });
+        return sock.addManager({ email, organizationId });
       },
       deleteOrganization(id: string) {
-        sock.updateOrganizationData({ organization: { id }, deleted: true });
+        return sock.updateOrganizationData({
+          organization: { id },
+          deleted: true,
+        });
       },
     }),
     [serverData, setServerData, sock]

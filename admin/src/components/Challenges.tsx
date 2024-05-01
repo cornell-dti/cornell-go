@@ -41,8 +41,11 @@ const locationOptions: ChallengeLocationDto[] = [
   ChallengeLocationDto.ENG_QUAD,
   ChallengeLocationDto.ARTS_QUAD,
   ChallengeLocationDto.AG_QUAD,
+  ChallengeLocationDto.CENTRAL_CAMPUS,
   ChallengeLocationDto.NORTH_CAMPUS,
   ChallengeLocationDto.WEST_CAMPUS,
+  ChallengeLocationDto.CORNELL_ATHLETICS,
+  ChallengeLocationDto.VET_SCHOOL,
   ChallengeLocationDto.COLLEGETOWN,
   ChallengeLocationDto.ITHACA_COMMONS,
   ChallengeLocationDto.ANY,
@@ -54,6 +57,7 @@ function ChallengeCard(props: {
   onDown: () => void;
   onDelete: () => void;
   onEdit: () => void;
+  onCopy: () => void;
 }) {
   return (
     <ListCardBox>
@@ -78,6 +82,9 @@ function ChallengeCard(props: {
         </HButton>
         <HButton onClick={props.onEdit} float="right">
           EDIT
+        </HButton>
+        <HButton onClick={props.onCopy} float="right">
+          COPY
         </HButton>
       </ListCardButtons>
     </ListCardBox>
@@ -170,6 +177,16 @@ function fromForm(
   };
 }
 
+function makeCopyForm(evOptions: string[], initialIndex: number) {
+  return [
+    {
+      name: "Target Event",
+      options: evOptions,
+      value: initialIndex,
+    },
+  ] as EntryForm[];
+}
+
 export function Challenges() {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -179,6 +196,12 @@ export function Challenges() {
   const [form, setForm] = useState(() => makeForm());
   const [currentId, setCurrentId] = useState("");
   const [query, setQuery] = useState("");
+
+  const [isCopyModalOpen, setCopyModalOpen] = useState(false);
+  const [copyForm, setCopyForm] = useState(() => ({
+    form: makeCopyForm([], 0),
+    evIds: [] as string[],
+  }));
 
   const serverData = useContext(ServerDataContext);
   const selectedEvent = serverData.events.get(serverData.selectedEvent);
@@ -228,6 +251,25 @@ export function Challenges() {
           serverData.deleteChallenge(currentId);
           setDeleteModalOpen(false);
         }}
+      />
+      <EntryModal
+        title="Copy Challenge"
+        isOpen={isCopyModalOpen}
+        entryButtonText="COPY"
+        onEntry={async () => {
+          const chal = serverData.challenges.get(currentId)!;
+          serverData.updateChallenge({
+            ...chal,
+            linkedEventId:
+              copyForm.evIds[(copyForm.form[0] as OptionEntryForm).value],
+            id: "",
+          });
+          setCopyModalOpen(false);
+        }}
+        onCancel={() => {
+          setCopyModalOpen(false);
+        }}
+        form={copyForm.form}
       />
       <SearchBar
         onCreate={() => {
@@ -291,6 +333,21 @@ export function Challenges() {
             onDelete={() => {
               setCurrentId(chal.id);
               setDeleteModalOpen(true);
+            }}
+            onCopy={() => {
+              const evs = Array.from(serverData.events.values());
+              const myEvIndex = evs.findIndex(
+                (v) => v.id === selectedEvent?.id
+              );
+              setCurrentId(chal.id);
+              setCopyForm({
+                form: makeCopyForm(
+                  evs.map((ev) => ev.name ?? ""),
+                  myEvIndex
+                ),
+                evIds: evs.map((ev) => ev.id),
+              });
+              setCopyModalOpen(true);
             }}
           />
         ))}

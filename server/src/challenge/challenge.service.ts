@@ -185,6 +185,10 @@ export class ChallengeService {
       eventId: newEvTracker.eventId,
     });
 
+    const updatedChal = await this.getChallengeById(curChallenge.id);
+    if (updatedChal != null)
+      await this.emitUpdateChallengeData(updatedChal, false);
+
     return true;
   }
 
@@ -351,9 +355,6 @@ export class ChallengeService {
           { id: challengeId },
           accessibleBy(ability, Action.Delete).Challenge,
         ],
-      },
-      include: {
-        linkedEvent: { include: { challenges: true } },
       },
     });
 

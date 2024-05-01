@@ -53,6 +53,8 @@ export class AchievementGateway {
     for (const ach of achs) {
       await this.achievementService.emitUpdateAchievementData(ach, false, user);
     }
+
+    return achs.length;
   }
 
   /**
@@ -75,6 +77,8 @@ export class AchievementGateway {
     for (const ach of achs) {
       await this.achievementService.emitUpdateAchievementTracker(ach, user);
     }
+
+    return achs.length;
   }
 
   /**
@@ -129,12 +133,17 @@ export class AchievementGateway {
         data.achievement.initialOrganizationId!,
       );
 
-      await this.orgService.emitUpdateOrganizationData(org, false);
+      if (org) {
+        await this.orgService.emitUpdateOrganizationData(org, false);
+      }
+
       this.clientService.subscribe(user, achievement.id);
       await this.achievementService.emitUpdateAchievementData(
         achievement,
         false,
       );
     }
+
+    return achievement?.id;
   }
 }
