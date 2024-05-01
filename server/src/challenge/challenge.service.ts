@@ -356,9 +356,6 @@ export class ChallengeService {
           accessibleBy(ability, Action.Delete).Challenge,
         ],
       },
-      include: {
-        linkedEvent: { include: { challenges: true } },
-      },
     });
 
     if (!challenge) return false;

@@ -33,6 +33,41 @@ Future<void> showAlert(String message, context) async {
   );
 }
 
+TextEditingController _textFieldController = TextEditingController();
+
+Future<void> displayTextInputDialog(
+    BuildContext context, String text, String hintText, dynamic onOk) async {
+  _textFieldController.clear();
+
+  return showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: Text(text),
+        content: TextField(
+          controller: _textFieldController,
+          decoration: InputDecoration(hintText: hintText),
+        ),
+        actions: <Widget>[
+          TextButton(
+            child: Text('CANCEL'),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+          TextButton(
+            child: Text('OK'),
+            onPressed: () {
+              onOk(_textFieldController.text);
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
 Future<String?> getId() async {
   var deviceInfo = DeviceInfoPlugin();
   if (Platform.isIOS) {

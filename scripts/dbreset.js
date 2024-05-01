@@ -18,6 +18,9 @@ async function main() {
   execSync(
     "docker compose up --build --no-attach postgres --exit-code-from server"
   );
+  chdir("./server");
+  console.log("Generating prisma client");
+  execSync("npx prisma generate");
 
   console.log("Successfully reset the database!");
 }

@@ -52,6 +52,7 @@ function AchiemementCard(props: {
   onSelect: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  onCopy: () => void;
 }) {
   return (
     <>
@@ -79,6 +80,9 @@ function AchiemementCard(props: {
           <HButton onClick={props.onDelete}>DELETE</HButton>
           <HButton onClick={props.onEdit} float="right">
             EDIT
+          </HButton>
+          <HButton onClick={props.onCopy} float="right">
+            COPY
           </HButton>
         </ListCardButtons>
       </ListCardBox>
@@ -146,6 +150,16 @@ function toForm(achievement: AchievementDto) {
   ] as EntryForm[];
 }
 
+function makeCopyForm(orgOptions: string[], initialIndex: number) {
+  return [
+    {
+      name: "Target Organization",
+      options: orgOptions,
+      value: initialIndex,
+    },
+  ] as EntryForm[];
+}
+
 export function Achievements() {
   const serverData = useContext(ServerDataContext);
   const [isCreateModalOpen, setCreateModalOpen] = useState(false);
@@ -153,6 +167,13 @@ export function Achievements() {
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectModalOpen, setSelectModalOpen] = useState(false);
   const [isLinkedModalOpen, setLinkedModalOpen] = useState(false);
+
+  const [isCopyModalOpen, setCopyModalOpen] = useState(false);
+  const [copyForm, setCopyForm] = useState(() => ({
+    form: makeCopyForm([], 0),
+    orgIds: [] as string[],
+  }));
+
   const [form, setForm] = useState(() => makeForm());
   const [currentId, setCurrentId] = useState("");
   const [query, setQuery] = useState("");
@@ -202,6 +223,26 @@ export function Achievements() {
           setEditModalOpen(false);
         }}
         form={form}
+      />
+      <EntryModal
+        title="Copy Achievement"
+        isOpen={isCopyModalOpen}
+        entryButtonText="COPY"
+        onEntry={async () => {
+          const ach = serverData.achievements.get(currentId)!;
+          serverData.updateAchievement({
+            ...ach,
+            eventId: "",
+            initialOrganizationId:
+              copyForm.orgIds[(copyForm.form[0] as OptionEntryForm).value],
+            id: "",
+          });
+          setCopyModalOpen(false);
+        }}
+        onCancel={() => {
+          setCopyModalOpen(false);
+        }}
+        form={copyForm.form}
       />
       <DeleteModal
         objectName={serverData.achievements.get(currentId)?.name ?? ""}
@@ -279,6 +320,21 @@ export function Achievements() {
               setCurrentId(ach.id);
               setForm(toForm(ach));
               setEditModalOpen(true);
+            }}
+            onCopy={() => {
+              const orgs = Array.from(serverData.organizations.values());
+              const myOrgIndex = orgs.findIndex(
+                (v) => v.id === selectedOrg?.id
+              );
+              setCurrentId(ach.id);
+              setCopyForm({
+                form: makeCopyForm(
+                  orgs.map((org) => org.name ?? ""),
+                  myOrgIndex
+                ),
+                orgIds: orgs.map((org) => org.id),
+              });
+              setCopyModalOpen(true);
             }}
           />
         ))}

@@ -12,12 +12,13 @@
     "setup": "node ./scripts/setup.js",
     "updateapi": "node ./scripts/updateapi.js",
     "formatall": "node ./scripts/formatall.js",
-    "compilescripts": "tsc scripts/updateapi.ts --target es2021 --moduleResolution nodenext --module nodenext"
+    "compilescripts": "tsc --project scripts"
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11"
   },
   "dependencies": {
+    "@types/node": "^20.12.7",
     "ts-morph": "^22.0.0",
     "typescript": "^5.4.3"
   }
