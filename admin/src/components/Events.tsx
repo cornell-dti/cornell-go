@@ -44,6 +44,7 @@ function EventCard(props: {
   onSelect: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  onCopy: () => void;
 }) {
   const requiredText =
     props.event.requiredMembers && props.event.requiredMembers < 0
@@ -98,6 +99,9 @@ function EventCard(props: {
           <HButton onClick={props.onDelete}>DELETE</HButton>
           <HButton onClick={props.onEdit} float="right">
             EDIT
+          </HButton>
+          <HButton onClick={props.onCopy} float="right">
+            COPY
           </HButton>
         </ListCardButtons>
       </ListCardBox>
@@ -201,13 +205,28 @@ function toForm(event: EventDto) {
   ] as EntryForm[];
 }
 
+function makeCopyForm(orgOptions: string[], initialIndex: number) {
+  return [
+    {
+      name: "Org",
+      options: orgOptions,
+      value: initialIndex,
+    },
+  ] as EntryForm[];
+}
+
 export function Events() {
   const serverData = useContext(ServerDataContext);
   const [isCreateModalOpen, setCreateModalOpen] = useState(false);
   const [isEditModalOpen, setEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectModalOpen, setSelectModalOpen] = useState(false);
+  const [isCopyModalOpen, setCopyModalOpen] = useState(false);
   const [form, setForm] = useState(() => makeForm());
+  const [copyForm, setCopyForm] = useState(() => ({
+    form: makeCopyForm([], 0),
+    orgIds: [] as string[],
+  }));
   const [currentId, setCurrentId] = useState("");
   const [query, setQuery] = useState("");
   const selectedOrg = serverData.organizations.get(serverData.selectedOrg);
@@ -249,6 +268,35 @@ export function Events() {
         }}
         onCancel={() => {
           setEditModalOpen(false);
+        }}
+        form={form}
+      />
+      <EntryModal
+        title="Copy Event"
+        isOpen={isEditModalOpen}
+        entryButtonText="COPY"
+        onEntry={async () => {
+          const ev = serverData.events.get(currentId)!;
+          const evId = await serverData.updateEvent({
+            ...ev,
+            id: "",
+          });
+          if (!evId) {
+            setCopyModalOpen(false);
+            return;
+          }
+          for (const chalId of ev.challenges!) {
+            const chal = serverData.challenges.get(chalId)!;
+            serverData.updateChallenge({
+              ...chal,
+              linkedEventId: evId,
+              id: "",
+            });
+          }
+          setCopyModalOpen(false);
+        }}
+        onCancel={() => {
+          setCopyModalOpen(false);
         }}
         form={form}
       />
@@ -306,6 +354,21 @@ export function Events() {
               setCurrentId(ev.id);
               setForm(toForm(ev));
               setEditModalOpen(true);
+            }}
+            onCopy={() => {
+              const orgs = Array.from(serverData.organizations.values());
+              const myOrgIndex = orgs.findIndex(
+                (v) => v.id === selectedOrg?.id
+              );
+              setCurrentId(ev.id);
+              setCopyForm({
+                form: makeCopyForm(
+                  orgs.map((org) => org.name ?? ""),
+                  myOrgIndex
+                ),
+                orgIds: orgs.map((org) => org.id),
+              });
+              setCopyModalOpen(true);
             }}
           />
         ))}

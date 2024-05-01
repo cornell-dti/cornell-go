@@ -286,7 +286,7 @@ export function getDartServerApiFile(apiDefs: ApiDefs) {
         completer.complete(arg);
       };
 
-      Future.delayed(Duration(seconds: 2))
+      Future.delayed(Duration(seconds: 5))
           .then((value) => completer.complete(null));
 
       _refreshEv = ev;
