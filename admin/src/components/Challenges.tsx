@@ -247,7 +247,7 @@ export function Challenges() {
         <CenterText>Select an event to view challenges</CenterText>
       ) : serverData.events.get(serverData.selectedEvent) ? (
         serverData.events.get(serverData.selectedEvent)?.challenges?.length ===
-        0 && <CenterText>No challenges in event</CenterText>
+          0 && <CenterText>No challenges in event</CenterText>
       ) : (
         <CenterText>Error getting challenges</CenterText>
       )}
@@ -258,9 +258,9 @@ export function Challenges() {
           query === ""
             ? 0
             : compareTwoStrings(b.name ?? "", query) -
-            compareTwoStrings(a.name ?? "", query) +
-            compareTwoStrings(b.description ?? "", query) -
-            compareTwoStrings(a.description ?? "", query)
+              compareTwoStrings(a.name ?? "", query) +
+              compareTwoStrings(b.description ?? "", query) -
+              compareTwoStrings(a.description ?? "", query)
         )
         .map((chal: ChallengeDto) => (
           <ChallengeCard

@@ -185,7 +185,7 @@ export class ChallengeService {
       eventId: newEvTracker.eventId,
     });
 
-    const updatedChal = await this.getChallengeById(challengeId);
+    const updatedChal = await this.getChallengeById(curChallenge.id);
     if (updatedChal != null)
       await this.emitUpdateChallengeData(updatedChal, false);
 

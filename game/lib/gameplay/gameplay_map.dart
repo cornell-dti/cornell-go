@@ -298,14 +298,13 @@ class _GameplayMapState extends State<GameplayMap> {
           "An error occurred while getting event tracker", Status.error);
     } else {
       var challenge = Provider.of<ChallengeModel>(context, listen: false)
-          .getChallengeById(tracker.curChallengeId);
+          .getChallengeById(tracker.curChallengeId ?? '');
       if (challenge == null) {
         displayToast("An error occurred while getting challenge", Status.error);
       } else {
         Provider.of<ApiClient>(context, listen: false)
             .serverApi
-            ?.completedChallenge(
-                CompletedChallengeDto(challengeId: challenge.id));
+            ?.completedChallenge(CompletedChallengeDto());
         setState(() {
           challengeName = challenge.name;
         });
@@ -339,7 +338,7 @@ class _GameplayMapState extends State<GameplayMap> {
               challengeModel, apiClient, child) {
         EventTrackerDto? tracker =
             trackerModel.trackerByEventId(groupModel.curEventId ?? "");
-        if (tracker?.curChallengeId == null) {
+        if (tracker == null) {
           displayToast("Error getting event tracker", Status.error);
         } else {
           numHintsLeft = totalHints - tracker.hintsUsed;
@@ -436,8 +435,8 @@ class _GameplayMapState extends State<GameplayMap> {
                       displayToast("An error occurred while getting challenge",
                           Status.error);
                     } else {
-                      apiClient.serverApi?.completedChallenge(
-                          CompletedChallengeDto(challengeId: challenge.id));
+                      apiClient.serverApi
+                          ?.completedChallenge(CompletedChallengeDto());
                       setState(() {
                         challengeName = challenge.name;
                       });
