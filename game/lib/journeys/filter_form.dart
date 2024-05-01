@@ -83,7 +83,7 @@ class _FilterFormState extends State<FilterForm> {
   @override
   Widget build(BuildContext context) {
     return FractionallySizedBox(
-      heightFactor: 0.9,
+      heightFactor: 0.8,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
