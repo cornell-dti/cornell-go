@@ -10,127 +10,153 @@ export class ServerApi {
 
   send(ev: string, data: {}) {
     console.log(`Sending ${ev} with ${JSON.stringify(data)}`);
-    this.socket.emit(ev, data);
+    return this.socket.timeout(5000).emitWithAck(ev, data);
   }
 
   requestAchievementData(data: dto.RequestAchievementDataDto) {
-    this.send("requestAchievementData", data);
+    return this.send("requestAchievementData", data) as Promise<
+      number | undefined
+    >;
   }
 
   requestAchievementTrackerData(data: dto.RequestAchievementTrackerDataDto) {
-    this.send("requestAchievementTrackerData", data);
+    return this.send("requestAchievementTrackerData", data) as Promise<
+      number | undefined
+    >;
   }
 
   updateAchievementData(data: dto.UpdateAchievementDataDto) {
-    this.send("updateAchievementData", data);
+    return this.send("updateAchievementData", data) as Promise<
+      string | undefined
+    >;
   }
 
   requestChallengeData(data: dto.RequestChallengeDataDto) {
-    this.send("requestChallengeData", data);
+    return this.send("requestChallengeData", data) as Promise<
+      number | undefined
+    >;
   }
 
   completedChallenge(data: dto.CompletedChallengeDto) {
-    this.send("completedChallenge", data);
+    return this.send("completedChallenge", data) as Promise<
+      boolean | undefined
+    >;
   }
 
   updateChallengeData(data: dto.UpdateChallengeDataDto) {
-    this.send("updateChallengeData", data);
+    return this.send("updateChallengeData", data) as Promise<
+      string | undefined
+    >;
   }
 
   requestEventData(data: dto.RequestEventDataDto) {
-    this.send("requestEventData", data);
+    return this.send("requestEventData", data) as Promise<number | undefined>;
   }
 
   requestFilteredEventIds(data: dto.RequestFilteredEventsDto) {
-    this.send("requestFilteredEventIds", data);
+    return this.send("requestFilteredEventIds", data) as Promise<
+      number | undefined
+    >;
   }
 
   requestRecommendedEvents(data: dto.RequestRecommendedEventsDto) {
-    this.send("requestRecommendedEvents", data);
+    return this.send("requestRecommendedEvents", data) as Promise<
+      number | undefined
+    >;
   }
 
   requestEventLeaderData(data: dto.RequestEventLeaderDataDto) {
-    this.send("requestEventLeaderData", data);
+    return this.send("requestEventLeaderData", data) as Promise<
+      number | undefined
+    >;
   }
 
   requestEventTrackerData(data: dto.RequestEventTrackerDataDto) {
-    this.send("requestEventTrackerData", data);
+    return this.send("requestEventTrackerData", data) as Promise<
+      number | undefined
+    >;
   }
 
   useEventTrackerHint(data: dto.UseEventTrackerHintDto) {
-    this.send("useEventTrackerHint", data);
+    return this.send("useEventTrackerHint", data) as Promise<
+      boolean | undefined
+    >;
   }
 
   updateEventData(data: dto.UpdateEventDataDto) {
-    this.send("updateEventData", data);
+    return this.send("updateEventData", data) as Promise<string | undefined>;
   }
 
   requestGroupData(data: dto.RequestGroupDataDto) {
-    this.send("requestGroupData", data);
+    return this.send("requestGroupData", data) as Promise<boolean | undefined>;
   }
 
   joinGroup(data: dto.JoinGroupDto) {
-    this.send("joinGroup", data);
+    return this.send("joinGroup", data) as Promise<boolean | undefined>;
   }
 
   leaveGroup(data: dto.LeaveGroupDto) {
-    this.send("leaveGroup", data);
+    return this.send("leaveGroup", data) as Promise<boolean | undefined>;
   }
 
   setCurrentEvent(data: dto.SetCurrentEventDto) {
-    this.send("setCurrentEvent", data);
+    return this.send("setCurrentEvent", data) as Promise<boolean | undefined>;
   }
 
   updateGroupData(data: dto.UpdateGroupDataDto) {
-    this.send("updateGroupData", data);
+    return this.send("updateGroupData", data) as Promise<boolean | undefined>;
   }
 
   sendGroupInvite(data: dto.SendGroupInviteDto) {
-    this.send("sendGroupInvite", data);
+    return this.send("sendGroupInvite", data) as Promise<boolean | undefined>;
   }
 
   requestOrganizationData(data: dto.RequestOrganizationDataDto) {
-    this.send("requestOrganizationData", data);
+    return this.send("requestOrganizationData", data) as Promise<
+      number | undefined
+    >;
   }
 
   updateOrganizationData(data: dto.UpdateOrganizationDataDto) {
-    this.send("updateOrganizationData", data);
+    return this.send("updateOrganizationData", data) as Promise<
+      string | undefined
+    >;
   }
 
   requestAllUserData(data: dto.RequestAllUserDataDto) {
-    this.send("requestAllUserData", data);
+    return this.send("requestAllUserData", data) as Promise<number | undefined>;
   }
 
   requestUserData(data: dto.RequestUserDataDto) {
-    this.send("requestUserData", data);
+    return this.send("requestUserData", data) as Promise<boolean | undefined>;
   }
 
   updateUserData(data: dto.UpdateUserDataDto) {
-    this.send("updateUserData", data);
+    return this.send("updateUserData", data) as Promise<boolean | undefined>;
   }
 
   setAuthToDevice(data: dto.SetAuthToDeviceDto) {
-    this.send("setAuthToDevice", data);
+    return this.send("setAuthToDevice", data) as Promise<boolean | undefined>;
   }
 
   setAuthToOAuth(data: dto.SetAuthToOAuthDto) {
-    this.send("setAuthToOAuth", data);
+    return this.send("setAuthToOAuth", data) as Promise<boolean | undefined>;
   }
 
   banUser(data: dto.BanUserDto) {
-    this.send("banUser", data);
+    return this.send("banUser", data) as Promise<boolean | undefined>;
   }
 
   addManager(data: dto.AddManagerDto) {
-    this.send("addManager", data);
+    return this.send("addManager", data) as Promise<string | undefined>;
   }
 
   joinOrganization(data: dto.JoinOrganizationDto) {
-    this.send("joinOrganization", data);
+    return this.send("joinOrganization", data) as Promise<boolean | undefined>;
   }
 
   closeAccount(data: dto.CloseAccountDto) {
-    this.send("closeAccount", data);
+    return this.send("closeAccount", data) as Promise<boolean | undefined>;
   }
 
   onUpdateUserData(callback: (data: dto.UpdateUserDataDto) => void) {

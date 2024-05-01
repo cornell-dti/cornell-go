@@ -46,14 +46,15 @@ function getAdminApiFile(apiDefs) {
 
       send(ev: string, data: {}) {
         console.log(\`Sending \${ev} with \${JSON.stringify(data)}\`);
-        this.socket.emit(ev, data);
+        return this.socket.timeout(5000).emitWithAck(ev, data);
       }
 
   `;
     for (const [ev, dto] of apiDefs.serverEntrypoints.entries()) {
+        const ackType = apiDefs.serverAcks.get(ev);
         tsCode += `
       ${ev}(data: dto.${dto}) {
-        this.send("${ev}", data);
+        return this.send("${ev}", data) as Promise<${ackType} | undefined>;
       }
 
     `;

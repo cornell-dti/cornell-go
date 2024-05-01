@@ -9,8 +9,8 @@ export function getDtoDefinitions(): DtoDefs {
   console.log(`Discovered ${project.getSourceFiles().length} DTO files!`);
   console.log();
 
-  const enumDtos = new Map<String, EnumDto>();
-  const baseDtos = new Map<String, BaseDto>();
+  const enumDtos = new Map<string, EnumDto>();
+  const baseDtos = new Map<string, BaseDto>();
 
   for (const file of project.getSourceFiles()) {
     const interfs = file.getInterfaces();

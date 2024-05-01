@@ -11,11 +11,12 @@ export type EnumDto = string[];
 export type BaseDto = Map<string, [string, FieldType, boolean]>;
 
 export type DtoDefs = {
-  enumDtos: Map<String, EnumDto>;
-  baseDtos: Map<String, BaseDto>;
+  enumDtos: Map<string, EnumDto>;
+  baseDtos: Map<string, BaseDto>;
 };
 
 export type ApiDefs = {
-  clientEntrypoints: Map<String, String>; // message => dto
-  serverEntrypoints: Map<String, String>; // message => dto
+  clientEntrypoints: Map<string, string>; // message => dto
+  serverEntrypoints: Map<string, string>; // message => dto
+  serverAcks: Map<string, string>; // message => ack primitive type
 };

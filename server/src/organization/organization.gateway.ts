@@ -47,6 +47,8 @@ export class OrganizationGateway {
     for (const org of orgs) {
       await this.orgService.emitUpdateOrganizationData(org, false, user);
     }
+
+    return orgs.length;
   }
 
   /**
@@ -61,12 +63,10 @@ export class OrganizationGateway {
     @CallingUser() user: User,
     @MessageBody() data: UpdateOrganizationDataDto,
   ) {
+    let org = await this.orgService.getOrganizationById(data.organization.id);
     if (data.deleted) {
-      const org = await this.orgService.getOrganizationById(
-        data.organization.id,
-      );
-
       if (
+        !org ||
         !(await this.orgService.removeOrganization(
           ability,
           data.organization.id,
@@ -80,7 +80,7 @@ export class OrganizationGateway {
       }
       await this.orgService.emitUpdateOrganizationData(org, true);
     } else {
-      const org = await this.orgService.upsertOrganizationFromDto(
+      org = await this.orgService.upsertOrganizationFromDto(
         ability,
         data.organization,
       );
@@ -96,5 +96,7 @@ export class OrganizationGateway {
       this.clientService.subscribe(user, org.id);
       await this.orgService.emitUpdateOrganizationData(org, false);
     }
+
+    return org.id;
   }
 }

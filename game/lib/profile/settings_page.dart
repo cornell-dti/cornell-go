@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:game/api/game_api.dart';
+import 'package:game/api/game_client_dto.dart';
 import 'package:game/profile/edit_profile.dart';
 import 'package:game/main.dart';
+import 'package:game/utils/utility_functions.dart';
+import 'package:provider/provider.dart';
 
 class SettingsPage extends StatelessWidget {
   final bool isGuest;
@@ -117,8 +121,52 @@ class SettingsPage extends StatelessWidget {
                     Container(
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.all(
-                          Radius.circular(10),
+                        borderRadius: BorderRadius.only(
+                          topRight: Radius.circular(10),
+                          topLeft: Radius.circular(10),
+                        ),
+                      ),
+                      child: TextButton(
+                        onPressed: () {
+                          displayTextInputDialog(
+                              context, "Join Organization", "Access Code",
+                              (text) {
+                            client.serverApi?.joinOrganization(
+                                JoinOrganizationDto(
+                                    accessCode: text.toUpperCase()));
+                          });
+                        },
+                        style: TextButton.styleFrom(
+                            padding: EdgeInsets.only(left: 20.0),
+                            alignment: Alignment.centerLeft,
+                            fixedSize: Size(constraints.maxWidth, 60)),
+                        child: Row(
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.only(right: 20.0),
+                              child: SvgPicture.asset(
+                                'assets/icons/head.svg',
+                              ),
+                            ),
+                            Text(
+                              'Join Organization',
+                              textAlign: TextAlign.left,
+                              style: TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: 16,
+                                  color: Colors.black),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                    Divider(height: 1),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.only(
+                          bottomRight: Radius.circular(10),
+                          bottomLeft: Radius.circular(10),
                         ),
                       ),
                       child: TextButton(
