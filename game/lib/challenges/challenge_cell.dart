@@ -105,9 +105,10 @@ class _ChallengeCellState extends State<ChallengeCell> {
             ),
           ],
         ),
-        height: 135.0,
+        height: MediaQuery.sizeOf(context).height * 0.15,
+        width: MediaQuery.sizeOf(context).width * 0.85,
         child: Padding(
-          padding: EdgeInsets.all(16.0),
+          padding: EdgeInsets.all(16),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -116,7 +117,9 @@ class _ChallengeCellState extends State<ChallengeCell> {
                 child: ClipRRect(
                   borderRadius: BorderRadius.all(Radius.circular(4.6)),
                   child: Image.network(imgUrl,
-                      width: 100, height: 100, fit: BoxFit.cover),
+                      width: MediaQuery.sizeOf(context).height * 0.1,
+                      height: MediaQuery.sizeOf(context).height * 0.1,
+                      fit: BoxFit.cover),
                 ),
               ),
               Expanded(
@@ -139,9 +142,7 @@ class _ChallengeCellState extends State<ChallengeCell> {
                         ),
                       ],
                     ),
-                    SizedBox(
-                      height: 4,
-                    ),
+                    Spacer(),
                     Text(
                       challengeName,
                       style: TextStyle(
@@ -151,9 +152,7 @@ class _ChallengeCellState extends State<ChallengeCell> {
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    SizedBox(
-                      height: 12,
-                    ),
+                    Spacer(),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [

@@ -76,13 +76,9 @@ Widget leaderBoardCell(
                     ),
                     Padding(
                       padding: const EdgeInsets.only(left: 10, right: 5),
-                      child: SizedBox(
-                        width: 110,
-                        child: FittedBox(
-                          alignment: Alignment.centerLeft,
-                          fit: BoxFit.scaleDown,
-                          child: Text(name, style: nameStyle),
-                        ),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(name, style: nameStyle),
                       ),
                     ),
                   ],

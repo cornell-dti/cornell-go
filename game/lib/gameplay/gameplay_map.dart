@@ -675,7 +675,11 @@ class _GameplayMapState extends State<GameplayMap> {
                       onPressed: () => Navigator.pop(context, false),
                       style: ButtonStyle(
                         padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
-                            EdgeInsets.only(left: 15, right: 15)),
+                            EdgeInsets.symmetric(
+                                horizontal:
+                                    (MediaQuery.devicePixelRatioOf(context) < 3
+                                        ? 10
+                                        : 20))),
                         shape:
                             MaterialStateProperty.all<RoundedRectangleBorder>(
                           RoundedRectangleBorder(
@@ -695,6 +699,10 @@ class _GameplayMapState extends State<GameplayMap> {
                       ),
                       child: Text("Nevermind",
                           style: TextStyle(
+                              fontSize:
+                                  MediaQuery.devicePixelRatioOf(context) < 3
+                                      ? 12
+                                      : 14,
                               color: Color.fromARGB(255, 237, 86, 86)))),
                   if (numHintsLeft > 0) Spacer(),
                   if (numHintsLeft > 0)
@@ -715,7 +723,12 @@ class _GameplayMapState extends State<GameplayMap> {
                               Color.fromARGB(255, 237, 86, 86)),
                         ),
                         child: Text("Use Hint (${numHintsLeft} Left)",
-                            style: TextStyle(color: Colors.white))),
+                            style: TextStyle(
+                                fontSize:
+                                    MediaQuery.devicePixelRatioOf(context) < 3
+                                        ? 12
+                                        : 14,
+                                color: Colors.white))),
                 ])
               ],
             ),

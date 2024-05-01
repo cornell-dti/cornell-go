@@ -17,7 +17,7 @@ class LoadingBar extends StatelessWidget {
     return Row(
       children: [
         Container(
-            width: 200,
+            width: MediaQuery.sizeOf(context).width * 0.47,
             child: LayoutBuilder(
                 builder: (BuildContext context, BoxConstraints constraints) {
               return Stack(children: [
@@ -109,7 +109,9 @@ class _AchievementCellState extends State<AchievementCell> {
     return GestureDetector(
       onTap: () async {},
       child: Container(
-        padding: EdgeInsets.all(5),
+        width: MediaQuery.sizeOf(context).width * 0.85,
+        height: MediaQuery.sizeOf(context).height * 0.11,
+        //padding: EdgeInsets.all(5),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(15),
@@ -122,8 +124,7 @@ class _AchievementCellState extends State<AchievementCell> {
           ],
         ),
         child: Container(
-          margin: EdgeInsets.all(10),
-          height: 64,
+          padding: EdgeInsets.all(10),
           child: Row(
             children: [
               Container(margin: EdgeInsets.only(right: 12), child: thumbnail),
@@ -134,13 +135,18 @@ class _AchievementCellState extends State<AchievementCell> {
                 children: [
                   Align(
                     alignment: Alignment.centerLeft,
-                    child: Text(
-                      description,
-                      style: TextStyle(
-                        color: Color.fromARGB(204, 0, 0, 0),
-                        fontSize: 14,
-                        fontFamily: 'Poppins',
-                        fontWeight: FontWeight.w500,
+                    child: Container(
+                      width: MediaQuery.sizeOf(context).width * 0.45,
+                      child: Text(
+                        description,
+                        maxLines: 2,
+                        overflow: TextOverflow.clip,
+                        style: TextStyle(
+                          color: Color.fromARGB(204, 0, 0, 0),
+                          fontSize: 14,
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                   ),

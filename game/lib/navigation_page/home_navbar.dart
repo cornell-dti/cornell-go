@@ -38,7 +38,7 @@ class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
     return Scaffold(
       appBar: PreferredSize(
         preferredSize:
-            Size.fromHeight(MediaQuery.sizeOf(context).height * 0.06),
+            Size.fromHeight(MediaQuery.sizeOf(context).height * 0.08),
         child: AppBar(
           backgroundColor: Color(0xFFED5656),
           titleTextStyle: TextStyle(fontSize: 25, fontWeight: FontWeight.w500),
@@ -67,7 +67,7 @@ class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
               Tab(
                 child: Padding(
                   padding: EdgeInsets.only(
-                      bottom: MediaQuery.sizeOf(context).height * 0.02),
+                      bottom: MediaQuery.sizeOf(context).height * 0.03),
                   child: Text(
                     'Challenges',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
@@ -77,7 +77,7 @@ class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
               Tab(
                 child: Padding(
                   padding: EdgeInsets.only(
-                      bottom: MediaQuery.sizeOf(context).height * 0.02),
+                      bottom: MediaQuery.sizeOf(context).height * 0.03),
                   child: Text(
                     'Journeys',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),

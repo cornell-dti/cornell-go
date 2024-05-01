@@ -51,9 +51,7 @@ class _ProfilePageState extends State<ProfilePage> {
           List<Tuple3<DateTime, EventDto, int>> completedEvents = [];
 
           //Get completed events
-          print(userModel.userData!.trackedEvents!.length);
           for (var eventId in userModel.userData!.trackedEvents!) {
-            print("event id: " + eventId);
             if (completedEvents.length == 2) break;
 
             var tracker = trackerModel.trackerByEventId(eventId);
@@ -63,10 +61,7 @@ class _ProfilePageState extends State<ProfilePage> {
               continue;
             }
             if (tracker.prevChallenges.length != event.challenges!.length) {
-              print("incomplete event name: " + (event.name ?? ""));
               continue;
-            } else {
-              print("complete event name: " + (event.name ?? ""));
             }
 
             try {
@@ -258,6 +253,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     }
 
                     return completedCell(
+                        context,
                         event.name!,
                         locationImage,
                         type,

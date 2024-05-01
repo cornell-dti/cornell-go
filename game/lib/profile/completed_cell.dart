@@ -11,11 +11,18 @@ import 'package:velocity_x/velocity_x.dart';
  * @param points: Points that the completed journey / challenge had
 
  */
-Widget completedCell(String name, String picture, String type, String date,
-    String difficulty, int totalHintsUsed, int points) {
+Widget completedCell(
+    BuildContext context,
+    String name,
+    String picture,
+    String type,
+    String date,
+    String difficulty,
+    int totalHintsUsed,
+    int points) {
   return Container(
-      width: 345,
-      height: 88,
+      width: MediaQuery.sizeOf(context).width * 0.85,
+      height: MediaQuery.sizeOf(context).height * 0.11,
       decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(10.0),
