@@ -1,4 +1,8 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:game/navigation_page/bottom_navbar.dart';
 import 'package:game/splash_page/splash_page.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:game/api/geopoint.dart';
@@ -8,6 +12,7 @@ import 'dart:async';
 import 'dart:math';
 import 'package:game/gameplay/challenge_completed.dart';
 import 'package:game/utils/utility_functions.dart';
+import 'dart:ui' as ui;
 
 // for backend connection
 import 'package:provider/provider.dart';
@@ -15,20 +20,23 @@ import 'package:game/api/game_client_dto.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/model/tracker_model.dart';
 import 'package:game/model/group_model.dart';
+import 'package:game/model/event_model.dart';
 import 'package:game/model/challenge_model.dart';
 
 class GameplayMap extends StatefulWidget {
+  final String challengeId;
   final GeoPoint targetLocation;
   final double awardingRadius;
-  final String description;
   final int points;
+  final int startingHintsUsed;
 
   const GameplayMap(
       {Key? key,
+      required this.challengeId,
       required this.targetLocation,
       required this.awardingRadius,
-      required this.description,
-      required this.points})
+      required this.points,
+      required this.startingHintsUsed})
       : super(key: key);
 
   @override
@@ -56,18 +64,22 @@ class _GameplayMapState extends State<GameplayMap> {
   int numHintsLeft = 10;
   GeoPoint? startingHintCenter;
   GeoPoint? hintCenter;
-  double startingHintRadius = 100.0;
-  double hintRadius = 100.0;
+  double defaultHintRadius = 200.0;
+  double? hintRadius;
 
   // whether the picture is expanded over the map
   bool isExpanded = false;
 
+  // name of the challenge, either null or the name of the most recently
+  // completed challenge in this event
+  String? challengeName;
+
   @override
   void initState() {
-    super.initState();
     setCustomMarkerIcon();
+    super.initState();
     streamStarted = startPositionStream();
-    setStartingHintCenter();
+    setStartingHintCircle();
   }
 
   @override
@@ -85,13 +97,26 @@ class _GameplayMapState extends State<GameplayMap> {
   /**
    * Sets a center for the hint circle by random such that
    * the entire circle encompasses the awarding area denoted by
-   * widget.targetLocation and widget.awardingRadius
+   * widget.targetLocation and widget.awardingRadius.
+   * 
+   * Sets the radius for the hint circle based on the number of
+   * hints used for this challenge already.
    */
-  void setStartingHintCenter() {
+  void setStartingHintCircle() {
+    print(widget.startingHintsUsed);
+    hintRadius = defaultHintRadius -
+        (defaultHintRadius - widget.awardingRadius) *
+            0.33 *
+            widget.startingHintsUsed;
+    if (hintRadius == null) {
+      hintRadius = defaultHintRadius;
+    }
+    print(hintRadius);
+
     Random _random = Random();
 
     // Calculate the max distance between the centers of the circles in meters
-    double maxDistance = startingHintRadius - widget.awardingRadius;
+    double maxDistance = hintRadius! - widget.awardingRadius;
     // Center for hint circle can be up to maxDistance away from targetLocation
     // Generate random angle
     double angle = _random.nextDouble() * 2 * pi;
@@ -209,19 +234,25 @@ class _GameplayMapState extends State<GameplayMap> {
     });
   }
 
+  Future<Uint8List> getBytesFromAsset(String path, int width) async {
+    ByteData data = await rootBundle.load(path);
+    ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(),
+        targetWidth: width, targetHeight: width);
+    ui.FrameInfo fi = await codec.getNextFrame();
+    return (await fi.image.toByteData(format: ui.ImageByteFormat.png))!
+        .buffer
+        .asUint8List();
+  }
+
   /** 
    * Sets the custom user location icon, which is called upon
    * initializing the state
    */
   BitmapDescriptor currentLocationIcon = BitmapDescriptor.defaultMarker;
-  void setCustomMarkerIcon() {
-    BitmapDescriptor.fromAssetImage(
-            ImageConfiguration.empty, "assets/icons/userlocation.png")
-        .then(
-      (icon) {
-        currentLocationIcon = icon;
-      },
-    );
+  void setCustomMarkerIcon() async {
+    Uint8List newMarker =
+        await getBytesFromAsset('assets/icons/userlocation.png', 200);
+    currentLocationIcon = BitmapDescriptor.fromBytes(newMarker);
     setState(() {});
   }
 
@@ -244,8 +275,8 @@ class _GameplayMapState extends State<GameplayMap> {
 
       // decreases radius by 0.33 upon each hint press
       // after 3 hints, hint radius will equal that of the awarding radius
-      double newRadius =
-          hintRadius - (startingHintRadius - widget.awardingRadius) * 0.33;
+      double newRadius = (hintRadius ?? defaultHintRadius) -
+          (defaultHintRadius - widget.awardingRadius) * 0.33;
       double newLat = hintCenter!.lat -
           (startingHintCenter!.lat - widget.targetLocation.lat) * 0.33;
       double newLong = hintCenter!.long -
@@ -277,17 +308,28 @@ class _GameplayMapState extends State<GameplayMap> {
         useMaterial3: true,
         colorSchemeSeed: Colors.green[700],
       ),
-      home: Consumer3<GroupModel, TrackerModel, ChallengeModel>(
-          builder: (context, groupModel, trackerModel, challengeModel, child) {
+      home: Consumer5<EventModel, GroupModel, TrackerModel, ChallengeModel,
+              ApiClient>(
+          builder: (context, eventModel, groupModel, trackerModel,
+              challengeModel, apiClient, child) {
         EventTrackerDto? tracker =
             trackerModel.trackerByEventId(groupModel.curEventId ?? "");
-        if (tracker?.curChallengeId == null) {
+        if (tracker == null) {
           displayToast("Error getting event tracker", Status.error);
-        } else {
-          numHintsLeft = totalHints - (tracker!.hintsUsed);
+        } else if ((tracker.curChallengeId ?? '') == widget.challengeId) {
+          numHintsLeft = totalHints - tracker.hintsUsed;
         }
-        var challenge =
-            challengeModel.getChallengeById(tracker?.curChallengeId ?? "");
+        var challenge = challengeModel.getChallengeById(widget.challengeId);
+
+        if (challenge == null) {
+          displayToast("Error getting challenge", Status.error);
+        }
+
+        var imageUrl = challenge?.imageUrl;
+        if (imageUrl == null || imageUrl.length == 0) {
+          imageUrl =
+              "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png";
+        }
 
         return Scaffold(
             body: Stack(
@@ -333,6 +375,7 @@ class _GameplayMapState extends State<GameplayMap> {
                     position: currentLocation == null
                         ? _center
                         : LatLng(currentLocation!.lat, currentLocation!.long),
+                    anchor: Offset(0.5, 0.5),
                     rotation:
                         currentLocation == null ? 0 : currentLocation!.heading,
                   ),
@@ -343,7 +386,7 @@ class _GameplayMapState extends State<GameplayMap> {
                     center: hintCenter != null
                         ? LatLng(hintCenter!.lat, hintCenter!.long)
                         : _center,
-                    radius: hintRadius,
+                    radius: (hintRadius ?? defaultHintRadius),
                     strokeColor: Color.fromARGB(80, 30, 41, 143),
                     strokeWidth: 2,
                     fillColor: Color.fromARGB(80, 83, 134, 237),
@@ -371,8 +414,25 @@ class _GameplayMapState extends State<GameplayMap> {
                       color: Color(0xFFFFFFFF)),
                 ),
                 onPressed: () {
+                  bool hasArrived = checkArrived();
+                  if (hasArrived) {
+                    if (tracker == null || challenge == null) {
+                      displayToast("An error occurred while getting challenge",
+                          Status.error);
+                    } else {
+                      apiClient.serverApi
+                          ?.completedChallenge(CompletedChallengeDto());
+                      setState(() {
+                        challengeName = challengeModel
+                            .getChallengeById(
+                                tracker.prevChallenges.last.challengeId)
+                            ?.name;
+                      });
+                    }
+                  }
                   showDialog(
                     context: context,
+                    barrierDismissible: !hasArrived,
                     builder: (context) {
                       return Container(
                         margin: EdgeInsetsDirectional.only(start: 10, end: 10),
@@ -381,7 +441,7 @@ class _GameplayMapState extends State<GameplayMap> {
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(
                                 10), // Same as the Dialog's shape
-                            child: displayDialogue(),
+                            child: displayDialogue(hasArrived),
                           ),
                         ),
                       );
@@ -413,7 +473,7 @@ class _GameplayMapState extends State<GameplayMap> {
                         ),
                         // num hints left counter
                         Positioned(
-                          top: -5,
+                          top: 0,
                           right: 0,
                           child: Container(
                             padding: EdgeInsets.all(5.0),
@@ -495,8 +555,7 @@ class _GameplayMapState extends State<GameplayMap> {
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(10),
                           child: Image.network(
-                            challenge?.imageUrl ??
-                                "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png",
+                            imageUrl,
                             fit: BoxFit.cover,
                             width: pictureWidth,
                             height: pictureHeight,
@@ -526,8 +585,8 @@ class _GameplayMapState extends State<GameplayMap> {
         widget.awardingRadius;
   }
 
-  Container displayDialogue() {
-    return checkArrived()
+  Container displayDialogue(bool hasArrived) {
+    return hasArrived
         ? Container(
             // margin: EdgeInsetsDirectional.only(start: 50, end: 50),
             color: Colors.white,
@@ -546,7 +605,7 @@ class _GameplayMapState extends State<GameplayMap> {
                 Container(
                     margin: EdgeInsets.only(bottom: 10),
                     child: Text(
-                      "You've arrived at ${widget.description}!",
+                      "You've arrived at ${challengeName ?? ""}!",
                       style:
                           TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
                     )),
@@ -558,37 +617,9 @@ class _GameplayMapState extends State<GameplayMap> {
                   child: SvgPicture.asset('assets/images/arrived.svg',
                       fit: BoxFit.cover),
                 ),
-                Row(children: [
-                  ElevatedButton(
-                      onPressed: () => Navigator.pop(context, false),
-                      style: ButtonStyle(
-                        shape:
-                            MaterialStateProperty.all<RoundedRectangleBorder>(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                                7.3), // Adjust the radius as needed
-                          ),
-                        ),
-                        side: MaterialStateProperty.all<BorderSide>(
-                          BorderSide(
-                            color: Color.fromARGB(
-                                255, 237, 86, 86), // Specify the border color
-                            width: 2.0, // Specify the border width
-                          ),
-                        ),
-                        backgroundColor:
-                            MaterialStateProperty.all<Color>(Colors.white),
-                      ),
-                      child: Text("Leave",
-                          style: TextStyle(
-                              color: Color.fromARGB(255, 237, 86, 86)))),
-                  Spacer(),
-                  ElevatedButton(
+                Center(
+                  child: ElevatedButton(
                     onPressed: () {
-                      Provider.of<ApiClient>(context, listen: false)
-                          .serverApi
-                          ?.completedChallenge(CompletedChallengeDto());
-
                       Navigator.pop(context);
                       Navigator.pushReplacement(
                         context,
@@ -611,7 +642,7 @@ class _GameplayMapState extends State<GameplayMap> {
                     child: Text("Point Breakdown",
                         style: TextStyle(color: Colors.white)),
                   ),
-                ])
+                )
               ],
             ),
           )
@@ -671,8 +702,7 @@ class _GameplayMapState extends State<GameplayMap> {
                         shape:
                             MaterialStateProperty.all<RoundedRectangleBorder>(
                           RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                                7.3), // Adjust the radius as needed
+                            borderRadius: BorderRadius.circular(7.3),
                           ),
                         ),
                         backgroundColor: MaterialStateProperty.all<Color>(

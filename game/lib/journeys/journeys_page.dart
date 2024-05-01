@@ -145,8 +145,6 @@ class _JourneysPageState extends State<JourneysPage> {
                           .getChallengeById(event.challenges?[0] ?? "");
 
                       if (challenge == null) continue;
-                      var location = challenge.location?.name;
-                      var imageUrl = challenge.imageUrl;
 
                       for (var challengeId in event.challenges ?? []) {
                         var challenge =
@@ -213,6 +211,12 @@ class _JourneysPageState extends State<JourneysPage> {
                         }
                       }
 
+                      var imageUrl = challenge.imageUrl;
+                      if (imageUrl == null || imageUrl.length == 0) {
+                        imageUrl =
+                            "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png";
+                      }
+
                       if (!complete &&
                           !timeTillExpire.isNegative &&
                           eventMatchesDifficultySelection &&
@@ -224,8 +228,7 @@ class _JourneysPageState extends State<JourneysPage> {
                           name: event.name ?? "",
                           lat: challenge.latF ?? null,
                           long: challenge.longF ?? null,
-                          imgUrl: imageUrl ??
-                              "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png",
+                          imgUrl: imageUrl,
                           complete: complete,
                           locationCount: locationCount,
                           numberCompleted: numberCompleted,

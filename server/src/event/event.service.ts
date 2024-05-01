@@ -530,7 +530,7 @@ export class EventService {
       trackers.map(async tracker => {
         const nextChal = await this.prisma.challenge.findFirst({
           where: {
-            linkedEventId: tracker.id,
+            linkedEventId: tracker.eventId,
             completions: { none: { userId: tracker.userId } },
           },
           orderBy: {
