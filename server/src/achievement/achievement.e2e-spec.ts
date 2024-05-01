@@ -5,6 +5,8 @@ import { AchievementService } from './achievement.service';
 import { AppModule } from '../app.module';
 import { PrismaService } from '../prisma/prisma.service';
 import { UserService } from '../user/user.service';
+import { ChallengeService } from '../challenge/challenge.service';
+
 import {
   AuthType,
   User,
@@ -39,6 +41,7 @@ describe('AchievementModule E2E', () => {
   let abilityFactory: CaslAbilityFactory;
   let fullAbility: AppAbility;
   let orgUsage: OrganizationSpecialUsage;
+  let challengeService: ChallengeService;
 
   /** beforeAll runs before anything else. It adds new users and prerequisites.
    * afterAll runs after all the tests. It removes lingering values in the database.
@@ -60,6 +63,7 @@ describe('AchievementModule E2E', () => {
         EventService,
         ClientService,
         GroupService,
+        ChallengeService,
         OrganizationService,
         CaslAbilityFactory,
       ],
@@ -69,6 +73,7 @@ describe('AchievementModule E2E', () => {
     console.log = function () {};
 
     achievementService = module.get<AchievementService>(AchievementService);
+    challengeService = module.get<ChallengeService>(ChallengeService);
     prisma = module.get<PrismaService>(PrismaService);
     userService = module.get<UserService>(UserService);
     eventService = module.get<EventService>(EventService);
@@ -95,6 +100,7 @@ describe('AchievementModule E2E', () => {
       include: { memberOf: true },
     });
 
+    // tracker = await achievementService.getAchievementsByIdsForAbility(fullAbility, )
     console.log = log;
   });
 
@@ -104,7 +110,7 @@ describe('AchievementModule E2E', () => {
   });
 
   describe('Create and read functions', () => {
-    it('should add an achievement: upsertAchievementFromDto', async () => {
+    it('should add an achievement: upsertAchievementFromDto; should create a tracker with progress 0', async () => {
       const orgUsage = OrganizationSpecialUsage;
       const orgId = (
         await organizationService.getDefaultOrganization(orgUsage.DEVICE_LOGIN)
@@ -126,12 +132,22 @@ describe('AchievementModule E2E', () => {
         fullAbility,
         achDto,
       );
-      console.log(ach);
 
       const findAch = await prisma.achievement.findFirstOrThrow({
         where: { id: ach!.id },
       });
+
+      if (ach) {
+        tracker = await achievementService.createAchievementTracker(
+          user,
+          ach.id,
+        );
+        console.log(tracker);
+      }
+
       expect(findAch.description).toEqual('ach dto');
+      expect(tracker.progress).toEqual(0);
+      expect(tracker.dateComplete).toEqual(null);
     });
 
     it('should read achievements: getAchievementFromId, getAchievementsByIdsForAbility', async () => {
@@ -155,7 +171,7 @@ describe('AchievementModule E2E', () => {
     it('should update an achievement: upsertAchievementFromDto', async () => {
       const achId = (await prisma.achievement.findFirstOrThrow()).id;
       const test = (await achievementService.getAchievementFromId(achId))
-        .imageUrl;
+        ?.imageUrl;
       console.log('before: ' + test);
       const orgUsage = OrganizationSpecialUsage;
       const orgId = (
@@ -180,12 +196,99 @@ describe('AchievementModule E2E', () => {
       });
       const testAfterUpdate = (
         await achievementService.getAchievementFromId(achId)
-      ).imageUrl;
+      )?.imageUrl;
       console.log('after: ' + testAfterUpdate);
 
       expect(ach.imageUrl).toEqual('update test');
     });
   });
+
+  describe('Testing achievement tracker', () => {
+    it('should update tracker progress when a challenge is completed', async () => {
+      // Assuming a challenge completion would update an existing tracker
+      const initialProgress = tracker.progress;
+      await challengeService.completeChallenge(user);
+
+      const updatedTracker = await prisma.achievementTracker.findUnique({
+        where: { id: tracker.id },
+      });
+      if (updatedTracker) {
+        expect(updatedTracker.progress).toBeGreaterThan(initialProgress);
+      }
+    });
+  });
+  /*
+  describe('Achievement tracker functions', () => {
+    it('should create a tracker when an achievement is added and applicable', async () => {
+      const achId = (await prisma.achievement.findFirstOrThrow()).id;
+      const orgUsage = OrganizationSpecialUsage;
+      const orgId = (
+        await organizationService.getDefaultOrganization(orgUsage.DEVICE_LOGIN)
+      ).id;
+      const achDto: AchievementDto = {
+        id: achId,
+        eventId: 'event123',
+        name: 'test',
+        description: 'ach dto',
+        requiredPoints: 1,
+        imageUrl: 'tracker test',
+        locationType: ChallengeLocationDto.ENG_QUAD,
+        achievementType: AchievementTypeDto.TOTAL_CHALLENGES_OR_JOURNEYS,
+        initialOrganizationId: orgId,
+      };
+
+      await achievementService.upsertAchievementFromDto(fullAbility, achDto);
+      const ach = await prisma.achievement.findFirstOrThrow({
+        where: { id: achId },
+      });
+
+      expect(ach).toBeDefined();
+
+      // Simulate challenge completion
+      await achievementService.checkAchievementProgress(
+        user,
+        'event123',
+        false,
+      );
+
+      // Check if tracker was created
+      const tracker = await prisma.achievementTracker.findFirst({
+        where: { achievementId: ach.id, userId: user.id },
+      });
+      expect(tracker).toBeDefined();
+      expect(tracker?.progress).toBe(1);
+    });
+
+    // it('should create an achievement tracker', async () => {
+    //   const achId = (await prisma.achievement.findFirstOrThrow()).id;
+    //   const achTrackerDto: AchievementTrackerDto = {
+    //     userId: user.id,
+    //     achievementId: achId,
+    //     progress: 0,
+    //   };
+
+    //   const achTracker = await achievementService.upsertAchievementTrackerFromDto(
+    //     fullAbility,
+    //     achTrackerDto,
+    //   );
+
+    //   const findAchTracker = await prisma.achievementTracker.findFirstOrThrow({
+    //     where: { id: achTracker.id },
+    //   });
+    //   expect(findAchTracker.points).toEqual(0);
+    // });
+
+    it('should mark tracker as complete when achievement criteria are met', async () => {
+      // Complete a challenge that gives the final point needed
+      await challengeService.completeChallenge(user, 'event123');
+
+      const completedTracker = await prisma.achievementTracker.findUnique({
+        where: { id: tracker.id },
+      });
+      expect(completedTracker).not.toBeNull();
+      expect(completedTracker!.dateComplete).not.toBeNull();
+    });
+  });*/
 
   describe('Delete functions', () => {
     it('should remove achievement: removeAchievement', async () => {
@@ -207,6 +310,8 @@ describe('AchievementModule E2E', () => {
         id: user.id,
       },
     });
+    await prisma.achievementTracker.deleteMany({});
+    await prisma.achievement.deleteMany({});
     await app.close();
   });
 });

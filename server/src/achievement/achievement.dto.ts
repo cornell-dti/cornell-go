@@ -34,3 +34,7 @@ export interface UpdateAchievementDataDto {
 export interface RequestAchievementDataDto {
   achievements: string[];
 }
+
+export interface RequestAchievementTrackerDataDto {
+  achievements?: string[];
+}

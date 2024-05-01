@@ -60,37 +60,12 @@ export class ChallengeGateway {
     return challenges.length;
   }
 
-  // Disabled for now to prevent any cheating
-  /*
-  @SubscribeMessage('setCurrentChallenge')
-  async setCurrentChallenge(
-    @CallingUser() user: User,
-    @MessageBody() data: SetCurrentChallengeDto,
-  ) {
-    if (
-      await this.challengeService.setCurrentChallenge(user, data.challengeId)
-    ) {
-      const group = await this.groupService.getGroupForUser(user);
-      const tracker = await this.eventService.getCurrentEventTrackerForUser(
-        user,
-      );
-
-      await this.groupService.emitUpdateGroupData(group, false);
-      await this.eventService.emitUpdateEventTracker(tracker);
-    } else {
-      await this.clientService.emitErrorData(
-        user,
-        'Challenge is not valid (Challenge is not in event)',
-      );
-    }
-  }*/
-
   @SubscribeMessage('completedChallenge')
   async completedChallenge(
     @CallingUser() user: User,
     @MessageBody() data: CompletedChallengeDto,
   ) {
-    if (await this.challengeService.completeChallenge(user, data.challengeId)) {
+    if (await this.challengeService.completeChallenge(user)) {
       const group = await this.groupService.getGroupForUser(user);
       const tracker = await this.eventService.getCurrentEventTrackerForUser(
         user,

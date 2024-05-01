@@ -289,7 +289,7 @@ export class GroupService {
           name: mem.username,
           points: tracker.score,
           host: mem.id === group.hostId,
-          curChallengeId: tracker.curChallengeId,
+          curChallengeId: tracker.curChallengeId ?? undefined,
         };
       }),
     );

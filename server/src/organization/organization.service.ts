@@ -175,6 +175,9 @@ export class OrganizationService {
       members: (await org.members({ select: { id: true } })).map(e => e.id),
       events: (await org.events({ select: { id: true } })).map(e => e.id),
       managers: (await org.managers({ select: { id: true } })).map(e => e.id),
+      achivements: (await org.achievements({ select: { id: true } })).map(
+        e => e.id,
+      ),
       accessCode: organization.accessCode,
     };
   }
@@ -224,6 +227,9 @@ export class OrganizationService {
       },
       events: {
         connect: organization.events?.map(id => ({ id })),
+      },
+      achievements: {
+        connect: organization.achivements?.map(id => ({ id })),
       },
       specialUsage: OrganizationSpecialUsage.NONE,
     };
@@ -370,11 +376,5 @@ export class OrganizationService {
       where: { id: org.id },
       data: { members: { connect: { id: user.id } } },
     });
-
-    await this.prisma.user.update({
-      where: { id: user.id },
-      data: { memberOf: { connect: { id: org.id } } },
-    });
-    return true;
   }
 }

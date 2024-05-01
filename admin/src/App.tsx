@@ -38,6 +38,7 @@ import { ServerConnectionContext } from "./components/ServerConnection";
 import { ServerDataContext } from "./components/ServerData";
 import { AlertModal } from "./components/AlertModal";
 import { Groups } from "./components/Groups";
+import { Achievements } from "./components/Achievements";
 
 const routes = [
   {
@@ -63,6 +64,12 @@ const routes = [
     element: <Challenges />,
     icon: faLocationDot,
     name: "Challenges",
+  },
+  {
+    path: "/achievements",
+    element: <Achievements />,
+    icon: faTrophy,
+    name: "Achievements",
   },
   {
     path: "/users",

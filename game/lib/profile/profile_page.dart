@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:game/achievements/achievements_page.dart';
 import 'package:game/api/game_client_dto.dart';
+import 'package:game/model/achievement_model.dart';
 import 'package:game/model/challenge_model.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/tracker_model.dart';
@@ -14,6 +15,7 @@ import 'package:intl/intl.dart' hide TextDirection;
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 import 'package:game/profile/completed_challenges_page.dart';
+import 'package:velocity_x/velocity_x.dart';
 
 /**
  * The profile page of the app that is rendered for the user's profile
@@ -31,14 +33,17 @@ class _ProfilePageState extends State<ProfilePage> {
     return Scaffold(
       backgroundColor: Color.fromARGB(255, 255, 245, 234),
       body: SafeArea(child: Container(
-        child: Consumer4<UserModel, EventModel, TrackerModel, ChallengeModel>(
+        child: Consumer5<UserModel, EventModel, TrackerModel, ChallengeModel,
+                AchievementModel>(
             builder: (context, userModel, eventModel, trackerModel,
-                challengeModel, child) {
+                challengeModel, achModel, child) {
           if (userModel.userData == null) {
             return Center(
               child: CircularProgressIndicator(),
             );
           }
+
+          final achList = achModel.getAvailableTrackerPairs();
           var username = userModel.userData?.username;
           var isGuest = userModel.userData?.authType == UserAuthTypeDto.device;
           var score = userModel.userData?.score;
@@ -47,8 +52,11 @@ class _ProfilePageState extends State<ProfilePage> {
 
           //Get completed events
           for (var eventId in userModel.userData!.trackedEvents!) {
+            if (completedEvents.length == 2) break;
+
             var tracker = trackerModel.trackerByEventId(eventId);
             EventDto? event = eventModel.getEventById(eventId);
+
             if (tracker == null || event == null) {
               continue;
             }
@@ -161,19 +169,25 @@ class _ProfilePageState extends State<ProfilePage> {
               //To be replaced with real data
               Padding(
                   padding: EdgeInsets.only(left: 30, right: 30),
-                  child: Column(children: [
-                    AchievementCell(
-                        "Complete three challenges",
-                        SvgPicture.asset("assets/icons/achievementsilver.svg"),
-                        4,
-                        6),
-                    SizedBox(height: 10),
-                    AchievementCell(
-                        "Complete three challenges",
-                        SvgPicture.asset("assets/icons/achievementsilver.svg"),
-                        4,
-                        6),
-                  ])),
+                  child: Column(
+                      children: (achList
+                          .sortedBy((a, b) => (a
+                                      .$1.progress / // least completed first
+                                  (a.$2.requiredPoints ?? 1))
+                              .compareTo(
+                                  b.$1.progress / (b.$2.requiredPoints ?? 1)))
+                          .take(2)
+                          .map((e) => ([
+                                AchievementCell(
+                                    e.$2.description ?? "",
+                                    SvgPicture.asset(
+                                        "assets/icons/achievementsilver.svg"),
+                                    e.$1.progress,
+                                    e.$2.requiredPoints ?? 0),
+                                SizedBox(height: 10),
+                              ]))
+                          .expand((el) => el)
+                          .toList()))),
               //Completed Events
               Padding(
                 padding: const EdgeInsets.only(left: 24, right: 24.0),
@@ -220,12 +234,14 @@ class _ProfilePageState extends State<ProfilePage> {
 
                     //Calculate totalPoints.
                     var totalPoints = 0;
-                    var locationImage = "";
+                    var locationImage;
                     for (var challengeId in event.challenges ?? []) {
                       var challenge =
                           challengeModel.getChallengeById(challengeId);
-                      locationImage = challenge?.imageUrl ??
-                          "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png";
+                      locationImage = challenge?.imageUrl;
+                      if (locationImage == null || locationImage.length == 0)
+                        locationImage =
+                            "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png";
 
                       if (challenge != null) {
                         totalPoints += challenge.points ?? 0;

@@ -136,7 +136,7 @@ final Map<EventDifficultyDto, String> friendlyDifficulty = {
 };
 
 final Map<ChallengeLocationDto, String> friendlyLocation = {
-  ChallengeLocationDto.ENG_QUAD: "Eng Quad",
+  ChallengeLocationDto.ENG_QUAD: "Engineering Quad",
   ChallengeLocationDto.ARTS_QUAD: "Arts Quad",
   ChallengeLocationDto.AG_QUAD: "Ag Quad",
   ChallengeLocationDto.NORTH_CAMPUS: "North Campus",

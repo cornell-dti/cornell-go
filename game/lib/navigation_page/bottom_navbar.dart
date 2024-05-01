@@ -7,6 +7,7 @@ import 'package:game/splash_page/splash_page.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:provider/provider.dart';
 import 'home_navbar.dart';
+import 'search_filter_home.dart';
 
 class BottomNavBar extends StatefulWidget {
   const BottomNavBar({Key? key}) : super(key: key);
@@ -19,8 +20,8 @@ class _BottomNavBarState extends State<BottomNavBar> {
   int _selectedIndex = 0;
   static const TextStyle optionStyle =
       TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
-  static const List<Widget> _widgetOptions = <Widget>[
-    HomeNavBar(),
+  static List<Widget> _widgetOptions = <Widget>[
+    SearchFilterBar(),
     GlobalLeaderboardWidget(),
     ProfilePage(),
   ];

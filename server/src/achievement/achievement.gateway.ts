@@ -13,6 +13,7 @@ import {
   AchievementDto,
   AchievementTrackerDto,
   RequestAchievementDataDto,
+  RequestAchievementTrackerDataDto,
   UpdateAchievementDataDto,
 } from './achievement.dto';
 import { AchievementService } from './achievement.service';
@@ -21,6 +22,7 @@ import { UserAbility } from '../casl/user-ability.decorator';
 import { AppAbility } from '../casl/casl-ability.factory';
 import { Action } from '../casl/action.enum';
 import { subject } from '@casl/ability';
+import { OrganizationService } from '../organization/organization.service';
 
 @WebSocketGateway({ cors: true })
 @UseGuards(UserGuard, PoliciesGuard)
@@ -28,11 +30,11 @@ export class AchievementGateway {
   constructor(
     private achievementService: AchievementService,
     private clientService: ClientService,
+    private orgService: OrganizationService,
   ) {}
 
   /**
    * request achievements by list of ids
-   * update achievement with a dto
    * @param user
    * @param data
    */
@@ -47,12 +49,34 @@ export class AchievementGateway {
       ability,
       data.achievements,
     );
-    console.log(achs.length);
+
     for (const ach of achs) {
       await this.achievementService.emitUpdateAchievementData(ach, false, user);
     }
 
     return achs.length;
+  }
+
+  /**
+   * request achievement trackers by list of ids
+   * @param user
+   * @param data
+   */
+
+  @SubscribeMessage('requestAchievementTrackerData')
+  async requestAchievementTrackerData(
+    @UserAbility() ability: AppAbility,
+    @CallingUser() user: User,
+    @MessageBody() data: RequestAchievementTrackerDataDto,
+  ) {
+    const achs = await this.achievementService.getAchievementTrackersForUser(
+      user,
+      data.achievements,
+    );
+
+    for (const ach of achs) {
+      await this.achievementService.emitUpdateAchievementTracker(ach, user);
+    }
   }
 
   /**
@@ -103,6 +127,11 @@ export class AchievementGateway {
         return;
       }
 
+      const org = await this.orgService.getOrganizationById(
+        data.achievement.initialOrganizationId!,
+      );
+
+      await this.orgService.emitUpdateOrganizationData(org, false);
       this.clientService.subscribe(user, achievement.id);
       await this.achievementService.emitUpdateAchievementData(
         achievement,

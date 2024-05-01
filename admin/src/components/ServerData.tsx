@@ -13,6 +13,7 @@ import {
   GroupDto,
   UserDto,
   OrganizationDto,
+  AchievementDto,
 } from "../all.dto";
 
 import { ServerApi } from "./ServerApi";
@@ -21,6 +22,7 @@ import { ServerConnectionContext } from "./ServerConnection";
 /**  object to store user data fetched from server */
 const defaultData = {
   events: new Map<string, EventDto>(),
+  achievements: new Map<string, AchievementDto>(),
   challenges: new Map<string, ChallengeDto>(),
   organizations: new Map<string, OrganizationDto>(),
   users: new Map<string, UserDto>(),
@@ -116,6 +118,12 @@ export function ServerDataProvider(props: { children: ReactNode }) {
       deleteEvent(id: string) {
         return sock.updateEventData({ event: { id }, deleted: true });
       },
+      updateAchievement(achievement: AchievementDto) {
+        sock.updateAchievementData({ achievement, deleted: false });
+      },
+      deleteAchievement(id: string) {
+        sock.updateAchievementData({ achievement: { id }, deleted: true });
+      },
       deleteError(id: string) {
         serverData.errors.delete(id);
         setTimeout(() => setServerData({ ...serverData }), 0);
@@ -159,6 +167,18 @@ export function ServerDataProvider(props: { children: ReactNode }) {
 
   /** Update defaultData object when ServerApi websocket receives a response */
   useEffect(() => {
+    sock.onUpdateAchievementData((data) => {
+      if (data.deleted) {
+        serverData.achievements.delete(data.achievement.id);
+      } else {
+        serverData.achievements.set(
+          (data.achievement as AchievementDto).id,
+          data.achievement as AchievementDto
+        );
+      }
+
+      setTimeout(() => setServerData({ ...serverData }), 0);
+    });
     sock.onUpdateEventData((data) => {
       if (data.deleted) {
         serverData.events.delete(data.event.id);
@@ -226,11 +246,24 @@ export function ServerDataProvider(props: { children: ReactNode }) {
             (data.organization as OrganizationDto).id
           )?.events ?? [];
 
+        const oldAchievements =
+          serverData.organizations.get(
+            (data.organization as OrganizationDto).id
+          )?.achivements ?? [];
+
         sock.requestEventData({
           events: (data.organization as OrganizationDto).events?.filter(
             (ev: string) => !(ev in oldEvents)
           ),
         });
+
+        if (data.organization.achivements) {
+          sock.requestAchievementData({
+            achievements: data.organization.achivements?.filter(
+              (achId) => !(achId in oldAchievements)
+            ),
+          });
+        }
 
         serverData.organizations.set(
           (data.organization as OrganizationDto).id,

@@ -125,18 +125,7 @@ describe('EventModule E2E', () => {
       );
       expect(tracker1.eventId).toEqual(exJourney1.id);
       expect(tracker1.score).toEqual(0);
-      expect(
-        await challengeService.completeChallenge(
-          exPlayer,
-          tracker1.curChallengeId,
-        ),
-      ).toBeTruthy();
-      expect(
-        await challengeService.completeChallenge(
-          exPlayer,
-          tracker1.curChallengeId,
-        ),
-      ).toBeFalsy();
+      expect(await challengeService.completeChallenge(exPlayer)).toBeTruthy();
 
       const tracker2 = await eventService.getCurrentEventTrackerForUser(
         exPlayer,
@@ -150,47 +139,19 @@ describe('EventModule E2E', () => {
       );
       expect(tracker3.eventId).toEqual(exJourney2.id);
       expect(tracker3.score).toEqual(0);
-      expect(
-        await challengeService.completeChallenge(
-          exPlayer,
-          tracker2.curChallengeId,
-        ),
-      ).toBeFalsy();
-      expect(
-        await challengeService.completeChallenge(
-          exPlayer,
-          tracker3.curChallengeId,
-        ),
-      ).toBeTruthy();
-      expect(
-        await challengeService.completeChallenge(
-          exPlayer,
-          tracker3.curChallengeId,
-        ),
-      ).toBeFalsy();
+      expect(await challengeService.completeChallenge(exPlayer)).toBeTruthy();
 
       const tracker4 = await eventService.getCurrentEventTrackerForUser(
         exPlayer,
       );
       expect(tracker4.curChallengeId).toEqual(journey2Chal.id);
       expect(tracker4.score).toEqual(1);
-      expect(
-        await challengeService.completeChallenge(
-          exPlayer,
-          tracker4.curChallengeId,
-        ),
-      ).toBeTruthy();
-      expect(
-        await challengeService.completeChallenge(
-          exPlayer,
-          tracker4.curChallengeId,
-        ),
-      ).toBeFalsy();
+      expect(await challengeService.completeChallenge(exPlayer)).toBeTruthy();
 
       const tracker5 = await eventService.getCurrentEventTrackerForUser(
         exPlayer,
       );
-      expect(tracker5.curChallengeId).toEqual(journey2Chal.id);
+      expect(tracker5.curChallengeId).toEqual(null);
       expect(tracker5.score).toEqual(2);
 
       await groupGateway.setCurrentEvent(exPlayer, {
@@ -202,23 +163,13 @@ describe('EventModule E2E', () => {
       );
       expect(tracker6.eventId).toEqual(exChallenge1.id);
       expect(tracker6.score).toEqual(0);
-      expect(
-        await challengeService.completeChallenge(
-          exPlayer,
-          tracker6.curChallengeId,
-        ),
-      ).toBeTruthy();
-      expect(
-        await challengeService.completeChallenge(
-          exPlayer,
-          tracker6.curChallengeId,
-        ),
-      ).toBeFalsy();
+      expect(await challengeService.completeChallenge(exPlayer)).toBeTruthy();
+      expect(await challengeService.completeChallenge(exPlayer)).toBeFalsy();
 
       const tracker7 = await eventService.getCurrentEventTrackerForUser(
         exPlayer,
       );
-      expect(tracker7.curChallengeId).toEqual(tracker6.curChallengeId);
+      expect(tracker7.curChallengeId).toEqual(null);
       expect(tracker7.score).toEqual(1);
 
       await groupGateway.setCurrentEvent(exPlayer, { eventId: exJourney1.id });
@@ -229,25 +180,15 @@ describe('EventModule E2E', () => {
       expect(tracker8.eventId).toEqual(exJourney1.id);
       expect(tracker8.curChallengeId).toEqual(journey1Chal.id);
       expect(tracker8.score).toEqual(1);
-      expect(
-        await challengeService.completeChallenge(
-          exPlayer,
-          tracker8.curChallengeId,
-        ),
-      ).toBeTruthy();
-      expect(
-        await challengeService.completeChallenge(
-          exPlayer,
-          tracker8.curChallengeId,
-        ),
-      ).toBeFalsy();
+      expect(await challengeService.completeChallenge(exPlayer)).toBeTruthy();
 
       const tracker9 = await eventService.getCurrentEventTrackerForUser(
         exPlayer,
       );
       expect(tracker9.eventId).toEqual(exJourney1.id);
-      expect(tracker9.curChallengeId).toEqual(journey1Chal.id);
+      expect(tracker9.curChallengeId).toEqual(null);
       expect(tracker9.score).toEqual(2);
+      expect(await challengeService.completeChallenge(exPlayer)).toBeFalsy();
 
       const latestUserData = await userService.byId(exPlayer.id);
       expect(latestUserData?.score).toEqual(5);

@@ -298,7 +298,7 @@ export class EventService {
       eventId: tracker.eventId,
       isRanked: tracker.isRankedForEvent,
       hintsUsed: tracker.hintsUsed,
-      curChallengeId: tracker.curChallengeId,
+      curChallengeId: tracker.curChallengeId ?? undefined,
       prevChallenges: prevChallenges.map(pc => ({
         challengeId: pc.challengeId,
         hintsUsed: pc.hintsUsed,
@@ -511,7 +511,47 @@ export class EventService {
       }
     }
 
+    await this.fixEventTrackers(event.id);
+
     return ev;
+  }
+
+  async fixEventTrackers(eventId?: string) {
+    if (!eventId) return;
+
+    const trackers = await this.prisma.eventTracker.findMany({
+      where: {
+        eventId: eventId,
+        curChallengeId: null,
+      },
+    });
+
+    const newTrackers = await Promise.all(
+      trackers.map(async tracker => {
+        const nextChal = await this.prisma.challenge.findFirst({
+          where: {
+            linkedEventId: tracker.id,
+            completions: { none: { userId: tracker.userId } },
+          },
+          orderBy: {
+            eventIndex: 'asc',
+          },
+        });
+
+        if (!nextChal) return null;
+
+        return await this.prisma.eventTracker.update({
+          where: { id: tracker.id },
+          data: { curChallengeId: nextChal?.id },
+        });
+      }),
+    );
+
+    await Promise.all(
+      newTrackers.map(tracker => {
+        if (tracker) this.emitUpdateEventTracker(tracker);
+      }),
+    );
   }
 
   async removeEvent(ability: AppAbility, eventId: string) {
@@ -532,6 +572,8 @@ export class EventService {
           id: eventId,
         },
       });
+
+      await this.fixEventTrackers(eventId);
 
       console.log(`Deleted event ${eventId}`);
       return true;
