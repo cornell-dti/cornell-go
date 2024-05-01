@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:game/api/game_api.dart';
+import 'package:game/api/game_client_dto.dart';
 import 'package:game/profile/edit_profile.dart';
 import 'package:game/main.dart';
+import 'package:game/utils/utility_functions.dart';
+import 'package:provider/provider.dart';
 
 class SettingsPage extends StatelessWidget {
   final bool isGuest;
@@ -123,7 +127,15 @@ class SettingsPage extends StatelessWidget {
                         ),
                       ),
                       child: TextButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          displayTextInputDialog(
+                              context, "Join Organization", "Access Code",
+                              (text) {
+                            client.serverApi?.joinOrganization(
+                                JoinOrganizationDto(
+                                    accessCode: text.toUpperCase()));
+                          });
+                        },
                         style: TextButton.styleFrom(
                             padding: EdgeInsets.only(left: 20.0),
                             alignment: Alignment.centerLeft,
