@@ -25,10 +25,6 @@ export class ServerApi {
     >;
   }
 
-  requestAchievementTrackerData(data: dto.RequestAchievementTrackerDataDto) {
-    this.send("requestAchievementTrackerData", data);
-  }
-
   updateAchievementData(data: dto.UpdateAchievementDataDto) {
     return this.send("updateAchievementData", data) as Promise<
       string | undefined
