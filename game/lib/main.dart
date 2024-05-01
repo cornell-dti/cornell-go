@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_config/flutter_config.dart';
 import 'package:game/loading_page/loading_page.dart';
+import 'package:game/model/achievement_model.dart';
 
 // imports for google maps
 import 'dart:io' show Platform;
@@ -90,6 +91,10 @@ class MyApp extends StatelessWidget {
           ),
           ChangeNotifierProvider(
             create: (_) => EventModel(client),
+            lazy: false,
+          ),
+          ChangeNotifierProvider(
+            create: (_) => AchievementModel(client),
             lazy: false,
           ),
           ChangeNotifierProvider(

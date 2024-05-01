@@ -1,7 +1,4 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:game/api/game_client_dto.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/group_model.dart';
@@ -9,7 +6,6 @@ import 'package:game/model/user_model.dart';
 import 'package:game/global_leaderboard/podium_widgets.dart';
 import 'package:game/widget/leaderboard_cell.dart';
 import 'package:game/widget/podium_cell.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 
 /**

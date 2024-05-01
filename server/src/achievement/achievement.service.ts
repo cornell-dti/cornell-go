@@ -8,6 +8,7 @@ import {
   LocationType,
   PrismaClient,
   User,
+  EventTracker,
 } from '@prisma/client';
 import { ClientService } from '../client/client.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -15,7 +16,10 @@ import { accessibleBy } from '@casl/prisma';
 import { AppAbility, CaslAbilityFactory } from '../casl/casl-ability.factory';
 import { Action } from '../casl/action.enum';
 import { subject } from '@casl/ability';
-import { defaultAchievementData } from '../organization/organization.service';
+import {
+  defaultAchievementData,
+  OrganizationService,
+} from '../organization/organization.service';
 import {
   AchievementTypeDto,
   AchievementDto,
@@ -34,7 +38,7 @@ export class AchievementService {
 
   /** get an achievement by its ID */
   async getAchievementFromId(id: string) {
-    return await this.prisma.achievement.findFirstOrThrow({ where: { id } });
+    return await this.prisma.achievement.findFirst({ where: { id } });
   }
 
   /** get list of achievements by IDs, based on ability */
@@ -71,6 +75,16 @@ export class AchievementService {
         },
       })) > 0;
 
+    const canUpdateEv =
+      (await this.prisma.eventBase.count({
+        where: {
+          AND: [
+            accessibleBy(ability, Action.Update).EventBase,
+            { id: achievement.eventId ?? '' },
+          ],
+        },
+      })) > 0;
+
     const canUpdateAch =
       (await this.prisma.achievement.count({
         where: {
@@ -89,6 +103,10 @@ export class AchievementService {
         imageUrl: achievement.imageUrl?.substring(0, 2048),
         locationType: achievement.locationType as LocationType,
         achievementType: achievement.achievementType as AchievementTypeDto,
+        linkedEventId:
+          achievement.eventId && achievement.eventId !== '' && canUpdateEv
+            ? achievement.eventId
+            : null,
       };
       const data = await this.abilityFactory.filterInaccessible(
         ach.id,
@@ -115,8 +133,8 @@ export class AchievementService {
           defaultAchievementData.imageUrl,
         locationType: achievement.locationType as LocationType,
         achievementType: achievement.achievementType as AchievementTypeDto,
-        // eventIndex: assignData.eventId ?? 0, // check
-        requiredPoints: achievement.requiredPoints ?? 0,
+        requiredPoints: achievement.requiredPoints ?? 1,
+        organizations: { connect: { id: achievement.initialOrganizationId } },
       };
 
       ach = await this.prisma.achievement.create({
@@ -127,6 +145,7 @@ export class AchievementService {
     } else {
       return null;
     }
+    if (ach) this.createAchievementTrackers(undefined, ach);
     return ach;
   }
 
@@ -193,5 +212,231 @@ export class AchievementService {
       locationType: ach.locationType as ChallengeLocationDto,
       achievementType: ach.achievementType as AchievementTypeDto,
     };
+  }
+
+  /** AchievementTracker functions */
+
+  /** Creates an achievement tracker */
+  async createAchievementTracker(user: User, achievementId: string) {
+    const existing = await this.prisma.achievementTracker.findFirst({
+      where: { userId: user.id, achievementId },
+    });
+
+    if (existing) {
+      return existing;
+    }
+
+    const progress = await this.prisma.achievementTracker.create({
+      data: {
+        userId: user.id,
+        progress: 0,
+        achievementId,
+      },
+    });
+
+    return progress;
+  }
+
+  async getAchievementTrackerByAchievementId(
+    user: User,
+    achievementId: string,
+  ) {
+    return await this.prisma.achievementTracker.findFirst({
+      where: { userId: user.id, achievementId },
+    });
+  }
+
+  async getAchievementTrackersForUser(user: User, achievementIds?: string[]) {
+    return await this.prisma.achievementTracker.findMany({
+      where: {
+        userId: user.id,
+        achievementId: achievementIds ? { in: achievementIds } : undefined,
+      },
+    });
+  }
+
+  async dtoForAchievementTracker(
+    tracker: AchievementTracker,
+  ): Promise<AchievementTrackerDto> {
+    return {
+      userId: tracker.userId,
+      progress: tracker.progress,
+      achievementId: tracker.achievementId,
+      dateComplete: tracker.dateComplete?.toISOString(),
+    };
+  }
+
+  /** Emits & updates an achievement tracker */
+  async emitUpdateAchievementTracker(
+    tracker: AchievementTracker,
+    target?: User,
+  ) {
+    const dto = await this.dtoForAchievementTracker(tracker);
+
+    await this.clientService.sendProtected(
+      'updateAchievementTrackerData',
+      target ?? tracker.id,
+      dto,
+      {
+        id: tracker.id,
+        subject: 'AchievementTracker',
+        prismaStore: this.prisma.achievementTracker,
+      },
+    );
+  }
+
+  /** checks for all achievements associated with a user for a given completed challenge. */
+  async checkAchievementProgress(
+    user: User,
+    evTracker: EventTracker,
+    pointsAdded: number,
+  ) {
+    const ability = this.abilityFactory.createForUser(user);
+
+    const isJourney =
+      (await this.prisma.challenge.count({
+        where: { linkedEventId: evTracker.eventId },
+      })) > 1;
+
+    const locations = (
+      await this.prisma.challenge.findMany({
+        distinct: ['location'],
+        select: { location: true },
+      })
+    ).map(l => l.location);
+
+    const uncompletedAchs = await this.prisma.achievement.findMany({
+      where: {
+        AND: [
+          accessibleBy(ability, Action.Read).Achievement,
+          {
+            // must either be for all events or for this one
+            OR: [{ linkedEventId: null }, { linkedEventId: evTracker.eventId }],
+          },
+          {
+            // must either be any location of one of the ones here
+            OR: [
+              { locationType: { in: locations } },
+              { locationType: LocationType.ANY },
+            ],
+          },
+          {
+            // must either be both challenge + journey achievement
+            // total points achievement
+            // or journey/challenge achievement depending on what was completed
+            OR: [
+              { achievementType: AchievementType.TOTAL_CHALLENGES_OR_JOURNEYS },
+              { achievementType: AchievementType.TOTAL_POINTS },
+              {
+                achievementType: isJourney
+                  ? AchievementType.TOTAL_JOURNEYS
+                  : AchievementType.TOTAL_CHALLENGES,
+              },
+            ],
+          },
+          {
+            // Only find non-completed achievements
+            OR: [
+              {
+                trackers: {
+                  some: {
+                    userId: user.id,
+                    dateComplete: null,
+                  },
+                },
+              },
+              { trackers: { none: { userId: user.id } } },
+            ],
+          },
+        ],
+      },
+      include: {
+        trackers: {
+          where: {
+            userId: user.id,
+          },
+        },
+      },
+    });
+
+    for (const ach of uncompletedAchs) {
+      let achTracker = ach.trackers[0];
+
+      // In case the above completion check fails
+      if (achTracker.progress < ach.requiredPoints) {
+        const deltaProgress =
+          ach.achievementType === AchievementType.TOTAL_POINTS
+            ? pointsAdded
+            : 1;
+
+        achTracker = await this.prisma.achievementTracker.update({
+          where: { id: achTracker.id },
+          data: {
+            progress: { increment: deltaProgress },
+            dateComplete:
+              achTracker.progress + deltaProgress >= ach.requiredPoints
+                ? new Date()
+                : null,
+          },
+        });
+
+        if (achTracker.progress > ach.requiredPoints) {
+          achTracker = await this.prisma.achievementTracker.update({
+            where: { id: achTracker.id },
+            data: {
+              progress: { set: ach.requiredPoints },
+            },
+          });
+        }
+
+        await this.clientService.subscribe(user, achTracker.id);
+        await this.emitUpdateAchievementTracker(achTracker);
+      }
+    }
+  }
+
+  async createAchievementTrackers(user?: User, achievement?: Achievement) {
+    if (user) {
+      const ability = this.abilityFactory.createForUser(user);
+
+      const achsWithoutTrackers = await this.prisma.achievement.findMany({
+        where: {
+          AND: [
+            { id: achievement?.id },
+            accessibleBy(ability).Achievement,
+            { trackers: { none: { userId: user.id } } },
+          ],
+        },
+      });
+
+      await this.prisma.achievementTracker.createMany({
+        data: achsWithoutTrackers.map(ach => ({
+          userId: user.id,
+          progress: 0,
+          achievementId: ach.id,
+        })),
+      });
+    } else if (achievement) {
+      const usersWithoutTrackers = await this.prisma.user.findMany({
+        where: {
+          memberOf: {
+            some: { achievements: { some: { id: achievement.id } } },
+          },
+          achievementTrackers: {
+            none: { achievementId: achievement.id },
+          },
+        },
+      });
+
+      await this.prisma.achievementTracker.createMany({
+        data: usersWithoutTrackers.map(usr => ({
+          userId: usr.id,
+          progress: 0,
+          achievementId: achievement.id,
+        })),
+      });
+    } else {
+      throw 'Cannot create all possible achievement trackers in one call!';
+    }
   }
 }

@@ -7,6 +7,7 @@ import 'package:game/api/game_client_dto.dart';
  */
 class UserModel extends ChangeNotifier {
   UserDto? userData;
+  Map<String, OrganizationDto> orgData = {};
   ApiClient _client;
 
   UserModel(ApiClient client) : _client = client {
@@ -23,7 +24,40 @@ class UserModel extends ChangeNotifier {
     client.clientApi.connectedStream.listen((event) {
       userData = null;
       client.serverApi?.requestUserData(RequestUserDataDto());
+      client.serverApi
+          ?.requestOrganizationData(RequestOrganizationDataDto(admin: false));
     });
+
+    client.clientApi.disconnectedStream.listen((event) {
+      userData = null;
+      orgData.clear();
+    });
+
+    client.clientApi.updateOrganizationDataStream.listen((event) {
+      if (event.deleted) {
+        orgData.remove(event.organization.id);
+      } else {
+        if (!orgData.containsKey(event.organization.id)) {
+          orgData[event.organization.id] = event.organization;
+        } else {
+          orgData[event.organization.id]?.partialUpdate(event.organization);
+        }
+      }
+
+      notifyListeners();
+    });
+  }
+
+  List<String> getAvailableEventIds() {
+    Set<String> evIds = Set();
+
+    for (final org in orgData.values) {
+      if (org.events != null) {
+        evIds.addAll(org.events!);
+      }
+    }
+
+    return evIds.toList();
   }
 
   void updateUserData(String id, String? username, String? college,
