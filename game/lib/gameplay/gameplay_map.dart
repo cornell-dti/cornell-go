@@ -70,10 +70,6 @@ class _GameplayMapState extends State<GameplayMap> {
   // whether the picture is expanded over the map
   bool isExpanded = false;
 
-  // name of the challenge, either null or the name of the most recently
-  // completed challenge in this event
-  String? challengeName;
-
   @override
   void initState() {
     setCustomMarkerIcon();
@@ -424,14 +420,9 @@ class _GameplayMapState extends State<GameplayMap> {
                     } else {
                       apiClient.serverApi
                           ?.completedChallenge(CompletedChallengeDto());
-                      setState(() {
-                        challengeName = challengeModel
-                            .getChallengeById(
-                                tracker.prevChallenges.last.challengeId)
-                            ?.name;
-                      });
                     }
                   }
+                  final chalId = widget.challengeId;
                   showDialog(
                     context: context,
                     barrierDismissible: !hasArrived,
@@ -443,7 +434,7 @@ class _GameplayMapState extends State<GameplayMap> {
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(
                                 10), // Same as the Dialog's shape
-                            child: displayDialogue(hasArrived),
+                            child: displayDialog(context, hasArrived, chalId),
                           ),
                         ),
                       );
@@ -590,7 +581,12 @@ class _GameplayMapState extends State<GameplayMap> {
         widget.awardingRadius;
   }
 
-  Container displayDialogue(bool hasArrived) {
+  Container displayDialog(
+      BuildContext context, hasArrived, String challengeId) {
+    final name = Provider.of<ChallengeModel>(context)
+            .getChallengeById(challengeId)
+            ?.name ??
+        "";
     return hasArrived
         ? Container(
             // margin: EdgeInsetsDirectional.only(start: 50, end: 50),
@@ -610,7 +606,7 @@ class _GameplayMapState extends State<GameplayMap> {
                 Container(
                     margin: EdgeInsets.only(bottom: 10),
                     child: Text(
-                      "You've arrived at ${challengeName ?? ""}!",
+                      "You've arrived at ${name}!",
                       style:
                           TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
                     )),

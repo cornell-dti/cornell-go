@@ -58,8 +58,8 @@ function EventCard(props: {
     props.event.difficulty === "Easy"
       ? "Easy"
       : props.event.difficulty === "Normal"
-      ? "Normal"
-      : "Hard";
+        ? "Normal"
+        : "Hard";
 
   let categoryInput = props.event.category as string;
   const categoryType =
@@ -158,8 +158,8 @@ function fromForm(form: EntryForm[], id: string): EventDto {
       (form[5] as OptionEntryForm).value === 0
         ? EventDifficultyDto.Easy
         : (form[5] as OptionEntryForm).value === 1
-        ? EventDifficultyDto.Normal
-        : EventDifficultyDto.Hard,
+          ? EventDifficultyDto.Normal
+          : EventDifficultyDto.Hard,
 
     latitudeF: 0,
     longitudeF: 0,
@@ -290,7 +290,7 @@ export function Events() {
             setCopyModalOpen(false);
             return;
           }
-          for (const chalId of ev.challenges?.toReversed()!) {
+          for (const chalId of [...ev.challenges!].reverse()!) {
             const chal = serverData.challenges.get(chalId)!;
             serverData.updateChallenge({
               ...chal,
