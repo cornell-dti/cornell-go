@@ -213,10 +213,10 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                 Container(
                   padding: EdgeInsets.only(bottom: 15),
                   child: Text(
-                    "You've found the " + (challenge.description ?? "") + "!",
+                    challenge.description ?? "NO DESCRIPTION",
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 16.0,
+                      fontSize: 14.0,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -347,7 +347,11 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                           ],
                         )),
                 ] else
-                  ...completedChallenges,
+                  Container(
+                      height: MediaQuery.sizeOf(context).height * 0.15,
+                      child: ListView(
+                          padding: EdgeInsets.zero,
+                          children: completedChallenges)),
                 SizedBox(height: 10),
                 Text(
                   journeyPage
@@ -458,7 +462,7 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
               )
             : Container(
                 alignment: Alignment.bottomCenter,
-                margin: EdgeInsets.only(bottom: 70),
+                margin: EdgeInsets.only(bottom: 40),
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color.fromARGB(255, 237, 86, 86),

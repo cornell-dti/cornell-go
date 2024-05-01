@@ -4,7 +4,8 @@ import 'package:game/model/challenge_model.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/tracker_model.dart';
 import 'package:game/model/user_model.dart';
-import 'package:game/profile/completed_challenge_cell.dart';
+import 'package:game/profile/profile_page.dart';
+import 'package:game/profile/completed_feed_cell.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -12,7 +13,7 @@ import 'package:tuple/tuple.dart';
 
 /* The page view of all the completed challenges */
 
-class CompletedChallengesPage extends StatelessWidget {
+class CompletedFeedWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -84,11 +85,17 @@ class CompletedChallengesPage extends StatelessWidget {
                 var pictureList = <String>[];
                 var locationList = [];
                 var totalPoints = 0;
+
                 for (var challengeId in event.challenges ?? []) {
                   var challenge = challengeModel.getChallengeById(challengeId);
+                  var imageUrl = challenge?.imageUrl;
+                  if (imageUrl == null || imageUrl.length == 0) {
+                    imageUrl =
+                        "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png";
+                  }
+
                   if (challenge != null) {
-                    pictureList.add(challenge.imageUrl ??
-                        "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png");
+                    pictureList.add(imageUrl);
                     locationList
                         .add(friendlyLocation[challenge.location ?? 'ANY']);
                     totalPoints += challenge.points ?? 0;
