@@ -133,7 +133,7 @@ class SettingsPage extends StatelessWidget {
                               (text) {
                             client.serverApi?.joinOrganization(
                                 JoinOrganizationDto(
-                                    accessCode: text.toUpperCase()));
+                                    accessCode: text.toLowerCase()));
                           });
                         },
                         style: TextButton.styleFrom(

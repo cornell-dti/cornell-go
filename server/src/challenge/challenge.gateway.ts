@@ -72,8 +72,8 @@ export class ChallengeGateway {
       );
 
       await this.groupService.emitUpdateGroupData(group, false);
-      await this.eventService.emitUpdateEventTracker(tracker);
-      await this.userService.emitUpdateUserData(user, false, true, user);
+      await this.eventService.emitUpdateEventTracker(tracker, user);
+      await this.userService.emitUpdateUserData(user, false, false, user);
     } else {
       await this.clientService.emitErrorData(
         user,

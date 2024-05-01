@@ -252,9 +252,8 @@ class _GameplayMapState extends State<GameplayMap> {
    */
   BitmapDescriptor currentLocationIcon = BitmapDescriptor.defaultMarker;
   void setCustomMarkerIcon() async {
-    Uint8List newMarker = await getBytesFromAsset(
-        'assets/icons/userlocation.png',
-        (MediaQuery.sizeOf(context).width * 0.05).round());
+    Uint8List newMarker =
+        await getBytesFromAsset('assets/icons/userlocation.png', 200);
     currentLocationIcon = BitmapDescriptor.fromBytes(newMarker);
     setState(() {});
   }
@@ -669,7 +668,10 @@ class _GameplayMapState extends State<GameplayMap> {
                 Container(
                     margin: EdgeInsets.only(bottom: 10),
                     child: Text(
-                        "You’re close, but not there yet. Use a hint if needed! Hints use 25 points.",
+                        "You’re close, but not there yet." +
+                            (numHintsLeft > 0
+                                ? "Use a hint if needed! Hints use 25 points."
+                                : ""),
                         style: TextStyle(
                             fontSize: 14, fontWeight: FontWeight.w400))),
                 Row(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -710,8 +712,7 @@ class _GameplayMapState extends State<GameplayMap> {
                           shape:
                               MaterialStateProperty.all<RoundedRectangleBorder>(
                             RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                  7.3), // Adjust the radius as needed
+                              borderRadius: BorderRadius.circular(7.3),
                             ),
                           ),
                           backgroundColor: MaterialStateProperty.all<Color>(
