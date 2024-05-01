@@ -50,6 +50,7 @@ class _SearchFilterBarState extends State<SearchFilterBar>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       body: Container(
         color: Color(0xFFED5656),
         width: double.infinity,
