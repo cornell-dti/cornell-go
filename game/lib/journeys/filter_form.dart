@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:game/api/game_client_dto.dart';
 import 'package:game/utils/utility_functions.dart';
+import 'package:sticky_headers/sticky_headers.dart';
 
 class FilterForm extends StatefulWidget {
   final void Function(List<String>, List<String>, String) onSubmit;
@@ -115,7 +116,7 @@ class _FilterFormState extends State<FilterForm> {
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.only(left: 110),
+                        padding: const EdgeInsets.only(left: 115),
                         child: SizedBox(
                           child: Align(
                             alignment: Alignment.topLeft,

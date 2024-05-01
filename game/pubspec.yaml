@@ -58,6 +58,7 @@ dependencies:
   dropdown_button2: ^2.3.9
   carousel_slider: ^4.0.0
   tuple: ^2.0.2
+  sticky_headers: ^0.3.0+2
 
 dev_dependencies:
   flutter_launcher_icons:
