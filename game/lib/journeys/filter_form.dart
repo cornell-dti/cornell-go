@@ -88,30 +88,36 @@ class _FilterFormState extends State<FilterForm> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Container(
-            padding: EdgeInsets.symmetric(vertical: 8.0),
+            padding: EdgeInsets.symmetric(vertical: 12.0),
             color: Color.fromARGB(255, 237, 86, 86),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: Stack(
               children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 16.0),
-                  child: Text(
-                    'Filters',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontFamily: 'Poppins',
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Filters',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontFamily: 'Poppins',
+                      ),
                     ),
-                  ),
+                  ],
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(right: 16.0),
-                  child: CloseButton(color: Colors.white),
+                Positioned(
+                  top: -4.0,
+                  right: 5.0,
+                  child: Container(
+                    width: 40.0,
+                    height: 40.0,
+                    child: CloseButton(color: Colors.white),
+                  ),
                 ),
               ],
             ),
           ),
-          SizedBox(height: 20.0),
+          // SizedBox(height: 20.0),
           Expanded(
               child: ListView(
                   padding: EdgeInsets.symmetric(horizontal: 20.0),
