@@ -376,5 +376,7 @@ export class OrganizationService {
       where: { id: org.id },
       data: { members: { connect: { id: user.id } } },
     });
+
+    await this.emitUpdateOrganizationData(org, false, user);
   }
 }
