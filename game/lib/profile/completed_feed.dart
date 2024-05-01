@@ -85,11 +85,17 @@ class CompletedFeedWidget extends StatelessWidget {
                 var pictureList = <String>[];
                 var locationList = [];
                 var totalPoints = 0;
+
                 for (var challengeId in event.challenges ?? []) {
                   var challenge = challengeModel.getChallengeById(challengeId);
+                  var imageUrl = challenge?.imageUrl;
+                  if (imageUrl == null || imageUrl.length == 0) {
+                    imageUrl =
+                        "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png";
+                  }
+
                   if (challenge != null) {
-                    pictureList.add(challenge.imageUrl ??
-                        "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png");
+                    pictureList.add(imageUrl);
                     locationList
                         .add(friendlyLocation[challenge.location ?? 'ANY']);
                     totalPoints += challenge.points ?? 0;

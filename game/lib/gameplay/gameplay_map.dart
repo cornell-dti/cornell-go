@@ -24,6 +24,7 @@ import 'package:game/model/event_model.dart';
 import 'package:game/model/challenge_model.dart';
 
 class GameplayMap extends StatefulWidget {
+  final String challengeId;
   final GeoPoint targetLocation;
   final double awardingRadius;
   final int points;
@@ -31,6 +32,7 @@ class GameplayMap extends StatefulWidget {
 
   const GameplayMap(
       {Key? key,
+      required this.challengeId,
       required this.targetLocation,
       required this.awardingRadius,
       required this.points,
@@ -67,6 +69,10 @@ class _GameplayMapState extends State<GameplayMap> {
 
   // whether the picture is expanded over the map
   bool isExpanded = false;
+
+  // name of the challenge, either null or the name of the most recently
+  // completed challenge in this event
+  String? challengeName;
 
   @override
   void initState() {
@@ -282,36 +288,6 @@ class _GameplayMapState extends State<GameplayMap> {
     }
   }
 
-  String? challengeName;
-  // Used when user presses I've Arrived when they are within the awarding
-  // radius. Messages the backend to complete the current challenge and update
-  // event trackers.
-  void completeChallenge() {
-    var eventId = Provider.of<GroupModel>(context, listen: false).curEventId;
-    var event = Provider.of<EventModel>(context, listen: false)
-        .getEventById(eventId ?? "");
-    var tracker = Provider.of<TrackerModel>(context, listen: false)
-        .trackerByEventId(eventId ?? "");
-
-    if (tracker == null) {
-      displayToast(
-          "An error occurred while getting event tracker", Status.error);
-    } else {
-      var challenge = Provider.of<ChallengeModel>(context, listen: false)
-          .getChallengeById(tracker.curChallengeId ?? '');
-      if (challenge == null) {
-        displayToast("An error occurred while getting challenge", Status.error);
-      } else {
-        Provider.of<ApiClient>(context, listen: false)
-            .serverApi
-            ?.completedChallenge(CompletedChallengeDto());
-        setState(() {
-          challengeName = challenge.name;
-        });
-      }
-    }
-  }
-
   // size variables for expanding picture for animation
   var pictureWidth = 80.0;
   var pictureHeight = 80.0;
@@ -340,11 +316,20 @@ class _GameplayMapState extends State<GameplayMap> {
             trackerModel.trackerByEventId(groupModel.curEventId ?? "");
         if (tracker == null) {
           displayToast("Error getting event tracker", Status.error);
-        } else {
+        } else if ((tracker.curChallengeId ?? '') == widget.challengeId) {
           numHintsLeft = totalHints - tracker.hintsUsed;
         }
-        var challenge =
-            challengeModel.getChallengeById(tracker?.curChallengeId ?? '');
+        var challenge = challengeModel.getChallengeById(widget.challengeId);
+
+        if (challenge == null) {
+          displayToast("Error getting challenge", Status.error);
+        }
+
+        var imageUrl = challenge?.imageUrl;
+        if (imageUrl == null || imageUrl.length == 0) {
+          imageUrl =
+              "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png";
+        }
 
         return Scaffold(
             body: Stack(
@@ -431,14 +416,17 @@ class _GameplayMapState extends State<GameplayMap> {
                 onPressed: () {
                   bool hasArrived = checkArrived();
                   if (hasArrived) {
-                    if (challenge == null) {
+                    if (tracker == null || challenge == null) {
                       displayToast("An error occurred while getting challenge",
                           Status.error);
                     } else {
                       apiClient.serverApi
                           ?.completedChallenge(CompletedChallengeDto());
                       setState(() {
-                        challengeName = challenge.name;
+                        challengeName = challengeModel
+                            .getChallengeById(
+                                tracker.prevChallenges.last.challengeId)
+                            ?.name;
                       });
                     }
                   }
@@ -567,8 +555,7 @@ class _GameplayMapState extends State<GameplayMap> {
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(10),
                           child: Image.network(
-                            challenge?.imageUrl ??
-                                "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png",
+                            imageUrl,
                             fit: BoxFit.cover,
                             width: pictureWidth,
                             height: pictureHeight,
@@ -715,8 +702,7 @@ class _GameplayMapState extends State<GameplayMap> {
                         shape:
                             MaterialStateProperty.all<RoundedRectangleBorder>(
                           RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                                7.3), // Adjust the radius as needed
+                            borderRadius: BorderRadius.circular(7.3),
                           ),
                         ),
                         backgroundColor: MaterialStateProperty.all<Color>(

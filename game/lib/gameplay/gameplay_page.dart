@@ -89,8 +89,8 @@ class _GameplayPageState extends State<GameplayPage> {
         return CircularIndicator();
       }
 
-      var challenge =
-          challengeModel.getChallengeById(tracker.curChallengeId ?? "");
+      var challenge = challengeModel.getChallengeById(
+          tracker.curChallengeId ?? tracker.prevChallenges.last.challengeId);
 
       if (challenge == null) {
         return Scaffold(
@@ -98,8 +98,11 @@ class _GameplayPageState extends State<GameplayPage> {
         );
       }
 
-      GeoPoint targetLocation = GeoPoint(challenge.latF!, challenge.longF!, 0);
-      double awardingRadius = challenge.awardingRadiusF!;
+      GeoPoint? targetLocation;
+      if (challenge.latF != null && challenge.longF != null) {
+        targetLocation = GeoPoint(challenge.latF!, challenge.longF!, 0);
+      }
+      double awardingRadius = challenge.awardingRadiusF ?? 0;
       int hintsUsed = tracker.hintsUsed;
 
       return Scaffold(
@@ -195,7 +198,8 @@ class _GameplayPageState extends State<GameplayPage> {
                                   SvgPicture.asset("assets/icons/feetpics.svg"),
                                   Text(
                                       ' ' +
-                                          (currentLocation != null
+                                          (currentLocation != null &&
+                                                  targetLocation != null
                                               ? (currentLocation!.distanceTo(
                                                           targetLocation) /
                                                       1609.34)
@@ -228,9 +232,10 @@ class _GameplayPageState extends State<GameplayPage> {
                         ]))),
             Expanded(
               child: Padding(
-                  padding: EdgeInsets.only(top: 20),
+                  padding: EdgeInsets.only(top: 10),
                   child: GameplayMap(
-                    targetLocation: targetLocation,
+                    challengeId: challenge.id,
+                    targetLocation: (targetLocation ?? _center),
                     awardingRadius: awardingRadius,
                     points: challenge.points ?? 0,
                     startingHintsUsed: hintsUsed,
