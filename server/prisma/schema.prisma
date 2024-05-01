@@ -186,7 +186,7 @@ model EventTracker {
   isRankedForEvent    Boolean         @default(true)
   event               EventBase       @relation(fields: [eventId], references: [id], onDelete: Cascade)
   eventId             String
-  curChallenge        Challenge?      @relation(fields: [curChallengeId], references: [id])
+  curChallenge        Challenge?      @relation(fields: [curChallengeId], references: [id], onDelete: SetNull)
   curChallengeId      String?
   completedChallenges PrevChallenge[]
 }
