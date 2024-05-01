@@ -83,7 +83,7 @@ export interface EventTrackerDto {
   eventId: string;
   isRanked: boolean;
   hintsUsed: number;
-  curChallengeId: string;
+  curChallengeId?: string;
   prevChallenges: PrevChallengeDto[];
 }
 

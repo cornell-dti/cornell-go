@@ -17,6 +17,10 @@ export class ServerApi {
     this.send("requestAchievementData", data);
   }
 
+  requestAchievementTrackerData(data: dto.RequestAchievementTrackerDataDto) {
+    this.send("requestAchievementTrackerData", data);
+  }
+
   updateAchievementData(data: dto.UpdateAchievementDataDto) {
     this.send("updateAchievementData", data);
   }

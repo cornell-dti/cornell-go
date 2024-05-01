@@ -8,6 +8,7 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { UserModule } from '../user/user.module';
 import { ChallengeGateway } from './challenge.gateway';
 import { ChallengeService } from './challenge.service';
+import { AchievementModule } from '../achievement/achievement.module';
 import { CaslModule } from '../casl/casl.module';
 
 @Module({
@@ -20,6 +21,7 @@ import { CaslModule } from '../casl/casl.module';
     PrismaModule,
     SessionLogModule,
     CaslModule,
+    AchievementModule,
   ],
   providers: [ChallengeGateway, ChallengeService],
 })

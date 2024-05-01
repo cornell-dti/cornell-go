@@ -5,6 +5,7 @@ export interface OrganizationDto {
   members?: string[];
   events?: string[];
   managers?: string[];
+  achivements?: string[];
 }
 
 export interface RequestOrganizationDataDto {

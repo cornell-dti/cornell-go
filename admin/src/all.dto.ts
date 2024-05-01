@@ -103,6 +103,10 @@ export interface RequestAchievementDataDto {
   achievements: string[];
 }
 
+export interface RequestAchievementTrackerDataDto {
+  achievements?: string[];
+}
+
 export interface LoginDto {
   idToken: string;
   noRegister: boolean;
@@ -121,9 +125,7 @@ export interface RefreshTokenDto {
   refreshToken: string;
 }
 
-export interface CompletedChallengeDto {
-  challengeId: string;
-}
+export interface CompletedChallengeDto {}
 
 export interface ChallengeDto {
   id: string;
@@ -230,7 +232,7 @@ export interface EventTrackerDto {
   eventId: string;
   isRanked: boolean;
   hintsUsed: number;
-  curChallengeId: string;
+  curChallengeId?: string;
   prevChallenges: PrevChallengeDto[];
 }
 
@@ -261,7 +263,7 @@ export interface GroupMemberDto {
   id: string;
   name: string;
   points: number;
-  curChallengeId: string;
+  curChallengeId?: string;
 }
 
 export interface GroupDto {
@@ -293,6 +295,7 @@ export interface OrganizationDto {
   members?: string[];
   events?: string[];
   managers?: string[];
+  achivements?: string[];
 }
 
 export interface RequestOrganizationDataDto {

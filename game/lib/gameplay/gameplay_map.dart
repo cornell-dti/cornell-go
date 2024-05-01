@@ -339,7 +339,7 @@ class _GameplayMapState extends State<GameplayMap> {
               challengeModel, apiClient, child) {
         EventTrackerDto? tracker =
             trackerModel.trackerByEventId(groupModel.curEventId ?? "");
-        if (tracker == null) {
+        if (tracker?.curChallengeId == null) {
           displayToast("Error getting event tracker", Status.error);
         } else {
           numHintsLeft = totalHints - tracker.hintsUsed;
