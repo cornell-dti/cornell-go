@@ -49,9 +49,15 @@ class _AchievementsPageState extends State<AchievementsPage> {
   List<String> selectedCategories = [];
   List<String> selectedLocations = [];
   String selectedDifficulty = '';
-
   @override
   Widget build(BuildContext context) {
+    var headerStyle = TextStyle(
+      color: Color(0xFFFFF8F1),
+      fontSize: 20,
+      fontFamily: 'Poppins',
+      fontWeight: FontWeight.w600,
+    );
+
     return Container(
         decoration: BoxDecoration(
           color: Color(0xFFED5656),
@@ -60,7 +66,26 @@ class _AchievementsPageState extends State<AchievementsPage> {
             bottom: false,
             child: Scaffold(
               appBar: AppBar(
-                title: const Text('Achievements'),
+                backgroundColor: Color.fromARGB(255, 237, 86, 86),
+                toolbarHeight: MediaQuery.of(context).size.height * 0.1,
+                leading: Align(
+                  alignment: Alignment.center,
+                  child: IconButton(
+                    icon: Icon(Icons.navigate_before),
+                    color: Colors.white,
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ),
+                title: Padding(
+                  padding: EdgeInsets.only(
+                      top: MediaQuery.of(context).size.height * 0.01),
+                  child: Text(
+                    'Achievements',
+                    style: headerStyle,
+                  ),
+                ),
+                centerTitle: true, // Still useful for horizontal centering
+                actions: [],
               ),
               body: Container(
                   width: double.infinity,
