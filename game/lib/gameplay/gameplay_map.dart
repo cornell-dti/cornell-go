@@ -70,10 +70,6 @@ class _GameplayMapState extends State<GameplayMap> {
   // whether the picture is expanded over the map
   bool isExpanded = false;
 
-  // name of the challenge, either null or the name of the most recently
-  // completed challenge in this event
-  String? challengeName;
-
   @override
   void initState() {
     setCustomMarkerIcon();
@@ -103,7 +99,6 @@ class _GameplayMapState extends State<GameplayMap> {
    * hints used for this challenge already.
    */
   void setStartingHintCircle() {
-    print(widget.startingHintsUsed);
     hintRadius = defaultHintRadius -
         (defaultHintRadius - widget.awardingRadius) *
             0.33 *
@@ -111,7 +106,6 @@ class _GameplayMapState extends State<GameplayMap> {
     if (hintRadius == null) {
       hintRadius = defaultHintRadius;
     }
-    print(hintRadius);
 
     Random _random = Random();
 
@@ -192,6 +186,10 @@ class _GameplayMapState extends State<GameplayMap> {
    */
   void recenterCamera() async {
     GoogleMapController googleMapController = await mapCompleter.future;
+
+    if (currentLocation == null) {
+      return;
+    }
 
     // recenters camera to user location
     googleMapController.animateCamera(
@@ -422,14 +420,9 @@ class _GameplayMapState extends State<GameplayMap> {
                     } else {
                       apiClient.serverApi
                           ?.completedChallenge(CompletedChallengeDto());
-                      setState(() {
-                        challengeName = challengeModel
-                            .getChallengeById(
-                                tracker.prevChallenges.last.challengeId)
-                            ?.name;
-                      });
                     }
                   }
+                  final chalId = widget.challengeId;
                   showDialog(
                     context: context,
                     barrierDismissible: !hasArrived,
@@ -441,7 +434,7 @@ class _GameplayMapState extends State<GameplayMap> {
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(
                                 10), // Same as the Dialog's shape
-                            child: displayDialogue(hasArrived),
+                            child: displayDialog(context, hasArrived, chalId),
                           ),
                         ),
                       );
@@ -581,11 +574,19 @@ class _GameplayMapState extends State<GameplayMap> {
 
   /** Returns whether the user is at the challenge location */
   bool checkArrived() {
+    if (currentLocation == null) {
+      return false;
+    }
     return currentLocation!.distanceTo(widget.targetLocation) <=
         widget.awardingRadius;
   }
 
-  Container displayDialogue(bool hasArrived) {
+  Container displayDialog(
+      BuildContext context, hasArrived, String challengeId) {
+    final name = Provider.of<ChallengeModel>(context)
+            .getChallengeById(challengeId)
+            ?.name ??
+        "";
     return hasArrived
         ? Container(
             // margin: EdgeInsetsDirectional.only(start: 50, end: 50),
@@ -605,7 +606,7 @@ class _GameplayMapState extends State<GameplayMap> {
                 Container(
                     margin: EdgeInsets.only(bottom: 10),
                     child: Text(
-                      "You've arrived at ${challengeName ?? ""}!",
+                      "You've arrived at ${name}!",
                       style:
                           TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
                     )),
@@ -613,7 +614,7 @@ class _GameplayMapState extends State<GameplayMap> {
                   margin: EdgeInsets.only(bottom: 10),
                   width: MediaQuery.of(context).size.width,
                   decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(5.0))),
+                      borderRadius: BorderRadius.all(Radius.circular(10.0))),
                   child: SvgPicture.asset('assets/images/arrived.svg',
                       fit: BoxFit.cover),
                 ),
@@ -663,15 +664,22 @@ class _GameplayMapState extends State<GameplayMap> {
                 Container(
                     margin: EdgeInsets.only(bottom: 10),
                     child: Text(
-                        "You’re close, but not there yet. Use a hint if needed! Hints use 25 points.",
+                        "You’re close, but not there yet." +
+                            (numHintsLeft > 0
+                                ? "Use a hint if needed! Hints use 25 points."
+                                : ""),
                         style: TextStyle(
                             fontSize: 14, fontWeight: FontWeight.w400))),
-                Row(children: [
+                Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                   ElevatedButton(
                       onPressed: () => Navigator.pop(context, false),
                       style: ButtonStyle(
                         padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
-                            EdgeInsets.only(left: 15, right: 15)),
+                            EdgeInsets.symmetric(
+                                horizontal:
+                                    (MediaQuery.devicePixelRatioOf(context) < 3
+                                        ? 10
+                                        : 20))),
                         shape:
                             MaterialStateProperty.all<RoundedRectangleBorder>(
                           RoundedRectangleBorder(
@@ -691,25 +699,36 @@ class _GameplayMapState extends State<GameplayMap> {
                       ),
                       child: Text("Nevermind",
                           style: TextStyle(
+                              fontSize:
+                                  MediaQuery.devicePixelRatioOf(context) < 3
+                                      ? 12
+                                      : 14,
                               color: Color.fromARGB(255, 237, 86, 86)))),
-                  Spacer(),
-                  ElevatedButton(
-                      onPressed: () =>
-                          {useHint(), Navigator.pop(context, false)},
-                      style: ButtonStyle(
-                        padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
-                            EdgeInsets.only(left: 20, right: 20)),
-                        shape:
-                            MaterialStateProperty.all<RoundedRectangleBorder>(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(7.3),
+                  if (numHintsLeft > 0) Spacer(),
+                  if (numHintsLeft > 0)
+                    ElevatedButton(
+                        onPressed: () =>
+                            {useHint(), Navigator.pop(context, false)},
+                        style: ButtonStyle(
+                          padding:
+                              MaterialStateProperty.all<EdgeInsetsGeometry>(
+                                  EdgeInsets.only(left: 20, right: 20)),
+                          shape:
+                              MaterialStateProperty.all<RoundedRectangleBorder>(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(7.3),
+                            ),
                           ),
+                          backgroundColor: MaterialStateProperty.all<Color>(
+                              Color.fromARGB(255, 237, 86, 86)),
                         ),
-                        backgroundColor: MaterialStateProperty.all<Color>(
-                            Color.fromARGB(255, 237, 86, 86)),
-                      ),
-                      child: Text("Use Hint (${numHintsLeft} Left)",
-                          style: TextStyle(color: Colors.white))),
+                        child: Text("Use Hint (${numHintsLeft} Left)",
+                            style: TextStyle(
+                                fontSize:
+                                    MediaQuery.devicePixelRatioOf(context) < 3
+                                        ? 12
+                                        : 14,
+                                color: Colors.white))),
                 ])
               ],
             ),
