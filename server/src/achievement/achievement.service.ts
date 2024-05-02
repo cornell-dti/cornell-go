@@ -361,6 +361,7 @@ export class AchievementService {
 
     for (const ach of uncompletedAchs) {
       let achTracker = ach.trackers[0];
+      if(achTracker == undefined) continue;
 
       // In case the above completion check fails
       if (achTracker.progress < ach.requiredPoints) {
