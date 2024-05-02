@@ -40,7 +40,7 @@ class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
       resizeToAvoidBottomInset: false,
       appBar: PreferredSize(
         preferredSize:
-            Size.fromHeight(MediaQuery.sizeOf(context).height * 0.08),
+            Size.fromHeight(MediaQuery.sizeOf(context).height * 0.07),
         child: AppBar(
           elevation: 0.0,
           backgroundColor: Color(0xFFED5656),
@@ -70,7 +70,7 @@ class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
               Tab(
                 child: Padding(
                   padding: EdgeInsets.only(
-                      bottom: MediaQuery.sizeOf(context).height * 0.03),
+                      bottom: MediaQuery.sizeOf(context).height * 0.02),
                   child: Text(
                     'Challenges',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
@@ -80,7 +80,7 @@ class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
               Tab(
                 child: Padding(
                   padding: EdgeInsets.only(
-                      bottom: MediaQuery.sizeOf(context).height * 0.03),
+                      bottom: MediaQuery.sizeOf(context).height * 0.02),
                   child: Text(
                     'Journeys',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),

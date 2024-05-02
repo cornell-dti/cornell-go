@@ -9,6 +9,70 @@ import 'package:game/api/geopoint.dart';
 import 'dart:async';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import 'dart:math';
+
+class LoadingBar extends StatelessWidget {
+  final int totalTasks;
+  final int tasksFinished;
+
+  const LoadingBar(
+    this.tasksFinished,
+    this.totalTasks,
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        width: MediaQuery.sizeOf(context).width * 0.9,
+        height: 24,
+        child: LayoutBuilder(
+            builder: (BuildContext context, BoxConstraints constraints) {
+          return Stack(children: [
+            Container(
+              width: constraints.maxWidth,
+              height: constraints.maxHeight,
+              alignment: Alignment.centerLeft,
+              child: Container(
+                decoration: new BoxDecoration(
+                  color: Color.fromARGB(255, 241, 241, 241),
+                  shape: BoxShape.rectangle,
+                  borderRadius: BorderRadius.all(Radius.circular(16.0)),
+                ),
+              ),
+            ),
+            Container(
+              width: (totalTasks > 0 ? tasksFinished / totalTasks : 0) *
+                  constraints.maxWidth,
+              height: constraints.maxHeight,
+              alignment: Alignment.centerLeft,
+              child: Container(
+                decoration: new BoxDecoration(
+                  color: Color.fromARGB(197, 237, 86, 86),
+                  shape: BoxShape.rectangle,
+                  borderRadius: BorderRadius.all(Radius.circular(16.0)),
+                ),
+              ),
+            ),
+            Container(
+              height: 5,
+              width: max(
+                  (totalTasks > 0 ? tasksFinished / totalTasks : 0) *
+                          constraints.maxWidth -
+                      16,
+                  0),
+              margin: EdgeInsets.only(left: 8, top: 3),
+              alignment: Alignment.centerLeft,
+              decoration: new BoxDecoration(
+                color: Color(0x99F3C6C6),
+                shape: BoxShape.rectangle,
+                borderRadius: BorderRadius.all(Radius.circular(5.0)),
+              ),
+            ),
+          ]);
+        }));
+  }
+}
+
 enum PreviewType { CHALLENGE, JOURNEY }
 
 /** Returns a preview of a challenge given the challenge name, description, 
@@ -349,38 +413,8 @@ class _PreviewState extends State<Preview> {
                           Padding(
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 25, vertical: 5),
-                              child: Stack(children: [
-                                Container(
-                                  width: MediaQuery.sizeOf(context).width * 0.9,
-                                  height: 24,
-                                  alignment: Alignment.centerLeft,
-                                  child: Container(
-                                    decoration: new BoxDecoration(
-                                      color: Color.fromARGB(255, 241, 241, 241),
-                                      shape: BoxShape.rectangle,
-                                      borderRadius: BorderRadius.all(
-                                          Radius.circular(16.0)),
-                                    ),
-                                  ),
-                                ),
-                                Container(
-                                  width: (locationCount > 0
-                                          ? numberCompleted / locationCount
-                                          : 0) *
-                                      MediaQuery.sizeOf(context).width *
-                                      0.9,
-                                  height: 24,
-                                  alignment: Alignment.centerLeft,
-                                  child: Container(
-                                    decoration: new BoxDecoration(
-                                      color: backgroundRedMuted,
-                                      shape: BoxShape.rectangle,
-                                      borderRadius: BorderRadius.all(
-                                          Radius.circular(16.0)),
-                                    ),
-                                  ),
-                                ),
-                              ])),
+                              child:
+                                  LoadingBar(numberCompleted, locationCount)),
                           Padding(
                             padding: const EdgeInsets.only(
                                 left: 25, right: 25, bottom: 15, top: 3),
