@@ -13,25 +13,35 @@ class SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var headerStyle = TextStyle(
+      color: Color(0xFFFFF8F1),
+      fontSize: 20,
+      fontFamily: 'Poppins',
+      fontWeight: FontWeight.w600,
+    );
+
     return Scaffold(
         backgroundColor: Color.fromARGB(255, 255, 248, 241),
         appBar: AppBar(
           backgroundColor: Color.fromARGB(255, 237, 86, 86),
-          // Set widget before appBar title
-          leading: IconButton(
-            icon: const Icon(Icons.navigate_before),
-            color: Colors.white,
-            onPressed: () {
-              Navigator.pop(context);
-            },
+          toolbarHeight: MediaQuery.of(context).size.height * 0.1,
+          leading: Align(
+            alignment: Alignment.center,
+            child: IconButton(
+              icon: Icon(Icons.navigate_before),
+              color: Colors.white,
+              onPressed: () => Navigator.pop(context),
+            ),
           ),
-          title: const Text(
-            'Settings',
-            style: TextStyle(
-                color: Colors.white,
-                fontFamily: 'Poppins',
-                fontWeight: FontWeight.bold),
+          title: Padding(
+            padding:
+                EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.01),
+            child: Text(
+              'Settings',
+              style: headerStyle,
+            ),
           ),
+          centerTitle: true, // Still useful for horizontal centering
           actions: [],
         ),
         body: Center(child: LayoutBuilder(
