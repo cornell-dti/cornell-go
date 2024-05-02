@@ -6,6 +6,10 @@ import 'package:game/profile/edit_profile.dart';
 import 'package:game/main.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+final FEEDBACK_URL = Uri.parse(
+    "https://docs.google.com/forms/d/e/1FAIpQLSczSG6iJ_yv6zqlqNJWrtvSB7aupTiIvYGmy7nAzKKKPal-5g/viewform");
 
 class SettingsPage extends StatelessWidget {
   final bool isGuest;
@@ -102,7 +106,9 @@ class SettingsPage extends StatelessWidget {
                         ),
                       ),
                       child: TextButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          launchUrl(FEEDBACK_URL);
+                        },
                         style: TextButton.styleFrom(
                             padding: EdgeInsets.only(left: 20.0),
                             alignment: Alignment.centerLeft,
