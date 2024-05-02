@@ -160,35 +160,9 @@ export class CaslAbilityFactory {
     // Read challenges that belong to events you're allowed to access
     // And you must have completed them or are in the process
     can(Action.Read, 'Challenge', undefined, {
-      AND: [
-        {
-          linkedEvent: {
-            usedIn: { some: { members: { some: { id: user.id } } } },
-          },
-        },
-        {
-          OR: [
-            { eventIndex: 0 },
-            {
-              completions: {
-                some: { userId: user.id },
-              },
-            },
-            {
-              activeTrackers: {
-                some: {
-                  user: { id: user.id },
-                  event: {
-                    activeGroups: {
-                      some: { members: { some: { id: user.id } } },
-                    },
-                  },
-                },
-              },
-            },
-          ],
-        },
-      ],
+      linkedEvent: {
+        usedIn: { some: { members: { some: { id: user.id } } } },
+      },
     });
 
     cannot(Action.Read, 'Challenge', ['name'], {
