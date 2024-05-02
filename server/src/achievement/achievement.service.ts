@@ -404,7 +404,7 @@ export class AchievementService {
         where: {
           AND: [
             ...(achievement ? [{ id: achievement.id }] : []),
-            accessibleBy(ability).Achievement,
+            accessibleBy(ability, Action.Read).Achievement,
             { trackers: { none: { userId: user.id } } },
           ],
         },
