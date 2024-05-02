@@ -48,7 +48,7 @@ class _ProfilePageState extends State<ProfilePage> {
           var isGuest = userModel.userData?.authType == UserAuthTypeDto.device;
           var score = userModel.userData?.score;
 
-          List<Tuple2<DateTime, EventDto>> completedEvents = [];
+          List<Tuple3<DateTime, EventDto, int>> completedEvents = [];
 
           //Get completed events
           for (var eventId in userModel.userData!.trackedEvents!) {
@@ -70,7 +70,12 @@ class _ProfilePageState extends State<ProfilePage> {
               var completedDate = tracker.prevChallenges.last.dateCompleted;
               DateTime date =
                   DateFormat("E, d MMM y HH:mm:ss").parse(completedDate);
-              completedEvents.add(Tuple2<DateTime, EventDto>(date, event));
+              int totalHintsUsed = 0;
+              for (var prev in tracker.prevChallenges) {
+                totalHintsUsed += prev.hintsUsed;
+              }
+              completedEvents.add(
+                  Tuple3<DateTime, EventDto, int>(date, event, totalHintsUsed));
             } catch (e) {
               displayToast("Error with completing challenge", Status.error);
             }
@@ -179,11 +184,12 @@ class _ProfilePageState extends State<ProfilePage> {
                     }
                     var date = completedEvents[index].item1;
                     var event = completedEvents[index].item2;
+                    var hintsUsed = completedEvents[index].item3;
                     String formattedDate = DateFormat("MMMM d, y").format(date);
                     var type =
                         event.challenges!.length > 1 ? "Journeys" : "Challenge";
 
-                    //Calculate totalPoints.
+                    // Calculate totalPoints.
                     var totalPoints = 0;
                     var locationImage;
                     for (var challengeId in event.challenges ?? []) {
@@ -193,18 +199,19 @@ class _ProfilePageState extends State<ProfilePage> {
                       if (locationImage == null || locationImage.length == 0)
                         locationImage =
                             "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png";
-
                       if (challenge != null) {
                         totalPoints += challenge.points ?? 0;
                       }
                     }
 
                     return completedCell(
+                        context,
                         event.name!,
                         locationImage,
                         type,
                         formattedDate,
                         friendlyDifficulty[event.difficulty]!,
+                        hintsUsed,
                         totalPoints);
                   },
                   physics: BouncingScrollPhysics(),

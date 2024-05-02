@@ -11,8 +11,89 @@ import 'package:game/model/event_model.dart';
 import 'package:game/model/tracker_model.dart';
 import 'package:game/model/group_model.dart';
 import 'package:game/model/challenge_model.dart';
+import 'dart:math';
 
 import 'package:flutter_svg/flutter_svg.dart';
+
+class LoadingBar extends StatelessWidget {
+  final int totalTasks;
+  final int tasksFinished;
+
+  const LoadingBar(
+    this.tasksFinished,
+    this.totalTasks,
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+            width: MediaQuery.sizeOf(context).width * 0.66,
+            height: 20,
+            child: LayoutBuilder(
+                builder: (BuildContext context, BoxConstraints constraints) {
+              return Stack(children: [
+                Container(
+                  width: constraints.maxWidth,
+                  height: constraints.maxHeight,
+                  alignment: Alignment.centerLeft,
+                  child: Container(
+                    decoration: new BoxDecoration(
+                      color: Color.fromARGB(220, 237, 86, 86),
+                      shape: BoxShape.rectangle,
+                      borderRadius: BorderRadius.all(Radius.circular(16.0)),
+                    ),
+                  ),
+                ),
+                Container(
+                  width: (totalTasks > 0 ? tasksFinished / totalTasks : 0) *
+                      constraints.maxWidth,
+                  height: constraints.maxHeight,
+                  alignment: Alignment.centerLeft,
+                  child: Container(
+                    decoration: new BoxDecoration(
+                      color: Color.fromARGB(197, 237, 86, 86),
+                      shape: BoxShape.rectangle,
+                      borderRadius: BorderRadius.all(Radius.circular(16.0)),
+                    ),
+                  ),
+                ),
+                Container(
+                  height: 5,
+                  width: max(
+                      (totalTasks > 0 ? tasksFinished / totalTasks : 0) *
+                              constraints.maxWidth -
+                          16,
+                      0),
+                  margin: EdgeInsets.only(left: 8, top: 3),
+                  alignment: Alignment.centerLeft,
+                  decoration: new BoxDecoration(
+                    color: Color(0x99F3C6C6),
+                    shape: BoxShape.rectangle,
+                    borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                  ),
+                ),
+              ]);
+            })),
+        Expanded(
+            flex: 2,
+            child: Row(children: [
+              Text(" "),
+              SvgPicture.asset("assets/icons/pin.svg"),
+              Text(
+                " " + tasksFinished.toString() + "/" + totalTasks.toString(),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              )
+            ]))
+      ],
+    );
+  }
+}
 
 class ChallengeCompletedPage extends StatefulWidget {
   const ChallengeCompletedPage({
@@ -21,86 +102,6 @@ class ChallengeCompletedPage extends StatefulWidget {
 
   @override
   State<ChallengeCompletedPage> createState() => _ChallengeCompletedState();
-}
-
-class LoadingBar extends StatelessWidget {
-  final int num_challenges;
-  final int num_completed;
-
-  const LoadingBar(
-    this.num_completed,
-    this.num_challenges,
-  );
-
-  @override
-  Widget build(BuildContext context) {
-    double progress = num_completed / num_challenges;
-    return Row(mainAxisSize: MainAxisSize.max, children: [
-      Expanded(
-          flex: 8,
-          child: Stack(children: [
-            Container(
-              width: MediaQuery.sizeOf(context).width * 0.66,
-              height: 24,
-              alignment: Alignment.centerLeft,
-              child: Container(
-                decoration: new BoxDecoration(
-                  color: Color.fromARGB(255, 241, 241, 241),
-                  shape: BoxShape.rectangle,
-                  borderRadius: BorderRadius.all(Radius.circular(16.0)),
-                ),
-              ),
-            ),
-            Container(
-              width:
-                  (progress + 0.05) * MediaQuery.sizeOf(context).width * 0.66,
-              height: 24,
-              alignment: Alignment.centerLeft,
-              child: Container(
-                decoration: new BoxDecoration(
-                  color: Color(0xE6ED5656),
-                  shape: BoxShape.rectangle,
-                  borderRadius: BorderRadius.all(Radius.circular(16.0)),
-                ),
-              ),
-            ),
-          ])
-          // child: Container(
-          //   clipBehavior: Clip.hardEdge,
-          //   decoration: BoxDecoration(
-          //     borderRadius: BorderRadius.circular(15.0),
-          //   ),
-          //   height: 20.0,
-          //   width: double.infinity,
-          //   child: Stack(
-          //     alignment: Alignment.centerLeft,
-          //     children: [
-          //       Positioned.fill(
-          //         child: LinearProgressIndicator(
-          //             value: progress,
-          //             color: Color(0xE6ED5656),
-          //             backgroundColor: Color(0xFFF1F1F1)),
-          //       ),
-          //     ],
-          //   ),
-          // ),
-          ),
-      Expanded(
-          flex: 2,
-          child: Row(children: [
-            Text(" "),
-            SvgPicture.asset("assets/icons/pin.svg"),
-            Text(
-              num_completed.toString() + "/" + num_challenges.toString(),
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16.0,
-                fontWeight: FontWeight.bold,
-              ),
-            )
-          ]))
-    ]);
-  }
 }
 
 class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
@@ -366,139 +367,160 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                     fontSize: 25.0,
                     fontWeight: FontWeight.bold,
                   ),
-                )
-              ],
-            )),
-        journeyPage
-            ? Container(
-                alignment: Alignment.bottomCenter,
-                margin: EdgeInsets.all(40),
-                child: journeyCompleted
-                    ? ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Color.fromARGB(255, 237, 86, 86),
-                          padding: EdgeInsets.only(
-                              right: 15, left: 15, top: 10, bottom: 10),
-                          shape: RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.circular(10), // button's shape,
-                          ),
-                        ),
-                        child: Row(mainAxisSize: MainAxisSize.min, children: [
-                          Text(
-                            "Return Home ",
-                            style: TextStyle(
-                                fontFamily: 'Poppins',
-                                fontSize: 21,
-                                fontWeight: FontWeight.w400,
-                                color: Color(0xFFFFFFFF)),
-                          ),
-                          SvgPicture.asset("assets/icons/forwardcarrot.svg")
-                        ]),
-                        onPressed: () {
-                          Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => BottomNavBar()));
-                        },
-                      )
-                    : Row(
-                        children: [
-                          ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    Color.fromARGB(0, 255, 255, 255),
-                                shadowColor: Color.fromARGB(0, 255, 255, 255),
-                                padding: EdgeInsets.only(
-                                    right: 15, left: 15, top: 10, bottom: 10),
-                                shape: RoundedRectangleBorder(
-                                  side: BorderSide(color: Colors.white),
-                                  borderRadius: BorderRadius.circular(
-                                      10), // button's shape,
+                ),
+                Spacer(),
+                journeyPage
+                    ? Container(
+                        alignment: Alignment.bottomCenter,
+                        margin: EdgeInsets.only(
+                            bottom: MediaQuery.sizeOf(context).height * 0.05),
+                        child: journeyCompleted
+                            ? ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor:
+                                      Color.fromARGB(255, 237, 86, 86),
+                                  padding: EdgeInsets.only(
+                                      right: 15, left: 15, top: 10, bottom: 10),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(
+                                        10), // button's shape,
+                                  ),
                                 ),
+                                child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        "Return Home ",
+                                        style: TextStyle(
+                                            fontFamily: 'Poppins',
+                                            fontSize: 21,
+                                            fontWeight: FontWeight.w400,
+                                            color: Color(0xFFFFFFFF)),
+                                      ),
+                                      SvgPicture.asset(
+                                          "assets/icons/forwardcarrot.svg")
+                                    ]),
+                                onPressed: () {
+                                  Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              BottomNavBar()));
+                                },
+                              )
+                            : Row(
+                                children: [
+                                  ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor:
+                                            Color.fromARGB(0, 255, 255, 255),
+                                        shadowColor:
+                                            Color.fromARGB(0, 255, 255, 255),
+                                        padding: EdgeInsets.only(
+                                            right: 15,
+                                            left: 15,
+                                            top: 10,
+                                            bottom: 10),
+                                        shape: RoundedRectangleBorder(
+                                          side: BorderSide(color: Colors.white),
+                                          borderRadius: BorderRadius.circular(
+                                              10), // button's shape,
+                                        ),
+                                      ),
+                                      onPressed: () =>
+                                          Navigator.pushReplacement(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      BottomNavBar())),
+                                      child: Text(
+                                        "Leave",
+                                        style: TextStyle(
+                                            fontFamily: 'Poppins',
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.w400,
+                                            color: Color(0xFFFFFFFF)),
+                                      )),
+                                  Spacer(),
+                                  ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor:
+                                          Color.fromARGB(255, 237, 86, 86),
+                                      padding: EdgeInsets.only(
+                                          right: 15,
+                                          left: 15,
+                                          top: 10,
+                                          bottom: 10),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(
+                                            10), // button's shape,
+                                      ),
+                                    ),
+                                    onPressed: () => Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                GameplayPage())),
+                                    child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            "Next Challenge ",
+                                            style: TextStyle(
+                                                fontFamily: 'Poppins',
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.w400,
+                                                color: Color(0xFFFFFFFF)),
+                                          ),
+                                          SvgPicture.asset(
+                                              "assets/icons/forwardcarrot.svg")
+                                        ]),
+                                  ),
+                                ],
                               ),
-                              onPressed: () => Navigator.pushReplacement(
+                      )
+                    : Container(
+                        alignment: Alignment.bottomCenter,
+                        margin: EdgeInsets.only(
+                            bottom: MediaQuery.sizeOf(context).height * 0.05),
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color.fromARGB(255, 237, 86, 86),
+                            padding: EdgeInsets.only(
+                                right: 15, left: 15, top: 10, bottom: 10),
+                            shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.circular(10), // button's shape,
+                            ),
+                          ),
+                          child: Row(mainAxisSize: MainAxisSize.min, children: [
+                            Text(
+                              ((event?.challenges?.length ?? 0) > 1)
+                                  ? "Journey Progress "
+                                  : "Return Home ",
+                              style: TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: 21,
+                                  fontWeight: FontWeight.w400,
+                                  color: Color(0xFFFFFFFF)),
+                            ),
+                            SvgPicture.asset("assets/icons/forwardcarrot.svg")
+                          ]),
+                          onPressed: () {
+                            if ((event?.challenges?.length ?? 0) > 1) {
+                              journeyPage = true;
+                              setState(() {});
+                            } else {
+                              Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => BottomNavBar())),
-                              child: Text(
-                                "Leave",
-                                style: TextStyle(
-                                    fontFamily: 'Poppins',
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.w400,
-                                    color: Color(0xFFFFFFFF)),
-                              )),
-                          Spacer(),
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Color.fromARGB(255, 237, 86, 86),
-                              padding: EdgeInsets.only(
-                                  right: 15, left: 15, top: 10, bottom: 10),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(
-                                    10), // button's shape,
-                              ),
-                            ),
-                            onPressed: () => Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => GameplayPage())),
-                            child:
-                                Row(mainAxisSize: MainAxisSize.min, children: [
-                              Text(
-                                "Next Challenge ",
-                                style: TextStyle(
-                                    fontFamily: 'Poppins',
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.w400,
-                                    color: Color(0xFFFFFFFF)),
-                              ),
-                              SvgPicture.asset("assets/icons/forwardcarrot.svg")
-                            ]),
-                          ),
-                        ],
+                                      builder: (context) => BottomNavBar()));
+                            }
+                          },
+                        ),
                       ),
-              )
-            : Container(
-                alignment: Alignment.bottomCenter,
-                margin: EdgeInsets.only(bottom: 40),
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color.fromARGB(255, 237, 86, 86),
-                    padding: EdgeInsets.only(
-                        right: 15, left: 15, top: 10, bottom: 10),
-                    shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(10), // button's shape,
-                    ),
-                  ),
-                  child: Row(mainAxisSize: MainAxisSize.min, children: [
-                    Text(
-                      ((event?.challenges?.length ?? 0) > 1)
-                          ? "Journey Progress "
-                          : "Return Home ",
-                      style: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 21,
-                          fontWeight: FontWeight.w400,
-                          color: Color(0xFFFFFFFF)),
-                    ),
-                    SvgPicture.asset("assets/icons/forwardcarrot.svg")
-                  ]),
-                  onPressed: () {
-                    if ((event?.challenges?.length ?? 0) > 1) {
-                      journeyPage = true;
-                      setState(() {});
-                    } else {
-                      Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => BottomNavBar()));
-                    }
-                  },
-                ),
-              ),
+              ],
+            )),
       ]));
     });
   }

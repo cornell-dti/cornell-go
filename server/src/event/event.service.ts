@@ -6,6 +6,7 @@ import {
   TimeLimitationType,
   EventTracker,
   User,
+  OrganizationSpecialUsage,
 } from '@prisma/client';
 import { LeaderDto, UpdateLeaderDataDto } from './event.dto';
 import { v4 } from 'uuid';
@@ -567,6 +568,18 @@ export class EventService {
         },
       })
     ) {
+      const defaultOrg = await this.orgService.getDefaultOrganization(
+        OrganizationSpecialUsage.DEVICE_LOGIN,
+      );
+
+      const defaultEv = await this.orgService.getDefaultEvent(defaultOrg);
+      if (defaultEv.id === eventId) return false;
+
+      await this.prisma.group.updateMany({
+        where: { curEventId: eventId },
+        data: { curEventId: defaultEv.id },
+      });
+
       await this.prisma.eventBase.delete({
         where: {
           id: eventId,

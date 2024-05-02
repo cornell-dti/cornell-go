@@ -191,7 +191,7 @@ class _GameplayPageState extends State<GameplayPage> {
                                           (abbrevLocation[challenge.location] ??
                                               ""),
                                       style: TextStyle(
-                                          fontSize: 13,
+                                          fontSize: 14,
                                           color: Color(0xFF835A7C)))
                                 ]),
                                 Row(children: [
@@ -207,7 +207,7 @@ class _GameplayPageState extends State<GameplayPage> {
                                               : "?.?") +
                                           ' Mi Away',
                                       style: TextStyle(
-                                          fontSize: 13,
+                                          fontSize: 14,
                                           color: Color(0xFF58B171)))
                                 ]),
                                 Row(children: [
@@ -224,7 +224,7 @@ class _GameplayPageState extends State<GameplayPage> {
                                           (challenge.points ?? 0).toString() +
                                           " PTS",
                                       style: TextStyle(
-                                          fontSize: 13,
+                                          fontSize: 14,
                                           fontWeight: FontWeight.w500,
                                           color: Color(0xFFC17E19)))
                                 ]),

@@ -37,7 +37,7 @@ export const defaultChallengeData = {
   name: 'Default Challenge',
   location: LocationType.ARTS_QUAD,
   description: 'McGraw Tower',
-  points: 1,
+  points: 100,
   imageUrl:
     'https://upload.wikimedia.org/wikipedia/commons/5/5f/CentralAvenueCornell2.jpg',
   latitude: 42.44755580740012,
