@@ -410,8 +410,6 @@ export class AchievementService {
         },
       });
 
-      console.log(achsWithoutTrackers.length);
-
       await this.prisma.achievementTracker.createMany({
         data: achsWithoutTrackers.map(ach => ({
           userId: user.id,
