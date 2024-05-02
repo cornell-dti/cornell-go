@@ -361,7 +361,7 @@ export class AchievementService {
 
     for (const ach of uncompletedAchs) {
       let achTracker = ach.trackers[0];
-      if(achTracker == undefined) continue;
+      if (achTracker == undefined) continue;
 
       // In case the above completion check fails
       if (achTracker.progress < ach.requiredPoints) {
@@ -400,7 +400,7 @@ export class AchievementService {
     if (user) {
       const ability = this.abilityFactory.createForUser(user);
       let achsWithoutTrackers;
-      if(achievement) {
+      if (achievement) {
         achsWithoutTrackers = await this.prisma.achievement.findMany({
           where: {
             AND: [
@@ -420,7 +420,7 @@ export class AchievementService {
           },
         });
       }
-      
+
       console.log(achsWithoutTrackers.length);
 
       await this.prisma.achievementTracker.createMany({
