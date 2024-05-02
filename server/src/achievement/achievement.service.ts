@@ -398,16 +398,29 @@ export class AchievementService {
   async createAchievementTrackers(user?: User, achievement?: Achievement) {
     if (user) {
       const ability = this.abilityFactory.createForUser(user);
-
-      const achsWithoutTrackers = await this.prisma.achievement.findMany({
-        where: {
-          AND: [
-            { id: achievement?.id },
-            accessibleBy(ability).Achievement,
-            { trackers: { none: { userId: user.id } } },
-          ],
-        },
-      });
+      let achsWithoutTrackers;
+      if(achievement) {
+        achsWithoutTrackers = await this.prisma.achievement.findMany({
+          where: {
+            AND: [
+              { id: achievement?.id },
+              accessibleBy(ability).Achievement,
+              { trackers: { none: { userId: user.id } } },
+            ],
+          },
+        });
+      } else {
+        achsWithoutTrackers = await this.prisma.achievement.findMany({
+          where: {
+            AND: [
+              accessibleBy(ability).Achievement,
+              { trackers: { none: { userId: user.id } } },
+            ],
+          },
+        });
+      }
+      
+      console.log(achsWithoutTrackers.length);
 
       await this.prisma.achievementTracker.createMany({
         data: achsWithoutTrackers.map(ach => ({
