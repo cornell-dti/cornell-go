@@ -131,6 +131,16 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
           tracker.prevChallenges.last.challengeId != widget.challengeId) {
         return CircularIndicator();
       }
+      // if (tracker == null) {
+      //   return Text("tracker is null");
+      // }
+      // if (tracker.prevChallenges.length == 0) {
+      //   return Text("tracker prevchallenges has 0 length");
+      // }
+      // if (tracker.prevChallenges.last.challengeId != widget.challengeId) {
+      //   return Text(
+      //       "tracker last completed challenge does not match passed in challenge id");
+      // }
 
       // if this event is a journey
       if ((event?.challenges?.length ?? 0) > 1)
