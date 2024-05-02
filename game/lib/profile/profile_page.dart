@@ -174,7 +174,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               ),
               SizedBox(
-                height: MediaQuery.sizeOf(context).height * 0.225,
+                height: MediaQuery.sizeOf(context).height * 0.25,
                 width: MediaQuery.sizeOf(context).width * 0.85,
                 child: ListView.separated(
                   itemCount: 2,

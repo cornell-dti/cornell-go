@@ -65,7 +65,7 @@ export class ChallengeGateway {
     @CallingUser() user: User,
     @MessageBody() data: CompletedChallengeDto,
   ) {
-    var completedId = await this.challengeService.completeChallenge(user);
+    const completedId = await this.challengeService.completeChallenge(user);
     if (completedId != null) {
       const group = await this.groupService.getGroupForUser(user);
       const tracker = await this.eventService.getCurrentEventTrackerForUser(

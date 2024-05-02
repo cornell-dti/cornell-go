@@ -165,15 +165,15 @@ export class CaslAbilityFactory {
       },
     });
 
-    // cannot(Action.Read, 'Challenge', ['name'], {
-    //   AND: [
-    //     {
-    //       completions: {
-    //         none: { userId: user.id },
-    //       },
-    //     },
-    //   ],
-    // });
+    cannot(Action.Read, 'Challenge', ['name'], {
+      AND: [
+        {
+          completions: {
+            none: { userId: user.id },
+          },
+        },
+      ],
+    });
 
     const latlongNames = [
       'latitude',
