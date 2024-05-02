@@ -145,6 +145,81 @@ class _ProfilePageState extends State<ProfilePage> {
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
               ),
+              //Completed Events
+              Padding(
+                padding: const EdgeInsets.only(left: 24, right: 24.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text("Completed",
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold)),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => CompletedFeedWidget()));
+                      },
+                      child: Text(
+                        'View More →',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 14.0,
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+              SizedBox(
+                height: MediaQuery.sizeOf(context).height * 0.25,
+                width: MediaQuery.sizeOf(context).width * 0.85,
+                child: ListView.separated(
+                  itemCount: 2,
+                  itemBuilder: (context, index) {
+                    if (index >= completedEvents.length) {
+                      return Container();
+                    }
+                    var date = completedEvents[index].item1;
+                    var event = completedEvents[index].item2;
+                    var hintsUsed = completedEvents[index].item3;
+                    String formattedDate = DateFormat("MMMM d, y").format(date);
+                    var type =
+                        event.challenges!.length > 1 ? "Journeys" : "Challenge";
+
+                    // Calculate totalPoints.
+                    var totalPoints = 0;
+                    var locationImage;
+                    for (var challengeId in event.challenges ?? []) {
+                      var challenge =
+                          challengeModel.getChallengeById(challengeId);
+                      locationImage = challenge?.imageUrl;
+                      if (locationImage == null || locationImage.length == 0)
+                        locationImage =
+                            "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png";
+                      if (challenge != null) {
+                        totalPoints += challenge.points ?? 0;
+                      }
+                    }
+
+                    return completedCell(
+                        context,
+                        event.name!,
+                        locationImage,
+                        type,
+                        formattedDate,
+                        friendlyDifficulty[event.difficulty]!,
+                        hintsUsed,
+                        totalPoints);
+                  },
+                  physics: BouncingScrollPhysics(),
+                  separatorBuilder: (context, index) {
+                    return SizedBox(height: 10);
+                  },
+                ),
+              ),
               Padding(
                 padding: const EdgeInsets.only(left: 24, right: 24),
                 child: Row(
@@ -193,81 +268,6 @@ class _ProfilePageState extends State<ProfilePage> {
                               ]))
                           .expand((el) => el)
                           .toList()))),
-              //Completed Events
-              Padding(
-                padding: const EdgeInsets.only(left: 24, right: 24.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text("Completed",
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold)),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => CompletedFeedWidget()));
-                      },
-                      child: Text(
-                        'View More →',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 14.0,
-                        ),
-                      ),
-                    )
-                  ],
-                ),
-              ),
-              SizedBox(
-                height: 200,
-                width: 345,
-                child: ListView.separated(
-                  itemCount: 2,
-                  itemBuilder: (context, index) {
-                    if (index >= completedEvents.length) {
-                      return Container();
-                    }
-                    var date = completedEvents[index].item1;
-                    var event = completedEvents[index].item2;
-                    var hintsUsed = completedEvents[index].item3;
-                    String formattedDate = DateFormat("MMMM d, y").format(date);
-                    var type =
-                        event.challenges!.length > 1 ? "Journeys" : "Challenge";
-
-                    // Calculate totalPoints.
-                    var totalPoints = 0;
-                    var locationImage;
-                    for (var challengeId in event.challenges ?? []) {
-                      var challenge =
-                          challengeModel.getChallengeById(challengeId);
-                      locationImage = challenge?.imageUrl;
-                      if (locationImage == null || locationImage.length == 0)
-                        locationImage =
-                            "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png";
-                      if (challenge != null) {
-                        totalPoints += challenge.points ?? 0;
-                      }
-                    }
-
-                    return completedCell(
-                        context,
-                        event.name!,
-                        locationImage,
-                        type,
-                        formattedDate,
-                        friendlyDifficulty[event.difficulty]!,
-                        hintsUsed,
-                        totalPoints);
-                  },
-                  physics: BouncingScrollPhysics(),
-                  separatorBuilder: (context, index) {
-                    return SizedBox(height: 10);
-                  },
-                ),
-              ),
             ],
           );
         }),

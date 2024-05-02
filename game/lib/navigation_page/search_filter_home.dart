@@ -50,6 +50,7 @@ class _SearchFilterBarState extends State<SearchFilterBar>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       body: Container(
         color: Color(0xFFED5656),
         width: double.infinity,
@@ -57,35 +58,40 @@ class _SearchFilterBarState extends State<SearchFilterBar>
         child: Container(
           // padding: EdgeInsets.only(top: 50),
           height: MediaQuery.sizeOf(context).height * 0.175,
+
           child: SafeArea(
             child: Column(
               children: [
                 Spacer(),
                 Stack(
                   children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Color.fromARGB(255, 255, 248, 241),
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      child: SizedBox(
-                        width: MediaQuery.sizeOf(context).width * 0.9,
-                        height: 45,
-                        child: TextField(
-                          onSubmitted: onSearchTextChanged,
-                          decoration: InputDecoration(
-                            prefixIcon: Icon(
-                              Icons.search,
-                              color: Color.fromARGB(76, 0, 0, 0),
-                              size: 20,
-                            ),
-                            labelText: "Search a name, location, etc...",
-                            labelStyle: TextStyle(
-                              color: Color(0xFFB9B9B9),
-                              fontSize: 12,
-                              fontFamily: 'Poppins',
-                              backgroundColor:
-                                  Color.fromARGB(255, 255, 248, 241),
+                    SingleChildScrollView(
+                      physics: NeverScrollableScrollPhysics(),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Color.fromARGB(255, 255, 248, 241),
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        child: SizedBox(
+                          width: MediaQuery.sizeOf(context).width * 0.9,
+                          height: 45,
+                          child: TextField(
+                            onSubmitted: onSearchTextChanged,
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              prefixIcon: Icon(
+                                Icons.search,
+                                color: Color.fromARGB(76, 0, 0, 0),
+                                size: 20,
+                              ),
+                              labelText: "Search a name, location, etc...",
+                              labelStyle: TextStyle(
+                                // color: Color(0xFFB9B9B9),
+                                fontSize: 12,
+                                fontFamily: 'Poppins',
+                                // backgroundColor:
+                                //     Color.fromARGB(255, 255, 248, 241),
+                              ),
                             ),
                           ),
                         ),

@@ -119,28 +119,36 @@ class _EditProfileState extends State<EditProfileWidget> {
 
   @override
   Widget build(BuildContext context) {
+    var headerStyle = TextStyle(
+      color: Color(0xFFFFF8F1),
+      fontSize: 20,
+      fontFamily: 'Poppins',
+      fontWeight: FontWeight.w600,
+    );
+
     return Scaffold(
         backgroundColor: Color.fromARGB(255, 255, 248, 241),
         appBar: AppBar(
-          toolbarHeight: 70,
-          backgroundColor: Color.fromARGB(255, 237, 86, 86),
-          // Set widget before appBar title
-          leading: IconButton(
-            icon: const Icon(Icons.navigate_before),
-            color: Colors.white,
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
-          title: const Text(
-            'Edit Profile',
-            style: TextStyle(
-                color: Colors.white,
-                fontFamily: 'Poppins',
-                fontWeight: FontWeight.bold),
-          ),
-          actions: [],
-        ),
+            toolbarHeight: 70,
+            backgroundColor: Color.fromARGB(255, 237, 86, 86),
+            // Set widget before appBar title
+            leading: IconButton(
+              icon: const Icon(Icons.navigate_before),
+              color: Colors.white,
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+            title: Padding(
+              padding: EdgeInsets.only(
+                  top: MediaQuery.of(context).size.height * 0.01),
+              child: Text(
+                'Edit Profile',
+                style: headerStyle,
+              ),
+            ),
+            actions: [],
+            centerTitle: true),
         body: Center(
             child: Consumer<UserModel>(builder: (context, userModel, child) {
           if (userModel.userData == null) {

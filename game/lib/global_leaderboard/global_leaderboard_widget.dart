@@ -44,12 +44,13 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
       key: scaffoldKey,
       backgroundColor: Color.fromARGB(255, 255, 248, 241),
       appBar: AppBar(
-        toolbarHeight: 85,
+        toolbarHeight: MediaQuery.sizeOf(context).height * 0.1,
         automaticallyImplyLeading: false,
         backgroundColor: Color.fromARGB(255, 237, 86, 86),
         flexibleSpace: FlexibleSpaceBar(
             title: Padding(
-              padding: const EdgeInsets.only(bottom: 8),
+              padding: EdgeInsets.only(
+                  bottom: MediaQuery.sizeOf(context).height * 0.01),
               child: Text(
                 'Leaderboard',
                 style: leaderboardStyle,
