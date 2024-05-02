@@ -38,9 +38,7 @@ export class ServerApi {
   }
 
   completedChallenge(data: dto.CompletedChallengeDto) {
-    return this.send("completedChallenge", data) as Promise<
-      boolean | undefined
-    >;
+    return this.send("completedChallenge", data) as Promise<string | undefined>;
   }
 
   updateChallengeData(data: dto.UpdateChallengeDataDto) {

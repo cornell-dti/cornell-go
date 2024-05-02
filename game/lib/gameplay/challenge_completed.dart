@@ -96,8 +96,10 @@ class LoadingBar extends StatelessWidget {
 }
 
 class ChallengeCompletedPage extends StatefulWidget {
+  final String challengeId;
   const ChallengeCompletedPage({
     Key? key,
+    required this.challengeId,
   }) : super(key: key);
 
   @override
@@ -124,7 +126,9 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
       var eventId = groupModel.curEventId;
       var event = eventModel.getEventById(eventId ?? "");
       var tracker = trackerModel.trackerByEventId(eventId ?? "");
-      if (tracker == null) {
+      if (tracker == null ||
+          tracker.prevChallenges.length == 0 ||
+          tracker.prevChallenges.last.challengeId != widget.challengeId) {
         return CircularIndicator();
       }
 
