@@ -2,6 +2,95 @@ import 'package:flutter/material.dart';
 import 'package:game/preview/preview.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import 'dart:math';
+
+class LoadingBar extends StatelessWidget {
+  final int totalTasks;
+  final int tasksFinished;
+
+  const LoadingBar(
+    this.tasksFinished,
+    this.totalTasks,
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+            width: MediaQuery.sizeOf(context).width * 0.7,
+            height: 22,
+            child: LayoutBuilder(
+                builder: (BuildContext context, BoxConstraints constraints) {
+              return Stack(children: [
+                Container(
+                  width: constraints.maxWidth,
+                  height: constraints.maxHeight,
+                  alignment: Alignment.centerLeft,
+                  child: Container(
+                    decoration: new BoxDecoration(
+                      color: Color.fromARGB(255, 241, 241, 241),
+                      shape: BoxShape.rectangle,
+                      borderRadius: BorderRadius.all(Radius.circular(16.0)),
+                    ),
+                  ),
+                ),
+                Container(
+                  width: (totalTasks > 0 ? tasksFinished / totalTasks : 0) *
+                      constraints.maxWidth,
+                  height: constraints.maxHeight,
+                  alignment: Alignment.centerLeft,
+                  child: Container(
+                    decoration: new BoxDecoration(
+                      color: Color.fromARGB(197, 237, 86, 86),
+                      shape: BoxShape.rectangle,
+                      borderRadius: BorderRadius.all(Radius.circular(16.0)),
+                    ),
+                  ),
+                ),
+                Container(
+                  height: 5,
+                  width: max(
+                      (totalTasks > 0 ? tasksFinished / totalTasks : 0) *
+                              constraints.maxWidth -
+                          16,
+                      0),
+                  margin: EdgeInsets.only(left: 8, top: 3),
+                  alignment: Alignment.centerLeft,
+                  decoration: new BoxDecoration(
+                    color: Color(0x99F3C6C6),
+                    shape: BoxShape.rectangle,
+                    borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                  ),
+                ),
+              ]);
+            })),
+        Container(
+          //width: 50,
+          child: Row(children: [
+            SizedBox(
+              width: 8,
+            ),
+            SvgPicture.asset("assets/icons/pin.svg"),
+            SizedBox(
+              width: 5,
+            ),
+            Text(
+              tasksFinished.toString() + "/" + totalTasks.toString(),
+              style: TextStyle(
+                color: Color.fromARGB(255, 110, 110, 110),
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                fontFamily: 'Poppins',
+              ),
+            ),
+          ]),
+        )
+      ],
+    );
+  }
+}
+
 class JourneyCell extends StatefulWidget {
   final int locationCount;
   final String location;
@@ -251,61 +340,62 @@ class _JourneyCellState extends State<JourneyCell> {
                     ),
                     Padding(
                       padding: const EdgeInsets.only(top: 15.0, bottom: 5),
-                      child: Row(
-                        children: [
-                          Stack(children: [
-                            Container(
-                              width: MediaQuery.sizeOf(context).width * 0.66,
-                              height: 22,
-                              alignment: Alignment.centerLeft,
-                              child: Container(
-                                decoration: new BoxDecoration(
-                                  color: Color.fromARGB(255, 241, 241, 241),
-                                  shape: BoxShape.rectangle,
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(16.0)),
-                                ),
-                              ),
-                            ),
-                            Container(
-                              width: (locationCount > 0
-                                      ? numberCompleted / locationCount
-                                      : 0) *
-                                  MediaQuery.sizeOf(context).width *
-                                  0.66,
-                              height: 20,
-                              alignment: Alignment.centerLeft,
-                              child: Container(
-                                decoration: new BoxDecoration(
-                                  color: Color.fromARGB(191, 237, 86, 86),
-                                  shape: BoxShape.rectangle,
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(16.0)),
-                                ),
-                              ),
-                            ),
-                          ]),
-                          SizedBox(width: 8),
-                          Container(
-                            width: 50,
-                            child: Row(children: [
-                              SvgPicture.asset("assets/icons/pin.svg"),
-                              Text(
-                                " " +
-                                    numberCompleted.toString() +
-                                    "/" +
-                                    locationCount.toString(),
-                                style: TextStyle(
-                                  color: Color.fromARGB(255, 110, 110, 110),
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  fontFamily: 'Poppins',
-                                ),
-                              ),
-                            ]),
-                          )
-                        ],
-                      ),
+                      child: LoadingBar(numberCompleted, locationCount),
+                      // child: Row(
+                      //   children: [
+                      // Stack(children: [
+                      //   Container(
+                      //     width: MediaQuery.sizeOf(context).width * 0.66,
+                      //     height: 22,
+                      //     alignment: Alignment.centerLeft,
+                      //     child: Container(
+                      //       decoration: new BoxDecoration(
+                      //         color: Color.fromARGB(255, 241, 241, 241),
+                      //         shape: BoxShape.rectangle,
+                      //         borderRadius:
+                      //             BorderRadius.all(Radius.circular(16.0)),
+                      //       ),
+                      //     ),
+                      //   ),
+                      //   Container(
+                      //     width: (locationCount > 0
+                      //             ? numberCompleted / locationCount
+                      //             : 0) *
+                      //         MediaQuery.sizeOf(context).width *
+                      //         0.66,
+                      //     height: 20,
+                      //     alignment: Alignment.centerLeft,
+                      //     child: Container(
+                      //       decoration: new BoxDecoration(
+                      //         color: Color.fromARGB(191, 237, 86, 86),
+                      //         shape: BoxShape.rectangle,
+                      //         borderRadius:
+                      //             BorderRadius.all(Radius.circular(16.0)),
+                      //       ),
+                      //     ),
+                      //   ),
+                      // ]),
+                      // SizedBox(width: 8),
+                      // Container(
+                      //   width: 50,
+                      //   child: Row(children: [
+                      //     SvgPicture.asset("assets/icons/pin.svg"),
+                      //     Text(
+                      //       " " +
+                      //           numberCompleted.toString() +
+                      //           "/" +
+                      //           locationCount.toString(),
+                      //       style: TextStyle(
+                      //         color: Color.fromARGB(255, 110, 110, 110),
+                      //         fontSize: 16,
+                      //         fontWeight: FontWeight.w600,
+                      //         fontFamily: 'Poppins',
+                      //       ),
+                      //     ),
+                      //   ]),
+                      // )
+                      //   ],
+                      // ),
                     ),
                   ],
                 ),

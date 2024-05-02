@@ -11,8 +11,89 @@ import 'package:game/model/event_model.dart';
 import 'package:game/model/tracker_model.dart';
 import 'package:game/model/group_model.dart';
 import 'package:game/model/challenge_model.dart';
+import 'dart:math';
 
 import 'package:flutter_svg/flutter_svg.dart';
+
+class LoadingBar extends StatelessWidget {
+  final int totalTasks;
+  final int tasksFinished;
+
+  const LoadingBar(
+    this.tasksFinished,
+    this.totalTasks,
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+            width: MediaQuery.sizeOf(context).width * 0.66,
+            height: 20,
+            child: LayoutBuilder(
+                builder: (BuildContext context, BoxConstraints constraints) {
+              return Stack(children: [
+                Container(
+                  width: constraints.maxWidth,
+                  height: constraints.maxHeight,
+                  alignment: Alignment.centerLeft,
+                  child: Container(
+                    decoration: new BoxDecoration(
+                      color: Color.fromARGB(255, 241, 241, 241),
+                      shape: BoxShape.rectangle,
+                      borderRadius: BorderRadius.all(Radius.circular(16.0)),
+                    ),
+                  ),
+                ),
+                Container(
+                  width: (totalTasks > 0 ? tasksFinished / totalTasks : 0) *
+                      constraints.maxWidth,
+                  height: constraints.maxHeight,
+                  alignment: Alignment.centerLeft,
+                  child: Container(
+                    decoration: new BoxDecoration(
+                      color: Color.fromARGB(197, 237, 86, 86),
+                      shape: BoxShape.rectangle,
+                      borderRadius: BorderRadius.all(Radius.circular(16.0)),
+                    ),
+                  ),
+                ),
+                Container(
+                  height: 5,
+                  width: max(
+                      (totalTasks > 0 ? tasksFinished / totalTasks : 0) *
+                              constraints.maxWidth -
+                          16,
+                      0),
+                  margin: EdgeInsets.only(left: 8, top: 3),
+                  alignment: Alignment.centerLeft,
+                  decoration: new BoxDecoration(
+                    color: Color(0x99F3C6C6),
+                    shape: BoxShape.rectangle,
+                    borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                  ),
+                ),
+              ]);
+            })),
+        Expanded(
+            flex: 2,
+            child: Row(children: [
+              Text(" "),
+              SvgPicture.asset("assets/icons/pin.svg"),
+              Text(
+                " " + tasksFinished.toString() + "/" + totalTasks.toString(),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              )
+            ]))
+      ],
+    );
+  }
+}
 
 class ChallengeCompletedPage extends StatefulWidget {
   const ChallengeCompletedPage({
@@ -21,86 +102,6 @@ class ChallengeCompletedPage extends StatefulWidget {
 
   @override
   State<ChallengeCompletedPage> createState() => _ChallengeCompletedState();
-}
-
-class LoadingBar extends StatelessWidget {
-  final int num_challenges;
-  final int num_completed;
-
-  const LoadingBar(
-    this.num_completed,
-    this.num_challenges,
-  );
-
-  @override
-  Widget build(BuildContext context) {
-    double progress = num_completed / num_challenges;
-    return Row(mainAxisSize: MainAxisSize.max, children: [
-      Expanded(
-          flex: 8,
-          child: Stack(children: [
-            Container(
-              width: MediaQuery.sizeOf(context).width * 0.66,
-              height: 24,
-              alignment: Alignment.centerLeft,
-              child: Container(
-                decoration: new BoxDecoration(
-                  color: Color.fromARGB(255, 241, 241, 241),
-                  shape: BoxShape.rectangle,
-                  borderRadius: BorderRadius.all(Radius.circular(16.0)),
-                ),
-              ),
-            ),
-            Container(
-              width:
-                  (progress + 0.05) * MediaQuery.sizeOf(context).width * 0.66,
-              height: 24,
-              alignment: Alignment.centerLeft,
-              child: Container(
-                decoration: new BoxDecoration(
-                  color: Color(0xE6ED5656),
-                  shape: BoxShape.rectangle,
-                  borderRadius: BorderRadius.all(Radius.circular(16.0)),
-                ),
-              ),
-            ),
-          ])
-          // child: Container(
-          //   clipBehavior: Clip.hardEdge,
-          //   decoration: BoxDecoration(
-          //     borderRadius: BorderRadius.circular(15.0),
-          //   ),
-          //   height: 20.0,
-          //   width: double.infinity,
-          //   child: Stack(
-          //     alignment: Alignment.centerLeft,
-          //     children: [
-          //       Positioned.fill(
-          //         child: LinearProgressIndicator(
-          //             value: progress,
-          //             color: Color(0xE6ED5656),
-          //             backgroundColor: Color(0xFFF1F1F1)),
-          //       ),
-          //     ],
-          //   ),
-          // ),
-          ),
-      Expanded(
-          flex: 2,
-          child: Row(children: [
-            Text(" "),
-            SvgPicture.asset("assets/icons/pin.svg"),
-            Text(
-              num_completed.toString() + "/" + num_challenges.toString(),
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16.0,
-                fontWeight: FontWeight.bold,
-              ),
-            )
-          ]))
-    ]);
-  }
 }
 
 class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
