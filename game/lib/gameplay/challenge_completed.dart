@@ -126,9 +126,7 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
       var eventId = groupModel.curEventId;
       var event = eventModel.getEventById(eventId ?? "");
       var tracker = trackerModel.trackerByEventId(eventId ?? "");
-      if (tracker == null ||
-          tracker.prevChallenges.length == 0 ||
-          tracker.prevChallenges.last.challengeId != widget.challengeId) {
+      if (tracker == null || tracker.prevChallenges.length == 0) {
         return CircularIndicator();
       }
       // if (tracker == null) {
