@@ -305,6 +305,8 @@ export class AchievementService {
       })
     ).map(l => l.location);
 
+    await this.createAchievementTrackers(user);
+
     const uncompletedAchs = await this.prisma.achievement.findMany({
       where: {
         AND: [
@@ -361,7 +363,6 @@ export class AchievementService {
 
     for (const ach of uncompletedAchs) {
       let achTracker = ach.trackers[0];
-      if (achTracker == undefined) continue;
 
       // In case the above completion check fails
       if (achTracker.progress < ach.requiredPoints) {
@@ -399,27 +400,15 @@ export class AchievementService {
   async createAchievementTrackers(user?: User, achievement?: Achievement) {
     if (user) {
       const ability = this.abilityFactory.createForUser(user);
-      let achsWithoutTrackers;
-      if (achievement) {
-        achsWithoutTrackers = await this.prisma.achievement.findMany({
-          where: {
-            AND: [
-              { id: achievement?.id },
-              accessibleBy(ability).Achievement,
-              { trackers: { none: { userId: user.id } } },
-            ],
-          },
-        });
-      } else {
-        achsWithoutTrackers = await this.prisma.achievement.findMany({
-          where: {
-            AND: [
-              accessibleBy(ability).Achievement,
-              { trackers: { none: { userId: user.id } } },
-            ],
-          },
-        });
-      }
+      const achsWithoutTrackers = await this.prisma.achievement.findMany({
+        where: {
+          AND: [
+            ...(achievement ? [{ id: achievement.id }] : []),
+            accessibleBy(ability).Achievement,
+            { trackers: { none: { userId: user.id } } },
+          ],
+        },
+      });
 
       console.log(achsWithoutTrackers.length);
 
