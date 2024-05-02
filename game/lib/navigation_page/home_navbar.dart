@@ -36,9 +36,12 @@ class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFED5656),
+      resizeToAvoidBottomInset: false,
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(50.0),
         child: AppBar(
+          elevation: 0.0,
           backgroundColor: Color(0xFFED5656),
           titleTextStyle: TextStyle(fontSize: 25, fontWeight: FontWeight.w500),
           bottom: TabBar(
