@@ -170,13 +170,12 @@ export class ChallengeService {
         },
       })) === 0;
 
-    if (isJourneyCompleted) {
-      await this.achievementService.checkAchievementProgress(
-        user,
-        eventTracker,
-        deltaScore,
-      );
-    }
+    await this.achievementService.checkAchievementProgress(
+      user,
+      eventTracker,
+      deltaScore,
+      isJourneyCompleted,
+    );
 
     await this.eventService.emitUpdateLeaderPosition({
       playerId: newUser.id,
