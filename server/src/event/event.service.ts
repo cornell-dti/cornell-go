@@ -158,8 +158,10 @@ export class EventService {
 
     const closestChallenge = await this.prisma.challenge.findFirstOrThrow({
       where: {
-        eventIndex: 0,
         linkedEvent: { id: event.id },
+      },
+      orderBy: {
+        eventIndex: 'asc',
       },
     });
 

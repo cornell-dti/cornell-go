@@ -127,20 +127,24 @@ class _ChallengeCellState extends State<ChallengeCell> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Icon(Icons.location_on,
-                            size: 20, color: Color.fromARGB(255, 131, 90, 124)),
-                        Text(
-                          location,
-                          style: TextStyle(
-                            color: Color.fromARGB(255, 131, 90, 124),
-                            fontSize: 14,
-                            fontFamily: 'Poppins',
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 5.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Icon(Icons.location_on,
+                              size: 20,
+                              color: Color.fromARGB(255, 131, 90, 124)),
+                          Text(
+                            location,
+                            style: TextStyle(
+                              color: Color.fromARGB(255, 131, 90, 124),
+                              fontSize: 14,
+                              fontFamily: 'Poppins',
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                     Spacer(),
                     Text(

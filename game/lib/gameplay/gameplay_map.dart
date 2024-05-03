@@ -411,14 +411,15 @@ class _GameplayMapState extends State<GameplayMap> {
                       fontWeight: FontWeight.w400,
                       color: Color(0xFFFFFFFF)),
                 ),
-                onPressed: () {
+                onPressed: () async {
                   bool hasArrived = checkArrived();
+                  String? chalName;
                   if (hasArrived) {
                     if (tracker == null || challenge == null) {
                       displayToast("An error occurred while getting challenge",
                           Status.error);
                     } else {
-                      apiClient.serverApi
+                      chalName = await apiClient.serverApi
                           ?.completedChallenge(CompletedChallengeDto());
                     }
                   }
@@ -434,7 +435,8 @@ class _GameplayMapState extends State<GameplayMap> {
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(
                                 10), // Same as the Dialog's shape
-                            child: displayDialog(context, hasArrived, chalId),
+                            child: displayDialog(
+                                context, hasArrived, chalId, chalName),
                           ),
                         ),
                       );
@@ -581,12 +583,9 @@ class _GameplayMapState extends State<GameplayMap> {
         widget.awardingRadius;
   }
 
-  Container displayDialog(
-      BuildContext context, hasArrived, String challengeId) {
-    final name = Provider.of<ChallengeModel>(context)
-            .getChallengeById(challengeId)
-            ?.name ??
-        "";
+  Container displayDialog(BuildContext context, hasArrived, String challengeId,
+      String? challengeName) {
+    final name = challengeName ?? "";
     return hasArrived
         ? Container(
             // margin: EdgeInsetsDirectional.only(start: 50, end: 50),
@@ -625,7 +624,9 @@ class _GameplayMapState extends State<GameplayMap> {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => ChallengeCompletedPage()),
+                            builder: (context) => ChallengeCompletedPage(
+                                  challengeId: challengeId,
+                                )),
                       );
                     },
                     style: ButtonStyle(
@@ -679,7 +680,7 @@ class _GameplayMapState extends State<GameplayMap> {
                                 horizontal:
                                     (MediaQuery.devicePixelRatioOf(context) < 3
                                         ? 10
-                                        : 20))),
+                                        : 15))),
                         shape:
                             MaterialStateProperty.all<RoundedRectangleBorder>(
                           RoundedRectangleBorder(
@@ -712,7 +713,7 @@ class _GameplayMapState extends State<GameplayMap> {
                         style: ButtonStyle(
                           padding:
                               MaterialStateProperty.all<EdgeInsetsGeometry>(
-                                  EdgeInsets.only(left: 20, right: 20)),
+                                  EdgeInsets.only(left: 15, right: 15)),
                           shape:
                               MaterialStateProperty.all<RoundedRectangleBorder>(
                             RoundedRectangleBorder(

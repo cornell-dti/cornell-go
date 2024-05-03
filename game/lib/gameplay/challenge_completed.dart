@@ -40,7 +40,7 @@ class LoadingBar extends StatelessWidget {
                   alignment: Alignment.centerLeft,
                   child: Container(
                     decoration: new BoxDecoration(
-                      color: Color.fromARGB(220, 237, 86, 86),
+                      color: Color.fromARGB(255, 241, 241, 241),
                       shape: BoxShape.rectangle,
                       borderRadius: BorderRadius.all(Radius.circular(16.0)),
                     ),
@@ -96,8 +96,10 @@ class LoadingBar extends StatelessWidget {
 }
 
 class ChallengeCompletedPage extends StatefulWidget {
+  final String challengeId;
   const ChallengeCompletedPage({
     Key? key,
+    required this.challengeId,
   }) : super(key: key);
 
   @override
@@ -124,9 +126,19 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
       var eventId = groupModel.curEventId;
       var event = eventModel.getEventById(eventId ?? "");
       var tracker = trackerModel.trackerByEventId(eventId ?? "");
-      if (tracker == null) {
+      if (tracker == null || tracker.prevChallenges.length == 0) {
         return CircularIndicator();
       }
+      // if (tracker == null) {
+      //   return Text("tracker is null");
+      // }
+      // if (tracker.prevChallenges.length == 0) {
+      //   return Text("tracker prevchallenges has 0 length");
+      // }
+      // if (tracker.prevChallenges.last.challengeId != widget.challengeId) {
+      //   return Text(
+      //       "tracker last completed challenge does not match passed in challenge id");
+      // }
 
       // if this event is a journey
       if ((event?.challenges?.length ?? 0) > 1)
