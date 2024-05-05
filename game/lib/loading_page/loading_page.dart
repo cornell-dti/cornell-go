@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:game/navigation_page/bottom_navbar.dart';
 import 'package:game/splash_page/splash_page.dart';
 
+/**
+ * The loading page. Used to check if the user is already signed in. Directs the user to the corresponding page (HomePage vs SplashPage)
+ */
 class LoadingPageWidget extends StatelessWidget {
   final Future<bool> relogResult;
   LoadingPageWidget(this.relogResult, {Key? key}) : super(key: key);
