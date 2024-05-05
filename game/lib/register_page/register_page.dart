@@ -4,7 +4,12 @@ import 'package:game/details_page/details_page.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+/**
+ * The register page. Allows the user to select their enrollment type.
+ * Comes from the SplashPageWidget.
+ */
 class RegisterPageWidget extends StatefulWidget {
+  // The user's Google account. Must be kept track of to sign in.
   final GoogleSignInAccount? user;
   final String? idToken;
   RegisterPageWidget(

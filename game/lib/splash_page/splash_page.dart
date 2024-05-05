@@ -8,6 +8,9 @@ import 'package:game/register_page/register_page.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:game/navigation_page/bottom_navbar.dart';
 
+/**
+ * The splash page. Allows the user to sign in with Google or continue as a guest. SplashPageWidget is skipped if the user is already signed in (account already exists).
+ */
 class SplashPageWidget extends StatelessWidget {
   SplashPageWidget({Key? key}) : super(key: key);
   final scaffoldKey = GlobalKey<ScaffoldState>();

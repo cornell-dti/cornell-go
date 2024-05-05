@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+/**
+ * A circular progress indicator. Used for loading screens.
+ */
 class CircularIndicator extends StatelessWidget {
   const CircularIndicator({super.key});
 
