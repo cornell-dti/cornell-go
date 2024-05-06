@@ -37,17 +37,17 @@ describe('AchievementModule E2E', () => {
   let eventService: EventService;
   let user: User;
   let tracker: AchievementTracker;
-  let exJourney: EventBase
+  let exJourney: EventBase;
   let exJourney1: EventBase;
   let exJourney2: EventBase;
   let exChallenge1: EventBase;
   let exChallenge2: EventBase;
   let organizationService: OrganizationService;
-  let abilityFactory:  CaslAbilityFactory;
+  let abilityFactory: CaslAbilityFactory;
   let fullAbility: AppAbility;
   let orgUsage: OrganizationSpecialUsage;
   let challengeService: ChallengeService;
-  let groupGateway : GroupGateway;
+  let groupGateway: GroupGateway;
 
   /** beforeAll runs before anything else. It adds new users and prerequisites.
    * afterAll runs after all the tests. It removes lingering values in the database.
@@ -265,7 +265,6 @@ describe('AchievementModule E2E', () => {
     //   expect(completedTracker!.dateComplete).not.toBeNull();
     // });
 
-    
     it('should test ach tracker on dif achievement types; update tracker with progress; and mark tracker as complete when achievement criteria are met', async () => {
       const orgUsage = OrganizationSpecialUsage;
       const orgId = (
@@ -277,7 +276,7 @@ describe('AchievementModule E2E', () => {
       exChallenge1 = await organizationService.makeDefaultEvent(orgId);
       exChallenge2 = await organizationService.makeDefaultEvent(orgId);
       const achChalJourDto: AchievementDto = {
-        id: "",
+        id: '',
         eventId: exJourney1.id,
         name: 'achChalJourDto',
         description: 'ach dto',
@@ -288,7 +287,7 @@ describe('AchievementModule E2E', () => {
         initialOrganizationId: orgId,
       };
       const achChalDto: AchievementDto = {
-        id: "",
+        id: '',
         eventId: exChallenge1.id,
         name: 'achChalDto',
         description: 'ach dto',
@@ -300,7 +299,7 @@ describe('AchievementModule E2E', () => {
       };
 
       const achPtsDto: AchievementDto = {
-        id: "",
+        id: '',
         eventId: exChallenge2.id,
         name: 'achPtsDto',
         description: 'ach dto',
@@ -312,7 +311,7 @@ describe('AchievementModule E2E', () => {
       };
 
       const achJourDto: AchievementDto = {
-        id: "",
+        id: '',
         eventId: exJourney2.id,
         name: 'achJourDto',
         description: 'ach dto',
@@ -323,9 +322,18 @@ describe('AchievementModule E2E', () => {
         initialOrganizationId: orgId,
       };
 
-      await achievementService.upsertAchievementFromDto(fullAbility, achChalDto);
-      await achievementService.upsertAchievementFromDto(fullAbility, achChalJourDto);
-      await achievementService.upsertAchievementFromDto(fullAbility, achJourDto);
+      await achievementService.upsertAchievementFromDto(
+        fullAbility,
+        achChalDto,
+      );
+      await achievementService.upsertAchievementFromDto(
+        fullAbility,
+        achChalJourDto,
+      );
+      await achievementService.upsertAchievementFromDto(
+        fullAbility,
+        achJourDto,
+      );
       await achievementService.upsertAchievementFromDto(fullAbility, achPtsDto);
 
       const achChal = await prisma.achievement.findFirstOrThrow({
@@ -358,25 +366,29 @@ describe('AchievementModule E2E', () => {
         achPts.id,
       );
 
-
       await groupGateway.setCurrentEvent(user, { eventId: exChallenge1.id });
       await challengeService.completeChallenge(user);
 
-      const newTrackerChal = await prisma.achievementTracker.findFirstOrThrow({where: { id: trackerChal.id }});
-      
-      expect (newTrackerChal.progress).toBeGreaterThan(0);
-      expect (newTrackerChal.dateComplete).not.toBeNull();
+      const newTrackerChal = await prisma.achievementTracker.findFirstOrThrow({
+        where: { id: trackerChal.id },
+      });
 
-      expect (trackerChalJour.progress).toBe(0);
-      expect (trackerJour.progress).toBe(0);
-      expect (trackerPts.progress).toBe(0);
+      expect(newTrackerChal.progress).toBeGreaterThan(0);
+      expect(newTrackerChal.dateComplete).not.toBeNull();
+
+      expect(trackerChalJour.progress).toBe(0);
+      expect(trackerJour.progress).toBe(0);
+      expect(trackerPts.progress).toBe(0);
 
       await groupGateway.setCurrentEvent(user, { eventId: exJourney1.id });
       await challengeService.completeChallenge(user);
 
-      const newTrackerChalJour = await prisma.achievementTracker.findFirstOrThrow({where: { id: trackerChalJour.id }});
-      expect (newTrackerChalJour.progress).toBeGreaterThan(0);
-      expect (newTrackerChalJour.dateComplete).not.toBeNull();
+      const newTrackerChalJour =
+        await prisma.achievementTracker.findFirstOrThrow({
+          where: { id: trackerChalJour.id },
+        });
+      expect(newTrackerChalJour.progress).toBeGreaterThan(0);
+      expect(newTrackerChalJour.dateComplete).not.toBeNull();
 
       // const completedTracker = await prisma.achievementTracker.findUnique({
       //   where: { id: trackerChal.id },
@@ -394,11 +406,10 @@ describe('AchievementModule E2E', () => {
       // expect(completedTracker?.progress).toBeGreaterThan(0);
       // expect(completedTrackerJour?.progress).toBeGreaterThan(0);
       // expect(completedTrackerJour2?.progress).toBeGreaterThan(0);
-      // expect(completedTrackerPts?.progress).toBeGreaterThan(0); 
+      // expect(completedTrackerPts?.progress).toBeGreaterThan(0);
 
       // achievem
     });
-    
   });
   /*
   describe('Achievement tracker functions', () => {
