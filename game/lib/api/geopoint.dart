@@ -48,7 +48,10 @@ class GeoPoint {
         return Future.error(
             'Location permissions are permanently denied, we cannot request permissions.');
       }
-      final pos = await Geolocator.getCurrentPosition();
+      final pos = await Geolocator.getCurrentPosition(
+          // Ideally we would use best accuracy, but it doesn't work for some reason
+          // desiredAccuracy: LocationAccuracy.best
+          desiredAccuracy: LocationAccuracy.medium);
       return GeoPoint(pos.latitude, pos.longitude, pos.heading);
     } catch (e) {
       print(e);
