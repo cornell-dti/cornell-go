@@ -1,3 +1,5 @@
+/* This file is the login page for the app. It is called splash because of an old design choice that we didn't change. It allows the user to sign in with their Cornell email through google sign in or continue as a guest. When the user tries to log in, we verify the user with their information, the important ones being google authentication and location. */
+
 import 'package:flutter/material.dart';
 import 'package:game/api/game_client_dto.dart';
 import 'package:google_sign_in/google_sign_in.dart';
