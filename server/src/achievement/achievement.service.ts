@@ -290,6 +290,7 @@ export class AchievementService {
     user: User,
     evTracker: EventTracker,
     pointsAdded: number,
+    journeyComplete: boolean,
   ) {
     const ability = this.abilityFactory.createForUser(user);
 
@@ -304,6 +305,8 @@ export class AchievementService {
         select: { location: true },
       })
     ).map(l => l.location);
+
+    await this.createAchievementTrackers(user);
 
     const uncompletedAchs = await this.prisma.achievement.findMany({
       where: {
@@ -324,15 +327,20 @@ export class AchievementService {
             // must either be both challenge + journey achievement
             // total points achievement
             // or journey/challenge achievement depending on what was completed
-            OR: [
-              { achievementType: AchievementType.TOTAL_CHALLENGES_OR_JOURNEYS },
-              { achievementType: AchievementType.TOTAL_POINTS },
-              {
-                achievementType: isJourney
-                  ? AchievementType.TOTAL_JOURNEYS
-                  : AchievementType.TOTAL_CHALLENGES,
-              },
-            ],
+            OR: journeyComplete
+              ? [
+                  {
+                    achievementType:
+                      AchievementType.TOTAL_CHALLENGES_OR_JOURNEYS,
+                  },
+                  { achievementType: AchievementType.TOTAL_POINTS },
+                  {
+                    achievementType: isJourney
+                      ? AchievementType.TOTAL_JOURNEYS
+                      : AchievementType.TOTAL_CHALLENGES,
+                  },
+                ]
+              : [{ achievementType: AchievementType.TOTAL_POINTS }],
           },
           {
             // Only find non-completed achievements
@@ -398,12 +406,11 @@ export class AchievementService {
   async createAchievementTrackers(user?: User, achievement?: Achievement) {
     if (user) {
       const ability = this.abilityFactory.createForUser(user);
-
       const achsWithoutTrackers = await this.prisma.achievement.findMany({
         where: {
           AND: [
-            { id: achievement?.id },
-            accessibleBy(ability).Achievement,
+            ...(achievement ? [{ id: achievement.id }] : []),
+            accessibleBy(ability, Action.Read).Achievement,
             { trackers: { none: { userId: user.id } } },
           ],
         },

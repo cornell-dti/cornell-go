@@ -105,7 +105,7 @@ export class ChallengeService {
     const eventTracker: EventTracker =
       await this.eventService.getCurrentEventTrackerForUser(user);
 
-    if (!eventTracker.curChallengeId) return false;
+    if (!eventTracker.curChallengeId) return null;
 
     const alreadyDone =
       (await this.prisma.prevChallenge.count({
@@ -118,7 +118,7 @@ export class ChallengeService {
 
     // Ensure that the correct challenge is marked complete
     if (alreadyDone) {
-      return false;
+      return null;
     }
 
     await this.prisma.prevChallenge.create({
@@ -170,13 +170,12 @@ export class ChallengeService {
         },
       })) === 0;
 
-    if (isJourneyCompleted) {
-      await this.achievementService.checkAchievementProgress(
-        user,
-        eventTracker,
-        deltaScore,
-      );
-    }
+    await this.achievementService.checkAchievementProgress(
+      user,
+      eventTracker,
+      deltaScore,
+      isJourneyCompleted,
+    );
 
     await this.eventService.emitUpdateLeaderPosition({
       playerId: newUser.id,
@@ -186,10 +185,11 @@ export class ChallengeService {
     });
 
     const updatedChal = await this.getChallengeById(curChallenge.id);
-    if (updatedChal != null)
+    if (updatedChal != null) {
       await this.emitUpdateChallengeData(updatedChal, false);
-
-    return true;
+      return updatedChal.name;
+    }
+    return null;
   }
 
   async getUserCompletionDate(user: User, challenge: Challenge) {
