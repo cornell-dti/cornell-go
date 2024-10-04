@@ -65,7 +65,8 @@ export class ChallengeGateway {
     @CallingUser() user: User,
     @MessageBody() data: CompletedChallengeDto,
   ) {
-    if (await this.challengeService.completeChallenge(user)) {
+    const completedId = await this.challengeService.completeChallenge(user);
+    if (completedId != null) {
       const group = await this.groupService.getGroupForUser(user);
       const tracker = await this.eventService.getCurrentEventTrackerForUser(
         user,
@@ -79,10 +80,10 @@ export class ChallengeGateway {
         user,
         'Challenge could not be completed',
       );
-      return false;
+      return null;
     }
 
-    return true;
+    return completedId;
   }
 
   @SubscribeMessage('updateChallengeData')

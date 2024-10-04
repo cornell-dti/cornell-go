@@ -56,7 +56,7 @@ dependencies:
   location: ^5.0.0
   flutter_config: ^2.0.2
   dropdown_button2: ^2.3.9
-  carousel_slider: ^4.0.0
+  carousel_slider: ^5.0.0
   tuple: ^2.0.2
   sticky_headers: ^0.3.0+2
 

@@ -45,12 +45,8 @@ class GameServerApi {
       completer.complete(arg);
     };
 
-    Future.delayed(Duration(seconds: 5)).then((value) {
-      if (completer.isCompleted) {
-        return;
-      }
-      completer.complete(null);
-    });
+    Future.delayed(Duration(seconds: 5))
+        .then((value) => completer.complete(null));
 
     _refreshEv = ev;
     _refreshDat = data;
@@ -75,7 +71,7 @@ class GameServerApi {
   Future<int?> requestChallengeData(RequestChallengeDataDto dto) async =>
       await _invokeWithRefresh("requestChallengeData", dto.toJson());
 
-  Future<bool?> completedChallenge(CompletedChallengeDto dto) async =>
+  Future<String?> completedChallenge(CompletedChallengeDto dto) async =>
       await _invokeWithRefresh("completedChallenge", dto.toJson());
 
   Future<String?> updateChallengeData(UpdateChallengeDataDto dto) async =>

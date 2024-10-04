@@ -9,7 +9,7 @@ import {
     Custom imports for AuthService, jwt secret, etc...
 */
 import { Socket } from 'socket.io';
-import { Handshake } from 'socket.io/dist/socket';
+import { Handshake } from 'socket.io/dist/socket-types';
 import { AuthService } from './auth.service';
 import { WsData } from './ws-data';
 
