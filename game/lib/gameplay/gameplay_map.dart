@@ -70,6 +70,9 @@ class _GameplayMapState extends State<GameplayMap> {
   // whether the picture is expanded over the map
   bool isExpanded = false;
 
+  // Add this to your state variables (After isExapnded)
+  bool isArrivedButtonEnabled = true;
+
   @override
   void initState() {
     setCustomMarkerIcon();
@@ -400,18 +403,25 @@ class _GameplayMapState extends State<GameplayMap> {
                   padding:
                       EdgeInsets.only(right: 15, left: 15, top: 10, bottom: 10),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10), // button's shape
+                    borderRadius: BorderRadius.circular(10),
                   ),
                 ),
                 child: Text(
                   "I've Arrived!",
                   style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 21,
-                      fontWeight: FontWeight.w400,
-                      color: Color(0xFFFFFFFF)),
+                    fontFamily: 'Poppins',
+                    fontSize: 21,
+                    fontWeight: FontWeight.w400,
+                    color: Color(0xFFFFFFFF),
+                  ),
                 ),
                 onPressed: () async {
+                  if (!isArrivedButtonEnabled) return;
+
+                  setState(() {
+                    isArrivedButtonEnabled = false;
+                  });
+
                   bool hasArrived = checkArrived();
                   String? chalName;
                   if (hasArrived) {
@@ -431,17 +441,21 @@ class _GameplayMapState extends State<GameplayMap> {
                       return Container(
                         margin: EdgeInsetsDirectional.only(start: 10, end: 10),
                         child: Dialog(
-                          elevation: 16, //arbitrary large number
+                          elevation: 16,
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(
-                                10), // Same as the Dialog's shape
+                            borderRadius: BorderRadius.circular(10),
                             child: displayDialog(
                                 context, hasArrived, chalId, chalName),
                           ),
                         ),
                       );
                     },
-                  );
+                  ).then((_) {
+                    // Re-enable the button after the dialog is closed
+                    setState(() {
+                      isArrivedButtonEnabled = true;
+                    });
+                  });
                 },
               ),
             ),
