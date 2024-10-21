@@ -34,13 +34,6 @@ Widget leaderBoardCell(
     height: 0,
   );
 
-// Helper Function with ellipses functionality such that we can set max character length length/cutoff
-  String truncateWithEllipsis(String text, int maxLength) {
-    return (text.length <= maxLength)
-        ? text
-        : '${text.substring(0, maxLength)}...';
-  }
-
   return Container(
       decoration: ShapeDecoration(
         // Leaderboard cell is highlighted if it is the user
@@ -84,8 +77,7 @@ Widget leaderBoardCell(
                     Padding(
                       padding: const EdgeInsets.only(left: 10, right: 5),
                       child: Container(
-                        width: MediaQuery.of(context).size.width *
-                            0.3, // Adjust this value as needed
+                        width: MediaQuery.of(context).size.width * 0.3,
                         child: Text(
                           name,
                           style: nameStyle,
