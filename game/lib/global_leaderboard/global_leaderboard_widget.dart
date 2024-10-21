@@ -146,6 +146,7 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
                   topRight: Radius.circular(10.0),
                 ),
               ),
+              // Ranking List
               child: ListView(
                 shrinkWrap: true,
                 scrollDirection: Axis.vertical,
