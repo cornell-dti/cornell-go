@@ -60,6 +60,7 @@ dependencies:
   tuple: ^2.0.2
   sticky_headers: ^0.3.0+2
   win32: ^5.6.1
+  flutter_compass: ^0.7.0
 
 dev_dependencies:
   flutter_launcher_icons:

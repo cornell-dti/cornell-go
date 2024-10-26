@@ -13,6 +13,7 @@ import 'dart:math';
 import 'package:game/gameplay/challenge_completed.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'dart:ui' as ui;
+import 'package:flutter_compass/flutter_compass.dart';
 
 // for backend connection
 import 'package:provider/provider.dart';
@@ -66,6 +67,8 @@ class _GameplayMapState extends State<GameplayMap> {
   GeoPoint? hintCenter;
   double defaultHintRadius = 200.0;
   double? hintRadius;
+  double? compassHeading = 0.0;
+  // Timer? mockHeadingTimer; // mock compass data
 
   // whether the picture is expanded over the map
   bool isExpanded = false;
@@ -76,10 +79,28 @@ class _GameplayMapState extends State<GameplayMap> {
     super.initState();
     streamStarted = startPositionStream();
     setStartingHintCircle();
+    compassHeading = 0.0;
+
+    // Listen to compass events
+    FlutterCompass.events!.listen((event) {
+      setState(() {
+        compassHeading = event.heading;
+      });
+    });
+
+    // Mock compass data for testing
+    // mockHeadingTimer = Timer.periodic(Duration(milliseconds: 100), (timer) {
+    //   setState(() {
+    //     // Increment by 10 degrees
+    //     compassHeading = (compassHeading! + 10) % 360;
+    //     print('Updated compassHeading: $compassHeading');
+    //   });
+    // });
   }
 
   @override
   void dispose() {
+    // mockHeadingTimer?.cancel(); // mock compass data
     positionStream.cancel();
     _disposeController();
     super.dispose();
@@ -374,8 +395,7 @@ class _GameplayMapState extends State<GameplayMap> {
                         ? _center
                         : LatLng(currentLocation!.lat, currentLocation!.long),
                     anchor: Offset(0.5, 0.5),
-                    rotation:
-                        currentLocation == null ? 0 : currentLocation!.heading,
+                    rotation: compassHeading ?? 0,
                   ),
                 },
                 circles: {
