@@ -167,32 +167,33 @@ class _JourneysPageState extends State<JourneysPage> {
                       bool eventMatchesSearchText = true;
                       String? searchTerm = widget.mySearchText;
 
+                      if (widget.myDifficulty?.length == 0 ||
+                          widget.myDifficulty == event.difficulty?.name)
+                        eventMatchesDifficultySelection = true;
+                      else
+                        eventMatchesDifficultySelection = false;
+
+                      if (widget.myLocations?.isNotEmpty ?? false) {
+                        if (widget.myLocations?.contains(challengeLocation) ??
+                            false)
+                          eventMatchesLocationSelection = true;
+                        else
+                          eventMatchesLocationSelection = false;
+                      } else
+                        eventMatchesLocationSelection = true;
+
+                      if (widget.myCategories?.isNotEmpty ?? false) {
+                        if (widget.myCategories
+                                ?.contains(event.category?.name) ??
+                            false)
+                          eventMatchesCategorySelection = true;
+                        else
+                          eventMatchesCategorySelection = false;
+                      } else
+                        eventMatchesCategorySelection = true;
+
                       if (searchTerm?.length == 0) {
                         eventMatchesSearchText = true;
-                        if (widget.myDifficulty?.length == 0 ||
-                            widget.myDifficulty == event.difficulty?.name)
-                          eventMatchesDifficultySelection = true;
-                        else
-                          eventMatchesDifficultySelection = false;
-
-                        if (widget.myLocations?.isNotEmpty ?? false) {
-                          if (widget.myLocations?.contains(challengeLocation) ??
-                              false)
-                            eventMatchesLocationSelection = true;
-                          else
-                            eventMatchesLocationSelection = false;
-                        } else
-                          eventMatchesLocationSelection = true;
-
-                        if (widget.myCategories?.isNotEmpty ?? false) {
-                          if (widget.myCategories
-                                  ?.contains(event.category?.name) ??
-                              false)
-                            eventMatchesCategorySelection = true;
-                          else
-                            eventMatchesCategorySelection = false;
-                        } else
-                          eventMatchesCategorySelection = true;
                       } else {
                         if (searchTerm != null &&
                             challengeLocation
