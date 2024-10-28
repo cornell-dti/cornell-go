@@ -203,7 +203,7 @@ class _JourneysPageState extends State<JourneysPage> {
                       } else
                         eventMatchesCategorySelection = true;
 
-                      if (searchTerm.length == 0) {
+                      if (searchTerm?.length == 0) {
                         eventMatchesSearchText = true;
                       } else {
                         if (challengeLocation
