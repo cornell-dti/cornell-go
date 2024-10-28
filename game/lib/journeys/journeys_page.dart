@@ -14,6 +14,8 @@ import 'package:game/utils/utility_functions.dart';
 import 'package:provider/provider.dart';
 import 'package:velocity_x/velocity_x.dart';
 
+/** A Data Transfer Object that holds information about a challenge 
+ * cell in the UI */
 class JourneyCellDto {
   JourneyCellDto({
     required this.location,
@@ -67,6 +69,14 @@ class JourneysPage extends StatefulWidget {
   State<JourneysPage> createState() => _JourneysPageState();
 }
 
+/**
+ * '_JourneysPageState' - Manages and displays a list of journeys, filtered by criteria such as difficulty, name, and more.
+ * 
+ * @remarks
+ * This class handles the layout and logic for displaying journeys on the Journeys page. 
+ * It builds `Journey` widgets and applies any filters set by the search bar
+ * or user selections to show only the relevant journeys.
+ */
 class _JourneysPageState extends State<JourneysPage> {
   List<String> selectedCategories = [];
   List<String> selectedLocations = [];
