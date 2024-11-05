@@ -170,12 +170,13 @@ class _JourneysPageState extends State<JourneysPage> {
 
                       final challengeLocation = challenge.location?.name ?? "";
                       final challengeName = challenge.name ?? "";
+                      final String eventName = event.name ?? "";
 
                       bool eventMatchesDifficultySelection = true;
                       bool eventMatchesCategorySelection = true;
                       bool eventMatchesLocationSelection = true;
                       bool eventMatchesSearchText = true;
-                      String? searchTerm = widget.mySearchText;
+                      String searchTerm = widget.mySearchText ?? "";
 
                       if (widget.myDifficulty?.length == 0 ||
                           widget.myDifficulty == event.difficulty?.name)
@@ -202,20 +203,24 @@ class _JourneysPageState extends State<JourneysPage> {
                       } else
                         eventMatchesCategorySelection = true;
 
-                      if (searchTerm?.length == 0) {
+                      if (searchTerm.length == 0) {
                         eventMatchesSearchText = true;
                       } else {
-                        if (searchTerm != null &&
-                            challengeLocation
-                                .toLowerCase()
-                                .contains(searchTerm.toLowerCase())) {
+                        if (challengeLocation
+                            .toLowerCase()
+                            .contains(searchTerm.toLowerCase())) {
                           eventMatchesSearchText = true;
                         } else {
                           eventMatchesSearchText = false;
-                          if (searchTerm != null &&
-                              challengeName
-                                  .toLowerCase()
-                                  .contains(searchTerm.toLowerCase())) {
+                          if (challengeName
+                              .toLowerCase()
+                              .contains(searchTerm.toLowerCase())) {
+                            eventMatchesSearchText = true;
+                          } else
+                            eventMatchesSearchText = false;
+                          if (eventName
+                              .toLowerCase()
+                              .contains(searchTerm.toLowerCase())) {
                             eventMatchesSearchText = true;
                           } else
                             eventMatchesSearchText = false;
