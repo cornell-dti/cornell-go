@@ -49,21 +49,20 @@ class _SearchFilterBarState extends State<SearchFilterBar>
 
   @override
   Widget build(BuildContext context) {
+    double deviceWidth = MediaQuery.sizeOf(context).width;
+    double deviceHeight = MediaQuery.sizeOf(context).height;
+
     return Scaffold(
       resizeToAvoidBottomInset: true,
       body: Container(
         color: Color(0xFFED5656),
-        width: double.infinity,
-        height: double.infinity,
-        child: Container(
-          // padding: EdgeInsets.only(top: 50),
-          height: MediaQuery.sizeOf(context).height * 0.175,
-
-          child: SafeArea(
-            child: Column(
-              children: [
-                Spacer(),
-                Stack(
+        child: SafeArea(
+          child: Column(
+            children: [
+              // Search bar section
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: deviceHeight * 0.01),
+                child: Stack(
                   children: [
                     SingleChildScrollView(
                       physics: NeverScrollableScrollPhysics(),
@@ -73,8 +72,8 @@ class _SearchFilterBarState extends State<SearchFilterBar>
                           borderRadius: BorderRadius.circular(30),
                         ),
                         child: SizedBox(
-                          width: MediaQuery.sizeOf(context).width * 0.9,
-                          height: 45,
+                          width: deviceWidth * 0.9,
+                          height: deviceHeight * 0.055,
                           child: TextField(
                             onSubmitted: onSearchTextChanged,
                             decoration: InputDecoration(
@@ -125,22 +124,17 @@ class _SearchFilterBarState extends State<SearchFilterBar>
                     ),
                   ],
                 ),
-                Spacer(),
-                Column(
-                  children: [
-                    Container(
-                      height: MediaQuery.sizeOf(context).height * 0.8,
-                      child: HomeNavBar(
-                        difficulty: selectedDifficulty,
-                        locations: selectedLocations,
-                        categories: selectedCategories,
-                        searchText: searchText,
-                      ),
-                    ),
-                  ],
+              ),
+              // HomeNavBar section - use Expanded instead of fixed height Container
+              Expanded(
+                child: HomeNavBar(
+                  difficulty: selectedDifficulty,
+                  locations: selectedLocations,
+                  categories: selectedCategories,
+                  searchText: searchText,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

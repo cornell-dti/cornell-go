@@ -40,11 +40,13 @@ class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
       resizeToAvoidBottomInset: false,
       appBar: PreferredSize(
         preferredSize:
-            Size.fromHeight(MediaQuery.sizeOf(context).height * 0.07),
+            Size.fromHeight(MediaQuery.sizeOf(context).height * 0.08),
         child: AppBar(
           elevation: 0.0,
           backgroundColor: Color(0xFFED5656),
-          titleTextStyle: TextStyle(fontSize: 25, fontWeight: FontWeight.w500),
+          titleTextStyle: TextStyle(
+              fontSize: MediaQuery.sizeOf(context).height * 0.03,
+              fontWeight: FontWeight.w500),
           bottom: TabBar(
             controller: _tabController,
             indicator: BoxDecoration(
@@ -73,7 +75,9 @@ class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
                       bottom: MediaQuery.sizeOf(context).height * 0.02),
                   child: Text(
                     'Challenges',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                    style: TextStyle(
+                        fontSize: MediaQuery.sizeOf(context).height * 0.022,
+                        fontWeight: FontWeight.w600),
                   ),
                 ),
               ),
@@ -83,7 +87,9 @@ class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
                       bottom: MediaQuery.sizeOf(context).height * 0.02),
                   child: Text(
                     'Journeys',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                    style: TextStyle(
+                        fontSize: MediaQuery.sizeOf(context).height * 0.022,
+                        fontWeight: FontWeight.w600),
                   ),
                 ),
               ),
