@@ -12,12 +12,33 @@ class LoadingBar extends StatelessWidget {
     this.totalTasks,
   );
 
+  String formatNumber(int number) {
+    if (number < 1000) {
+      return number.toString();
+    } else {
+      return (number / 1000).toStringAsFixed(1) + 'K';
+    }
+  }
+
+  double calculateWidthMultiplier(int number) {
+    int length = number.toString().length;
+    if (length == 1) {
+      return 0.5;
+    } else if (length == 2) {
+      return 0.47;
+    } else {
+      return 0.43;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    double widthMultiplier = calculateWidthMultiplier(totalTasks);
+
     return Row(
       children: [
         Container(
-            width: MediaQuery.sizeOf(context).width * 0.5,
+            width: MediaQuery.sizeOf(context).width * widthMultiplier,
             child: LayoutBuilder(
                 builder: (BuildContext context, BoxConstraints constraints) {
               return Stack(children: [
@@ -66,7 +87,7 @@ class LoadingBar extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.only(left: 8.0),
           child: Text(
-            tasksFinished.toString() + "/" + totalTasks.toString(),
+            "${formatNumber(tasksFinished)}/${formatNumber(totalTasks)}",
           ),
         ),
       ],
