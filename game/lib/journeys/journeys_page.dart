@@ -170,6 +170,7 @@ class _JourneysPageState extends State<JourneysPage> {
 
                       final challengeLocation = challenge.location?.name ?? "";
                       final challengeName = challenge.name ?? "";
+                      final eventDifficulty = event.difficulty?.name ?? "";
                       final String eventName = event.name ?? "";
 
                       bool eventMatchesDifficultySelection = true;
@@ -224,6 +225,11 @@ class _JourneysPageState extends State<JourneysPage> {
                             eventMatchesSearchText = true;
                           } else
                             eventMatchesSearchText = false;
+                          if (eventDifficulty
+                              .toLowerCase()
+                              .contains(searchTerm.toLowerCase())) {
+                            eventMatchesSearchText = true;
+                          }
                         }
                       }
 
