@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:game/journeys/journeys_page.dart';
 import 'package:game/challenges/challenges_page.dart';
 import 'package:game/journeys/filter_form.dart';
 import 'package:game/navigation_page/home_navbar.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter/services.dart';
 
 class SearchFilterBar extends StatefulWidget {
   String? myDifficulty;
@@ -61,7 +64,12 @@ class _SearchFilterBarState extends State<SearchFilterBar>
             children: [
               // Search bar section
               Padding(
-                padding: EdgeInsets.symmetric(vertical: deviceHeight * 0.01),
+                padding: EdgeInsets.only(
+                    top: Platform.isIOS
+                        ? deviceHeight * 0.01
+                        : MediaQuery.of(context).padding.top +
+                            deviceHeight * 0.01, // Android padding
+                    bottom: deviceHeight * 0.01),
                 child: Stack(
                   children: [
                     SingleChildScrollView(
