@@ -40,7 +40,7 @@ class _AchievementCellState extends State<AchievementCell> {
       onTap: () async {},
       child: Container(
         width: MediaQuery.sizeOf(context).width * 0.85,
-        height: MediaQuery.sizeOf(context).height * 0.11,
+        height: MediaQuery.sizeOf(context).height * 0.105,
         //padding: EdgeInsets.all(5),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -67,6 +67,7 @@ class _AchievementCellState extends State<AchievementCell> {
                     alignment: Alignment.centerLeft,
                     child: Container(
                       width: MediaQuery.sizeOf(context).width * 0.45,
+                      padding: EdgeInsets.only(top: 2),
                       child: Text(
                         description,
                         maxLines: 2,

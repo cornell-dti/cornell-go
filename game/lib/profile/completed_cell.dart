@@ -22,7 +22,7 @@ Widget completedCell(
     int points) {
   return Container(
       width: MediaQuery.sizeOf(context).width * 0.85,
-      height: MediaQuery.sizeOf(context).height * 0.11,
+      height: MediaQuery.sizeOf(context).height * 0.105,
       decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(10.0),
@@ -38,7 +38,7 @@ Widget completedCell(
           Padding(
             padding: const EdgeInsets.all(10),
             child: ClipRRect(
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(10),
                 child: Image(
                   width: 64,
                   height: 64,
@@ -64,9 +64,13 @@ Widget completedCell(
                   children: [
                     Text(
                       "From " + type + " - ",
-                      style: TextStyle(color: Colors.grey, fontSize: 12),
+                      style: TextStyle(
+                          color: Colors.grey,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600),
                     ),
-                    Text(date)
+                    Text(date,
+                        style: TextStyle(color: Colors.black, fontSize: 12))
                   ],
                 ),
                 Padding(
