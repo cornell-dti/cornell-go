@@ -79,11 +79,31 @@ class SplashPageWidget extends StatelessWidget {
                           return;
                         }
 
-                        final gRelogResult =
-                            await apiClient.connectGoogleNoRegister(account);
+                        final auth = await account.authentication;
+                        final idToken = auth.idToken;
 
-                        if (gRelogResult != null) {
-                          return;
+                        bool userExists =
+                            await apiClient.checkUserExists(idToken ?? "");
+                        if (userExists) {
+                          // User exists, proceed with the login process
+                          print("User exists, connecting...");
+                          final gRelogResult =
+                              await client.connectGoogleNoRegister(account);
+
+                          if (gRelogResult != null) {
+                            print("Login successful, navigating to home...");
+                            return;
+                          }
+                        } else {
+                          // User does not exist, navigate to registration page
+                          print(
+                              "User does not exist, navigating to registration...");
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => RegisterPageWidget(
+                                  user: account, idToken: idToken),
+                            ),
+                          );
                         }
 
                         Navigator.of(context).push(

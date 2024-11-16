@@ -211,13 +211,14 @@ class ApiClient extends ChangeNotifier {
       _createSocket(false);
       return loginResponse;
     } else {
-      print(loginResponse.body);
-    }
-    authenticated = false;
-    notifyListeners();
+      print("LoginResponse:" + loginResponse.body);
 
-    print("Failed to connect to server!");
-    return null;
+      authenticated = false;
+      notifyListeners();
+
+      print("Failed to connect to server!");
+      return null;
+    }
     /*
     }
     print("Failed to get location data!");
@@ -242,5 +243,28 @@ class ApiClient extends ChangeNotifier {
 
     authenticated = false;
     notifyListeners();
+  }
+
+  Future<bool> checkUserExists(String idToken) async {
+    try {
+      final response = await http.get(_googleLoginUrl);
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        if (responseData['exists'] == true) {
+          print('User exists in the database.');
+          return true;
+        } else {
+          print('User does not exist.');
+          return false;
+        }
+      } else {
+        print('Failed to check user. Status code: ${response.statusCode}');
+        return false;
+      }
+    } catch (e) {
+      print('Error occurred while checking user: $e');
+      return false;
+    }
   }
 }
