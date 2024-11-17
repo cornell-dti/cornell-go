@@ -16,29 +16,27 @@ class LoadingBar extends StatelessWidget {
     if (number < 1000) {
       return number.toString();
     } else {
-      return (number / 1000).toStringAsFixed(1) + 'K';
-    }
-  }
-
-  double calculateWidthMultiplier(int number) {
-    int length = number.toString().length;
-    if (length == 1) {
-      return 0.5;
-    } else if (length == 2) {
-      return 0.47;
-    } else {
-      return 0.43;
+      if (number == 1000) {
+        return "1K";
+      } else if (number > 1000 && number < 10000) {
+        return (number / 1000).toStringAsFixed(1) + 'K';
+      } else if (number == 10000) {
+        return "10K";
+      } else if (number > 10000 && number < 100000) {
+        return (number / 1000).toStringAsFixed(0) + 'K';
+      } else {
+        // Throw an exception for numbers greater than 100,000
+        throw FormatException('Number too large to format');
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    double widthMultiplier = calculateWidthMultiplier(totalTasks);
-
     return Row(
       children: [
         Container(
-            width: MediaQuery.sizeOf(context).width * widthMultiplier,
+            width: MediaQuery.sizeOf(context).width * 0.415,
             child: LayoutBuilder(
                 builder: (BuildContext context, BoxConstraints constraints) {
               return Stack(children: [
@@ -85,11 +83,15 @@ class LoadingBar extends StatelessWidget {
               ]);
             })),
         Padding(
-          padding: const EdgeInsets.only(left: 8.0),
-          child: Text(
-            "${formatNumber(tasksFinished)}/${formatNumber(totalTasks)}",
-          ),
-        ),
+            padding: EdgeInsets.only(left: 2.0),
+            child: Container(
+                // Explicit container for the text
+                // color: Colors.cyan,
+                width: MediaQuery.sizeOf(context).width * 0.16,
+                alignment: Alignment.center, // Center text within the container
+                child: Text(
+                  "${formatNumber(tasksFinished)}/${formatNumber(totalTasks)}",
+                )))
       ],
     );
   }
