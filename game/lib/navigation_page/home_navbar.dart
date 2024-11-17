@@ -2,6 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:game/journeys/journeys_page.dart';
 import 'package:game/challenges/challenges_page.dart';
 
+/**
+ * `HomeNavBar` Widget - Tab navigation system for Challenges and Journeys.
+ * 
+ * @remarks
+ * This widget implements a tab controller to switch between Challenges and
+ * Journeys views. It receives filter states from SearchFilterBar and passes
+ * them to the appropriate tab content.
+ * 
+ * @param props - Contains:
+ *   - `myDifficulty`: Selected difficulty filter
+ *   - `myLocations`: List of selected location filters
+ *   - `myCategories`: List of selected category filters
+ *   - `mySearchText`: Current search query text
+ */
 class HomeNavBar extends StatefulWidget {
   String? myDifficulty;
   List<String>? myLocations;

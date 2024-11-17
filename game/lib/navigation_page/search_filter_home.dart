@@ -8,6 +8,21 @@ import 'package:game/navigation_page/home_navbar.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/services.dart';
 
+/**
+ * `SearchFilterBar` Widget - Main container for home screen search and filtering.
+ * 
+ * @remarks
+ * This stateful widget serves as the top-level component for the home screen,
+ * managing search functionality and filter states. It contains the search bar
+ * and filter button, passing filter states down to child components.
+ * 
+ * @param state - Contains:
+ *   - `selectedCategories`: List of selected category filters
+ *   - `selectedLocations`: List of selected location filters
+ *   - `selectedDifficulty`: Selected difficulty level
+ *   - `searchText`: Current search query
+ */
+
 class SearchFilterBar extends StatefulWidget {
   String? myDifficulty;
   List<String>? myLocations;

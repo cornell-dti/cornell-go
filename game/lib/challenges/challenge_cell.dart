@@ -2,6 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:game/preview/preview.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+/**
+ * `ChallengeCell` Widget - Individual challenge display component.
+ * 
+ * @remarks
+ * This widget represents a single challenge card in the challenges list.
+ * It displays key information about a challenge and handles tap interactions
+ * to show more details.
+ * 
+ * @param props - Contains:
+ *   - `location`: Challenge location
+ *   - `challengeName`: Name of the challenge
+ *   - `challengeLat`: Latitude coordinate
+ *   - `challengeLong`: Longitude coordinate
+ *   - `imgUrl`: Challenge image URL
+ *   - `isCompleted`: Completion status
+ *   - `description`: Challenge description
+ *   - `difficulty`: Challenge difficulty level
+ *   - `points`: Points awarded for completion
+ *   - `eventId`: Unique identifier for the challenge
+ */
 class ChallengeCell extends StatefulWidget {
   final String location;
   final String challengeName;
