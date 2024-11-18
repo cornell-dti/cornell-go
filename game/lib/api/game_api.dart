@@ -247,7 +247,13 @@ class ApiClient extends ChangeNotifier {
 
   Future<bool> checkUserExists(String idToken) async {
     try {
-      final response = await http.get(_googleLoginUrl);
+      final uri = _googleLoginUrl.replace(
+        path: '${_googleLoginUrl.path}/check-user',
+        queryParameters: {'idToken': idToken},
+      );
+      final response = await http.get(uri);
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
