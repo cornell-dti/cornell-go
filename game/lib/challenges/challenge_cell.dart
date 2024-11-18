@@ -2,6 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:game/preview/preview.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+/**
+ * `ChallengeCell` Widget - Individual challenge display component.
+ * 
+ * @remarks
+ * This widget represents a single challenge card in the challenges list.
+ * It displays key information about a challenge and handles tap interactions
+ * to show more details.
+ * 
+ * @param props - Contains:
+ *   - `location`: Challenge location
+ *   - `challengeName`: Name of the challenge
+ *   - `challengeLat`: Latitude coordinate
+ *   - `challengeLong`: Longitude coordinate
+ *   - `imgUrl`: Challenge image URL
+ *   - `isCompleted`: Completion status
+ *   - `description`: Challenge description
+ *   - `difficulty`: Challenge difficulty level
+ *   - `points`: Points awarded for completion
+ *   - `eventId`: Unique identifier for the challenge
+ */
 class ChallengeCell extends StatefulWidget {
   final String location;
   final String challengeName;
@@ -73,6 +93,9 @@ class _ChallengeCellState extends State<ChallengeCell> {
 
   @override
   Widget build(BuildContext context) {
+    double deviceWidth = MediaQuery.sizeOf(context).width;
+    double deviceHeight = MediaQuery.sizeOf(context).height;
+
     return GestureDetector(
       onTap: () async {
         await showModalBottomSheet(
@@ -105,8 +128,8 @@ class _ChallengeCellState extends State<ChallengeCell> {
             ),
           ],
         ),
-        height: MediaQuery.sizeOf(context).height * 0.15,
-        width: MediaQuery.sizeOf(context).width * 0.85,
+        height: deviceHeight * 0.15,
+        width: deviceWidth * 0.85,
         child: Padding(
           padding: EdgeInsets.all(16),
           child: Row(
@@ -117,8 +140,8 @@ class _ChallengeCellState extends State<ChallengeCell> {
                 child: ClipRRect(
                   borderRadius: BorderRadius.all(Radius.circular(4.6)),
                   child: Image.network(imgUrl,
-                      width: MediaQuery.sizeOf(context).height * 0.1,
-                      height: MediaQuery.sizeOf(context).height * 0.1,
+                      width: deviceHeight * 0.1,
+                      height: deviceHeight * 0.1,
                       fit: BoxFit.cover),
                 ),
               ),
@@ -128,19 +151,25 @@ class _ChallengeCellState extends State<ChallengeCell> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 5.0),
+                      padding: EdgeInsets.symmetric(
+                        vertical: MediaQuery.sizeOf(context).height * 0.005,
+                      ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           Icon(Icons.location_on,
-                              size: 20,
+                              size: MediaQuery.sizeOf(context).height * 0.025,
                               color: Color.fromARGB(255, 131, 90, 124)),
-                          Text(
-                            location,
-                            style: TextStyle(
-                              color: Color.fromARGB(255, 131, 90, 124),
-                              fontSize: 14,
-                              fontFamily: 'Poppins',
+                          Expanded(
+                            child: Text(
+                              location,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: Color.fromARGB(255, 131, 90, 124),
+                                fontSize:
+                                    MediaQuery.sizeOf(context).height * 0.016,
+                                fontFamily: 'Poppins',
+                              ),
                             ),
                           ),
                         ],
@@ -149,9 +178,10 @@ class _ChallengeCellState extends State<ChallengeCell> {
                     Spacer(),
                     Text(
                       challengeName,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: Color.fromARGB(204, 0, 0, 0),
-                        fontSize: 16.5,
+                        fontSize: deviceHeight * 0.02,
                         fontFamily: 'Poppins',
                         fontWeight: FontWeight.w600,
                       ),
@@ -161,8 +191,10 @@ class _ChallengeCellState extends State<ChallengeCell> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Container(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: deviceWidth * 0.02,
+                            vertical: deviceHeight * 0.003,
+                          ),
                           decoration: BoxDecoration(
                             color: Color.fromARGB(255, 249, 237, 218),
                             borderRadius: BorderRadius.circular(20),
@@ -171,23 +203,26 @@ class _ChallengeCellState extends State<ChallengeCell> {
                             difficulty,
                             style: TextStyle(
                               color: Color.fromARGB(204, 0, 0, 0),
-                              fontSize: 14,
+                              fontSize: deviceHeight * 0.016,
                               fontFamily: 'Poppins',
                               fontWeight: FontWeight.w300,
                             ),
                           ),
                         ),
-                        SizedBox(width: 10),
+                        SizedBox(width: deviceWidth * 0.02),
                         Row(children: [
                           SvgPicture.asset(
                             "assets/icons/bearcoins.svg",
-                            width: 25,
+                            width: deviceWidth * 0.06,
                           ),
-                          Text(' ' + points.toString() + " PTS",
-                              style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                  color: Color(0xFFC17E19)))
+                          Text(
+                            ' ' + points.toString() + " PTS",
+                            style: TextStyle(
+                              fontSize: deviceHeight * 0.018,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xFFC17E19),
+                            ),
+                          ),
                         ]),
                       ],
                     ),
