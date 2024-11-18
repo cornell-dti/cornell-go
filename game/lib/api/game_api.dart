@@ -255,10 +255,7 @@ class ApiClient extends ChangeNotifier {
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
-        if (responseData['exists'] == true) {
-          return true;
-        }
-        return false;
+        return responseData['exists'];
       }
       print('Failed to check user. Status code: ${response.statusCode}');
       return false;
