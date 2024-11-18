@@ -45,6 +45,23 @@ class JourneyCellDto {
   late String eventId;
 }
 
+/**
+ * `JourneysPage` - A page that displays a list of journeys, allowing 
+ * users to filter based on difficulty, location, category, and search text.
+ *
+ * @remarks
+ * This class manages the display of challenges by retrieving a
+ * journey and its challenges' data and applying various filters. The page updates dynamically 
+ * based on the user's selected difficulty, locations, categories, 
+ * and/or search text. It also utilizes the `JourneyCell` widget to render 
+ * each challenge's details.
+ *
+ * @param myDifficulty - The selected difficulty filter for the challenges.
+ * @param myLocations - The selected locations filter for the challenges.
+ * @param myCategories - The selected categories filter for the challenges.
+ * @param mySearchText - The search text used to filter challenges by name 
+ * or location.
+ */
 class JourneysPage extends StatefulWidget {
   String? myDifficulty;
   List<String>? myLocations;
@@ -104,6 +121,18 @@ class _JourneysPageState extends State<JourneysPage> {
     });
   }
 
+  /**
+ * Builds and displays the journeys list based on the selected filters.
+ *
+ * @remarks
+ * This function fetches data from multiple models, applies filtering 
+ * logic based on the user's preferences (difficulty, location, category, 
+ * and search text) for both the journey and its challenges, and renders the 
+ * filtered journeys using `JourneyCell` widgets. It returns a `ListView` 
+ * widget displaying the journey details dynamically.
+ *
+ * @returns A `Widget` representing the journeys list with filtered items.
+ */
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -170,8 +199,8 @@ class _JourneysPageState extends State<JourneysPage> {
 
                       final challengeLocation = challenge.location?.name ?? "";
                       final challengeName = challenge.name ?? "";
-                      final eventDifficulty = event.difficulty?.name ?? "";
-                      final String eventName = event.name ?? "";
+                      final journeyDifficulty = event.difficulty?.name ?? "";
+                      final journeyName = event.name ?? "";
 
                       bool eventMatchesDifficultySelection = true;
                       bool eventMatchesCategorySelection = true;
@@ -219,13 +248,13 @@ class _JourneysPageState extends State<JourneysPage> {
                             eventMatchesSearchText = true;
                           } else
                             eventMatchesSearchText = false;
-                          if (eventName
+                          if (journeyName
                               .toLowerCase()
                               .contains(searchTerm.toLowerCase())) {
                             eventMatchesSearchText = true;
                           } else
                             eventMatchesSearchText = false;
-                          if (eventDifficulty
+                          if (journeyDifficulty
                               .toLowerCase()
                               .contains(searchTerm.toLowerCase())) {
                             eventMatchesSearchText = true;

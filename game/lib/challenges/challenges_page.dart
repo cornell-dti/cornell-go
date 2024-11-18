@@ -40,6 +40,23 @@ class ChallengeCellDto {
   late String eventId;
 }
 
+/**
+ * `ChallengesPage` - A page that displays a list of challenges, allowing 
+ * users to filter based on difficulty, location, category, and search text.
+ *
+ * @remarks
+ * This class manages the display of challenges by retrieving 
+ * challenge data and applying various filters. The page updates dynamically 
+ * based on the user's selected difficulty, locations, categories, 
+ * and/or search text. It also utilizes the `ChallengeCell` widget to render 
+ * each challenge's details.
+ *
+ * @param myDifficulty - The selected difficulty filter for the challenges.
+ * @param myLocations - The selected locations filter for the challenges.
+ * @param myCategories - The selected categories filter for the challenges.
+ * @param mySearchText - The search text used to filter challenges by name 
+ * or location.
+ */
 class ChallengesPage extends StatefulWidget {
   String? myDifficulty;
   List<String>? myLocations;
@@ -79,6 +96,18 @@ class _ChallengesPageState extends State<ChallengesPage> {
     mySearchText = searchText ?? '';
   }
 
+  /**
+ * Builds and displays the challenges list based on the selected filters.
+ *
+ * @remarks
+ * This function fetches data from multiple models, applies filtering 
+ * logic based on the user's preferences (difficulty, location, category, 
+ * and search text), and renders the filtered challenges using `ChallengeCell` 
+ * widgets. It returns a `ListView` widget displaying the challenge details 
+ * dynamically.
+ *
+ * @returns A `Widget` representing the challenges list with filtered items.
+ */
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -147,8 +176,6 @@ class _ChallengesPageState extends State<ChallengesPage> {
 
                         if (widget.myDifficulty?.length == 0 ||
                             widget.myDifficulty == event.difficulty?.name) {
-                          print(widget.myDifficulty);
-                          print(event.difficulty?.name);
                           eventMatchesDifficultySelection = true;
                         } else
                           eventMatchesDifficultySelection = false;
