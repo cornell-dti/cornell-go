@@ -252,22 +252,16 @@ class ApiClient extends ChangeNotifier {
         queryParameters: {'idToken': idToken},
       );
       final response = await http.get(uri);
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}');
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
         if (responseData['exists'] == true) {
-          print('User exists in the database.');
           return true;
-        } else {
-          print('User does not exist.');
-          return false;
         }
-      } else {
-        print('Failed to check user. Status code: ${response.statusCode}');
         return false;
       }
+      print('Failed to check user. Status code: ${response.statusCode}');
+      return false;
     } catch (e) {
       print('Error occurred while checking user: $e');
       return false;
