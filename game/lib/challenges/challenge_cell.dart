@@ -93,6 +93,9 @@ class _ChallengeCellState extends State<ChallengeCell> {
 
   @override
   Widget build(BuildContext context) {
+    double deviceWidth = MediaQuery.sizeOf(context).width;
+    double deviceHeight = MediaQuery.sizeOf(context).height;
+
     return GestureDetector(
       onTap: () async {
         await showModalBottomSheet(
@@ -125,8 +128,8 @@ class _ChallengeCellState extends State<ChallengeCell> {
             ),
           ],
         ),
-        height: MediaQuery.sizeOf(context).height * 0.15,
-        width: MediaQuery.sizeOf(context).width * 0.85,
+        height: deviceHeight * 0.15,
+        width: deviceWidth * 0.85,
         child: Padding(
           padding: EdgeInsets.all(16),
           child: Row(
@@ -137,8 +140,8 @@ class _ChallengeCellState extends State<ChallengeCell> {
                 child: ClipRRect(
                   borderRadius: BorderRadius.all(Radius.circular(4.6)),
                   child: Image.network(imgUrl,
-                      width: MediaQuery.sizeOf(context).height * 0.1,
-                      height: MediaQuery.sizeOf(context).height * 0.1,
+                      width: deviceHeight * 0.1,
+                      height: deviceHeight * 0.1,
                       fit: BoxFit.cover),
                 ),
               ),
@@ -178,7 +181,7 @@ class _ChallengeCellState extends State<ChallengeCell> {
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: Color.fromARGB(204, 0, 0, 0),
-                        fontSize: MediaQuery.sizeOf(context).height * 0.02,
+                        fontSize: deviceHeight * 0.02,
                         fontFamily: 'Poppins',
                         fontWeight: FontWeight.w600,
                       ),
@@ -189,8 +192,8 @@ class _ChallengeCellState extends State<ChallengeCell> {
                       children: [
                         Container(
                           padding: EdgeInsets.symmetric(
-                            horizontal: MediaQuery.sizeOf(context).width * 0.02,
-                            vertical: MediaQuery.sizeOf(context).height * 0.003,
+                            horizontal: deviceWidth * 0.02,
+                            vertical: deviceHeight * 0.003,
                           ),
                           decoration: BoxDecoration(
                             color: Color.fromARGB(255, 249, 237, 218),
@@ -200,25 +203,22 @@ class _ChallengeCellState extends State<ChallengeCell> {
                             difficulty,
                             style: TextStyle(
                               color: Color.fromARGB(204, 0, 0, 0),
-                              fontSize:
-                                  MediaQuery.sizeOf(context).height * 0.016,
+                              fontSize: deviceHeight * 0.016,
                               fontFamily: 'Poppins',
                               fontWeight: FontWeight.w300,
                             ),
                           ),
                         ),
-                        SizedBox(
-                            width: MediaQuery.sizeOf(context).width * 0.02),
+                        SizedBox(width: deviceWidth * 0.02),
                         Row(children: [
                           SvgPicture.asset(
                             "assets/icons/bearcoins.svg",
-                            width: MediaQuery.sizeOf(context).width * 0.06,
+                            width: deviceWidth * 0.06,
                           ),
                           Text(
                             ' ' + points.toString() + " PTS",
                             style: TextStyle(
-                              fontSize:
-                                  MediaQuery.sizeOf(context).height * 0.018,
+                              fontSize: deviceHeight * 0.018,
                               fontWeight: FontWeight.w500,
                               color: Color(0xFFC17E19),
                             ),
