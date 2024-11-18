@@ -12,6 +12,17 @@ class LoadingBar extends StatelessWidget {
     this.totalTasks,
   );
 
+/**
+ * Formats a number into a readable string with a "K" suffix for thousands.
+ * 
+ * Converts numbers to a string format using different precision based on their size to ensure readability in UI displays.
+ * For numbers between 1,000 and 9,999, one decimal is shown; numbers exactly at 1,000 or 10,000 are shown without decimals.
+ * Numbers above 10,000 and up to 99,999 are rounded to the nearest thousand. The function throws an exception for numbers exceeding 100,000.
+ *
+ * @param number - The number to format.
+ * @returns A string representing the formatted number or throws a FormatException for numbers above 100,000.
+ * 
+ */
   String formatNumber(int number) {
     if (number < 1000) {
       return number.toString();
