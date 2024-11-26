@@ -112,6 +112,20 @@ npx prisma migrate dev --name my_migration
 
 ## Contributors
 
+### FA24
+
+- **Jesse Cheng** - Developer
+- **Temi Adebowale** - Developer
+- **Frank Dai** - Developer
+- **Esha Shah** - Developer
+- **Happy Li** - Designer
+- **Ashley Paik** - Designer
+- **Jessica Liu** - Designer
+- **Cynthia Lan** - PMM
+- **Brian La** - TPM
+- **Joshua Park** - PM
+- **Carolyn Wang** - PM
+
 ### SP24
 
 - **Chris Gu** - Developer
