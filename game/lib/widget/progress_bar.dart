@@ -44,66 +44,79 @@ class LoadingBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-            width: MediaQuery.sizeOf(context).width * 0.415,
-            child: LayoutBuilder(
-                builder: (BuildContext context, BoxConstraints constraints) {
-              return Stack(children: [
-                Container(
-                  width: constraints.maxWidth,
-                  height: 13,
-                  alignment: Alignment.centerLeft,
-                  child: Container(
-                    decoration: new BoxDecoration(
-                      color: Color.fromARGB(255, 241, 241, 241),
-                      shape: BoxShape.rectangle,
-                      borderRadius: BorderRadius.all(Radius.circular(16.0)),
+    return Container(
+      constraints:
+          BoxConstraints(maxWidth: MediaQuery.sizeOf(context).width * 0.53),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Expanded(
+              flex: 3,
+              child: LayoutBuilder(
+                  builder: (BuildContext context, BoxConstraints constraints) {
+                return Stack(children: [
+                  Container(
+                    width: constraints.maxWidth,
+                    height: 13,
+                    alignment: Alignment.centerLeft,
+                    child: Container(
+                      decoration: new BoxDecoration(
+                        color: Color.fromARGB(255, 241, 241, 241),
+                        shape: BoxShape.rectangle,
+                        borderRadius: BorderRadius.all(Radius.circular(16.0)),
+                      ),
                     ),
                   ),
-                ),
-                Container(
-                  width: (totalTasks > 0 ? tasksFinished / totalTasks : 0) *
-                      constraints.maxWidth,
-                  height: 13,
-                  alignment: Alignment.centerLeft,
-                  child: Container(
-                    decoration: new BoxDecoration(
-                      color: Color.fromARGB(197, 237, 86, 86),
-                      shape: BoxShape.rectangle,
-                      borderRadius: BorderRadius.all(Radius.circular(16.0)),
+                  Container(
+                    width: (totalTasks > 0 ? tasksFinished / totalTasks : 0) *
+                        constraints.maxWidth,
+                    height: 13,
+                    alignment: Alignment.centerLeft,
+                    child: Container(
+                      decoration: new BoxDecoration(
+                        color: Color.fromARGB(197, 237, 86, 86),
+                        shape: BoxShape.rectangle,
+                        borderRadius: BorderRadius.all(Radius.circular(16.0)),
+                      ),
                     ),
                   ),
-                ),
-                Container(
-                  height: 3,
-                  width: max(
-                      (totalTasks > 0 ? tasksFinished / totalTasks : 0) *
-                              constraints.maxWidth -
-                          16,
-                      0),
-                  margin: EdgeInsets.only(left: 8, top: 3),
-                  alignment: Alignment.centerLeft,
-                  decoration: new BoxDecoration(
-                    color: Color(0x99F3C6C6),
-                    shape: BoxShape.rectangle,
-                    borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                  Container(
+                    height: 3,
+                    width: max(
+                        (totalTasks > 0 ? tasksFinished / totalTasks : 0) *
+                                constraints.maxWidth -
+                            16,
+                        0),
+                    margin: EdgeInsets.only(left: 8, top: 3),
+                    alignment: Alignment.centerLeft,
+                    decoration: new BoxDecoration(
+                      color: Color(0x99F3C6C6),
+                      shape: BoxShape.rectangle,
+                      borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                    ),
                   ),
-                ),
-              ]);
-            })),
-        Padding(
-            padding: EdgeInsets.only(left: 2.0),
-            child: Container(
-                // Explicit container for the text
-                // color: Colors.cyan,
-                width: MediaQuery.sizeOf(context).width * 0.16,
-                alignment: Alignment.center, // Center text within the container
-                child: Text(
-                  "${formatNumber(tasksFinished)}/${formatNumber(totalTasks)}",
-                )))
-      ],
+                ]);
+              })),
+          const SizedBox(width: 10),
+          Row(
+            children: [
+              // current points
+              Container(
+                  alignment: Alignment.centerRight,
+                  child: Text("${formatNumber(tasksFinished)}",
+                      style: const TextStyle(fontSize: 12))),
+              const Text(
+                "/",
+                style: TextStyle(fontSize: 12),
+              ),
+              Text(
+                "${formatNumber(totalTasks)}",
+                style: const TextStyle(fontSize: 12),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
