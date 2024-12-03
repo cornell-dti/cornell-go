@@ -4,6 +4,10 @@ import 'package:game/details_page/details_page.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+/// If the google-login user is not registered, this page will be displayed.
+/// The user will be asked to select their enrollment type. The user is created
+/// only when they fill all required information (at registerpage -> details_page
+/// -> interests_page).
 class RegisterPageWidget extends StatefulWidget {
   final GoogleSignInAccount? user;
   final String? idToken;

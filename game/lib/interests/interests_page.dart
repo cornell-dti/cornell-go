@@ -5,6 +5,8 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+/// This page allows the user to select their interests. Connection to backend
+/// (creating the user) happens here.
 class InterestsPageWidget extends StatefulWidget {
   InterestsPageWidget(
       {Key? key,

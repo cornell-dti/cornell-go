@@ -14,6 +14,12 @@ interface IntermediatePayload {
   email: string;
 }
 
+/**
+ * The `AuthService` class provides authentication-related functionality for the application,
+ * including login, token management, and user verification.
+ *
+ * Now supports Google and Apple (OAuth), and device login. Only Cornell emails are allowed.
+ */
 @Injectable()
 export class AuthService {
   constructor(
@@ -37,6 +43,13 @@ export class AuthService {
     secret: process.env.JWT_ACCESS_SECRET,
   };
 
+  /**
+   * Verifies an Apple ID token and extracts the user's ID and email.
+   *
+   * @param idToken - The ID token from Apple Sign-In.
+   * @returns An object containing the user’s `id` and `email` if verification is successful;
+   *          otherwise, `null` if verification fails.
+   */
   async payloadFromApple(idToken: string): Promise<IntermediatePayload | null> {
     try {
       const payload = await appleSignin.verifyIdToken(
@@ -54,6 +67,14 @@ export class AuthService {
     }
   }
 
+  /**
+   * Verifies a Google ID token based on the audience (platform) and extracts the user's ID and email.
+   *
+   * @param idToken - The ID token received from Google.
+   * @param aud - The platform that issued the token: 'android', 'ios', or 'web'.
+   * @returns An object containing the user's `id` and `email` if verification is successful;
+   *          otherwise, `null` if verification fails.
+   */
   async payloadFromGoogle(
     idToken: string,
     aud: 'android' | 'ios' | 'web',
@@ -89,6 +110,14 @@ export class AuthService {
     }
   }
 
+  /**
+   * Authenticates a user based on the user credentials, issues access and refresh tokens.
+   *
+   * @param authType - The type of authentication used.
+   * @param req - The login DTO containing user credentials.
+   * @returns A tuple `[accessToken, refreshToken]` if login is successful;
+   *          otherwise, `null` if authentication fails.
+   */
   async login(
     authType: AuthType,
     req: LoginDto,
@@ -141,10 +170,15 @@ export class AuthService {
         idToken.id,
         req.enrollmentType,
       );
+
+      if (!user) {
+        console.log('Unable to register user');
+        return null;
+      }
     }
 
+    // if user is null here, then it means we're not registering this user now (req.noRegister === true)
     if (!user) {
-      console.log('Unable to register user');
       return null;
     }
 

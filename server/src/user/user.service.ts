@@ -219,6 +219,13 @@ export class UserService {
     });
   }
 
+  async checkIfUserExists(
+    authType: AuthType,
+    id: string,
+  ): Promise<User | null> {
+    return this.byAuth(authType, id);
+  }
+
   async dtoForUserData(user: User, partial: boolean): Promise<UserDto> {
     const joinedUser = await this.prisma.user.findUniqueOrThrow({
       where: { id: user.id },
