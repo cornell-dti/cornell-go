@@ -281,7 +281,7 @@ class _JourneyCellState extends State<JourneyCell> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      widget.journeyName,
+                      journeyName,
                       style: TextStyle(
                         color: Colors.black,
                         fontSize: 20,
