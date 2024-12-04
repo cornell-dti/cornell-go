@@ -40,5 +40,7 @@ docs
 # dotenv environment variables file
 .env
 .env.test
+server/.env
+game/.env
 
 documentation

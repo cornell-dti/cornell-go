@@ -106,6 +106,9 @@ function toForm(user: any) {
     id: user.id,
     groupId: user.groupId,
     email: user.email,
+    year: user.year,
+    isBanned: user.isBanned,
+    trackedEvents: user.trackedEvents,
   };
 }
 
@@ -138,6 +141,29 @@ function getColumns(setRowsData: any, serverData: any) {
       id: 4,
       field: "email",
       label: "Email",
+    },
+    {
+      id: 5,
+      field: "year",
+      label: "Year",
+      cellRenderer: ({ data }: { data: any }) => (
+        <span>{data.year ? data.year : "-"}</span>
+      ),
+    },
+    {id: 6,
+      field: "isBanned",
+      label: "Status",
+      cellRenderer: ({ data }: { data: any }) => (
+        <span>{data.isBanned ? "Banned" : "Active"}</span>
+      ),
+    },
+    {
+      id: 7,
+      field: "trackedEvents",
+      label: "Tracked Events",
+      cellRenderer: ({ data }: { data: any }) => (
+        <span>{data.trackedEvents ? data.trackedEvents.join(", ") : "-"}</span>
+      ),
     },
     {
       id: "buttons",
