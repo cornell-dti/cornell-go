@@ -82,7 +82,6 @@ class GameClientApi {
 
   void connectSocket(Socket sock) {
     sock.onReconnect((data) => _reconnectedController.add(true));
-    sock.onReconnecting((data) => _reconnectingController.add(true));
     sock.onDisconnect((data) => disconnectedController.add(true));
 
     sock.on(

@@ -14,6 +14,7 @@ import 'package:velocity_x/velocity_x.dart';
 import 'challenge_cell.dart';
 import 'package:game/journeys/filter_form.dart';
 
+/* A Data Transfer Object that holds information about a challenge cell in the UI */
 class ChallengeCellDto {
   ChallengeCellDto({
     required this.location,
@@ -39,6 +40,23 @@ class ChallengeCellDto {
   late String eventId;
 }
 
+/**
+ * `ChallengesPage` - A page that displays a list of challenges, allowing 
+ * users to filter based on difficulty, location, category, and search text.
+ *
+ * @remarks
+ * This class manages the display of challenges by retrieving 
+ * challenge data and applying various filters. The page updates dynamically 
+ * based on the user's selected difficulty, locations, categories, 
+ * and/or search text. It also utilizes the `ChallengeCell` widget to render 
+ * each challenge's details.
+ *
+ * @param myDifficulty - The selected difficulty filter for the challenges.
+ * @param myLocations - The selected locations filter for the challenges.
+ * @param myCategories - The selected categories filter for the challenges.
+ * @param mySearchText - The search text used to filter challenges by name 
+ * or location.
+ */
 class ChallengesPage extends StatefulWidget {
   String? myDifficulty;
   List<String>? myLocations;
@@ -78,6 +96,18 @@ class _ChallengesPageState extends State<ChallengesPage> {
     mySearchText = searchText ?? '';
   }
 
+  /**
+ * Builds and displays the challenges list based on the selected filters.
+ *
+ * @remarks
+ * This function fetches data from multiple models, applies filtering 
+ * logic based on the user's preferences (difficulty, location, category, 
+ * and search text), and renders the filtered challenges using `ChallengeCell` 
+ * widgets. It returns a `ListView` widget displaying the challenge details 
+ * dynamically.
+ *
+ * @returns A `Widget` representing the challenges list with filtered items.
+ */
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -134,17 +164,20 @@ class _ChallengesPageState extends State<ChallengesPage> {
                         }
                         final challengeLocation =
                             challenge.location?.name ?? "";
+                        final challengeDifficulty =
+                            event.difficulty?.name ?? "";
+                        final challengeName = event.name ?? "";
 
                         bool eventMatchesDifficultySelection = true;
                         bool eventMatchesCategorySelection = true;
                         bool eventMatchesLocationSelection = true;
                         bool eventMatchesSearchText = true;
-                        String? searchTerm = widget.mySearchText;
+                        String searchTerm = widget.mySearchText ?? "";
 
                         if (widget.myDifficulty?.length == 0 ||
-                            widget.myDifficulty == event.difficulty?.name)
+                            widget.myDifficulty == event.difficulty?.name) {
                           eventMatchesDifficultySelection = true;
-                        else
+                        } else
                           eventMatchesDifficultySelection = false;
 
                         if (widget.myLocations?.isNotEmpty ?? false) {
@@ -166,24 +199,27 @@ class _ChallengesPageState extends State<ChallengesPage> {
                         } else
                           eventMatchesCategorySelection = true;
 
-                        if (searchTerm?.length == 0) {
+                        if (searchTerm.length == 0) {
                           eventMatchesSearchText = true;
                         } else {
                           // search term length > 0
-                          if (searchTerm != null &&
-                              challengeLocation
-                                  .toLowerCase()
-                                  .contains(searchTerm.toLowerCase())) {
+                          if (challengeLocation
+                              .toLowerCase()
+                              .contains(searchTerm.toLowerCase())) {
                             eventMatchesSearchText = true;
                           } else {
                             eventMatchesSearchText = false;
-                            if (searchTerm != null &&
-                                (event.name ?? "")
-                                    .toLowerCase()
-                                    .contains(searchTerm.toLowerCase())) {
+                            if (challengeName
+                                .toLowerCase()
+                                .contains(searchTerm.toLowerCase())) {
                               eventMatchesSearchText = true;
                             } else
                               eventMatchesSearchText = false;
+                            if (challengeDifficulty
+                                .toLowerCase()
+                                .contains(searchTerm.toLowerCase())) {
+                              eventMatchesSearchText = true;
+                            }
                           }
                         }
 

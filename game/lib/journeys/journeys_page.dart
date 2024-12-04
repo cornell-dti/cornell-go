@@ -14,6 +14,8 @@ import 'package:game/utils/utility_functions.dart';
 import 'package:provider/provider.dart';
 import 'package:velocity_x/velocity_x.dart';
 
+/** A Data Transfer Object that holds information about a challenge 
+ * cell in the UI */
 class JourneyCellDto {
   JourneyCellDto({
     required this.location,
@@ -43,6 +45,23 @@ class JourneyCellDto {
   late String eventId;
 }
 
+/**
+ * `JourneysPage` - A page that displays a list of journeys, allowing 
+ * users to filter based on difficulty, location, category, and search text.
+ *
+ * @remarks
+ * This class manages the display of challenges by retrieving a
+ * journey and its challenges' data and applying various filters. The page updates dynamically 
+ * based on the user's selected difficulty, locations, categories, 
+ * and/or search text. It also utilizes the `JourneyCell` widget to render 
+ * each challenge's details.
+ *
+ * @param myDifficulty - The selected difficulty filter for the challenges.
+ * @param myLocations - The selected locations filter for the challenges.
+ * @param myCategories - The selected categories filter for the challenges.
+ * @param mySearchText - The search text used to filter challenges by name 
+ * or location.
+ */
 class JourneysPage extends StatefulWidget {
   String? myDifficulty;
   List<String>? myLocations;
@@ -67,6 +86,14 @@ class JourneysPage extends StatefulWidget {
   State<JourneysPage> createState() => _JourneysPageState();
 }
 
+/**
+ * '_JourneysPageState' - Manages and displays a list of journeys, filtered by criteria such as difficulty, name, and more.
+ * 
+ * @remarks
+ * This class handles the layout and logic for displaying journeys on the Journeys page. 
+ * It builds `Journey` widgets and applies any filters set by the search bar
+ * or user selections to show only the relevant journeys.
+ */
 class _JourneysPageState extends State<JourneysPage> {
   List<String> selectedCategories = [];
   List<String> selectedLocations = [];
@@ -94,6 +121,18 @@ class _JourneysPageState extends State<JourneysPage> {
     });
   }
 
+  /**
+ * Builds and displays the journeys list based on the selected filters.
+ *
+ * @remarks
+ * This function fetches data from multiple models, applies filtering 
+ * logic based on the user's preferences (difficulty, location, category, 
+ * and search text) for both the journey and its challenges, and renders the 
+ * filtered journeys using `JourneyCell` widgets. It returns a `ListView` 
+ * widget displaying the journey details dynamically.
+ *
+ * @returns A `Widget` representing the journeys list with filtered items.
+ */
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -160,54 +199,66 @@ class _JourneysPageState extends State<JourneysPage> {
 
                       final challengeLocation = challenge.location?.name ?? "";
                       final challengeName = challenge.name ?? "";
+                      final journeyDifficulty = event.difficulty?.name ?? "";
+                      final journeyName = event.name ?? "";
 
                       bool eventMatchesDifficultySelection = true;
                       bool eventMatchesCategorySelection = true;
                       bool eventMatchesLocationSelection = true;
                       bool eventMatchesSearchText = true;
-                      String? searchTerm = widget.mySearchText;
+                      String searchTerm = widget.mySearchText ?? "";
 
-                      if (searchTerm?.length == 0) {
-                        eventMatchesSearchText = true;
-                        if (widget.myDifficulty?.length == 0 ||
-                            widget.myDifficulty == event.difficulty?.name)
-                          eventMatchesDifficultySelection = true;
-                        else
-                          eventMatchesDifficultySelection = false;
+                      if (widget.myDifficulty?.length == 0 ||
+                          widget.myDifficulty == event.difficulty?.name)
+                        eventMatchesDifficultySelection = true;
+                      else
+                        eventMatchesDifficultySelection = false;
 
-                        if (widget.myLocations?.isNotEmpty ?? false) {
-                          if (widget.myLocations?.contains(challengeLocation) ??
-                              false)
-                            eventMatchesLocationSelection = true;
-                          else
-                            eventMatchesLocationSelection = false;
-                        } else
+                      if (widget.myLocations?.isNotEmpty ?? false) {
+                        if (widget.myLocations?.contains(challengeLocation) ??
+                            false)
                           eventMatchesLocationSelection = true;
+                        else
+                          eventMatchesLocationSelection = false;
+                      } else
+                        eventMatchesLocationSelection = true;
 
-                        if (widget.myCategories?.isNotEmpty ?? false) {
-                          if (widget.myCategories
-                                  ?.contains(event.category?.name) ??
-                              false)
-                            eventMatchesCategorySelection = true;
-                          else
-                            eventMatchesCategorySelection = false;
-                        } else
+                      if (widget.myCategories?.isNotEmpty ?? false) {
+                        if (widget.myCategories
+                                ?.contains(event.category?.name) ??
+                            false)
                           eventMatchesCategorySelection = true;
+                        else
+                          eventMatchesCategorySelection = false;
+                      } else
+                        eventMatchesCategorySelection = true;
+
+                      if (searchTerm.length == 0) {
+                        eventMatchesSearchText = true;
                       } else {
-                        if (searchTerm != null &&
-                            challengeLocation
-                                .toLowerCase()
-                                .contains(searchTerm.toLowerCase())) {
+                        if (challengeLocation
+                            .toLowerCase()
+                            .contains(searchTerm.toLowerCase())) {
                           eventMatchesSearchText = true;
                         } else {
                           eventMatchesSearchText = false;
-                          if (searchTerm != null &&
-                              challengeName
-                                  .toLowerCase()
-                                  .contains(searchTerm.toLowerCase())) {
+                          if (challengeName
+                              .toLowerCase()
+                              .contains(searchTerm.toLowerCase())) {
                             eventMatchesSearchText = true;
                           } else
                             eventMatchesSearchText = false;
+                          if (journeyName
+                              .toLowerCase()
+                              .contains(searchTerm.toLowerCase())) {
+                            eventMatchesSearchText = true;
+                          } else
+                            eventMatchesSearchText = false;
+                          if (journeyDifficulty
+                              .toLowerCase()
+                              .contains(searchTerm.toLowerCase())) {
+                            eventMatchesSearchText = true;
+                          }
                         }
                       }
 
