@@ -206,3 +206,45 @@ final Map<EventCategoryDto, String> friendlyCategory = {
   EventCategoryDto.HISTORICAL: "Historical",
   EventCategoryDto.NATURE: "Nature",
 };
+
+/// Matches an event based on difficulty, location, category, and search text
+bool eventMatchesFilters({
+  required EventDto event,
+  required String? difficulty,
+  required List<String>? locations,
+  required List<String>? categories,
+  required String? searchText,
+  required String challengeLocation,
+}) {
+  // Check difficulty
+  final matchesDifficulty =
+      (difficulty?.length ?? 0) == 0 || difficulty == event.difficulty?.name;
+
+  // Check locations
+  final matchesLocation = locations == null ||
+      locations.isEmpty ||
+      locations.contains(challengeLocation);
+
+  // Check categories
+  final matchesCategory = categories == null ||
+      categories.isEmpty ||
+      categories.contains(event.category?.name);
+
+  // Check search text
+  final searchTerm = searchText?.toLowerCase() ?? '';
+  final matchesSearch = searchTerm.isEmpty ||
+      challengeLocation.toLowerCase().contains(searchTerm) ||
+      (event.name ?? "").toLowerCase().contains(searchTerm);
+
+  return matchesDifficulty &&
+      matchesLocation &&
+      matchesCategory &&
+      matchesSearch;
+}
+
+/// Returns a valid image URL or a default placeholder if the input is null or empty
+String getValidImageUrl(String? imageUrl) {
+  return (imageUrl == null || imageUrl.isEmpty)
+      ? "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png"
+      : imageUrl;
+}
