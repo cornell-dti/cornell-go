@@ -159,70 +159,21 @@ class _JourneysPageState extends State<JourneysPage> {
                       Duration timeTillExpire = endtime.difference(now);
 
                       final challengeLocation = challenge.location?.name ?? "";
-                      final challengeName = challenge.name ?? "";
 
-                      bool eventMatchesDifficultySelection = true;
-                      bool eventMatchesCategorySelection = true;
-                      bool eventMatchesLocationSelection = true;
-                      bool eventMatchesSearchText = true;
-                      String? searchTerm = widget.mySearchText;
+                      bool eventMatchesFiltersResult = eventMatchesFilters(
+                        event: event,
+                        difficulty: widget.myDifficulty,
+                        locations: widget.myLocations,
+                        categories: widget.myCategories,
+                        searchText: widget.mySearchText,
+                        challengeLocation: challengeLocation,
+                      );
 
-                      if (searchTerm?.length == 0) {
-                        eventMatchesSearchText = true;
-                        if (widget.myDifficulty?.length == 0 ||
-                            widget.myDifficulty == event.difficulty?.name)
-                          eventMatchesDifficultySelection = true;
-                        else
-                          eventMatchesDifficultySelection = false;
-
-                        if (widget.myLocations?.isNotEmpty ?? false) {
-                          if (widget.myLocations?.contains(challengeLocation) ??
-                              false)
-                            eventMatchesLocationSelection = true;
-                          else
-                            eventMatchesLocationSelection = false;
-                        } else
-                          eventMatchesLocationSelection = true;
-
-                        if (widget.myCategories?.isNotEmpty ?? false) {
-                          if (widget.myCategories
-                                  ?.contains(event.category?.name) ??
-                              false)
-                            eventMatchesCategorySelection = true;
-                          else
-                            eventMatchesCategorySelection = false;
-                        } else
-                          eventMatchesCategorySelection = true;
-                      } else {
-                        if (searchTerm != null &&
-                            challengeLocation
-                                .toLowerCase()
-                                .contains(searchTerm.toLowerCase())) {
-                          eventMatchesSearchText = true;
-                        } else {
-                          eventMatchesSearchText = false;
-                          if (searchTerm != null &&
-                              challengeName
-                                  .toLowerCase()
-                                  .contains(searchTerm.toLowerCase())) {
-                            eventMatchesSearchText = true;
-                          } else
-                            eventMatchesSearchText = false;
-                        }
-                      }
-
-                      var imageUrl = challenge.imageUrl;
-                      if (imageUrl == null || imageUrl.length == 0) {
-                        imageUrl =
-                            "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png";
-                      }
+                      var imageUrl = getValidImageUrl(challenge.imageUrl);
 
                       if (!complete &&
                           !timeTillExpire.isNegative &&
-                          eventMatchesDifficultySelection &&
-                          eventMatchesCategorySelection &&
-                          eventMatchesLocationSelection &&
-                          eventMatchesSearchText) {
+                          eventMatchesFiltersResult) {
                         eventData.add(JourneyCellDto(
                           location: friendlyLocation[challenge.location] ?? "",
                           name: event.name ?? "",
