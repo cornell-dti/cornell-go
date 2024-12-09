@@ -106,7 +106,12 @@ function toForm(user: any) {
     id: user.id,
     groupId: user.groupId,
     email: user.email,
-  };
+    year: user.year,
+    isBanned: user.isBanned,
+    trackedEvents: user.trackedEvents,
+    authType: user.authType,
+    enrollmentType: user.enrollmentType,
+  }
 }
 
 function getColumns(setRowsData: any, serverData: any) {
@@ -136,8 +141,47 @@ function getColumns(setRowsData: any, serverData: any) {
     },
     {
       id: 4,
+      field: "authType",
+      label: "Device Type",
+      cellRenderer: ({ data }: { data: any }) => (
+        <span>{data.authType ? data.authType : "-"}</span>
+      )
+    },
+    {
+      id: 5,
       field: "email",
       label: "Email",
+    },
+    {
+      id: 6,
+      field: "year",
+      label: "Year",
+      cellRenderer: ({ data }: { data: any }) => (
+        <span>{data.year ? data.year : "-"}</span>
+      ),
+    },
+    {
+      id: 7,
+      field: "enrollmentType",
+      label: "Enrollment Type",
+      cellRenderer: ({ data }: { data: any }) => (
+        <span>{data.enrollmentType ? data.enrollmentType : "-"}</span>
+      ),
+    },
+    {
+      id: 7,
+      field: "trackedEvents",
+      label: "Tracked Events",
+      cellRenderer: ({ data }: { data: any }) => (
+        <span>{data.trackedEvents ? data.trackedEvents.join(", ") : "-"}</span>
+      ),
+    },
+    {id: 8,
+      field: "isBanned",
+      label: "Status",
+      cellRenderer: ({ data }: { data: any }) => (
+        <span>{data.isBanned ? "Banned" : "Active"}</span>
+      ),
     },
     {
       id: "buttons",
