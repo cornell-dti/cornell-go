@@ -92,12 +92,62 @@ class _GameplayMapState extends State<GameplayMap> {
   // Add this to your state variables (After isExapnded)
   bool isArrivedButtonEnabled = true;
 
+  Set<Marker> _markers = {};
+  Set<Circle> _circles = {};
+
+  @override
+  void didUpdateWidget(GameplayMap oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Check if target location changed
+    if (oldWidget.targetLocation != widget.targetLocation) {
+      _updateMapMarkers();
+    }
+  }
+
+  void _updateMapMarkers() {
+    setState(() {
+      // Update the target location marker
+      _markers = {
+        Marker(
+          markerId: MarkerId('targetLocation'),
+          position:
+              LatLng(widget.targetLocation.lat, widget.targetLocation.long),
+          icon: BitmapDescriptor.defaultMarker,
+        ),
+        Marker(
+          markerId: MarkerId("currentLocation"),
+          icon: currentLocationIcon,
+          position: currentLocation == null
+              ? _center
+              : LatLng(currentLocation!.lat, currentLocation!.long),
+          anchor: Offset(0.5, 0.5),
+          rotation: currentLocation == null ? 0 : currentLocation!.heading,
+        ),
+      };
+
+      // Update the hint circle
+      _circles = {
+        Circle(
+          circleId: CircleId('hintCircle'),
+          center: hintCenter != null
+              ? LatLng(hintCenter!.lat, hintCenter!.long)
+              : _center,
+          radius: (hintRadius ?? defaultHintRadius),
+          strokeColor: Color.fromARGB(80, 30, 41, 143),
+          strokeWidth: 2,
+          fillColor: Color.fromARGB(80, 83, 134, 237),
+        )
+      };
+    });
+  }
+
   @override
   void initState() {
     setCustomMarkerIcon();
     super.initState();
     streamStarted = startPositionStream();
     setStartingHintCircle();
+    _updateMapMarkers();
   }
 
   @override
@@ -355,21 +405,6 @@ class _GameplayMapState extends State<GameplayMap> {
             body: Stack(
           alignment: Alignment.bottomCenter,
           children: [
-            StreamBuilder(
-                stream: client.clientApi.disconnectedStream,
-                builder: ((context, snapshot) {
-                  if (client.serverApi == null) {
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => SplashPageWidget()));
-                      displayToast("Lost connection!", Status.success);
-                    });
-                  }
-
-                  return Container();
-                })),
             Listener(
               onPointerDown: (e) {
                 cancelRecenterCamera();
@@ -388,30 +423,8 @@ class _GameplayMapState extends State<GameplayMap> {
                       : LatLng(currentLocation!.lat, currentLocation!.lat),
                   zoom: 11,
                 ),
-                markers: {
-                  Marker(
-                    markerId: const MarkerId("currentLocation"),
-                    icon: currentLocationIcon,
-                    position: currentLocation == null
-                        ? _center
-                        : LatLng(currentLocation!.lat, currentLocation!.long),
-                    anchor: Offset(0.5, 0.5),
-                    rotation:
-                        currentLocation == null ? 0 : currentLocation!.heading,
-                  ),
-                },
-                circles: {
-                  Circle(
-                    circleId: CircleId("hintCircle"),
-                    center: hintCenter != null
-                        ? LatLng(hintCenter!.lat, hintCenter!.long)
-                        : _center,
-                    radius: (hintRadius ?? defaultHintRadius),
-                    strokeColor: Color.fromARGB(80, 30, 41, 143),
-                    strokeWidth: 2,
-                    fillColor: Color.fromARGB(80, 83, 134, 237),
-                  )
-                },
+                markers: _markers,
+                circles: _circles,
               ),
             ),
             Container(
