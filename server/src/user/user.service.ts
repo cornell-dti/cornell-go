@@ -141,6 +141,10 @@ export class UserService {
     return await this.prisma.user.findMany();
   }
 
+  /**
+   * Delete a user based on their user id.
+   * @param user the user who will be deleted.
+   */
   async deleteUser(ability: AppAbility, user: User) {
     if (
       (await this.prisma.user.count({
@@ -220,6 +224,13 @@ export class UserService {
     });
   }
 
+  /**
+   * Check if a user exists based on their authentication type and id.
+   * @param authType the authentication type of the user.
+   * @param id the id of the user.
+   * @returns A promise containing the user if they exist.
+   *         Otherwise, it returns null.
+   */
   async checkIfUserExists(
     authType: AuthType,
     id: string,
