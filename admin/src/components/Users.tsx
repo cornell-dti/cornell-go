@@ -254,6 +254,21 @@ function getColumns(setRowsData: any, serverData: any) {
   ];
 }
 
+/**
+ * `Users` - A component that displays a list of users in a table format.
+ *
+ * @remarks
+ * This component retrieves user data from the `ServerDataContext` and maps it to 
+ * a format suitable for display in a table. It uses the `GridTable` component to 
+ * render the data in rows and columns, with dynamic updates based on changes 
+ * in the data. The `getColumns` function is used to define the table columns, 
+ * while `setRowsData` is used to update the rows when necessary.
+ *
+ * @param serverData - The context that contains the user data to be displayed in the table.
+ * @param rowsData - The state that holds the formatted user data for rendering in the table.
+ * 
+ * @returns A `GridTable` component displaying the user data in a structured table format.
+ */
 export function Users() {
   const serverData = useContext(ServerDataContext);
   const [rowsData, setRowsData] = useState(
