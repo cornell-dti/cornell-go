@@ -157,6 +157,7 @@ export class UserService {
     await this.prisma.$transaction(async tx => {
       await this.groupsService.fixOrDeleteGroup({ id: user.groupId }, tx);
     });
+    console.log(`User ${user.id} deleted!`);
   }
 
   /**
