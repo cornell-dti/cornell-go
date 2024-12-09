@@ -109,6 +109,7 @@ function toForm(user: any) {
   };
 }
 
+// The columns of the User page
 function getColumns(setRowsData: any, serverData: any) {
   return [
     {
