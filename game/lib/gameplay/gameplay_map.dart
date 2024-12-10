@@ -62,6 +62,25 @@ class GameplayMap extends StatefulWidget {
   State<GameplayMap> createState() => _GameplayMapState();
 }
 
+/// GameplayMap State
+///
+/// Manages the state and functionality for the GameplayMap widget.
+///
+/// State Fields:
+/// - METERS_TO_DEGREES: Conversion constant for geographic calculations
+/// - mapCompleter: Manages async initialization of Google Maps
+/// - positionStream: Handles location update subscription
+/// - currentLocation: Tracks user's current position
+/// - totalHints: Maximum hints allowed
+/// - numHintsLeft: Remaining available hints
+/// - hintRadius: Current size of hint circle
+/// - isExpanded: Image expansion state
+/// - isArrivedButtonEnabled: Arrival button interaction state
+///
+/// @param widget - Reference to the parent GameplayMap widget (with same fields)
+///
+/// @returns State object managing the GameplayMap's interactive elements and location tracking
+
 class _GameplayMapState extends State<GameplayMap> {
   final METERS_TO_DEGREES = 111139;
 

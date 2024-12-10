@@ -17,6 +17,30 @@ import 'package:game/progress_indicators/circular_progress_indicator.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:async';
 
+/// GameplayPage Widget
+///
+/// Manages the gameplay experience by combining the map interface with challenge information
+/// and progress tracking.
+///
+/// @remarks
+/// This widget serves as the main container for gameplay, coordinating between the interactive
+/// map and challenge status displays. It handles location tracking, challenge progress,
+/// and provides real-time feedback about the user's distance from targets and points.
+/// The widget integrates with various game models to maintain state and track progress.
+///
+/// The page is structured with:
+/// - A header showing challenge information and progress
+/// - The main gameplay map for navigation
+/// - Interactive elements for hints and location tracking
+///
+/// @param key - Optional widget key for identification and testing
+///
+/// @returns A StatefulWidget that provides the complete gameplay interface, including:
+///   - Challenge description and location details
+///   - Distance tracking and point calculations
+///   - Interactive map interface
+///   - Navigation controls
+
 class GameplayPage extends StatefulWidget {
   const GameplayPage({Key? key}) : super(key: key);
 
