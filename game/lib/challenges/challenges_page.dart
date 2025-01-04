@@ -14,6 +14,7 @@ import 'package:velocity_x/velocity_x.dart';
 import 'challenge_cell.dart';
 import 'package:game/journeys/filter_form.dart';
 
+//this is a test
 class ChallengeCellDto {
   ChallengeCellDto({
     required this.location,
