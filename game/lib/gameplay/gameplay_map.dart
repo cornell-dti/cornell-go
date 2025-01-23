@@ -23,6 +23,25 @@ import 'package:game/model/group_model.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/challenge_model.dart';
 
+/// GameplayMap Widget
+///
+/// Displays an interactive map for gameplay, showing the user's location,
+/// hint circles, and challenge-related information.
+///
+/// @remarks
+/// This widget is responsible for handling user location updates, displaying
+/// hints, and managing the challenge completion process. It uses Google Maps
+/// for rendering the map and integrates with various game-related models and
+/// APIs to provide a seamless gameplay experience.
+///
+/// @param challengeId - The unique identifier for the current challenge.
+/// @param targetLocation - The GeoPoint representing the target location for the challenge.
+/// @param awardingRadius - The radius (in meters) within which the challenge is considered complete.
+/// @param points - The number of points awarded for completing this challenge.
+/// @param startingHintsUsed - The number of hints already used for this challenge.
+///
+/// @returns A StatefulWidget that renders the gameplay map and associated UI elements
+
 class GameplayMap extends StatefulWidget {
   final String challengeId;
   final GeoPoint targetLocation;
@@ -69,6 +88,9 @@ class _GameplayMapState extends State<GameplayMap> {
 
   // whether the picture is expanded over the map
   bool isExpanded = false;
+
+  // Add this to your state variables (After isExapnded)
+  bool isArrivedButtonEnabled = true;
 
   @override
   void initState() {
@@ -400,18 +422,25 @@ class _GameplayMapState extends State<GameplayMap> {
                   padding:
                       EdgeInsets.only(right: 15, left: 15, top: 10, bottom: 10),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10), // button's shape
+                    borderRadius: BorderRadius.circular(10),
                   ),
                 ),
                 child: Text(
                   "I've Arrived!",
                   style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 21,
-                      fontWeight: FontWeight.w400,
-                      color: Color(0xFFFFFFFF)),
+                    fontFamily: 'Poppins',
+                    fontSize: 21,
+                    fontWeight: FontWeight.w400,
+                    color: Color(0xFFFFFFFF),
+                  ),
                 ),
                 onPressed: () async {
+                  if (!isArrivedButtonEnabled) return;
+
+                  setState(() {
+                    isArrivedButtonEnabled = false;
+                  });
+
                   bool hasArrived = checkArrived();
                   String? chalName;
                   if (hasArrived) {
@@ -431,17 +460,21 @@ class _GameplayMapState extends State<GameplayMap> {
                       return Container(
                         margin: EdgeInsetsDirectional.only(start: 10, end: 10),
                         child: Dialog(
-                          elevation: 16, //arbitrary large number
+                          elevation: 16,
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(
-                                10), // Same as the Dialog's shape
+                            borderRadius: BorderRadius.circular(10),
                             child: displayDialog(
                                 context, hasArrived, chalId, chalName),
                           ),
                         ),
                       );
                     },
-                  );
+                  ).then((_) {
+                    // Re-enable the button after the dialog is closed
+                    setState(() {
+                      isArrivedButtonEnabled = true;
+                    });
+                  });
                 },
               ),
             ),
