@@ -117,6 +117,7 @@ npx prisma migrate dev --name my_migration
 - **Jesse Cheng** - Developer
 - **Temi Adebowale** - Developer
 - **Frank Dai** - Developer
+- **Esha Shah** - Developer
 - **Happy Li** - Designer
 - **Ashley Paik** - Designer
 - **Jessica Liu** - Designer
