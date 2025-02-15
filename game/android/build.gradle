@@ -1,10 +1,10 @@
 allprojects {
     repositories {
         google()
-//        jcenter()
         mavenCentral()
     }
     subprojects {
+        /** Checks if the namespace is set for an Android project; if not set, sets the namespace as com.cornellgo.CornellGO*/
         afterEvaluate { project ->
             if (project.hasProperty('android')) {
                 project.android {
