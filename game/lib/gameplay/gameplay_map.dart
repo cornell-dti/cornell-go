@@ -23,24 +23,28 @@ import 'package:game/model/group_model.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/challenge_model.dart';
 
-/// GameplayMap Widget
-///
-/// Displays an interactive map for gameplay, showing the user's location,
-/// hint circles, and challenge-related information.
-///
-/// @remarks
-/// This widget is responsible for handling user location updates, displaying
-/// hints, and managing the challenge completion process. It uses Google Maps
-/// for rendering the map and integrates with various game-related models and
-/// APIs to provide a seamless gameplay experience.
-///
-/// @param challengeId - The unique identifier for the current challenge.
-/// @param targetLocation - The GeoPoint representing the target location for the challenge.
-/// @param awardingRadius - The radius (in meters) within which the challenge is considered complete.
-/// @param points - The number of points awarded for completing this challenge.
-/// @param startingHintsUsed - The number of hints already used for this challenge.
-///
-/// @returns A StatefulWidget that renders the gameplay map and associated UI elements
+/*
+
+* GameplayMap Widget
+*
+* Displays an interactive map for gameplay, showing the user's location,
+* hint circles, and challenge-related information.
+*
+* @remarks
+* This widget is responsible for handling user location updates, displaying
+* hints, and managing the challenge completion process. It uses Google Maps
+* for rendering the map and integrates with various game-related models and
+* APIs to provide a seamless gameplay experience.
+*
+* @param challengeId - The unique identifier for the current challenge.
+* @param targetLocation - The GeoPoint representing the target location for the challenge.
+* @param awardingRadius - The radius (in meters) within which the challenge is considered complete.
+* @param points - The number of points awarded for completing this challenge.
+* @param startingHintsUsed - The number of hints already used for this challenge.
+*
+* @returns A StatefulWidget that renders the gameplay map and associated UI elements
+
+*/
 
 class GameplayMap extends StatefulWidget {
   final String challengeId;
@@ -358,13 +362,16 @@ class _GameplayMapState extends State<GameplayMap> {
             StreamBuilder(
                 stream: client.clientApi.disconnectedStream,
                 builder: ((context, snapshot) {
+                  // Redirect to login if server api is null
                   if (client.serverApi == null) {
                     WidgetsBinding.instance.addPostFrameCallback((_) {
-                      Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => SplashPageWidget()));
-                      displayToast("Lost connection!", Status.success);
+                      // Clear entire navigation stack and push to login screen
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(
+                            builder: (context) => SplashPageWidget()),
+                        (route) => false,
+                      );
+                      displayToast("Signed out", Status.success);
                     });
                   }
 

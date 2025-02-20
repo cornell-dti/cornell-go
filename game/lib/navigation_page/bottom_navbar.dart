@@ -9,6 +9,38 @@ import 'package:provider/provider.dart';
 import 'home_navbar.dart';
 import 'search_filter_home.dart';
 
+/** 
+
+* BottomNavBar Widget - Main navigation container for the app.
+*
+* A stateful widget that manages the primary navigation interface and handles
+* authentication state for the main app flow.
+*
+* @remarks
+* This widget serves as the root container for the main app interface, managing:
+* - Navigation between main app sections (Home, Leaderboard, Profile)
+* - Authentication state monitoring via disconnection stream
+* - Automatic redirection to login when authentication is lost
+* - Consistent bottom navigation bar UI across all main sections
+*
+* The widget uses Provider pattern to access the ApiClient and manages its own
+* state for the selected navigation index.
+*
+* @example
+* ```dart
+* Navigator.pushReplacement(
+*   context,
+*   MaterialPageRoute(builder: (context) => BottomNavBar()),
+* );
+* ```
+*
+* @param key - Optional widget key for identification and testing.
+*
+* @returns A StatefulWidget that renders the main navigation interface with
+* bottom navigation bar and handles authentication state.
+
+*/
+
 class BottomNavBar extends StatefulWidget {
   const BottomNavBar({Key? key}) : super(key: key);
 
@@ -41,17 +73,18 @@ class _BottomNavBarState extends State<BottomNavBar> {
         child: StreamBuilder(
             stream: client.clientApi.disconnectedStream,
             builder: (context, snapshot) {
+              // Redirect to login if server api is null
               if (client.serverApi == null) {
-                print("ServerApi == null");
                 WidgetsBinding.instance.addPostFrameCallback((_) {
-                  Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => SplashPageWidget()));
+                  // Clear entire navigation stack and push to login screen
+                  Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(builder: (context) => SplashPageWidget()),
+                    (route) => false,
+                  );
                   displayToast("Signed out", Status.success);
                 });
               }
-
+              // Returning the main content page abvoe the navbar [Home, Leaderboard, Profile]
               return _widgetOptions.elementAt(_selectedIndex);
             }),
       ),
