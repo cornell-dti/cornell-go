@@ -12,6 +12,52 @@ import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:http/http.dart' as http;
 import 'package:game/api/geopoint.dart';
 
+/** 
+ * ApiClient Class - Core authentication and API communication manager.
+ * 
+ * A ChangeNotifier class that manages authentication state, socket connections,
+ * and API communication for the entire application.
+ * 
+ * @remarks
+ * This class serves as the central hub for all API-related functionality:
+ * - Authentication state management (Google Sign-In, device login)
+ * - Socket connection handling and management
+ * - Token management (access and refresh tokens)
+ * - Stream management through GameClientApi
+ * - Server API access through GameServerApi
+ * 
+ * The class uses a multi-layered approach:
+ * - ApiClient: Top-level manager and state coordinator
+ * - GameClientApi: Manages streams for UI updates
+ * - GameServerApi: Handles server-side communication
+ * 
+ * Key Features:
+ * - Automatic token refresh
+ * - Persistent authentication through secure storage
+ * - Socket connection management
+ * - Google Sign-In integration
+ * - Device-based authentication
+ * 
+ * @example
+ * ```dart
+ * final apiClient = Provider.of<ApiClient>(context);
+ * 
+ * // Listen to connection state
+ * StreamBuilder(
+ *   stream: apiClient.clientApi.disconnectedStream,
+ *   builder: (context, snapshot) {
+ *     // Handle connection state changes
+ *   }
+ * );
+ * 
+ * // Perform authentication
+ * await apiClient.connectGoogle(googleAccount, ...);
+ * ```
+ * 
+ * @see GameClientApi for stream management
+ * @see GameServerApi for server communication
+ */
+
 class ApiClient extends ChangeNotifier {
   final FlutterSecureStorage _storage;
   final _googleSignIn = GoogleSignIn(
@@ -20,6 +66,7 @@ class ApiClient extends ChangeNotifier {
     ],
   );
 
+  // The ApiClient manages the socket and authentication state while the ClientApi manages the streams that components listen to
   final String _apiUrl;
   final Uri _googleLoginUrl;
   final Uri _deviceLoginUrl;
