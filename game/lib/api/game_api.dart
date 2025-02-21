@@ -104,13 +104,24 @@ class ApiClient extends ChangeNotifier {
         IO.OptionBuilder()
             .setTransports(["websocket"])
             .disableAutoConnect()
-            .disableReconnection()
             .setAuth({'token': _accessToken})
             .build());
 
     socket.onDisconnect((data) {
-      _serverApi = null;
-      notifyListeners();
+      print("Server Disconnected!");
+      // Check if user is logged out
+      if (_refreshToken == null) {
+        _serverApi = null;
+        notifyListeners();
+      }
+    });
+
+    socket.onReconnectFailed((_) async {
+      // Try to reconnect
+      final refreshResult = await _accessRefresher();
+      if (!refreshResult) {
+        _serverApi = null;
+      }    
     });
 
     socket.onConnect((data) {
