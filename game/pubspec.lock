@@ -1214,10 +1214,10 @@ packages:
     dependency: "direct main"
     description:
       name: velocity_x
-      sha256: "99b910c80cc2010b184ef921f0af6894a8d632e13169cf77e6f6cb5a7f310698"
+      sha256: "45c1584d00c625d15132d1ec88b71427b907980f8ba7445a8d9052931d573c15"
       url: "https://pub.dev"
     source: hosted
-    version: "4.2.1"
+    version: "4.3.1"
   vm_service:
     dependency: transitive
     description:

@@ -128,10 +128,10 @@ Widget ThirdPodium(context, int points, bool isUser) {
         semanticsLabel: '3rd Podium',
       ),
       Positioned(
-        bottom: MediaQuery.sizeOf(context).height * 0.005,
+        bottom: MediaQuery.sizeOf(context).height * 0.006,
         child: Container(
           width: 68,
-          height: 29,
+          height: 25,
           padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
           decoration: ShapeDecoration(
             color: Color.fromRGBO(219, 120, 42, 1),
