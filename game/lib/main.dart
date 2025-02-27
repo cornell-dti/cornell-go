@@ -71,10 +71,14 @@ Future<AndroidMapRenderer?> initializeMapRenderer() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final GoogleMapsFlutterPlatform platform = GoogleMapsFlutterPlatform.instance;
-  unawaited((platform as GoogleMapsFlutterAndroid)
-      .initializeWithRenderer(AndroidMapRenderer.latest)
-      .then((AndroidMapRenderer initializedRenderer) =>
-          completer.complete(initializedRenderer)));
+  unawaited(
+    (platform as GoogleMapsFlutterAndroid)
+        .initializeWithRenderer(AndroidMapRenderer.latest)
+        .then(
+          (AndroidMapRenderer initializedRenderer) =>
+              completer.complete(initializedRenderer),
+        ),
+  );
 
   return completer.future;
 }
@@ -86,46 +90,41 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-        providers: [
-          ChangeNotifierProvider.value(value: client),
-          ChangeNotifierProvider(
-            create: (_) => UserModel(client),
-            lazy: false,
+      providers: [
+        ChangeNotifierProvider.value(value: client),
+        ChangeNotifierProvider(create: (_) => UserModel(client), lazy: false),
+        ChangeNotifierProvider(create: (_) => GroupModel(client), lazy: false),
+        ChangeNotifierProvider(create: (_) => EventModel(client), lazy: false),
+        ChangeNotifierProvider(
+          create: (_) => AchievementModel(client),
+          lazy: false,
+        ),
+        ChangeNotifierProvider(
+          create: (_) => TrackerModel(client),
+          lazy: false,
+        ),
+        ChangeNotifierProvider(
+          create: (_) => ChallengeModel(client),
+          lazy: false,
+        ),
+      ],
+      child: GameWidget(
+        child: MaterialApp(
+          title: 'CornellGO!',
+          localizationsDelegates: [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [Locale('en', '')],
+          theme: ThemeData(
+            fontFamily: 'Poppins',
+            primarySwatch: ColorPalette.BigRed,
+            useMaterial3: false,
           ),
-          ChangeNotifierProvider(
-            create: (_) => GroupModel(client),
-            lazy: false,
-          ),
-          ChangeNotifierProvider(
-            create: (_) => EventModel(client),
-            lazy: false,
-          ),
-          ChangeNotifierProvider(
-            create: (_) => AchievementModel(client),
-            lazy: false,
-          ),
-          ChangeNotifierProvider(
-            create: (_) => TrackerModel(client),
-            lazy: false,
-          ),
-          ChangeNotifierProvider(
-            create: (_) => ChallengeModel(client),
-            lazy: false,
-          )
-        ],
-        child: GameWidget(
-            child: MaterialApp(
-                title: 'CornellGO!',
-                localizationsDelegates: [
-                  GlobalMaterialLocalizations.delegate,
-                  GlobalWidgetsLocalizations.delegate,
-                  GlobalCupertinoLocalizations.delegate,
-                ],
-                supportedLocales: const [Locale('en', '')],
-                theme: ThemeData(
-                    fontFamily: 'Poppins',
-                    primarySwatch: ColorPalette.BigRed,
-                    useMaterial3: false),
-                home: LoadingPageWidget(client.tryRelog()))));
+          home: LoadingPageWidget(client.tryRelog()),
+        ),
+      ),
+    );
   }
 }
