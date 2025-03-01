@@ -18,8 +18,24 @@ import 'package:game/profile/completed_feed.dart';
 import 'package:velocity_x/velocity_x.dart';
 
 /**
- * The profile page of the app that is rendered for the user's profile
+ * `ProfilePage` Component - Displays the user's profile information and achievements.
+ * 
+ * @remarks
+ * This component serves as the main profile screen in the CornellGO app, presenting
+ * the user's personal information, completed events, and achievements. It features
+ * a custom curved header with the user's avatar and score, followed by sections for
+ * completed events and achievements.
+ * 
+ * The layout is responsive, with dimensions calculated as percentages of screen size
+ * to ensure consistent appearance across different devices. It consumes data from
+ * multiple providers including UserModel, EventModel, TrackerModel, ChallengeModel,
+ * and AchievementModel.
+ * 
+ * @param key - Optional Flutter widget key for identification and testing.
+ * 
+ * @returns A StatefulWidget that displays the user profile interface.
  */
+
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
 
@@ -383,6 +399,22 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 }
+
+/**
+ * `CustomCurveClipper` - Creates a custom curved shape for the profile header.
+ * 
+ * @remarks
+ * This clipper generates a path with a subtle curve at the bottom edge of the
+ * profile header, creating a visually appealing transition between the header
+ * and the content below. The curve is designed to be gentle, resembling the
+ * bottom of an oval, with the lowest point at the center of the width.
+ * 
+ * @param size - The size of the area to be clipped, containing width and height.
+ * 
+ * @returns A Path object defining the custom curved shape for clipping.
+ * 
+ * @shouldReclip - Returns false as the clip shape doesn't change dynamically.
+ */
 
 class CustomCurveClipper extends CustomClipper<Path> {
   @override
