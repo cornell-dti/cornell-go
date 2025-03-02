@@ -71,6 +71,9 @@ android {
         buildConfig true
     }
 
+    /** Add in Java Toolchain support to set the Java Version to 17
+     * See more at https://kotlinlang.org/docs/gradle-configure-project.html?utm_campaign=gradle-jvm-toolchain&utm_medium=kgp&utm_source=warnings#set-jdk-version-with-the-task-dsl
+     * */
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
