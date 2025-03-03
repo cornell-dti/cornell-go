@@ -15,10 +15,30 @@ interface IntermediatePayload {
 }
 
 /**
- * The `AuthService` class provides authentication-related functionality for the application,
- * including login, token management, and user verification.
+ * `AuthService` - Handles authentication and user session management.
  *
- * Now supports Google and Apple (OAuth), and device login. Only Cornell emails are allowed.
+ * @remarks
+ * This service is responsible for user authentication using Google, Apple, and device-based sign-in.
+ * It verifies ID tokens, registers new users if needed, and issues JWT access and refresh tokens.
+ * It also provides functionalities for token-based user retrieval, access token refreshing, and
+ * checking user management roles.
+ *
+ * The authentication process supports multiple platforms (`web`, `android`, `ios`) using platform-specific
+ * Google OAuth clients. Apple authentication is verified through Apple Sign-In ID tokens.
+ *
+ * The service integrates with `UserService` for user retrieval and registration and uses `PrismaService`
+ * for database interactions. It also utilizes JWT for secure token generation and verification.
+ *
+ * @param prisma - Injected `PrismaService` for database operations.
+ * @param jwtService - Injected `JwtService` for handling JWT authentication.
+ * @param userService - Injected `UserService` to manage user-related operations.
+ *
+ * @returns Provides authentication-related functionalities, including:
+ * - Verifying Google and Apple ID tokens.
+ * - Handling user login and registration.
+ * - Issuing and refreshing JWT tokens.
+ * - Retrieving users by authentication tokens.
+ * - Checking if a user manages any organizations.
  */
 @Injectable()
 export class AuthService {
