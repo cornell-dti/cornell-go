@@ -38,3 +38,5 @@ postgres-data-saved
 docs
 
 documentation
+
+.env
