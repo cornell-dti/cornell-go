@@ -179,12 +179,16 @@ class _EditProfileState extends State<EditProfileWidget> {
           }
 
           bool fieldsChanged() {
-            if (newUsername == null ||
-                newCollege == null ||
+            if (newCollege == null ||
                 newYear == null ||
                 newMajor == null) {
               return false;
-            }
+            } 
+            //previously returned false if username was null or 
+            //if any of the other options were null, so if the 
+            // username was changed, would still return false if other ones werent changed
+            
+            //doesnt allow username to be empty; username is never null
             if (newUsername!.isEmpty) {
               return false;
             }
