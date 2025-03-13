@@ -57,6 +57,8 @@ class _ProfilePageState extends State<ProfilePage> {
     final iconSize = screenWidth * 0.075; // 7.5% of screen width
     final badgeWidth = screenWidth * 0.2; // 20% of screen width
     final badgeHeight = screenHeight * 0.03; // 3% of screen height
+    final smallFontSize = screenWidth * 0.035;
+    final mediumFontSize = screenWidth * 0.04;
 
     return Scaffold(
       backgroundColor: Color.fromARGB(255, 255, 245, 234),
@@ -208,7 +210,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                                   style: TextStyle(
                                                     color: Colors.white,
                                                     fontSize:
-                                                        screenWidth * 0.035,
+                                                        screenWidth * fontSize,
                                                     fontWeight: FontWeight.w600,
                                                   ),
                                                 ),
@@ -242,7 +244,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                       Text(
                                         "@${username.toLowerCase().replaceAll(' ', '')}",
                                         style: TextStyle(
-                                          fontSize: screenWidth * 0.04,
+                                          fontSize: mediumFontSize,
                                           color: Colors.white,
                                           height: 1,
                                         ),
@@ -271,7 +273,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   children: [
                     Text("Completed",
                         style: TextStyle(
-                            fontSize: screenWidth * 0.04, // 4% of screen width
+                            fontSize: mediumFontSize, // 4% of screen width
                             fontWeight: FontWeight.bold)),
                     TextButton(
                       onPressed: () {
@@ -284,7 +286,8 @@ class _ProfilePageState extends State<ProfilePage> {
                         'View All →',
                         style: TextStyle(
                           color: Colors.black,
-                          fontSize: screenWidth * 0.035, // 3.5% of screen width
+                          fontSize:
+                              screenWidth * fontSize, // 3.5% of screen width
                         ),
                       ),
                     )
@@ -348,7 +351,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   children: [
                     Text("Achievements",
                         style: TextStyle(
-                            fontSize: screenWidth * 0.04, // 4% of screen width
+                             0.fontSize: screenWidth *04, // 4% of screen width
                             fontWeight: FontWeight.bold)),
                     TextButton(
                       onPressed: () {
@@ -360,7 +363,8 @@ class _ProfilePageState extends State<ProfilePage> {
                         'View Details →',
                         style: TextStyle(
                           color: Colors.black,
-                          fontSize: screenWidth * 0.035, // 3.5% of screen width
+                          fontSize:
+                              screenWidth * fontSize, // 3.5% of screen width
                         ),
                       ),
                     )
