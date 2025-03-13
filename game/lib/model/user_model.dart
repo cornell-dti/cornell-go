@@ -61,13 +61,18 @@ class UserModel extends ChangeNotifier {
 
   void updateUserData(String id, String? username, String? college,
       String? major, String? year) {
-    _client.serverApi?.updateUserData(UpdateUserDataDto(
-        user: UserDto(
-            id: id,
-            username: username,
-            college: college,
-            major: major,
-            year: year),
-        deleted: false));
+    try {
+      _client.serverApi?.updateUserData(UpdateUserDataDto(
+          user: UserDto(
+              id: id,
+              username: username,
+              college: college,
+              major: major,
+              year: year),
+          deleted: false));
+    } catch (e) {
+      //catch username already exists error
+      rethrow; //rethrow to be handled in UI
+    }
   }
 }
