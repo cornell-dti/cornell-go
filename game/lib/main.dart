@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_config/flutter_config.dart';
+import 'package:game/api/geopoint.dart';
 import 'package:game/loading_page/loading_page.dart';
 import 'package:game/model/achievement_model.dart';
 
@@ -43,6 +44,13 @@ void main() async {
   // load environment variables
   WidgetsFlutterBinding.ensureInitialized(); // Required by FlutterConfig
   await FlutterConfig.loadEnvVariables();
+
+  GeoPoint.current().then((location) {
+    print(
+        "App startup - Location initialized: ${location.lat}, ${location.long}");
+  }).catchError((e) {
+    print("Error initializing location at startup: $e");
+  });
 
   // Set preferred orientations to portrait only
   SystemChrome.setPreferredOrientations([
