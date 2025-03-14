@@ -59,10 +59,10 @@ class UserModel extends ChangeNotifier {
     return evIds.toList();
   }
 
-  void updateUserData(String id, String? username, String? college,
-      String? major, String? year) {
+  Future<void> updateUserData(String id, String? username, String? college,
+      String? major, String? year) async{
     try {
-      _client.serverApi?.updateUserData(UpdateUserDataDto(
+      await _client.serverApi?.updateUserData(UpdateUserDataDto(
           user: UserDto(
               id: id,
               username: username,

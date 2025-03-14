@@ -222,7 +222,9 @@ class _EditProfileState extends State<EditProfileWidget> {
                               Text('Username *', style: headingStyle),
                               SizedBox(height: 5),
                               TextFormField(
-                                decoration: fieldDecoration,
+                                decoration: fieldDecoration.copyWith(
+                                  errorText : null //default errorText is null 
+                                ),
                                 initialValue: newUsername,
                                 onChanged: (value) {
                                   newUsername = value;
@@ -302,14 +304,22 @@ class _EditProfileState extends State<EditProfileWidget> {
                               key: ValueKey(keyValue),
                               onPressed: !fieldsChanged()
                                   ? null
-                                  : () {
-                                      userModel.updateUserData(
+                                  : () async {
+                                      try {
+                                        userModel.updateUserData(
                                           userModel.userData?.id ?? "",
                                           newUsername,
                                           newCollege,
                                           newMajor,
                                           newYear);
-                                      setState(() {});
+                                      setState(() {}); //profile changed 
+                                      } catch (e) { //catch username already exists error
+                                        setState(() { //display error text
+                                          fieldDecoration = fieldDecoration.copyWith(
+                                            errorText : "Username already exists"
+                                          );
+                                        });
+                                        }
                                     },
                               style: TextButton.styleFrom(
                                 backgroundColor: Color(0xFFE95755),
