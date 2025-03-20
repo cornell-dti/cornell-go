@@ -32,12 +32,16 @@ class _FilterFormState extends State<FilterForm> {
   List<String> selectedCategories = [];
   List<String> selectedLocations = [];
   late String selectedDifficulty;
+  int filterCount = 0;
 
   _FilterFormState(
       String? difficulty, List<String>? locations, List<String>? categories) {
     selectedDifficulty = difficulty ?? '';
     selectedLocations = locations ?? [];
     selectedCategories = categories ?? [];
+    filterCount = selectedCategories.length +
+        selectedLocations.length +
+        (selectedDifficulty.isNotEmpty ? 1 : 0);
   }
 
   List<EventCategoryDto> categories = EventCategoryDto.values;
@@ -59,24 +63,48 @@ class _FilterFormState extends State<FilterForm> {
   }
 
   void toggleCategory(String category) {
-    if (selectedCategories.contains(category)) {
-      selectedCategories.remove(category);
-    } else {
-      selectedCategories.add(category);
-    }
+    setState(() {
+      if (selectedCategories.contains(category)) {
+        selectedCategories.remove(category);
+      } else {
+        selectedCategories.add(category);
+      }
+      updateFilterState();
+    });
   }
 
   void toggleLocation(String location) {
-    if (selectedLocations.contains(location)) {
-      selectedLocations.remove(location);
-    } else {
-      selectedLocations.add(location);
-    }
+    setState(() {
+      if (selectedLocations.contains(location)) {
+        selectedLocations.remove(location);
+      } else {
+        selectedLocations.add(location);
+      }
+      updateFilterState();
+    });
   }
 
   void setDifficulty(String diff) {
     setState(() {
       selectedDifficulty = diff;
+      updateFilterState();
+    });
+  }
+
+  void updateFilterState() {
+    setState(() {
+      filterCount = selectedCategories.length +
+          selectedLocations.length +
+          (selectedDifficulty.isNotEmpty ? 1 : 0);
+    });
+  }
+
+  void clearFilters() {
+    setState(() {
+      selectedCategories.clear();
+      selectedLocations.clear();
+      selectedDifficulty = '';
+      filterCount = 0;
     });
   }
 
@@ -292,17 +320,40 @@ class _FilterFormState extends State<FilterForm> {
                     ),
                   ),
                 ),
-                TextButton(
-                  onPressed: filterChallenges,
-                  child: Text('See results'),
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Color.fromARGB(255, 255, 255, 255),
-                    backgroundColor: Color(0xFFEC5555),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
+                Stack(
+                  children: [
+                    TextButton(
+                      onPressed: filterCount > 0 ? filterChallenges : null,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: filterCount > 0
+                            ? const Color(0xFFEC5555) // Active color
+                            : Colors.grey, // Disabled color
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                      ),
+                      child: Text(
+                        filterCount == 0
+                            ? 'See 0 result'
+                            : filterCount == 1
+                                ? 'See $filterCount result'
+                                : 'See $filterCount results',
+                      ),
                     ),
-                  ),
-                )
+                  ],
+                ),
+                // TextButton(
+                //   onPressed: filterChallenges,
+                //   child: Text('See results'),
+                //   style: ElevatedButton.styleFrom(
+                //     foregroundColor: Color.fromARGB(255, 255, 255, 255),
+                //     backgroundColor: Color(0xFFEC5555),
+                //     shape: RoundedRectangleBorder(
+                //       borderRadius: BorderRadius.circular(10.0),
+                //     ),
+                //   ),
+                // )
               ],
             ),
           ),
