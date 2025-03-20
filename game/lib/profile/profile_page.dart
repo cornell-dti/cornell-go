@@ -209,8 +209,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                                   "${score} PTS",
                                                   style: TextStyle(
                                                     color: Colors.white,
-                                                    fontSize:
-                                                        screenWidth * fontSize,
+                                                    fontSize: smallFontSize,
                                                     fontWeight: FontWeight.w600,
                                                   ),
                                                 ),
@@ -286,8 +285,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         'View All →',
                         style: TextStyle(
                           color: Colors.black,
-                          fontSize:
-                              screenWidth * fontSize, // 3.5% of screen width
+                          fontSize: smallFontSize, // 3.5% of screen width
                         ),
                       ),
                     )
@@ -351,7 +349,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   children: [
                     Text("Achievements",
                         style: TextStyle(
-                             0.fontSize: screenWidth *04, // 4% of screen width
+                            fontSize: mediumFontSize, // 4% of screen width
                             fontWeight: FontWeight.bold)),
                     TextButton(
                       onPressed: () {
@@ -363,8 +361,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         'View Details →',
                         style: TextStyle(
                           color: Colors.black,
-                          fontSize:
-                              screenWidth * fontSize, // 3.5% of screen width
+                          fontSize: smallFontSize, // 3.5% of screen width
                         ),
                       ),
                     )
