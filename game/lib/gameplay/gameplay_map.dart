@@ -496,6 +496,7 @@ class _GameplayMapState extends State<GameplayMap> {
                       children: [
                         // hint button
                         FloatingActionButton.extended(
+                          heroTag: "hint_button",
                           onPressed: useHint,
                           label: SvgPicture.asset("assets/icons/maphint.svg",
                               colorFilter: ColorFilter.mode(
@@ -540,6 +541,7 @@ class _GameplayMapState extends State<GameplayMap> {
                   Padding(
                     padding: EdgeInsets.only(bottom: 150.0),
                     child: FloatingActionButton.extended(
+                      heroTag: "recenter_button",
                       onPressed: recenterCamera,
                       label: SvgPicture.asset("assets/icons/maprecenter.svg",
                           colorFilter: ColorFilter.mode(
@@ -705,7 +707,7 @@ class _GameplayMapState extends State<GameplayMap> {
                 Container(
                     margin: EdgeInsets.only(bottom: 10),
                     child: Text(
-                        "You’re close, but not there yet." +
+                        "You're close, but not there yet." +
                             (numHintsLeft > 0
                                 ? "Use a hint if needed! Hints use 25 points."
                                 : ""),
