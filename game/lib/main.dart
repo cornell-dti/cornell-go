@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:flutter_config/flutter_config.dart';
+// import 'package:flutter_config/flutter_config.dart';
+import 'package:flutter_config_plus/flutter_config_plus.dart';
 import 'package:game/loading_page/loading_page.dart';
 import 'package:game/model/achievement_model.dart';
 
@@ -42,7 +43,7 @@ void main() async {
   }
   // load environment variables
   WidgetsFlutterBinding.ensureInitialized(); // Required by FlutterConfig
-  await FlutterConfig.loadEnvVariables();
+  await FlutterConfigPlus.loadEnvVariables();
 
   // Set preferred orientations to portrait only
   SystemChrome.setPreferredOrientations([
