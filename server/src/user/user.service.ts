@@ -178,6 +178,7 @@ export class UserService {
    * Update a User's username, email, college, major, or year.
    * @param user User requiring an update.
    * @returns The new user after the update is made
+   * @throws Error if the username already exists from a different user
    */
   async updateUser(ability: AppAbility, user: UserDto): Promise<User> {
     const username = user.username
@@ -197,6 +198,20 @@ export class UserService {
         AND: [accessibleBy(ability, Action.Update).User, { id: user.id }],
       },
     });
+
+    //check if username already exists from a different user
+    // //if the same user, then let them update their username with the same username (aka not change their username)
+    const diffUserWithUsername = await this.prisma.findUnique({
+      where: {
+        username: username
+      }
+    });
+    //if diffUserWithUsername is not null and is not the current user, then throw an error
+    if (diffUserWithUsername != null && diffUserWithUsername.id != userObj.id) {
+      throw new Error('Username already exists');
+    }
+    
+
 
     const assignData = await this.abilityFactory.filterInaccessible(
       userObj.id,

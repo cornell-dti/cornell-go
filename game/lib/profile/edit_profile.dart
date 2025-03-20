@@ -160,6 +160,10 @@ class _EditProfileState extends State<EditProfileWidget> {
           String? currCollege = userModel.userData?.college;
           String? currMajor = userModel.userData?.major;
 
+// can't repress update bar when username is changed (no option to select it, whereas for college, major, if they are changed you can reclick update button)
+// how to check if username already exists: check admin/Users, prisma postgres 
+//if no database of usernames, make one in backend 
+
           newUsername = currUsername;
           newYear = currYear;
           if (newYear != null && newYear!.isEmpty) {
@@ -175,12 +179,16 @@ class _EditProfileState extends State<EditProfileWidget> {
           }
 
           bool fieldsChanged() {
-            if (newUsername == null ||
-                newCollege == null ||
+            if (newCollege == null ||
                 newYear == null ||
                 newMajor == null) {
               return false;
-            }
+            } 
+            //previously returned false if username was null or 
+            //if any of the other options were null, so if the 
+            // username was changed, would still return false if other ones werent changed
+            
+            //doesnt allow username to be empty; username is never null
             if (newUsername!.isEmpty) {
               return false;
             }
@@ -214,7 +222,9 @@ class _EditProfileState extends State<EditProfileWidget> {
                               Text('Username *', style: headingStyle),
                               SizedBox(height: 5),
                               TextFormField(
-                                decoration: fieldDecoration,
+                                decoration: fieldDecoration.copyWith(
+                                  errorText : null //default errorText is null 
+                                ),
                                 initialValue: newUsername,
                                 onChanged: (value) {
                                   newUsername = value;
@@ -294,14 +304,22 @@ class _EditProfileState extends State<EditProfileWidget> {
                               key: ValueKey(keyValue),
                               onPressed: !fieldsChanged()
                                   ? null
-                                  : () {
-                                      userModel.updateUserData(
+                                  : () async {
+                                      try {
+                                        userModel.updateUserData(
                                           userModel.userData?.id ?? "",
                                           newUsername,
                                           newCollege,
                                           newMajor,
                                           newYear);
-                                      setState(() {});
+                                      setState(() {}); //profile changed 
+                                      } catch (e) { //catch username already exists error
+                                        setState(() { //display error text
+                                          fieldDecoration = fieldDecoration.copyWith(
+                                            errorText : "Username already exists"
+                                          );
+                                        });
+                                        }
                                     },
                               style: TextButton.styleFrom(
                                 backgroundColor: Color(0xFFE95755),
