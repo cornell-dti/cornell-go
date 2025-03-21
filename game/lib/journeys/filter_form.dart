@@ -309,6 +309,7 @@ class _FilterFormState extends State<FilterForm> {
                       selectedCategories = [];
                       selectedLocations = [];
                       selectedDifficulty = '';
+                      clearFilters();
                     });
                   },
                   child: Text('Clear'),
