@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_config/flutter_config.dart';
@@ -58,6 +59,12 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
 
+  // Set preferred orientations to portrait only
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+
   runApp(MyApp());
 }
 
@@ -79,6 +86,14 @@ Future<AndroidMapRenderer?> initializeMapRenderer() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final GoogleMapsFlutterPlatform platform = GoogleMapsFlutterPlatform.instance;
+  unawaited(
+    (platform as GoogleMapsFlutterAndroid)
+        .initializeWithRenderer(AndroidMapRenderer.latest)
+        .then(
+          (AndroidMapRenderer initializedRenderer) =>
+              completer.complete(initializedRenderer),
+        ),
+  );
   unawaited(
     (platform as GoogleMapsFlutterAndroid)
         .initializeWithRenderer(AndroidMapRenderer.latest)
