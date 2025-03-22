@@ -96,6 +96,12 @@ class _FilterFormState extends State<FilterForm> {
       filterCount = selectedCategories.length +
           selectedLocations.length +
           (selectedDifficulty.isNotEmpty ? 1 : 0);
+
+      widget.onSubmit(
+        selectedCategories,
+        selectedLocations,
+        selectedDifficulty,
+      );
     });
   }
 
@@ -106,6 +112,7 @@ class _FilterFormState extends State<FilterForm> {
       selectedDifficulty = '';
       filterCount = 0;
     });
+    widget.onSubmit([], [], '');
   }
 
   @override
