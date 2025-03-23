@@ -91,6 +91,20 @@ class _FilterFormState extends State<FilterForm> {
     });
   }
 
+  /*
+  * updateFilterState Function
+  *
+  * Updates the state of the filter selections and triggers the submission
+  * of the current filter values to the parent widget.
+  *
+  * @remarks
+  * This function recalculates the total number of active filters based on
+  * selected categories, locations, and difficulty. It then calls the
+  * `onSubmit` callback with the current filter selections to apply them.
+  * This function should be called whenever a filter is added or removed.
+  *
+  * @returns void
+  */
   void updateFilterState() {
     setState(() {
       filterCount = selectedCategories.length +
@@ -105,6 +119,19 @@ class _FilterFormState extends State<FilterForm> {
     });
   }
 
+  /*
+  * clearFilters Function
+  *
+  * Clears all selected filters and resets the filter state.
+  *
+  * @remarks
+  * This function empties the selected categories and locations, resets
+  * the difficulty selection, and sets the filter count to zero. It also
+  * calls the `onSubmit` callback with empty values to indicate that no
+  * filters are currently selected.
+  *
+  * @returns void
+  */
   void clearFilters() {
     setState(() {
       selectedCategories.clear();
@@ -351,17 +378,6 @@ class _FilterFormState extends State<FilterForm> {
                     ),
                   ],
                 ),
-                // TextButton(
-                //   onPressed: filterChallenges,
-                //   child: Text('See results'),
-                //   style: ElevatedButton.styleFrom(
-                //     foregroundColor: Color.fromARGB(255, 255, 255, 255),
-                //     backgroundColor: Color(0xFFEC5555),
-                //     shape: RoundedRectangleBorder(
-                //       borderRadius: BorderRadius.circular(10.0),
-                //     ),
-                //   ),
-                // )
               ],
             ),
           ),
