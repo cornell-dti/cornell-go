@@ -16,6 +16,27 @@ class EditProfileWidget extends StatefulWidget {
   _EditProfileState createState() => _EditProfileState();
 }
 
+/**
+ * The profile editing page of the app that allows the user to update their profile information.
+ * `EditProfileWidget` Component - A page where the user can modify their username, college, major, and graduation year.
+ * 
+ * @remarks
+ * This component serves as the screen where users can edit their profile information in the CornellGO app. It includes fields for updating:
+ * - Username
+ * - College
+ * - Major (dynamically populated based on selected college)
+ * - Graduation Year
+ * 
+ * The component is designed to be responsive, adapting to screen sizes using flexible layout strategies such as `LayoutBuilder` and `ValueListenableBuilder`. It uses a custom `DropdownWidget` for selecting college, major, and graduation year.
+ * 
+ * The page ensures that only non-empty and valid fields are allowed to update, and provides real-time updates to the "Update" button's state based on changes made to any of the fields. It consumes data from the `UserModel` and updates user profile information using the `updateUserData` method.
+ * 
+ * The app also uses the `GoogleSignInAccount` for user-related data, and the profile page reacts accordingly if the user is not signed in or if their data is unavailable.
+ * 
+ * @param key - Optional Flutter widget key for identification and testing.
+ * 
+ * @returns A StatefulWidget that displays a form to edit the user's profile information.
+ */
 class _EditProfileState extends State<EditProfileWidget> {
   GoogleSignInAccount? user = null;
   @override
