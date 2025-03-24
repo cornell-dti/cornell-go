@@ -83,39 +83,136 @@ class _EditProfileState extends State<EditProfileWidget> {
     "Architecture, Art and Planning",
     "Arts and Sciences",
     "Business",
-    // "Computing and Information Science",
+    "Computing and Information Science",
     "Engineering",
     "Human Ecology",
     "Industrial and Labor Relations (ILR)",
     "Public Policy",
     "Cornell Tech",
     "Law School",
-    // "Veterinary Medicine",
-    // "Weill Cornell Medicine"
+    "Veterinary Medicine",
+    "Weill Cornell Medicine"
   ];
+
   Map<String, List<String>> _majors = {
-    "Agriculture and Life Sciences": [],
-    "Architecture, Art and Planning": [],
-    "Business": [],
-    "Engineering": [
-      "Computer Science",
+    "Agriculture and Life Sciences": [
+      "Agricultural Sciences",
+      "Animal Science",
+      "Applied Economics & Management",
+      "Atmospheric Science",
+      "Biological Engineering",
+      "Biological Sciences",
+      "Biology & Society",
+      "Biometry & Statistics",
+      "Communication",
+      "Earth & Atmospheric Sciences",
+      "Entomology",
+      "Environment & Sustainability",
+      "Environmental Engineering",
+      "Food Science",
+      "Global & Public Health Sciences",
+      "Global Development",
       "Information Science",
-      "Chemical Engineering"
+      "Interdisciplinary Studies",
+      "Landscape Architecture",
+      "Nutritional Sciences",
+      "Plant Sciences",
+      "Viticulture & Enology"
+    ],
+    "Architecture, Art and Planning": [
+      "Architecture",
+      "Fine Arts",
+      "History of Architecture",
+      "Urban and Regional Studies"
+    ],
+    "Business": ["Applied Economics and Management", "Hotel Administration"],
+    "Engineering": [
+      "Biological Engineering",
+      "Biomedical Engineering",
+      "Chemical Engineering",
+      "Civil Engineering",
+      "Computer Science",
+      "Earth and Atmospheric Sciences",
+      "Electrical and Computer Engineering",
+      "Engineering Physics",
+      "Environmental Engineering",
+      "Independent Major",
+      "Information Science, Systems, and Technology",
+      "Materials Science and Engineering",
+      "Mechanical Engineering",
+      "Operations Research and Engineering"
     ],
     "Arts and Sciences": [
-      "Computer Science",
-      "Mathematics",
+      "Africana Studies",
+      "American Studies",
+      "Anthropology",
+      "Archaeology",
+      "Asian Studies",
+      "Astronomy",
+      "Biological Sciences",
+      "Biology and Society",
       "Chemistry",
-      "Biology",
-      "Psychology"
+      "China and Asia-Pacific Studies",
+      "Classics (Classics, Greek, Latin, Classical Civilization)",
+      "Cognitive Science",
+      "College Scholar/Independent Major",
+      "Comparative Literature",
+      "Computer Science",
+      "Earth and Atmospheric Sciences",
+      "Economics",
+      "English",
+      "Environment and Sustainability",
+      "Feminist, Gender, and Sexuality Studies",
+      "French",
+      "German Studies",
+      "Government",
+      "History",
+      "History of Art",
+      "Information Science",
+      "Italian",
+      "Jewish Studies",
+      "Linguistics",
+      "Mathematics",
+      "Music",
+      "Near Eastern Studies",
+      "Performing and Media Arts",
+      "Philosophy",
+      "Physics",
+      "Psychology",
+      "Public Policy",
+      "Religious Studies",
+      "Science and Technology Studies",
+      "Sociology",
+      "Spanish",
+      "Statistical Science",
+      "Undecided"
     ],
-    "Human Ecology": [],
+    "Human Ecology": [
+      "Design and Environmental Analysis",
+      "Fashion Design and Management",
+      "Fiber Science",
+      "Global and Public Health Sciences",
+      "Human Biology, Health, and Society",
+      "Human Development",
+      "Nutritional Sciences",
+      "Undecided"
+    ],
     "Industrial and Labor Relations (ILR)": [],
-    "Public Policy": [],
+    "Public Policy": ["Health Care Policy", "Public Policy"],
+    "Computing and Information Science": [
+      "Biometry and Statistics",
+      "Computer Science",
+      "Information Science",
+      "Information Science, Systems, and Technology",
+      "Statistical Science"
+    ],
     "Cornell Tech": [],
     "Law School": [],
+    "Veterinary Medicine": [],
+    "Weill Cornell Medicine": []
   };
-  List<String> _years = ["2024", "2025", "2026", "2027"];
+
+  List<String> _years = ["2025", "2026", "2027", "2028", "2029"];
 
   @override
   Widget build(BuildContext context) {
@@ -256,11 +353,10 @@ class _EditProfileState extends State<EditProfileWidget> {
                                         // assigning UniqueKey will rebuild widget upon state change
                                         key: ValueKey(keyValue),
                                         (_majors[newCollege] == null ||
-                                                !_majors[newCollege]!
-                                                    .contains(newMajor))
+                                                _majors[newCollege]!.isEmpty)
                                             ? null
-                                            : newMajor,
-                                        newCollege == null
+                                            : _majors[newCollege]!.first,
+                                        (newCollege == null)
                                             ? null
                                             : _majors[newCollege],
                                         notifyParent: (val) {
