@@ -260,8 +260,10 @@ class _ProfilePageState extends State<ProfilePage> {
                           .map((e) => ([
                                 AchievementCell(
                                     e.$2.description ?? "",
-                                    SvgPicture.asset(
-                                        "assets/icons/achievementsilver.svg"),
+                                    SvgPicture.asset(e.$1.progress >=
+                                            (e.$2.requiredPoints ?? 0)
+                                        ? "assets/icons/achievementgold.svg"
+                                        : "assets/icons/achievementsilver.svg"),
                                     e.$1.progress,
                                     e.$2.requiredPoints ?? 0),
                                 SizedBox(height: 10),
