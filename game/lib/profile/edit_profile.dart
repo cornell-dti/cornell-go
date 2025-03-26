@@ -159,9 +159,9 @@ class _EditProfileState extends State<EditProfileWidget> {
           String? currYear = userModel.userData?.year;
           String? currCollege = userModel.userData?.college;
           String? currMajor = userModel.userData?.major;
-
           newUsername = currUsername;
           newYear = currYear;
+          //set newYear, newCollege, newMajor to null if they are empty and not already null
           if (newYear != null && newYear!.isEmpty) {
             newYear = null;
           }
@@ -175,12 +175,13 @@ class _EditProfileState extends State<EditProfileWidget> {
           }
 
           bool fieldsChanged() {
-            if (newUsername == null ||
-                newCollege == null ||
+            //if newCollege, newYear, or newMajor are null, return false 
+            if (newCollege == null ||
                 newYear == null ||
                 newMajor == null) {
               return false;
-            }
+            } 
+            //doesnt allow username to be empty; username is never null
             if (newUsername!.isEmpty) {
               return false;
             }
@@ -214,7 +215,9 @@ class _EditProfileState extends State<EditProfileWidget> {
                               Text('Username *', style: headingStyle),
                               SizedBox(height: 5),
                               TextFormField(
-                                decoration: fieldDecoration,
+                                decoration: fieldDecoration.copyWith(
+                                  errorText : null //default errorText is null 
+                                ),
                                 initialValue: newUsername,
                                 onChanged: (value) {
                                   newUsername = value;
@@ -294,14 +297,22 @@ class _EditProfileState extends State<EditProfileWidget> {
                               key: ValueKey(keyValue),
                               onPressed: !fieldsChanged()
                                   ? null
-                                  : () {
-                                      userModel.updateUserData(
+                                  : () async {
+                                      try {
+                                        await userModel.updateUserData(
                                           userModel.userData?.id ?? "",
                                           newUsername,
                                           newCollege,
                                           newMajor,
                                           newYear);
-                                      setState(() {});
+                                      setState(() {}); //profile changed 
+                                      } catch (e) { //catch username already exists error
+                                        setState(() { //display error text
+                                          fieldDecoration = fieldDecoration.copyWith(
+                                            errorText : "Username already exists"
+                                          );
+                                        });
+                                        }
                                     },
                               style: TextButton.styleFrom(
                                 backgroundColor: Color(0xFFE95755),
