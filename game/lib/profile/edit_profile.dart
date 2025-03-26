@@ -161,6 +161,7 @@ class _EditProfileState extends State<EditProfileWidget> {
           String? currMajor = userModel.userData?.major;
           newUsername = currUsername;
           newYear = currYear;
+          //set newYear, newCollege, newMajor to null if they are empty and not already null
           if (newYear != null && newYear!.isEmpty) {
             newYear = null;
           }
@@ -174,6 +175,7 @@ class _EditProfileState extends State<EditProfileWidget> {
           }
 
           bool fieldsChanged() {
+            //if newCollege, newYear, or newMajor are null, return false 
             if (newCollege == null ||
                 newYear == null ||
                 newMajor == null) {
