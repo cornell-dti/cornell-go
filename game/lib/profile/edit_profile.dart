@@ -159,11 +159,6 @@ class _EditProfileState extends State<EditProfileWidget> {
           String? currYear = userModel.userData?.year;
           String? currCollege = userModel.userData?.college;
           String? currMajor = userModel.userData?.major;
-
-// can't repress update bar when username is changed (no option to select it, whereas for college, major, if they are changed you can reclick update button)
-// how to check if username already exists: check admin/Users, prisma postgres 
-//if no database of usernames, make one in backend 
-
           newUsername = currUsername;
           newYear = currYear;
           if (newYear != null && newYear!.isEmpty) {
@@ -184,10 +179,6 @@ class _EditProfileState extends State<EditProfileWidget> {
                 newMajor == null) {
               return false;
             } 
-            //previously returned false if username was null or 
-            //if any of the other options were null, so if the 
-            // username was changed, would still return false if other ones werent changed
-            
             //doesnt allow username to be empty; username is never null
             if (newUsername!.isEmpty) {
               return false;
@@ -306,7 +297,7 @@ class _EditProfileState extends State<EditProfileWidget> {
                                   ? null
                                   : () async {
                                       try {
-                                        userModel.updateUserData(
+                                        await userModel.updateUserData(
                                           userModel.userData?.id ?? "",
                                           newUsername,
                                           newCollege,
