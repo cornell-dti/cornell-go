@@ -43,6 +43,7 @@ Widget backBtn(scaffoldKey, context, text) {
           Positioned(
             left: 5,
             child: FloatingActionButton(
+              heroTag: "back_btn_$text",
               elevation: 2,
               onPressed: () {
                 Navigator.pop(context);
