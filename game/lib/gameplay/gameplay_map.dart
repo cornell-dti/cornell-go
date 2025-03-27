@@ -432,6 +432,19 @@ class _GameplayMapState extends State<GameplayMap> {
                   SvgPicture.asset(
                     "assets/icons/timerbg.svg"
                   ),
+                  Positioned(
+                    right: 10,
+                    top: 3,
+                    child: Text (
+                      "00:00",
+                      style: TextStyle(
+                        // fontFamily: Poppins,
+                        fontSize:12.8,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white
+                      ),
+                    ),
+                  )
                 ],
               ),
             ),
