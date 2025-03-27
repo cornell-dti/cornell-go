@@ -22,6 +22,8 @@ import 'package:game/model/tracker_model.dart';
 import 'package:game/model/group_model.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/challenge_model.dart';
+// need to change svg to bitmapdescriptor
+// https://stackoverflow.com/questions/55655554/using-svg-markers-in-google-maps-flutter-flutter-plugin
 
 /*
 
@@ -419,6 +421,18 @@ class _GameplayMapState extends State<GameplayMap> {
                     fillColor: Color.fromARGB(80, 83, 134, 237),
                   )
                 },
+              ),
+            ),
+            Positioned(
+              top: MediaQuery.of(context).size.height * 0.02, // Adjust top position
+              // left: MediaQuery.of(context).size.width * 0.5, // Adjust left position
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  SvgPicture.asset(
+                    "assets/icons/timerbg.svg"
+                  ),
+                ],
               ),
             ),
             Container(
