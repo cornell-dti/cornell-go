@@ -44,7 +44,7 @@ void main() async {
   }
   // load environment variables
   WidgetsFlutterBinding.ensureInitialized(); // Required by FlutterConfig
-  await FlutterConfig.loadEnvVariables();
+  await FlutterConfigPlus.loadEnvVariables();
 
   GeoPoint.current().then((location) {
     print(
