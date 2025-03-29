@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-// import 'package:flutter_config/flutter_config.dart';
-import 'package:flutter_config_plus/flutter_config_plus.dart';
+import 'package:flutter_config/flutter_config.dart';
+import 'package:game/api/geopoint.dart';
 import 'package:game/loading_page/loading_page.dart';
 import 'package:game/model/achievement_model.dart';
 
@@ -45,6 +46,19 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // Required by FlutterConfig
   await FlutterConfigPlus.loadEnvVariables();
 
+  GeoPoint.current().then((location) {
+    print(
+        "App startup - Location initialized: ${location.lat}, ${location.long}");
+  }).catchError((e) {
+    print("Error initializing location at startup: $e");
+  });
+
+  // Set preferred orientations to portrait only
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+
   // Set preferred orientations to portrait only
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
@@ -72,6 +86,14 @@ Future<AndroidMapRenderer?> initializeMapRenderer() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final GoogleMapsFlutterPlatform platform = GoogleMapsFlutterPlatform.instance;
+  unawaited(
+    (platform as GoogleMapsFlutterAndroid)
+        .initializeWithRenderer(AndroidMapRenderer.latest)
+        .then(
+          (AndroidMapRenderer initializedRenderer) =>
+              completer.complete(initializedRenderer),
+        ),
+  );
   unawaited(
     (platform as GoogleMapsFlutterAndroid)
         .initializeWithRenderer(AndroidMapRenderer.latest)

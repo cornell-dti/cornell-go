@@ -34,6 +34,22 @@ import 'package:velocity_x/velocity_x.dart';
  * @param key - Optional Flutter widget key for identification and testing.
  * 
  * @returns A StatefulWidget that displays the user profile interface.
+ * `ProfilePage` Component - Displays the user's profile information and achievements.
+ * 
+ * @remarks
+ * This component serves as the main profile screen in the CornellGO app, presenting
+ * the user's personal information, completed events, and achievements. It features
+ * a custom curved header with the user's avatar and score, followed by sections for
+ * completed events and achievements.
+ * 
+ * The layout is responsive, with dimensions calculated as percentages of screen size
+ * to ensure consistent appearance across different devices. It consumes data from
+ * multiple providers including UserModel, EventModel, TrackerModel, ChallengeModel,
+ * and AchievementModel.
+ * 
+ * @param key - Optional Flutter widget key for identification and testing.
+ * 
+ * @returns A StatefulWidget that displays the user profile interface.
  */
 
 class ProfilePage extends StatefulWidget {
