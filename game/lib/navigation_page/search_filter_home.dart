@@ -126,25 +126,58 @@ class _SearchFilterBarState extends State<SearchFilterBar>
                       child: Container(
                         width: 50,
                         height: 36,
-                        child: IconButton(
-                          icon: SvgPicture.asset(
-                            'assets/icons/Group 578.svg',
-                          ),
-                          onPressed: () {
-                            showModalBottomSheet(
-                              context: context,
-                              isScrollControlled: true,
-                              builder: (context) => FilterForm(
-                                onSubmit: handleFilterSubmit,
-                                difficulty: selectedDifficulty,
-                                locations: selectedLocations,
-                                categories: selectedCategories,
+                        child: Stack(
+                          children: [
+                            IconButton(
+                              icon: SvgPicture.asset(
+                                'assets/icons/Group 578.svg',
                               ),
-                            );
-                          },
+                              onPressed: () {
+                                showModalBottomSheet(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  builder: (context) => FilterForm(
+                                    onSubmit: handleFilterSubmit,
+                                    difficulty: selectedDifficulty,
+                                    locations: selectedLocations,
+                                    categories: selectedCategories,
+                                  ),
+                                );
+                              },
+                            ),
+                            if ((selectedCategories.length +
+                                    selectedLocations.length +
+                                    (selectedDifficulty.isNotEmpty ? 1 : 0)) >
+                                0)
+                              Positioned(
+                                top: 4,
+                                right: 4,
+                                child: Container(
+                                  padding: EdgeInsets.all(5),
+                                  decoration: BoxDecoration(
+                                    color: Colors.orange,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  constraints: BoxConstraints(
+                                    minWidth: 20,
+                                    minHeight: 20,
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      '${selectedCategories.length + selectedLocations.length + (selectedDifficulty.isNotEmpty ? 1 : 0)}',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
                       ),
-                    ),
+                    )
                   ],
                 ),
               ),
