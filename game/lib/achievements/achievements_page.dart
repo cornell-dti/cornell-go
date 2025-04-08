@@ -105,11 +105,15 @@ class _AchievementsPageState extends State<AchievementsPage> {
                             padding: const EdgeInsets.symmetric(horizontal: 3),
                             itemCount: achList.length,
                             itemBuilder: (context, index) {
+                              // Check if the achievement is completed
+                              bool completed = achList[index].$1.progress >=
+                                  (achList[index].$2.requiredPoints ?? 0);
                               return AchievementCell(
                                   key: UniqueKey(),
                                   achList[index].$2.description ?? "",
-                                  SvgPicture.asset(
-                                      "assets/icons/achievementsilver.svg"),
+                                  SvgPicture.asset(completed
+                                      ? "assets/icons/achievementgold.svg"
+                                      : "assets/icons/achievementsilver.svg"),
                                   achList[index].$1.progress,
                                   achList[index].$2.requiredPoints ?? 0);
                             },
