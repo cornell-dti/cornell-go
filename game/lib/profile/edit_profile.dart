@@ -39,9 +39,27 @@ class EditProfileWidget extends StatefulWidget {
  */
 class _EditProfileState extends State<EditProfileWidget> {
   GoogleSignInAccount? user = null;
+  final controller = new TextEditingController();
+
   @override
   void initState() {
     super.initState();
+
+    controller.text = newUsername ?? "";
+    controller.addListener(_updateNewUsername);
+  }
+
+  @override
+  void dispose() {
+    // Clean up the controller when the widget is removed from the widget tree.
+    // This also removes the _updateNewUsername listener.
+    controller.dispose();
+    super.dispose();
+  }
+
+  void _updateNewUsername() {
+    newUsername = controller.text;
+    updateButtonKey.value++;
   }
 
   final majorDropdownKey = ValueNotifier<double>(0);
@@ -51,6 +69,8 @@ class _EditProfileState extends State<EditProfileWidget> {
   String? newMajor;
   String? newYear;
   String? newUsername;
+
+  bool _hasSetInitialUsername = false;
 
   var headingStyle = TextStyle(
     color: Colors.black.withOpacity(0.8),
@@ -278,6 +298,11 @@ class _EditProfileState extends State<EditProfileWidget> {
           String? currCollege = userModel.userData?.college;
           String? currMajor = userModel.userData?.major;
 
+          if (!_hasSetInitialUsername && userModel.userData!.username != null) {
+            controller.text = userModel.userData!.username!;
+            _hasSetInitialUsername = true;
+          }
+
           newUsername = currUsername;
           newYear = currYear;
           if (newYear != null && newYear!.isEmpty) {
@@ -332,12 +357,8 @@ class _EditProfileState extends State<EditProfileWidget> {
                               Text('Username *', style: headingStyle),
                               SizedBox(height: 5),
                               TextFormField(
+                                controller: controller,
                                 decoration: fieldDecoration,
-                                initialValue: newUsername,
-                                onChanged: (value) {
-                                  newUsername = value;
-                                  updateButtonKey.value++;
-                                },
                               )
                             ],
                           )),
