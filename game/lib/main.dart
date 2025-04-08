@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:flutter_config/flutter_config.dart';
+import 'package:flutter_config_plus/flutter_config_plus.dart';
 import 'package:game/api/geopoint.dart';
 import 'package:game/loading_page/loading_page.dart';
 import 'package:game/model/achievement_model.dart';
@@ -43,7 +43,7 @@ void main() async {
     initializeMapRenderer();
   }
   // load environment variables
-  WidgetsFlutterBinding.ensureInitialized(); // Required by FlutterConfig
+  WidgetsFlutterBinding.ensureInitialized(); // Required by FlutterConfigPlus
   await FlutterConfigPlus.loadEnvVariables();
 
   GeoPoint.current().then((location) {

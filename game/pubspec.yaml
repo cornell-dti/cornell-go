@@ -67,6 +67,9 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
+flutter_config_plus:
+  env_file: .env
+
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
