@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:flutter_config/flutter_config.dart';
+import 'package:flutter_config_plus/flutter_config_plus.dart';
 import 'package:game/api/geopoint.dart';
 import 'package:game/loading_page/loading_page.dart';
 import 'package:game/model/achievement_model.dart';
@@ -43,7 +42,7 @@ void main() async {
     initializeMapRenderer();
   }
   // load environment variables
-  WidgetsFlutterBinding.ensureInitialized(); // Required by FlutterConfig
+  WidgetsFlutterBinding.ensureInitialized(); // Required by FlutterConfigPlus
   await FlutterConfigPlus.loadEnvVariables();
 
   GeoPoint.current().then((location) {
@@ -71,7 +70,6 @@ void main() async {
 Completer<AndroidMapRenderer?>? _initializedRendererCompleter;
 
 /// Initializes map renderer to the `latest` renderer type.
-///
 /// The renderer must be requested before creating GoogleMap instances,
 /// as the renderer can be initialized only once per application context.
 Future<AndroidMapRenderer?> initializeMapRenderer() async {
@@ -94,15 +92,6 @@ Future<AndroidMapRenderer?> initializeMapRenderer() async {
               completer.complete(initializedRenderer),
         ),
   );
-  unawaited(
-    (platform as GoogleMapsFlutterAndroid)
-        .initializeWithRenderer(AndroidMapRenderer.latest)
-        .then(
-          (AndroidMapRenderer initializedRenderer) =>
-              completer.complete(initializedRenderer),
-        ),
-  );
-
   return completer.future;
 }
 
