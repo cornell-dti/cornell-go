@@ -3,7 +3,6 @@ import 'package:flutter_svg/svg.dart';
 import 'package:game/details_page/dropdown_widget.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:game/progress_indicators/circular_progress_indicator.dart';
-
 import 'package:game/model/user_model.dart';
 import 'package:provider/provider.dart';
 
@@ -160,18 +159,28 @@ class _EditProfileState extends State<EditProfileWidget> {
           String? currCollege = userModel.userData?.college;
           String? currMajor = userModel.userData?.major;
 
-          newUsername = currUsername;
-          newYear = currYear;
-          if (newYear != null && newYear!.isEmpty) {
-            newYear = null;
+          // Initialize fields only if they haven't been already
+          if (newUsername == null) newUsername = currUsername ?? '';
+
+          if (newYear == null) {
+            newYear = currYear;
+            if (newYear != null && newYear!.isEmpty) {
+              newYear = null;
+            }
           }
-          newCollege = currCollege;
-          if (newCollege != null && newCollege!.isEmpty) {
-            newCollege = null;
+
+          if (newCollege == null) {
+            newCollege = currCollege;
+            if (newCollege != null && newCollege!.isEmpty) {
+              newCollege = null;
+            }
           }
-          newMajor = currMajor;
-          if (newMajor != null && newMajor!.isEmpty) {
-            newMajor = null;
+
+          if (newMajor == null) {
+            newMajor = currMajor;
+            if (newMajor != null && newMajor!.isEmpty) {
+              newMajor = null;
+            }
           }
 
           bool fieldsChanged() {
