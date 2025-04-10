@@ -22,8 +22,7 @@ import 'package:game/model/tracker_model.dart';
 import 'package:game/model/group_model.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/challenge_model.dart';
-// need to change svg to bitmapdescriptor
-// https://stackoverflow.com/questions/55655554/using-svg-markers-in-google-maps-flutter-flutter-plugin
+import 'package:timerun/timerun.dart';
 
 /*
 
@@ -85,6 +84,9 @@ class _GameplayMapState extends State<GameplayMap> {
   // cannot be found
   GeoPoint? currentLocation;
 
+  late TimeRun timer; //the timer for the challenge
+  String timeLeft = "01:00"; //time left that is displayed to the user
+
   int totalHints = 3;
   int numHintsLeft = 10;
   GeoPoint? startingHintCenter;
@@ -104,12 +106,52 @@ class _GameplayMapState extends State<GameplayMap> {
     super.initState();
     streamStarted = startPositionStream();
     setStartingHintCircle();
+    initTimer();
+    startTimer();
+  }
+
+  void initTimer() {
+    timer =  TimeRun(series: 3,
+    repetitions: 1,
+    pauseSeries: 0,
+    pauseRepeition: 0,
+    time: 60,
+    onUpdate: (currentSeries, totalSeries, currentRepetition, totalRepetitions, currentSeconds, timePause, currentState) {
+        int minutes = (currentSeconds / 60).floor();
+        String minutes_str = minutes.toString();
+        if (minutes < 10) {
+          minutes_str = "0"+minutes_str;
+        }
+        int seconds = currentSeconds % 60;
+        String seconds_str = seconds.toString();
+        if (seconds < 10) {
+          seconds_str = "0"+seconds_str;
+        }
+        setState( () {
+          timeLeft = minutes_str+":"+seconds_str;
+        });
+
+    },
+    onFinish: () {
+      print("TIMER DONE");
+      //TODO
+    //add 5 more min , subtract 25 points
+    },
+    onChange: (timerState) {
+      //TODO
+      //when 5 min new screen with cgo bear
+    },
+    );
+  }
+  void startTimer() {
+    timer.play();
   }
 
   @override
   void dispose() {
     positionStream.cancel();
     _disposeController();
+    timer.stop();
     super.dispose();
   }
 
@@ -423,6 +465,7 @@ class _GameplayMapState extends State<GameplayMap> {
                 },
               ),
             ),
+
             Positioned(
               top: MediaQuery.of(context).size.height * 0.02, // Adjust top position
               // left: MediaQuery.of(context).size.width * 0.5, // Adjust left position
@@ -448,7 +491,7 @@ class _GameplayMapState extends State<GameplayMap> {
                     right: 7,
                     top: 3,
                     child: Text (
-                      "00:00",
+                      timeLeft,
                       style: TextStyle(
                         // fontFamily: Poppins,
                         fontSize:12.8,
