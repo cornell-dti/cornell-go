@@ -204,8 +204,8 @@ class _EditProfileState extends State<EditProfileWidget> {
               builder: (BuildContext context, BoxConstraints constraints) {
             return SizedBox(
                 width: constraints.maxWidth * 0.85,
-                child: Column(
-                    // crossAxisAlignment: CrossAxisAlignment.center,
+                child: SingleChildScrollView(
+                  child: Column(
                     children: [
                       Padding(
                         padding: EdgeInsets.only(top: 30),
@@ -294,46 +294,47 @@ class _EditProfileState extends State<EditProfileWidget> {
                               })
                             ],
                           )),
-                      SizedBox(height: 100),
-                      ValueListenableBuilder<double>(
+                      Padding(
+                        padding: const EdgeInsets.only(top: 30, bottom: 60),
+                        child: ValueListenableBuilder<double>(
                           valueListenable: updateButtonKey,
                           builder: (BuildContext context, double keyValue,
                               Widget? child) {
-                            return TextButton(
-                              key: ValueKey(keyValue),
-                              onPressed: !fieldsChanged()
-                                  ? null
-                                  : () {
-                                      userModel.updateUserData(
-                                          userModel.userData?.id ?? "",
-                                          newUsername,
-                                          newCollege,
-                                          newMajor,
-                                          newYear);
-                                      setState(() {});
-                                    },
-                              style: TextButton.styleFrom(
-                                backgroundColor: Color(0xFFE95755),
-                                disabledBackgroundColor: Color(0xFFB9B9B9),
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 138, vertical: 16),
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8)),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    'Update',
-                                    style: buttonStyle,
-                                  ),
-                                ],
+                            return Container(
+                              width: double.infinity,
+                              child: TextButton(
+                                key: ValueKey(keyValue),
+                                onPressed: !fieldsChanged()
+                                    ? null
+                                    : () {
+                                        userModel.updateUserData(
+                                            userModel.userData?.id ?? "",
+                                            newUsername,
+                                            newCollege,
+                                            newMajor,
+                                            newYear);
+                                        setState(() {});
+                                      },
+                                style: TextButton.styleFrom(
+                                  backgroundColor: Color(0xFFE95755),
+                                  disabledBackgroundColor: Color(0xFFB9B9B9),
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 16),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8)),
+                                ),
+                                child: Text(
+                                  'Update',
+                                  style: buttonStyle,
+                                ),
                               ),
                             );
-                          })
-                    ]));
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ));
           });
         })));
   }
