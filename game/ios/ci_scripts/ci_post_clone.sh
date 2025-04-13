@@ -10,14 +10,11 @@ unzip -qq flutter_macos_3.29.0-stable.zip -d $HOME
 export PATH="$PATH:$HOME/flutter/bin"
 
 echo "🌀 Running flutter pub get..."
-cd ../../  # From ios/ci_scripts to game/
+cd ../../  # This brings you from ios/ci_scripts/ to game/
 flutter pub get
-
-echo "🚀 Building Flutter iOS release build..."
-flutter build ios --release
 
 echo "📦 Running pod install..."
 cd ios
 pod install
 
-echo "✅ Flutter iOS build and setup complete!"
+echo "✅ Flutter and CocoaPods setup complete!"
