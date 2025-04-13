@@ -1,10 +1,13 @@
 #!/bin/sh
 set -e
 
-echo "🛠 Installing CocoaPods via Homebrew..."
+echo "Installing CocoaPods via Homebrew..."
 brew install cocoapods
 
-echo "📦 Running pod install..."
+echo "Running flutter pub get..."
+flutter pub get
+
+echo "Running pod install..."
 pod install
 
-echo "✅ Done!"
+echo "Done!"
