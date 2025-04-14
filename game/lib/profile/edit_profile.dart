@@ -6,6 +6,16 @@ import 'package:game/progress_indicators/circular_progress_indicator.dart';
 import 'package:game/model/user_model.dart';
 import 'package:provider/provider.dart';
 
+/**
+ * `EditProfileWidget` - A form interface for editing user profile information.
+ * 
+ * @remarks
+ * This widget provides a complete form for users to edit their profile details including
+ * username, college, major, and graduation year. It uses dropdown selectors for predefined
+ * options and text input for the username. The widget automatically detects changes to
+ * enable/disable the update button and communicates with the UserModel to persist changes.
+ * 
+ */
 class EditProfileWidget extends StatefulWidget {
   EditProfileWidget({
     Key? key,
@@ -15,6 +25,20 @@ class EditProfileWidget extends StatefulWidget {
   _EditProfileState createState() => _EditProfileState();
 }
 
+/**
+ * State class for EditProfileWidget that manages the form state and UI.
+ * 
+ * @remarks
+ * This class maintains the state of the form fields, handles validation,
+ * and communicates with the UserModel provider to update the user's profile.
+ * It includes dropdown selections for college, major, and graduation year,
+ * with dependencies between fields (e.g., major options depend on selected college).
+ * 
+ * @privateRemarks
+ * The state uses ValueNotifier objects to trigger rebuilds of specific widget
+ * subtrees when dependent values change, which is more efficient than calling
+ * setState() for the entire widget.
+ */
 class _EditProfileState extends State<EditProfileWidget> {
   GoogleSignInAccount? user = null;
   @override
@@ -183,6 +207,7 @@ class _EditProfileState extends State<EditProfileWidget> {
             }
           }
 
+          // Determines if any profile fields have been changed from their original values.
           bool fieldsChanged() {
             if (newUsername == null ||
                 newCollege == null ||
