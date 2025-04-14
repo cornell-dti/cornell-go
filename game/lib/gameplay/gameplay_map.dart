@@ -110,6 +110,10 @@ class _GameplayMapState extends State<GameplayMap> {
     startTimer();
   }
 
+  /**
+   * Initializes a timer for the challenge. Currently starts at one minute.
+   * Each second, the remaining minutes and seconds is shown.
+   * */
   void initTimer() {
     timer =  TimeRun(series: 3,
     repetitions: 1,
@@ -478,6 +482,7 @@ class _GameplayMapState extends State<GameplayMap> {
                   Positioned (
                     left: 15.5,
                     top: 6,
+                    //Show a timer with a black background, a circular progress indicator, and a countdown. The countdown is
                     child: Container(
                       decoration: BoxDecoration(
                           color: Colors.white,
