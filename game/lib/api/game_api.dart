@@ -86,9 +86,9 @@ class ApiClient extends ChangeNotifier {
   ApiClient(FlutterSecureStorage storage, String apiUrl)
       : _storage = storage,
         _apiUrl = apiUrl,
-        _googleLoginUrl = Uri.parse(apiUrl + "/google"),
-        _deviceLoginUrl = Uri.parse(apiUrl + "/device-login"),
-        _refreshUrl = Uri.parse(apiUrl + "/refresh-access"),
+        _googleLoginUrl = Uri.parse(apiUrl).resolve("google"),
+        _deviceLoginUrl = Uri.parse(apiUrl).resolve("device-login"),
+        _refreshUrl = Uri.parse(apiUrl).resolve("refresh-access"),
         _clientApi = GameClientApi();
 
   void _createSocket(bool refreshing) async {
