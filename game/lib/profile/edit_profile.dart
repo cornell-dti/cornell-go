@@ -53,27 +53,9 @@ class EditProfileWidget extends StatefulWidget {
  */
 class _EditProfileState extends State<EditProfileWidget> {
   GoogleSignInAccount? user = null;
-  final controller = new TextEditingController();
-
   @override
   void initState() {
     super.initState();
-
-    controller.text = newUsername ?? "";
-    controller.addListener(_updateNewUsername);
-  }
-
-  @override
-  void dispose() {
-    // Clean up the controller when the widget is removed from the widget tree.
-    // This also removes the _updateNewUsername listener.
-    controller.dispose();
-    super.dispose();
-  }
-
-  void _updateNewUsername() {
-    newUsername = controller.text;
-    updateButtonKey.value++;
   }
 
   final majorDropdownKey = ValueNotifier<double>(0);
@@ -83,8 +65,6 @@ class _EditProfileState extends State<EditProfileWidget> {
   String? newMajor;
   String? newYear;
   String? newUsername;
-
-  bool _hasSetInitialUsername = false;
 
   var headingStyle = TextStyle(
     color: Colors.black.withOpacity(0.8),
@@ -312,7 +292,6 @@ class _EditProfileState extends State<EditProfileWidget> {
           String? currCollege = userModel.userData?.college;
           String? currMajor = userModel.userData?.major;
 
-
           // Initialize fields only if they haven't been already
           if (newUsername == null) newUsername = currUsername ?? '';
 
@@ -378,8 +357,12 @@ class _EditProfileState extends State<EditProfileWidget> {
                               Text('Username *', style: headingStyle),
                               SizedBox(height: 5),
                               TextFormField(
-                                controller: controller,
                                 decoration: fieldDecoration,
+                                initialValue: newUsername,
+                                onChanged: (value) {
+                                  newUsername = value;
+                                  updateButtonKey.value++;
+                                },
                               )
                             ],
                           )),
@@ -416,10 +399,11 @@ class _EditProfileState extends State<EditProfileWidget> {
                                         // assigning UniqueKey will rebuild widget upon state change
                                         key: ValueKey(keyValue),
                                         (_majors[newCollege] == null ||
-                                                _majors[newCollege]!.isEmpty)
+                                                !_majors[newCollege]!
+                                                    .contains(newMajor))
                                             ? null
-                                            : _majors[newCollege]!.first,
-                                        (newCollege == null)
+                                            : newMajor,
+                                        newCollege == null
                                             ? null
                                             : _majors[newCollege],
                                         notifyParent: (val) {
