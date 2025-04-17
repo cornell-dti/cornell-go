@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:flutter_config/flutter_config.dart';
+import 'package:flutter_config_plus/flutter_config_plus.dart';
+import 'package:game/api/geopoint.dart';
 import 'package:game/loading_page/loading_page.dart';
 import 'package:game/model/achievement_model.dart';
 
@@ -25,24 +26,40 @@ import 'package:game/widget/game_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:game/color_palette.dart';
 
-const ENV_URL = String.fromEnvironment('API_URL', defaultValue: "");
-
 final storage = FlutterSecureStorage();
-final LOOPBACK =
-    (Platform.isAndroid ? "http://10.0.2.2:8080" : "http://0.0.0.0:8080");
-final API_URL = ENV_URL == "" ? LOOPBACK : ENV_URL;
+late final String API_URL;
+late final ApiClient client;
 
 void main() async {
-  print(API_URL);
+  // Initialize Flutter bindings first - required for ALL plugins
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Load environment variables from .env file
+  await FlutterConfigPlus.loadEnvVariables();
+
+  // Define LOOPBACK and get API_URL from FlutterConfigPlus
+  final LOOPBACK =
+      (Platform.isAndroid ? "http://10.0.2.2:8080" : "http://0.0.0.0:8080");
+  API_URL = FlutterConfigPlus.get('API_URL') ?? LOOPBACK;
+  print('Using API URL: $API_URL');
+
+  // Initialize API client
+  client = ApiClient(storage, API_URL);
+
+  // Init Google Maps platform
   final GoogleMapsFlutterPlatform platform = GoogleMapsFlutterPlatform.instance;
   // should only apply to Android - needs to be tested for iOS
   if (platform is GoogleMapsFlutterAndroid) {
     (platform).useAndroidViewSurface = true;
     initializeMapRenderer();
   }
-  // load environment variables
-  WidgetsFlutterBinding.ensureInitialized(); // Required by FlutterConfig
-  await FlutterConfig.loadEnvVariables();
+
+  GeoPoint.current().then((location) {
+    print(
+        "App startup - Location initialized: ${location.lat}, ${location.long}");
+  }).catchError((e) {
+    print("Error initializing location at startup: $e");
+  });
 
   // Set preferred orientations to portrait only
   SystemChrome.setPreferredOrientations([
@@ -56,7 +73,6 @@ void main() async {
 Completer<AndroidMapRenderer?>? _initializedRendererCompleter;
 
 /// Initializes map renderer to the `latest` renderer type.
-///
 /// The renderer must be requested before creating GoogleMap instances,
 /// as the renderer can be initialized only once per application context.
 Future<AndroidMapRenderer?> initializeMapRenderer() async {
@@ -79,11 +95,8 @@ Future<AndroidMapRenderer?> initializeMapRenderer() async {
               completer.complete(initializedRenderer),
         ),
   );
-
   return completer.future;
 }
-
-final client = ApiClient(storage, API_URL);
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
