@@ -71,7 +71,7 @@ class _SearchFilterBarState extends State<SearchFilterBar>
     double deviceHeight = MediaQuery.sizeOf(context).height;
 
     return Scaffold(
-      resizeToAvoidBottomInset: true,
+      resizeToAvoidBottomInset: false,
       body: Container(
         color: Color(0xFFED5656),
         child: SafeArea(
