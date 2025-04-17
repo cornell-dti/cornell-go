@@ -13,6 +13,9 @@ echo "🌀 Running flutter pub get..."
 cd ../../  # This brings you from ios/ci_scripts/ to game/
 flutter pub get
 
+echo "📄 Creating .env file for flutter_config_plus"
+echo "IOS_MAP_API_KEY=$IOS_MAP_API_KEY" >> .env
+
 echo "📦 Running pod install..."
 cd ios
 pod install
