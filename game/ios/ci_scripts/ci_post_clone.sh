@@ -15,6 +15,7 @@ flutter pub get
 
 echo "📄 Creating .env file for flutter_config_plus"
 echo "IOS_MAP_API_KEY=$IOS_MAP_API_KEY" >> .env
+echo "API_URL=$API_URL" >> .env
 
 echo "📦 Running pod install..."
 cd ios
