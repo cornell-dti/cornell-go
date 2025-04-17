@@ -3,10 +3,19 @@ import 'package:flutter_svg/svg.dart';
 import 'package:game/details_page/dropdown_widget.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:game/progress_indicators/circular_progress_indicator.dart';
-
 import 'package:game/model/user_model.dart';
 import 'package:provider/provider.dart';
 
+/**
+ * `EditProfileWidget` - A form interface for editing user profile information.
+ * 
+ * @remarks
+ * This widget provides a complete form for users to edit their profile details including
+ * username, college, major, and graduation year. It uses dropdown selectors for predefined
+ * options and text input for the username. The widget automatically detects changes to
+ * enable/disable the update button and communicates with the UserModel to persist changes.
+ * 
+ */
 class EditProfileWidget extends StatefulWidget {
   EditProfileWidget({
     Key? key,
@@ -21,7 +30,7 @@ class EditProfileWidget extends StatefulWidget {
  * `EditProfileWidget` Component - A page where the user can modify their username, college, major, and graduation year.
  * 
  * @remarks
- * This component serves as the screen where users can edit their profile information in the CornellGO app. It includes fields for updating:
+ * This component serves as the screen where users can edit their profile information in the CornellGO app. It communicates with the UserModel provider to update the user's profile. It includes fields for updating:
  * - Username
  * - College
  * - Major (dynamically populated based on selected college)
@@ -36,6 +45,11 @@ class EditProfileWidget extends StatefulWidget {
  * @param key - Optional Flutter widget key for identification and testing.
  * 
  * @returns A StatefulWidget that displays a form to edit the user's profile information.
+
+ * @privateRemarks
+ * The state uses ValueNotifier objects to trigger rebuilds of specific widget
+ * subtrees when dependent values change, which is more efficient than calling
+ * setState() for the entire widget.
  */
 class _EditProfileState extends State<EditProfileWidget> {
   GoogleSignInAccount? user = null;
@@ -298,25 +312,32 @@ class _EditProfileState extends State<EditProfileWidget> {
           String? currCollege = userModel.userData?.college;
           String? currMajor = userModel.userData?.major;
 
-          if (!_hasSetInitialUsername && userModel.userData!.username != null) {
-            controller.text = userModel.userData!.username!;
-            _hasSetInitialUsername = true;
+
+          // Initialize fields only if they haven't been already
+          if (newUsername == null) newUsername = currUsername ?? '';
+
+          if (newYear == null) {
+            newYear = currYear;
+            if (newYear != null && newYear!.isEmpty) {
+              newYear = null;
+            }
           }
 
-          newUsername = currUsername;
-          newYear = currYear;
-          if (newYear != null && newYear!.isEmpty) {
-            newYear = null;
-          }
-          newCollege = currCollege;
-          if (newCollege != null && newCollege!.isEmpty) {
-            newCollege = null;
-          }
-          newMajor = currMajor;
-          if (newMajor != null && newMajor!.isEmpty) {
-            newMajor = null;
+          if (newCollege == null) {
+            newCollege = currCollege;
+            if (newCollege != null && newCollege!.isEmpty) {
+              newCollege = null;
+            }
           }
 
+          if (newMajor == null) {
+            newMajor = currMajor;
+            if (newMajor != null && newMajor!.isEmpty) {
+              newMajor = null;
+            }
+          }
+
+          // Determines if any profile fields have been changed from their original values.
           bool fieldsChanged() {
             if (newUsername == null ||
                 newCollege == null ||
@@ -338,8 +359,8 @@ class _EditProfileState extends State<EditProfileWidget> {
               builder: (BuildContext context, BoxConstraints constraints) {
             return SizedBox(
                 width: constraints.maxWidth * 0.85,
-                child: Column(
-                    // crossAxisAlignment: CrossAxisAlignment.center,
+                child: SingleChildScrollView(
+                  child: Column(
                     children: [
                       Padding(
                         padding: EdgeInsets.only(top: 30),
@@ -423,46 +444,47 @@ class _EditProfileState extends State<EditProfileWidget> {
                               })
                             ],
                           )),
-                      SizedBox(height: 100),
-                      ValueListenableBuilder<double>(
+                      Padding(
+                        padding: const EdgeInsets.only(top: 30, bottom: 60),
+                        child: ValueListenableBuilder<double>(
                           valueListenable: updateButtonKey,
                           builder: (BuildContext context, double keyValue,
                               Widget? child) {
-                            return TextButton(
-                              key: ValueKey(keyValue),
-                              onPressed: !fieldsChanged()
-                                  ? null
-                                  : () {
-                                      userModel.updateUserData(
-                                          userModel.userData?.id ?? "",
-                                          newUsername,
-                                          newCollege,
-                                          newMajor,
-                                          newYear);
-                                      setState(() {});
-                                    },
-                              style: TextButton.styleFrom(
-                                backgroundColor: Color(0xFFE95755),
-                                disabledBackgroundColor: Color(0xFFB9B9B9),
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 138, vertical: 16),
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8)),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    'Update',
-                                    style: buttonStyle,
-                                  ),
-                                ],
+                            return Container(
+                              width: double.infinity,
+                              child: TextButton(
+                                key: ValueKey(keyValue),
+                                onPressed: !fieldsChanged()
+                                    ? null
+                                    : () {
+                                        userModel.updateUserData(
+                                            userModel.userData?.id ?? "",
+                                            newUsername,
+                                            newCollege,
+                                            newMajor,
+                                            newYear);
+                                        setState(() {});
+                                      },
+                                style: TextButton.styleFrom(
+                                  backgroundColor: Color(0xFFE95755),
+                                  disabledBackgroundColor: Color(0xFFB9B9B9),
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 16),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8)),
+                                ),
+                                child: Text(
+                                  'Update',
+                                  style: buttonStyle,
+                                ),
                               ),
                             );
-                          })
-                    ]));
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ));
           });
         })));
   }

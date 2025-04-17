@@ -121,7 +121,7 @@ class ApiClient extends ChangeNotifier {
       final refreshResult = await _accessRefresher();
       if (!refreshResult) {
         _serverApi = null;
-      }    
+      }
     });
 
     socket.onConnect((data) {
