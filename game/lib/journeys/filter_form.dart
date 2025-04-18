@@ -32,12 +32,16 @@ class _FilterFormState extends State<FilterForm> {
   List<String> selectedCategories = [];
   List<String> selectedLocations = [];
   late String selectedDifficulty;
+  int filterCount = 0;
 
   _FilterFormState(
       String? difficulty, List<String>? locations, List<String>? categories) {
     selectedDifficulty = difficulty ?? '';
     selectedLocations = locations ?? [];
     selectedCategories = categories ?? [];
+    filterCount = selectedCategories.length +
+        selectedLocations.length +
+        (selectedDifficulty.isNotEmpty ? 1 : 0);
   }
 
   List<EventCategoryDto> categories = EventCategoryDto.values;
@@ -59,25 +63,83 @@ class _FilterFormState extends State<FilterForm> {
   }
 
   void toggleCategory(String category) {
-    if (selectedCategories.contains(category)) {
-      selectedCategories.remove(category);
-    } else {
-      selectedCategories.add(category);
-    }
+    setState(() {
+      if (selectedCategories.contains(category)) {
+        selectedCategories.remove(category);
+      } else {
+        selectedCategories.add(category);
+      }
+      updateFilterState();
+    });
   }
 
   void toggleLocation(String location) {
-    if (selectedLocations.contains(location)) {
-      selectedLocations.remove(location);
-    } else {
-      selectedLocations.add(location);
-    }
+    setState(() {
+      if (selectedLocations.contains(location)) {
+        selectedLocations.remove(location);
+      } else {
+        selectedLocations.add(location);
+      }
+      updateFilterState();
+    });
   }
 
   void setDifficulty(String diff) {
     setState(() {
       selectedDifficulty = diff;
+      updateFilterState();
     });
+  }
+
+  /*
+  * updateFilterState Function
+  *
+  * Updates the state of the filter selections and triggers the submission
+  * of the current filter values to the parent widget.
+  *
+  * @remarks
+  * This function recalculates the total number of active filters based on
+  * selected categories, locations, and difficulty. It then calls the
+  * `onSubmit` callback with the current filter selections to apply them.
+  * This function should be called whenever a filter is added or removed.
+  *
+  * @returns void
+  */
+  void updateFilterState() {
+    setState(() {
+      filterCount = selectedCategories.length +
+          selectedLocations.length +
+          (selectedDifficulty.isNotEmpty ? 1 : 0);
+
+      widget.onSubmit(
+        selectedCategories,
+        selectedLocations,
+        selectedDifficulty,
+      );
+    });
+  }
+
+  /*
+  * clearFilters Function
+  *
+  * Clears all selected filters and resets the filter state.
+  *
+  * @remarks
+  * This function empties the selected categories and locations, resets
+  * the difficulty selection, and sets the filter count to zero. It also
+  * calls the `onSubmit` callback with empty values to indicate that no
+  * filters are currently selected.
+  *
+  * @returns void
+  */
+  void clearFilters() {
+    setState(() {
+      selectedCategories.clear();
+      selectedLocations.clear();
+      selectedDifficulty = '';
+      filterCount = 0;
+    });
+    widget.onSubmit([], [], '');
   }
 
   @override
@@ -281,6 +343,7 @@ class _FilterFormState extends State<FilterForm> {
                       selectedCategories = [];
                       selectedLocations = [];
                       selectedDifficulty = '';
+                      clearFilters();
                     });
                   },
                   child: Text('Clear'),
@@ -292,17 +355,29 @@ class _FilterFormState extends State<FilterForm> {
                     ),
                   ),
                 ),
-                TextButton(
-                  onPressed: filterChallenges,
-                  child: Text('See results'),
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Color.fromARGB(255, 255, 255, 255),
-                    backgroundColor: Color(0xFFEC5555),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
+                Stack(
+                  children: [
+                    TextButton(
+                      onPressed: filterCount > 0 ? filterChallenges : null,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: filterCount > 0
+                            ? const Color(0xFFEC5555) // Active color
+                            : Colors.grey, // Disabled color
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                      ),
+                      child: Text(
+                        filterCount == 0
+                            ? 'See 0 result'
+                            : filterCount == 1
+                                ? 'See $filterCount result'
+                                : 'See $filterCount results',
+                      ),
                     ),
-                  ),
-                )
+                  ],
+                ),
               ],
             ),
           ),
