@@ -86,6 +86,8 @@ class _GameplayMapState extends State<GameplayMap> {
 
   late TimeRun timer; //the timer for the challenge
   String timeLeft = "01:00"; //time left that is displayed to the user
+  late double currentTime = 0.0;
+  int totalTime= 60;
 
   int totalHints = 3;
   int numHintsLeft = 10;
@@ -119,7 +121,7 @@ class _GameplayMapState extends State<GameplayMap> {
     repetitions: 1,
     pauseSeries: 0,
     pauseRepeition: 0,
-    time: 60,
+    time: totalTime,
     onUpdate: (currentSeries, totalSeries, currentRepetition, totalRepetitions, currentSeconds, timePause, currentState) {
         int minutes = (currentSeconds / 60).floor();
         String minutes_str = minutes.toString();
@@ -133,6 +135,7 @@ class _GameplayMapState extends State<GameplayMap> {
         }
         setState( () {
           timeLeft = minutes_str+":"+seconds_str;
+          currentTime = currentSeconds * 1.0 ;
         });
 
     },
@@ -488,8 +491,15 @@ class _GameplayMapState extends State<GameplayMap> {
                           color: Colors.white,
                           shape: BoxShape.circle,
                       ),
-                    width:14,
-                    height:14,
+                      child: CustomPaint(
+                        size: Size(14,14),
+                        painter: CircleSliceTimer(progress: currentTime/totalTime),
+                      // child: CircularProgressIndicator(
+                      //   value: 1.0 - currentTime/totalTime
+                        // color: Colors.white,
+                      // width:14,
+                      // height:14,
+                      ),
                   ),
                   ),
                 Positioned(
@@ -864,4 +874,41 @@ class _GameplayMapState extends State<GameplayMap> {
             ),
           );
   }
+}
+
+/**
+ * CircleSliceTimer creates the circular icon timer for a challenge.
+ * The timer starts out as a fully white circle, and slices of the timer are cut out as time progresses in the challenge.
+ * */
+class CircleSliceTimer extends CustomPainter {
+  final double progress;
+  CircleSliceTimer ({
+    required this.progress
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    Paint paint = Paint()
+        ..color = Colors.white
+        ..style = PaintingStyle.fill;
+
+    Paint backgroundPaint = Paint()
+          ..color = Colors.grey
+          ..style = PaintingStyle.fill;
+
+    canvas.drawCircle(Offset(size.width / 2, size.height / 2), size.width / 2, paint);
+    double sweepAngle = 2 * pi * (1.0 - progress); //subtract from 1 so clockwise
+    canvas.drawArc(
+      Rect.fromCircle(center: Offset(size.width / 2, size.height / 2), radius: size.width / 2),
+      -pi / 2,
+      sweepAngle,
+      true,
+      backgroundPaint,
+    );
+  }
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) {
+    return true;
+  }
+
 }
