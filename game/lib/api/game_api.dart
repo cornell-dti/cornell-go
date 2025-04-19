@@ -323,5 +323,3 @@ class ApiClient extends ChangeNotifier {
     }
   }
 }
-
-//
