@@ -87,7 +87,7 @@ class _GameplayMapState extends State<GameplayMap> {
   late TimeRun timer; //the timer for the challenge
   String timeLeft = "01:00"; //time left that is displayed to the user
   late double currentTime = 0.0;
-  int totalTime= 60;
+  int totalTime= 315;
 
   int totalHints = 3;
   int numHintsLeft = 10;
@@ -479,13 +479,16 @@ class _GameplayMapState extends State<GameplayMap> {
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  SvgPicture.asset(
-                    "assets/icons/timerbg.svg"
-                  ),
+                  (currentTime < 300) ?
+                  SvgPicture.asset( //turn timer red when less than 5 minutes left
+                    "assets/icons/timerbg_red.svg"
+                  ) :
+                    SvgPicture.asset( "assets/icons/timerbg.svg"
+                    ),
                   Positioned (
                     left: 15.5,
                     top: 6,
-                    //Show a timer with a black background, a circular progress indicator, and a countdown. The countdown is
+                    //Show a circular progress indicator
                     child: Container(
                       decoration: BoxDecoration(
                           color: Colors.white,
@@ -494,11 +497,6 @@ class _GameplayMapState extends State<GameplayMap> {
                       child: CustomPaint(
                         size: Size(14,14),
                         painter: CircleSliceTimer(progress: currentTime/totalTime),
-                      // child: CircularProgressIndicator(
-                      //   value: 1.0 - currentTime/totalTime
-                        // color: Colors.white,
-                      // width:14,
-                      // height:14,
                       ),
                   ),
                   ),
@@ -882,6 +880,7 @@ class _GameplayMapState extends State<GameplayMap> {
  * */
 class CircleSliceTimer extends CustomPainter {
   final double progress;
+
   CircleSliceTimer ({
     required this.progress
   });
