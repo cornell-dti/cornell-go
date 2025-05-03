@@ -25,7 +25,6 @@ import 'package:game/splash_page/splash_page.dart';
 import 'package:game/widget/game_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:game/color_palette.dart';
-import 'package:game/quiz/quiz_page.dart';
 
 final storage = FlutterSecureStorage();
 late final String API_URL;
@@ -99,15 +98,6 @@ Future<AndroidMapRenderer?> initializeMapRenderer() async {
   return completer.future;
 }
 
-class QuizPageWrapper extends StatelessWidget {
-  const QuizPageWrapper({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return QuizPage(); // 👈 This shows your quiz page
-  }
-}
-
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
@@ -145,7 +135,7 @@ class MyApp extends StatelessWidget {
             primarySwatch: ColorPalette.BigRed,
             useMaterial3: false,
           ),
-          home: const QuizPageWrapper(),
+          home: LoadingPageWidget(client.tryRelog()),
         ),
       ),
     );
