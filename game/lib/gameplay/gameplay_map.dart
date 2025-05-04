@@ -660,34 +660,83 @@ class _GameplayMapState extends State<GameplayMap> {
                   child: SvgPicture.asset('assets/images/arrived.svg',
                       fit: BoxFit.cover),
                 ),
-                Center(
-                  child: ElevatedButton(
+                Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                  ElevatedButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      style: ButtonStyle(
+                        padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
+                            EdgeInsets.symmetric(
+                                horizontal:
+                                    (MediaQuery.devicePixelRatioOf(context) < 3
+                                        ? 6
+                                        : 10))),
+                        shape:
+                            MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                                7.3), // Adjust the radius as needed
+                          ),
+                        ),
+                        side: MaterialStateProperty.all<BorderSide>(
+                          BorderSide(
+                            color: Color.fromARGB(
+                                255, 237, 86, 86), // Specify the border color
+                            width: 2.0, // Specify the border width
+                          ),
+                        ),
+                        backgroundColor:
+                            MaterialStateProperty.all<Color>(Colors.white),
+                      ),
+                      child: Text("Point Breakdown",
+                          style: TextStyle(
+                              fontSize:
+                                  MediaQuery.devicePixelRatioOf(context) < 3
+                                      ? 12
+                                      : 14,
+                              color: Color.fromARGB(255, 237, 86, 86)))),
+                  const SizedBox(width: 10),
+                  ElevatedButton.icon(
                     onPressed: () {
                       Navigator.pop(context);
-                      Navigator.pushReplacement(
+                      Navigator.push(
                         context,
-                        MaterialPageRoute(
-                            builder: (context) => ChallengeCompletedPage(
-                                  challengeId: challengeId,
-                                )),
+                        MaterialPageRoute(builder: (context) => QuizPage()),
                       );
                     },
+                    icon: SvgPicture.asset(
+                      'assets/icons/bearcoins.svg',
+                      height: 19,
+                      width: 19,
+                    ),
+                    label: Text(
+                      "+10 PTS",
+                      style: TextStyle(
+                        fontSize: MediaQuery.devicePixelRatioOf(context) < 3
+                            ? 12
+                            : 14,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     style: ButtonStyle(
                       padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
-                          EdgeInsets.only(left: 15, right: 15)),
+                        EdgeInsets.symmetric(
+                          horizontal: MediaQuery.devicePixelRatioOf(context) < 3
+                              ? 3
+                              : 7,
+                        ),
+                      ),
                       shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                         RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                              7.3), // Adjust the radius as needed
+                          borderRadius: BorderRadius.circular(7.3),
                         ),
                       ),
                       backgroundColor: MaterialStateProperty.all<Color>(
-                          Color.fromARGB(255, 237, 86, 86)),
+                        Color(0xFFED5656),
+                      ),
                     ),
-                    child: Text("Point Breakdown",
-                        style: TextStyle(color: Colors.white)),
                   ),
-                )
+                ])
               ],
             ),
           )
