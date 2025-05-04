@@ -21,6 +21,21 @@ class DetailsPageWidget extends StatefulWidget {
   _DetailsPageWidgetState createState() => _DetailsPageWidgetState();
 }
 
+/* A form page in the onboarding flow for collecting user academic details.
+
+This widget allows users to input their username (required), college, major,
+and graduation year. The major dropdown updates dynamically based on the
+selected college. All inputs are validated before proceeding.
+
+Upon successful validation, the user is navigated to [InterestsPageWidget]
+with their entered details and authentication info (user type, ID token, etc.).
+
+Key features include:
+- Dynamic dropdowns for college, major, and year
+- Form validation using [_formKey]
+- State-managed inputs with real-time updates
+
+This page is a required step in the onboarding process before collecting interests. */
 class _DetailsPageWidgetState extends State<DetailsPageWidget> {
   String _name = "";
   String? _college;

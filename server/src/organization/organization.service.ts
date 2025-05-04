@@ -102,8 +102,13 @@ export class OrganizationService {
   }
 
   async getDefaultEvent(org: Organization): Promise<EventBase> {
+    // First try to find an event that has at least one challenge
+
     return await this.prisma.eventBase.findFirstOrThrow({
-      where: { usedIn: { some: { id: org.id } } },
+      where: {
+        usedIn: { some: { id: org.id } },
+        challenges: { some: {} }, // This ensures at least one challenge exists
+      },
     });
   }
 
