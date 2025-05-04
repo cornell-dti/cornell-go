@@ -4,7 +4,10 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:game/gameplay/challenge_completed.dart';
 
+/// Provider that manages the quiz state, including question tracking,
+/// answer selection, point calculation, and shuffle logic.
 class QuizProvider extends ChangeNotifier {
+  // List of all quiz questions and associated metadata.
   final List<Map<String, dynamic>> _questionBank = [
     {
       'category': 'Physical',
@@ -31,25 +34,27 @@ class QuizProvider extends ChangeNotifier {
     },
   ];
 
-  final _rng = Random();
-  int _curIdx = 0;
-  List<String> _answers = [];
-  int shuffleLeft = 3;
-  int? selectedIdx;
-  bool submitted = false;
-  bool? correct;
-  int totalPoints = 0;
+  final _rng = Random(); // For shuffling questions
+  int _curIdx = 0; // Index of current question
+  List<String> _answers = []; // Shuffled answer list
+  int shuffleLeft = 3; // Shuffle attempts remaining
+  int? selectedIdx; // Index of selected answer
+  bool submitted = false; // Whether the user has submitted the answer
+  bool? correct; // Whether the submitted answer is correct
+  int totalPoints = 0; // Cumulative points
 
   QuizProvider() {
     _answers = List<String>.from(_questionBank.first['answers']);
   }
 
+  // Getters to expose relevant quiz data
   String get category => _questionBank[_curIdx]['category'];
   String get question => _questionBank[_curIdx]['question'];
   List<String> get answers => _answers;
   String get correctAnswer => _questionBank[_curIdx]['correct'];
   bool get isLast => _curIdx == _questionBank.length - 1;
 
+  /// Shuffle to a new question (if remaining shuffles exist and answer not yet submitted)
   void shuffle() {
     if (shuffleLeft == 0 || submitted) return;
     int newIdx = _curIdx;
@@ -64,6 +69,7 @@ class QuizProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Record user's selected answer index
   void selectAnswer(int i) {
     if (!submitted) {
       selectedIdx = i;
@@ -71,6 +77,7 @@ class QuizProvider extends ChangeNotifier {
     }
   }
 
+  /// Submit the selected answer, update points if correct
   void submit() {
     if (selectedIdx == null || submitted) return;
     submitted = true;
@@ -79,6 +86,7 @@ class QuizProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Move to next question in the quiz
   void nextQuestion() {
     if (isLast) return;
     _curIdx++;
@@ -91,6 +99,7 @@ class QuizProvider extends ChangeNotifier {
   }
 }
 
+/// Entry widget for quiz page that initializes the provider
 class QuizPage extends StatelessWidget {
   const QuizPage({Key? key}) : super(key: key);
 
@@ -103,12 +112,14 @@ class QuizPage extends StatelessWidget {
   }
 }
 
+/// Main quiz UI screen
 class _QuizScreen extends StatelessWidget {
   const _QuizScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Consumer<QuizProvider>(builder: (context, quiz, _) {
+      // Show result dialog immediately after submission
       if (quiz.submitted) {
         Future.microtask(() => _showResultDialog(context, quiz));
       }
@@ -140,8 +151,10 @@ class _QuizScreen extends StatelessWidget {
     });
   }
 
+  /// Category + Points header bar
   Widget _header(QuizProvider quiz) {
     return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+      // Quiz category label
       Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
@@ -150,6 +163,7 @@ class _QuizScreen extends StatelessWidget {
         child: Text(quiz.category,
             style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
       ),
+      // Points display
       Row(children: [
         SvgPicture.asset('assets/icons/bearcoins.svg',
             height: 18, width: 18, color: const Color(0xFFC17E19)),
@@ -163,6 +177,7 @@ class _QuizScreen extends StatelessWidget {
     ]);
   }
 
+  /// Displays the current question and a shuffle button
   Widget _questionCard(QuizProvider quiz) {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -186,6 +201,7 @@ class _QuizScreen extends StatelessWidget {
     );
   }
 
+  /// Generates tappable list of answer options
   Widget _answerList(QuizProvider quiz) {
     return Column(
       children: List.generate(quiz.answers.length, (idx) {
@@ -216,6 +232,7 @@ class _QuizScreen extends StatelessWidget {
     );
   }
 
+  /// Submit button to finalize the answer
   Widget _submitBtn(QuizProvider quiz) {
     final enabled = quiz.selectedIdx != null;
     return SizedBox(
@@ -237,6 +254,7 @@ class _QuizScreen extends StatelessWidget {
     );
   }
 
+  /// Modal that shows up after answer submission
   Future<void> _showResultDialog(
       BuildContext context, QuizProvider quiz) async {
     if (ModalRoute.of(context)?.isCurrent != true) return;
@@ -255,7 +273,7 @@ class _QuizScreen extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.all(18),
               child: Column(mainAxisSize: MainAxisSize.min, children: [
-                // header row
+                // Dialog header
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -273,6 +291,7 @@ class _QuizScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
 
+                // Body depending on correctness
                 if (isCorrect) ...[
                   SvgPicture.asset('assets/icons/confetti.svg',
                       height: 80, width: 80),
@@ -312,6 +331,7 @@ class _QuizScreen extends StatelessWidget {
 
                 const SizedBox(height: 16),
 
+                // Navigation button
                 SizedBox(
                   width: double.infinity,
                   child: OutlinedButton(
@@ -336,6 +356,7 @@ class _QuizScreen extends StatelessWidget {
         });
   }
 
+  /// Final summary dialog shown after the last quiz question
   void _showFinal(BuildContext context, int pts) {
     showDialog(
         context: context,
