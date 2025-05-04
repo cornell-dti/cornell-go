@@ -662,7 +662,17 @@ class _GameplayMapState extends State<GameplayMap> {
                 ),
                 Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                   ElevatedButton(
-                      onPressed: () => Navigator.pop(context, false),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ChallengeCompletedPage(
+                              challengeId: challengeId,
+                            ),
+                          ),
+                        );
+                      },
                       style: ButtonStyle(
                         padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
                             EdgeInsets.symmetric(
