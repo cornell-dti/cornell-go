@@ -59,6 +59,18 @@ class UserModel extends ChangeNotifier {
     return evIds.toList();
   }
 
+  List<String> getAvailableAchievementIds() {
+    Set<String> achIds = Set();
+
+    for (final org in orgData.values) {
+      if (org.achivements != null) {
+        achIds.addAll(org.achivements!);
+      }
+    }
+
+    return achIds.toList();
+  }
+
   void updateUserData(String id, String? username, String? college,
       String? major, String? year) {
     _client.serverApi?.updateUserData(UpdateUserDataDto(
