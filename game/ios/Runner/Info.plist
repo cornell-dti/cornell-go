@@ -42,11 +42,11 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSLocationAlwaysUsageDescription</key>
-	<string> CornellGO! servers need access to your location. </string>
+	<string>We use your location to help improve your experience using CornellGo, including detecting when you have successfully found an event's location so you can gain points and move on to the next challenge.</string>
 	<key>NSLocationUsageDescription</key>
-	<string> CornellGO! servers need access to your location. </string>
+	<string>We use your location to help improve your experience using CornellGo, including detecting when you have successfully found an event's location so you can gain points and move on to the next challenge.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string> CornellGO! servers need access to your location. </string>
+	<string>We use your location to help improve your experience using CornellGo, including detecting when you have successfully found an event's location so you can gain points and move on to the next challenge.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
