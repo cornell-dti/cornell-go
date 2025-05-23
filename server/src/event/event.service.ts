@@ -119,7 +119,7 @@ export class EventService {
       select * from "EventBase" ev 
       inner join "Challenge" chal 
       on ev.id = chal."linkedEventId" and ev."id" = ${defEv.id}
-      order by ((chal."latitude" - ${lat})^2 + (chal."longitude" - ${long})^2) desc
+      order by ((chal."latitude" - ${lat})^2 + (chal."longitude" - ${long})^2) asc
     `;
 
     if (defaultEvent.length === 0) throw 'Cannot find closest challenge!';

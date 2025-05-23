@@ -25,6 +25,10 @@ class AchievementModel extends ChangeNotifier {
     });
 
     client.clientApi.connectedStream.listen((event) {
+      _achievementsById.clear();
+
+      client.serverApi
+          ?.requestAchievementData(RequestAchievementDataDto(achievements: []));
       client.serverApi
           ?.requestAchievementTrackerData(RequestAchievementTrackerDataDto());
 
@@ -33,11 +37,6 @@ class AchievementModel extends ChangeNotifier {
 
     client.clientApi.updateAchievementTrackerDataStream.listen((event) {
       _trackersByAchId[event.achievementId] = event;
-      notifyListeners();
-    });
-
-    client.clientApi.connectedStream.listen((event) {
-      _achievementsById.clear();
       notifyListeners();
     });
   }
@@ -56,13 +55,16 @@ class AchievementModel extends ChangeNotifier {
     return _trackersByAchId.valuesList();
   }
 
-  List<(AchievementTrackerDto, AchievementDto)> getAvailableTrackerPairs() {
+  List<(AchievementTrackerDto, AchievementDto)> getAvailableTrackerPairs({
+    required List<String> allowedAchievementIds,
+  }) {
     final achTrackers = getAchievementTrackers();
 
     return achTrackers
-        .map((e) => (e, getAchievementById(e.achievementId)))
-        .filter((e) => e.$2 != null)
-        .map((e) => (e.$1, e.$2!))
+        .where((t) => allowedAchievementIds.contains(t.achievementId))
+        .map((t) => (t, getAchievementById(t.achievementId)))
+        .where((pair) => pair.$2 != null)
+        .map((pair) => (pair.$1, pair.$2!))
         .toList();
   }
 }

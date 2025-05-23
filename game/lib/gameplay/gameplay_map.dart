@@ -90,11 +90,32 @@ class _GameplayMapState extends State<GameplayMap> {
   double defaultHintRadius = 200.0;
   double? hintRadius;
 
-  // whether the picture is expanded over the map
-  bool isExpanded = false;
-
   // Add this to your state variables (After isExapnded)
   bool isArrivedButtonEnabled = true;
+
+  // whether the picture is expanded over the map
+  bool isExpanded = false;
+  double pictureWidth = 80, pictureHeight = 80;
+  Alignment pictureAlign = Alignment.topRight;
+
+  // size variables for expanding picture for animation
+
+  var pictureIcon = SvgPicture.asset("assets/icons/mapexpand.svg");
+  // var pictureAlign = Alignment.topRight;
+
+  /// Switch between the two sizes
+  void _toggle() => setState(() {
+        isExpanded = !isExpanded;
+
+        if (isExpanded) {
+          pictureHeight = MediaQuery.of(context).size.height * 0.60;
+          pictureWidth = MediaQuery.of(context).size.width * 0.90;
+          pictureAlign = Alignment.topCenter;
+        } else {
+          pictureHeight = pictureWidth = 80;
+          pictureAlign = Alignment.topRight;
+        }
+      });
 
   @override
   void initState() {
@@ -312,12 +333,6 @@ class _GameplayMapState extends State<GameplayMap> {
     }
   }
 
-  // size variables for expanding picture for animation
-  var pictureWidth = 80.0;
-  var pictureHeight = 80.0;
-  var pictureIcon = SvgPicture.asset("assets/icons/mapexpand.svg");
-  var pictureAlign = Alignment.topRight;
-
   @override
   Widget build(BuildContext context) {
     // return FutureBuilder<bool>(
@@ -328,6 +343,7 @@ class _GameplayMapState extends State<GameplayMap> {
     final client = Provider.of<ApiClient>(context);
 
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
         colorSchemeSeed: Colors.green[700],
@@ -355,8 +371,7 @@ class _GameplayMapState extends State<GameplayMap> {
               "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png";
         }
 
-        return Scaffold(
-            body: Stack(
+        return Stack(
           alignment: Alignment.bottomCenter,
           children: [
             StreamBuilder(
@@ -555,62 +570,59 @@ class _GameplayMapState extends State<GameplayMap> {
               ),
             ),
             Positioned(
-              // expandable image in top right of map
-              // padding: EdgeInsets.only(left: 10.0, right: 10, top: 0.0),
               top: MediaQuery.of(context).size.width * 0.05,
               right: MediaQuery.of(context).size.width * 0.05,
-              child: GestureDetector(
-                onTap: () {
-                  isExpanded
-                      ? setState(() {
-                          isExpanded = false;
-                          pictureHeight = 80.0;
-                          pictureWidth = 80.0;
-                          pictureIcon =
-                              SvgPicture.asset("assets/icons/mapexpand.svg");
-                          pictureAlign = Alignment.topRight;
-                        })
-                      : setState(() {
-                          isExpanded = true;
-                          pictureHeight =
-                              MediaQuery.of(context).size.height * 0.6;
-                          pictureWidth =
-                              MediaQuery.of(context).size.width * 0.90;
-                          pictureIcon =
-                              SvgPicture.asset("assets/icons/mapexit.svg");
-                          pictureAlign = Alignment.topCenter;
-                        });
-                },
-                child: AnimatedContainer(
-                  duration: Duration(milliseconds: 100),
-                  width: pictureWidth,
-                  height: pictureHeight,
-                  child: Stack(
-                    children: [
-                      Container(
-                        alignment: pictureAlign,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: Image.network(
-                            imageUrl,
-                            fit: BoxFit.cover,
-                            width: pictureWidth,
-                            height: pictureHeight,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 100),
+                width: pictureWidth,
+                height: pictureHeight,
+                child: Stack(
+                  children: [
+                    // photo
+                    Align(
+                      alignment: pictureAlign,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Image.network(
+                          imageUrl,
+                          fit: BoxFit.cover,
+                          width: pictureWidth,
+                          height: pictureHeight,
+                        ),
+                      ),
+                    ),
+
+                    // inside your Stack → AnimatedContainer
+                    Positioned(
+                      top: 4,
+                      right: 4,
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () {
+                          print("ICON TAPPED!"); // Debug print
+                          _toggle();
+                        },
+                        child: Container(
+                          width: 60, // Larger invisible hit-area
+                          height: 60,
+                          alignment: Alignment.topRight,
+                          // Make the debug rectangle much more visible
+                          child: SvgPicture.asset(
+                            isExpanded
+                                ? 'assets/icons/mapexit.svg'
+                                : 'assets/icons/mapexpand.svg',
+                            width: 40,
+                            height: 40,
                           ),
                         ),
                       ),
-                      Padding(
-                        padding: EdgeInsets.all(4.0),
-                        child: Container(
-                            alignment: Alignment.topRight, child: pictureIcon),
-                      ),
-                    ],
-                  ),
+                    )
+                  ],
                 ),
               ),
             ),
           ],
-        ));
+        );
       }),
     );
     // });
