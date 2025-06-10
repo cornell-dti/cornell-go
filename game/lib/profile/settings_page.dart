@@ -9,7 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 final FEEDBACK_URL = Uri.parse(
-    "https://docs.google.com/forms/d/e/1FAIpQLSczSG6iJ_yv6zqlqNJWrtvSB7aupTiIvYGmy7nAzKKKPal-5g/viewform");
+    "https://docs.google.com/forms/d/e/1FAIpQLSeY1vhtUVmaUo1806AK58wNkVT3iS21vefGakeNBV1ud9XP3g/viewform?usp=dialog");
 
 class SettingsPage extends StatelessWidget {
   final bool isGuest;
