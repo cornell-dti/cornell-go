@@ -368,13 +368,7 @@ class _FilterFormState extends State<FilterForm> {
                           borderRadius: BorderRadius.circular(10.0),
                         ),
                       ),
-                      child: Text(
-                        filterCount == 0
-                            ? 'See 0 result'
-                            : filterCount == 1
-                                ? 'See $filterCount result'
-                                : 'See $filterCount results',
-                      ),
+                      child: Text("See results"),
                     ),
                   ],
                 ),
