@@ -60,6 +60,7 @@ class AchievementModel extends ChangeNotifier {
   }) {
     final achTrackers = getAchievementTrackers();
 
+    // Filters achievements by organizing membership before returning tracker pairs
     return achTrackers
         .where((t) => allowedAchievementIds.contains(t.achievementId))
         .map((t) => (t, getAchievementById(t.achievementId)))

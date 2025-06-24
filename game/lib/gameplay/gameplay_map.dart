@@ -101,7 +101,6 @@ class _GameplayMapState extends State<GameplayMap> {
   // size variables for expanding picture for animation
 
   var pictureIcon = SvgPicture.asset("assets/icons/mapexpand.svg");
-  // var pictureAlign = Alignment.topRight;
 
   /// Switch between the two sizes
   void _toggle() => setState(() {
@@ -591,8 +590,6 @@ class _GameplayMapState extends State<GameplayMap> {
                         ),
                       ),
                     ),
-
-                    // inside your Stack → AnimatedContainer
                     Positioned(
                       top: 4,
                       right: 4,

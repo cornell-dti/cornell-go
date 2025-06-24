@@ -59,6 +59,7 @@ class UserModel extends ChangeNotifier {
     return evIds.toList();
   }
 
+  // Extract achievement IDs from user's organization
   List<String> getAvailableAchievementIds() {
     Set<String> achIds = Set();
 
