@@ -106,7 +106,6 @@ describe('AchievementModule E2E', () => {
       where: { id: user.id },
       include: { memberOf: true },
     });
-    // tracker = await achievementService.getAchievementsByIdsForAbility(fullAbility, )
     console.log = log;
   });
 
@@ -210,61 +209,6 @@ describe('AchievementModule E2E', () => {
   });
 
   describe('Testing achievement tracker', () => {
-    // it('should update tracker progress when a challenge is completed', async () => {
-    //   // Assuming a challenge completion would update an existing tracker
-    //   const initialProgress = tracker.progress;
-    //   await challengeService.completeChallenge(user);
-
-    //   const updatedTracker = await prisma.achievementTracker.findUnique({
-    //     where: { id: tracker.id },
-    //   });
-    //   if (updatedTracker) {
-    //     expect(updatedTracker.progress).toBeGreaterThan(initialProgress);
-    //   }
-
-    //   console.log("initial progress: " + initialProgress);
-    //   console.log("updated progress: " + updatedTracker?.progress);
-    // });
-
-    // it('should mark tracker as complete when achievement criteria are met', async () => {
-    //   // Complete a challenge that gives the final point needed
-    //   const orgUsage = OrganizationSpecialUsage;
-    //   const orgId = (
-    //     await organizationService.getDefaultOrganization(orgUsage.DEVICE_LOGIN)
-    //   ).id;
-
-    //   exJourney1 = await organizationService.makeDefaultEvent(orgId);
-    //   const achChalJourDto: AchievementDto = {
-    //     id: "",
-    //     eventId: exJourney1.id,
-    //     name: 'achChalJourDto',
-    //     description: 'ach dto',
-    //     requiredPoints: 1,
-    //     imageUrl: 'update test',
-    //     locationType: ChallengeLocationDto.ARTS_QUAD,
-    //     achievementType: AchievementTypeDto.TOTAL_CHALLENGES_OR_JOURNEYS,
-    //     initialOrganizationId: orgId,
-    //   };
-
-    //   const achChalJour = await prisma.achievement.findFirstOrThrow({
-    //     where: { name: 'achChalJourDto' },
-    //   });
-
-    //   const trackerChalJour = await achievementService.createAchievementTracker(
-    //     user,
-    //     achChalJour.id,
-    //   );
-
-    //   await groupGateway.setCurrentEvent(user, { eventId: tracker.id });
-    //   await challengeService.completeChallenge(user);
-
-    //   const completedTracker = await prisma.achievementTracker.findUnique({
-    //     where: { id: tracker.id },
-    //   });
-    //   expect(completedTracker).not.toBeNull();
-    //   expect(completedTracker!.dateComplete).not.toBeNull();
-    // });
-
     it('should test ach tracker on dif achievement types; update tracker with progress; and mark tracker as complete when achievement criteria are met', async () => {
       const orgUsage = OrganizationSpecialUsage;
       const orgId = (
@@ -389,100 +333,8 @@ describe('AchievementModule E2E', () => {
         });
       expect(newTrackerChalJour.progress).toBeGreaterThan(0);
       expect(newTrackerChalJour.dateComplete).not.toBeNull();
-
-      // const completedTracker = await prisma.achievementTracker.findUnique({
-      //   where: { id: trackerChal.id },
-      // });
-      // const completedTrackerJour = await prisma.achievementTracker.findUnique({
-      //   where: { id: trackerChalJour.id },
-      // });
-      // const completedTrackerJour2 = await prisma.achievementTracker.findUnique({
-      //   where: { id: trackerJour.id },
-      // });
-      // const completedTrackerPts = await prisma.achievementTracker.findUnique({
-      //   where: { id: trackerPts.id },
-      // });
-
-      // expect(completedTracker?.progress).toBeGreaterThan(0);
-      // expect(completedTrackerJour?.progress).toBeGreaterThan(0);
-      // expect(completedTrackerJour2?.progress).toBeGreaterThan(0);
-      // expect(completedTrackerPts?.progress).toBeGreaterThan(0);
-
-      // achievem
     });
   });
-  /*
-  describe('Achievement tracker functions', () => {
-    it('should create a tracker when an achievement is added and applicable', async () => {
-      const achId = (await prisma.achievement.findFirstOrThrow()).id;
-      const orgUsage = OrganizationSpecialUsage;
-      const orgId = (
-        await organizationService.getDefaultOrganization(orgUsage.DEVICE_LOGIN)
-      ).id;
-      const achDto: AchievementDto = {
-        id: achId,
-        eventId: 'event123',
-        name: 'test',
-        description: 'ach dto',
-        requiredPoints: 1,
-        imageUrl: 'tracker test',
-        locationType: ChallengeLocationDto.ENG_QUAD,
-        achievementType: AchievementTypeDto.TOTAL_CHALLENGES_OR_JOURNEYS,
-        initialOrganizationId: orgId,
-      };
-
-      await achievementService.upsertAchievementFromDto(fullAbility, achDto);
-      const ach = await prisma.achievement.findFirstOrThrow({
-        where: { id: achId },
-      });
-
-      expect(ach).toBeDefined();
-
-      // Simulate challenge completion
-      await achievementService.checkAchievementProgress(
-        user,
-        'event123',
-        false,
-      );
-
-      // Check if tracker was created
-      const tracker = await prisma.achievementTracker.findFirst({
-        where: { achievementId: ach.id, userId: user.id },
-      });
-      expect(tracker).toBeDefined();
-      expect(tracker?.progress).toBe(1);
-    });
-
-    // it('should create an achievement tracker', async () => {
-    //   const achId = (await prisma.achievement.findFirstOrThrow()).id;
-    //   const achTrackerDto: AchievementTrackerDto = {
-    //     userId: user.id,
-    //     achievementId: achId,
-    //     progress: 0,
-    //   };
-
-    //   const achTracker = await achievementService.upsertAchievementTrackerFromDto(
-    //     fullAbility,
-    //     achTrackerDto,
-    //   );
-
-    //   const findAchTracker = await prisma.achievementTracker.findFirstOrThrow({
-    //     where: { id: achTracker.id },
-    //   });
-    //   expect(findAchTracker.points).toEqual(0);
-    // });
-
-    it('should mark tracker as complete when achievement criteria are met', async () => {
-      // Complete a challenge that gives the final point needed
-      await challengeService.completeChallenge(user, 'event123');
-
-      const completedTracker = await prisma.achievementTracker.findUnique({
-        where: { id: tracker.id },
-      });
-      expect(completedTracker).not.toBeNull();
-      expect(completedTracker!.dateComplete).not.toBeNull();
-    });
-  });*/
 
   describe('Delete functions', () => {
     it('should remove achievement: removeAchievement', async () => {
