@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:game/api/game_client_dto.dart';
 import 'package:game/main.dart';
+import 'package:game/challenges/challenges_page.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+/// This page allows the user to select their interests. Connection to backend
+/// (creating the user) happens here.
 class InterestsPageWidget extends StatefulWidget {
   InterestsPageWidget(
       {Key? key,
@@ -128,6 +131,14 @@ class _InterestsPageWidgetState extends State<InterestsPageWidget> {
                       if (connectionResult == null) {
                         displayToast("An error occurred while signing you up!",
                             Status.error);
+                      } else {
+                        Navigator.of(context).pushAndRemoveUntil(
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                ChallengesPage(), // go here after signup
+                          ),
+                          (route) => false, // removes everything below it
+                        );
                       }
                     }
                   },

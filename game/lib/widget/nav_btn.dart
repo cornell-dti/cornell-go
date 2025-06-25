@@ -10,6 +10,7 @@ Widget navBtn(scaffoldKey, context) {
         margin: EdgeInsets.only(
             top: MediaQuery.of(context).size.height / 8, left: 25),
         child: FloatingActionButton(
+          heroTag: "nav_menu_btn",
           onPressed: () {
             scaffoldKey.currentState?.openDrawer();
           },

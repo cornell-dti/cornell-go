@@ -170,10 +170,15 @@ export class AuthService {
         idToken.id,
         req.enrollmentType,
       );
+
+      if (!user) {
+        console.log('Unable to register user');
+        return null;
+      }
     }
 
+    // if user is null here, then it means we're not registering this user now (req.noRegister === true)
     if (!user) {
-      console.log('Unable to register user');
       return null;
     }
 

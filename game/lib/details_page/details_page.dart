@@ -21,6 +21,21 @@ class DetailsPageWidget extends StatefulWidget {
   _DetailsPageWidgetState createState() => _DetailsPageWidgetState();
 }
 
+/* A form page in the onboarding flow for collecting user academic details.
+
+This widget allows users to input their username (required), college, major,
+and graduation year. The major dropdown updates dynamically based on the
+selected college. All inputs are validated before proceeding.
+
+Upon successful validation, the user is navigated to [InterestsPageWidget]
+with their entered details and authentication info (user type, ID token, etc.).
+
+Key features include:
+- Dynamic dropdowns for college, major, and year
+- Form validation using [_formKey]
+- State-managed inputs with real-time updates
+
+This page is a required step in the onboarding process before collecting interests. */
 class _DetailsPageWidgetState extends State<DetailsPageWidget> {
   String _name = "";
   String? _college;
@@ -39,40 +54,135 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
     "Architecture, Art and Planning",
     "Arts and Sciences",
     "Business",
-    // "Computing and Information Science",
+    "Computing and Information Science",
     "Engineering",
     "Human Ecology",
     "Industrial and Labor Relations (ILR)",
     "Public Policy",
     "Cornell Tech",
     "Law School",
-    // "Veterinary Medicine",
-    // "Weill Cornell Medicine"
+    "Veterinary Medicine",
+    "Weill Cornell Medicine"
   ];
 
-  List<String> _years = ["2024", "2025", "2026", "2027"];
+  List<String> _years = ["2025", "2026", "2027", "2028", "2029"];
 
   Map<String, List<String>> _majors = {
-    "Agriculture and Life Sciences": [],
-    "Architecture, Art and Planning": [],
-    "Business": [],
-    "Engineering": [
-      "Computer Science",
+    "Agriculture and Life Sciences": [
+      "Agricultural Sciences",
+      "Animal Science",
+      "Applied Economics & Management",
+      "Atmospheric Science",
+      "Biological Engineering",
+      "Biological Sciences",
+      "Biology & Society",
+      "Biometry & Statistics",
+      "Communication",
+      "Earth & Atmospheric Sciences",
+      "Entomology",
+      "Environment & Sustainability",
+      "Environmental Engineering",
+      "Food Science",
+      "Global & Public Health Sciences",
+      "Global Development",
       "Information Science",
-      "Chemical Engineering"
+      "Interdisciplinary Studies",
+      "Landscape Architecture",
+      "Nutritional Sciences",
+      "Plant Sciences",
+      "Viticulture & Enology"
+    ],
+    "Architecture, Art and Planning": [
+      "Architecture",
+      "Fine Arts",
+      "History of Architecture",
+      "Urban and Regional Studies"
+    ],
+    "Business": ["Applied Economics and Management", "Hotel Administration"],
+    "Engineering": [
+      "Biological Engineering",
+      "Biomedical Engineering",
+      "Chemical Engineering",
+      "Civil Engineering",
+      "Computer Science",
+      "Earth and Atmospheric Sciences",
+      "Electrical and Computer Engineering",
+      "Engineering Physics",
+      "Environmental Engineering",
+      "Independent Major",
+      "Information Science, Systems, and Technology",
+      "Materials Science and Engineering",
+      "Mechanical Engineering",
+      "Operations Research and Engineering"
     ],
     "Arts and Sciences": [
-      "Computer Science",
-      "Mathematics",
+      "Africana Studies",
+      "American Studies",
+      "Anthropology",
+      "Archaeology",
+      "Asian Studies",
+      "Astronomy",
+      "Biological Sciences",
+      "Biology and Society",
       "Chemistry",
-      "Biology",
-      "Psychology"
+      "China and Asia-Pacific Studies",
+      "Classics (Classics, Greek, Latin, Classical Civilization)",
+      "Cognitive Science",
+      "College Scholar/Independent Major",
+      "Comparative Literature",
+      "Computer Science",
+      "Earth and Atmospheric Sciences",
+      "Economics",
+      "English",
+      "Environment and Sustainability",
+      "Feminist, Gender, and Sexuality Studies",
+      "French",
+      "German Studies",
+      "Government",
+      "History",
+      "History of Art",
+      "Information Science",
+      "Italian",
+      "Jewish Studies",
+      "Linguistics",
+      "Mathematics",
+      "Music",
+      "Near Eastern Studies",
+      "Performing and Media Arts",
+      "Philosophy",
+      "Physics",
+      "Psychology",
+      "Public Policy",
+      "Religious Studies",
+      "Science and Technology Studies",
+      "Sociology",
+      "Spanish",
+      "Statistical Science",
+      "Undecided"
     ],
-    "Human Ecology": [],
+    "Human Ecology": [
+      "Design and Environmental Analysis",
+      "Fashion Design and Management",
+      "Fiber Science",
+      "Global and Public Health Sciences",
+      "Human Biology, Health, and Society",
+      "Human Development",
+      "Nutritional Sciences",
+      "Undecided"
+    ],
     "Industrial and Labor Relations (ILR)": [],
-    "Public Policy": [],
+    "Public Policy": ["Health Care Policy", "Public Policy"],
+    "Computing and Information Science": [
+      "Biometry and Statistics",
+      "Computer Science",
+      "Information Science",
+      "Information Science, Systems, and Technology",
+      "Statistical Science"
+    ],
     "Cornell Tech": [],
     "Law School": [],
+    "Veterinary Medicine": [],
+    "Weill Cornell Medicine": []
   };
 
   @override

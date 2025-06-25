@@ -1701,6 +1701,9 @@ class RequestFavoriteEventDataDto {
   late String eventId;
 }
 
+/* Converts the [UserDto] instance into a JSON-compatible map.
+
+Only non-null fields are included. */
 class UserDto {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> fields = {};
@@ -1747,6 +1750,12 @@ class UserDto {
     return fields;
   }
 
+  /* Creates a [UserDto] from a JSON [fields] map.
+  
+  Parses user info including optional fields and converts enum strings
+  to [UserEnrollmentTypeDto] and [UserAuthTypeDto].
+  
+  Safely handles missing keys; lists and enums are parsed appropriately. */
   UserDto.fromJson(Map<String, dynamic> fields) {
     id = fields["id"];
     username = fields.containsKey('username') ? (fields["username"]) : null;
@@ -1774,6 +1783,10 @@ class UserDto {
         : null;
   }
 
+  /* Updates non-null fields from another [UserDto] instance.
+  
+  For each field in [other], replaces the current value only if the
+  corresponding value in [other] is not null. */
   void partialUpdate(UserDto other) {
     id = other.id;
     username = other.username == null ? username : other.username;

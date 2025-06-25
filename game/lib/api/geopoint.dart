@@ -12,6 +12,10 @@ class GeoPoint {
   double get long => _long;
   double get heading => _heading;
 
+  // Static cache for last retrieved location (in-memory only)
+  static GeoPoint? _lastLocation;
+  static GeoPoint? get lastLocation => _lastLocation;
+
   GeoPoint(
     double lat,
     double long,
@@ -22,6 +26,14 @@ class GeoPoint {
     _heading = heading;
   }
 
+  /**
+   * Get current location with optimized retrieval strategy
+   * 
+   * This method first tries to get the last known position first (fast),
+   * and if available, returns it immediately while requesting a fresh
+   * location in the background. If no last known position is available,
+   * it falls back to waiting for a fresh location.
+   */
   static Future<GeoPoint> current() async {
     var serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
@@ -48,14 +60,49 @@ class GeoPoint {
         return Future.error(
             'Location permissions are permanently denied, we cannot request permissions.');
       }
+
+      // FAST PATH: Try to get last known position first (milliseconds)
+      try {
+        Position? lastPosition = await Geolocator.getLastKnownPosition();
+        if (lastPosition != null) {
+          print(
+              "Using last known position: ${lastPosition.latitude}, ${lastPosition.longitude}");
+
+          // Store in static cache
+          _lastLocation = GeoPoint(lastPosition.latitude,
+              lastPosition.longitude, lastPosition.heading);
+
+          // Start getting current position in background for better accuracy
+          Geolocator.getCurrentPosition(
+                  desiredAccuracy: LocationAccuracy.medium)
+              .then((pos) {
+            print("Got updated location: ${pos.latitude}, ${pos.longitude}");
+            _lastLocation = GeoPoint(pos.latitude, pos.longitude, pos.heading);
+          }).catchError((e) {
+            print("Error getting current position: $e");
+          });
+
+          // Return the last known position immediately
+          return _lastLocation!;
+        }
+      } catch (e) {
+        print("Error getting last known position: $e");
+      }
+
+      // SLOW PATH: If no last known position, wait for current position
+      print("Getting location");
       final pos = await Geolocator.getCurrentPosition(
           // Ideally we would use best accuracy, but it doesn't work for some reason
           // desiredAccuracy: LocationAccuracy.best
           desiredAccuracy: LocationAccuracy.medium);
-      return GeoPoint(pos.latitude, pos.longitude, pos.heading);
+      print("Got location: ${pos.latitude}, ${pos.longitude}");
+
+      // Store in static cache
+      _lastLocation = GeoPoint(pos.latitude, pos.longitude, pos.heading);
+      return _lastLocation!;
     } catch (e) {
       print(e);
-      return Future.error(e.toString());
+      return Future.error("Error:" + e.toString());
     }
   }
 
@@ -89,7 +136,7 @@ class GeoPoint {
         accuracy: LocationAccuracy.high,
         activityType: ActivityType.fitness,
         distanceFilter: 100,
-        pauseLocationUpdatesAutomatically: true,
+        pauseLocationUpdatesAutomatically: false,
         // Only set to true if our app will be started up in the background.
         showBackgroundLocationIndicator: false,
       );
