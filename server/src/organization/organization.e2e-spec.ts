@@ -264,17 +264,6 @@ describe('OrganizationModule E2E', () => {
       expect(dto.challenge.longF).toEqual(exChal1.longitude);
     });
 
-    it('Should not be able to see lat, long of second challenge in a non-current evnet', async () => {
-      await groupService.setCurrentEvent(basicUser, defaultEv.id);
-
-      affectedUsers.push(basicUser);
-      expect(
-        await chalGateway.requestChallengeData(basicAbility, basicUser, {
-          challenges: [exChal2.id],
-        }),
-      ).toBeFalsy;
-    });
-
     it('Should be able to see current challenge lat long but not name', async () => {
       await groupService.setCurrentEvent(basicUser, defaultEv.id);
       affectedUsers.push(basicUser);

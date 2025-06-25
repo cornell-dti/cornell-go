@@ -290,7 +290,7 @@ export function Events() {
             setCopyModalOpen(false);
             return;
           }
-          for (const chalId of ev.challenges!) {
+          for (const chalId of [...ev.challenges!].reverse()!) {
             const chal = serverData.challenges.get(chalId)!;
             serverData.updateChallenge({
               ...chal,

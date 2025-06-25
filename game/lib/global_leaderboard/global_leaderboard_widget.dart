@@ -44,12 +44,13 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
       key: scaffoldKey,
       backgroundColor: Color.fromARGB(255, 255, 248, 241),
       appBar: AppBar(
-        toolbarHeight: 85,
+        toolbarHeight: MediaQuery.sizeOf(context).height * 0.1,
         automaticallyImplyLeading: false,
         backgroundColor: Color.fromARGB(255, 237, 86, 86),
         flexibleSpace: FlexibleSpaceBar(
             title: Padding(
-              padding: const EdgeInsets.only(bottom: 8),
+              padding: EdgeInsets.only(
+                  bottom: MediaQuery.sizeOf(context).height * 0.01),
               child: Text(
                 'Leaderboard',
                 style: leaderboardStyle,
@@ -136,8 +137,8 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
           SizedBox(height: MediaQuery.sizeOf(context).height * 0.01),
           Expanded(
             child: Container(
-              width: 360.0,
-              height: 446.0,
+              width: MediaQuery.sizeOf(context).width * 0.88,
+              height: MediaQuery.sizeOf(context).height * 0.5,
               decoration: BoxDecoration(
                 color: Color.fromRGBO(255, 170, 91, 0.15),
                 borderRadius: BorderRadius.only(
@@ -145,6 +146,7 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
                   topRight: Radius.circular(10.0),
                 ),
               ),
+              // Ranking List
               child: ListView(
                 shrinkWrap: true,
                 scrollDirection: Axis.vertical,

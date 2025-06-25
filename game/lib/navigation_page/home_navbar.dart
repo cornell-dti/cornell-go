@@ -2,6 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:game/journeys/journeys_page.dart';
 import 'package:game/challenges/challenges_page.dart';
 
+/**
+ * `HomeNavBar` Widget - Tab navigation system for Challenges and Journeys.
+ * 
+ * @remarks
+ * This widget implements a tab controller to switch between Challenges and
+ * Journeys views. It receives filter states from SearchFilterBar and passes
+ * them to the appropriate tab content.
+ * 
+ * @param props - Contains:
+ *   - `myDifficulty`: Selected difficulty filter
+ *   - `myLocations`: List of selected location filters
+ *   - `myCategories`: List of selected category filters
+ *   - `mySearchText`: Current search query text
+ */
 class HomeNavBar extends StatefulWidget {
   String? myDifficulty;
   List<String>? myLocations;
@@ -36,17 +50,23 @@ class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFED5656),
+      resizeToAvoidBottomInset: false,
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(50.0),
+        preferredSize:
+            Size.fromHeight(MediaQuery.sizeOf(context).height * 0.08),
         child: AppBar(
+          elevation: 0.0,
           backgroundColor: Color(0xFFED5656),
-          titleTextStyle: TextStyle(fontSize: 25, fontWeight: FontWeight.w500),
+          titleTextStyle: TextStyle(
+              fontSize: MediaQuery.sizeOf(context).height * 0.03,
+              fontWeight: FontWeight.w500),
           bottom: TabBar(
             controller: _tabController,
             indicator: BoxDecoration(
               border: Border(
                 bottom: BorderSide(
-                  color: Colors.yellow,
+                  color: Color(0xFFFFAA5B),
                   width: 2.0,
                 ),
               ),
@@ -62,22 +82,28 @@ class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
             ),
             labelColor: Colors.white,
             unselectedLabelColor: Colors.black.withOpacity(0.5),
-            tabs: const <Widget>[
+            tabs: <Widget>[
               Tab(
                 child: Padding(
-                  padding: EdgeInsets.only(bottom: 20),
+                  padding: EdgeInsets.only(
+                      bottom: MediaQuery.sizeOf(context).height * 0.02),
                   child: Text(
                     'Challenges',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                    style: TextStyle(
+                        fontSize: MediaQuery.sizeOf(context).height * 0.022,
+                        fontWeight: FontWeight.w600),
                   ),
                 ),
               ),
               Tab(
                 child: Padding(
-                  padding: EdgeInsets.only(bottom: 20),
+                  padding: EdgeInsets.only(
+                      bottom: MediaQuery.sizeOf(context).height * 0.02),
                   child: Text(
                     'Journeys',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                    style: TextStyle(
+                        fontSize: MediaQuery.sizeOf(context).height * 0.022,
+                        fontWeight: FontWeight.w600),
                   ),
                 ),
               ),

@@ -12,6 +12,52 @@ import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:http/http.dart' as http;
 import 'package:game/api/geopoint.dart';
 
+/** 
+ * ApiClient Class - Core authentication and API communication manager.
+ * 
+ * A ChangeNotifier class that manages authentication state, socket connections,
+ * and API communication for the entire application.
+ * 
+ * @remarks
+ * This class serves as the central hub for all API-related functionality:
+ * - Authentication state management (Google Sign-In, device login)
+ * - Socket connection handling and management
+ * - Token management (access and refresh tokens)
+ * - Stream management through GameClientApi
+ * - Server API access through GameServerApi
+ * 
+ * The class uses a multi-layered approach:
+ * - ApiClient: Top-level manager and state coordinator
+ * - GameClientApi: Manages streams for UI updates
+ * - GameServerApi: Handles server-side communication
+ * 
+ * Key Features:
+ * - Automatic token refresh
+ * - Persistent authentication through secure storage
+ * - Socket connection management
+ * - Google Sign-In integration
+ * - Device-based authentication
+ * 
+ * @example
+ * ```dart
+ * final apiClient = Provider.of<ApiClient>(context);
+ * 
+ * // Listen to connection state
+ * StreamBuilder(
+ *   stream: apiClient.clientApi.disconnectedStream,
+ *   builder: (context, snapshot) {
+ *     // Handle connection state changes
+ *   }
+ * );
+ * 
+ * // Perform authentication
+ * await apiClient.connectGoogle(googleAccount, ...);
+ * ```
+ * 
+ * @see GameClientApi for stream management
+ * @see GameServerApi for server communication
+ */
+
 class ApiClient extends ChangeNotifier {
   final FlutterSecureStorage _storage;
   final _googleSignIn = GoogleSignIn(
@@ -20,6 +66,7 @@ class ApiClient extends ChangeNotifier {
     ],
   );
 
+  // The ApiClient manages the socket and authentication state while the ClientApi manages the streams that components listen to
   final String _apiUrl;
   final Uri _googleLoginUrl;
   final Uri _deviceLoginUrl;
@@ -39,9 +86,9 @@ class ApiClient extends ChangeNotifier {
   ApiClient(FlutterSecureStorage storage, String apiUrl)
       : _storage = storage,
         _apiUrl = apiUrl,
-        _googleLoginUrl = Uri.parse(apiUrl + "/google"),
-        _deviceLoginUrl = Uri.parse(apiUrl + "/device-login"),
-        _refreshUrl = Uri.parse(apiUrl + "/refresh-access"),
+        _googleLoginUrl = Uri.parse(apiUrl).resolve("google"),
+        _deviceLoginUrl = Uri.parse(apiUrl).resolve("device-login"),
+        _refreshUrl = Uri.parse(apiUrl).resolve("refresh-access"),
         _clientApi = GameClientApi();
 
   void _createSocket(bool refreshing) async {
@@ -57,13 +104,24 @@ class ApiClient extends ChangeNotifier {
         IO.OptionBuilder()
             .setTransports(["websocket"])
             .disableAutoConnect()
-            .disableReconnection()
             .setAuth({'token': _accessToken})
             .build());
 
     socket.onDisconnect((data) {
-      _serverApi = null;
-      notifyListeners();
+      print("Server Disconnected!");
+      // Check if user is logged out
+      if (_refreshToken == null) {
+        _serverApi = null;
+        notifyListeners();
+      }
+    });
+
+    socket.onReconnectFailed((_) async {
+      // Try to reconnect
+      final refreshResult = await _accessRefresher();
+      if (!refreshResult) {
+        _serverApi = null;
+      }
     });
 
     socket.onConnect((data) {
@@ -211,13 +269,14 @@ class ApiClient extends ChangeNotifier {
       _createSocket(false);
       return loginResponse;
     } else {
-      print(loginResponse.body);
-    }
-    authenticated = false;
-    notifyListeners();
+      print("LoginResponse:" + loginResponse.body);
 
-    print("Failed to connect to server!");
-    return null;
+      authenticated = false;
+      notifyListeners();
+
+      print("Failed to connect to server!");
+      return null;
+    }
     /*
     }
     print("Failed to get location data!");
@@ -242,5 +301,25 @@ class ApiClient extends ChangeNotifier {
 
     authenticated = false;
     notifyListeners();
+  }
+
+  Future<bool> checkUserExists(String idToken) async {
+    try {
+      final uri = _googleLoginUrl.replace(
+        path: '${_googleLoginUrl.path}/check-user',
+        queryParameters: {'idToken': idToken},
+      );
+      final response = await http.get(uri);
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        return responseData['exists'];
+      }
+      print('Failed to check user. Status code: ${response.statusCode}');
+      return false;
+    } catch (e) {
+      print('Error occurred while checking user: $e');
+      return false;
+    }
   }
 }

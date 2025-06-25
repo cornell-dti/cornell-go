@@ -76,12 +76,13 @@ Widget leaderBoardCell(
                     ),
                     Padding(
                       padding: const EdgeInsets.only(left: 10, right: 5),
-                      child: SizedBox(
-                        width: 110,
-                        child: FittedBox(
-                          alignment: Alignment.centerLeft,
-                          fit: BoxFit.scaleDown,
-                          child: Text(name, style: nameStyle),
+                      child: Container(
+                        width: MediaQuery.of(context).size.width * 0.3,
+                        child: Text(
+                          name,
+                          style: nameStyle,
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
                         ),
                       ),
                     ),

@@ -193,29 +193,65 @@ function DraggableMarker(props: {
 }
 
 function MapEntryFormBox(props: { form: MapEntryForm }) {
+  const [lat, setLat] = useState(props.form.latitude);
+  const [lng, setLng] = useState(props.form.longitude);
+
+  useEffect(() => {
+    setLat(props.form.latitude);
+    setLng(props.form.longitude);
+  }, [props.form.latitude, props.form.longitude]);
+
+  const handleLatChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newLat = parseFloat(e.target.value);
+    if (!isNaN(newLat)) {
+      setLat(newLat);
+      props.form.latitude = newLat;
+    }
+  };
+
+  const handleLngChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newLng = parseFloat(e.target.value);
+    if (!isNaN(newLng)) {
+      setLng(newLng);
+      props.form.longitude = newLng;
+    }
+  };
+
   return (
-    <MapBox>
-      <MapContainer
-        center={[props.form.latitude, props.form.longitude]}
-        zoom={20}
-        style={{
-          width: "100%",
-          height: 300,
-        }}
-      >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-        <DraggableMarker
-          center={[props.form.latitude, props.form.longitude]}
-          onLocationChange={(lat, long) => {
-            props.form.latitude = lat;
-            props.form.longitude = long;
+    <>
+      <MapBox>
+        <MapContainer
+          center={[lat, lng]}
+          zoom={20}
+          style={{ 
+            width: "100%", 
+            height: 300,
           }}
-        />
-      </MapContainer>
-    </MapBox>
+        >
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+          <DraggableMarker
+            center={[lat, lng]}
+            onLocationChange={(newLat, newLng) => {
+              setLat(newLat);
+              setLng(newLng);
+              props.form.latitude = newLat;
+              props.form.longitude = newLng;
+            }}
+          />
+        </MapContainer>
+      </MapBox>
+      <EntryBox>
+        <span>Latitude:</span>
+        <EntryTextBox type="number" value={lat} onChange={handleLatChange} />
+      </EntryBox>
+      <EntryBox>
+        <span>Longitude:</span>
+        <EntryTextBox type="number" value={lng} onChange={handleLngChange} />
+      </EntryBox>
+    </>
   );
 }
 

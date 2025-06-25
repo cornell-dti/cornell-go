@@ -8,6 +8,7 @@ import 'package:game/model/achievement_model.dart';
 import 'package:game/model/challenge_model.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/group_model.dart';
+import 'package:game/model/user_model.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:game/model/tracker_model.dart';
 import 'package:provider/provider.dart';
@@ -45,13 +46,39 @@ class AchievementsPage extends StatefulWidget {
   State<AchievementsPage> createState() => _AchievementsPageState();
 }
 
+/**
+ * The achievements page of the app that displays a list of trackable user achievements.
+ * `_AchievementsPageState` Class - A page where users can view their progress toward completing various achievements within the app.
+ * 
+ * @remarks
+ * This component serves as the screen where users can browse their available achievements in the app. It provides a clean, scrollable interface for users to track:
+ * - Achievement descriptions
+ * - Current progress toward each achievement
+ * - Total required points to complete each achievement
+ * 
+ * The component utilizes a custom `AchievementCell` widget to display individual achievements. It retrieves the list of achievements from the `AchievementModel` using the `getAvailableTrackerPairs()` method and dynamically populates the UI.
+ * 
+ * The page layout is responsive and styled with consistent design patterns used throughout the app. It also provides safe navigation through a back button in the app bar.
+ * 
+ * The component listens to real-time updates from both the `AchievementModel` and `ApiClient` using `Consumer2` from the `provider` package, ensuring the list of achievements stays current without requiring a manual refresh.
+ * 
+ * @param key - Optional Flutter widget key for identification and testing (used within `AchievementCell`).
+ * 
+ * @returns A StatefulWidget that displays a scrollable list of the user's achievements with their progress.
+ */
 class _AchievementsPageState extends State<AchievementsPage> {
   List<String> selectedCategories = [];
   List<String> selectedLocations = [];
   String selectedDifficulty = '';
-
   @override
   Widget build(BuildContext context) {
+    var headerStyle = TextStyle(
+      color: Color(0xFFFFF8F1),
+      fontSize: 20,
+      fontFamily: 'Poppins',
+      fontWeight: FontWeight.w600,
+    );
+
     return Container(
         decoration: BoxDecoration(
           color: Color(0xFFED5656),
@@ -60,7 +87,26 @@ class _AchievementsPageState extends State<AchievementsPage> {
             bottom: false,
             child: Scaffold(
               appBar: AppBar(
-                title: const Text('Achievements'),
+                backgroundColor: Color.fromARGB(255, 237, 86, 86),
+                toolbarHeight: MediaQuery.of(context).size.height * 0.1,
+                leading: Align(
+                  alignment: Alignment.center,
+                  child: IconButton(
+                    icon: Icon(Icons.navigate_before),
+                    color: Colors.white,
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ),
+                title: Padding(
+                  padding: EdgeInsets.only(
+                      top: MediaQuery.of(context).size.height * 0.01),
+                  child: Text(
+                    'Achievements',
+                    style: headerStyle,
+                  ),
+                ),
+                centerTitle: true, // Still useful for horizontal centering
+                actions: [],
               ),
               body: Container(
                   width: double.infinity,
@@ -72,19 +118,28 @@ class _AchievementsPageState extends State<AchievementsPage> {
                     padding: EdgeInsets.all(30),
                     child: Column(
                       children: [
-                        Expanded(child: Consumer2<AchievementModel, ApiClient>(
-                            builder: (context, achModel, apiClient, child) {
-                          final achList = achModel.getAvailableTrackerPairs();
+                        Expanded(child: Consumer4<AchievementModel, ApiClient,
+                                UserModel, GroupModel>(
+                            builder: (context, achModel, apiClient, userModel,
+                                groupModel, child) {
+                          final achIds = userModel.getAvailableAchievementIds();
+                          final achList = achModel.getAvailableTrackerPairs(
+                            allowedAchievementIds: achIds,
+                          );
 
                           return ListView.separated(
                             padding: const EdgeInsets.symmetric(horizontal: 3),
                             itemCount: achList.length,
                             itemBuilder: (context, index) {
+                              // Check if the achievement is completed
+                              bool completed = achList[index].$1.progress >=
+                                  (achList[index].$2.requiredPoints ?? 0);
                               return AchievementCell(
                                   key: UniqueKey(),
                                   achList[index].$2.description ?? "",
-                                  SvgPicture.asset(
-                                      "assets/icons/achievementsilver.svg"),
+                                  SvgPicture.asset(completed
+                                      ? "assets/icons/achievementgold.svg"
+                                      : "assets/icons/achievementsilver.svg"),
                                   achList[index].$1.progress,
                                   achList[index].$2.requiredPoints ?? 0);
                             },

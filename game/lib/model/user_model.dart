@@ -16,7 +16,6 @@ class UserModel extends ChangeNotifier {
      */
     client.clientApi.updateUserDataStream.listen((event) {
       if (userData == null) userData = event.user;
-
       userData?.partialUpdate(event.user);
       notifyListeners();
     });
@@ -58,6 +57,19 @@ class UserModel extends ChangeNotifier {
     }
 
     return evIds.toList();
+  }
+
+  // Extract achievement IDs from user's organization
+  List<String> getAvailableAchievementIds() {
+    Set<String> achIds = Set();
+
+    for (final org in orgData.values) {
+      if (org.achivements != null) {
+        achIds.addAll(org.achivements!);
+      }
+    }
+
+    return achIds.toList();
   }
 
   void updateUserData(String id, String? username, String? college,

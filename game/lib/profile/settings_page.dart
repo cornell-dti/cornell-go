@@ -6,6 +6,10 @@ import 'package:game/profile/edit_profile.dart';
 import 'package:game/main.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+final FEEDBACK_URL = Uri.parse(
+    "https://docs.google.com/forms/d/e/1FAIpQLSeY1vhtUVmaUo1806AK58wNkVT3iS21vefGakeNBV1ud9XP3g/viewform?usp=dialog");
 
 class SettingsPage extends StatelessWidget {
   final bool isGuest;
@@ -13,25 +17,35 @@ class SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var headerStyle = TextStyle(
+      color: Color(0xFFFFF8F1),
+      fontSize: 20,
+      fontFamily: 'Poppins',
+      fontWeight: FontWeight.w600,
+    );
+
     return Scaffold(
         backgroundColor: Color.fromARGB(255, 255, 248, 241),
         appBar: AppBar(
           backgroundColor: Color.fromARGB(255, 237, 86, 86),
-          // Set widget before appBar title
-          leading: IconButton(
-            icon: const Icon(Icons.navigate_before),
-            color: Colors.white,
-            onPressed: () {
-              Navigator.pop(context);
-            },
+          toolbarHeight: MediaQuery.of(context).size.height * 0.1,
+          leading: Align(
+            alignment: Alignment.center,
+            child: IconButton(
+              icon: Icon(Icons.navigate_before),
+              color: Colors.white,
+              onPressed: () => Navigator.pop(context),
+            ),
           ),
-          title: const Text(
-            'Settings',
-            style: TextStyle(
-                color: Colors.white,
-                fontFamily: 'Poppins',
-                fontWeight: FontWeight.bold),
+          title: Padding(
+            padding:
+                EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.01),
+            child: Text(
+              'Settings',
+              style: headerStyle,
+            ),
           ),
+          centerTitle: true, // Still useful for horizontal centering
           actions: [],
         ),
         body: Center(child: LayoutBuilder(
@@ -92,7 +106,9 @@ class SettingsPage extends StatelessWidget {
                         ),
                       ),
                       child: TextButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          launchUrl(FEEDBACK_URL);
+                        },
                         style: TextButton.styleFrom(
                             padding: EdgeInsets.only(left: 20.0),
                             alignment: Alignment.centerLeft,
@@ -133,7 +149,7 @@ class SettingsPage extends StatelessWidget {
                               (text) {
                             client.serverApi?.joinOrganization(
                                 JoinOrganizationDto(
-                                    accessCode: text.toUpperCase()));
+                                    accessCode: text.toLowerCase()));
                           });
                         },
                         style: TextButton.styleFrom(

@@ -86,7 +86,7 @@ class _ChallengesPageState extends State<ChallengesPage> {
           color: Color.fromARGB(255, 255, 248, 241),
         ),
         child: Padding(
-            padding: EdgeInsets.all(30),
+            padding: EdgeInsets.all(16),
             child: Stack(
               children: [
                 Align(

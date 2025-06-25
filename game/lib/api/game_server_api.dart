@@ -36,17 +36,21 @@ class GameServerApi {
 
   Future<dynamic> _invokeWithRefresh(String ev, Map<String, dynamic> data) {
     Completer<dynamic> completer = Completer();
+    bool isCompleted = false;
 
     final completionFunc = (arg) {
-      if (completer.isCompleted) {
-        return;
+      if (!isCompleted) {
+        isCompleted = true;
+        completer.complete(arg);
       }
-
-      completer.complete(arg);
     };
 
-    Future.delayed(Duration(seconds: 5))
-        .then((value) => completer.complete(null));
+    Future.delayed(Duration(seconds: 5)).then((_) {
+      if (!isCompleted) {
+        isCompleted = true;
+        completer.completeError(TimeoutException('Operation timed out'));
+      }
+    });
 
     _refreshEv = ev;
     _refreshDat = data;
@@ -71,7 +75,7 @@ class GameServerApi {
   Future<int?> requestChallengeData(RequestChallengeDataDto dto) async =>
       await _invokeWithRefresh("requestChallengeData", dto.toJson());
 
-  Future<bool?> completedChallenge(CompletedChallengeDto dto) async =>
+  Future<String?> completedChallenge(CompletedChallengeDto dto) async =>
       await _invokeWithRefresh("completedChallenge", dto.toJson());
 
   Future<String?> updateChallengeData(UpdateChallengeDataDto dto) async =>

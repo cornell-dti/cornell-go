@@ -23,6 +23,29 @@ import 'package:game/model/group_model.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/challenge_model.dart';
 
+/*
+
+* GameplayMap Widget
+*
+* Displays an interactive map for gameplay, showing the user's location,
+* hint circles, and challenge-related information.
+*
+* @remarks
+* This widget is responsible for handling user location updates, displaying
+* hints, and managing the challenge completion process. It uses Google Maps
+* for rendering the map and integrates with various game-related models and
+* APIs to provide a seamless gameplay experience.
+*
+* @param challengeId - The unique identifier for the current challenge.
+* @param targetLocation - The GeoPoint representing the target location for the challenge.
+* @param awardingRadius - The radius (in meters) within which the challenge is considered complete.
+* @param points - The number of points awarded for completing this challenge.
+* @param startingHintsUsed - The number of hints already used for this challenge.
+*
+* @returns A StatefulWidget that renders the gameplay map and associated UI elements
+
+*/
+
 class GameplayMap extends StatefulWidget {
   final String challengeId;
   final GeoPoint targetLocation;
@@ -67,12 +90,31 @@ class _GameplayMapState extends State<GameplayMap> {
   double defaultHintRadius = 200.0;
   double? hintRadius;
 
+  // Add this to your state variables (After isExapnded)
+  bool isArrivedButtonEnabled = true;
+
   // whether the picture is expanded over the map
   bool isExpanded = false;
+  double pictureWidth = 80, pictureHeight = 80;
+  Alignment pictureAlign = Alignment.topRight;
 
-  // name of the challenge, either null or the name of the most recently
-  // completed challenge in this event
-  String? challengeName;
+  // size variables for expanding picture for animation
+
+  var pictureIcon = SvgPicture.asset("assets/icons/mapexpand.svg");
+
+  /// Switch between the two sizes
+  void _toggle() => setState(() {
+        isExpanded = !isExpanded;
+
+        if (isExpanded) {
+          pictureHeight = MediaQuery.of(context).size.height * 0.60;
+          pictureWidth = MediaQuery.of(context).size.width * 0.90;
+          pictureAlign = Alignment.topCenter;
+        } else {
+          pictureHeight = pictureWidth = 80;
+          pictureAlign = Alignment.topRight;
+        }
+      });
 
   @override
   void initState() {
@@ -103,7 +145,6 @@ class _GameplayMapState extends State<GameplayMap> {
    * hints used for this challenge already.
    */
   void setStartingHintCircle() {
-    print(widget.startingHintsUsed);
     hintRadius = defaultHintRadius -
         (defaultHintRadius - widget.awardingRadius) *
             0.33 *
@@ -111,7 +152,6 @@ class _GameplayMapState extends State<GameplayMap> {
     if (hintRadius == null) {
       hintRadius = defaultHintRadius;
     }
-    print(hintRadius);
 
     Random _random = Random();
 
@@ -192,6 +232,10 @@ class _GameplayMapState extends State<GameplayMap> {
    */
   void recenterCamera() async {
     GoogleMapController googleMapController = await mapCompleter.future;
+
+    if (currentLocation == null) {
+      return;
+    }
 
     // recenters camera to user location
     googleMapController.animateCamera(
@@ -288,12 +332,6 @@ class _GameplayMapState extends State<GameplayMap> {
     }
   }
 
-  // size variables for expanding picture for animation
-  var pictureWidth = 80.0;
-  var pictureHeight = 80.0;
-  var pictureIcon = SvgPicture.asset("assets/icons/mapexpand.svg");
-  var pictureAlign = Alignment.topRight;
-
   @override
   Widget build(BuildContext context) {
     // return FutureBuilder<bool>(
@@ -304,6 +342,7 @@ class _GameplayMapState extends State<GameplayMap> {
     final client = Provider.of<ApiClient>(context);
 
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
         colorSchemeSeed: Colors.green[700],
@@ -331,20 +370,22 @@ class _GameplayMapState extends State<GameplayMap> {
               "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png";
         }
 
-        return Scaffold(
-            body: Stack(
+        return Stack(
           alignment: Alignment.bottomCenter,
           children: [
             StreamBuilder(
                 stream: client.clientApi.disconnectedStream,
                 builder: ((context, snapshot) {
+                  // Redirect to login if server api is null
                   if (client.serverApi == null) {
                     WidgetsBinding.instance.addPostFrameCallback((_) {
-                      Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => SplashPageWidget()));
-                      displayToast("Lost connection!", Status.success);
+                      // Clear entire navigation stack and push to login screen
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(
+                            builder: (context) => SplashPageWidget()),
+                        (route) => false,
+                      );
+                      displayToast("Signed out", Status.success);
                     });
                   }
 
@@ -402,34 +443,37 @@ class _GameplayMapState extends State<GameplayMap> {
                   padding:
                       EdgeInsets.only(right: 15, left: 15, top: 10, bottom: 10),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10), // button's shape
+                    borderRadius: BorderRadius.circular(10),
                   ),
                 ),
                 child: Text(
                   "I've Arrived!",
                   style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 21,
-                      fontWeight: FontWeight.w400,
-                      color: Color(0xFFFFFFFF)),
+                    fontFamily: 'Poppins',
+                    fontSize: 21,
+                    fontWeight: FontWeight.w400,
+                    color: Color(0xFFFFFFFF),
+                  ),
                 ),
-                onPressed: () {
+                onPressed: () async {
+                  if (!isArrivedButtonEnabled) return;
+
+                  setState(() {
+                    isArrivedButtonEnabled = false;
+                  });
+
                   bool hasArrived = checkArrived();
+                  String? chalName;
                   if (hasArrived) {
                     if (tracker == null || challenge == null) {
                       displayToast("An error occurred while getting challenge",
                           Status.error);
                     } else {
-                      apiClient.serverApi
+                      chalName = await apiClient.serverApi
                           ?.completedChallenge(CompletedChallengeDto());
-                      setState(() {
-                        challengeName = challengeModel
-                            .getChallengeById(
-                                tracker.prevChallenges.last.challengeId)
-                            ?.name;
-                      });
                     }
                   }
+                  final chalId = widget.challengeId;
                   showDialog(
                     context: context,
                     barrierDismissible: !hasArrived,
@@ -437,16 +481,21 @@ class _GameplayMapState extends State<GameplayMap> {
                       return Container(
                         margin: EdgeInsetsDirectional.only(start: 10, end: 10),
                         child: Dialog(
-                          elevation: 16, //arbitrary large number
+                          elevation: 16,
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(
-                                10), // Same as the Dialog's shape
-                            child: displayDialogue(hasArrived),
+                            borderRadius: BorderRadius.circular(10),
+                            child: displayDialog(
+                                context, hasArrived, chalId, chalName),
                           ),
                         ),
                       );
                     },
-                  );
+                  ).then((_) {
+                    // Re-enable the button after the dialog is closed
+                    setState(() {
+                      isArrivedButtonEnabled = true;
+                    });
+                  });
                 },
               ),
             ),
@@ -461,6 +510,7 @@ class _GameplayMapState extends State<GameplayMap> {
                       children: [
                         // hint button
                         FloatingActionButton.extended(
+                          heroTag: "hint_button",
                           onPressed: useHint,
                           label: SvgPicture.asset("assets/icons/maphint.svg",
                               colorFilter: ColorFilter.mode(
@@ -505,6 +555,7 @@ class _GameplayMapState extends State<GameplayMap> {
                   Padding(
                     padding: EdgeInsets.only(bottom: 150.0),
                     child: FloatingActionButton.extended(
+                      heroTag: "recenter_button",
                       onPressed: recenterCamera,
                       label: SvgPicture.asset("assets/icons/maprecenter.svg",
                           colorFilter: ColorFilter.mode(
@@ -518,62 +569,57 @@ class _GameplayMapState extends State<GameplayMap> {
               ),
             ),
             Positioned(
-              // expandable image in top right of map
-              // padding: EdgeInsets.only(left: 10.0, right: 10, top: 0.0),
               top: MediaQuery.of(context).size.width * 0.05,
               right: MediaQuery.of(context).size.width * 0.05,
-              child: GestureDetector(
-                onTap: () {
-                  isExpanded
-                      ? setState(() {
-                          isExpanded = false;
-                          pictureHeight = 80.0;
-                          pictureWidth = 80.0;
-                          pictureIcon =
-                              SvgPicture.asset("assets/icons/mapexpand.svg");
-                          pictureAlign = Alignment.topRight;
-                        })
-                      : setState(() {
-                          isExpanded = true;
-                          pictureHeight =
-                              MediaQuery.of(context).size.height * 0.6;
-                          pictureWidth =
-                              MediaQuery.of(context).size.width * 0.90;
-                          pictureIcon =
-                              SvgPicture.asset("assets/icons/mapexit.svg");
-                          pictureAlign = Alignment.topCenter;
-                        });
-                },
-                child: AnimatedContainer(
-                  duration: Duration(milliseconds: 100),
-                  width: pictureWidth,
-                  height: pictureHeight,
-                  child: Stack(
-                    children: [
-                      Container(
-                        alignment: pictureAlign,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: Image.network(
-                            imageUrl,
-                            fit: BoxFit.cover,
-                            width: pictureWidth,
-                            height: pictureHeight,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 100),
+                width: pictureWidth,
+                height: pictureHeight,
+                child: Stack(
+                  children: [
+                    // photo
+                    Align(
+                      alignment: pictureAlign,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Image.network(
+                          imageUrl,
+                          fit: BoxFit.cover,
+                          width: pictureWidth,
+                          height: pictureHeight,
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      top: 4,
+                      right: 4,
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () {
+                          print("ICON TAPPED!"); // Debug print
+                          _toggle();
+                        },
+                        child: Container(
+                          width: 60, // Larger invisible hit-area
+                          height: 60,
+                          alignment: Alignment.topRight,
+                          // Make the debug rectangle much more visible
+                          child: SvgPicture.asset(
+                            isExpanded
+                                ? 'assets/icons/mapexit.svg'
+                                : 'assets/icons/mapexpand.svg',
+                            width: 40,
+                            height: 40,
                           ),
                         ),
                       ),
-                      Padding(
-                        padding: EdgeInsets.all(4.0),
-                        child: Container(
-                            alignment: Alignment.topRight, child: pictureIcon),
-                      ),
-                    ],
-                  ),
+                    )
+                  ],
                 ),
               ),
             ),
           ],
-        ));
+        );
       }),
     );
     // });
@@ -581,11 +627,16 @@ class _GameplayMapState extends State<GameplayMap> {
 
   /** Returns whether the user is at the challenge location */
   bool checkArrived() {
+    if (currentLocation == null) {
+      return false;
+    }
     return currentLocation!.distanceTo(widget.targetLocation) <=
         widget.awardingRadius;
   }
 
-  Container displayDialogue(bool hasArrived) {
+  Container displayDialog(BuildContext context, hasArrived, String challengeId,
+      String? challengeName) {
+    final name = challengeName ?? "";
     return hasArrived
         ? Container(
             // margin: EdgeInsetsDirectional.only(start: 50, end: 50),
@@ -605,7 +656,7 @@ class _GameplayMapState extends State<GameplayMap> {
                 Container(
                     margin: EdgeInsets.only(bottom: 10),
                     child: Text(
-                      "You've arrived at ${challengeName ?? ""}!",
+                      "You've arrived at ${name}!",
                       style:
                           TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
                     )),
@@ -613,7 +664,7 @@ class _GameplayMapState extends State<GameplayMap> {
                   margin: EdgeInsets.only(bottom: 10),
                   width: MediaQuery.of(context).size.width,
                   decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(5.0))),
+                      borderRadius: BorderRadius.all(Radius.circular(10.0))),
                   child: SvgPicture.asset('assets/images/arrived.svg',
                       fit: BoxFit.cover),
                 ),
@@ -624,7 +675,9 @@ class _GameplayMapState extends State<GameplayMap> {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => ChallengeCompletedPage()),
+                            builder: (context) => ChallengeCompletedPage(
+                                  challengeId: challengeId,
+                                )),
                       );
                     },
                     style: ButtonStyle(
@@ -663,15 +716,22 @@ class _GameplayMapState extends State<GameplayMap> {
                 Container(
                     margin: EdgeInsets.only(bottom: 10),
                     child: Text(
-                        "You’re close, but not there yet. Use a hint if needed! Hints use 25 points.",
+                        "You're close, but not there yet." +
+                            (numHintsLeft > 0
+                                ? "Use a hint if needed! Hints use 25 points."
+                                : ""),
                         style: TextStyle(
                             fontSize: 14, fontWeight: FontWeight.w400))),
-                Row(children: [
+                Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                   ElevatedButton(
                       onPressed: () => Navigator.pop(context, false),
                       style: ButtonStyle(
                         padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
-                            EdgeInsets.only(left: 15, right: 15)),
+                            EdgeInsets.symmetric(
+                                horizontal:
+                                    (MediaQuery.devicePixelRatioOf(context) < 3
+                                        ? 10
+                                        : 15))),
                         shape:
                             MaterialStateProperty.all<RoundedRectangleBorder>(
                           RoundedRectangleBorder(
@@ -691,25 +751,36 @@ class _GameplayMapState extends State<GameplayMap> {
                       ),
                       child: Text("Nevermind",
                           style: TextStyle(
+                              fontSize:
+                                  MediaQuery.devicePixelRatioOf(context) < 3
+                                      ? 12
+                                      : 14,
                               color: Color.fromARGB(255, 237, 86, 86)))),
-                  Spacer(),
-                  ElevatedButton(
-                      onPressed: () =>
-                          {useHint(), Navigator.pop(context, false)},
-                      style: ButtonStyle(
-                        padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
-                            EdgeInsets.only(left: 20, right: 20)),
-                        shape:
-                            MaterialStateProperty.all<RoundedRectangleBorder>(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(7.3),
+                  if (numHintsLeft > 0) Spacer(),
+                  if (numHintsLeft > 0)
+                    ElevatedButton(
+                        onPressed: () =>
+                            {useHint(), Navigator.pop(context, false)},
+                        style: ButtonStyle(
+                          padding:
+                              MaterialStateProperty.all<EdgeInsetsGeometry>(
+                                  EdgeInsets.only(left: 15, right: 15)),
+                          shape:
+                              MaterialStateProperty.all<RoundedRectangleBorder>(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(7.3),
+                            ),
                           ),
+                          backgroundColor: MaterialStateProperty.all<Color>(
+                              Color.fromARGB(255, 237, 86, 86)),
                         ),
-                        backgroundColor: MaterialStateProperty.all<Color>(
-                            Color.fromARGB(255, 237, 86, 86)),
-                      ),
-                      child: Text("Use Hint (${numHintsLeft} Left)",
-                          style: TextStyle(color: Colors.white))),
+                        child: Text("Use Hint (${numHintsLeft} Left)",
+                            style: TextStyle(
+                                fontSize:
+                                    MediaQuery.devicePixelRatioOf(context) < 3
+                                        ? 12
+                                        : 14,
+                                color: Colors.white))),
                 ])
               ],
             ),

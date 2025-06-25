@@ -43,9 +43,9 @@ dependencies:
   permission_handler: ^11.0.1
   fluttertoast: ^8.2.2
   profanity_filter: ^2.0.0
-  intl:
+  intl: 0.19.0
   flutter_linkify: ^6.0.0
-  platform_device_id: ^1.0.1
+  # platform_device_id: ^1.0.1
   flutter_map: ^6.0.1
   latlong2: ^0.9.0
   device_info_plus: ^9.1.0
@@ -54,15 +54,21 @@ dependencies:
   google_maps_flutter_android: ^2.4.2
   google_maps_flutter_platform_interface: ^2.4.3
   location: ^5.0.0
-  flutter_config: ^2.0.2
+  # flutter_config: ^2.0.2
+  flutter_config_plus: ^1.1.1
   dropdown_button2: ^2.3.9
-  carousel_slider: ^4.0.0
+  carousel_slider: ^5.0.0
   tuple: ^2.0.2
+  sticky_headers: ^0.3.0+2
+  win32: ^5.6.1
 
 dev_dependencies:
   flutter_launcher_icons:
   flutter_test:
     sdk: flutter
+
+flutter_config_plus:
+  env_file: .env
 
 flutter_launcher_icons:
   android: "launcher_icon"
@@ -109,3 +115,8 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+
+# Add this section to override the problematic file
+dependency_overrides:
+  # This forces the latest intl version that works with flutter_localizations
+  intl: 0.19.0

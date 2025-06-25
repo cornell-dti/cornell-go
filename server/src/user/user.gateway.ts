@@ -34,6 +34,7 @@ import { UserAbility } from '../casl/user-ability.decorator';
 import { AppAbility } from '../casl/casl-ability.factory';
 import { Action } from '../casl/action.enum';
 import { subject } from '@casl/ability';
+import { AchievementService } from '../achievement/achievement.service';
 
 const majors = readFileSync('./src/user/majors.txt', 'utf8').split('\n');
 
@@ -49,6 +50,7 @@ export class UserGateway {
     private groupService: GroupService,
     private eventService: EventService,
     private orgService: OrganizationService,
+    private achievementService: AchievementService,
   ) {}
 
   private providerToAuthType(provider: string) {
@@ -205,6 +207,8 @@ export class UserGateway {
     );
 
     if (!success) return false;
+
+    await this.achievementService.createAchievementTrackers(user);
 
     const org = await this.orgService.getOrganizationByCode(data.accessCode);
     await this.orgService.emitUpdateOrganizationData(org, false);

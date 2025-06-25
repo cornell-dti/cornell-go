@@ -14,6 +14,8 @@ import 'package:game/utils/utility_functions.dart';
 import 'package:provider/provider.dart';
 import 'package:velocity_x/velocity_x.dart';
 
+/** A Data Transfer Object that holds information about a challenge 
+ * cell in the UI */
 class JourneyCellDto {
   JourneyCellDto({
     required this.location,
@@ -67,6 +69,14 @@ class JourneysPage extends StatefulWidget {
   State<JourneysPage> createState() => _JourneysPageState();
 }
 
+/**
+ * '_JourneysPageState' - Manages and displays a list of journeys, filtered by criteria such as difficulty, name, and more.
+ * 
+ * @remarks
+ * This class handles the layout and logic for displaying journeys on the Journeys page. 
+ * It builds `Journey` widgets and applies any filters set by the search bar
+ * or user selections to show only the relevant journeys.
+ */
 class _JourneysPageState extends State<JourneysPage> {
   List<String> selectedCategories = [];
   List<String> selectedLocations = [];
@@ -160,51 +170,57 @@ class _JourneysPageState extends State<JourneysPage> {
 
                       final challengeLocation = challenge.location?.name ?? "";
                       final challengeName = challenge.name ?? "";
+                      final String eventName = event.name ?? "";
 
                       bool eventMatchesDifficultySelection = true;
                       bool eventMatchesCategorySelection = true;
                       bool eventMatchesLocationSelection = true;
                       bool eventMatchesSearchText = true;
-                      String? searchTerm = widget.mySearchText;
+                      String searchTerm = widget.mySearchText ?? "";
 
-                      if (searchTerm?.length == 0) {
-                        eventMatchesSearchText = true;
-                        if (widget.myDifficulty?.length == 0 ||
-                            widget.myDifficulty == event.difficulty?.name)
-                          eventMatchesDifficultySelection = true;
-                        else
-                          eventMatchesDifficultySelection = false;
+                      if (widget.myDifficulty?.length == 0 ||
+                          widget.myDifficulty == event.difficulty?.name)
+                        eventMatchesDifficultySelection = true;
+                      else
+                        eventMatchesDifficultySelection = false;
 
-                        if (widget.myLocations?.isNotEmpty ?? false) {
-                          if (widget.myLocations?.contains(challengeLocation) ??
-                              false)
-                            eventMatchesLocationSelection = true;
-                          else
-                            eventMatchesLocationSelection = false;
-                        } else
+                      if (widget.myLocations?.isNotEmpty ?? false) {
+                        if (widget.myLocations?.contains(challengeLocation) ??
+                            false)
                           eventMatchesLocationSelection = true;
+                        else
+                          eventMatchesLocationSelection = false;
+                      } else
+                        eventMatchesLocationSelection = true;
 
-                        if (widget.myCategories?.isNotEmpty ?? false) {
-                          if (widget.myCategories
-                                  ?.contains(event.category?.name) ??
-                              false)
-                            eventMatchesCategorySelection = true;
-                          else
-                            eventMatchesCategorySelection = false;
-                        } else
+                      if (widget.myCategories?.isNotEmpty ?? false) {
+                        if (widget.myCategories
+                                ?.contains(event.category?.name) ??
+                            false)
                           eventMatchesCategorySelection = true;
+                        else
+                          eventMatchesCategorySelection = false;
+                      } else
+                        eventMatchesCategorySelection = true;
+
+                      if (searchTerm.length == 0) {
+                        eventMatchesSearchText = true;
                       } else {
-                        if (searchTerm != null &&
-                            challengeLocation
-                                .toLowerCase()
-                                .contains(searchTerm.toLowerCase())) {
+                        if (challengeLocation
+                            .toLowerCase()
+                            .contains(searchTerm.toLowerCase())) {
                           eventMatchesSearchText = true;
                         } else {
                           eventMatchesSearchText = false;
-                          if (searchTerm != null &&
-                              challengeName
-                                  .toLowerCase()
-                                  .contains(searchTerm.toLowerCase())) {
+                          if (challengeName
+                              .toLowerCase()
+                              .contains(searchTerm.toLowerCase())) {
+                            eventMatchesSearchText = true;
+                          } else
+                            eventMatchesSearchText = false;
+                          if (eventName
+                              .toLowerCase()
+                              .contains(searchTerm.toLowerCase())) {
                             eventMatchesSearchText = true;
                           } else
                             eventMatchesSearchText = false;
