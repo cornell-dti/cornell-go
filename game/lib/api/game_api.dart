@@ -7,6 +7,7 @@ import 'package:game/api/game_client_dto.dart';
 import 'package:game/api/game_server_api.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:http/http.dart' as http;
@@ -20,7 +21,7 @@ import 'package:game/api/geopoint.dart';
  * 
  * @remarks
  * This class serves as the central hub for all API-related functionality:
- * - Authentication state management (Google Sign-In, device login)
+ * - Authentication state management (Google Sign-In, Apple Sign-In, device login)
  * - Socket connection handling and management
  * - Token management (access and refresh tokens)
  * - Stream management through GameClientApi
@@ -36,6 +37,7 @@ import 'package:game/api/geopoint.dart';
  * - Persistent authentication through secure storage
  * - Socket connection management
  * - Google Sign-In integration
+ * - Apple Sign-In integration
  * - Device-based authentication
  * 
  * @example
@@ -69,6 +71,7 @@ class ApiClient extends ChangeNotifier {
   // The ApiClient manages the socket and authentication state while the ClientApi manages the streams that components listen to
   final String _apiUrl;
   final Uri _googleLoginUrl;
+  final Uri _appleLoginUrl;  // Apple Sign-In endpoint
   final Uri _deviceLoginUrl;
   final Uri _refreshUrl;
   final GameClientApi _clientApi;
@@ -87,6 +90,7 @@ class ApiClient extends ChangeNotifier {
       : _storage = storage,
         _apiUrl = apiUrl,
         _googleLoginUrl = Uri.parse(apiUrl).resolve("google"),
+        _appleLoginUrl = Uri.parse(apiUrl).resolve("apple"),
         _deviceLoginUrl = Uri.parse(apiUrl).resolve("device-login"),
         _refreshUrl = Uri.parse(apiUrl).resolve("refresh-access"),
         _clientApi = GameClientApi();
@@ -229,6 +233,30 @@ class ApiClient extends ChangeNotifier {
         noRegister: true);
   }
 
+  // Connects to server using Apple Sign-In credentials with full registration
+  // Uses Apple identity token and user-provided registration details
+  Future<http.Response?> connectApple(
+      AuthorizationCredentialAppleID credential,
+      String year,
+      LoginEnrollmentTypeDto enrollmentType,
+      String username,
+      String college,
+      String major,
+      List<String> interests) async {
+    return connect(credential.identityToken ?? "", _appleLoginUrl, year, enrollmentType,
+        username, college, major, interests,
+        noRegister: false);
+  }
+
+  // Connects to server using Apple Sign-In credentials without registration
+  // Used for existing users who just want to sign in
+  Future<http.Response?> connectAppleNoRegister(
+      AuthorizationCredentialAppleID credential) async {
+    return connect(credential.identityToken ?? "", _appleLoginUrl, "",
+        LoginEnrollmentTypeDto.GUEST, "", "", "", [],
+        noRegister: true);
+  }
+
   Future<http.Response?> connect(
       String idToken,
       Uri url,
@@ -287,6 +315,30 @@ class ApiClient extends ChangeNotifier {
   Future<GoogleSignInAccount?> signinGoogle() async {
     final account = await _googleSignIn.signIn();
     return account;
+  }
+
+  // Initiates Apple Sign-In flow and returns credentials
+  // Requests email and full name scopes for user identification
+  Future<AuthorizationCredentialAppleID?> signinApple() async {
+    try {
+      // Check if Apple Sign-In is available on this device
+      if (!await SignInWithApple.isAvailable()) {
+        print('Apple Sign-In is not available on this device');
+        return null;
+      }
+
+      final credential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+      );
+      return credential;
+    } catch (e) {
+      print('Apple Sign-In error: $e');
+      print('Error type: ${e.runtimeType}');
+      return null;
+    }
   }
 
   Future<void> disconnect() async {
