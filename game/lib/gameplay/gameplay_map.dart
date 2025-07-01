@@ -185,45 +185,65 @@ class _GameplayMapState extends State<GameplayMap> {
   Future<bool> startPositionStream() async {
     GoogleMapController googleMapController = await mapCompleter.future;
 
-    GeoPoint.current().then(
-      (location) {
-        currentLocation = location;
-      },
-    );
+    try {
+      final location = await GeoPoint.current();
+      currentLocation = location;
 
-    positionStream = Geolocator.getPositionStream(
-            locationSettings: GeoPoint.getLocationSettings())
-        .listen((Position? newPos) {
-      // prints user coordinates - useful for debugging
-      // print(newPos == null
-      //     ? 'Unknown'
-      //     : '${newPos.latitude.toString()}, ${newPos.longitude.toString()}');
+      positionStream = Geolocator.getPositionStream(
+              locationSettings: GeoPoint.getLocationSettings())
+          .listen((Position? newPos) {
+        // prints user coordinates - useful for debugging
+        // print(newPos == null
+        //     ? 'Unknown'
+        //     : '${newPos.latitude.toString()}, ${newPos.longitude.toString()}');
 
-      // putting the animate camera logic in here seems to not work
-      // could be useful to debug later?
-      currentLocation = newPos == null
-          ? GeoPoint(_center.latitude, _center.longitude, 0)
-          : GeoPoint(newPos.latitude, newPos.longitude, newPos.heading);
-      setState(() {});
-    });
+        // putting the animate camera logic in here seems to not work
+        // could be useful to debug later?
+        currentLocation = newPos == null
+            ? GeoPoint(_center.latitude, _center.longitude, 0)
+            : GeoPoint(newPos.latitude, newPos.longitude, newPos.heading);
+        setState(() {});
+      });
 
-    positionStream.onData((newPos) {
-      currentLocation =
-          GeoPoint(newPos.latitude, newPos.longitude, newPos.heading);
+      positionStream.onData((newPos) {
+        currentLocation =
+            GeoPoint(newPos.latitude, newPos.longitude, newPos.heading);
 
-      // upon new user location data, moves map camera to be centered around
-      // new position and sets zoom.
-      googleMapController.animateCamera(
-        CameraUpdate.newCameraPosition(
-          CameraPosition(
-            target: LatLng(newPos.latitude, newPos.longitude),
-            zoom: 16.5,
+        // upon new user location data, moves map camera to be centered around
+        // new position and sets zoom.
+        googleMapController.animateCamera(
+          CameraUpdate.newCameraPosition(
+            CameraPosition(
+              target: LatLng(newPos.latitude, newPos.longitude),
+              zoom: 16.5,
+            ),
           ),
-        ),
-      );
-      setState(() {});
-    });
-    return true;
+        );
+        setState(() {});
+      });
+
+      return true;
+    } catch (e) {
+      print('Failed to get location: $e');
+
+      // Show toast and navigate back to bottom navbar
+      displayToast("Not able to receive location. Please check permissions.",
+          Status.error);
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Future.delayed(Duration(seconds: 1), () {
+          if (mounted) {
+            // if the page state is still active, navigate to bottom navbar
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (context) => BottomNavBar()),
+              (route) => false,
+            );
+          }
+        });
+      });
+
+      return false;
+    }
   }
 
   /**

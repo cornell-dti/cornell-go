@@ -2,18 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:game/api/game_client_dto.dart';
 import 'package:game/details_page/details_page.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-/// If the google-login user is not registered, this page will be displayed.
+/// If the google-login or apple-login user is not registered, this page will be displayed.
 /// The user will be asked to select their enrollment type. The user is created
 /// only when they fill all required information (at registerpage -> details_page
 /// -> interests_page).
 class RegisterPageWidget extends StatefulWidget {
-  final GoogleSignInAccount? user;
+  final GoogleSignInAccount? googleUser;
+  final AuthorizationCredentialAppleID? appleUser;
   final String? idToken;
   RegisterPageWidget(
       {Key? key,
-      required GoogleSignInAccount? this.user,
+      GoogleSignInAccount? this.googleUser,
+      AuthorizationCredentialAppleID? this.appleUser,
       required String? this.idToken})
       : super(key: key);
   final scaffoldKey = GlobalKey<ScaffoldState>();
@@ -118,13 +121,15 @@ class _RegisterPageWidgetState extends State<RegisterPageWidget> {
                           )),
                     )),
                 onPressed: () {
-                  print(widget.user);
+                  print(widget.googleUser);
+                  print(widget.appleUser);
                   print(widget.idToken);
                   Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (context) => DetailsPageWidget(
                         userType: entryToEnrollmentType[_selectedOption]!,
-                        user: widget.user,
+                        googleUser: widget.googleUser,
+                        appleUser: widget.appleUser,
                         idToken: widget.idToken,
                       ),
                     ),

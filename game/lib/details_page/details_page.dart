@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:game/api/game_client_dto.dart';
 import 'package:game/interests/interests_page.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:game/details_page/dropdown_widget.dart';
 
@@ -10,12 +11,14 @@ class DetailsPageWidget extends StatefulWidget {
       {Key? key,
       required LoginEnrollmentTypeDto this.userType,
       required String? this.idToken,
-      required GoogleSignInAccount? this.user})
+      GoogleSignInAccount? this.googleUser,
+      AuthorizationCredentialAppleID? this.appleUser})
       : super(key: key);
   final scaffoldKey = GlobalKey<ScaffoldState>();
   final LoginEnrollmentTypeDto userType;
   final String? idToken;
-  final GoogleSignInAccount? user;
+  final GoogleSignInAccount? googleUser;
+  final AuthorizationCredentialAppleID? appleUser;
 
   @override
   _DetailsPageWidgetState createState() => _DetailsPageWidgetState();
@@ -329,7 +332,8 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
                         MaterialPageRoute(
                           builder: (context) => InterestsPageWidget(
                             userType: widget.userType,
-                            user: widget.user,
+                            googleUser: widget.googleUser,
+                            appleUser: widget.appleUser,
                             idToken: widget.idToken,
                             username: _name,
                             college: _college,

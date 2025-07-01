@@ -54,12 +54,12 @@ void main() async {
     initializeMapRenderer();
   }
 
-  GeoPoint.current().then((location) {
-    print(
-        "App startup - Location initialized: ${location.lat}, ${location.long}");
-  }).catchError((e) {
-    print("Error initializing location at startup: $e");
-  });
+  // GeoPoint.current().then((location) {
+  //   print(
+  //       "App startup - Location initialized: ${location.lat}, ${location.long}");
+  // }).catchError((e) {
+  //   print("Error initializing location at startup: $e");
+  // });
 
   // Set preferred orientations to portrait only
   SystemChrome.setPreferredOrientations([

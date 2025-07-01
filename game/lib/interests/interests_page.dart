@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:game/api/game_client_dto.dart';
-import 'package:game/main.dart';
 import 'package:game/challenges/challenges_page.dart';
+import 'package:game/main.dart';
+import 'package:game/navigation_page/bottom_navbar.dart';
+import 'package:game/splash_page/splash_page.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:game/profile/settings_page.dart';
 
 /// This page allows the user to select their interests. Connection to backend
 /// (creating the user) happens here.
@@ -13,7 +17,8 @@ class InterestsPageWidget extends StatefulWidget {
       {Key? key,
       required LoginEnrollmentTypeDto this.userType,
       required String? this.idToken,
-      required GoogleSignInAccount? this.user,
+      GoogleSignInAccount? this.googleUser,
+      AuthorizationCredentialAppleID? this.appleUser,
       required String this.username,
       required String? this.college,
       required String? this.major,
@@ -22,7 +27,8 @@ class InterestsPageWidget extends StatefulWidget {
   final scaffoldKey = GlobalKey<ScaffoldState>();
   final LoginEnrollmentTypeDto userType;
   final String? idToken;
-  final GoogleSignInAccount? user;
+  final GoogleSignInAccount? googleUser;
+  final AuthorizationCredentialAppleID? appleUser;
   final String username;
   final String? college;
   final String? major;
@@ -119,26 +125,39 @@ class _InterestsPageWidgetState extends State<InterestsPageWidget> {
                         if (_checked[i]) interests.add(_categories[i]);
                       }
 
-                      final connectionResult = await client.connectGoogle(
-                          widget.user!,
-                          this.widget.year ?? "",
-                          this.widget.userType,
-                          this.widget.username,
-                          this.widget.college ?? "",
-                          this.widget.major ?? "",
-                          interests);
+                      var connectionResult;
+
+                      // Handle Google Sign-In user
+                      if (widget.googleUser != null) {
+                        connectionResult = await client.connectGoogle(
+                            widget.googleUser!,
+                            this.widget.year ?? "",
+                            this.widget.userType,
+                            this.widget.username,
+                            this.widget.college ?? "",
+                            this.widget.major ?? "",
+                            interests);
+                      }
+                      // Handle Apple Sign-In user
+                      else if (widget.appleUser != null) {
+                        connectionResult = await client.connectApple(
+                            widget.appleUser!,
+                            this.widget.year ?? "",
+                            this.widget.userType,
+                            this.widget.username,
+                            this.widget.college ?? "",
+                            this.widget.major ?? "",
+                            interests);
+                      }
 
                       if (connectionResult == null) {
                         displayToast("An error occurred while signing you up!",
                             Status.error);
                       } else {
-                        Navigator.of(context).pushAndRemoveUntil(
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                ChallengesPage(), // go here after signup
-                          ),
-                          (route) => false, // removes everything below it
-                        );
+                        // ✅ Success! Navigation handled by splash_page.dart StreamBuilder
+                        // (listens to connectedStream → auto-navigates to BottomNavBar)
+                        print(
+                            "Registration successful - automatic navigation will occur");
                       }
                     }
                   },
