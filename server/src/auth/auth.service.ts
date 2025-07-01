@@ -143,12 +143,17 @@ export class AuthService {
         break;
     }
 
-    if (!idToken || !idToken.email.endsWith('@cornell.edu')) {
-      if (!idToken) {
-        console.log('Id token was null!');
-      } else {
-        console.log('Non cornell account was used!');
-      }
+    if (!idToken) {
+      console.log('Id token was null!');
+      return null;
+    }
+
+    // Only enforce Cornell email requirement for Google and Device login, not Apple
+    if (
+      authType !== AuthType.APPLE &&
+      !idToken.email.endsWith('@cornell.edu')
+    ) {
+      console.log('Non cornell account was used!');
       return null;
     }
 
