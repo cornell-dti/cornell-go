@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/api/game_client_dto.dart';
+import 'package:game/splash_page/splash_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'dart:io' show Platform; //at the top
@@ -116,6 +117,42 @@ Future<void> showLeaveConfirmationAlert(
   );
 }
 
+Future<void> showDeletionConfirmationAlert(context, ApiClient client) async {
+  return showDialog<void>(
+    context: context,
+    barrierDismissible: false, // user must tap button!
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Delete Account'),
+        content: const Text(
+            'Are you sure you want to delete your account? This action cannot be undone.'),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('YES'),
+            onPressed: () async {
+              await client.serverApi?.closeAccount(CloseAccountDto());
+              // Clear user Local State
+              await client.disconnect();
+              Navigator.of(context).pop();
+              // Navigate to splash page and clear navigation stack
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (context) => SplashPageWidget()),
+                (route) => false,
+              );
+            },
+          ),
+          TextButton(
+            child: const Text('NO'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
 int numDigs(int num) {
   return num.toString().length;
 }
@@ -144,7 +181,7 @@ void displayToast(message, Status status) {
     msg: message,
     toastLength: Toast.LENGTH_SHORT,
     gravity: ToastGravity.BOTTOM,
-    timeInSecForIosWeb: 1,
+    timeInSecForIosWeb: 3,
     backgroundColor: status == Status.error
         ? (Colors.red)
         : (status == Status.success ? (Colors.green) : Colors.yellow),

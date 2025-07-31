@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:game/widget/progress_bar.dart';
@@ -40,7 +38,7 @@ class _AchievementCellState extends State<AchievementCell> {
       onTap: () async {},
       child: Container(
         width: MediaQuery.sizeOf(context).width * 0.85,
-        height: MediaQuery.sizeOf(context).height * 0.11,
+
         //padding: EdgeInsets.all(5),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -80,7 +78,6 @@ class _AchievementCellState extends State<AchievementCell> {
                       ),
                     ),
                   ),
-                  Spacer(),
                   Align(
                       alignment: Alignment.bottomCenter,
                       child: LoadingBar(this.tasksFinished, this.totalTasks)),

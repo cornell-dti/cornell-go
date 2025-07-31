@@ -11,7 +11,7 @@ RUN npm install
 
 WORKDIR /app/server
 COPY server/package.json .
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 WORKDIR /app/admin
 COPY admin .

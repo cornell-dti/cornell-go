@@ -45,6 +45,7 @@ class SplashPageWidget extends StatelessWidget {
             }
 
             if (!account.email.contains("@cornell.edu")) {
+              await apiClient.disconnect();
               displayToast(
                   "Only Cornell-affiliated users may use Google Sign-in!",
                   Status.error);

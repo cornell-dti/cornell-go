@@ -203,169 +203,179 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Padding(
-          padding: const EdgeInsets.only(left: 25, right: 25, top: 50),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: SvgPicture.asset("assets/icons/back.svg")),
-                SvgPicture.asset("assets/images/details_progress.svg"),
-                SizedBox(height: 40.0),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text("Username*",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                        )),
-                    TextFormField(
-                      onChanged: (newValue) => setState(() {
-                        _name = newValue;
-                      }),
-                      decoration: const InputDecoration(
-                        contentPadding: EdgeInsets.only(
-                            left: 20.0, right: 20.0, top: 10, bottom: 10),
-                        labelStyle: TextStyle(
-                            color: Color.fromARGB(51, 0, 0, 0),
-                            fontWeight: FontWeight.w400),
-                        labelText: 'e.g. CornellianLover123',
-                        enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                                color: Color.fromARGB(51, 0, 0, 0), width: 1.5),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.only(
+                top: 20.0, left: 25, right: 25, bottom: 30),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: SvgPicture.asset("assets/icons/back.svg")),
+                  SvgPicture.asset("assets/images/details_progress.svg"),
+                  SizedBox(height: 40.0),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Username*",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                          )),
+                      TextFormField(
+                        onChanged: (newValue) => setState(() {
+                          _name = newValue;
+                        }),
+                        decoration: const InputDecoration(
+                          contentPadding: EdgeInsets.only(
+                              left: 20.0, right: 20.0, top: 10, bottom: 10),
+                          labelStyle: TextStyle(
+                              color: Color.fromARGB(51, 0, 0, 0),
+                              fontWeight: FontWeight.w400),
+                          labelText: 'e.g. CornellianLover123',
+                          enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  color: Color.fromARGB(51, 0, 0, 0),
+                                  width: 1.5),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10.0))),
+                          focusedBorder: OutlineInputBorder(
                             borderRadius:
-                                BorderRadius.all(Radius.circular(10.0))),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                          borderSide: BorderSide(
-                            color: Color.fromARGB(255, 255, 170, 91),
-                            width: 1.5,
+                                BorderRadius.all(Radius.circular(10.0)),
+                            borderSide: BorderSide(
+                              color: Color.fromARGB(255, 255, 170, 91),
+                              width: 1.5,
+                            ),
+                          ),
+                          errorBorder: OutlineInputBorder(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(10.0)),
+                            borderSide: BorderSide(
+                              color: Color.fromARGB(153, 233, 87, 85),
+                              width: 1.5,
+                            ),
+                          ),
+                          focusedErrorBorder: OutlineInputBorder(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(10.0)),
+                            borderSide: BorderSide(
+                              color: Color.fromARGB(153, 233, 87, 85),
+                              width: 1.5,
+                            ),
                           ),
                         ),
-                        errorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                          borderSide: BorderSide(
-                            color: Color.fromARGB(153, 233, 87, 85),
-                            width: 1.5,
-                          ),
-                        ),
-                        focusedErrorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                          borderSide: BorderSide(
-                            color: Color.fromARGB(153, 233, 87, 85),
-                            width: 1.5,
-                          ),
-                        ),
-                      ),
 
-                      // The validator receives the text that the user has entered.
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your username';
-                        }
-                        return null;
-                      },
-                    ),
-                  ],
-                ),
-                SizedBox(height: 20),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text("College",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                        )),
-                    DropdownWidget(
-                      null,
-                      _colleges,
-                      notifyParent: (val) => {
-                        setState(() {
-                          _college = val;
-                        })
-                      },
-                    )
-                  ],
-                ),
-                SizedBox(height: 20),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text("Major",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                        )),
-                    majorDropdown
-                  ],
-                ),
-                SizedBox(height: 20),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text("Graduation Year",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                        )),
-                    DropdownWidget(
-                      null,
-                      _years,
-                      notifyParent: (val) {
-                        _year = val;
-                      },
-                    )
-                  ],
-                ),
-                SizedBox(height: 150.0),
-                TextButton(
-                  onPressed: () async {
-                    if (_formKey.currentState!.validate()) {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => InterestsPageWidget(
-                            userType: widget.userType,
-                            googleUser: widget.googleUser,
-                            appleUser: widget.appleUser,
-                            idToken: widget.idToken,
-                            username: _name,
-                            college: _college,
-                            major: _major,
-                            year: _year,
+                        // The validator receives the text that the user has entered.
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter your username';
+                          }
+                          return null;
+                        },
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 20),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("College",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                          )),
+                      DropdownWidget(
+                        null,
+                        _colleges,
+                        notifyParent: (val) => {
+                          setState(() {
+                            _college = val;
+                          })
+                        },
+                      )
+                    ],
+                  ),
+                  SizedBox(height: 20),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Major",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                          )),
+                      majorDropdown
+                    ],
+                  ),
+                  SizedBox(height: 20),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Graduation Year",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                          )),
+                      DropdownWidget(
+                        null,
+                        _years,
+                        notifyParent: (val) {
+                          _year = val;
+                        },
+                      )
+                    ],
+                  ),
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+                  TextButton(
+                    onPressed: () async {
+                      if (_formKey.currentState!.validate()) {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => InterestsPageWidget(
+                              userType: widget.userType,
+                              googleUser: widget.googleUser,
+                              appleUser: widget.appleUser,
+                              idToken: widget.idToken,
+                              username: _name,
+                              college: _college,
+                              major: _major,
+                              year: _year,
+                            ),
                           ),
-                        ),
-                      );
-                    }
-                  },
-                  style: ButtonStyle(
-                      shape: MaterialStatePropertyAll<OutlinedBorder>(
-                          RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10.0))),
-                      backgroundColor: MaterialStatePropertyAll<Color>(
-                          Color.fromARGB(255, 233, 87, 85))),
-                  child: Container(
-                      width: 345,
-                      height: 50,
-                      child: Align(
-                        alignment: Alignment.center,
-                        child: Text("Continue",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            )),
-                      )),
-                ),
-              ],
+                        );
+                      }
+                    },
+                    style: ButtonStyle(
+                        shape: MaterialStatePropertyAll<OutlinedBorder>(
+                            RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.0))),
+                        backgroundColor: MaterialStatePropertyAll<Color>(
+                            Color.fromARGB(255, 233, 87, 85))),
+                    child: Container(
+                        width: 345,
+                        height: 50,
+                        child: Align(
+                          alignment: Alignment.center,
+                          child: Text("Continue",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              )),
+                        )),
+                  ),
+                ],
+              ),
             ),
-          )),
+          ),
+        ),
+      ),
     );
   }
 }
