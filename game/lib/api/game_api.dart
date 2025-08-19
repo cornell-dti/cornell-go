@@ -269,7 +269,7 @@ class ApiClient extends ChangeNotifier {
       String major,
       List<String> interests,
       {bool noRegister = false}) async {
-    // Try to get location, but don't block authentication if it fails
+    // Location at registration is optional
     double? lat;
     double? long;
 
@@ -279,8 +279,8 @@ class ApiClient extends ChangeNotifier {
       long = pos.long;
       print('Location obtained for login: $lat, $long');
     } catch (e) {
-      print('Location not available during login, proceeding without it: $e');
       // lat and long remain null, server will use defaults
+      print('Location not available during login, proceeding without it: $e');
     }
 
     final loginDto = LoginDto(

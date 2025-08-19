@@ -9,7 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 final SUPPORT_URL =
-    Uri.parse("https://sites.google.com/cornell.edu/cornellgosupport/home");
+    Uri.parse("https://sites.google.com/cornell.edu/cornellgosupport");
 
 class SettingsPage extends StatelessWidget {
   final bool isGuest;
@@ -235,7 +235,9 @@ class SettingsPage extends StatelessWidget {
                             Padding(
                               padding: EdgeInsets.only(right: 20.0),
                               child: SvgPicture.asset(
-                                'assets/icons/delete.png',
+                                'assets/icons/delete.svg',
+                                width: 14,
+                                height: 14,
                               ),
                             ),
                             Text(

@@ -159,8 +159,7 @@ class _InterestsPageWidgetState extends State<InterestsPageWidget> {
                               "An error occurred while signing you up!",
                               Status.error);
                         } else {
-                          // ✅ Success! Navigation handled by splash_page.dart StreamBuilder
-                          // (listens to connectedStream → auto-navigates to BottomNavBar)
+                          //  Sucess case - Navigation handled by splash_page.dart StreamBuilder
                           print(
                               "Registration successful - automatic navigation will occur");
                         }

@@ -178,7 +178,7 @@ class SplashPageWidget extends StatelessWidget {
                       if (client.serverApi != null) {
                         print("ServerApi != null");
                         WidgetsBinding.instance.addPostFrameCallback((_) {
-                          print('Navigating to main app from splash page');
+                          // Navigate to main app from splash page
                           Navigator.pushAndRemoveUntil(
                               context,
                               MaterialPageRoute(

@@ -3,7 +3,7 @@ import { AuthType } from '@prisma/client';
 import { AuthService } from '../auth.service';
 import { LoginDto } from '../login.dto';
 import { UserService } from '../../user/user.service';
-
+import { User } from '@prisma/client';
 @Controller('apple')
 export class AppleController {
   constructor(
@@ -25,7 +25,7 @@ export class AppleController {
   @Get('check-user')
   async checkUser(
     @Query('idToken') idToken: string,
-  ): Promise<{ exists: boolean; user?: any }> {
+  ): Promise<{ exists: boolean; user?: User }> {
     const idTokenPayload = await this.authService.payloadFromApple(idToken);
 
     if (!idTokenPayload) {

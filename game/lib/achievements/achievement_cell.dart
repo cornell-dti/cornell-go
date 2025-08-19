@@ -38,8 +38,6 @@ class _AchievementCellState extends State<AchievementCell> {
       onTap: () async {},
       child: Container(
         width: MediaQuery.sizeOf(context).width * 0.85,
-
-        //padding: EdgeInsets.all(5),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(15),

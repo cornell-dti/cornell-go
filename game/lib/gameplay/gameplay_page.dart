@@ -110,7 +110,6 @@ class _GameplayPageState extends State<GameplayPage> {
       return Scaffold(
         body: Column(
           children: [
-            //SafeArea to avoid notch overlap
             SafeArea(
                 bottom: false,
                 child: Container(
@@ -180,7 +179,6 @@ class _GameplayPageState extends State<GameplayPage> {
                             ),
                           ),
                           Container(
-                              // padding: EdgeInsets.symmetric(horizontal: 8),
                               child: Row(children: [
                             // Location section - auto-scaling text
                             Expanded(

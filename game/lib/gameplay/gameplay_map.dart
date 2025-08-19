@@ -226,7 +226,6 @@ class _GameplayMapState extends State<GameplayMap> {
     } catch (e) {
       print('Failed to get location: $e');
 
-      // Show toast and navigate back to bottom navbar
       displayToast("Not able to receive location. Please check permissions.",
           Status.error);
 
