@@ -38,6 +38,27 @@ export class ChallengeService {
     private abilityFactory: CaslAbilityFactory,
   ) {}
 
+  /**
+   * Calculate hint-adjusted points using the "Half-after-3" system
+   * 0 hints = full points; 3 hints = exactly half points; 1-2 hints linearly reduce
+   */
+  private calculateHintAdjustedPoints(
+    basePoints: number,
+    hintsUsed: number,
+  ): number {
+    // Formula: P * (1 - h/6) where h is hints used
+    const raw = basePoints * (1 - hintsUsed / 6.0);
+
+    // Round to nearest 5
+    const rounded = Math.round(raw / 5) * 5;
+
+    // Ensure minimum of half points, maximum of full points
+    const minAllowed = Math.floor(basePoints / 2);
+    const award = Math.max(minAllowed, Math.min(rounded, basePoints));
+
+    return award;
+  }
+
   /** Get challenges with prev challenges for a given user */
   async getChallengesByIdsForAbility(
     ability: AppAbility,
@@ -139,7 +160,10 @@ export class ChallengeService {
 
     const nextChallenge = await this.nextChallenge(eventTracker);
 
-    const deltaScore = curChallenge.points - 25 * eventTracker.hintsUsed;
+    const deltaScore = this.calculateHintAdjustedPoints(
+      curChallenge.points,
+      eventTracker.hintsUsed,
+    );
 
     const newUser = await this.prisma.user.update({
       where: { id: user.id },

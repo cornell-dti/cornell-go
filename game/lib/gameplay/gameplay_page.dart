@@ -254,14 +254,17 @@ class _GameplayPageState extends State<GameplayPage> {
                                   Flexible(
                                     child: LayoutBuilder(
                                       builder: (context, constraints) {
+                                        int basePoints = challenge.points ?? 0;
+                                        int adjustedPoints =
+                                            calculateHintAdjustedPoints(
+                                                basePoints, hintsUsed);
+
                                         String text = ' ' +
                                             (hintsUsed > 0
-                                                ? ((challenge.points ?? 0) -
-                                                            hintsUsed * 25)
-                                                        .toString() +
-                                                    '/'
-                                                : '') +
-                                            (challenge.points ?? 0).toString() +
+                                                ? adjustedPoints.toString() +
+                                                    '/' +
+                                                    basePoints.toString()
+                                                : basePoints.toString()) +
                                             " PTS";
                                         return FittedBox(
                                           fit: BoxFit.scaleDown,

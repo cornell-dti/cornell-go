@@ -11,6 +11,7 @@ import 'package:game/model/event_model.dart';
 import 'package:game/model/tracker_model.dart';
 import 'package:game/model/group_model.dart';
 import 'package:game/model/challenge_model.dart';
+import 'package:game/utils/utility_functions.dart';
 import 'dart:math';
 
 import 'package:flutter_svg/flutter_svg.dart';
@@ -117,8 +118,6 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
 
   @override
   Widget build(BuildContext context) {
-    final int hintsDeduction = 25;
-
     return Consumer5<ChallengeModel, EventModel, TrackerModel, ApiClient,
             GroupModel>(
         builder: (context, challengeModel, eventModel, trackerModel, apiClient,
@@ -162,8 +161,8 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
         var completedChal =
             challengeModel.getChallengeById(prevChal.challengeId);
         if (completedChal == null) continue;
-        var pts =
-            (completedChal.points ?? 0) - (prevChal.hintsUsed * hintsDeduction);
+        var pts = calculateHintAdjustedPoints(
+            completedChal.points ?? 0, prevChal.hintsUsed);
         total_pts += pts;
 
         completedChallenges.add(Container(
@@ -286,11 +285,11 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                         child: Row(
                           children: [
                             SvgPicture.asset(
-                              'assets/icons/hint.svg', // Replace with your SVG file path
+                              'assets/icons/hint.svg',
                               fit: BoxFit.cover,
                             ),
                             Text(
-                              "   Used 1st Hint",
+                              "   Used ${tracker.prevChallenges.last.hintsUsed} hint${tracker.prevChallenges.last.hintsUsed > 1 ? 's' : ''}",
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 16.0,
@@ -299,63 +298,18 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                             ),
                             Spacer(),
                             Text(
-                              "- " + hintsDeduction.toString() + " points",
+                              () {
+                                int basePoints = challenge.points ?? 0;
+                                int adjustedPoints =
+                                    calculateHintAdjustedPoints(basePoints,
+                                        tracker.prevChallenges.last.hintsUsed);
+                                int penalty = basePoints - adjustedPoints;
+                                return "- $penalty points";
+                              }(),
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 16.0,
                               ),
-                            ),
-                          ],
-                        )),
-                  if (tracker.prevChallenges.last.hintsUsed > 1)
-                    Container(
-                        margin:
-                            EdgeInsets.only(left: 30, bottom: 10, right: 30),
-                        child: Row(
-                          children: [
-                            SvgPicture.asset(
-                              'assets/icons/hint.svg', // Replace with your SVG file path
-                              fit: BoxFit.cover,
-                            ),
-                            Text(
-                              "   Used 2nd Hint",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16.0,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Spacer(),
-                            Text(
-                              "- " + hintsDeduction.toString() + " points",
-                              style: TextStyle(
-                                  color: Colors.white, fontSize: 16.0),
-                            ),
-                          ],
-                        )),
-                  if ((tracker.prevChallenges.last.hintsUsed) > 2)
-                    Container(
-                        margin:
-                            EdgeInsets.only(left: 30, bottom: 10, right: 30),
-                        child: Row(
-                          children: [
-                            SvgPicture.asset(
-                              'assets/icons/hint.svg', // Replace with your SVG file path
-                              fit: BoxFit.cover,
-                            ),
-                            Text(
-                              "   Used 3rd Hint",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16.0,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Spacer(),
-                            Text(
-                              "- " + hintsDeduction.toString() + " points",
-                              style: TextStyle(
-                                  color: Colors.white, fontSize: 16.0),
                             ),
                           ],
                         )),
@@ -370,9 +324,8 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                   journeyPage
                       ? "Total Points: " + total_pts.toString()
                       : "Points Earned: " +
-                          ((challenge.points ?? 0) -
-                                  (tracker.prevChallenges.last.hintsUsed) *
-                                      hintsDeduction)
+                          calculateHintAdjustedPoints(challenge.points ?? 0,
+                                  tracker.prevChallenges.last.hintsUsed)
                               .toString(),
                   style: TextStyle(
                     color: Colors.white,

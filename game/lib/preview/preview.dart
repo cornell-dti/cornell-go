@@ -322,12 +322,14 @@ class _PreviewState extends State<Preview> {
                           horizontal: 25.0, vertical: 8.0),
                       child: Align(
                         alignment: Alignment.topLeft,
-                        child: Text(description,
-                            style: TextStyle(
-                                // fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                                fontFamily: 'Poppins',
-                                color: Preview.greyColor)),
+                        child: SingleChildScrollView(
+                          child: Text(description,
+                              style: TextStyle(
+                                  // fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                  fontFamily: 'Poppins',
+                                  color: Preview.greyColor)),
+                        ),
                       ),
                     ),
                   ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:game/utils/utility_functions.dart';
 import 'package:velocity_x/velocity_x.dart';
 
 /**
@@ -80,7 +81,9 @@ Widget completedCell(
                       ),
                       Text(
                           ' ' +
-                              (points - totalHintsUsed * 25).toString() +
+                              calculateHintAdjustedPoints(
+                                      points, totalHintsUsed)
+                                  .toString() +
                               "/" +
                               points.toString() +
                               " PTS",
