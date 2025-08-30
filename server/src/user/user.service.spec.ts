@@ -6,6 +6,8 @@ import { PrismaService } from '../prisma/prisma.service';
 import { OrganizationService } from '../organization/organization.service';
 import { ClientService } from '../client/client.service';
 import { SessionLogService } from '../session-log/session-log.service';
+import { CaslAbilityFactory } from '../casl/casl-ability.factory';
+import { AchievementService } from '../achievement/achievement.service';
 
 describe('UserService', () => {
   let service: UserService;
@@ -37,6 +39,14 @@ describe('UserService', () => {
         {
           useValue: null,
           provide: SessionLogService,
+        },
+        {
+          useValue: null,
+          provide: CaslAbilityFactory,
+        },
+        {
+          useValue: null,
+          provide: AchievementService,
         },
       ],
     }).compile();

@@ -2,8 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { OrganizationGateway } from './organization.gateway';
 import { ClientService } from '../client/client.service';
 import { OrganizationService } from './organization.service';
-import { UserService } from '../user/user.service';
 import { AuthService } from '../auth/auth.service';
+import { CaslAbilityFactory } from '../casl/casl-ability.factory';
+import { Reflector } from '@nestjs/core';
 
 describe('OrganizationGateway', () => {
   let gateway: OrganizationGateway;
@@ -22,7 +23,11 @@ describe('OrganizationGateway', () => {
         },
         {
           useValue: null,
-          provide: UserService,
+          provide: CaslAbilityFactory,
+        },
+        {
+          useValue: null,
+          provide: Reflector,
         },
         {
           useValue: null,
