@@ -125,6 +125,19 @@ class _GameplayMapState extends State<GameplayMap> {
   }
 
   @override
+  void didUpdateWidget(GameplayMap oldWidget) {
+    // If challenge changed, reset hint state
+    if (oldWidget.challengeId != widget.challengeId) {
+      startingHintCenter = null;
+      hintCenter = null;
+      hintRadius = null;
+      setStartingHintCircle();
+    }
+
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
   void dispose() {
     positionStream.cancel();
     _disposeController();
@@ -145,10 +158,12 @@ class _GameplayMapState extends State<GameplayMap> {
    * hints used for this challenge already.
    */
   void setStartingHintCircle() {
-    hintRadius = defaultHintRadius -
+    double calculation = defaultHintRadius -
         (defaultHintRadius - widget.awardingRadius) *
             0.33 *
             widget.startingHintsUsed;
+
+    hintRadius = calculation;
     if (hintRadius == null) {
       hintRadius = defaultHintRadius;
     }
@@ -185,45 +200,64 @@ class _GameplayMapState extends State<GameplayMap> {
   Future<bool> startPositionStream() async {
     GoogleMapController googleMapController = await mapCompleter.future;
 
-    GeoPoint.current().then(
-      (location) {
-        currentLocation = location;
-      },
-    );
+    try {
+      final location = await GeoPoint.current();
+      currentLocation = location;
 
-    positionStream = Geolocator.getPositionStream(
-            locationSettings: GeoPoint.getLocationSettings())
-        .listen((Position? newPos) {
-      // prints user coordinates - useful for debugging
-      // print(newPos == null
-      //     ? 'Unknown'
-      //     : '${newPos.latitude.toString()}, ${newPos.longitude.toString()}');
+      positionStream = Geolocator.getPositionStream(
+              locationSettings: GeoPoint.getLocationSettings())
+          .listen((Position? newPos) {
+        // prints user coordinates - useful for debugging
+        // print(newPos == null
+        //     ? 'Unknown'
+        //     : '${newPos.latitude.toString()}, ${newPos.longitude.toString()}');
 
-      // putting the animate camera logic in here seems to not work
-      // could be useful to debug later?
-      currentLocation = newPos == null
-          ? GeoPoint(_center.latitude, _center.longitude, 0)
-          : GeoPoint(newPos.latitude, newPos.longitude, newPos.heading);
-      setState(() {});
-    });
+        // putting the animate camera logic in here seems to not work
+        // could be useful to debug later?
+        currentLocation = newPos == null
+            ? GeoPoint(_center.latitude, _center.longitude, 0)
+            : GeoPoint(newPos.latitude, newPos.longitude, newPos.heading);
+        setState(() {});
+      });
 
-    positionStream.onData((newPos) {
-      currentLocation =
-          GeoPoint(newPos.latitude, newPos.longitude, newPos.heading);
+      positionStream.onData((newPos) {
+        currentLocation =
+            GeoPoint(newPos.latitude, newPos.longitude, newPos.heading);
 
-      // upon new user location data, moves map camera to be centered around
-      // new position and sets zoom.
-      googleMapController.animateCamera(
-        CameraUpdate.newCameraPosition(
-          CameraPosition(
-            target: LatLng(newPos.latitude, newPos.longitude),
-            zoom: 16.5,
+        // upon new user location data, moves map camera to be centered around
+        // new position and sets zoom.
+        googleMapController.animateCamera(
+          CameraUpdate.newCameraPosition(
+            CameraPosition(
+              target: LatLng(newPos.latitude, newPos.longitude),
+              zoom: 16.5,
+            ),
           ),
-        ),
-      );
-      setState(() {});
-    });
-    return true;
+        );
+        setState(() {});
+      });
+
+      return true;
+    } catch (e) {
+      print('Failed to get location: $e');
+
+      displayToast("Not able to receive location. Please check permissions.",
+          Status.error);
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Future.delayed(Duration(seconds: 1), () {
+          if (mounted) {
+            // if the page state is still active, navigate to bottom navbar
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (context) => BottomNavBar()),
+              (route) => false,
+            );
+          }
+        });
+      });
+
+      return false;
+    }
   }
 
   /**
@@ -317,10 +351,18 @@ class _GameplayMapState extends State<GameplayMap> {
             .useEventTrackerHint(eventId);
       }
 
-      // decreases radius by 0.33 upon each hint press
-      // after 3 hints, hint radius will equal that of the awarding radius
-      double newRadius = (hintRadius ?? defaultHintRadius) -
-          (defaultHintRadius - widget.awardingRadius) * 0.33;
+      // Calculate total hints: backend hints + this new hint we're about to use
+      int totalHintsUsed = widget.startingHintsUsed + 1;
+
+      // Calculate radius from default, accounting for ALL hints used on this challenge
+      double calculatedRadius = defaultHintRadius -
+          (defaultHintRadius - widget.awardingRadius) * 0.33 * totalHintsUsed;
+
+      // Ensure radius never goes below awarding radius (safety check)
+      double newRadius = calculatedRadius < widget.awardingRadius
+          ? widget.awardingRadius
+          : calculatedRadius;
+
       double newLat = hintCenter!.lat -
           (startingHintCenter!.lat - widget.targetLocation.lat) * 0.33;
       double newLong = hintCenter!.long -
@@ -406,8 +448,8 @@ class _GameplayMapState extends State<GameplayMap> {
                 initialCameraPosition: CameraPosition(
                   target: currentLocation == null
                       ? _center
-                      : LatLng(currentLocation!.lat, currentLocation!.lat),
-                  zoom: 11,
+                      : LatLng(currentLocation!.lat, currentLocation!.long),
+                  zoom: 16,
                 ),
                 markers: {
                   Marker(
@@ -427,7 +469,19 @@ class _GameplayMapState extends State<GameplayMap> {
                     center: hintCenter != null
                         ? LatLng(hintCenter!.lat, hintCenter!.long)
                         : _center,
-                    radius: (hintRadius ?? defaultHintRadius),
+                    radius: () {
+                      double radiusValue = hintRadius ?? defaultHintRadius;
+
+                      // Safety check to prevent crashes
+                      if (radiusValue.isNaN ||
+                          radiusValue.isInfinite ||
+                          radiusValue <= 0) {
+                        return widget.awardingRadius
+                            .clamp(10.0, defaultHintRadius);
+                      }
+                      return radiusValue.clamp(
+                          widget.awardingRadius, defaultHintRadius);
+                    }(),
                     strokeColor: Color.fromARGB(80, 30, 41, 143),
                     strokeWidth: 2,
                     fillColor: Color.fromARGB(80, 83, 134, 237),
@@ -718,7 +772,7 @@ class _GameplayMapState extends State<GameplayMap> {
                     child: Text(
                         "You're close, but not there yet." +
                             (numHintsLeft > 0
-                                ? "Use a hint if needed! Hints use 25 points."
+                                ? " Use a hint if needed! Each hint reduces reward by ~15%. Using all 3 hints yields half the points."
                                 : ""),
                         style: TextStyle(
                             fontSize: 14, fontWeight: FontWeight.w400))),

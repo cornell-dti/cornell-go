@@ -90,7 +90,7 @@ class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
                   child: Text(
                     'Challenges',
                     style: TextStyle(
-                        fontSize: MediaQuery.sizeOf(context).height * 0.022,
+                        fontSize: MediaQuery.sizeOf(context).height * 0.02,
                         fontWeight: FontWeight.w600),
                   ),
                 ),
@@ -102,7 +102,7 @@ class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
                   child: Text(
                     'Journeys',
                     style: TextStyle(
-                        fontSize: MediaQuery.sizeOf(context).height * 0.022,
+                        fontSize: MediaQuery.sizeOf(context).height * 0.02,
                         fontWeight: FontWeight.w600),
                   ),
                 ),
