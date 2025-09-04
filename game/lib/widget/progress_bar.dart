@@ -17,7 +17,7 @@ class LoadingBar extends StatelessWidget {
     return Row(
       children: [
         Container(
-            width: MediaQuery.sizeOf(context).width * 0.5,
+            width: MediaQuery.sizeOf(context).width * 0.49,
             child: LayoutBuilder(
                 builder: (BuildContext context, BoxConstraints constraints) {
               return Stack(children: [

@@ -1,0 +1,2 @@
+# Production database script with hardcoded credentials
+inspect-prod-db.js

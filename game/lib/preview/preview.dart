@@ -156,7 +156,6 @@ class _PreviewState extends State<Preview> {
   final String location;
 
   static Color backgroundRed = Color.fromARGB(255, 237, 86, 86);
-  static Color backgroundRedMuted = Color.fromARGB(191, 237, 86, 86);
 
   //fields unique to journeys
   final int locationCount;
@@ -262,7 +261,8 @@ class _PreviewState extends State<Preview> {
               height: MediaQuery.of(context).size.height * 0.75,
               width: MediaQuery.of(context).size.width,
               color: Colors.white,
-              child: Column(
+              child: SingleChildScrollView(
+                  child: Column(
                 children: [
                   //Image
                   Image.network(imgUrl,
@@ -322,12 +322,14 @@ class _PreviewState extends State<Preview> {
                           horizontal: 25.0, vertical: 8.0),
                       child: Align(
                         alignment: Alignment.topLeft,
-                        child: Text(description,
-                            style: TextStyle(
-                                // fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                                fontFamily: 'Poppins',
-                                color: Preview.greyColor)),
+                        child: SingleChildScrollView(
+                          child: Text(description,
+                              style: TextStyle(
+                                  // fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                  fontFamily: 'Poppins',
+                                  color: Preview.greyColor)),
+                        ),
                       ),
                     ),
                   ),
@@ -486,7 +488,7 @@ class _PreviewState extends State<Preview> {
                         )),
                   )
                 ],
-              )),
+              ))),
         ));
   }
 }

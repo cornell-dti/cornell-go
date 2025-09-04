@@ -89,11 +89,31 @@ class _GameplayMapState extends State<GameplayMap> {
   double defaultHintRadius = 200.0;
   double? hintRadius;
 
-  // whether the picture is expanded over the map
-  bool isExpanded = false;
-
   // Add this to your state variables (After isExapnded)
   bool isArrivedButtonEnabled = true;
+
+  // whether the picture is expanded over the map
+  bool isExpanded = false;
+  double pictureWidth = 80, pictureHeight = 80;
+  Alignment pictureAlign = Alignment.topRight;
+
+  // size variables for expanding picture for animation
+
+  var pictureIcon = SvgPicture.asset("assets/icons/mapexpand.svg");
+
+  /// Switch between the two sizes
+  void _toggle() => setState(() {
+        isExpanded = !isExpanded;
+
+        if (isExpanded) {
+          pictureHeight = MediaQuery.of(context).size.height * 0.60;
+          pictureWidth = MediaQuery.of(context).size.width * 0.90;
+          pictureAlign = Alignment.topCenter;
+        } else {
+          pictureHeight = pictureWidth = 80;
+          pictureAlign = Alignment.topRight;
+        }
+      });
 
   @override
   void initState() {
@@ -101,6 +121,19 @@ class _GameplayMapState extends State<GameplayMap> {
     super.initState();
     streamStarted = startPositionStream();
     setStartingHintCircle();
+  }
+
+  @override
+  void didUpdateWidget(GameplayMap oldWidget) {
+    // If challenge changed, reset hint state
+    if (oldWidget.challengeId != widget.challengeId) {
+      startingHintCenter = null;
+      hintCenter = null;
+      hintRadius = null;
+      setStartingHintCircle();
+    }
+
+    super.didUpdateWidget(oldWidget);
   }
 
   @override
@@ -124,10 +157,12 @@ class _GameplayMapState extends State<GameplayMap> {
    * hints used for this challenge already.
    */
   void setStartingHintCircle() {
-    hintRadius = defaultHintRadius -
+    double calculation = defaultHintRadius -
         (defaultHintRadius - widget.awardingRadius) *
             0.33 *
             widget.startingHintsUsed;
+
+    hintRadius = calculation;
     if (hintRadius == null) {
       hintRadius = defaultHintRadius;
     }
@@ -164,45 +199,64 @@ class _GameplayMapState extends State<GameplayMap> {
   Future<bool> startPositionStream() async {
     GoogleMapController googleMapController = await mapCompleter.future;
 
-    GeoPoint.current().then(
-      (location) {
-        currentLocation = location;
-      },
-    );
+    try {
+      final location = await GeoPoint.current();
+      currentLocation = location;
 
-    positionStream = Geolocator.getPositionStream(
-            locationSettings: GeoPoint.getLocationSettings())
-        .listen((Position? newPos) {
-      // prints user coordinates - useful for debugging
-      // print(newPos == null
-      //     ? 'Unknown'
-      //     : '${newPos.latitude.toString()}, ${newPos.longitude.toString()}');
+      positionStream = Geolocator.getPositionStream(
+              locationSettings: GeoPoint.getLocationSettings())
+          .listen((Position? newPos) {
+        // prints user coordinates - useful for debugging
+        // print(newPos == null
+        //     ? 'Unknown'
+        //     : '${newPos.latitude.toString()}, ${newPos.longitude.toString()}');
 
-      // putting the animate camera logic in here seems to not work
-      // could be useful to debug later?
-      currentLocation = newPos == null
-          ? GeoPoint(_center.latitude, _center.longitude, 0)
-          : GeoPoint(newPos.latitude, newPos.longitude, newPos.heading);
-      setState(() {});
-    });
+        // putting the animate camera logic in here seems to not work
+        // could be useful to debug later?
+        currentLocation = newPos == null
+            ? GeoPoint(_center.latitude, _center.longitude, 0)
+            : GeoPoint(newPos.latitude, newPos.longitude, newPos.heading);
+        setState(() {});
+      });
 
-    positionStream.onData((newPos) {
-      currentLocation =
-          GeoPoint(newPos.latitude, newPos.longitude, newPos.heading);
+      positionStream.onData((newPos) {
+        currentLocation =
+            GeoPoint(newPos.latitude, newPos.longitude, newPos.heading);
 
-      // upon new user location data, moves map camera to be centered around
-      // new position and sets zoom.
-      googleMapController.animateCamera(
-        CameraUpdate.newCameraPosition(
-          CameraPosition(
-            target: LatLng(newPos.latitude, newPos.longitude),
-            zoom: 16.5,
+        // upon new user location data, moves map camera to be centered around
+        // new position and sets zoom.
+        googleMapController.animateCamera(
+          CameraUpdate.newCameraPosition(
+            CameraPosition(
+              target: LatLng(newPos.latitude, newPos.longitude),
+              zoom: 16.5,
+            ),
           ),
-        ),
-      );
-      setState(() {});
-    });
-    return true;
+        );
+        setState(() {});
+      });
+
+      return true;
+    } catch (e) {
+      print('Failed to get location: $e');
+
+      displayToast("Not able to receive location. Please check permissions.",
+          Status.error);
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Future.delayed(Duration(seconds: 1), () {
+          if (mounted) {
+            // if the page state is still active, navigate to bottom navbar
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (context) => BottomNavBar()),
+              (route) => false,
+            );
+          }
+        });
+      });
+
+      return false;
+    }
   }
 
   /**
@@ -296,10 +350,18 @@ class _GameplayMapState extends State<GameplayMap> {
             .useEventTrackerHint(eventId);
       }
 
-      // decreases radius by 0.33 upon each hint press
-      // after 3 hints, hint radius will equal that of the awarding radius
-      double newRadius = (hintRadius ?? defaultHintRadius) -
-          (defaultHintRadius - widget.awardingRadius) * 0.33;
+      // Calculate total hints: backend hints + this new hint we're about to use
+      int totalHintsUsed = widget.startingHintsUsed + 1;
+
+      // Calculate radius from default, accounting for ALL hints used on this challenge
+      double calculatedRadius = defaultHintRadius -
+          (defaultHintRadius - widget.awardingRadius) * 0.33 * totalHintsUsed;
+
+      // Ensure radius never goes below awarding radius (safety check)
+      double newRadius = calculatedRadius < widget.awardingRadius
+          ? widget.awardingRadius
+          : calculatedRadius;
+
       double newLat = hintCenter!.lat -
           (startingHintCenter!.lat - widget.targetLocation.lat) * 0.33;
       double newLong = hintCenter!.long -
@@ -311,12 +373,6 @@ class _GameplayMapState extends State<GameplayMap> {
     }
   }
 
-  // size variables for expanding picture for animation
-  var pictureWidth = 80.0;
-  var pictureHeight = 80.0;
-  var pictureIcon = SvgPicture.asset("assets/icons/mapexpand.svg");
-  var pictureAlign = Alignment.topRight;
-
   @override
   Widget build(BuildContext context) {
     // return FutureBuilder<bool>(
@@ -327,6 +383,7 @@ class _GameplayMapState extends State<GameplayMap> {
     final client = Provider.of<ApiClient>(context);
 
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
         colorSchemeSeed: Colors.green[700],
@@ -354,8 +411,7 @@ class _GameplayMapState extends State<GameplayMap> {
               "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png";
         }
 
-        return Scaffold(
-            body: Stack(
+        return Stack(
           alignment: Alignment.bottomCenter,
           children: [
             StreamBuilder(
@@ -391,8 +447,8 @@ class _GameplayMapState extends State<GameplayMap> {
                 initialCameraPosition: CameraPosition(
                   target: currentLocation == null
                       ? _center
-                      : LatLng(currentLocation!.lat, currentLocation!.lat),
-                  zoom: 11,
+                      : LatLng(currentLocation!.lat, currentLocation!.long),
+                  zoom: 16,
                 ),
                 markers: {
                   Marker(
@@ -412,7 +468,19 @@ class _GameplayMapState extends State<GameplayMap> {
                     center: hintCenter != null
                         ? LatLng(hintCenter!.lat, hintCenter!.long)
                         : _center,
-                    radius: (hintRadius ?? defaultHintRadius),
+                    radius: () {
+                      double radiusValue = hintRadius ?? defaultHintRadius;
+
+                      // Safety check to prevent crashes
+                      if (radiusValue.isNaN ||
+                          radiusValue.isInfinite ||
+                          radiusValue <= 0) {
+                        return widget.awardingRadius
+                            .clamp(10.0, defaultHintRadius);
+                      }
+                      return radiusValue.clamp(
+                          widget.awardingRadius, defaultHintRadius);
+                    }(),
                     strokeColor: Color.fromARGB(80, 30, 41, 143),
                     strokeWidth: 2,
                     fillColor: Color.fromARGB(80, 83, 134, 237),
@@ -554,62 +622,57 @@ class _GameplayMapState extends State<GameplayMap> {
               ),
             ),
             Positioned(
-              // expandable image in top right of map
-              // padding: EdgeInsets.only(left: 10.0, right: 10, top: 0.0),
               top: MediaQuery.of(context).size.width * 0.05,
               right: MediaQuery.of(context).size.width * 0.05,
-              child: GestureDetector(
-                onTap: () {
-                  isExpanded
-                      ? setState(() {
-                          isExpanded = false;
-                          pictureHeight = 80.0;
-                          pictureWidth = 80.0;
-                          pictureIcon =
-                              SvgPicture.asset("assets/icons/mapexpand.svg");
-                          pictureAlign = Alignment.topRight;
-                        })
-                      : setState(() {
-                          isExpanded = true;
-                          pictureHeight =
-                              MediaQuery.of(context).size.height * 0.6;
-                          pictureWidth =
-                              MediaQuery.of(context).size.width * 0.90;
-                          pictureIcon =
-                              SvgPicture.asset("assets/icons/mapexit.svg");
-                          pictureAlign = Alignment.topCenter;
-                        });
-                },
-                child: AnimatedContainer(
-                  duration: Duration(milliseconds: 100),
-                  width: pictureWidth,
-                  height: pictureHeight,
-                  child: Stack(
-                    children: [
-                      Container(
-                        alignment: pictureAlign,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: Image.network(
-                            imageUrl,
-                            fit: BoxFit.cover,
-                            width: pictureWidth,
-                            height: pictureHeight,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 100),
+                width: pictureWidth,
+                height: pictureHeight,
+                child: Stack(
+                  children: [
+                    // photo
+                    Align(
+                      alignment: pictureAlign,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Image.network(
+                          imageUrl,
+                          fit: BoxFit.cover,
+                          width: pictureWidth,
+                          height: pictureHeight,
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      top: 4,
+                      right: 4,
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () {
+                          print("ICON TAPPED!"); // Debug print
+                          _toggle();
+                        },
+                        child: Container(
+                          width: 60, // Larger invisible hit-area
+                          height: 60,
+                          alignment: Alignment.topRight,
+                          // Make the debug rectangle much more visible
+                          child: SvgPicture.asset(
+                            isExpanded
+                                ? 'assets/icons/mapexit.svg'
+                                : 'assets/icons/mapexpand.svg',
+                            width: 40,
+                            height: 40,
                           ),
                         ),
                       ),
-                      Padding(
-                        padding: EdgeInsets.all(4.0),
-                        child: Container(
-                            alignment: Alignment.topRight, child: pictureIcon),
-                      ),
-                    ],
-                  ),
+                    )
+                  ],
                 ),
               ),
             ),
           ],
-        ));
+        );
       }),
     );
     // });
@@ -767,7 +830,7 @@ class _GameplayMapState extends State<GameplayMap> {
                     child: Text(
                         "You're close, but not there yet." +
                             (numHintsLeft > 0
-                                ? "Use a hint if needed! Hints use 25 points."
+                                ? " Use a hint if needed! Each hint reduces reward by ~15%. Using all 3 hints yields half the points."
                                 : ""),
                         style: TextStyle(
                             fontSize: 14, fontWeight: FontWeight.w400))),
