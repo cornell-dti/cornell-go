@@ -22,6 +22,7 @@ import 'package:game/model/tracker_model.dart';
 import 'package:game/model/group_model.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/challenge_model.dart';
+import 'package:timerun/timerun.dart';
 
 /*
 
@@ -83,6 +84,11 @@ class _GameplayMapState extends State<GameplayMap> {
   // cannot be found
   GeoPoint? currentLocation;
 
+  late TimeRun timer; //the timer for the challenge
+  String timeLeft = "01:00"; //time left that is displayed to the user
+  late double currentTime = 0.0;
+  int totalTime= 315;
+
   int totalHints = 3;
   int numHintsLeft = 10;
   GeoPoint? startingHintCenter;
@@ -122,6 +128,50 @@ class _GameplayMapState extends State<GameplayMap> {
     super.initState();
     streamStarted = startPositionStream();
     setStartingHintCircle();
+    initTimer();
+    startTimer();
+  }
+
+  /**
+   * Initializes a timer for the challenge. Currently starts at one minute.
+   * Each second, the remaining minutes and seconds is shown.
+   * */
+  void initTimer() {
+    timer =  TimeRun(series: 3,
+    repetitions: 1,
+    pauseSeries: 0,
+    pauseRepeition: 0,
+    time: totalTime,
+    onUpdate: (currentSeries, totalSeries, currentRepetition, totalRepetitions, currentSeconds, timePause, currentState) {
+        int minutes = (currentSeconds / 60).floor();
+        String minutes_str = minutes.toString();
+        if (minutes < 10) {
+          minutes_str = "0"+minutes_str;
+        }
+        int seconds = currentSeconds % 60;
+        String seconds_str = seconds.toString();
+        if (seconds < 10) {
+          seconds_str = "0"+seconds_str;
+        }
+        setState( () {
+          timeLeft = minutes_str+":"+seconds_str;
+          currentTime = currentSeconds * 1.0 ;
+        });
+
+    },
+    onFinish: () {
+      print("TIMER DONE");
+      //TODO
+    //add 5 more min , subtract 25 points
+    },
+    onChange: (timerState) {
+      //TODO
+      //when 5 min new screen with cgo bear
+    },
+    );
+  }
+  void startTimer() {
+    timer.play();
   }
 
   @override
@@ -141,6 +191,7 @@ class _GameplayMapState extends State<GameplayMap> {
   void dispose() {
     positionStream.cancel();
     _disposeController();
+    timer.stop();
     super.dispose();
   }
 
@@ -487,6 +538,50 @@ class _GameplayMapState extends State<GameplayMap> {
                     fillColor: Color.fromARGB(80, 83, 134, 237),
                   )
                 },
+              ),
+            ),
+
+            Positioned(
+              top: MediaQuery.of(context).size.height * 0.02, // Adjust top position
+              // left: MediaQuery.of(context).size.width * 0.5, // Adjust left position
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  (currentTime < 300) ?
+                  SvgPicture.asset( //turn timer red when less than 5 minutes left
+                    "assets/icons/timerbg_red.svg"
+                  ) :
+                    SvgPicture.asset( "assets/icons/timerbg.svg"
+                    ),
+                  Positioned (
+                    left: 15.5,
+                    top: 6,
+                    //Show a circular progress indicator
+                    child: Container(
+                      decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                      ),
+                      child: CustomPaint(
+                        size: Size(14,14),
+                        painter: CircleSliceTimer(progress: currentTime/totalTime),
+                      ),
+                  ),
+                  ),
+                Positioned(
+                    right: 7,
+                    top: 3,
+                    child: Text (
+                      timeLeft,
+                      style: TextStyle(
+                        // fontFamily: Poppins,
+                        fontSize:12.8,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white
+                      ),
+                    ),
+                  )
+                ],
               ),
             ),
             Container(
@@ -840,4 +935,42 @@ class _GameplayMapState extends State<GameplayMap> {
             ),
           );
   }
+}
+
+/**
+ * CircleSliceTimer creates the circular icon timer for a challenge.
+ * The timer starts out as a fully white circle, and slices of the timer are cut out as time progresses in the challenge.
+ * */
+class CircleSliceTimer extends CustomPainter {
+  final double progress;
+
+  CircleSliceTimer ({
+    required this.progress
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    Paint paint = Paint()
+        ..color = Colors.white
+        ..style = PaintingStyle.fill;
+
+    Paint backgroundPaint = Paint()
+          ..color = Colors.grey
+          ..style = PaintingStyle.fill;
+
+    canvas.drawCircle(Offset(size.width / 2, size.height / 2), size.width / 2, paint);
+    double sweepAngle = 2 * pi * (1.0 - progress); //subtract from 1 so clockwise
+    canvas.drawArc(
+      Rect.fromCircle(center: Offset(size.width / 2, size.height / 2), radius: size.width / 2),
+      -pi / 2,
+      sweepAngle,
+      true,
+      backgroundPaint,
+    );
+  }
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) {
+    return true;
+  }
+
 }
