@@ -105,10 +105,11 @@ class _GameplayPageState extends State<GameplayPage> {
       double awardingRadius = challenge.awardingRadiusF ?? 0;
       int hintsUsed = tracker.hintsUsed;
 
+      double sectionSeperation = MediaQuery.of(context).size.width * 0.05;
+
       return Scaffold(
         body: Column(
           children: [
-            //SafeArea to avoid notch overlap
             SafeArea(
                 bottom: false,
                 child: Container(
@@ -178,57 +179,108 @@ class _GameplayPageState extends State<GameplayPage> {
                             ),
                           ),
                           Container(
-                              // padding: EdgeInsets.only(left: 18, right: 18),
+                              child: Row(children: [
+                            // Location section - auto-scaling text
+                            Expanded(
+                              flex: 3,
                               child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                Row(children: [
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
                                   SvgPicture.asset(
                                       "assets/icons/locationpin.svg"),
-                                  Text(
-                                      ' ' +
-                                          (abbrevLocation[challenge.location] ??
-                                              ""),
-                                      style: TextStyle(
-                                          fontSize: 14,
-                                          color: Color(0xFF835A7C)))
-                                ]),
-                                Row(children: [
+                                  Flexible(
+                                    child: LayoutBuilder(
+                                      builder: (context, constraints) {
+                                        String text = ' ' +
+                                            (abbrevLocation[
+                                                    challenge.location] ??
+                                                "");
+                                        return FittedBox(
+                                          fit: BoxFit.scaleDown,
+                                          child: Text(text,
+                                              style: TextStyle(
+                                                  fontSize: 14,
+                                                  color: Color(0xFF835A7C))),
+                                        );
+                                      },
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                            SizedBox(width: sectionSeperation),
+                            // Distance section - auto-scaling text
+                            Expanded(
+                              flex: 3,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
                                   SvgPicture.asset("assets/icons/feetpics.svg"),
-                                  Text(
-                                      ' ' +
-                                          (currentLocation != null &&
-                                                  targetLocation != null
-                                              ? (currentLocation!.distanceTo(
-                                                          targetLocation) /
-                                                      1609.34)
-                                                  .toStringAsFixed(1)
-                                              : "?.?") +
-                                          ' Mi Away',
-                                      style: TextStyle(
-                                          fontSize: 14,
-                                          color: Color(0xFF58B171)))
-                                ]),
-                                Row(children: [
+                                  Flexible(
+                                    child: LayoutBuilder(
+                                      builder: (context, constraints) {
+                                        String text = ' ' +
+                                            (currentLocation != null &&
+                                                    targetLocation != null
+                                                ? (currentLocation!.distanceTo(
+                                                            targetLocation) /
+                                                        1609.34)
+                                                    .toStringAsFixed(1)
+                                                : "?.?") +
+                                            ' Mi Away';
+                                        return FittedBox(
+                                          fit: BoxFit.scaleDown,
+                                          child: Text(text,
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                  fontSize: 14,
+                                                  color: Color(0xFF58B171))),
+                                        );
+                                      },
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                            SizedBox(width: sectionSeperation),
+                            // Points section - auto-scaling text
+                            Expanded(
+                              flex: 3,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
                                   SvgPicture.asset(
                                       "assets/icons/bearcoins.svg"),
-                                  Text(
-                                      ' ' +
-                                          (hintsUsed > 0
-                                              ? ((challenge.points ?? 0) -
-                                                          hintsUsed * 25)
-                                                      .toString() +
-                                                  '/'
-                                              : '') +
-                                          (challenge.points ?? 0).toString() +
-                                          " PTS",
-                                      style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w500,
-                                          color: Color(0xFFC17E19)))
-                                ]),
-                              ]))
+                                  Flexible(
+                                    child: LayoutBuilder(
+                                      builder: (context, constraints) {
+                                        int basePoints = challenge.points ?? 0;
+                                        int adjustedPoints =
+                                            calculateHintAdjustedPoints(
+                                                basePoints, hintsUsed);
+
+                                        String text = ' ' +
+                                            (hintsUsed > 0
+                                                ? adjustedPoints.toString() +
+                                                    '/' +
+                                                    basePoints.toString()
+                                                : basePoints.toString()) +
+                                            " PTS";
+                                        return FittedBox(
+                                          fit: BoxFit.scaleDown,
+                                          child: Text(text,
+                                              style: TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w500,
+                                                  color: Color(0xFFC17E19))),
+                                        );
+                                      },
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ]))
                         ]))),
             Expanded(
               child: Padding(

@@ -34,6 +34,22 @@ import 'package:velocity_x/velocity_x.dart';
  * @param key - Optional Flutter widget key for identification and testing.
  * 
  * @returns A StatefulWidget that displays the user profile interface.
+ * `ProfilePage` Component - Displays the user's profile information and achievements.
+ * 
+ * @remarks
+ * This component serves as the main profile screen in the CornellGO app, presenting
+ * the user's personal information, completed events, and achievements. It features
+ * a custom curved header with the user's avatar and score, followed by sections for
+ * completed events and achievements.
+ * 
+ * The layout is responsive, with dimensions calculated as percentages of screen size
+ * to ensure consistent appearance across different devices. It consumes data from
+ * multiple providers including UserModel, EventModel, TrackerModel, ChallengeModel,
+ * and AchievementModel.
+ * 
+ * @param key - Optional Flutter widget key for identification and testing.
+ * 
+ * @returns A StatefulWidget that displays the user profile interface.
  */
 
 class ProfilePage extends StatefulWidget {
@@ -73,7 +89,10 @@ class _ProfilePageState extends State<ProfilePage> {
             );
           }
 
-          final achList = achModel.getAvailableTrackerPairs();
+          final achIds = userModel.getAvailableAchievementIds();
+          final achList = achModel.getAvailableTrackerPairs(
+            allowedAchievementIds: achIds,
+          );
           var username = userModel.userData?.username;
           var isGuest = userModel.userData?.authType == UserAuthTypeDto.device;
           var score = userModel.userData?.score;
@@ -261,7 +280,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                 ],
               ),
-              SizedBox(height: screenHeight * 0.025), // 2.5% of screen height
+              SizedBox(height: screenHeight * 0.018), // 2.5% of screen height
               //Completed Events
               Padding(
                 padding: EdgeInsets.symmetric(
@@ -292,54 +311,75 @@ class _ProfilePageState extends State<ProfilePage> {
                   ],
                 ),
               ),
-              SizedBox(
-                height: screenHeight * 0.25, // 25% of screen height
-                width: screenWidth * 0.85, // 85% of screen width
-                child: ListView.separated(
-                  itemCount: 2,
-                  itemBuilder: (context, index) {
-                    if (index >= completedEvents.length) {
-                      return Container();
-                    }
-                    var date = completedEvents[index].item1;
-                    var event = completedEvents[index].item2;
-                    var hintsUsed = completedEvents[index].item3;
-                    String formattedDate = DateFormat("MMMM d, y").format(date);
-                    var type =
-                        event.challenges!.length > 1 ? "Journeys" : "Challenge";
-
-                    // Calculate totalPoints.
-                    var totalPoints = 0;
-                    var locationImage;
-                    for (var challengeId in event.challenges ?? []) {
-                      var challenge =
-                          challengeModel.getChallengeById(challengeId);
-                      locationImage = challenge?.imageUrl;
-                      if (locationImage == null || locationImage.length == 0)
-                        locationImage =
-                            "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png";
-                      if (challenge != null) {
-                        totalPoints += challenge.points ?? 0;
+              if (completedEvents.isEmpty)
+                SizedBox(
+                  height: screenHeight * 0.21,
+                  width: screenWidth * 0.85,
+                  child: Center(
+                    child: Text(
+                      "No Completed Events",
+                      style: TextStyle(
+                        fontSize: mediumFontSize,
+                        fontWeight: FontWeight.w400,
+                        color: Colors.grey,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                )
+              else
+                SizedBox(
+                  height: screenHeight * 0.21, // 25% of screen height
+                  width: screenWidth * 0.85, // 85% of screen width
+                  child: ListView.separated(
+                    itemCount: 2,
+                    itemBuilder: (context, index) {
+                      if (index >= completedEvents.length) {
+                        return Container();
                       }
-                    }
+                      var date = completedEvents[index].item1;
+                      var event = completedEvents[index].item2;
+                      var hintsUsed = completedEvents[index].item3;
+                      String formattedDate =
+                          DateFormat("MMMM d, y").format(date);
+                      var type = event.challenges!.length > 1
+                          ? "Journeys"
+                          : "Challenge";
 
-                    return completedCell(
-                        context,
-                        event.name!,
-                        locationImage,
-                        type,
-                        formattedDate,
-                        friendlyDifficulty[event.difficulty]!,
-                        hintsUsed,
-                        totalPoints);
-                  },
-                  physics: BouncingScrollPhysics(),
-                  separatorBuilder: (context, index) {
-                    return SizedBox(
-                        height: screenHeight * 0.012); // 1.2% of screen height
-                  },
+                      // Calculate totalPoints.
+                      var totalPoints = 0;
+                      var locationImage;
+                      for (var challengeId in event.challenges ?? []) {
+                        var challenge =
+                            challengeModel.getChallengeById(challengeId);
+                        locationImage = challenge?.imageUrl;
+                        if (locationImage == null || locationImage.length == 0)
+                          locationImage =
+                              "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png";
+                        if (challenge != null) {
+                          totalPoints += challenge.points ?? 0;
+                        }
+                      }
+
+                      return completedCell(
+                          context,
+                          event.name!,
+                          locationImage,
+                          type,
+                          formattedDate,
+                          friendlyDifficulty[event.difficulty]!,
+                          hintsUsed,
+                          totalPoints);
+                    },
+                    physics: BouncingScrollPhysics(),
+                    padding: EdgeInsets.only(top: 0),
+                    separatorBuilder: (context, index) {
+                      return SizedBox(
+                          height:
+                              screenHeight * 0.012); // 1.2% of screen height
+                    },
+                  ),
                 ),
-              ),
               Padding(
                 padding: EdgeInsets.symmetric(
                     horizontal: screenWidth * 0.06), // 6% of screen width
@@ -372,27 +412,42 @@ class _ProfilePageState extends State<ProfilePage> {
               Padding(
                   padding: EdgeInsets.symmetric(
                       horizontal: screenWidth * 0.075), // 7.5% of screen width
-                  child: Column(
-                      children: (achList
-                          .sortedBy((a, b) => (a
-                                      .$1.progress / // least completed first
-                                  (a.$2.requiredPoints ?? 1))
-                              .compareTo(
-                                  b.$1.progress / (b.$2.requiredPoints ?? 1)))
-                          .take(2)
-                          .map((e) => ([
-                                AchievementCell(
-                                    e.$2.description ?? "",
-                                    SvgPicture.asset(
-                                        "assets/icons/achievementsilver.svg"),
-                                    e.$1.progress,
-                                    e.$2.requiredPoints ?? 0),
-                                SizedBox(
-                                    height: screenHeight *
-                                        0.012), // 1.2% of screen height
-                              ]))
-                          .expand((el) => el)
-                          .toList()))),
+                  child: achList.isEmpty
+                      ? Padding(
+                          padding: EdgeInsets.only(top: screenHeight * 0.1),
+                          child: Center(
+                              child: Text(
+                            "No Available Achievements",
+                            style: TextStyle(
+                              fontSize: mediumFontSize,
+                              fontWeight: FontWeight.w400,
+                              color: Colors.grey,
+                            ),
+                            textAlign: TextAlign.center,
+                          )))
+                      : Column(
+                          children: (achList
+                              .sortedBy((a, b) =>
+                                  (a.$1.progress / // least completed first
+                                          (a.$2.requiredPoints ?? 1))
+                                      .compareTo(b.$1.progress /
+                                          (b.$2.requiredPoints ?? 1)))
+                              .take(2)
+                              .map((e) => ([
+                                    AchievementCell(
+                                        e.$2.description ?? "",
+                                        SvgPicture.asset(e.$1.progress >=
+                                                (e.$2.requiredPoints ?? 0)
+                                            ? "assets/icons/achievementgold.svg"
+                                            : "assets/icons/achievementsilver.svg"),
+                                        e.$1.progress,
+                                        e.$2.requiredPoints ?? 0),
+                                    SizedBox(
+                                        height: screenHeight *
+                                            0.012), // 1.2% of screen height
+                                  ]))
+                              .expand((el) => el)
+                              .toList()))),
             ],
           );
         }),

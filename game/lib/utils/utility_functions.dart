@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/api/game_client_dto.dart';
+import 'package:game/splash_page/splash_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'dart:io' show Platform; //at the top
@@ -116,6 +117,42 @@ Future<void> showLeaveConfirmationAlert(
   );
 }
 
+Future<void> showDeletionConfirmationAlert(context, ApiClient client) async {
+  return showDialog<void>(
+    context: context,
+    barrierDismissible: false, // user must tap button!
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Delete Account'),
+        content: const Text(
+            'Are you sure you want to delete your account? This action cannot be undone.'),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('YES'),
+            onPressed: () async {
+              await client.serverApi?.closeAccount(CloseAccountDto());
+              // Clear user Local State
+              await client.disconnect();
+              Navigator.of(context).pop();
+              // Navigate to splash page and clear navigation stack
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (context) => SplashPageWidget()),
+                (route) => false,
+              );
+            },
+          ),
+          TextButton(
+            child: const Text('NO'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
 int numDigs(int num) {
   return num.toString().length;
 }
@@ -144,7 +181,7 @@ void displayToast(message, Status status) {
     msg: message,
     toastLength: Toast.LENGTH_SHORT,
     gravity: ToastGravity.BOTTOM,
-    timeInSecForIosWeb: 1,
+    timeInSecForIosWeb: 3,
     backgroundColor: status == Status.error
         ? (Colors.red)
         : (status == Status.success ? (Colors.green) : Colors.yellow),
@@ -206,3 +243,28 @@ final Map<EventCategoryDto, String> friendlyCategory = {
   EventCategoryDto.HISTORICAL: "Historical",
   EventCategoryDto.NATURE: "Nature",
 };
+
+/**
+ * Calculate hint-adjusted points using the "Half-after-3" system
+ * 0 hints = full points; 3 hints = exactly half points; 1-2 hints linearly reduce
+ * 
+ * @param basePoints - Original challenge points
+ * @param hintsUsed - Number of hints used (0-3)
+ * @returns Points awarded after hint penalty
+ */
+int calculateHintAdjustedPoints(int basePoints, int hintsUsed) {
+  if (hintsUsed == 0) return basePoints;
+
+  // Formula: P * (1 - h/6) where h is hints used
+  double raw = basePoints * (1 - hintsUsed / 6.0);
+
+  // Round to nearest 5
+  int rounded = (raw / 5).round() * 5;
+
+  // Ensure minimum of half points, maximum of full points
+  int minAllowed = (basePoints / 2).floor();
+  return [
+    minAllowed,
+    [rounded, basePoints].reduce((a, b) => a < b ? a : b)
+  ].reduce((a, b) => a > b ? a : b);
+}
