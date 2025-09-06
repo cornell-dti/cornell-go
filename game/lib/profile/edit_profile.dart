@@ -6,6 +6,8 @@ import 'package:game/progress_indicators/circular_progress_indicator.dart';
 import 'package:game/model/user_model.dart';
 import 'package:provider/provider.dart';
 
+import '../utils/utility_functions.dart';
+
 /**
  * `EditProfileWidget` - A form interface for editing user profile information.
  * 
@@ -293,7 +295,9 @@ class _EditProfileState extends State<EditProfileWidget> {
           String? currMajor = userModel.userData?.major;
 
           // Initialize fields only if they haven't been already
-          if (newUsername == null) newUsername = currUsername ?? '';
+          if (newUsername == null) {
+            newUsername = currUsername ?? '';
+          }
 
           if (newYear == null) {
             newYear = currYear;
@@ -441,6 +445,10 @@ class _EditProfileState extends State<EditProfileWidget> {
                                 onPressed: !fieldsChanged()
                                     ? null
                                     : () {
+                                        if (newUsername == null || newUsername!.trim().length < 3) {
+                                          displayToast("Username must be 3 or more characters", Status.error);
+                                          return;
+                                        }
                                         userModel.updateUserData(
                                             userModel.userData?.id ?? "",
                                             newUsername,

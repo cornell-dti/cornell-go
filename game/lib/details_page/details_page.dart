@@ -276,6 +276,9 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
                           if (value == null || value.isEmpty) {
                             return 'Please enter your username';
                           }
+                          if (value.trim().length < 3) {
+                            return 'Username must be 3 or more characters';
+                          }
                           return null;
                         },
                       ),
