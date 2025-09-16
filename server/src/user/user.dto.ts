@@ -27,6 +27,7 @@ export interface RequestGlobalLeaderDataDto {
 /** DTO for requestUserData */
 export interface RequestUserDataDto {
   userId?: string;
+  hasCompletedOnboarding?: boolean;
 }
 
 export interface RequestAllUserDataDto {}
@@ -60,6 +61,7 @@ export interface UserDto {
   authType?: UserAuthTypeDto;
   trackedEvents?: string[];
   favorites?: string[];
+  hasCompletedOnboarding?: boolean;
 }
 
 export interface UpdateUserDataDto {
