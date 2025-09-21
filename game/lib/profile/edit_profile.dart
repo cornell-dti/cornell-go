@@ -254,7 +254,7 @@ class _EditProfileState extends State<EditProfileWidget> {
     "2028",
     "2029",
     "2030",
-    "alumni"
+    "Alumni"
   ];
 
   @override

@@ -75,7 +75,7 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
     "2028",
     "2029",
     "2030",
-    "alumni"
+    "Alumni"
   ];
 
   Map<String, List<String>> _majors = {
