@@ -247,7 +247,15 @@ class _EditProfileState extends State<EditProfileWidget> {
     "Weill Cornell Medicine": []
   };
 
-  List<String> _years = ["2025", "2026", "2027", "2028", "2029", "2030"];
+  List<String> _years = [
+    "2025",
+    "2026",
+    "2027",
+    "2028",
+    "2029",
+    "2030",
+    "alumni"
+  ];
 
   @override
   Widget build(BuildContext context) {

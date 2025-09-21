@@ -68,7 +68,15 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
     "Weill Cornell Medicine"
   ];
 
-  List<String> _years = ["2025", "2026", "2027", "2028", "2029", "2030"];
+  List<String> _years = [
+    "2025",
+    "2026",
+    "2027",
+    "2028",
+    "2029",
+    "2030",
+    "alumni"
+  ];
 
   Map<String, List<String>> _majors = {
     "Agriculture and Life Sciences": [
