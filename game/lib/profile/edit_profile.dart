@@ -17,6 +17,12 @@ import '../utils/utility_functions.dart';
  * options and text input for the username. The widget automatically detects changes to
  * enable/disable the update button and communicates with the UserModel to persist changes.
  * 
+ * The conditions for the update button to be enabled are:
+ * - Username is not empty and is at least 3 characters long
+ * - College is not empty
+ * - Major is not empty
+ * - Graduation Year is not empty
+ * - At least one field has bene changed from its original value 
  */
 class EditProfileWidget extends StatefulWidget {
   EditProfileWidget({
@@ -445,8 +451,11 @@ class _EditProfileState extends State<EditProfileWidget> {
                                 onPressed: !fieldsChanged()
                                     ? null
                                     : () {
-                                        if (newUsername == null || newUsername!.trim().length < 3) {
-                                          displayToast("Username must be 3 or more characters", Status.error);
+                                        if (newUsername == null ||
+                                            newUsername!.trim().length < 3) {
+                                          displayToast(
+                                              "Username must be 3 or more characters",
+                                              Status.error);
                                           return;
                                         }
                                         userModel.updateUserData(

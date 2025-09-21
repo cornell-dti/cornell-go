@@ -38,7 +38,10 @@ Key features include:
 - Form validation using [_formKey]
 - State-managed inputs with real-time updates
 
-This page is a required step in the onboarding process before collecting interests. */
+This page is a required step in the onboarding process before collecting interests.
+
+@remarks
+Form validation ensures that the username is not empty and is at least 3 characters long.*/
 class _DetailsPageWidgetState extends State<DetailsPageWidget> {
   String _name = "";
   String? _college;
