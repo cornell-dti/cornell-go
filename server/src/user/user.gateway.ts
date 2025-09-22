@@ -218,6 +218,22 @@ export class UserGateway {
     return true;
   }
 
+  @SubscribeMessage('completeOnboarding')
+  async completeOnboarding(
+    @CallingUser() user: User,
+    @MessageBody() data: CompleteOnboardingDto,
+  ) {
+    await this.userService.completeOnboarding(user);
+  }
+
+  @SubscribeMessage('resetOnboarding')
+  async resetOnboarding(
+    @CallingUser() user: User,
+    @MessageBody() data: ResetOnboardingDto,
+  ) {
+    await this.userService.resetOnboarding(user);
+  }
+
   @SubscribeMessage('closeAccount')
   async closeAccount(
     @UserAbility() ability: AppAbility,
