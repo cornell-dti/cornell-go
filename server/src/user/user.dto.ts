@@ -76,3 +76,10 @@ export interface AddManagerDto {
 export interface JoinOrganizationDto {
   accessCode: string;
 }
+
+/** DTO for completeOnboarding event 
+ * - doesn't include hasCompletedOnboarding field because its redundant (hasCompletedOnboarding will always be made true) */
+export interface CompleteOnboardingDto {}
+
+/** DVO for resetOnboarding event */
+export interface ResetOnboardingDto {}

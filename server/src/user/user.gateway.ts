@@ -25,6 +25,8 @@ import {
   BanUserDto,
   AddManagerDto,
   JoinOrganizationDto,
+  CompleteOnboardingDto,
+  ResetOnboardingDto,
 } from './user.dto';
 import { UserService } from './user.service';
 import { readFileSync } from 'fs';
@@ -223,7 +225,9 @@ export class UserGateway {
     @CallingUser() user: User,
     @MessageBody() data: CompleteOnboardingDto,
   ) {
-    await this.userService.completeOnboarding(user);
+    const updatedUser = await this.userService.completeOnboarding(user);
+    await this.userService.emitUpdateUserData(updatedUser, false, false);
+    return true;
   }
 
   @SubscribeMessage('resetOnboarding')
@@ -231,7 +235,9 @@ export class UserGateway {
     @CallingUser() user: User,
     @MessageBody() data: ResetOnboardingDto,
   ) {
-    await this.userService.resetOnboarding(user);
+    const updatedUser = await this.userService.resetOnboarding(user);
+    await this.userService.emitUpdateUserData(updatedUser, false, false);
+    return true;
   }
 
   @SubscribeMessage('closeAccount')

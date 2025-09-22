@@ -99,6 +99,7 @@ export class UserService {
           (process.env.DEVELOPMENT === 'true' &&
             !(process.env.TESTING_E2E === 'true')),
         isRanked: true,
+        hasCompletedOnboarding: false,
       },
     });
 
