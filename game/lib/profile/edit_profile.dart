@@ -22,7 +22,7 @@ import '../utils/utility_functions.dart';
  * - College is not empty
  * - Major is not empty
  * - Graduation Year is not empty
- * - At least one field has bene changed from its original value 
+ * - At least one field has been changed from its original value 
  */
 class EditProfileWidget extends StatefulWidget {
   EditProfileWidget({
