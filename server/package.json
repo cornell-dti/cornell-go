@@ -50,7 +50,7 @@
     "rxjs": "^7.8.0",
     "socket.io": "^4.8.0",
     "string.prototype.replaceall": "^1.0.7",
-    "typedoc": "^0.23.28",
+    "typedoc": "^0.26.0",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
@@ -67,15 +67,15 @@
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-prettier": "^3.4.1",
-    "jest": "^27.5.1",
+    "jest": "^29.0.0",
     "prettier": "^2.8.7",
     "prisma": "^5.10.2",
     "supertest": "^6.3.3",
-    "ts-jest": "^27.1.5",
+    "ts-jest": "^29.0.0",
     "ts-loader": "^9.4.2",
     "ts-node": "^10.9.1",
     "tsconfig-paths": "^3.14.2",
-    "typescript": "^5.9.2"
+    "typescript": "^5.6.0"
   },
   "jest": {
     "moduleFileExtensions": [
