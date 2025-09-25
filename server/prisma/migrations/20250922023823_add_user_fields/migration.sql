@@ -1,0 +1,49 @@
+/*
+  Warnings:
+
+  - A unique constraint covering the columns `[username]` on the table `User` will be added. If there are existing duplicate values, this will fail.
+  - Added the required column `hasCompletedOnboarding` to the `User` table without a default value. This is not possible if the table is not empty.
+
+*/
+-- AlterTable
+ALTER TABLE "public"."User" ADD COLUMN     "hasCompletedOnboarding" BOOLEAN DEFAULT false;
+ALTER TABLE "public"."User" ALTER COLUMN "hasCompletedOnboarding" SET NOT NULL;
+
+-- AlterTable
+ALTER TABLE "public"."_AchievementToOrganization" ADD CONSTRAINT "_AchievementToOrganization_AB_pkey" PRIMARY KEY ("A", "B");
+
+-- DropIndex
+DROP INDEX "public"."_AchievementToOrganization_AB_unique";
+
+-- AlterTable
+ALTER TABLE "public"."_EventBaseToUser" ADD CONSTRAINT "_EventBaseToUser_AB_pkey" PRIMARY KEY ("A", "B");
+
+-- DropIndex
+DROP INDEX "public"."_EventBaseToUser_AB_unique";
+
+-- AlterTable
+ALTER TABLE "public"."_eventOrgs" ADD CONSTRAINT "_eventOrgs_AB_pkey" PRIMARY KEY ("A", "B");
+
+-- DropIndex
+DROP INDEX "public"."_eventOrgs_AB_unique";
+
+-- AlterTable
+ALTER TABLE "public"."_orgManager" ADD CONSTRAINT "_orgManager_AB_pkey" PRIMARY KEY ("A", "B");
+
+-- DropIndex
+DROP INDEX "public"."_orgManager_AB_unique";
+
+-- AlterTable
+ALTER TABLE "public"."_orgToUser" ADD CONSTRAINT "_orgToUser_AB_pkey" PRIMARY KEY ("A", "B");
+
+-- DropIndex
+DROP INDEX "public"."_orgToUser_AB_unique";
+
+-- AlterTable
+ALTER TABLE "public"."_prevChallengeParticipant" ADD CONSTRAINT "_prevChallengeParticipant_AB_pkey" PRIMARY KEY ("A", "B");
+
+-- DropIndex
+DROP INDEX "public"."_prevChallengeParticipant_AB_unique";
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_username_key" ON "public"."User"("username");

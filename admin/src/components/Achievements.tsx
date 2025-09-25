@@ -278,16 +278,16 @@ export function Achievements() {
         serverData.organizations
           .get(serverData.selectedOrg)
           ?.achivements?.map(
-            (achId: string) => serverData.achievements.get(achId)!
+            (achId: string) => serverData.achievements.get(achId)!,
           )
-          .filter((ach?: AchievementDto) => !!ach) ?? []
+          .filter((ach?: AchievementDto) => !!ach) ?? [],
       )
         .sort(
           (a: AchievementDto, b: AchievementDto) =>
             compareTwoStrings(b.name ?? "", query) -
             compareTwoStrings(a.name ?? "", query) +
             compareTwoStrings(b.description ?? "", query) -
-            compareTwoStrings(a.description ?? "", query)
+            compareTwoStrings(a.description ?? "", query),
         )
         .map((ach) => (
           <AchiemementCard
@@ -324,13 +324,13 @@ export function Achievements() {
             onCopy={() => {
               const orgs = Array.from(serverData.organizations.values());
               const myOrgIndex = orgs.findIndex(
-                (v) => v.id === selectedOrg?.id
+                (v) => v.id === selectedOrg?.id,
               );
               setCurrentId(ach.id);
               setCopyForm({
                 form: makeCopyForm(
                   orgs.map((org) => org.name ?? ""),
-                  myOrgIndex
+                  myOrgIndex,
                 ),
                 orgIds: orgs.map((org) => org.id),
               });

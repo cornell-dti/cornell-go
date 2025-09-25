@@ -160,7 +160,7 @@ function toForm(challenge: ChallengeDto) {
 function fromForm(
   form: EntryForm[],
   eventId: string,
-  id: string
+  id: string,
 ): ChallengeDto {
   return {
     id,
@@ -219,7 +219,7 @@ export function Challenges() {
         entryButtonText="CREATE"
         onEntry={() => {
           serverData.updateChallenge(
-            fromForm(form, serverData.selectedEvent, "")
+            fromForm(form, serverData.selectedEvent, ""),
           );
           setCreateModalOpen(false);
         }}
@@ -234,7 +234,7 @@ export function Challenges() {
         entryButtonText="EDIT"
         onEntry={() => {
           serverData.updateChallenge(
-            fromForm(form, serverData.selectedEvent, currentId)
+            fromForm(form, serverData.selectedEvent, currentId),
           );
           setEditModalOpen(false);
         }}
@@ -299,7 +299,7 @@ export function Challenges() {
             : compareTwoStrings(b.name ?? "", query) -
               compareTwoStrings(a.name ?? "", query) +
               compareTwoStrings(b.description ?? "", query) -
-              compareTwoStrings(a.description ?? "", query)
+              compareTwoStrings(a.description ?? "", query),
         )
         .map((chal: ChallengeDto) => (
           <ChallengeCard
@@ -310,8 +310,8 @@ export function Challenges() {
               selectedEvent.challenges = moveUp(
                 selectedEvent.challenges,
                 selectedEvent.challenges.findIndex(
-                  (id: string) => id === chal.id
-                ) ?? 0
+                  (id: string) => id === chal.id,
+                ) ?? 0,
               );
               serverData.updateEvent(selectedEvent);
             }}
@@ -320,8 +320,8 @@ export function Challenges() {
               selectedEvent.challenges = moveDown(
                 selectedEvent.challenges,
                 selectedEvent.challenges.findIndex(
-                  (id: string) => id === chal.id
-                )
+                  (id: string) => id === chal.id,
+                ),
               );
               serverData.updateEvent(selectedEvent);
             }}
@@ -337,13 +337,13 @@ export function Challenges() {
             onCopy={() => {
               const evs = Array.from(serverData.events.values());
               const myEvIndex = evs.findIndex(
-                (v) => v.id === selectedEvent?.id
+                (v) => v.id === selectedEvent?.id,
               );
               setCurrentId(chal.id);
               setCopyForm({
                 form: makeCopyForm(
                   evs.map((ev) => ev.name ?? ""),
-                  myEvIndex
+                  myEvIndex,
                 ),
                 evIds: evs.map((ev) => ev.id),
               });
