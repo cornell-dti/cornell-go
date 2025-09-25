@@ -106,7 +106,7 @@ export class OrganizationService {
     }
 
     return await this.prisma.challenge.create({
-      data: { 
+      data: {
         ...defaultChallengeData,
         linkedEventId: evId,
         eventIndex: index,

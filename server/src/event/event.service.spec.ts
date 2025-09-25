@@ -3,6 +3,7 @@ import { EventService } from './event.service';
 import { ClientService } from '../client/client.service';
 import { OrganizationService } from '../organization/organization.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { CaslAbilityFactory } from '../casl/casl-ability.factory';
 
 describe('EventService', () => {
   let service: EventService;
@@ -22,6 +23,10 @@ describe('EventService', () => {
         {
           useValue: null,
           provide: PrismaService,
+        },
+        {
+          useValue: null,
+          provide: CaslAbilityFactory,
         },
       ],
     }).compile();
