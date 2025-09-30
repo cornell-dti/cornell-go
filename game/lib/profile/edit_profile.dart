@@ -129,6 +129,12 @@ class _EditProfileState extends State<EditProfileWidget> {
     "Weill Cornell Medicine"
   ];
 
+  /// Majors mapped to their respective colleges
+  ///
+  /// @remarks
+  /// - Key: College name (must match _colleges list exactly)
+  /// - Value: List of available majors for that college
+  /// - Empty lists indicate colleges with no specific major subdivisions
   Map<String, List<String>> _majors = {
     "Agriculture and Life Sciences": [
       "Agricultural Sciences",
@@ -247,7 +253,21 @@ class _EditProfileState extends State<EditProfileWidget> {
     "Weill Cornell Medicine": []
   };
 
-  List<String> _years = ["2025", "2026", "2027", "2028", "2029", "2030", "Alumni"];
+  /// Available graduation years for student selection
+  ///
+  /// @remarks
+  /// - Includes current and future graduation years
+  /// - "Alumni" option for graduated users
+  /// - Should be updated periodically to include new graduation years
+  List<String> _years = [
+    "2025",
+    "2026",
+    "2027",
+    "2028",
+    "2029",
+    "2030",
+    "Alumni"
+  ];
 
   @override
   Widget build(BuildContext context) {
