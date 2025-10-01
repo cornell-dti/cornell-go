@@ -59,6 +59,7 @@ export interface EventDto {
   requiredMembers?: number;
   name?: string;
   description?: string;
+  longDescription?: string; 
   category?: EventCategoryDto;
   timeLimitation?: 'LIMITED_TIME' | 'PERPETUAL';
   endTime?: string;
