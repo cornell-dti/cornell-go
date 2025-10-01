@@ -223,8 +223,8 @@ function MapEntryFormBox(props: { form: MapEntryForm }) {
         <MapContainer
           center={[lat, lng]}
           zoom={20}
-          style={{ 
-            width: "100%", 
+          style={{
+            width: "100%",
             height: 300,
           }}
         >
