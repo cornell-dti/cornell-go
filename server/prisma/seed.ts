@@ -8,7 +8,7 @@ async function main() {
   // Safety check: prevent accidental seeding of production database
   const databaseUrl = process.env.DATABASE_URL || '';
   if (
-    databaseUrl.includes('rds.amazonaws.com') ||
+    databaseUrl.includes('amazonaws') ||
     databaseUrl.includes('heroku') ||
     databaseUrl.includes('prod')
   ) {

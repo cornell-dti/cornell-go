@@ -218,7 +218,8 @@ describe('OrganizationModule E2E', () => {
       affectedUsers.push(basicUser);
       await userGateway.requestUserData(basicAbility, basicUser, {});
 
-      const [users, ev, dto] = sendEventMock.mock.lastCall as DtoLastCall<UpdateUserDataDto>;
+      const [users, ev, dto] = sendEventMock.mock
+        .lastCall as DtoLastCall<UpdateUserDataDto>;
 
       expect(ev).toEqual('updateUserData');
       expect(users).toContain('user/' + basicUser.id);
@@ -239,7 +240,8 @@ describe('OrganizationModule E2E', () => {
         deleted: false,
       });
 
-      const [users, ev, dto] = sendEventMock.mock.lastCall as DtoLastCall<UpdateUserDataDto>;
+      const [users, ev, dto] = sendEventMock.mock
+        .lastCall as DtoLastCall<UpdateUserDataDto>;
 
       expect(ev).toEqual('updateUserData');
       expect(dto.user.username).toEqual('myNewUsername');
@@ -253,7 +255,8 @@ describe('OrganizationModule E2E', () => {
         challenges: [exChal1.id],
       });
 
-      const [users, ev, dto] = sendEventMock.mock.lastCall as DtoLastCall<UpdateChallengeDataDto>;
+      const [users, ev, dto] = sendEventMock.mock
+        .lastCall as DtoLastCall<UpdateChallengeDataDto>;
 
       expect(ev).toEqual('updateChallengeData');
       expect(dto.challenge.name).toBeUndefined();
@@ -268,7 +271,8 @@ describe('OrganizationModule E2E', () => {
         challenges: [defaultChal.id],
       });
 
-      const [users, ev, dto] = sendEventMock.mock.lastCall as DtoLastCall<UpdateChallengeDataDto>;
+      const [users, ev, dto] = sendEventMock.mock
+        .lastCall as DtoLastCall<UpdateChallengeDataDto>;
 
       expect(ev).toEqual('updateChallengeData');
       expect(dto.challenge.name).toBeUndefined();
@@ -288,7 +292,8 @@ describe('OrganizationModule E2E', () => {
         challenges: [defaultChal.id],
       });
 
-      const [users, ev, dto] = sendEventMock.mock.lastCall as DtoLastCall<UpdateChallengeDataDto>;
+      const [users, ev, dto] = sendEventMock.mock
+        .lastCall as DtoLastCall<UpdateChallengeDataDto>;
 
       expect(ev).toEqual('updateChallengeData');
       expect(dto.challenge.name).toBeDefined();
@@ -309,7 +314,8 @@ describe('OrganizationModule E2E', () => {
         deleted: false,
       });
 
-      const [users, ev, dto] = sendEventMock.mock.lastCall as DtoLastCall<UpdateUserDataDto>;
+      const [users, ev, dto] = sendEventMock.mock
+        .lastCall as DtoLastCall<UpdateUserDataDto>;
 
       expect(ev).toEqual('updateUserData');
       expect(dto.user.score).toEqual(basicUser.score);
