@@ -1,7 +1,6 @@
-version: "3.3"
 services:
   postgres:
-    image: postgres
+    image: postgres:17
     restart: unless-stopped
     environment:
       POSTGRES_DB: postgres

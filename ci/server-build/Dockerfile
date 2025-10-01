@@ -4,6 +4,6 @@ WORKDIR /app/server
 COPY server .
 
 RUN npm install -g prettier @nestjs/cli jest rimraf
-RUN npm install
+RUN npm install --legacy-peer-deps
 RUN npx prisma generate
 RUN npm run build

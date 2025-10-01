@@ -19,6 +19,8 @@ async function main() {
     "docker compose up --build --no-attach postgres --exit-code-from server"
   );
   chdir("./server");
+  console.log("Installing server dependencies");
+  execSync("npm install --legacy-peer-deps");
   console.log("Generating prisma client");
   execSync("npx prisma generate");
 
