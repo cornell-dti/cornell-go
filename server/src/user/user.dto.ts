@@ -81,5 +81,5 @@ export interface JoinOrganizationDto {
  * - doesn't include hasCompletedOnboarding field because its redundant (hasCompletedOnboarding will always be made true) */
 export interface CompleteOnboardingDto {}
 
-/** DVO for resetOnboarding event */
+/** DTO for resetOnboarding event */
 export interface ResetOnboardingDto {}
