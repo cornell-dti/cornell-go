@@ -158,12 +158,12 @@ function getColumns(setRowsData: any, serverData: any) {
 
               let rowsClone = [...tableManager.rowsApi.rows];
               let deletedRowIndex = rowsClone.findIndex(
-                (r) => r.id === data.id
+                (r) => r.id === data.id,
               );
               rowsClone.splice(deletedRowIndex, 1);
 
               const newData = Array.from(serverData.groups.values()).map((gr) =>
-                toForm(gr)
+                toForm(gr),
               );
               newData.forEach((gr) => {
                 let index = rowsClone.findIndex((r) => r.id === gr.id);
@@ -185,7 +185,7 @@ function getColumns(setRowsData: any, serverData: any) {
 export function Groups() {
   const serverData = useContext(ServerDataContext);
   const [rowsData, setRowsData] = useState(
-    Array.from(serverData.groups.values()).map((gr) => toForm(gr))
+    Array.from(serverData.groups.values()).map((gr) => toForm(gr)),
   );
 
   return (

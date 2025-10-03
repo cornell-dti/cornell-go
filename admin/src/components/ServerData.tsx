@@ -46,7 +46,7 @@ const defaultData = {
     return undefined;
   },
   async updateAchievement(
-    achievement: AchievementDto
+    achievement: AchievementDto,
   ): Promise<string | undefined> {
     return undefined;
   },
@@ -54,7 +54,7 @@ const defaultData = {
     return undefined;
   },
   async updateOrganization(
-    organization: OrganizationDto
+    organization: OrganizationDto,
   ): Promise<string | undefined> {
     return undefined;
   },
@@ -63,7 +63,7 @@ const defaultData = {
   },
   async addManager(
     email: string,
-    orgniazationId: string
+    orgniazationId: string,
   ): Promise<string | undefined> {
     return undefined;
   },
@@ -89,7 +89,7 @@ export function ServerDataProvider(props: { children: ReactNode }) {
 
   const sock = useMemo(
     () => new ServerApi(connection.connection!),
-    [connection]
+    [connection],
   );
 
   const [serverData, setServerData] = useState(() => ({ ...defaultData }));
@@ -167,7 +167,7 @@ export function ServerDataProvider(props: { children: ReactNode }) {
         });
       },
     }),
-    [serverData, setServerData, sock]
+    [serverData, setServerData, sock],
   );
 
   useEffect(() => {
@@ -184,7 +184,7 @@ export function ServerDataProvider(props: { children: ReactNode }) {
       } else {
         serverData.achievements.set(
           (data.achievement as AchievementDto).id,
-          data.achievement as AchievementDto
+          data.achievement as AchievementDto,
         );
       }
 
@@ -203,13 +203,13 @@ export function ServerDataProvider(props: { children: ReactNode }) {
         sock.requestChallengeData({
           challenges:
             (data.event as EventDto).challenges?.filter(
-              (chal: string) => !(chal in oldChallenges)
+              (chal: string) => !(chal in oldChallenges),
             ) ?? [],
         });
 
         serverData.events.set(
           (data.event as EventDto).id,
-          data.event as EventDto
+          data.event as EventDto,
         );
       }
 
@@ -221,7 +221,7 @@ export function ServerDataProvider(props: { children: ReactNode }) {
       } else {
         serverData.challenges.set(
           (data.challenge as ChallengeDto).id,
-          data.challenge as ChallengeDto
+          data.challenge as ChallengeDto,
         );
       }
 
@@ -242,7 +242,7 @@ export function ServerDataProvider(props: { children: ReactNode }) {
       } else {
         serverData.groups.set(
           (data.group as GroupDto).id,
-          data.group as GroupDto
+          data.group as GroupDto,
         );
       }
 
@@ -254,31 +254,31 @@ export function ServerDataProvider(props: { children: ReactNode }) {
       } else {
         const oldEvents =
           serverData.organizations.get(
-            (data.organization as OrganizationDto).id
+            (data.organization as OrganizationDto).id,
           )?.events ?? [];
 
         const oldAchievements =
           serverData.organizations.get(
-            (data.organization as OrganizationDto).id
+            (data.organization as OrganizationDto).id,
           )?.achivements ?? [];
 
         sock.requestEventData({
           events: (data.organization as OrganizationDto).events?.filter(
-            (ev: string) => !(ev in oldEvents)
+            (ev: string) => !(ev in oldEvents),
           ),
         });
 
         if (data.organization.achivements) {
           sock.requestAchievementData({
             achievements: data.organization.achivements?.filter(
-              (achId) => !(achId in oldAchievements)
+              (achId) => !(achId in oldAchievements),
             ),
           });
         }
 
         serverData.organizations.set(
           (data.organization as OrganizationDto).id,
-          data.organization as OrganizationDto
+          data.organization as OrganizationDto,
         );
       }
 

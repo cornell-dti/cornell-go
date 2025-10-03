@@ -330,6 +330,7 @@ export interface RequestGlobalLeaderDataDto {
 
 export interface RequestUserDataDto {
   userId?: string;
+  hasCompletedOnboarding?: boolean;
 }
 
 export interface RequestAllUserDataDto {}
@@ -354,6 +355,7 @@ export interface UserDto {
   authType?: UserAuthTypeDto;
   trackedEvents?: string[];
   favorites?: string[];
+  hasCompletedOnboarding?: boolean;
 }
 
 export interface UpdateUserDataDto {
@@ -369,3 +371,7 @@ export interface AddManagerDto {
 export interface JoinOrganizationDto {
   accessCode: string;
 }
+
+export interface CompleteOnboardingDto {}
+
+export interface ResetOnboardingDto {}

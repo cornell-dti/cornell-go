@@ -191,7 +191,7 @@ function getColumns(setRowsData: any, serverData: any) {
 
               let rowsClone = [...tableManager.rowsApi.rows];
               let updatedRowIndex = rowsClone.findIndex(
-                (r) => r.id === data.id
+                (r) => r.id === data.id,
               );
               rowsClone[updatedRowIndex] = data;
 
@@ -213,7 +213,7 @@ function getColumns(setRowsData: any, serverData: any) {
 export function Users() {
   const serverData = useContext(ServerDataContext);
   const [rowsData, setRowsData] = useState(
-    Array.from(serverData.users.values()).map((us) => toForm(us))
+    Array.from(serverData.users.values()).map((us) => toForm(us)),
   );
 
   return (

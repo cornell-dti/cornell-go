@@ -153,6 +153,16 @@ export class ServerApi {
     return this.send("joinOrganization", data) as Promise<boolean | undefined>;
   }
 
+  completeOnboarding(data: dto.CompleteOnboardingDto) {
+    return this.send("completeOnboarding", data) as Promise<
+      boolean | undefined
+    >;
+  }
+
+  resetOnboarding(data: dto.ResetOnboardingDto) {
+    return this.send("resetOnboarding", data) as Promise<boolean | undefined>;
+  }
+
   closeAccount(data: dto.CloseAccountDto) {
     return this.send("closeAccount", data) as Promise<boolean | undefined>;
   }
@@ -173,14 +183,14 @@ export class ServerApi {
   }
 
   onUpdateAchievementData(
-    callback: (data: dto.UpdateAchievementDataDto) => void
+    callback: (data: dto.UpdateAchievementDataDto) => void,
   ) {
     this.socket.removeAllListeners("updateAchievementData");
     this.socket.on("updateAchievementData", (data) => callback(data));
   }
 
   onUpdateAchievementTrackerData(
-    callback: (data: dto.AchievementTrackerDto) => void
+    callback: (data: dto.AchievementTrackerDto) => void,
   ) {
     this.socket.removeAllListeners("updateAchievementTrackerData");
     this.socket.on("updateAchievementTrackerData", (data) => callback(data));
@@ -212,14 +222,14 @@ export class ServerApi {
   }
 
   onUpdateOrganizationData(
-    callback: (data: dto.UpdateOrganizationDataDto) => void
+    callback: (data: dto.UpdateOrganizationDataDto) => void,
   ) {
     this.socket.removeAllListeners("updateOrganizationData");
     this.socket.on("updateOrganizationData", (data) => callback(data));
   }
 
   onUpdateLeaderPosition(
-    callback: (data: dto.UpdateLeaderPositionDto) => void
+    callback: (data: dto.UpdateLeaderPositionDto) => void,
   ) {
     this.socket.removeAllListeners("updateLeaderPosition");
     this.socket.on("updateLeaderPosition", (data) => callback(data));

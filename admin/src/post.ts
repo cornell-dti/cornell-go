@@ -1,6 +1,6 @@
 export async function postRequest<TBody, TResponse>(
   route: string,
-  body: TBody
+  body: TBody,
 ): Promise<TResponse> {
   const resp = await fetch(route, {
     method: "post",
