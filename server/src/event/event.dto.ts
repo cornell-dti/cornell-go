@@ -1,4 +1,6 @@
-/** DTO for RequestFilteredEvents */
+/** DTO for filtering events based on multiple criteria
+ * Used in requestFilteredEvents (clients to request events matching specific filters)
+*/
 export interface RequestFilteredEventsDto {
   difficulty: string[];
   location: string[];
@@ -6,32 +8,44 @@ export interface RequestFilteredEventsDto {
   filterId: string[];
 }
 
-/** DTO for requestEventData */
+/** DTO for requesting event data by IDs
+ * Used in requestEventData (fetch specific events or all events if no IDs provided)
+*/
 export interface RequestEventDataDto {
   events?: string[];
 }
 
-/** DTO for requestEventLeaderData */
+/** DTO for requesting event leaderbaord data
+ * Used for pagination and specific event leaderboard retrieval
+ */
 export interface RequestEventLeaderDataDto {
   offset: number;
   count: number;
   eventId?: string;
 }
 
-/** DTO for user in updateLeaderData */
+/** DTO for representing a user entry on the leaderboard
+ * Contains minimal user data needed for leaderboard display
+*/
 export interface LeaderDto {
   userId: string;
   username: string;
   score: number;
 }
 
-/** DTO for updateLeaderData */
+/** DTO for updating leaderboard data
+ * Used to send leaderboard updates to clients
+ */
 export interface UpdateLeaderDataDto {
   eventId?: string;
   offset: number;
   users: LeaderDto[];
 }
 
+/**
+ * DTO for updating a single player's position on leaderboard
+ * Used when a player's score changes
+ */
 export interface UpdateLeaderPositionDto {
   playerId: string;
   newTotalScore: number;
@@ -39,12 +53,20 @@ export interface UpdateLeaderPositionDto {
   eventId: string;
 }
 
+/**
+ * DTO for requesting events near a geographic location
+ * Used for location-based recommendations
+ */
 export interface RequestRecommendedEventsDto {
   latitudeF: number;
   longitudeF: number;
   count?: number;
 }
 
+/**
+ * Enum defining possible event categories
+ * Used for categorization and filtering of events
+ */
 export enum EventCategoryDto {
   FOOD = 'FOOD',
   NATURE = 'NATURE',
@@ -54,6 +76,10 @@ export enum EventCategoryDto {
   DORM = 'DORM',
 }
 
+/**
+ * Primary DTO for event data
+ * Contains all properties needed to display and interact with an event
+ */
 export interface EventDto {
   id: string;
   requiredMembers?: number;
@@ -93,6 +119,10 @@ export interface UpdateEventTrackerDataDto {
   tracker: EventTrackerDto;
 }
 
+/**
+ * DTO for updating event data
+ * Used when event details change or an event is deleted
+ */
 export interface UpdateEventDataDto {
   event: EventDto;
   deleted: boolean;
