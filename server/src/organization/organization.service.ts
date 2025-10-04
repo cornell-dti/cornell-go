@@ -25,7 +25,7 @@ import { accessibleBy } from '@casl/prisma';
 export const defaultEventData = {
   name: 'Default Event',
   description: 'Default Event',
-  longDescription: 'This is a default event created for the organization.',
+  longDescription: 'Default Event',
   requiredMembers: 1,
   difficulty: DifficultyMode.NORMAL,
   category: EventCategoryType.NATURE,
