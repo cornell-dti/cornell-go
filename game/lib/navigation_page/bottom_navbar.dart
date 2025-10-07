@@ -53,10 +53,10 @@ class _BottomNavBarState extends State<BottomNavBar> {
   static const TextStyle optionStyle =
       TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
   static List<Widget> _widgetOptions = <Widget>[
-    SearchFilterBar(),           // Index 0: Home
-    Container(),                 // Index 1: Create (empty for now)
-    GlobalLeaderboardWidget(),   // Index 2: Leaderboard
-    ProfilePage(),              // Index 3: Profile
+    SearchFilterBar(), // Index 0: Home
+    Container(), // Index 1: Create (empty for now)
+    GlobalLeaderboardWidget(), // Index 2: Leaderboard
+    ProfilePage(), // Index 3: Profile
   ];
 
   void _onItemTapped(int index) {
