@@ -53,9 +53,10 @@ class _BottomNavBarState extends State<BottomNavBar> {
   static const TextStyle optionStyle =
       TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
   static List<Widget> _widgetOptions = <Widget>[
-    SearchFilterBar(),
-    GlobalLeaderboardWidget(),
-    ProfilePage(),
+    SearchFilterBar(),           // Index 0: Home
+    Container(),                 // Index 1: Create (empty for now)
+    GlobalLeaderboardWidget(),   // Index 2: Leaderboard
+    ProfilePage(),              // Index 3: Profile
   ];
 
   void _onItemTapped(int index) {
@@ -96,6 +97,13 @@ class _BottomNavBarState extends State<BottomNavBar> {
             activeIcon: SvgPicture.asset("assets/icons/home.svg",
                 colorFilter: ColorFilter.mode(Colors.black, BlendMode.srcIn)),
             label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: SvgPicture.asset("assets/icons/create.svg",
+                colorFilter: ColorFilter.mode(Colors.grey, BlendMode.srcIn)),
+            activeIcon: SvgPicture.asset("assets/icons/create.svg",
+                colorFilter: ColorFilter.mode(Colors.black, BlendMode.srcIn)),
+            label: 'Create',
           ),
           BottomNavigationBarItem(
             icon: SvgPicture.asset("assets/icons/leaderboard.svg",
