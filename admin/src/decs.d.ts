@@ -1,1 +1,1 @@
-declare module "@nadavshaar/react-grid-table";
+declare module '@nadavshaar/react-grid-table';

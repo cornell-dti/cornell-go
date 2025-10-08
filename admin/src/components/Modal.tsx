@@ -1,7 +1,7 @@
-import { ReactNode, useLayoutEffect, useState } from "react";
-import { createPortal } from "react-dom";
-import styled, { css } from "styled-components";
-import { HButton } from "./HButton";
+import { ReactNode, useLayoutEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
+import styled, { css } from 'styled-components';
+import { HButton } from './HButton';
 
 const ModalBackground = styled.div<{ opacity: number }>`
   position: fixed;
@@ -14,7 +14,7 @@ const ModalBackground = styled.div<{ opacity: number }>`
   transition: opacity 0.15s;
   overflow-y: auto;
 
-  ${(props) => css`
+  ${props => css`
     opacity: ${props.opacity};
   `}
 `;
@@ -28,7 +28,7 @@ const ModalLayout = styled.div`
   border-radius: 5px;
   background-color: white;
   padding: 12px 18px 12px 18px;
-  font-family: "Roboto";
+  font-family: 'Roboto';
   box-shadow: 0 0 32px 0.1px rgb(80, 80, 80);
 `;
 
@@ -96,7 +96,7 @@ export function Modal(props: {
           </ModalButtonPanel>
         </ModalLayout>
       </ModalBackground>,
-      document.getElementById("modal-root")!,
+      document.getElementById('modal-root')!,
     );
   }
   return <></>;

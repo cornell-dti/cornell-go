@@ -1,5 +1,5 @@
-import { useContext, useMemo, useState } from "react";
-import { DeleteModal } from "./DeleteModal";
+import { useContext, useMemo, useState } from 'react';
+import { DeleteModal } from './DeleteModal';
 import {
   EntryModal,
   EntryForm,
@@ -7,8 +7,8 @@ import {
   OptionEntryForm,
   FreeEntryForm,
   DateEntryForm,
-} from "./EntryModal";
-import { HButton } from "./HButton";
+} from './EntryModal';
+import { HButton } from './HButton';
 import {
   ButtonSizer,
   CenterText,
@@ -17,17 +17,17 @@ import {
   ListCardButtons,
   ListCardDescription,
   ListCardTitle,
-} from "./ListCard";
-import { SearchBar } from "./SearchBar";
-import { ServerDataContext } from "./ServerData";
+} from './ListCard';
+import { SearchBar } from './SearchBar';
+import { ServerDataContext } from './ServerData';
 
-import { compareTwoStrings } from "string-similarity";
+import { compareTwoStrings } from 'string-similarity';
 import {
   AchievementDto,
   AchievementTypeDto,
   ChallengeLocationDto,
-} from "../all.dto";
-import { AlertModal } from "./AlertModal";
+} from '../all.dto';
+import { AlertModal } from './AlertModal';
 
 const locationOptions = [
   ChallengeLocationDto.ENG_QUAD,
@@ -61,7 +61,7 @@ function AchiemementCard(props: {
           {props.achievement.name}
           <ButtonSizer>
             <HButton onClick={props.onSelect} float="right">
-              {props.achievement.eventId ? "UNLINK EVENT" : "LINK EVENT"}
+              {props.achievement.eventId ? 'UNLINK EVENT' : 'LINK EVENT'}
             </HButton>
           </ButtonSizer>
         </ListCardTitle>
@@ -70,9 +70,9 @@ function AchiemementCard(props: {
         </ListCardDescription>
         <ListCardBody>
           Id: <b>{props.achievement.id}</b> <br />
-          Required Points/Event Completions:{" "}
+          Required Points/Event Completions:{' '}
           <b>{props.achievement.requiredPoints}</b> <br />
-          Linked Event ID: <b>{props.achievement.eventId ?? "NONE"}</b> <br />
+          Linked Event ID: <b>{props.achievement.eventId ?? 'NONE'}</b> <br />
           Location Type: <b>{props.achievement.locationType}</b> <br />
           Achievement Type: <b>{props.achievement.achievementType}</b> <br />
         </ListCardBody>
@@ -93,19 +93,19 @@ function AchiemementCard(props: {
 // Default Form Creation
 function makeForm() {
   return [
-    { name: "Name", characterLimit: 256, value: "" },
-    { name: "Description", characterLimit: 2048, value: "" },
+    { name: 'Name', characterLimit: 256, value: '' },
+    { name: 'Description', characterLimit: 2048, value: '' },
     {
-      name: "Location Type",
+      name: 'Location Type',
       options: locationOptions as string[],
       value: 0,
     },
     {
-      name: "Achievement Type",
+      name: 'Achievement Type',
       options: achievementOptions as string[],
       value: 0,
     },
-    { name: "Required Points", value: 1, min: 1, max: 999 },
+    { name: 'Required Points', value: 1, min: 1, max: 999 },
   ] as EntryForm[];
 }
 
@@ -113,7 +113,7 @@ function makeForm() {
 function fromForm(form: EntryForm[], id: string): AchievementDto {
   return {
     id,
-    imageUrl: "",
+    imageUrl: '',
     name: (form[0] as FreeEntryForm).value,
     description: (form[1] as FreeEntryForm).value,
     locationType: locationOptions[(form[2] as OptionEntryForm).value],
@@ -125,24 +125,24 @@ function fromForm(form: EntryForm[], id: string): AchievementDto {
 // DTO to Form Conversion
 function toForm(achievement: AchievementDto) {
   return [
-    { name: "Name", characterLimit: 256, value: achievement.name! },
+    { name: 'Name', characterLimit: 256, value: achievement.name! },
     {
-      name: "Description",
+      name: 'Description',
       characterLimit: 2048,
       value: achievement.description!,
     },
     {
-      name: "Location Type",
+      name: 'Location Type',
       options: locationOptions as string[],
       value: locationOptions.indexOf(achievement.locationType!),
     },
     {
-      name: "Achievement Type",
+      name: 'Achievement Type',
       options: achievementOptions as string[],
       value: achievementOptions.indexOf(achievement.achievementType!),
     },
     {
-      name: "Required Points",
+      name: 'Required Points',
       value: achievement.requiredPoints!,
       min: 1,
       max: 999,
@@ -153,7 +153,7 @@ function toForm(achievement: AchievementDto) {
 function makeCopyForm(orgOptions: string[], initialIndex: number) {
   return [
     {
-      name: "Target Organization",
+      name: 'Target Organization',
       options: orgOptions,
       value: initialIndex,
     },
@@ -175,8 +175,8 @@ export function Achievements() {
   }));
 
   const [form, setForm] = useState(() => makeForm());
-  const [currentId, setCurrentId] = useState("");
-  const [query, setQuery] = useState("");
+  const [currentId, setCurrentId] = useState('');
+  const [query, setQuery] = useState('');
   const selectedOrg = serverData.organizations.get(serverData.selectedOrg);
 
   return (
@@ -197,7 +197,7 @@ export function Achievements() {
         entryButtonText="CREATE"
         onEntry={() => {
           serverData.updateAchievement({
-            ...fromForm(form, ""),
+            ...fromForm(form, ''),
             initialOrganizationId: serverData.selectedOrg,
           });
           setCreateModalOpen(false);
@@ -232,10 +232,10 @@ export function Achievements() {
           const ach = serverData.achievements.get(currentId)!;
           serverData.updateAchievement({
             ...ach,
-            eventId: "",
+            eventId: '',
             initialOrganizationId:
               copyForm.orgIds[(copyForm.form[0] as OptionEntryForm).value],
-            id: "",
+            id: '',
           });
           setCopyModalOpen(false);
         }}
@@ -245,7 +245,7 @@ export function Achievements() {
         form={copyForm.form}
       />
       <DeleteModal
-        objectName={serverData.achievements.get(currentId)?.name ?? ""}
+        objectName={serverData.achievements.get(currentId)?.name ?? ''}
         isOpen={isDeleteModalOpen}
         onClose={() => setDeleteModalOpen(false)}
         onDelete={() => {
@@ -262,9 +262,9 @@ export function Achievements() {
           setForm(makeForm());
           setCreateModalOpen(true);
         }}
-        onSearch={(query) => setQuery(query)}
+        onSearch={query => setQuery(query)}
       />
-      {serverData.selectedOrg === "" ? (
+      {serverData.selectedOrg === '' ? (
         <CenterText>Select an organization to view achievements</CenterText>
       ) : serverData.organizations.get(serverData.selectedOrg) ? (
         serverData.organizations?.get(serverData.selectedOrg)?.achivements
@@ -284,12 +284,12 @@ export function Achievements() {
       )
         .sort(
           (a: AchievementDto, b: AchievementDto) =>
-            compareTwoStrings(b.name ?? "", query) -
-            compareTwoStrings(a.name ?? "", query) +
-            compareTwoStrings(b.description ?? "", query) -
-            compareTwoStrings(a.description ?? "", query),
+            compareTwoStrings(b.name ?? '', query) -
+            compareTwoStrings(a.name ?? '', query) +
+            compareTwoStrings(b.description ?? '', query) -
+            compareTwoStrings(a.description ?? '', query),
         )
-        .map((ach) => (
+        .map(ach => (
           <AchiemementCard
             key={ach.id}
             achievement={ach}
@@ -297,13 +297,13 @@ export function Achievements() {
               if (ach.eventId) {
                 serverData.updateAchievement({
                   ...ach,
-                  eventId: "",
+                  eventId: '',
                 });
 
                 return;
               }
 
-              if (serverData.selectedEvent === "") {
+              if (serverData.selectedEvent === '') {
                 setLinkedModalOpen(true);
               } else {
                 serverData.updateAchievement({
@@ -323,16 +323,14 @@ export function Achievements() {
             }}
             onCopy={() => {
               const orgs = Array.from(serverData.organizations.values());
-              const myOrgIndex = orgs.findIndex(
-                (v) => v.id === selectedOrg?.id,
-              );
+              const myOrgIndex = orgs.findIndex(v => v.id === selectedOrg?.id);
               setCurrentId(ach.id);
               setCopyForm({
                 form: makeCopyForm(
-                  orgs.map((org) => org.name ?? ""),
+                  orgs.map(org => org.name ?? ''),
                   myOrgIndex,
                 ),
-                orgIds: orgs.map((org) => org.id),
+                orgIds: orgs.map(org => org.id),
               });
               setCopyModalOpen(true);
             }}

@@ -1,5 +1,5 @@
-import { useContext, useState } from "react";
-import { DeleteModal } from "./DeleteModal";
+import { useContext, useState } from 'react';
+import { DeleteModal } from './DeleteModal';
 import {
   EntryModal,
   EntryForm,
@@ -7,8 +7,8 @@ import {
   OptionEntryForm,
   FreeEntryForm,
   DateEntryForm,
-} from "./EntryModal";
-import { HButton } from "./HButton";
+} from './EntryModal';
+import { HButton } from './HButton';
 import {
   ButtonSizer,
   CenterText,
@@ -17,12 +17,12 @@ import {
   ListCardButtons,
   ListCardDescription,
   ListCardTitle,
-} from "./ListCard";
-import { SearchBar } from "./SearchBar";
-import { ServerDataContext } from "./ServerData";
+} from './ListCard';
+import { SearchBar } from './SearchBar';
+import { ServerDataContext } from './ServerData';
 
-import { compareTwoStrings } from "string-similarity";
-import { OrganizationDto } from "../all.dto";
+import { compareTwoStrings } from 'string-similarity';
+import { OrganizationDto } from '../all.dto';
 
 function OrganizationCard(props: {
   organization: OrganizationDto;
@@ -33,7 +33,7 @@ function OrganizationCard(props: {
   onSelect: () => void;
   onAddManager: () => void;
 }) {
-  const affirmOfBool = (val: boolean) => (val ? "Yes" : "No");
+  const affirmOfBool = (val: boolean) => (val ? 'Yes' : 'No');
   const serverData = useContext(ServerDataContext);
 
   return (
@@ -70,7 +70,7 @@ function OrganizationCard(props: {
 }
 
 function makeForm() {
-  return [{ name: "Name", characterLimit: 256, value: "" }] as EntryForm[];
+  return [{ name: 'Name', characterLimit: 256, value: '' }] as EntryForm[];
 }
 
 function fromForm(
@@ -87,15 +87,15 @@ function fromForm(
 
 function toForm(group: OrganizationDto) {
   return [
-    { name: "Name", characterLimit: 256, value: group.name },
+    { name: 'Name', characterLimit: 256, value: group.name },
   ] as EntryForm[];
 }
 
 const emptyDto: OrganizationDto = {
-  id: "",
+  id: '',
   members: [],
-  name: "",
-  accessCode: "",
+  name: '',
+  accessCode: '',
   events: [],
   managers: [],
 };
@@ -107,8 +107,8 @@ export function Organizations() {
   const [isAddManagerModalOpen, setAddManagerModalOpen] = useState(false);
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
   const [form, setForm] = useState(() => makeForm());
-  const [currentId, setCurrentId] = useState("");
-  const [query, setQuery] = useState("");
+  const [currentId, setCurrentId] = useState('');
+  const [query, setQuery] = useState('');
   const [oldDto, setOldDto] = useState(emptyDto);
 
   return (
@@ -118,7 +118,7 @@ export function Organizations() {
         isOpen={isCreateModalOpen}
         entryButtonText="CREATE"
         onEntry={() => {
-          serverData.updateOrganization(fromForm(form, "", emptyDto));
+          serverData.updateOrganization(fromForm(form, '', emptyDto));
           setCreateModalOpen(false);
         }}
         onCancel={() => {
@@ -153,7 +153,7 @@ export function Organizations() {
         form={form}
       />
       <DeleteModal
-        objectName={serverData.organizations.get(currentId)?.name ?? ""}
+        objectName={serverData.organizations.get(currentId)?.name ?? ''}
         isOpen={isDeleteModalOpen}
         onClose={() => setDeleteModalOpen(false)}
         onDelete={() => {
@@ -167,7 +167,7 @@ export function Organizations() {
           setForm(makeForm());
           setCreateModalOpen(true);
         }}
-        onSearch={(query) => setQuery(query)}
+        onSearch={query => setQuery(query)}
       />
       {serverData.organizations.size === 0 && (
         <CenterText>No organizations available</CenterText>
@@ -175,10 +175,10 @@ export function Organizations() {
       {Array.from(serverData.organizations.values())
         .sort(
           (a, b) =>
-            compareTwoStrings(b.name ?? "", query) -
-            compareTwoStrings(a.name ?? "", query),
+            compareTwoStrings(b.name ?? '', query) -
+            compareTwoStrings(a.name ?? '', query),
         )
-        .map((org) => (
+        .map(org => (
           <OrganizationCard
             key={org.id}
             organization={org}
@@ -205,7 +205,7 @@ export function Organizations() {
                     {
                       name: "New Manager's Email",
                       characterLimit: 256,
-                      value: "",
+                      value: '',
                     },
                   ] as EntryForm[],
               );

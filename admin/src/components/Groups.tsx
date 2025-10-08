@@ -1,8 +1,8 @@
-import { useContext, useEffect, useState } from "react";
-import { ServerDataContext } from "./ServerData";
-import GridTable from "@nadavshaar/react-grid-table";
-import userEvent from "@testing-library/user-event";
-import { DeleteModal } from "./DeleteModal";
+import { useContext, useEffect, useState } from 'react';
+import { ServerDataContext } from './ServerData';
+import GridTable from '@nadavshaar/react-grid-table';
+import userEvent from '@testing-library/user-event';
+import { DeleteModal } from './DeleteModal';
 
 const CANCEL_SVG = (
   <svg
@@ -19,53 +19,53 @@ const CANCEL_SVG = (
 );
 
 const styles = {
-  select: { margin: "0 20px" },
+  select: { margin: '0 20px' },
   buttonsCellContainer: {
-    padding: "0 20px",
-    width: "100%",
-    height: "100%",
-    display: "flex",
-    justifyContent: "flex-end",
-    alignItems: "center",
+    padding: '0 20px',
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
   },
   editButton: {
-    background: "#f3f3f3",
-    outline: "none",
-    cursor: "pointer",
+    background: '#f3f3f3',
+    outline: 'none',
+    cursor: 'pointer',
     padding: 4,
-    display: "inline-flex",
-    border: "none",
-    borderRadius: "50%",
-    boxShadow: "1px 1px 2px 0px rgb(0 0 0 / .3)",
+    display: 'inline-flex',
+    border: 'none',
+    borderRadius: '50%',
+    boxShadow: '1px 1px 2px 0px rgb(0 0 0 / .3)',
   },
   buttonsCellEditorContainer: {
-    height: "100%",
-    width: "100%",
-    display: "inline-flex",
-    padding: "0 20px",
-    justifyContent: "flex-end",
-    alignItems: "center",
+    height: '100%',
+    width: '100%',
+    display: 'inline-flex',
+    padding: '0 20px',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
   },
   cancelButton: {
-    background: "#f3f3f3",
-    outline: "none",
-    cursor: "pointer",
+    background: '#f3f3f3',
+    outline: 'none',
+    cursor: 'pointer',
     marginRight: 10,
     padding: 2,
-    display: "inline-flex",
-    border: "none",
-    borderRadius: "50%",
-    boxShadow: "1px 1px 2px 0px rgb(0 0 0 / .3)",
+    display: 'inline-flex',
+    border: 'none',
+    borderRadius: '50%',
+    boxShadow: '1px 1px 2px 0px rgb(0 0 0 / .3)',
   },
   saveButton: {
-    background: "#f3f3f3",
-    outline: "none",
-    cursor: "pointer",
+    background: '#f3f3f3',
+    outline: 'none',
+    cursor: 'pointer',
     padding: 2,
-    display: "inline-flex",
-    border: "none",
-    borderRadius: "50%",
-    boxShadow: "1px 1px 2px 0px rgb(0 0 0 / .3)",
+    display: 'inline-flex',
+    border: 'none',
+    borderRadius: '50%',
+    boxShadow: '1px 1px 2px 0px rgb(0 0 0 / .3)',
   },
 };
 
@@ -82,38 +82,38 @@ function getColumns(setRowsData: any, serverData: any) {
   let deleteId: any;
   return [
     {
-      id: "checkbox",
+      id: 'checkbox',
       visible: true,
       pinned: true,
-      width: "54px",
+      width: '54px',
     },
     {
       id: 1,
-      field: "id",
-      label: "Id",
+      field: 'id',
+      label: 'Id',
       editable: false,
     },
     {
       id: 2,
-      field: "friendlyId",
-      label: "FriendlyId",
+      field: 'friendlyId',
+      label: 'FriendlyId',
       editable: false,
     },
     {
       id: 3,
-      field: "hostId",
-      label: "HostId",
+      field: 'hostId',
+      label: 'HostId',
       editable: false,
     },
     {
       id: 4,
-      field: "curEventId",
-      label: "CurrentEventId",
+      field: 'curEventId',
+      label: 'CurrentEventId',
       editable: false,
     },
     {
-      id: "buttons",
-      width: "max-content",
+      id: 'buttons',
+      width: 'max-content',
       pinned: true,
       sortable: false,
       resizable: false,
@@ -128,7 +128,7 @@ function getColumns(setRowsData: any, serverData: any) {
           <button
             title="Edit"
             style={styles.editButton}
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation();
               tableManager.rowEditApi.setEditRowId(data.id);
               deleteId = data.id;
@@ -147,7 +147,7 @@ function getColumns(setRowsData: any, serverData: any) {
       }) => (
         <div>
           <DeleteModal
-            objectName={serverData.groups.get(deleteId)?.friendlyId ?? ""}
+            objectName={serverData.groups.get(deleteId)?.friendlyId ?? ''}
             isOpen={tableManager.rowEditApi.editRowId !== null}
             onClose={() => {
               tableManager.rowEditApi.setEditRowId(null);
@@ -157,16 +157,14 @@ function getColumns(setRowsData: any, serverData: any) {
               serverData.groups.delete(data.id);
 
               let rowsClone = [...tableManager.rowsApi.rows];
-              let deletedRowIndex = rowsClone.findIndex(
-                (r) => r.id === data.id,
-              );
+              let deletedRowIndex = rowsClone.findIndex(r => r.id === data.id);
               rowsClone.splice(deletedRowIndex, 1);
 
-              const newData = Array.from(serverData.groups.values()).map((gr) =>
+              const newData = Array.from(serverData.groups.values()).map(gr =>
                 toForm(gr),
               );
-              newData.forEach((gr) => {
-                let index = rowsClone.findIndex((r) => r.id === gr.id);
+              newData.forEach(gr => {
+                let index = rowsClone.findIndex(r => r.id === gr.id);
 
                 if (index === -1) rowsClone.push(gr);
               });
@@ -185,7 +183,7 @@ function getColumns(setRowsData: any, serverData: any) {
 export function Groups() {
   const serverData = useContext(ServerDataContext);
   const [rowsData, setRowsData] = useState(
-    Array.from(serverData.groups.values()).map((gr) => toForm(gr)),
+    Array.from(serverData.groups.values()).map(gr => toForm(gr)),
   );
 
   return (
