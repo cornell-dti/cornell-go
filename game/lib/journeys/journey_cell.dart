@@ -99,6 +99,7 @@ class JourneyCell extends StatefulWidget {
   final double? challengeLat;
   final String imgUrl;
   final String description;
+  final String? longDescription;
   final int numberCompleted;
   final bool isCompleted;
   final String difficulty;
@@ -112,6 +113,7 @@ class JourneyCell extends StatefulWidget {
       this.location,
       this.imgUrl,
       this.description,
+      this.longDescription,
       this.locationCount,
       this.numberCompleted,
       this.isCompleted,
@@ -129,6 +131,7 @@ class JourneyCell extends StatefulWidget {
       location,
       imgUrl,
       description,
+      longDescription,
       locationCount,
       numberCompleted,
       isCompleted,
@@ -145,6 +148,7 @@ class _JourneyCellState extends State<JourneyCell> {
   final String location;
   final String imgUrl;
   final String description;
+  final String? longDescription;
   final int numberCompleted;
   final bool isCompleted;
   final String difficulty;
@@ -159,6 +163,7 @@ class _JourneyCellState extends State<JourneyCell> {
     this.location,
     this.imgUrl,
     this.description,
+    this.longDescription,
     this.locationCount,
     this.numberCompleted,
     this.isCompleted,
@@ -185,7 +190,7 @@ class _JourneyCellState extends State<JourneyCell> {
                     journeyName,
                     challengeLat,
                     challengeLong,
-                    description,
+                    longDescription ?? description,
                     imgUrl,
                     difficulty,
                     points,

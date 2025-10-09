@@ -150,6 +150,7 @@ model EventBase {
   requiredMembers Int
   name            String
   description     String
+  longDescription String
   timeLimitation  TimeLimitationType
   indexable       Boolean
   endTime         DateTime
