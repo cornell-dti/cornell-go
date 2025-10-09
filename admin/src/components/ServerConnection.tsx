@@ -4,18 +4,18 @@ import {
   useContext,
   useEffect,
   useState,
-} from "react";
+} from 'react';
 
-import { GoogleLogin } from "@react-oauth/google";
-import { GoogleOAuthProvider } from "@react-oauth/google";
+import { GoogleLogin } from '@react-oauth/google';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
-import { io, Socket } from "socket.io-client";
-import styled from "styled-components";
-import isDev from "../development";
-import { postRequest } from "../post";
-import { Modal } from "./Modal";
+import { io, Socket } from 'socket.io-client';
+import styled from 'styled-components';
+import isDev from '../development';
+import { postRequest } from '../post';
+import { Modal } from './Modal';
 
-const serverUrl = isDev() ? "http://localhost:8080" : "";
+const serverUrl = isDev() ? 'http://localhost:8080' : '';
 
 export const ServerConnectionContext = createContext<{
   connection?: Socket;
@@ -43,17 +43,17 @@ export function ServerConnectionProvider(props: { children: ReactNode }) {
                 refreshToken: string;
                 accessToken: string;
               }
-            | undefined = await postRequest(serverUrl + "/google", {
+            | undefined = await postRequest(serverUrl + '/google', {
             idToken,
             lat: 1,
             long: 1,
-            username: "guest",
-            college: "Arts and Sciences",
-            major: "Computer Science",
-            year: "2025",
-            interests: "",
-            aud: "web",
-            enrollmentType: "UNDERGRADUATE",
+            username: 'guest',
+            college: 'Arts and Sciences',
+            major: 'Computer Science',
+            year: '2025',
+            interests: '',
+            aud: 'web',
+            enrollmentType: 'UNDERGRADUATE',
           });
 
           if (!loginResponse) {
@@ -65,13 +65,13 @@ export function ServerConnectionProvider(props: { children: ReactNode }) {
             autoConnect: false,
           });
 
-          socket.on("connect", () => {
+          socket.on('connect', () => {
             setConnection(socket);
           });
 
-          socket.on("connect_error", () => {});
+          socket.on('connect_error', () => {});
 
-          socket.on("disconnect", () => {
+          socket.on('disconnect', () => {
             this.disconnect();
           });
 
@@ -103,19 +103,19 @@ const GoogleButtonBox = styled.div`
 
 export function AuthenticationGuard(props: { children: ReactNode }) {
   const connection = useContext(ServerConnectionContext);
-  const [loginMessage, setLoginMessage] = useState("");
+  const [loginMessage, setLoginMessage] = useState('');
 
   const connect = async (response: any) => {
     //New package returns key 'clientId'
-    if ("clientId" in response) {
+    if ('clientId' in response) {
       const state = await connection.connect(response.credential);
     } else {
-      setLoginMessage("Connection error");
+      setLoginMessage('Connection error');
     }
   };
 
   useEffect(() => {
-    if (connection.connection) setLoginMessage("");
+    if (connection.connection) setLoginMessage('');
   }, [connection, setLoginMessage]);
 
   if (connection.connection) {
@@ -136,8 +136,8 @@ export function AuthenticationGuard(props: { children: ReactNode }) {
                 connect(credentialResponse);
               }}
               onError={() => {
-                console.log("Login Failed");
-                setLoginMessage("An error occured while signing you in.");
+                console.log('Login Failed');
+                setLoginMessage('An error occured while signing you in.');
               }}
             />
           </GoogleButtonBox>

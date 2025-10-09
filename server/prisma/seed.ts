@@ -140,6 +140,7 @@ async function main() {
         administrator: false,
         enrollmentType: 'UNDERGRADUATE',
         score: 285,
+        hasCompletedOnboarding: false,
         group: {
           create: {
             friendlyId: 'GROUP001',
@@ -165,6 +166,7 @@ async function main() {
         administrator: false,
         enrollmentType: 'UNDERGRADUATE',
         score: 420,
+        hasCompletedOnboarding: false,
         group: {
           create: {
             friendlyId: 'GROUP002',
@@ -190,6 +192,7 @@ async function main() {
         administrator: false,
         enrollmentType: 'UNDERGRADUATE',
         score: 155,
+        hasCompletedOnboarding: false,
         group: {
           create: {
             friendlyId: 'GROUP003',
@@ -215,6 +218,7 @@ async function main() {
         administrator: false,
         enrollmentType: 'UNDERGRADUATE',
         score: 340,
+        hasCompletedOnboarding: false,
         group: {
           create: {
             friendlyId: 'GROUP004',
@@ -240,6 +244,7 @@ async function main() {
         administrator: false,
         enrollmentType: 'UNDERGRADUATE',
         score: 90,
+        hasCompletedOnboarding: false,
         group: {
           create: {
             friendlyId: 'GROUP005',
@@ -265,6 +270,7 @@ async function main() {
         administrator: false,
         enrollmentType: 'UNDERGRADUATE',
         score: 215,
+        hasCompletedOnboarding: false,
         group: {
           create: {
             friendlyId: 'GROUP006',
@@ -290,6 +296,7 @@ async function main() {
         administrator: false,
         enrollmentType: 'UNDERGRADUATE',
         score: 175,
+        hasCompletedOnboarding: false,
         group: {
           create: {
             friendlyId: 'GROUP007',
@@ -316,6 +323,7 @@ async function main() {
         administrator: false,
         enrollmentType: 'GRADUATE',
         score: 260,
+        hasCompletedOnboarding: false,
         group: {
           create: {
             friendlyId: 'GROUP008',
@@ -342,6 +350,7 @@ async function main() {
         administrator: false,
         enrollmentType: 'ALUMNI',
         score: 50,
+        hasCompletedOnboarding: false,
         group: {
           create: {
             friendlyId: 'GROUP009',
@@ -368,6 +377,7 @@ async function main() {
         administrator: true,
         enrollmentType: 'UNDERGRADUATE',
         score: 385,
+        hasCompletedOnboarding: false,
         group: {
           create: {
             friendlyId: 'GROUP010',

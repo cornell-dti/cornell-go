@@ -27,6 +27,7 @@ export interface RequestGlobalLeaderDataDto {
 /** DTO for requestUserData */
 export interface RequestUserDataDto {
   userId?: string;
+  hasCompletedOnboarding?: boolean;
 }
 
 export interface RequestAllUserDataDto {}
@@ -60,6 +61,7 @@ export interface UserDto {
   authType?: UserAuthTypeDto;
   trackedEvents?: string[];
   favorites?: string[];
+  hasCompletedOnboarding?: boolean;
 }
 
 export interface UpdateUserDataDto {
@@ -74,3 +76,10 @@ export interface AddManagerDto {
 export interface JoinOrganizationDto {
   accessCode: string;
 }
+
+/** DTO for completeOnboarding event
+ * - doesn't include hasCompletedOnboarding field because its redundant (hasCompletedOnboarding will always be made true) */
+export interface CompleteOnboardingDto {}
+
+/** DTO for resetOnboarding event */
+export interface ResetOnboardingDto {}

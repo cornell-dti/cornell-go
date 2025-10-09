@@ -1,4 +1,4 @@
-import { Modal } from "./Modal";
+import { Modal } from './Modal';
 
 export function AlertModal(props: {
   isOpen: boolean;
@@ -8,8 +8,8 @@ export function AlertModal(props: {
   return (
     <Modal
       title="Alert"
-      buttons={["OK"]}
-      onButtonClick={(idx) => {
+      buttons={['OK']}
+      onButtonClick={idx => {
         props.onClose();
       }}
       isOpen={props.isOpen}

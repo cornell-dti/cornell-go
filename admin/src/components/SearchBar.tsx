@@ -1,7 +1,7 @@
-import { useContext, useRef } from "react";
-import styled from "styled-components";
-import { HButton } from "./HButton";
-import { ServerDataContext } from "./ServerData";
+import { useContext, useRef } from 'react';
+import styled from 'styled-components';
+import { HButton } from './HButton';
+import { ServerDataContext } from './ServerData';
 
 const SearchBarBox = styled.div`
   display: flex;
@@ -60,7 +60,7 @@ export function SearchBar(props: {
       </SearchBarButtons>
       <SearchTextBox
         placeholder="Search..."
-        onChange={(e) => {
+        onChange={e => {
           clearTimeout(searchRef.current);
           const val = e.target.value;
           searchRef.current = window.setTimeout(() => {

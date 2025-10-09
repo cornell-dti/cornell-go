@@ -106,6 +106,7 @@ model User {
   participatedIn      PrevChallenge[]      @relation("prevChallengeParticipant")
   sessionLogEntries   SessionLogEntry[]
   achievementTrackers AchievementTracker[]
+  hasCompletedOnboarding Boolean
 }
 
 model Group {

@@ -1,4 +1,4 @@
-import { Modal } from "./Modal";
+import { Modal } from './Modal';
 
 export function DeleteModal(props: {
   isOpen: boolean;
@@ -9,8 +9,8 @@ export function DeleteModal(props: {
   return (
     <Modal
       title="Confirm Deletion"
-      buttons={["YES", "NO"]}
-      onButtonClick={(idx) => {
+      buttons={['YES', 'NO']}
+      onButtonClick={idx => {
         if (idx === 0) props.onDelete();
         else props.onClose();
       }}

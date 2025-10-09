@@ -1,15 +1,15 @@
-import "./index.css";
-import "typeface-roboto";
-import React from "react";
-import ReactDOM from "react-dom";
-import App from "./App";
-import reportWebVitals from "./reportWebVitals";
-import { MemoryRouter } from "react-router-dom";
+import './index.css';
+import 'typeface-roboto';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import App from './App';
+import reportWebVitals from './reportWebVitals';
+import { MemoryRouter } from 'react-router-dom';
 import {
   AuthenticationGuard,
   ServerConnectionProvider,
-} from "./components/ServerConnection";
-import { ServerDataProvider } from "./components/ServerData";
+} from './components/ServerConnection';
+import { ServerDataProvider } from './components/ServerData';
 
 ReactDOM.render(
   <React.StrictMode>
@@ -23,7 +23,7 @@ ReactDOM.render(
       </AuthenticationGuard>
     </ServerConnectionProvider>
   </React.StrictMode>,
-  document.getElementById("root")
+  document.getElementById('root'),
 );
 
 // If you want to start measuring performance in your app, pass a function

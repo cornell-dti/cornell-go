@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Modal } from "./Modal";
-import styled from "styled-components";
-import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Modal } from './Modal';
+import styled from 'styled-components';
+import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet';
 
 export type OptionEntryForm = {
   name: string;
@@ -69,17 +69,17 @@ function OptionEntryFormBox(props: { form: OptionEntryForm }) {
 
   return (
     <EntryBox>
-      <label htmlFor={props.form.name}>{props.form.name + ":"}</label>
+      <label htmlFor={props.form.name}>{props.form.name + ':'}</label>
       <EntrySelect
         name={props.form.name}
         value={val}
-        onChange={(e) =>
+        onChange={e =>
           setVal(
-            props.form.options[(props.form.value = e.target.selectedIndex)]
+            props.form.options[(props.form.value = e.target.selectedIndex)],
           )
         }
       >
-        {props.form.options.map((val) => (
+        {props.form.options.map(val => (
           <option key={val} onSelect={() => console.log(val)}>
             {val}
           </option>
@@ -90,37 +90,37 @@ function OptionEntryFormBox(props: { form: OptionEntryForm }) {
 }
 
 function FreeEntryFormBox(props: { form: FreeEntryForm }) {
-  const [val, setVal] = useState("");
+  const [val, setVal] = useState('');
 
   useEffect(() => setVal(props.form.value), [props.form]);
 
   return (
     <EntryBox>
-      <span>{props.form.name + ":"}</span>
+      <span>{props.form.name + ':'}</span>
       <EntryTextBox
         value={val}
         maxLength={props.form.characterLimit}
-        onChange={(e) => setVal((props.form.value = e.target.value))}
+        onChange={e => setVal((props.form.value = e.target.value))}
       />
     </EntryBox>
   );
 }
 
 function DateEntryFormBox(props: { form: DateEntryForm }) {
-  const [val, setVal] = useState("");
+  const [val, setVal] = useState('');
 
   useEffect(
     () => setVal(props.form.date.toISOString().slice(0, -1)),
-    [props.form]
+    [props.form],
   );
 
   return (
     <EntryBox>
-      <span>{props.form.name + ":"}</span>
+      <span>{props.form.name + ':'}</span>
       <EntryTextBox
         type="datetime-local"
         value={val}
-        onChange={(e) => {
+        onChange={e => {
           setVal(e.target.value);
           props.form.date = new Date(e.target.value);
         }}
@@ -130,19 +130,19 @@ function DateEntryFormBox(props: { form: DateEntryForm }) {
 }
 
 function NumberEntryFormBox(props: { form: NumberEntryForm }) {
-  const [val, setVal] = useState("");
+  const [val, setVal] = useState('');
 
-  useEffect(() => setVal("" + props.form.value), [props.form]);
+  useEffect(() => setVal('' + props.form.value), [props.form]);
 
   return (
     <EntryBox>
-      {props.form.name + ": "}
+      {props.form.name + ': '}
       <EntryTextBox
         type="number"
         value={val}
         min={props.form.min}
         max={props.form.max}
-        onChange={(e) => {
+        onChange={e => {
           setVal(e.target.value);
           props.form.value = +e.target.value;
         }}
@@ -175,7 +175,7 @@ function DraggableMarker(props: {
         }
       },
     }),
-    []
+    [],
   );
 
   return (
@@ -224,7 +224,7 @@ function MapEntryFormBox(props: { form: MapEntryForm }) {
           center={[lat, lng]}
           zoom={20}
           style={{
-            width: "100%",
+            width: '100%',
             height: 300,
           }}
         >
@@ -266,21 +266,21 @@ export function EntryModal(props: {
   return (
     <Modal
       title={props.title}
-      buttons={[props.entryButtonText, "CANCEL"]}
+      buttons={[props.entryButtonText, 'CANCEL']}
       isOpen={props.isOpen}
-      onButtonClick={(idx) => {
+      onButtonClick={idx => {
         if (idx === 1) props.onCancel();
         else props.onEntry();
       }}
     >
-      {props.form.map((form) => {
-        if ("options" in form) {
+      {props.form.map(form => {
+        if ('options' in form) {
           return <OptionEntryFormBox form={form} key={form.name} />;
-        } else if ("characterLimit" in form) {
+        } else if ('characterLimit' in form) {
           return <FreeEntryFormBox form={form} key={form.name} />;
-        } else if ("min" in form) {
+        } else if ('min' in form) {
           return <NumberEntryFormBox form={form} key={form.name} />;
-        } else if ("date" in form) {
+        } else if ('date' in form) {
           return <DateEntryFormBox form={form} key={form.name} />;
         } else {
           return <MapEntryFormBox form={form} key={form.name} />;

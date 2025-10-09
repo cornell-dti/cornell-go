@@ -2,77 +2,77 @@
 // IF YOU MODIFY THIS FILE, MAKE SURE TO ALSO MODIFY THE updateapi SCRIPT!
 // OTHERWISE YOUR CHANGES MAY BE OVERWRITTEN!
 export enum AchievementTypeDto {
-  TOTAL_POINTS = "TOTAL_POINTS",
-  TOTAL_CHALLENGES = "TOTAL_CHALLENGES",
-  TOTAL_JOURNEYS = "TOTAL_JOURNEYS",
-  TOTAL_CHALLENGES_OR_JOURNEYS = "TOTAL_CHALLENGES_OR_JOURNEYS",
+  TOTAL_POINTS = 'TOTAL_POINTS',
+  TOTAL_CHALLENGES = 'TOTAL_CHALLENGES',
+  TOTAL_JOURNEYS = 'TOTAL_JOURNEYS',
+  TOTAL_CHALLENGES_OR_JOURNEYS = 'TOTAL_CHALLENGES_OR_JOURNEYS',
 }
 
 export enum LoginAudDto {
-  android = "android",
-  ios = "ios",
-  web = "web",
+  android = 'android',
+  ios = 'ios',
+  web = 'web',
 }
 
 export enum LoginEnrollmentTypeDto {
-  UNDERGRADUATE = "UNDERGRADUATE",
-  GRADUATE = "GRADUATE",
-  FACULTY = "FACULTY",
-  ALUMNI = "ALUMNI",
-  GUEST = "GUEST",
+  UNDERGRADUATE = 'UNDERGRADUATE',
+  GRADUATE = 'GRADUATE',
+  FACULTY = 'FACULTY',
+  ALUMNI = 'ALUMNI',
+  GUEST = 'GUEST',
 }
 
 export enum ChallengeLocationDto {
-  ENG_QUAD = "ENG_QUAD",
-  ARTS_QUAD = "ARTS_QUAD",
-  AG_QUAD = "AG_QUAD",
-  CENTRAL_CAMPUS = "CENTRAL_CAMPUS",
-  NORTH_CAMPUS = "NORTH_CAMPUS",
-  WEST_CAMPUS = "WEST_CAMPUS",
-  CORNELL_ATHLETICS = "CORNELL_ATHLETICS",
-  VET_SCHOOL = "VET_SCHOOL",
-  COLLEGETOWN = "COLLEGETOWN",
-  ITHACA_COMMONS = "ITHACA_COMMONS",
-  ANY = "ANY",
+  ENG_QUAD = 'ENG_QUAD',
+  ARTS_QUAD = 'ARTS_QUAD',
+  AG_QUAD = 'AG_QUAD',
+  CENTRAL_CAMPUS = 'CENTRAL_CAMPUS',
+  NORTH_CAMPUS = 'NORTH_CAMPUS',
+  WEST_CAMPUS = 'WEST_CAMPUS',
+  CORNELL_ATHLETICS = 'CORNELL_ATHLETICS',
+  VET_SCHOOL = 'VET_SCHOOL',
+  COLLEGETOWN = 'COLLEGETOWN',
+  ITHACA_COMMONS = 'ITHACA_COMMONS',
+  ANY = 'ANY',
 }
 
 export enum EventCategoryDto {
-  FOOD = "FOOD",
-  NATURE = "NATURE",
-  HISTORICAL = "HISTORICAL",
-  CAFE = "CAFE",
-  DININGHALL = "DININGHALL",
-  DORM = "DORM",
+  FOOD = 'FOOD',
+  NATURE = 'NATURE',
+  HISTORICAL = 'HISTORICAL',
+  CAFE = 'CAFE',
+  DININGHALL = 'DININGHALL',
+  DORM = 'DORM',
 }
 
 export enum EventTimeLimitationDto {
-  LIMITED_TIME = "LIMITED_TIME",
-  PERPETUAL = "PERPETUAL",
+  LIMITED_TIME = 'LIMITED_TIME',
+  PERPETUAL = 'PERPETUAL',
 }
 
 export enum EventDifficultyDto {
-  Easy = "Easy",
-  Normal = "Normal",
-  Hard = "Hard",
+  Easy = 'Easy',
+  Normal = 'Normal',
+  Hard = 'Hard',
 }
 
 export enum SetAuthToOAuthProviderDto {
-  apple = "apple",
-  google = "google",
+  apple = 'apple',
+  google = 'google',
 }
 
 export enum UserEnrollmentTypeDto {
-  UNDERGRADUATE = "UNDERGRADUATE",
-  GRADUATE = "GRADUATE",
-  FACULTY = "FACULTY",
-  ALUMNI = "ALUMNI",
-  GUEST = "GUEST",
+  UNDERGRADUATE = 'UNDERGRADUATE',
+  GRADUATE = 'GRADUATE',
+  FACULTY = 'FACULTY',
+  ALUMNI = 'ALUMNI',
+  GUEST = 'GUEST',
 }
 
 export enum UserAuthTypeDto {
-  apple = "apple",
-  google = "google",
-  device = "device",
+  apple = 'apple',
+  google = 'google',
+  device = 'device',
 }
 
 export interface AchievementDto {
@@ -330,6 +330,7 @@ export interface RequestGlobalLeaderDataDto {
 
 export interface RequestUserDataDto {
   userId?: string;
+  hasCompletedOnboarding?: boolean;
 }
 
 export interface RequestAllUserDataDto {}
@@ -354,6 +355,7 @@ export interface UserDto {
   authType?: UserAuthTypeDto;
   trackedEvents?: string[];
   favorites?: string[];
+  hasCompletedOnboarding?: boolean;
 }
 
 export interface UpdateUserDataDto {
@@ -369,3 +371,7 @@ export interface AddManagerDto {
 export interface JoinOrganizationDto {
   accessCode: string;
 }
+
+export interface CompleteOnboardingDto {}
+
+export interface ResetOnboardingDto {}

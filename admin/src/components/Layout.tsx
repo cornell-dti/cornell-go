@@ -1,7 +1,7 @@
-import { faBars, faTimes } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { createContext, ReactNode, useContext, useState } from "react";
-import styled, { css } from "styled-components";
+import { faBars, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { createContext, ReactNode, useContext, useState } from 'react';
+import styled, { css } from 'styled-components';
 
 const SidebarShowContext = createContext({
   shown: false,
@@ -59,7 +59,7 @@ const SidebarBase = styled.div<{ shown: boolean }>`
     left: -100%;
     width: 100%;
 
-    ${(props) =>
+    ${props =>
       props.shown &&
       css`
         left: 0px;
@@ -127,7 +127,7 @@ const SidebarButtonBase = styled.div<{ active?: boolean }>`
     background-color: rgb(220, 220, 255);
   }
 
-  ${(props) =>
+  ${props =>
     props.active &&
     css`
       background-color: rgb(240, 240, 255);

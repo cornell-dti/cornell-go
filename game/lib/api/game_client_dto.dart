@@ -1643,22 +1643,33 @@ class RequestUserDataDto {
     if (userId != null) {
       fields['userId'] = userId;
     }
+    if (hasCompletedOnboarding != null) {
+      fields['hasCompletedOnboarding'] = hasCompletedOnboarding;
+    }
     return fields;
   }
 
   RequestUserDataDto.fromJson(Map<String, dynamic> fields) {
     userId = fields.containsKey('userId') ? (fields["userId"]) : null;
+    hasCompletedOnboarding = fields.containsKey('hasCompletedOnboarding')
+        ? (fields["hasCompletedOnboarding"])
+        : null;
   }
 
   void partialUpdate(RequestUserDataDto other) {
     userId = other.userId == null ? userId : other.userId;
+    hasCompletedOnboarding = other.hasCompletedOnboarding == null
+        ? hasCompletedOnboarding
+        : other.hasCompletedOnboarding;
   }
 
   RequestUserDataDto({
     this.userId,
+    this.hasCompletedOnboarding,
   });
 
   late String? userId;
+  late bool? hasCompletedOnboarding;
 }
 
 class RequestAllUserDataDto {
@@ -1701,9 +1712,6 @@ class RequestFavoriteEventDataDto {
   late String eventId;
 }
 
-/* Converts the [UserDto] instance into a JSON-compatible map.
-
-Only non-null fields are included. */
 class UserDto {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> fields = {};
@@ -1747,15 +1755,12 @@ class UserDto {
     if (favorites != null) {
       fields['favorites'] = favorites;
     }
+    if (hasCompletedOnboarding != null) {
+      fields['hasCompletedOnboarding'] = hasCompletedOnboarding;
+    }
     return fields;
   }
 
-  /* Creates a [UserDto] from a JSON [fields] map.
-  
-  Parses user info including optional fields and converts enum strings
-  to [UserEnrollmentTypeDto] and [UserAuthTypeDto].
-  
-  Safely handles missing keys; lists and enums are parsed appropriately. */
   UserDto.fromJson(Map<String, dynamic> fields) {
     id = fields["id"];
     username = fields.containsKey('username') ? (fields["username"]) : null;
@@ -1781,12 +1786,11 @@ class UserDto {
     favorites = fields.containsKey('favorites')
         ? (List<String>.from(fields['favorites']))
         : null;
+    hasCompletedOnboarding = fields.containsKey('hasCompletedOnboarding')
+        ? (fields["hasCompletedOnboarding"])
+        : null;
   }
 
-  /* Updates non-null fields from another [UserDto] instance.
-  
-  For each field in [other], replaces the current value only if the
-  corresponding value in [other] is not null. */
   void partialUpdate(UserDto other) {
     id = other.id;
     username = other.username == null ? username : other.username;
@@ -1804,6 +1808,9 @@ class UserDto {
     trackedEvents =
         other.trackedEvents == null ? trackedEvents : other.trackedEvents;
     favorites = other.favorites == null ? favorites : other.favorites;
+    hasCompletedOnboarding = other.hasCompletedOnboarding == null
+        ? hasCompletedOnboarding
+        : other.hasCompletedOnboarding;
   }
 
   UserDto({
@@ -1821,6 +1828,7 @@ class UserDto {
     this.authType,
     this.trackedEvents,
     this.favorites,
+    this.hasCompletedOnboarding,
   });
 
   late String id;
@@ -1837,6 +1845,7 @@ class UserDto {
   late UserAuthTypeDto? authType;
   late List<String>? trackedEvents;
   late List<String>? favorites;
+  late bool? hasCompletedOnboarding;
 }
 
 class UpdateUserDataDto {
@@ -1913,4 +1922,30 @@ class JoinOrganizationDto {
   });
 
   late String accessCode;
+}
+
+class CompleteOnboardingDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    return fields;
+  }
+
+  CompleteOnboardingDto.fromJson(Map<String, dynamic> fields) {}
+
+  void partialUpdate(CompleteOnboardingDto other) {}
+
+  CompleteOnboardingDto();
+}
+
+class ResetOnboardingDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    return fields;
+  }
+
+  ResetOnboardingDto.fromJson(Map<String, dynamic> fields) {}
+
+  void partialUpdate(ResetOnboardingDto other) {}
+
+  ResetOnboardingDto();
 }
