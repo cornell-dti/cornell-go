@@ -106,6 +106,7 @@ model User {
   participatedIn      PrevChallenge[]      @relation("prevChallengeParticipant")
   sessionLogEntries   SessionLogEntry[]
   achievementTrackers AchievementTracker[]
+  challengeTimers     ChallengeTimer[]
 }
 
 model Group {
@@ -122,11 +123,11 @@ model Group {
 }
 
 model Challenge {
-  id             String          @id @default(uuid()) @map("id")
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt()
-  subject        String          @default("Challenge")
-  linkedEvent    EventBase?      @relation("all", fields: [linkedEventId], references: [id], onDelete: Cascade)
+  id             String           @id @default(uuid()) @map("id")
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt()
+  subject        String           @default("Challenge")
+  linkedEvent    EventBase?       @relation("all", fields: [linkedEventId], references: [id], onDelete: Cascade)
   linkedEventId  String?
   eventIndex     Int
   name           String
@@ -140,6 +141,7 @@ model Challenge {
   closeRadius    Float
   completions    PrevChallenge[]
   activeTrackers EventTracker[]
+  ChallengeTimer ChallengeTimer[]
 }
 
 model EventBase {
@@ -257,4 +259,38 @@ model AchievementTracker {
   dateComplete  DateTime?
   achievementId String
   userId        String
+}
+
+/**
+documentaiton here 
+*/
+enum ChallengeTimerStatus {
+  ACTIVE
+  COMPLETED
+  EXPIRED
+  PAUSED
+  CANCELLED
+}
+
+model ChallengeTimer {
+  id      String @id @default(uuid())
+  subject String @default("ChallengeTimer")
+
+  timerLength   Int                  @default(10) //in minutes
+  startTime     DateTime             @default(now())
+  endTime       DateTime?
+  currentStatus ChallengeTimerStatus @default(ACTIVE)
+
+  // wrnings
+  warningMilestones    Int[]     @default([]) //the milestones to send warnings for
+  warningMilestoneSent Int[]     @default([]) //which milestones have been sent
+  lastWarningSent      DateTime? //when last warning was sent
+
+  // Relationships (REQUIRED for the unique constraint to work)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  challengeId String
+
+  @@unique([userId, challengeId]) //one timer per user per challenge
 }
