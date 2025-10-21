@@ -7,7 +7,7 @@ import { ChallengeDto } from "../challenge/challenge.dto";
  */
 export interface TimerStartedDto {
     endTime: string;
-    challenge: ChallengeDto;
+    challengeId: string;
 }
 export interface TimerExtendedDto {
     challengeId: string;
