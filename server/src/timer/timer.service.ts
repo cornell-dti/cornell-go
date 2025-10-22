@@ -133,6 +133,11 @@ export class TimerService {
         const timer = await this.prisma.challengeTimer.findFirst({
             where: {challengeId: challengeId}
         });
+        
+        if (!timer) {
+            throw new Error('Timer not found');
+        }
+        
         const milestones = timer.warningMilestones;
 
         for (const milestone of milestones) {
@@ -162,6 +167,10 @@ export class TimerService {
             return;
         }
 
+        if (!timer.endTime) {
+            throw new Error('Timer end time is not set');
+        }
+
         const timeRemaining = Math.max(0, Math.floor((timer.endTime.getTime() - Date.now()) / 1000));
         
         const warningDto: TimerWarningDto = {
@@ -187,6 +196,9 @@ export class TimerService {
      * Formula: Current time + timer length + 5 minutes for each extension used
      */
     private calculateEndTime(challenge: Challenge, extensionsUsed: number): Date {
+        if (!challenge.timerLength) {
+            throw new Error('Challenge timer length is not set');
+        }
         return new Date(Date.now() + challenge.timerLength * 1000 + extensionsUsed * 5 * 60 * 1000);
     }
 

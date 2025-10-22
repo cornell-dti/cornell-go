@@ -262,7 +262,6 @@ model AchievementTracker {
   userId        String
 }
 
-
 enum ChallengeTimerStatus {
   ACTIVE
   COMPLETED
@@ -271,15 +270,6 @@ enum ChallengeTimerStatus {
   CANCELLED
 }
 
-/**
- * Timer Model
- * timerLength: the length of the timer in seconds
- * warningMilestones: the milestones to send warnings for
- * warningMilestoneSent: which milestones that have been sent
- * lastWarningSent: when last warning was sent
- * user: the user that the timer is associated with (when a user is deleted, all associated timers are deleted)
- * challenge: the challenge that the timer is associated with
- */
 model ChallengeTimer {
   id      String @id @default(uuid())
   subject String @default("ChallengeTimer")
@@ -290,9 +280,9 @@ model ChallengeTimer {
   currentStatus ChallengeTimerStatus @default(ACTIVE)
 
   // warnings
-  warningMilestones    Int[]     @default([])
-  warningMilestonesSent Int[]     @default([])
-  lastWarningSent      DateTime?
+  warningMilestones     Int[]     @default([]) //milestones to send warnings for
+  warningMilestonesSent Int[]     @default([]) //which milestones have been sent
+  lastWarningSent       DateTime? //when last warning was sent
 
   // relationships 
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
