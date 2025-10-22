@@ -50,8 +50,15 @@ export class TimerService {
             },
         });
         
-        // Schedule warnings for the timer
+        //Schedule warnings for the timer
         await this.scheduleWarnings(challengeId, endTime);
+
+        //Schedule autocompletion of challenge after timer expries
+        const completion_delay = endTime.getTime() - Date.now(); 
+        setTimeout(async () => { //send warning if delay is > 0 
+            await this.completeTimer(challengeId);
+        }, completion_delay);
+    
         
         return {
             endTime: endTime.toISOString(), 
