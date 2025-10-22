@@ -69,7 +69,8 @@ class _ProfilePageState extends State<ProfilePage> {
 
     // Calculate responsive sizes
     final headerHeight = screenHeight * 0.30;
-    final avatarSize = screenWidth * 0.22; // 22% of screen width
+    final bearWidth = screenWidth * 0.35; // 35% of screen width
+    final bearHeight = screenWidth * 0.35 * (593/429); // Maintain bear's aspect ratio
     final iconSize = screenWidth * 0.075; // 7.5% of screen width
     final badgeWidth = screenWidth * 0.2; // 20% of screen width
     final badgeHeight = screenHeight * 0.03; // 3% of screen height
@@ -133,142 +134,132 @@ class _ProfilePageState extends State<ProfilePage> {
           completedEvents.sort((a, b) => b.item1.compareTo(a.item1));
           return Column(
             children: [
-              // Red curved header with profile information
-              Stack(
-                children: [
-                  // Custom curved container
-                  ClipPath(
-                    clipper: CustomCurveClipper(),
-                    child: Container(
-                      width: double.infinity,
-                      height: headerHeight,
-                      color:
-                          Color(0xFFED5656), // Coral red color from the design
-                    ),
+              // Green gradient background with blue oval
+              Container(
+                width: double.infinity,
+                height: headerHeight,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Color(0xFF58B171),
+                      Color(0xFF31B346),
+                    ],
                   ),
-                  // Content inside the curved container
-                  Column(
+                ),
+                child: Stack(
+                  children: [
+                    Positioned(
+                      top: -headerHeight * 0.7, // Position to cut off more at top
+                      left: (screenWidth - 800) / 2, // Center the oval horizontally
+                      child: Container(
+                        width: 800,
+                        height: 352,
+                        decoration: ShapeDecoration(
+                          color: const Color(0xFFB3EBF6),
+                          shape: OvalBorder(),
+                        ),
+                      ),
+                    ),
+                    // Sun icon in top left corner
+                    Positioned(
+                      top: MediaQuery.of(context).padding.top + 10,
+                      left: 45,
+                      child: Container(
+                        width: iconSize,
+                        height: iconSize,
+                        child: Image.asset(
+                          'assets/icons/sun.png',
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                    ),
+                    // Cloud icon positioned on layer above sun to partially cover it
+                    Positioned(
+                      top: MediaQuery.of(context).padding.top - 18,
+                      left: 30,
+                      child: Container(
+                        width: iconSize * 3,
+                        height: iconSize * 3,
+                        child: Image.asset(
+                          'assets/icons/cloud.png',
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                    ),
+                    // Centered bear.png image
+                    Center(
+                      child: Container(
+                        padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top - 10),
+                        child: Container(
+                          width: bearWidth,
+                          height: bearHeight,
+                          child: Image.asset(
+                            'assets/icons/bear.png',
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                    ), 
+                  ],
+                ),
+              ),
+              // Profile header section
+              SizedBox(height: screenHeight * 0.018),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+                child: Container(
+                  width: double.infinity,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Add padding for status bar
-                      SizedBox(height: MediaQuery.of(context).padding.top),
-                      // Profile section with settings icon
-                      Padding(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: screenWidth * 0.05),
-                        child: Stack(
+                      Container(
+                        width: double.infinity,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            // Settings icon positioned on the right
-                            Positioned(
-                              right: 0,
-                              top: 0,
-                              child: IconButton(
-                                icon: Icon(Icons.settings,
-                                    size: iconSize, color: Colors.white),
-                                onPressed: () {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              SettingsPage(isGuest)));
-                                },
+                            Text(
+                              username!,
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: screenWidth * 0.055,
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w700,
+                                height: 1.50,
                               ),
                             ),
-                            // Centered profile content
-                            Center(
-                              child: Column(
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+                              clipBehavior: Clip.antiAlias,
+                              decoration: ShapeDecoration(
+                                color: const Color(0xFFC17E19),
+                                shape: RoundedRectangleBorder(
+                                  side: BorderSide(
+                                    width: 2,
+                                    strokeAlign: BorderSide.strokeAlignCenter,
+                                    color: const Color(0xFFFFC737),
+                                  ),
+                                  borderRadius: BorderRadius.circular(100),
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  // Profile avatar
-                                  Container(
-                                    height: screenHeight * 0.14,
-                                    child: Stack(
-                                      alignment: Alignment.center,
-                                      children: [
-                                        // Avatar
-                                        Container(
-                                          decoration: BoxDecoration(
-                                            color: Colors.white,
-                                            shape: BoxShape.circle,
-                                          ),
-                                          child: SvgPicture.asset(
-                                            "assets/images/bear_profile.svg",
-                                            height: avatarSize,
-                                            width: avatarSize,
-                                          ),
-                                        ),
-                                        // Points badge
-                                        Positioned(
-                                          bottom: 0,
-                                          child: Container(
-                                            width: badgeWidth,
-                                            height: badgeHeight,
-                                            clipBehavior: Clip.antiAlias,
-                                            decoration: ShapeDecoration(
-                                              color: Color(0xFFC17E19),
-                                              shape: RoundedRectangleBorder(
-                                                side: BorderSide(
-                                                  width: 2,
-                                                  strokeAlign: BorderSide
-                                                      .strokeAlignCenter,
-                                                  color: Color(0xFFFFC737),
-                                                ),
-                                                borderRadius:
-                                                    BorderRadius.circular(100),
-                                              ),
-                                            ),
-                                            child: Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              children: [
-                                                Text(
-                                                  "${score} PTS",
-                                                  style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: smallFontSize,
-                                                    fontWeight: FontWeight.w600,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ],
+                                  Text(
+                                    '${score} PTS',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: smallFontSize,
+                                      fontFamily: 'Poppins',
+                                      fontWeight: FontWeight.w600,
                                     ),
-                                  ),
-                                  // Add space between avatar/points and username
-                                  SizedBox(height: screenHeight * 0.015),
-                                  // Username
-                                  Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        username!,
-                                        style: TextStyle(
-                                          fontSize: screenWidth * 0.055,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
-                                          height: 1.2,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                      SizedBox(height: screenHeight * 0.002),
-                                      Text(
-                                        "@${username.toLowerCase().replaceAll(' ', '')}",
-                                        style: TextStyle(
-                                          fontSize: mediumFontSize,
-                                          color: Colors.white,
-                                          height: 1,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ],
                                   ),
                                 ],
                               ),
@@ -276,9 +267,23 @@ class _ProfilePageState extends State<ProfilePage> {
                           ],
                         ),
                       ),
+                      SizedBox(height: 4),
+                      SizedBox(
+                        width: double.infinity,
+                        child: Text(
+                          '@${username.toLowerCase().replaceAll(' ', '')}',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: mediumFontSize,
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.w500,
+                            height: 1.50,
+                          ),
+                        ),
+                      ),
                     ],
                   ),
-                ],
+                ),
               ),
               SizedBox(height: screenHeight * 0.018), // 2.5% of screen height
               //Completed Events
