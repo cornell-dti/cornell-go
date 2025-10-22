@@ -17,6 +17,7 @@ import {
 } from './challenge.dto';
 import { GroupService } from '../group/group.service';
 import { UserService } from '../user/user.service';
+import { TimerService } from '../timer/timer.service';
 import { EventService } from '../event/event.service';
 import { RequestGlobalLeaderDataDto } from '../user/user.dto';
 import { PoliciesGuard } from '../casl/policy.guard';
@@ -24,6 +25,7 @@ import { UserAbility } from '../casl/user-ability.decorator';
 import { AppAbility } from '../casl/casl-ability.factory';
 import { Action } from '../casl/action.enum';
 import { subject } from '@casl/ability';
+import { ExtendTimerDto, StartChallengeTimerDto, TimerCompletedDto, TimerWarningDto } from '../timer/timer.dto';
 
 @WebSocketGateway({ cors: true })
 @UseGuards(UserGuard, PoliciesGuard)
@@ -34,6 +36,7 @@ export class ChallengeGateway {
     private userService: UserService,
     private groupService: GroupService,
     private eventService: EventService,
+    private timerService: TimerService,
   ) {}
 
   /**
@@ -136,4 +139,32 @@ export class ChallengeGateway {
 
     return challenge.id;
   }
+
+  @SubscribeMessage('startChallengeTimer')
+  async startChallengeTimer(
+    @CallingUser() user: User,
+    @MessageBody() data: StartChallengeTimerDto,
+  ) {
+    const timer = await this.timerService.startTimer(data.challengeId, user.id);
+    return timer;
+  }
+
+  @SubscribeMessage('extendTimer')
+  async extendTimer(
+    @CallingUser() user: User,
+    @MessageBody() data: ExtendTimerDto,
+  ) {
+    const timer = await this.timerService.extendTimer(data.challengeId, user.id);
+    return timer;
+  }
+
+  @SubscribeMessage('completeTimer')
+  async completeTimer(
+    @CallingUser() user: User,
+    @MessageBody() data: TimerCompletedDto,
+  ) {
+    const timer = await this.timerService.completeTimer(data.challengeId);
+    return timer;
+  }
+  
 }
