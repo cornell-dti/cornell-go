@@ -262,9 +262,7 @@ model AchievementTracker {
   userId        String
 }
 
-/**
- * documentaiton here
- */
+
 enum ChallengeTimerStatus {
   ACTIVE
   COMPLETED
@@ -274,7 +272,7 @@ enum ChallengeTimerStatus {
 }
 
 /**
- * User Model
+ * Timer Model
  * timerLength: the length of the timer in seconds
  * warningMilestones: the milestones to send warnings for
  * warningMilestoneSent: which milestones that have been sent
@@ -293,7 +291,7 @@ model ChallengeTimer {
 
   // warnings
   warningMilestones    Int[]     @default([])
-  warningMilestoneSent Int[]     @default([])
+  warningMilestonesSent Int[]     @default([])
   lastWarningSent      DateTime?
 
   // relationships 
