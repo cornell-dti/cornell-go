@@ -429,32 +429,33 @@ export class ChallengeService {
     });
     
     //Schedule warnings for the timer
-    await this.scheduleWarnings(challengeId, endTime);
+    await this.scheduleWarnings(challengeId, userId, endTime);
 
     //Schedule autocompletion of challenge after timer expries
     const completion_delay = endTime.getTime() - Date.now(); 
     setTimeout(async () => { //send warning if delay is > 0 
-        await this.completeTimer(challengeId);
+        await this.completeTimer(challengeId, userId);
     }, completion_delay);
-
     
     return {
+        timerId: timer.id,
         endTime: endTime.toISOString(), 
         challengeId: challengeId,
     };
 }
 
-  async completeTimer(challengeId: string) : Promise<TimerCompletedDto> {
+  async completeTimer(challengeId: string, userId: string) : Promise<TimerCompletedDto> {
       //end timer 
-      const timer = await this.prisma.challengeTimer.findUniqueOrThrow({
-          where: { id: challengeId },
-          include: {user: true}
+      const timer = await this.prisma.challengeTimer.findFirstOrThrow({
+          where: { challengeId: challengeId, userId: userId
+            },
+            include: {user: true}
       });
 
       if (!timer) {
           throw new Error('Timer not found');
       }
-
+      
       // Mark timer as completed
       await this.prisma.challengeTimer.update({
           where: {id: timer.id},
@@ -466,6 +467,7 @@ export class ChallengeService {
       await this.completeChallenge(timer.user);
 
       return {
+          timerId: timer.id,
           challengeId: challengeId,
           challengeCompleted: true,
       };
@@ -474,8 +476,8 @@ export class ChallengeService {
 
   async extendTimer(challengeId: string, userId: string): Promise<TimerExtendedDto> {
       const timer = await this.prisma.challengeTimer.findFirst({
-          where: {challengeId: challengeId},
-          include: {challenge: true}
+          where: {challengeId: challengeId, userId: userId},
+          include: {challenge: true, user: true}
       });
       if (!timer) {
           throw new Error('Timer not found');
@@ -487,12 +489,9 @@ export class ChallengeService {
       
       const newEndTime = this.calculateEndTime(timer.challenge, 1);
       const extensionCost = this.calculateExtensionCost(timer.challenge.points);
-      const user = await this.userService.byId(userId);
-      if (!user) {
-          throw new Error('User not found');
-      }
+
       await this.prisma.user.update({
-          where: {id: user.id},
+          where: {id: timer.user.id},
           data: {score: {decrement: extensionCost}}
       });
 
@@ -503,6 +502,7 @@ export class ChallengeService {
       });
       
       return {
+          timerId: timer.id,
           challengeId: challengeId,
           newEndTime: newEndTime.toISOString(),
       };
@@ -514,9 +514,9 @@ export class ChallengeService {
       return Math.floor(basePoints * 0.25);
   }
 
-  async scheduleWarnings(challengeId: string, endTime: Date) : Promise<void> {
+  async scheduleWarnings(challengeId: string, userId: string, endTime: Date) : Promise<void> {
       const timer = await this.prisma.challengeTimer.findFirst({
-          where: {challengeId: challengeId}
+          where: {challengeId: challengeId, userId: userId}
       });
       
       if (!timer) {
@@ -532,24 +532,24 @@ export class ChallengeService {
           if (warningTime > now) {
               const delay = warningTime.getTime() - now.getTime(); //how long until warning should be sent
               setTimeout(async () => { // send warning if delay is > 0 
-                  await this.sendWarning(challengeId, milestone);
+                  await this.sendWarning(challengeId, userId, milestone);
               }, delay);
           }
       }
   }
 
-  async sendWarning(challengeId: string, milestone: number) : Promise<void> {
+  async sendWarning(challengeId: string, userId: string, milestone: number) : Promise<TimerWarningDto> {
       const timer = await this.prisma.challengeTimer.findFirst({
-          where: {challengeId: challengeId}
+          where: {challengeId: challengeId, userId: userId}
       });
       if (!timer) {
           throw new Error('Timer not found');
       }
       if (timer.currentStatus != ChallengeTimerStatus.ACTIVE) {
-          return;
+          throw new Error('Timer is not active');
       }
       if (timer.warningMilestonesSent.includes(milestone)) {
-          return;
+          throw new Error('Warning milestone already sent');
       }
 
       if (!timer.endTime) {
@@ -565,16 +565,18 @@ export class ChallengeService {
       };
 
       await this.clientService.sendEvent(
-          [`user/${timer.userId}`],
-          'timerWarning',
-          warningDto
-      );
+        [`user/${timer.userId}`],
+        'timerWarning',
+        warningDto
+    );
 
       await this.prisma.challengeTimer.update({
           where: {id: timer.id},
           data: {warningMilestonesSent: {push: milestone},
               lastWarningSent: new Date()}
       });
+
+      return warningDto;
   }
 
   /** Calculates end time of a challenge based on number of extensions used
@@ -594,7 +596,7 @@ export class ChallengeService {
       }
       
       const timer = await this.prisma.challengeTimer.findFirst({
-          where: {challengeId: challengeId},
+          where: {challengeId: challengeId, userId: userId},
           include: {challenge: true}
       });
       

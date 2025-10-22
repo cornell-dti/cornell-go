@@ -55,14 +55,17 @@ export interface SetCurrentChallengeDto {
  * DTOs for Warning Notifications: TimerWarningDto
  */
 export interface TimerStartedDto {
+  timerId: string;
   endTime: string;
   challengeId: string;
 }
 export interface TimerExtendedDto {
+  timerId: string;
   challengeId: string;
   newEndTime: string;
 }
 export interface TimerCompletedDto {
+  timerId: string;
   challengeId: string;
   challengeCompleted: boolean; //true if completed, false if failed 
 }

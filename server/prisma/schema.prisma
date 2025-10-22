@@ -141,7 +141,6 @@ model Challenge {
   closeRadius    Float
   completions    PrevChallenge[]
   activeTrackers EventTracker[]
-  ChallengeTimer ChallengeTimer[]
   timerLength    Int?
 }
 
@@ -287,7 +286,6 @@ model ChallengeTimer {
   // relationships 
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId      String
-  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
   challengeId String
 
   @@unique([userId, challengeId]) //one timer per user per challenge
