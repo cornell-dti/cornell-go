@@ -70,7 +70,8 @@ class _ProfilePageState extends State<ProfilePage> {
     // Calculate responsive sizes
     final headerHeight = screenHeight * 0.30;
     final bearWidth = screenWidth * 0.35; // 35% of screen width
-    final bearHeight = screenWidth * 0.35 * (593/429); // Maintain bear's aspect ratio
+    final bearHeight =
+        screenWidth * 0.35 * (593 / 429); // Maintain bear's aspect ratio
     final iconSize = screenWidth * 0.075; // 7.5% of screen width
     final badgeWidth = screenWidth * 0.2; // 20% of screen width
     final badgeHeight = screenHeight * 0.03; // 3% of screen height
@@ -151,8 +152,10 @@ class _ProfilePageState extends State<ProfilePage> {
                 child: Stack(
                   children: [
                     Positioned(
-                      top: -headerHeight * 0.7, // Position to cut off more at top
-                      left: (screenWidth - 800) / 2, // Center the oval horizontally
+                      top: -headerHeight *
+                          0.7, // Position to cut off more at top
+                      left: (screenWidth - 800) /
+                          2, // Center the oval horizontally
                       child: Container(
                         width: 800,
                         height: 352,
@@ -177,7 +180,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                     // Cloud icon positioned on layer above sun to partially cover it
                     Positioned(
-                      top: MediaQuery.of(context).padding.top - 18,
+                      top: MediaQuery.of(context).padding.top - 17,
                       left: 30,
                       child: Container(
                         width: iconSize * 3,
@@ -191,7 +194,8 @@ class _ProfilePageState extends State<ProfilePage> {
                     // Centered bear.png image
                     Center(
                       child: Container(
-                        padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top - 10),
+                        padding: EdgeInsets.only(
+                            top: MediaQuery.of(context).padding.top - 10),
                         child: Container(
                           width: bearWidth,
                           height: bearHeight,
@@ -201,7 +205,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                         ),
                       ),
-                    ), 
+                    ),
                   ],
                 ),
               ),
@@ -234,7 +238,8 @@ class _ProfilePageState extends State<ProfilePage> {
                               ),
                             ),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 2),
                               clipBehavior: Clip.antiAlias,
                               decoration: ShapeDecoration(
                                 color: const Color(0xFFC17E19),
