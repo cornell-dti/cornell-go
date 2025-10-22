@@ -32,7 +32,7 @@ export class TimerService {
         if (!challenge.timerLength) {
             throw new Error('This challenge has no timer (timer length is not set)');
         }
-        const endTime = new Date(Date.now() + challenge.timerLength * 1000);
+        const endTime = this.calculateEndTime(challenge, 0);
         const timer = await this.prisma.challengeTimer.create({
             data: {
                 challengeId: challengeId, 
@@ -77,21 +77,41 @@ export class TimerService {
 
     async extendTimer(challengeId: string, userId: string, pointsUsed: number) : Promise<TimerExtendedDto> {
         const challenge = await this.prisma.challenge.getChallengeById(challengeId);
-        const newEndTime = new Date(Date.now() + 5 * 60); // add 5 minutes to timer 
+        const newEndTime = this.calculateEndTime(challenge, pointsUsed);
         const extensionCost = this.calculateExtensionCost(challenge.points);
         const user = await this.prisma.user.getUserById(userId);
         await this.prisma.user.update({
             where: {id: user.id},
             data: {score: {decrement: extensionCost}}
         });
-        const timer = await this.prisma.challengeTimer.update({
-            where: {id: challengeId},
-            data: {endTime: newEndTime}
+
+        const timer = await this.prisma.challengeTimer.findFirst({
+            where: {challengeId: challengeId}
         });
-        return {
-            challengeId: challengeId,
-            newEndTime: newEndTime.toISOString(),
-        };
+        if (!timer) {
+            throw new Error('Timer not found');
+        }
+        const currentEndTime = timer.endTime;
+
+        if (!this.canExtendTimer(userId, challengeId)) { 
+            //cannot extend timer; TODO: if same endtime as before show error of not being able to extend in frontend
+            return {
+                challengeId: challengeId,
+                newEndTime: currentEndTime.toISOString(),
+            }
+        }
+        else {
+            await this.prisma.challengeTimer.update({
+                where: {id: challengeId},
+                data: {endTime: newEndTime}
+            });
+            
+            return {
+                challengeId: challengeId,
+                newEndTime: newEndTime.toISOString(),
+            };
+        }
+        
 
     }
     
@@ -147,8 +167,28 @@ export class TimerService {
         });
     }
 
-    
+    /** Calculates end time of a challenge based on number of extensions used
+     * Formula: Current time + timer length + 5 minutes for each extension used
+     */
+    private calculateEndTime(challenge: Challenge, extensionsUsed: number): Date {
+        return new Date(Date.now() + challenge.timerLength * 1000 + extensionsUsed * 5 * 60 * 1000);
+    }
 
-    
+    private canExtendTimer(userId: string, challengeId: string): boolean {
+        const user = await this.prisma.user.getUserById(userId);
+        const challenge = await this.prisma.challenge.getChallengeById(challengeId);
+        const timer = await this.prisma.challengeTimer.findFirst({
+            where: {challengeId: challengeId}
+        });
+        if (!timer) {
+            return false;
+        }
+        if (timer.currentStatus != ChallengeTimerStatus.ACTIVE) {
+            return false;
+        }
+        if (user.score < this.calculateExtensionCost(challenge.points)) {
+            return false;
+        }
+        return true;
+    }
 }
-
