@@ -13,8 +13,9 @@
 import { CaslAbilityFactory } from "../casl/casl-ability.factory";
 import { ClientService } from "../client/client.service";
 import { PrismaService } from "../prisma/prisma.service";
-import { ChallengeTimerStatus } from "@prisma/client";
-import { TimerStartedDto, TimerExtendedDto, TimerCompletedDto } from "./timer.dto";
+import { ChallengeTimer } from "@prisma/client";
+import { TimerStartedDto, TimerExtendedDto, TimerCompletedDto, TimerWarningDto } from "./timer.dto";
+import { ChallengeGateway } from "../challenge/challenge.gateway";
 
 export class TimerService {
     constructor(
@@ -77,10 +78,15 @@ export class TimerService {
     async extendTimer(challengeId: string, userId: string, pointsUsed: number) : Promise<TimerExtendedDto> {
         const challenge = await this.prisma.challenge.getChallengeById(challengeId);
         const newEndTime = new Date(Date.now() + 5 * 60); // add 5 minutes to timer 
+        const extensionCost = this.calculateExtensionCost(challenge.points);
+        const user = await this.prisma.user.getUserById(userId);
+        await this.prisma.user.update({
+            where: {id: user.id},
+            data: {score: {decrement: extensionCost}}
+        });
         const timer = await this.prisma.challengeTimer.update({
             where: {id: challengeId},
-            data: {endTime: newEndTime,
-                pointsExtending: pointsUsed}
+            data: {endTime: newEndTime}
         });
         return {
             challengeId: challengeId,
@@ -88,5 +94,61 @@ export class TimerService {
         };
 
     }
+    
+    /** Calculate the points deducted for using an extension 
+     * //TODO: is it possible for a user to not have enough points? 
+    */
+    private calculateExtensionCost(basePoints: number): number {
+        return Math.floor(basePoints * 0.25);
+    }
+
+    async scheduleWarnings(challengeId: string, endTime: Date) : Promise<void> {
+        const timer = await this.prisma.challengeTimer.findFirst(){
+            where: {challengeId: challengeId}
+        }
+        const milestones = timer.warningMilestones;
+
+        for (const milestone of milestones) {
+            const warningTime = new Date(endTime.getTime() - milestone * 1000); //convert to milliseconds
+            const now = new Date();
+            if (warningTime > now) {
+                const delay = warningTime.getTime() - now.getTime(); //how long until warning should be sent
+                setTimeout(async () => { // send warning if delay is > 0 
+                    await this.sendWarning(challengeId, milestone);
+                }, delay);
+            }
+        }
+    }
+
+    async sendWarning(challengeId: string, milestone: number) : Promise<void> {
+        const timer = await this.prisma.challengeTimer.findFirst({
+            where: {challengeId: challengeId}
+        });
+        if (!timer) {
+            throw new Error('Timer not found');
+        }
+        if (timer.currentStatus != ChallengeTimerStatus.ACTIVE) {
+            return;
+        }
+        if (timer.warningMilestoneSent.includes(milestone)) {
+            return;
+        }
+        const timeRemaining = timer.endTime.getTime() - new Date().getTime();
+        const warningDto: TimerWarningDto = {
+            challengeId: challengeId,
+            milestone: milestone,
+            timeRemaining: timeRemaining,
+        };
+
+        await this.prisma.challengeTimer.update({
+            where: {id: timer.id},
+            data: {warningMilestoneSent: {push: milestone},
+                lastWarningSent: new Date()}
+        });
+    }
+
+    
+
+    
 }
 
