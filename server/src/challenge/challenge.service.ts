@@ -11,6 +11,7 @@ import {
   Achievement,
   AchievementTracker,
   ChallengeTimerStatus,
+  ChallengeTimer,
 } from '@prisma/client';
 import { ClientService } from '../client/client.service';
 import { UserService } from '../user/user.service';
