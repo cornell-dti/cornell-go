@@ -19,6 +19,10 @@ import {
   QuizErrorDto
 } from './quiz.dto';
 
+/**
+ * WebSocket gateway for real-time quiz interactions
+ * Handles question requests, shuffling, and answer submissions
+ */
 @WebSocketGateway({
   cors: {
     origin: '*',
@@ -31,6 +35,10 @@ export class QuizGateway {
 
   constructor(private readonly quizService: QuizService) {}
 
+  /**
+   * Handle request for a quiz question
+   * Emits: quizQuestion or quizError
+   */
   @SubscribeMessage('requestQuizQuestion')
   async handleRequestQuestion(
     @MessageBody() data: RequestQuizQuestionDto,
@@ -57,6 +65,10 @@ export class QuizGateway {
     }
   }
 
+  /**
+   * Handle shuffle request for different question
+   * Emits: quizQuestion or quizError
+   */
   @SubscribeMessage('shuffleQuizQuestion')
   async handleShuffleQuestion(
     @MessageBody() data: ShuffleQuizQuestionDto,
@@ -87,6 +99,10 @@ export class QuizGateway {
     }
   }
 
+  /**
+   * Handle quiz answer submission
+   * Emits: quizResult or quizError
+   */
   @SubscribeMessage('submitQuizAnswer')
   async handleSubmitAnswer(
     @MessageBody() data: SubmitQuizAnswerDto,
@@ -130,6 +146,10 @@ export class QuizGateway {
     }
   }
 
+  /**
+   * Handle request for quiz progress
+   * Emits: quizProgress
+   */
   @SubscribeMessage('getQuizProgress')
   async handleGetProgress(
     @MessageBody() data: { challengeId: string },
