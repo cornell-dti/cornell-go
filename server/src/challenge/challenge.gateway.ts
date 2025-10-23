@@ -79,7 +79,7 @@ export class ChallengeGateway {
       if (tracker.curChallengeId) {
         const challenge = await this.challengeService.getChallengeById(tracker.curChallengeId);
         if (challenge?.timerLength) {
-          await this.challengeService.completeTimer(tracker.curChallengeId, user.id);
+          await this.challengeService.startTimer(tracker.curChallengeId, user.id);
         }
       }
 
