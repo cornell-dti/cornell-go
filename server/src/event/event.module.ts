@@ -7,6 +7,7 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { EventGateway } from './event.gateway';
 import { EventService } from './event.service';
 import { CaslModule } from '../casl/casl.module';
+import { ChallengeModule } from '../challenge/challenge.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { CaslModule } from '../casl/casl.module';
     PrismaModule,
     OrganizationModule,
     CaslModule,
+    forwardRef(() => ChallengeModule),
   ],
   providers: [EventService, EventGateway],
   exports: [EventService, EventGateway],

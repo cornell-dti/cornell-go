@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import {
   Challenge,
   DifficultyMode,
@@ -30,6 +30,7 @@ import { AppAbility, CaslAbilityFactory } from '../casl/casl-ability.factory';
 import { accessibleBy } from '@casl/prisma';
 import { Action } from '../casl/action.enum';
 import { subject } from '@casl/ability';
+import { ChallengeService } from '../challenge/challenge.service';
 
 /**
  * Service responsible for managing events and related entities like event trackers.
@@ -46,6 +47,8 @@ export class EventService {
     private orgService: OrganizationService,
     private readonly prisma: PrismaService,
     private abilityFactory: CaslAbilityFactory,
+    @Inject(forwardRef(() => ChallengeService))
+    private challengeService: ChallengeService,
   ) {}
 
   /**
@@ -230,6 +233,15 @@ export class EventService {
         userId: user.id,
       },
     });
+
+    //Start timer for the first challenge if it has a timer length
+    if (closestChallenge.timerLength) {
+      try {
+        await this.challengeService.startTimer(closestChallenge.id, user.id);
+      } catch (error) {
+        console.warn(`Failed to start timer for challenge ${closestChallenge.id}:`, error);
+      }
+    }
 
     return progress;
   }

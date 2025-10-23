@@ -11,7 +11,6 @@ import {
 } from '@prisma/client';
 import { ClientService } from '../client/client.service';
 import { EventService } from '../event/event.service';
-import { ChallengeService } from '../challenge/challenge.service';
 import { UserService } from '../user/user.service';
 import { OrganizationService } from '../organization/organization.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -31,7 +30,6 @@ export class GroupService {
     private clientService: ClientService,
     private prisma: PrismaService,
     private abilityFactory: CaslAbilityFactory,
-    private challengeService: ChallengeService,
   ) {}
 
   genFriendlyId() {
@@ -209,9 +207,6 @@ export class GroupService {
    * If host selects a new event, and if eventId is in the allowed
    * events of this group, then updates the group's current event.
    * 
-   * If the new event has a timer, starts the timer for the first challenge in the new event
-   * for each member of the group.
-   *
    * @param actor User that requested the event change, must be a group host
    * @param eventId Id of the event to switch to
    * @returns False if eventId is invalid, otherwise true
@@ -270,15 +265,6 @@ export class GroupService {
     await Promise.all(
       groupMembers.map(async (member: User) => {
         await this.eventService.createEventTracker(member, newEvent);
-
-        // Start timer for first challenge in new event if it has a timer length (aka has a timer)
-        const tracker = await this.eventService.getCurrentEventTrackerForUser(member);
-        if (tracker.curChallengeId) {
-          const firstChallenge = await this.challengeService.getChallengeById(tracker.curChallengeId);
-          if (firstChallenge?.timerLength) {
-            await this.challengeService.startTimer(tracker.curChallengeId, member.id);
-          }
-        }
       }),
     );
 

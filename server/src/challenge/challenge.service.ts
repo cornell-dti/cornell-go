@@ -187,6 +187,11 @@ export class ChallengeService {
       },
     });
 
+    //Start timer for the next challenge if it has a timer length
+    if (nextChallenge?.timerLength) {
+      await this.startTimer(nextChallenge.id, user.id);
+    }
+
     await this.log.logEvent(
       SessionLogEvent.COMPLETE_CHALLENGE,
       curChallenge.id,

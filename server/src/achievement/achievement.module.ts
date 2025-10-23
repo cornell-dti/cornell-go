@@ -12,7 +12,7 @@ import { OrganizationModule } from '../organization/organization.module';
   imports: [
     forwardRef(() => AuthModule),
     ClientModule,
-    EventModule,
+    forwardRef(() => EventModule),
     PrismaModule,
     CaslModule,
     OrganizationModule,

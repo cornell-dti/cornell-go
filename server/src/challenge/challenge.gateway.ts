@@ -75,14 +75,6 @@ export class ChallengeGateway {
         user,
       );
 
-      //Start timer for next challenge if that challenge has a timer
-      if (tracker.curChallengeId) {
-        const challenge = await this.challengeService.getChallengeById(tracker.curChallengeId);
-        if (challenge?.timerLength) {
-          await this.challengeService.startTimer(tracker.curChallengeId, user.id);
-        }
-      }
-
       await this.groupService.emitUpdateGroupData(group, false);
       await this.eventService.emitUpdateEventTracker(tracker, user);
       await this.userService.emitUpdateUserData(user, false, false, user);
