@@ -640,7 +640,10 @@ export class EventService {
         description:
           assignData.description?.substring(0, 2048) ??
           defaultEventData.description,
-        longDescription: event.longDescription?.substring(0, 8192) ?? defaultEventData.longDescription ?? '',
+        longDescription:
+          event.longDescription?.substring(0, 8192) ??
+          defaultEventData.longDescription ??
+          '',
         category: assignData.category ?? defaultEventData.category,
         timeLimitation: assignData.timeLimitation,
         endTime: assignData.endTime ?? defaultEventData.endTime,

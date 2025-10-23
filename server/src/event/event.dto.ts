@@ -1,6 +1,6 @@
 /** DTO for filtering events based on multiple criteria
  * Used in requestFilteredEvents (clients to request events matching specific filters)
-*/
+ */
 export interface RequestFilteredEventsDto {
   difficulty: string[];
   location: string[];
@@ -10,7 +10,7 @@ export interface RequestFilteredEventsDto {
 
 /** DTO for requesting event data by IDs
  * Used in requestEventData (fetch specific events or all events if no IDs provided)
-*/
+ */
 export interface RequestEventDataDto {
   events?: string[];
 }
@@ -26,7 +26,7 @@ export interface RequestEventLeaderDataDto {
 
 /** DTO for representing a user entry on the leaderboard
  * Contains minimal user data needed for leaderboard display
-*/
+ */
 export interface LeaderDto {
   userId: string;
   username: string;
@@ -85,7 +85,7 @@ export interface EventDto {
   requiredMembers?: number;
   name?: string;
   description?: string;
-  longDescription?: string; 
+  longDescription?: string;
   category?: EventCategoryDto;
   timeLimitation?: 'LIMITED_TIME' | 'PERPETUAL';
   endTime?: string;
