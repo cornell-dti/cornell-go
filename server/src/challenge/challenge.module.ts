@@ -15,7 +15,7 @@ import { CaslModule } from '../casl/casl.module';
   imports: [
     forwardRef(() => AuthModule),
     EventModule,
-    GroupModule,
+    forwardRef(() => GroupModule),
     UserModule,
     ClientModule,
     PrismaModule,
