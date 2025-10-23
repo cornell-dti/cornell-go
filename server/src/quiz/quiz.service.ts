@@ -190,7 +190,7 @@ export class QuizService {
     return {
       isCorrect,
       pointsEarned,
-      explanation: question.explanation,
+      explanation: question.explanation ?? undefined,
       correctAnswerText: correctAnswer?.answerText || '',
       newTotalScore: updatedUser.score,
     };
