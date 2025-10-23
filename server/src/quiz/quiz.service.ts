@@ -1,10 +1,10 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { 
-  QuizQuestionDto, 
-  QuizResultDto, 
-  QuizProgressDto,
-} from './quiz.dto';
+import { QuizQuestionDto, QuizResultDto, QuizProgressDto } from './quiz.dto';
 
 @Injectable()
 export class QuizService {
@@ -16,17 +16,20 @@ export class QuizService {
    * @param userId - User requesting the question
    * @returns Random question with shuffled answers
    */
-  async getRandomQuestion(challengeId: string, userId: string): Promise<QuizQuestionDto> {
+  async getRandomQuestion(
+    challengeId: string,
+    userId: string,
+  ): Promise<QuizQuestionDto> {
     const availableQuestions = await this.prisma.quizQuestion.findMany({
       where: {
         challengeId,
         userAnswers: {
-          none: { userId }
-        }
+          none: { userId },
+        },
       },
       include: {
-        answers: true
-      }
+        answers: true,
+      },
     });
 
     if (availableQuestions.length === 0) {
@@ -36,17 +39,21 @@ export class QuizService {
     const randomIndex = Math.floor(Math.random() * availableQuestions.length);
     const selectedQuestion = availableQuestions[randomIndex];
 
-    const shuffledAnswers = this.shuffleArray<{id: string, answerText: string, isCorrect?: boolean}>(selectedQuestion.answers);
+    const shuffledAnswers = this.shuffleArray<{
+      id: string;
+      answerText: string;
+      isCorrect?: boolean;
+    }>(selectedQuestion.answers);
 
     return {
       id: selectedQuestion.id,
       questionText: selectedQuestion.questionText,
       answers: shuffledAnswers.map(answer => ({
         id: answer.id,
-        answerText: answer.answerText
+        answerText: answer.answerText,
       })),
       pointValue: selectedQuestion.pointValue,
-      challengeId: selectedQuestion.challengeId
+      challengeId: selectedQuestion.challengeId,
     };
   }
 
@@ -58,21 +65,21 @@ export class QuizService {
    * @returns Different random question
    */
   async shuffleQuestion(
-    challengeId: string, 
-    userId: string, 
-    excludeQuestionId?: string
+    challengeId: string,
+    userId: string,
+    excludeQuestionId?: string,
   ): Promise<QuizQuestionDto> {
     const availableQuestions = await this.prisma.quizQuestion.findMany({
       where: {
         challengeId,
         id: excludeQuestionId ? { not: excludeQuestionId } : undefined,
         userAnswers: {
-          none: { userId }
-        }
+          none: { userId },
+        },
       },
       include: {
-        answers: true
-      }
+        answers: true,
+      },
     });
 
     if (availableQuestions.length === 0) {
@@ -81,17 +88,21 @@ export class QuizService {
 
     const randomIndex = Math.floor(Math.random() * availableQuestions.length);
     const selectedQuestion = availableQuestions[randomIndex];
-    const shuffledAnswers = this.shuffleArray<{id: string, answerText: string, isCorrect?: boolean}>(selectedQuestion.answers);
+    const shuffledAnswers = this.shuffleArray<{
+      id: string;
+      answerText: string;
+      isCorrect?: boolean;
+    }>(selectedQuestion.answers);
 
     return {
       id: selectedQuestion.id,
       questionText: selectedQuestion.questionText,
       answers: shuffledAnswers.map(answer => ({
         id: answer.id,
-        answerText: answer.answerText
+        answerText: answer.answerText,
       })),
       pointValue: selectedQuestion.pointValue,
-      challengeId: selectedQuestion.challengeId
+      challengeId: selectedQuestion.challengeId,
     };
   }
 
@@ -101,14 +112,17 @@ export class QuizService {
    * @param questionId - Question ID
    * @returns Whether user has answered this question
    */
-  async hasAnsweredQuestion(userId: string, questionId: string): Promise<boolean> {
+  async hasAnsweredQuestion(
+    userId: string,
+    questionId: string,
+  ): Promise<boolean> {
     const existingAnswer = await this.prisma.userQuizAnswer.findUnique({
       where: {
         userId_questionId: {
           userId,
-          questionId
-        }
-      }
+          questionId,
+        },
+      },
     });
 
     return !!existingAnswer;
@@ -122,9 +136,9 @@ export class QuizService {
    * @returns Result with correctness and points
    */
   async submitAnswer(
-    userId: string, 
-    questionId: string, 
-    selectedAnswerId: string
+    userId: string,
+    questionId: string,
+    selectedAnswerId: string,
   ): Promise<QuizResultDto> {
     if (await this.hasAnsweredQuestion(userId, questionId)) {
       throw new BadRequestException('Question already answered');
@@ -133,20 +147,24 @@ export class QuizService {
     const question = await this.prisma.quizQuestion.findUnique({
       where: { id: questionId },
       include: {
-        answers: true
-      }
+        answers: true,
+      },
     });
 
     if (!question) {
       throw new NotFoundException('Question not found');
     }
 
-    const selectedAnswer = question.answers.find((a: { id: string; }) => a.id === selectedAnswerId);
+    const selectedAnswer = question.answers.find(
+      (a: { id: string }) => a.id === selectedAnswerId,
+    );
     if (!selectedAnswer) {
       throw new BadRequestException('Invalid answer selection');
     }
 
-    const correctAnswer = question.answers.find((a: { isCorrect: any; }) => a.isCorrect);
+    const correctAnswer = question.answers.find(
+      (a: { isCorrect: any }) => a.isCorrect,
+    );
     const isCorrect = selectedAnswer.isCorrect;
     const pointsEarned = isCorrect ? question.pointValue : 0;
 
@@ -156,17 +174,17 @@ export class QuizService {
         questionId,
         selectedAnswerId,
         isCorrect,
-        pointsEarned
-      }
+        pointsEarned,
+      },
     });
 
     const updatedUser = await this.prisma.user.update({
       where: { id: userId },
       data: {
         score: {
-          increment: pointsEarned
-        }
-      }
+          increment: pointsEarned,
+        },
+      },
     });
 
     return {
@@ -174,7 +192,7 @@ export class QuizService {
       pointsEarned,
       explanation: question.explanation,
       correctAnswerText: correctAnswer?.answerText || '',
-      newTotalScore: updatedUser.score
+      newTotalScore: updatedUser.score,
     };
   }
 
@@ -184,30 +202,33 @@ export class QuizService {
    * @param userId - User ID
    * @returns Progress statistics
    */
-  async getQuizProgress(challengeId: string, userId: string): Promise<QuizProgressDto> {
+  async getQuizProgress(
+    challengeId: string,
+    userId: string,
+  ): Promise<QuizProgressDto> {
     const totalQuestions = await this.prisma.quizQuestion.count({
-      where: { challengeId }
+      where: { challengeId },
     });
 
     const answeredQuestions = await this.prisma.userQuizAnswer.count({
       where: {
         userId,
         question: {
-          challengeId
-        }
-      }
+          challengeId,
+        },
+      },
     });
 
     const totalPointsEarned = await this.prisma.userQuizAnswer.aggregate({
       where: {
         userId,
         question: {
-          challengeId
-        }
+          challengeId,
+        },
       },
       _sum: {
-        pointsEarned: true
-      }
+        pointsEarned: true,
+      },
     });
 
     return {
@@ -216,7 +237,7 @@ export class QuizService {
       answeredQuestions,
       remainingQuestions: totalQuestions - answeredQuestions,
       isComplete: answeredQuestions >= totalQuestions,
-      totalPointsEarned: totalPointsEarned._sum.pointsEarned || 0
+      totalPointsEarned: totalPointsEarned._sum.pointsEarned || 0,
     };
   }
 
@@ -226,14 +247,17 @@ export class QuizService {
    * @param userId - User ID
    * @returns Count of available questions
    */
-  async getAvailableQuestionCount(challengeId: string, userId: string): Promise<number> {
+  async getAvailableQuestionCount(
+    challengeId: string,
+    userId: string,
+  ): Promise<number> {
     return this.prisma.quizQuestion.count({
       where: {
         challengeId,
         userAnswers: {
-          none: { userId }
-        }
-      }
+          none: { userId },
+        },
+      },
     });
   }
 

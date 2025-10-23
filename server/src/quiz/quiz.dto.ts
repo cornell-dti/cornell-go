@@ -54,5 +54,9 @@ export interface QuizProgressDto {
 /** Error response for quiz operations */
 export interface QuizErrorDto {
   message: string;
-  code: 'NO_QUESTIONS' | 'ALREADY_ANSWERED' | 'INVALID_QUESTION' | 'INVALID_ANSWER';
+  code:
+    | 'NO_QUESTIONS'
+    | 'ALREADY_ANSWERED'
+    | 'INVALID_QUESTION'
+    | 'INVALID_ANSWER';
 }

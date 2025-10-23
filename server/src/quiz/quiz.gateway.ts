@@ -7,7 +7,7 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { UseGuards } from '@nestjs/common';
-import { UserGuard } from '../auth/jwt-auth.guard'; 
+import { UserGuard } from '../auth/jwt-auth.guard';
 import { QuizService } from './quiz.service';
 import {
   RequestQuizQuestionDto,
@@ -16,7 +16,7 @@ import {
   QuizQuestionDto,
   QuizResultDto,
   QuizProgressDto,
-  QuizErrorDto
+  QuizErrorDto,
 } from './quiz.dto';
 
 /**
@@ -28,7 +28,7 @@ import {
     origin: '*',
   },
 })
-@UseGuards(UserGuard) 
+@UseGuards(UserGuard)
 export class QuizGateway {
   @WebSocketServer()
   server!: Server;
@@ -52,14 +52,20 @@ export class QuizGateway {
         throw new Error('User not authenticated');
       }
 
-      const question = await this.quizService.getRandomQuestion(data.challengeId, userId);
-      
+      const question = await this.quizService.getRandomQuestion(
+        data.challengeId,
+        userId,
+      );
+
       client.emit('quizQuestion', question);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error occurred';
       const errorResponse: QuizErrorDto = {
         message: errorMessage,
-        code: errorMessage.includes('No available questions') ? 'NO_QUESTIONS' : 'INVALID_QUESTION'
+        code: errorMessage.includes('No available questions')
+          ? 'NO_QUESTIONS'
+          : 'INVALID_QUESTION',
       };
       client.emit('quizError', errorResponse);
     }
@@ -83,17 +89,18 @@ export class QuizGateway {
       }
 
       const question = await this.quizService.shuffleQuestion(
-        data.challengeId, 
-        userId, 
-        data.currentQuestionId
+        data.challengeId,
+        userId,
+        data.currentQuestionId,
       );
-      
+
       client.emit('quizQuestion', question);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error occurred';
       const errorResponse: QuizErrorDto = {
         message: errorMessage,
-        code: 'INVALID_QUESTION'
+        code: 'INVALID_QUESTION',
       };
       client.emit('quizError', errorResponse);
     }
@@ -119,19 +126,19 @@ export class QuizGateway {
       const result = await this.quizService.submitAnswer(
         userId,
         data.questionId,
-        data.selectedAnswerId
+        data.selectedAnswerId,
       );
 
       client.emit('quizResult', result);
       this.server.emit('scoreUpdate', {
         userId,
-        newScore: result.newTotalScore
+        newScore: result.newTotalScore,
       });
-
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error occurred';
       let errorCode: QuizErrorDto['code'] = 'INVALID_ANSWER';
-      
+
       if (errorMessage.includes('already answered')) {
         errorCode = 'ALREADY_ANSWERED';
       } else if (errorMessage.includes('not found')) {
@@ -140,7 +147,7 @@ export class QuizGateway {
 
       const errorResponse: QuizErrorDto = {
         message: errorMessage,
-        code: errorCode
+        code: errorCode,
       };
       client.emit('quizError', errorResponse);
     }
@@ -163,14 +170,18 @@ export class QuizGateway {
         throw new Error('User not authenticated');
       }
 
-      const progress = await this.quizService.getQuizProgress(data.challengeId, userId);
-      
+      const progress = await this.quizService.getQuizProgress(
+        data.challengeId,
+        userId,
+      );
+
       client.emit('quizProgress', progress);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error occurred';
       const errorResponse: QuizErrorDto = {
         message: errorMessage,
-        code: 'INVALID_QUESTION'
+        code: 'INVALID_QUESTION',
       };
       client.emit('quizError', errorResponse);
     }
