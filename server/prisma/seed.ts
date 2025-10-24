@@ -93,6 +93,8 @@ async function main() {
       longDescription:
         'Embark on the Ithaca Foodie Adventure and savor the diverse culinary delights that Cornell and the surrounding Ithaca area have to offer. Start your journey at one of Cornell\'s renowned dining halls, where you can sample a variety of dishes made with fresh, local ingredients. Then, venture into downtown Ithaca to explore charming cafes, food trucks, and restaurants that showcase the region\'s vibrant food scene. Whether you\'re craving farm-to-table fare or international cuisine, this adventure promises a feast for your taste buds!',
         timeLimitation: 'PERPETUAL',
+        'Discover the best eats around Cornell and Ithaca! From dining halls to local cafes, experience the culinary culture of our campus.',
+      timeLimitation: 'PERPETUAL',
       indexable: true,
       endTime: new Date('2030-12-31'),
       latitude: 42.4534,
@@ -114,6 +116,7 @@ async function main() {
       longDescription:
         'Experience the breathtaking natural beauty of Ithaca with the Gorges Nature Trail tour. Known for its stunning waterfalls, lush forests, and scenic hiking trails, Ithaca offers a perfect escape into nature. Begin your adventure at one of the many gorges near Cornell University, where you can take in the sights and sounds of cascading water and vibrant wildlife. As you hike through the trails, enjoy panoramic views of the surrounding landscape and discover hidden gems along the way. Whether you are an avid hiker or simply looking to unwind in nature, this tour is sure to leave you refreshed and inspired.',
         timeLimitation: 'PERPETUAL',
+      timeLimitation: 'PERPETUAL',
       indexable: true,
       endTime: new Date('2030-12-31'),
       latitude: 42.4534,
