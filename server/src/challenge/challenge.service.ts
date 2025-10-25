@@ -187,8 +187,8 @@ export class ChallengeService {
         'startTimerForChallenge',
         {
           challengeId: nextChallenge.id,
-          timerLength: nextChallenge.timerLength
-        }
+          timerLength: nextChallenge.timerLength,
+        },
       );
     }
 
@@ -410,5 +410,4 @@ export class ChallengeService {
     console.log(`Deleted challenge ${challengeId}`);
     return true;
   }
-
 }

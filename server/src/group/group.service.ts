@@ -206,7 +206,7 @@ export class GroupService {
    * selects a new event while current is still active.
    * If host selects a new event, and if eventId is in the allowed
    * events of this group, then updates the group's current event.
-   * 
+   *
    * @param actor User that requested the event change, must be a group host
    * @param eventId Id of the event to switch to
    * @returns False if eventId is invalid, otherwise true

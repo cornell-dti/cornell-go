@@ -227,8 +227,8 @@ export class EventService {
         'startTimerForChallenge',
         {
           challengeId: closestChallenge.id,
-          timerLength: closestChallenge.timerLength
-        }
+          timerLength: closestChallenge.timerLength,
+        },
       );
     }
 
