@@ -14,9 +14,9 @@ import { CaslModule } from '../casl/casl.module';
 @Module({
   imports: [
     forwardRef(() => AuthModule),
-    forwardRef(() => EventModule),
-    forwardRef(() => UserModule),
-    forwardRef(() => GroupModule),
+    EventModule,
+    UserModule,
+    GroupModule,
     ClientModule,
     PrismaModule,
     SessionLogModule,
@@ -24,6 +24,5 @@ import { CaslModule } from '../casl/casl.module';
     AchievementModule,
   ],
   providers: [ChallengeGateway, ChallengeService],
-  exports: [ChallengeService],
 })
 export class ChallengeModule {}
