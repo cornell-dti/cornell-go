@@ -14,9 +14,6 @@ import {
   RequestChallengeDataDto,
   SetCurrentChallengeDto,
   UpdateChallengeDataDto,
-  ExtendTimerDto, 
-  StartChallengeTimerDto, 
-  TimerCompletedDto 
 } from './challenge.dto';
 import { GroupService } from '../group/group.service';
 import { UserService } from '../user/user.service';
@@ -140,59 +137,5 @@ export class ChallengeGateway {
     return challenge.id;
   }
 
-   //use sendEvent instead of sendProtected/emit... since timer events are just notifications and dont check data
-  @SubscribeMessage('startChallengeTimer')
-  async startChallengeTimer(
-    @CallingUser() user: User,
-    @MessageBody() data: StartChallengeTimerDto,
-  ) {
-    const timer = await this.challengeService.startTimer(data.challengeId, user.id);
-    await this.clientService.sendEvent(
-      [`user/${user.id}`],
-      'timerStarted',
-      {
-        timerId: timer.timerId,
-        endTime: timer.endTime,
-        challengeId: timer.challengeId,
-      }
-    );
-    return timer.timerId;
-  }
-
-  @SubscribeMessage('extendTimer')
-  async extendTimer(
-    @CallingUser() user: User,
-    @MessageBody() data: ExtendTimerDto,
-  ) {
-    const timer = await this.challengeService.extendTimer(data.challengeId, user.id);
-    await this.clientService.sendEvent(
-      [`user/${user.id}`],
-      'timerExtended',
-      {
-        timerId: timer.timerId,
-        challengeId: timer.challengeId,
-        newEndTime: timer.newEndTime,
-      }
-    );
-    return timer.timerId;
-  }
-
-  @SubscribeMessage('completeTimer')
-  async completeTimer(
-    @CallingUser() user: User,
-    @MessageBody() data: TimerCompletedDto,
-  ) {
-    const timer = await this.challengeService.completeTimer(data.challengeId, user.id);
-    await this.clientService.sendEvent(
-      [`user/${user.id}`],
-      'timerCompleted',
-      {
-        timerId: timer.timerId,
-        challengeId: timer.challengeId,
-        challengeCompleted: timer.challengeCompleted,
-      }
-    );
-    return timer.challengeCompleted;
-  }
   
 }

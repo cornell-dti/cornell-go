@@ -10,8 +10,6 @@ import {
   LocationType,
   Achievement,
   AchievementTracker,
-  ChallengeTimerStatus,
-  ChallengeTimer,
 } from '@prisma/client';
 import { ClientService } from '../client/client.service';
 import { UserService } from '../user/user.service';
@@ -22,17 +20,12 @@ import {
   ChallengeDto,
   UpdateChallengeDataDto,
   ChallengeLocationDto,
-  TimerStartedDto,
-  TimerExtendedDto,
-  TimerCompletedDto,
-  TimerWarningDto,
 } from './challenge.dto';
 import { AppAbility, CaslAbilityFactory } from '../casl/casl-ability.factory';
 import { accessibleBy } from '@casl/prisma';
 import { Action } from '../casl/action.enum';
 import { subject } from '@casl/ability';
 import { defaultChallengeData } from '../organization/organization.service';
-import { connect } from 'http2';
 
 @Injectable()
 export class ChallengeService {
@@ -187,9 +180,16 @@ export class ChallengeService {
       },
     });
 
-    //Start timer for the next challenge if it has a timer length
+    //Send timer start event notif to user if next challenge has a timer length
     if (nextChallenge?.timerLength) {
-      await this.startTimer(nextChallenge.id, user.id);
+      await this.clientService.sendEvent(
+        [`user/${user.id}`],
+        'startTimerForChallenge',
+        {
+          challengeId: nextChallenge.id,
+          timerLength: nextChallenge.timerLength
+        }
+      );
     }
 
     await this.log.logEvent(
@@ -411,230 +411,4 @@ export class ChallengeService {
     return true;
   }
 
-  /** Start a timer for a challenge */
-  async startTimer(challengeId: string, userId: string) : Promise<TimerStartedDto> {
-    const challenge = await this.prisma.challenge.findUniqueOrThrow({
-        where: { id: challengeId }
-    });
-    if (!challenge.timerLength) {
-        throw new Error('This challenge has no timer (timer length is not set)');
-    }
-    const endTime = this.calculateEndTime(challenge, 0);
-    const timer = await this.prisma.challengeTimer.create({
-        data: {
-            challengeId: challengeId, 
-            userId: userId, 
-            timerLength: challenge.timerLength,
-            startTime: new Date(),
-            endTime: endTime,
-            currentStatus: ChallengeTimerStatus.ACTIVE,
-            warningMilestones: [300, 60, 30],
-            warningMilestonesSent: [],
-            lastWarningSent: null,
-        },
-    });
-    
-    //Schedule warnings for the timer
-    await this.scheduleWarnings(challengeId, userId, endTime);
-
-    //Schedule autocompletion of challenge after timer expries
-    const completion_delay = endTime.getTime() - Date.now(); 
-    setTimeout(async () => { //send warning if delay is > 0 
-        await this.completeTimer(challengeId, userId);
-    }, completion_delay);
-    
-    return {
-        timerId: timer.id,
-        endTime: endTime.toISOString(), 
-        challengeId: challengeId,
-    };
-}
-
-  /** Completes a timer for a challenge, and completes the challenge once the timer is completed */
-  async completeTimer(challengeId: string, userId: string) : Promise<TimerCompletedDto> {
-      //end timer 
-      const timer = await this.prisma.challengeTimer.findFirstOrThrow({
-          where: { challengeId: challengeId, userId: userId
-            },
-            include: {user: true}
-      });
-
-      if (!timer) {
-          throw new Error('Timer not found');
-      }
-      
-      // Mark timer as completed
-      await this.prisma.challengeTimer.update({
-          where: {id: timer.id},
-          data: {endTime: new Date(), 
-              currentStatus: ChallengeTimerStatus.COMPLETED}
-      });
-
-      // Complete the challenge
-      await this.completeChallenge(timer.user);
-
-      return {
-          timerId: timer.id,
-          challengeId: challengeId,
-          challengeCompleted: true,
-      };
-
-  }
-
-  /** Extends a timer for a challenge
-   * - updates the end time of the timer
-   * - deducts the extension cost from the user's score (25%)
-   * - if the timer cannot be extended (the user's score is not enough), an error is thrown
-   */
-  async extendTimer(challengeId: string, userId: string): Promise<TimerExtendedDto> {
-      const timer = await this.prisma.challengeTimer.findFirst({
-          where: {challengeId: challengeId, userId: userId},
-          include: {user: true}
-      });
-      if (!timer) {
-          throw new Error('Timer not found');
-      }
-      const canExtend = await this.canExtendTimer(userId, challengeId);
-      if (!canExtend) {
-          throw new Error('Cannot extend timer');
-      }
-      
-      const challenge = await this.getChallengeById(challengeId);
-      if (!challenge) {
-          throw new Error('Challenge not found');
-      }
-      
-      const newEndTime = this.calculateEndTime(challenge, 1);
-      const extensionCost = this.calculateExtensionCost(challenge.points);
-
-      await this.prisma.user.update({
-          where: {id: timer.user.id},
-          data: {score: {decrement: extensionCost}}
-      });
-
-
-      await this.prisma.challengeTimer.update({
-          where: {id: timer.id},
-          data: {endTime: newEndTime}
-      });
-      
-      return {
-          timerId: timer.id,
-          challengeId: challengeId,
-          newEndTime: newEndTime.toISOString(),
-      };
-  }
-
-  /** Calculate the points deducted for using an extension 
-  */
-  private calculateExtensionCost(basePoints: number): number {
-      return Math.floor(basePoints * 0.25);
-  }
-
-  /** Schedules warning for a timer at given milestones
-   * - schedules warnings for each milestone based on the end time of the timer (ex. if milestone has 30, sends a warning at endtime-30: 30 seconds left)
-   */
-  async scheduleWarnings(challengeId: string, userId: string, endTime: Date) : Promise<void> {
-      const timer = await this.prisma.challengeTimer.findFirst({
-          where: {challengeId: challengeId, userId: userId}
-      });
-      
-      if (!timer) {
-          throw new Error('Timer not found');
-      }
-      
-      const milestones = timer.warningMilestones;
-
-      for (const milestone of milestones) {
-          const warningTime = new Date(endTime.getTime() - milestone * 1000); //convert to milliseconds
-          const now = new Date();
-
-          if (warningTime > now) {
-              const delay = warningTime.getTime() - now.getTime(); //how long until warning should be sent
-              setTimeout(async () => { // send warning if delay is > 0 
-                  await this.sendWarning(challengeId, userId, milestone);
-              }, delay);
-          }
-      }
-  }
-
-  /** Sends a warning for a timer at given milestones
-   * - updates timer's warningMilestonesSent and lastWarningSent 
-   */
-  async sendWarning(challengeId: string, userId: string, milestone: number) : Promise<TimerWarningDto> {
-      const timer = await this.prisma.challengeTimer.findFirst({
-          where: {challengeId: challengeId, userId: userId}
-      });
-      if (!timer) {
-          throw new Error('Timer not found');
-      }
-      if (timer.currentStatus != ChallengeTimerStatus.ACTIVE) {
-          throw new Error('Timer is not active');
-      }
-      if (timer.warningMilestonesSent.includes(milestone)) {
-          throw new Error('Warning milestone already sent');
-      }
-
-      if (!timer.endTime) {
-          throw new Error('Timer end time is not set');
-      }
-
-      const timeRemaining = Math.max(0, Math.floor((timer.endTime.getTime() - Date.now()) / 1000));
-      
-      const warningDto: TimerWarningDto = {
-          challengeId: challengeId,
-          milestone: milestone,
-          timeRemaining: timeRemaining,
-      };
-
-      await this.clientService.sendEvent(
-        [`user/${timer.userId}`],
-        'timerWarning',
-        warningDto
-    );
-
-      await this.prisma.challengeTimer.update({
-          where: {id: timer.id},
-          data: {warningMilestonesSent: {push: milestone},
-              lastWarningSent: new Date()}
-      });
-
-      return warningDto;
-  }
-
-  /** Calculates end time of a challenge based on number of extensions used
-   * Formula: Current time + timer length + 5 minutes for each extension used
-   */
-  private calculateEndTime(challenge: Challenge, extensionsUsed: number): Date {
-      if (!challenge.timerLength) {
-          throw new Error('Challenge timer length is not set');
-      }
-      return new Date(Date.now() + challenge.timerLength * 1000 + extensionsUsed * 5 * 60 * 1000);
-  }
-
-  /** Checks if a timer can be extended by seeing if the user has a high enoughscore to allow for a deduction of points when an extension is used */
-  async canExtendTimer(userId: string, challengeId: string): Promise<boolean> {
-      const user = await this.userService.byId(userId);
-      if (!user) {
-          return false;
-      }
-      const challenge = await this.getChallengeById(challengeId);
-      if (!challenge) {
-          throw new Error('Challenge not found');
-      }
-      const timer = await this.prisma.challengeTimer.findFirst({
-          where: {challengeId: challengeId, userId: userId},
-      });
-      
-      if (!timer) {
-          return false;
-      }
-      if (timer.currentStatus != ChallengeTimerStatus.ACTIVE) {
-          return false;
-      }
-      if (user.score < this.calculateExtensionCost(challenge.points)) {
-          return false;
-      }
-      return true;
-  }
 }

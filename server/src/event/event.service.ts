@@ -220,6 +220,18 @@ export class EventService {
       },
     });
 
+    //Emit timer start event for the first challenge if it has a timer length
+    if (closestChallenge.timerLength) {
+      await this.clientService.sendEvent(
+        [`user/${user.id}`],
+        'startTimerForChallenge',
+        {
+          challengeId: closestChallenge.id,
+          timerLength: closestChallenge.timerLength
+        }
+      );
+    }
+
     const progress = await this.prisma.eventTracker.create({
       data: {
         score: 0,
