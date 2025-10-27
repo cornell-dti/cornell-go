@@ -78,6 +78,10 @@ class _ProfilePageState extends State<ProfilePage> {
     final smallFontSize = screenWidth * 0.035;
     final mediumFontSize = screenWidth * 0.04;
 
+    // Responsive oval sizing
+    final ovalWidth = screenWidth * 1; //full width of screen
+    final ovalHeight = ovalWidth * (352 / 800); // Maintain aspect ratio
+
     return Scaffold(
       backgroundColor: Color.fromARGB(255, 255, 245, 234),
       body: Container(
@@ -154,11 +158,10 @@ class _ProfilePageState extends State<ProfilePage> {
                     Positioned(
                       top: -headerHeight *
                           0.7, // Position to cut off more at top
-                      left: (screenWidth - 800) /
-                          2, // Center the oval horizontally
+                      left: -ovalWidth / 2, // Center the oval horizontally
                       child: Container(
-                        width: 800,
-                        height: 352,
+                        width: ovalWidth * 2,
+                        height: ovalHeight * 2,
                         decoration: ShapeDecoration(
                           color: const Color(0xFFB3EBF6),
                           shape: OvalBorder(),
