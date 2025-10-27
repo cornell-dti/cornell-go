@@ -158,7 +158,8 @@ class _ProfilePageState extends State<ProfilePage> {
                     Positioned(
                       top: -headerHeight *
                           0.7, // Position to cut off more at top
-                      left: -ovalWidth / 2, // Center the oval horizontally
+                      left: -ovalWidth /
+                          2, // Center the oval, the left edge starts halfway to left of screen
                       child: Container(
                         width: ovalWidth * 2,
                         height: ovalHeight * 2,
