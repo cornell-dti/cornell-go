@@ -9,6 +9,9 @@ import {
   TimerWarningDto,
 } from '../timer/timer.dto';
 
+const EXTENSION_LENGTH = 5 * 60 * 1000; // 5 minutes
+const EXTENSION_COST = 0.25; // 25% of the challenge points
+
 @Injectable()
 export class TimerService {
   constructor(
@@ -148,7 +151,7 @@ export class TimerService {
   /** Calculate the points deducted for using an extension
    */
   private calculateExtensionCost(basePoints: number): number {
-    return Math.floor(basePoints * 0.25);
+    return Math.floor(basePoints * EXTENSION_COST);
   }
 
   /** Schedules warning for a timer at given milestones
@@ -246,7 +249,7 @@ export class TimerService {
     return new Date(
       Date.now() +
         challenge.timerLength * 1000 +
-        extensionsUsed * 5 * 60 * 1000,
+        extensionsUsed * EXTENSION_LENGTH,
     );
   }
 
