@@ -13,6 +13,10 @@ describe('TimerModule E2E', () => {
   let eventId: string;
   let groupId: string;
 
+  beforeAll(() => {
+    process.env.TESTING_E2E = 'true';
+  });
+
 
   beforeAll(async () => {
     // Setup: Create test environment
@@ -141,6 +145,7 @@ describe('TimerModule E2E', () => {
     await prisma.user.delete({where: {id: '456'}});
     await prisma.group.delete({where: {id: groupId}});
     await prisma.eventBase.delete({where: {id: eventId}});
+    await prisma.$disconnect();
     await app.close();
   });
 });

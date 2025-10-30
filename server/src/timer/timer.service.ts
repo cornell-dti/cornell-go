@@ -45,15 +45,14 @@ export class TimerService {
       },
     });
 
-    //Schedule warnings for the timer
-    await this.scheduleWarnings(challengeId, userId, endTime);
-
-    //Schedule autocompletion of challenge after timer expries
-    const completion_delay = endTime.getTime() - Date.now();
-    setTimeout(async () => {
-      //send warning if delay is > 0
-      await this.completeTimer(challengeId, userId);
-    }, completion_delay);
+    //schedule warnings and auto-completion if not in e2e testing
+    if (!process.env.TESTING_E2E) {
+      await this.scheduleWarnings(challengeId, userId, endTime);
+      const completion_delay = endTime.getTime() - Date.now();
+      setTimeout(async () => {
+        await this.completeTimer(challengeId, userId);
+      }, completion_delay);
+    }
 
     return {
       timerId: timer.id,
