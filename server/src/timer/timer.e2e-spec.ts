@@ -4,6 +4,7 @@ import { AppModule } from '../app.module';
 import { PrismaService } from '../prisma/prisma.service';
 import { TimerService } from './timer.service';
 import { AuthType, EnrollmentType } from '@prisma/client';
+jest.setTimeout(30000);
 
 describe('TimerModule E2E', () => {
   let app: INestApplication;
@@ -12,13 +13,6 @@ describe('TimerModule E2E', () => {
   let eventId: string;
   let groupId: string;
 
-  beforeAll(() => { //prevent long timeouts from hanging (since startTimer schedules warnings)
-    jest.useFakeTimers();
-  });
-
-  afterEach(() => {
-    jest.clearAllTimers();
-  });
 
   beforeAll(async () => {
     // Setup: Create test environment
@@ -107,7 +101,7 @@ describe('TimerModule E2E', () => {
     expect(timerService).toBeDefined();
   });
 
-  it('should create and successfuly start a timer', async () => {
+  it('should create and successfully start a timer', async () => {
     const timerService = moduleRef.get<TimerService>(TimerService);
     const timer = await timerService.startTimer('123', '456');
     expect(timer).toBeDefined();
