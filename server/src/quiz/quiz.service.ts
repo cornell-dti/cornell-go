@@ -83,7 +83,7 @@ export class QuizService {
     });
 
     if (availableQuestions.length === 0) {
-      return this.getRandomQuestion(challengeId, userId);
+      throw new NotFoundException('No available questions for this challenge');
     }
 
     const randomIndex = Math.floor(Math.random() * availableQuestions.length);
