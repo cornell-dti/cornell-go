@@ -10,8 +10,11 @@ import 'package:game/model/group_model.dart';
 import 'package:game/model/tracker_model.dart';
 import 'package:game/model/challenge_model.dart';
 import 'package:game/model/user_model.dart';
+import 'package:game/model/onboarding_model.dart';
+import 'package:game/widgets/bear_mascot_message.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:provider/provider.dart';
+import 'package:showcaseview/showcaseview.dart';
 import 'package:velocity_x/velocity_x.dart';
 
 /** A Data Transfer Object that holds information about a challenge 
@@ -84,6 +87,32 @@ class _JourneysPageState extends State<JourneysPage> {
 
   List<JourneyCellDto> eventData = [];
 
+  @override
+  void initState() {
+    super.initState();
+
+    // Hot restart fix: unregister old instance if exists
+    try {
+      ShowcaseView.getNamed("journeys_page").unregister();
+    } catch (e) {
+      // Not registered yet, that's fine
+    }
+
+    // Register this page's showcase
+    ShowcaseView.register(
+      scope: "journeys_page",
+      onFinish: () {
+        Provider.of<OnboardingModel>(context, listen: false).completeStep4();
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    // Don't unregister here - causes issues during hot restart
+    super.dispose();
+  }
+
   void openFilter() {
     showModalBottomSheet(
         context: context,
@@ -106,6 +135,12 @@ class _JourneysPageState extends State<JourneysPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Positioning constants for onboarding bear/message
+    const double bearLeftPercent = -0.02;
+    const double bearBottomPercent = 0.12;
+    const double messageLeftPercent = 0.6;
+    const double messageBottomPercent = 0.35;
+
     return Scaffold(
         body: Container(
       width: double.infinity,
@@ -259,12 +294,27 @@ class _JourneysPageState extends State<JourneysPage> {
                             ?.setCurrentEvent(SetCurrentEventDto(eventId: ""));
                       }
                     }
+
+                    // Start showcase when step3 completes AND data is loaded
+                    final onboarding =
+                        Provider.of<OnboardingModel>(context, listen: true);
+                    if (onboarding.step3JourneysExplanationComplete &&
+                        !onboarding.step4FirstJourneyComplete &&
+                        eventData.isNotEmpty) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (mounted) {
+                          ShowcaseView.getNamed("journeys_page").startShowCase(
+                              [onboarding.step4FirstJourneyCardKey]);
+                        }
+                      });
+                    }
+
                     return ListView.separated(
                       padding: const EdgeInsets.symmetric(horizontal: 3),
                       itemCount: eventData.length,
                       itemBuilder: (context, index) {
-                        return JourneyCell(
-                            key: UniqueKey(),
+                        final journeyCell = JourneyCell(
+                            key: index == 0 ? null : UniqueKey(),
                             eventData[index].name,
                             eventData[index].lat,
                             eventData[index].long,
@@ -277,6 +327,34 @@ class _JourneysPageState extends State<JourneysPage> {
                             eventData[index].difficulty,
                             eventData[index].points,
                             eventData[index].eventId);
+
+                        // Wrap first journey with showcase for onboarding
+                        if (index == 0 &&
+                            !onboarding.step4FirstJourneyComplete) {
+                          return Showcase.withWidget(
+                            key: onboarding.step4FirstJourneyCardKey,
+                            disableMovingAnimation: true,
+                            container: BearMascotMessage(
+                              message:
+                                  'Click on the first journey to learn more and start your first adventure!',
+                              showBear: true,
+                              bearAsset: 'standing',
+                              bearLeftPercent: bearLeftPercent,
+                              bearBottomPercent: bearBottomPercent,
+                              messageLeftPercent: messageLeftPercent,
+                              messageBottomPercent: messageBottomPercent,
+                              onTap: () {
+                                print("Tapped anywhere on step 4");
+                                ShowcaseView.getNamed("journeys_page")
+                                    .dismiss();
+                                onboarding.completeStep4();
+                              },
+                            ),
+                            child: journeyCell,
+                          );
+                        }
+
+                        return journeyCell;
                       },
                       physics: BouncingScrollPhysics(),
                       separatorBuilder: (context, index) {

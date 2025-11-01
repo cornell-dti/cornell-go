@@ -6,6 +6,7 @@ import 'package:flutter_config_plus/flutter_config_plus.dart';
 import 'package:game/api/geopoint.dart';
 import 'package:game/loading_page/loading_page.dart';
 import 'package:game/model/achievement_model.dart';
+import 'package:game/model/onboarding_model.dart';
 
 // imports for google maps
 import 'dart:io' show Platform;
@@ -99,6 +100,7 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider.value(value: client),
         ChangeNotifierProvider(create: (_) => UserModel(client), lazy: false),
+        ChangeNotifierProvider(create: (_) => OnboardingModel(), lazy: true),
         ChangeNotifierProvider(create: (_) => GroupModel(client), lazy: false),
         ChangeNotifierProvider(create: (_) => EventModel(client), lazy: false),
         ChangeNotifierProvider(

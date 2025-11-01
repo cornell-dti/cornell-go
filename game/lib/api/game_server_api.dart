@@ -56,7 +56,6 @@ class GameServerApi {
     _refreshDat = data;
     _refreshResolver = completionFunc;
 
-    print(ev);
     _socket.emitWithAck(ev, data, ack: completionFunc);
 
     return completer.future;

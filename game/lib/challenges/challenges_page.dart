@@ -8,11 +8,13 @@ import 'package:game/model/event_model.dart';
 import 'package:game/model/group_model.dart';
 import 'package:game/model/tracker_model.dart';
 import 'package:game/model/user_model.dart';
+import 'package:game/model/onboarding_model.dart';
 import 'package:game/utils/utility_functions.dart';
+import 'package:game/widgets/bear_mascot_message.dart';
 import 'package:provider/provider.dart';
+import 'package:showcaseview/showcaseview.dart';
 import 'package:velocity_x/velocity_x.dart';
 import 'challenge_cell.dart';
-import 'package:game/journeys/filter_form.dart';
 
 class ChallengeCellDto {
   ChallengeCellDto({
@@ -79,7 +81,31 @@ class _ChallengesPageState extends State<ChallengesPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+
+    // Hot restart fix: unregister old instance if exists
+    try {
+      ShowcaseView.getNamed("challenges_page").unregister();
+    } catch (e) {
+      // Not registered yet, that's fine
+    }
+
+    // Register this page's showcase
+    ShowcaseView.register(
+      scope: "challenges_page",
+      onFinish: () {
+        Provider.of<OnboardingModel>(context, listen: false).completeStep1();
+      },
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
+    const double bearLeftPercent = -0.095;
+    const double bearBottomPercent = 0.08;
+    const double messageLeftPercent = 0.56;
+    const double messageBottomPercent = 0.31;
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -219,16 +245,27 @@ class _ChallengesPageState extends State<ChallengesPage> {
                         }
                       }
 
-                      // eventCells.forEach((Widget anEventCell) {
-                      //   print("AnEventCell is " + anEventCell.toString());
-                      // });
+                      // Start showcase when step0 completes AND data is loaded
+                      final onboarding =
+                          Provider.of<OnboardingModel>(context, listen: true);
+                      if (onboarding.step0WelcomeComplete &&
+                          !onboarding.step1ChallengesComplete &&
+                          eventData.isNotEmpty) {
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          if (mounted) {
+                            ShowcaseView.getNamed("challenges_page")
+                                .startShowCase(
+                                    [onboarding.step1ChallengeCardKey]);
+                          }
+                        });
+                      }
 
                       return ListView.separated(
                         padding: const EdgeInsets.symmetric(horizontal: 3),
                         itemCount: eventData.length,
                         itemBuilder: (context, index) {
-                          return ChallengeCell(
-                              key: UniqueKey(),
+                          final challengeCell = ChallengeCell(
+                              key: index == 0 ? null : UniqueKey(),
                               eventData[index].location,
                               eventData[index].name,
                               eventData[index].lat,
@@ -239,6 +276,35 @@ class _ChallengesPageState extends State<ChallengesPage> {
                               eventData[index].difficulty,
                               eventData[index].points,
                               eventData[index].eventId);
+
+                          // Wrap first challenge with showcase for onboarding
+                          if (index == 0 &&
+                              !onboarding.step1ChallengesComplete) {
+                            return Showcase.withWidget(
+                              key: onboarding.step1ChallengeCardKey,
+                              disableMovingAnimation: true,
+                              container: BearMascotMessage(
+                                message:
+                                    'This is the Challenge page. A Challenge is a single quest that takes you to one or more campus spots.',
+                                showBear: true,
+                                bearAsset: 'popup',
+                                bearLeftPercent: bearLeftPercent,
+                                bearBottomPercent: bearBottomPercent,
+                                messageLeftPercent: messageLeftPercent,
+                                messageBottomPercent: messageBottomPercent,
+                                onTap: () {
+                                  // Dismiss showcase when user taps anywhere
+                                  print("Tapped anywhere on step 1");
+                                  ShowcaseView.getNamed("challenges_page")
+                                      .dismiss();
+                                  onboarding.completeStep1();
+                                },
+                              ),
+                              child: challengeCell,
+                            );
+                          }
+
+                          return challengeCell;
                         },
                         physics: BouncingScrollPhysics(),
                         separatorBuilder: (context, index) {
