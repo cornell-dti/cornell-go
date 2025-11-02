@@ -107,6 +107,66 @@ describe('UserModule E2E', () => {
     expect(newList.length).toBeGreaterThan(oldList.length);
   });
 
+  it(`should properly complete onboarding for a user`, async () => {
+    const userService = moduleRef.get<UserService>(UserService);
+
+    await userService.register(
+      'test-onboarding-complete@example.com',
+      '',
+      '',
+      '',
+      '',
+      [],
+      1,
+      1,
+      AuthType.DEVICE,
+      'auth-onboarding-complete',
+      'UNDERGRADUATE'
+    );
+
+    const user = await userService.byAuth(AuthType.DEVICE, 'auth-onboarding-complete');
+    expect(user).toBeDefined();
+    expect(user?.hasCompletedOnboarding).toBe(false); 
+    
+    //checks that the returned user has correct hasCompletedOnboarding 
+    const updatedUser = await userService.completeOnboarding(user!);
+    expect(updatedUser.hasCompletedOnboarding).toBe(true);
+    
+    //checks that the database has the correct hasCompletedOnboarding 
+    const reloadedUser = await userService.byAuth(AuthType.DEVICE, 'auth-onboarding-complete');
+    expect(reloadedUser?.hasCompletedOnboarding).toBe(true);
+  });
+
+  it(`should properly reset onboarding for a user`, async () => {
+    const userService = moduleRef.get<UserService>(UserService);
+
+    await userService.register(
+      'test-onboarding-reset@example.com',
+      '',
+      '',
+      '',
+      '',
+      [],
+      1,
+      1,
+      AuthType.DEVICE,
+      'auth-onboarding-reset',
+      'UNDERGRADUATE'
+    );
+
+    const user = await userService.byAuth(AuthType.DEVICE, 'auth-onboarding-reset');
+    expect(user).toBeDefined();
+    
+    const completedUser = await userService.completeOnboarding(user!);
+    expect(completedUser.hasCompletedOnboarding).toBe(true);
+    
+    const resetUser = await userService.resetOnboarding(completedUser);
+    expect(resetUser.hasCompletedOnboarding).toBe(false);
+    
+    const reloadedUser = await userService.byAuth(AuthType.DEVICE, 'auth-onboarding-reset');
+    expect(reloadedUser?.hasCompletedOnboarding).toBe(false);
+  });
+
   afterAll(async () => {
     await app.close();
   });
