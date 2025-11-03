@@ -22,6 +22,9 @@ import 'package:game/model/tracker_model.dart';
 import 'package:game/model/group_model.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/challenge_model.dart';
+import 'package:game/model/onboarding_model.dart';
+import 'package:game/widgets/bear_mascot_message.dart';
+import 'package:showcaseview/showcaseview.dart';
 
 /*
 
@@ -118,10 +121,23 @@ class _GameplayMapState extends State<GameplayMap> {
 
   @override
   void initState() {
-    setCustomMarkerIcon();
     super.initState();
+    setCustomMarkerIcon();
     streamStarted = startPositionStream();
     setStartingHintCircle();
+
+    // Hot restart fix: Unregister old instance if it exists, then register new one
+    try {
+      ShowcaseView.getNamed("gameplay_map").unregister();
+    } catch (e) {
+      // Not registered yet, that's fine
+    }
+    ShowcaseView.register(
+      scope: "gameplay_map",
+      onFinish: () {
+        Provider.of<OnboardingModel>(context, listen: false).completeStep7();
+      },
+    );
   }
 
   @override
@@ -374,6 +390,271 @@ class _GameplayMapState extends State<GameplayMap> {
     }
   }
 
+  /// Build image toggle widget with optional onboarding showcase
+  Widget _buildImageToggle(
+    OnboardingModel onboarding,
+    String imageUrl,
+    double screenWidth,
+    double screenHeight,
+  ) {
+    // 1. Build base photo widget
+    Widget photoWidget = Align(
+      alignment: pictureAlign,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: Image.network(
+          imageUrl,
+          fit: BoxFit.cover,
+          width: pictureWidth,
+          height: pictureHeight,
+        ),
+      ),
+    );
+
+    // 2. Step 8: Wrap photoWidget with showcase if expanded (do this before building imageToggle)
+    if (isExpanded &&
+        onboarding.step7ImageToggleComplete &&
+        !onboarding.step8ExpandedImageComplete) {
+      photoWidget = Showcase.withWidget(
+        key: onboarding.step8ExpandedImageKey,
+        disableMovingAnimation: true,
+        targetPadding: EdgeInsets.all(0),
+        container: GestureDetector(
+          onTap: () {
+            print("Tapped anywhere on step 8");
+            ShowcaseView.getNamed("gameplay_map").dismiss();
+            onboarding.completeStep8();
+            _toggle();
+          },
+          child: Container(
+            width: screenWidth,
+            height: screenHeight,
+            color: Colors.transparent,
+          ),
+        ),
+        child: photoWidget,
+      );
+    }
+
+    // 3. Build complete image toggle (photo + exit button)
+    Widget imageToggle = Positioned(
+      top: screenWidth * 0.05,
+      right: screenWidth * 0.05,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 100),
+        width: pictureWidth,
+        height: pictureHeight,
+        child: Stack(
+          children: [
+            photoWidget,
+            Positioned(
+              top: 4,
+              right: 4,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  print("ICON TAPPED!"); // Debug print
+                  _toggle();
+                },
+                child: Container(
+                  width: 60, // Larger invisible hit-area
+                  height: 60,
+                  alignment: Alignment.topRight,
+                  child: SvgPicture.asset(
+                    isExpanded
+                        ? 'assets/icons/mapexit.svg'
+                        : 'assets/icons/mapexpand.svg',
+                    width: 40,
+                    height: 40,
+                  ),
+                ),
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+
+    // 4. Step 7: Wrap imageToggle with showcase (small zoom button)
+    if (onboarding.step6InfoRowComplete &&
+        !onboarding.step7ImageToggleComplete) {
+      imageToggle = Showcase.withWidget(
+        key: onboarding.step7ImageToggleKey,
+        disableMovingAnimation: true,
+        targetPadding: EdgeInsets.symmetric(
+          horizontal: screenWidth * 0.025, // ~10px on 393px screen
+          vertical: screenHeight * 0.012, // ~10px on 852px screen
+        ),
+        container: BearMascotMessage(
+          message:
+              'Click on the zoom button to get a better idea of what the location looks like!',
+          showBear: true,
+          bearAsset: 'standing',
+          bearLeftPercent: -0.02,
+          bearBottomPercent: 0.18,
+          messageLeftPercent: 0.6,
+          messageBottomPercent: 0.40,
+          onTap: () {
+            print("Tapped anywhere on step 7 - expanding image");
+            ShowcaseView.getNamed("gameplay_map").dismiss();
+            onboarding.completeStep7();
+            // Expand the image to trigger step 8
+            _toggle();
+          },
+        ),
+        child: imageToggle,
+      );
+    }
+
+    return imageToggle;
+  }
+
+  /// Build recenter button with optional onboarding showcase
+  Widget _buildRecenterButton(
+    OnboardingModel onboarding,
+    double screenWidth,
+    double screenHeight,
+  ) {
+    // 1. Build base SVG icon
+    Widget svgIcon = SvgPicture.asset("assets/icons/maprecenter.svg",
+        colorFilter: ColorFilter.mode(
+            Color.fromARGB(255, 131, 90, 124), BlendMode.srcIn));
+
+    // 2. Step 9: Wrap just the SVG with showcase
+    if (onboarding.step8ExpandedImageComplete &&
+        !onboarding.step9RecenterButtonComplete) {
+      svgIcon = Showcase.withWidget(
+        key: onboarding.step9RecenterButtonKey,
+        disableMovingAnimation: true,
+        targetPadding: EdgeInsets.symmetric(
+          horizontal: screenWidth * 0.025, // ~10px on 393px screen
+          vertical: screenHeight * 0.012, // ~10px on 852px screen
+        ),
+        container: BearMascotMessage(
+          message:
+              'Use the Recenter to return the map view to your current location so you can stay oriented.',
+          showBear: true,
+          bearAsset: 'popup',
+          bearLeftPercent: -0.095,
+          bearBottomPercent: 0.2,
+          messageLeftPercent: 0.55,
+          messageBottomPercent: 0.42,
+          onTap: () {
+            print("Tapped anywhere on step 9");
+            ShowcaseView.getNamed("gameplay_map").dismiss();
+            onboarding.completeStep9();
+          },
+        ),
+        child: svgIcon,
+      );
+    }
+
+    // 3. Build button with the (potentially wrapped) SVG icon
+    Widget button = FloatingActionButton.extended(
+      heroTag: "recenter_button",
+      onPressed: recenterCamera,
+      label: svgIcon,
+      backgroundColor: Color.fromARGB(255, 255, 255, 255),
+      shape: CircleBorder(),
+    );
+
+    // 4. Add padding outside everything
+    return Padding(
+      padding: EdgeInsets.only(bottom: 150.0),
+      child: button,
+    );
+  }
+
+  /// Build hint button with optional onboarding showcase
+  Widget _buildHintButton(
+    OnboardingModel onboarding,
+    double screenWidth,
+    double screenHeight,
+  ) {
+    // 1. Build complete hint button with counter badge (without padding)
+    Widget hintButton = Stack(
+      children: [
+        // hint button
+        FloatingActionButton.extended(
+          heroTag: "hint_button",
+          onPressed: useHint,
+          label: SvgPicture.asset("assets/icons/maphint.svg",
+              colorFilter: ColorFilter.mode(
+                  numHintsLeft == 0
+                      ? Color.fromARGB(255, 217, 217, 217)
+                      : Color.fromARGB(255, 131, 90, 124),
+                  BlendMode.srcIn)),
+          backgroundColor: Color.fromARGB(255, 255, 255, 255),
+          shape: CircleBorder(),
+        ),
+        // num hints left counter
+        Positioned(
+          top: 0,
+          right: 0,
+          child: Container(
+            padding: EdgeInsets.all(5.0),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.3),
+                  blurRadius: 5,
+                ),
+              ],
+            ),
+            child: Text(
+              numHintsLeft.toString(),
+              style: TextStyle(
+                color: numHintsLeft == 0
+                    ? Color.fromARGB(255, 217, 217, 217)
+                    : Color.fromARGB(255, 131, 90, 124),
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+
+    // 2. Step 10: Wrap entire hint button (button + counter) with showcase
+    if (onboarding.step9RecenterButtonComplete &&
+        !onboarding.step10HintButtonComplete) {
+      hintButton = Showcase.withWidget(
+        key: onboarding.step10HintButtonKey,
+        disableMovingAnimation: true,
+        container: BearMascotMessage(
+          message:
+              'Stuck? Use a Hint to make the location circle smaller, helping you pinpoint the spot.',
+          showBear: true,
+          bearAsset: 'standing',
+          bearLeftPercent: -0.02,
+          bearBottomPercent: 0.18,
+          messageLeftPercent: 0.6,
+          messageBottomPercent: 0.40,
+          onTap: () {
+            print("Tapped anywhere on step 10");
+            ShowcaseView.getNamed("gameplay_map").dismiss();
+            onboarding.completeStep10();
+            // Navigate back to home to show Profile tab highlight (step 11)
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => BottomNavBar()),
+            );
+          },
+        ),
+        child: hintButton,
+      );
+    }
+
+    // 3. Add padding outside showcase
+    return Container(
+      padding: EdgeInsets.only(bottom: 15.0),
+      child: hintButton,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // return FutureBuilder<bool>(
@@ -382,6 +663,9 @@ class _GameplayMapState extends State<GameplayMap> {
     //       return !snapshot.hasData
     //           ? CircularIndicator()
     final client = Provider.of<ApiClient>(context);
+    final onboarding = Provider.of<OnboardingModel>(context);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -410,6 +694,51 @@ class _GameplayMapState extends State<GameplayMap> {
         if (imageUrl == null || imageUrl.length == 0) {
           imageUrl =
               "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png";
+        }
+
+        // Start showcase when step 6 completes (small zoom button)
+        if (onboarding.step6InfoRowComplete &&
+            !onboarding.step7ImageToggleComplete) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              ShowcaseView.getNamed("gameplay_map")
+                  .startShowCase([onboarding.step7ImageToggleKey]);
+            }
+          });
+        }
+
+        // Start showcase when step 7 completes and image is expanded
+        if (isExpanded &&
+            onboarding.step7ImageToggleComplete &&
+            !onboarding.step8ExpandedImageComplete) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              ShowcaseView.getNamed("gameplay_map")
+                  .startShowCase([onboarding.step8ExpandedImageKey]);
+            }
+          });
+        }
+
+        // Start showcase when step 8 completes (recenter button)
+        if (onboarding.step8ExpandedImageComplete &&
+            !onboarding.step9RecenterButtonComplete) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              ShowcaseView.getNamed("gameplay_map")
+                  .startShowCase([onboarding.step9RecenterButtonKey]);
+            }
+          });
+        }
+
+        // Start showcase when step 9 completes (hint button)
+        if (onboarding.step9RecenterButtonComplete &&
+            !onboarding.step10HintButtonComplete) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              ShowcaseView.getNamed("gameplay_map")
+                  .startShowCase([onboarding.step10HintButtonKey]);
+            }
+          });
         }
 
         return Stack(
@@ -558,119 +887,24 @@ class _GameplayMapState extends State<GameplayMap> {
               right: 10,
               child: Column(
                 children: [
-                  Container(
-                    padding: EdgeInsets.only(bottom: 15.0),
-                    child: Stack(
-                      children: [
-                        // hint button
-                        FloatingActionButton.extended(
-                          heroTag: "hint_button",
-                          onPressed: useHint,
-                          label: SvgPicture.asset("assets/icons/maphint.svg",
-                              colorFilter: ColorFilter.mode(
-                                  numHintsLeft == 0
-                                      ? Color.fromARGB(255, 217, 217, 217)
-                                      : Color.fromARGB(255, 131, 90, 124),
-                                  BlendMode.srcIn)),
-                          backgroundColor: Color.fromARGB(255, 255, 255, 255),
-                          shape: CircleBorder(),
-                        ),
-                        // num hints left counter
-                        Positioned(
-                          top: 0,
-                          right: 0,
-                          child: Container(
-                            padding: EdgeInsets.all(5.0),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.white,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.3),
-                                  blurRadius: 5,
-                                ),
-                              ],
-                            ),
-                            child: Text(
-                              numHintsLeft.toString(),
-                              style: TextStyle(
-                                color: numHintsLeft == 0
-                                    ? Color.fromARGB(255, 217, 217, 217)
-                                    : Color.fromARGB(255, 131, 90, 124),
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                  _buildHintButton(
+                    onboarding,
+                    screenWidth,
+                    screenHeight,
                   ),
-                  Padding(
-                    padding: EdgeInsets.only(bottom: 150.0),
-                    child: FloatingActionButton.extended(
-                      heroTag: "recenter_button",
-                      onPressed: recenterCamera,
-                      label: SvgPicture.asset("assets/icons/maprecenter.svg",
-                          colorFilter: ColorFilter.mode(
-                              Color.fromARGB(255, 131, 90, 124),
-                              BlendMode.srcIn)),
-                      backgroundColor: Color.fromARGB(255, 255, 255, 255),
-                      shape: CircleBorder(),
-                    ),
+                  _buildRecenterButton(
+                    onboarding,
+                    screenWidth,
+                    screenHeight,
                   ),
                 ],
               ),
             ),
-            Positioned(
-              top: MediaQuery.of(context).size.width * 0.05,
-              right: MediaQuery.of(context).size.width * 0.05,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 100),
-                width: pictureWidth,
-                height: pictureHeight,
-                child: Stack(
-                  children: [
-                    // photo
-                    Align(
-                      alignment: pictureAlign,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: Image.network(
-                          imageUrl,
-                          fit: BoxFit.cover,
-                          width: pictureWidth,
-                          height: pictureHeight,
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      top: 4,
-                      right: 4,
-                      child: GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onTap: () {
-                          print("ICON TAPPED!"); // Debug print
-                          _toggle();
-                        },
-                        child: Container(
-                          width: 60, // Larger invisible hit-area
-                          height: 60,
-                          alignment: Alignment.topRight,
-                          // Make the debug rectangle much more visible
-                          child: SvgPicture.asset(
-                            isExpanded
-                                ? 'assets/icons/mapexit.svg'
-                                : 'assets/icons/mapexpand.svg',
-                            width: 40,
-                            height: 40,
-                          ),
-                        ),
-                      ),
-                    )
-                  ],
-                ),
-              ),
+            _buildImageToggle(
+              onboarding,
+              imageUrl,
+              screenWidth,
+              screenHeight,
             ),
           ],
         );

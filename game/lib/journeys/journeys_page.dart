@@ -12,6 +12,7 @@ import 'package:game/model/challenge_model.dart';
 import 'package:game/model/user_model.dart';
 import 'package:game/model/onboarding_model.dart';
 import 'package:game/widgets/bear_mascot_message.dart';
+import 'package:game/gameplay/gameplay_page.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:provider/provider.dart';
 import 'package:showcaseview/showcaseview.dart';
@@ -344,10 +345,20 @@ class _JourneysPageState extends State<JourneysPage> {
                               messageLeftPercent: messageLeftPercent,
                               messageBottomPercent: messageBottomPercent,
                               onTap: () {
-                                print("Tapped anywhere on step 4");
+                                print(
+                                    "Tapped anywhere on step 4 - navigating to gameplay");
                                 ShowcaseView.getNamed("journeys_page")
                                     .dismiss();
                                 onboarding.completeStep4();
+
+                                // Set current event and navigate to gameplay
+                                apiClient.serverApi?.setCurrentEvent(
+                                    SetCurrentEventDto(
+                                        eventId: eventData[0].eventId));
+                                Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => GameplayPage()));
                               },
                             ),
                             child: journeyCell,

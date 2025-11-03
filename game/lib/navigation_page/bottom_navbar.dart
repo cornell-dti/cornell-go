@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:game/model/onboarding_model.dart';
 import 'package:game/widgets/bear_mascot_message.dart';
 import 'package:game/utils/utility_functions.dart';
+import 'package:showcaseview/showcaseview.dart';
 import 'search_filter_home.dart';
 
 /** 
@@ -51,6 +52,8 @@ class BottomNavBar extends StatefulWidget {
 
 class _BottomNavBarState extends State<BottomNavBar> {
   int _selectedIndex = 0;
+  bool _hasTriggeredStep11 = false; // Prevent multiple showcase triggers
+  bool _hasTriggeredStep12 = false; // Prevent multiple showcase triggers
   static const TextStyle optionStyle =
       TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
   static List<Widget> _widgetOptions = <Widget>[
@@ -71,17 +74,215 @@ class _BottomNavBarState extends State<BottomNavBar> {
     // TODO: Later load user.hasCompletedOnboarding from backend database here
   }
 
+  /// Build Profile tab with optional onboarding showcase
+  BottomNavigationBarItem _buildProfileTab(
+    OnboardingModel onboarding,
+    double screenWidth,
+    double screenHeight,
+  ) {
+    // Step 11: Wrap icon + label with showcase if onboarding active
+    // Note: Profile tab is always active during this showcase (we navigate to it)
+    if (onboarding.step10HintButtonComplete &&
+        !onboarding.step11ProfileTabComplete) {
+      final showcasedWidget = Showcase.withWidget(
+        key: onboarding.step11ProfileTabKey,
+        disableMovingAnimation: true,
+        targetShapeBorder: CircleBorder(),
+        targetPadding: EdgeInsets.symmetric(
+          horizontal: screenWidth * 0.055, // ~30px on 393px screen
+          vertical: screenHeight * 0.02, // ~30px on 852px screen
+        ),
+        container: BearMascotMessage(
+          message:
+              'Welcome to your Profile where you can track your Challenges, Journeys, and Achievements as a record of your exploration across campus.',
+          showBear: true,
+          bearAsset: 'standing',
+          bearLeftPercent: -0.02,
+          bearBottomPercent: 0.12,
+          messageLeftPercent: 0.6,
+          messageBottomPercent: 0.35,
+          onTap: () {
+            print("Tapped anywhere on step 11");
+            ShowcaseView.getNamed("bottom_navbar_profile").dismiss();
+            onboarding.completeStep11();
+          },
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SvgPicture.asset("assets/icons/profilehead.svg",
+                colorFilter:
+                    ColorFilter.mode(Colors.black, BlendMode.srcIn)), // Active
+            SizedBox(height: 2),
+            Text('Profile',
+                style: TextStyle(fontSize: 12, color: Colors.black)), // Active
+          ],
+        ),
+      );
+
+      return BottomNavigationBarItem(
+        icon: showcasedWidget,
+        activeIcon: showcasedWidget, // Use same widget for active state!
+        label: '', // Empty to avoid duplicate text
+      );
+    }
+
+    // Normal tab when not in onboarding
+    final profileIcon = SvgPicture.asset("assets/icons/profilehead.svg",
+        colorFilter: ColorFilter.mode(Colors.grey, BlendMode.srcIn));
+
+    return BottomNavigationBarItem(
+      icon: profileIcon,
+      activeIcon: SvgPicture.asset("assets/icons/profilehead.svg",
+          colorFilter: ColorFilter.mode(Colors.black, BlendMode.srcIn)),
+      label: 'Profile',
+    );
+  }
+
+  /// Build Leaderboard tab with optional onboarding showcase
+  BottomNavigationBarItem _buildLeaderboardTab(
+    OnboardingModel onboarding,
+    double screenWidth,
+    double screenHeight,
+  ) {
+    // Step 12: Wrap icon + label with showcase if onboarding active
+    // Note: Leaderboard tab is always active during this showcase (we navigate to it)
+    if (onboarding.step11ProfileTabComplete &&
+        !onboarding.step12LeaderboardTabComplete) {
+      final showcasedWidget = Showcase.withWidget(
+        key: onboarding.step12LeaderboardTabKey,
+        disableMovingAnimation: true,
+        targetShapeBorder: CircleBorder(),
+        targetPadding: EdgeInsets.symmetric(
+          horizontal: screenWidth * 0.055, // Same as Profile
+          vertical: screenHeight * 0.04, // Same as Profile
+        ),
+        container: BearMascotMessage(
+          message:
+              'See how you stack up against other CornellGo players. The more Challenges and Journeys you complete, the higher your score!',
+          showBear: true,
+          bearAsset: 'popup',
+          bearLeftPercent: -0.095,
+          bearBottomPercent: 0.2,
+          messageLeftPercent: 0.55,
+          messageBottomPercent: 0.42,
+          onTap: () {
+            print("Tapped anywhere on step 12");
+            ShowcaseView.getNamed("bottom_navbar_leaderboard").dismiss();
+            onboarding.completeStep12();
+          },
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SvgPicture.asset("assets/icons/leaderboard.svg",
+                colorFilter:
+                    ColorFilter.mode(Colors.black, BlendMode.srcIn)), // Active
+            SizedBox(height: 2),
+            Text('Leaderboard',
+                style: TextStyle(fontSize: 12, color: Colors.black)), // Active
+          ],
+        ),
+      );
+
+      return BottomNavigationBarItem(
+        icon: showcasedWidget,
+        activeIcon: showcasedWidget, // Use same widget for active state!
+        label: '', // Empty to avoid duplicate text
+      );
+    }
+
+    // Normal tab when not in onboarding
+    final leaderboardIcon = SvgPicture.asset("assets/icons/leaderboard.svg",
+        colorFilter: ColorFilter.mode(Colors.grey, BlendMode.srcIn));
+
+    return BottomNavigationBarItem(
+      icon: leaderboardIcon,
+      activeIcon: SvgPicture.asset("assets/icons/leaderboard.svg",
+          colorFilter: ColorFilter.mode(Colors.black, BlendMode.srcIn)),
+      label: 'Leaderboard',
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final client = Provider.of<ApiClient>(context);
     final onboarding = Provider.of<OnboardingModel>(
         context); // listen: true (default) so we rebuild on step completion
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
 
-    // Percentage-based positioning for onboarding (from Figma design 393x852)
-    const double bearLeftPercent = 0.02;
-    const double bearBottomPercent = 0.08;
-    const double messageLeftPercent = 0.62;
-    const double messageBottomPercent = 0.31;
+    // Step 11: Auto-select Profile tab and start showcase (trigger once)
+    if (onboarding.step10HintButtonComplete &&
+        !onboarding.step11ProfileTabComplete &&
+        !_hasTriggeredStep11) {
+      _hasTriggeredStep11 = true; // Prevent re-triggering on rebuild
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          // Register showcase for step 11
+          try {
+            ShowcaseView.getNamed("bottom_navbar_profile").unregister();
+          } catch (e) {}
+          ShowcaseView.register(
+            scope: "bottom_navbar_profile",
+            onFinish: () {
+              Provider.of<OnboardingModel>(context, listen: false)
+                  .completeStep11();
+            },
+          );
+          // Switch to Profile tab
+          setState(() {
+            _selectedIndex = 2;
+          });
+          // Start showcase to highlight Profile icon
+          ShowcaseView.getNamed("bottom_navbar_profile")
+              .startShowCase([onboarding.step11ProfileTabKey]);
+        }
+      });
+    }
+
+    // Step 12: Auto-select Leaderboard tab and start showcase (trigger once)
+    if (onboarding.step11ProfileTabComplete &&
+        !onboarding.step12LeaderboardTabComplete &&
+        !_hasTriggeredStep12) {
+      _hasTriggeredStep12 = true; // Prevent re-triggering on rebuild
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          // Register showcase for step 12
+          try {
+            ShowcaseView.getNamed("bottom_navbar_leaderboard").unregister();
+          } catch (e) {}
+          ShowcaseView.register(
+            scope: "bottom_navbar_leaderboard",
+            onFinish: () {
+              Provider.of<OnboardingModel>(context, listen: false)
+                  .completeStep12();
+            },
+          );
+          // Switch to Leaderboard tab
+          setState(() {
+            _selectedIndex = 1;
+          });
+          // Start showcase to highlight Leaderboard icon
+          ShowcaseView.getNamed("bottom_navbar_leaderboard")
+              .startShowCase([onboarding.step12LeaderboardTabKey]);
+        }
+      });
+    }
+
+    // Step 13: Navigate back to Home for final overlay
+    if (onboarding.step12LeaderboardTabComplete &&
+        !onboarding.step13FinalComplete &&
+        _selectedIndex != 0) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            _selectedIndex = 0; // Navigate to Home
+          });
+        }
+      });
+    }
+
     return Stack(
       children: [
         // LAYER 1: Main app UI (Scaffold with content + bottom navbar)
@@ -117,23 +318,15 @@ class _BottomNavBarState extends State<BottomNavBar> {
                           ColorFilter.mode(Colors.black, BlendMode.srcIn)),
                   label: 'Home',
                 ),
-                BottomNavigationBarItem(
-                  icon: SvgPicture.asset("assets/icons/leaderboard.svg",
-                      colorFilter:
-                          ColorFilter.mode(Colors.grey, BlendMode.srcIn)),
-                  activeIcon: SvgPicture.asset("assets/icons/leaderboard.svg",
-                      colorFilter:
-                          ColorFilter.mode(Colors.black, BlendMode.srcIn)),
-                  label: 'Leaderboard',
+                _buildLeaderboardTab(
+                  onboarding,
+                  screenWidth,
+                  screenHeight,
                 ),
-                BottomNavigationBarItem(
-                  icon: SvgPicture.asset("assets/icons/profilehead.svg",
-                      colorFilter:
-                          ColorFilter.mode(Colors.grey, BlendMode.srcIn)),
-                  activeIcon: SvgPicture.asset("assets/icons/profilehead.svg",
-                      colorFilter:
-                          ColorFilter.mode(Colors.black, BlendMode.srcIn)),
-                  label: 'Profile',
+                _buildProfileTab(
+                  onboarding,
+                  screenWidth,
+                  screenHeight,
                 ),
               ],
               currentIndex: _selectedIndex,
@@ -186,6 +379,31 @@ class _BottomNavBarState extends State<BottomNavBar> {
                 print("Step 3: Journeys explanation dismissed");
                 onboarding.completeStep3();
               },
+            ),
+          ),
+
+        // LAYER 4: Step 13 - Final goodbye overlay (full-screen dimmed)
+        if (onboarding.step12LeaderboardTabComplete &&
+            !onboarding.step13FinalComplete)
+          GestureDetector(
+            onTap: () {
+              print('🎉 Step 13: Onboarding complete!');
+              onboarding.completeStep13();
+            },
+            child: Container(
+              width: double.infinity,
+              height: double.infinity,
+              color: Colors.black.withOpacity(0.75),
+              child: BearMascotMessage(
+                message:
+                    'That\'s it! Start exploring, earn points, and see how many locations you can uncover.',
+                showBear: true,
+                bearAsset: 'standing',
+                bearLeftPercent: 0.02,
+                bearBottomPercent: 0.08,
+                messageLeftPercent: 0.62,
+                messageBottomPercent: 0.31,
+              ),
             ),
           ),
       ],

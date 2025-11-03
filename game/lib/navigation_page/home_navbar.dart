@@ -73,7 +73,11 @@ class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
   }
 
   /// Build Journeys tab with optional onboarding showcase
-  Widget _buildJourneysTab(OnboardingModel onboarding) {
+  Widget _buildJourneysTab(
+    OnboardingModel onboarding,
+    double screenWidth,
+    double screenHeight,
+  ) {
     final journeysTab = Tab(
       child: Padding(
         padding:
@@ -94,7 +98,10 @@ class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
         key: onboarding.step2JourneysTabKey,
         disableMovingAnimation: true,
         targetShapeBorder: CircleBorder(),
-        targetPadding: EdgeInsets.symmetric(horizontal: 30, vertical: 50),
+        targetPadding: EdgeInsets.symmetric(
+          horizontal: screenWidth * 0.076, // ~30px on 393px screen
+          vertical: screenHeight * 0.059, // ~50px on 852px screen
+        ),
         container: BearMascotMessage(
           message: 'Click on the Journeys tab to go to the Journeys page.',
           showBear: true,
@@ -122,6 +129,8 @@ class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final onboarding = Provider.of<OnboardingModel>(context, listen: true);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
 
     // Start showcase when step1 completes
     if (onboarding.step1ChallengesComplete &&
@@ -180,7 +189,7 @@ class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
                   ),
                 ),
               ),
-              _buildJourneysTab(onboarding),
+              _buildJourneysTab(onboarding, screenWidth, screenHeight),
             ],
           ),
         ),
