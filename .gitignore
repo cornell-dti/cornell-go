@@ -41,8 +41,13 @@ docs
 .env
 .env.test
 
-documentation
+#AI
 CLAUDE.md
-
-TPM/
 *.mdc
+
+#Docs
+TPM/
+documentation
+
+#Backups
+db-backups/
