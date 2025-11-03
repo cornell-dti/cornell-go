@@ -71,6 +71,7 @@ class _ChallengesPageState extends State<ChallengesPage> {
   String selectedDifficulty = '';
   String? mySearchText;
   List<ChallengeCellDto> eventData = [];
+  OverlayEntry? _bearOverlayEntry;
 
   _ChallengesPageState(String? difficulty, List<String>? locations,
       List<String>? categories, String? searchText) {
@@ -101,11 +102,50 @@ class _ChallengesPageState extends State<ChallengesPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  void dispose() {
+    _removeBearOverlay();
+    super.dispose();
+  }
+
+  void _showBearOverlay() {
+    _removeBearOverlay(); // Remove existing if any
+
     const double bearLeftPercent = -0.095;
     const double bearBottomPercent = 0.08;
     const double messageLeftPercent = 0.56;
     const double messageBottomPercent = 0.31;
+
+    _bearOverlayEntry = OverlayEntry(
+      builder: (context) => BearMascotMessage(
+        message:
+            'This is the Challenge page. A Challenge is a single quest that takes you to one or more campus spots.',
+        showBear: true,
+        bearAsset: 'popup',
+        bearLeftPercent: bearLeftPercent,
+        bearBottomPercent: bearBottomPercent,
+        messageLeftPercent: messageLeftPercent,
+        messageBottomPercent: messageBottomPercent,
+        onTap: () {
+          print("Tapped anywhere on step 1");
+          _removeBearOverlay();
+          ShowcaseView.getNamed("challenges_page").dismiss();
+          Provider.of<OnboardingModel>(context, listen: false).completeStep1();
+        },
+      ),
+    );
+
+    Overlay.of(context).insert(_bearOverlayEntry!);
+  }
+
+  void _removeBearOverlay() {
+    _bearOverlayEntry?.remove();
+    _bearOverlayEntry = null;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final onboarding = Provider.of<OnboardingModel>(context, listen: true);
+
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -246,8 +286,6 @@ class _ChallengesPageState extends State<ChallengesPage> {
                       }
 
                       // Start showcase when step0 completes AND data is loaded
-                      final onboarding =
-                          Provider.of<OnboardingModel>(context, listen: true);
                       if (onboarding.step0WelcomeComplete &&
                           !onboarding.step1ChallengesComplete &&
                           eventData.isNotEmpty) {
@@ -256,6 +294,8 @@ class _ChallengesPageState extends State<ChallengesPage> {
                             ShowcaseView.getNamed("challenges_page")
                                 .startShowCase(
                                     [onboarding.step1ChallengeCardKey]);
+                            // Show bear overlay on top of showcase
+                            _showBearOverlay();
                           }
                         });
                       }
@@ -277,29 +317,15 @@ class _ChallengesPageState extends State<ChallengesPage> {
                               eventData[index].points,
                               eventData[index].eventId);
 
-                          // Wrap first challenge with showcase for onboarding
+                          // Wrap first challenge with regular showcase (no custom container)
                           if (index == 0 &&
                               !onboarding.step1ChallengesComplete) {
-                            return Showcase.withWidget(
+                            return Showcase(
                               key: onboarding.step1ChallengeCardKey,
+                              title: '',
+                              description: '',
+                              tooltipBackgroundColor: Colors.transparent,
                               disableMovingAnimation: true,
-                              container: BearMascotMessage(
-                                message:
-                                    'This is the Challenge page. A Challenge is a single quest that takes you to one or more campus spots.',
-                                showBear: true,
-                                bearAsset: 'popup',
-                                bearLeftPercent: bearLeftPercent,
-                                bearBottomPercent: bearBottomPercent,
-                                messageLeftPercent: messageLeftPercent,
-                                messageBottomPercent: messageBottomPercent,
-                                onTap: () {
-                                  // Dismiss showcase when user taps anywhere
-                                  print("Tapped anywhere on step 1");
-                                  ShowcaseView.getNamed("challenges_page")
-                                      .dismiss();
-                                  onboarding.completeStep1();
-                                },
-                              ),
                               child: challengeCell,
                             );
                           }

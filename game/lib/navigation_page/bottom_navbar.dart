@@ -54,6 +54,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
   int _selectedIndex = 0;
   bool _hasTriggeredStep11 = false; // Prevent multiple showcase triggers
   bool _hasTriggeredStep12 = false; // Prevent multiple showcase triggers
+  OverlayEntry? _bearOverlayEntry;
   static const TextStyle optionStyle =
       TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
   static List<Widget> _widgetOptions = <Widget>[
@@ -74,6 +75,67 @@ class _BottomNavBarState extends State<BottomNavBar> {
     // TODO: Later load user.hasCompletedOnboarding from backend database here
   }
 
+  @override
+  void dispose() {
+    _removeBearOverlay();
+    super.dispose();
+  }
+
+  void _showProfileBearOverlay() {
+    _removeBearOverlay(); // Remove existing if any
+
+    _bearOverlayEntry = OverlayEntry(
+      builder: (context) => BearMascotMessage(
+        message:
+            'Welcome to your Profile where you can track your Challenges, Journeys, and Achievements as a record of your exploration across campus.',
+        showBear: true,
+        bearAsset: 'standing',
+        bearLeftPercent: -0.02,
+        bearBottomPercent: 0.12,
+        messageLeftPercent: 0.6,
+        messageBottomPercent: 0.35,
+        onTap: () {
+          print("Tapped anywhere on step 11");
+          _removeBearOverlay();
+          ShowcaseView.getNamed("bottom_navbar_profile").dismiss();
+          Provider.of<OnboardingModel>(context, listen: false).completeStep11();
+        },
+      ),
+    );
+
+    Overlay.of(context).insert(_bearOverlayEntry!);
+  }
+
+  void _showLeaderboardBearOverlay() {
+    _removeBearOverlay(); // Remove existing if any
+
+    _bearOverlayEntry = OverlayEntry(
+      builder: (context) => BearMascotMessage(
+        message:
+            'See how you stack up against other CornellGo players. The more Challenges and Journeys you complete, the higher your score!',
+        showBear: true,
+        bearAsset: 'popup',
+        bearLeftPercent: -0.095,
+        bearBottomPercent: 0.2,
+        messageLeftPercent: 0.55,
+        messageBottomPercent: 0.42,
+        onTap: () {
+          print("Tapped anywhere on step 12");
+          _removeBearOverlay();
+          ShowcaseView.getNamed("bottom_navbar_leaderboard").dismiss();
+          Provider.of<OnboardingModel>(context, listen: false).completeStep12();
+        },
+      ),
+    );
+
+    Overlay.of(context).insert(_bearOverlayEntry!);
+  }
+
+  void _removeBearOverlay() {
+    _bearOverlayEntry?.remove();
+    _bearOverlayEntry = null;
+  }
+
   /// Build Profile tab with optional onboarding showcase
   BottomNavigationBarItem _buildProfileTab(
     OnboardingModel onboarding,
@@ -84,28 +146,16 @@ class _BottomNavBarState extends State<BottomNavBar> {
     // Note: Profile tab is always active during this showcase (we navigate to it)
     if (onboarding.step10HintButtonComplete &&
         !onboarding.step11ProfileTabComplete) {
-      final showcasedWidget = Showcase.withWidget(
+      final showcasedWidget = Showcase(
         key: onboarding.step11ProfileTabKey,
+        title: '',
+        description: '',
+        tooltipBackgroundColor: Colors.transparent,
         disableMovingAnimation: true,
         targetShapeBorder: CircleBorder(),
         targetPadding: EdgeInsets.symmetric(
           horizontal: screenWidth * 0.055, // ~30px on 393px screen
           vertical: screenHeight * 0.02, // ~30px on 852px screen
-        ),
-        container: BearMascotMessage(
-          message:
-              'Welcome to your Profile where you can track your Challenges, Journeys, and Achievements as a record of your exploration across campus.',
-          showBear: true,
-          bearAsset: 'standing',
-          bearLeftPercent: -0.02,
-          bearBottomPercent: 0.12,
-          messageLeftPercent: 0.6,
-          messageBottomPercent: 0.35,
-          onTap: () {
-            print("Tapped anywhere on step 11");
-            ShowcaseView.getNamed("bottom_navbar_profile").dismiss();
-            onboarding.completeStep11();
-          },
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -149,28 +199,16 @@ class _BottomNavBarState extends State<BottomNavBar> {
     // Note: Leaderboard tab is always active during this showcase (we navigate to it)
     if (onboarding.step11ProfileTabComplete &&
         !onboarding.step12LeaderboardTabComplete) {
-      final showcasedWidget = Showcase.withWidget(
+      final showcasedWidget = Showcase(
         key: onboarding.step12LeaderboardTabKey,
+        title: '',
+        description: '',
+        tooltipBackgroundColor: Colors.transparent,
         disableMovingAnimation: true,
         targetShapeBorder: CircleBorder(),
         targetPadding: EdgeInsets.symmetric(
           horizontal: screenWidth * 0.055, // Same as Profile
           vertical: screenHeight * 0.04, // Same as Profile
-        ),
-        container: BearMascotMessage(
-          message:
-              'See how you stack up against other CornellGo players. The more Challenges and Journeys you complete, the higher your score!',
-          showBear: true,
-          bearAsset: 'popup',
-          bearLeftPercent: -0.095,
-          bearBottomPercent: 0.2,
-          messageLeftPercent: 0.55,
-          messageBottomPercent: 0.42,
-          onTap: () {
-            print("Tapped anywhere on step 12");
-            ShowcaseView.getNamed("bottom_navbar_leaderboard").dismiss();
-            onboarding.completeStep12();
-          },
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -237,6 +275,8 @@ class _BottomNavBarState extends State<BottomNavBar> {
           // Start showcase to highlight Profile icon
           ShowcaseView.getNamed("bottom_navbar_profile")
               .startShowCase([onboarding.step11ProfileTabKey]);
+          // Show bear overlay on top of showcase
+          _showProfileBearOverlay();
         }
       });
     }
@@ -266,6 +306,8 @@ class _BottomNavBarState extends State<BottomNavBar> {
           // Start showcase to highlight Leaderboard icon
           ShowcaseView.getNamed("bottom_navbar_leaderboard")
               .startShowCase([onboarding.step12LeaderboardTabKey]);
+          // Show bear overlay on top of showcase
+          _showLeaderboardBearOverlay();
         }
       });
     }

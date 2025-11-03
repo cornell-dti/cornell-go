@@ -38,6 +38,7 @@ class _GameplayPageState extends State<GameplayPage> {
   GeoPoint? currentLocation;
 
   late StreamSubscription<Position> positionStream;
+  OverlayEntry? _bearOverlayEntry;
 
   @override
   void initState() {
@@ -60,8 +61,44 @@ class _GameplayPageState extends State<GameplayPage> {
 
   @override
   void dispose() {
+    _removeBearOverlay();
     positionStream.cancel();
     super.dispose();
+  }
+
+  void _showBearOverlay() {
+    _removeBearOverlay(); // Remove existing if any
+    
+    const double bearLeftPercent = -0.02;
+    const double bearBottomPercent = 0.18;
+    const double messageLeftPercent = 0.6;
+    const double messageBottomPercent = 0.40;
+    
+    _bearOverlayEntry = OverlayEntry(
+      builder: (context) => BearMascotMessage(
+        message:
+            'See where your destination is, how far away you are, and how many points the challenge is worth.',
+        showBear: true,
+        bearAsset: 'standing',
+        bearLeftPercent: bearLeftPercent,
+        bearBottomPercent: bearBottomPercent,
+        messageLeftPercent: messageLeftPercent,
+        messageBottomPercent: messageBottomPercent,
+        onTap: () {
+          print("Tapped anywhere on step 6");
+          _removeBearOverlay();
+          ShowcaseView.getNamed("gameplay_page").dismiss();
+          Provider.of<OnboardingModel>(context, listen: false).completeStep6();
+        },
+      ),
+    );
+    
+    Overlay.of(context).insert(_bearOverlayEntry!);
+  }
+
+  void _removeBearOverlay() {
+    _bearOverlayEntry?.remove();
+    _bearOverlayEntry = null;
   }
 
   /// Build info row with optional onboarding showcase
@@ -74,10 +111,6 @@ class _GameplayPageState extends State<GameplayPage> {
     double sectionSeperation,
     double screenWidth,
     double screenHeight,
-    double bearLeftPercent,
-    double bearBottomPercent,
-    double messageLeftPercent,
-    double messageBottomPercent,
   ) {
     final infoRow = Container(
       child: Row(
@@ -179,27 +212,15 @@ class _GameplayPageState extends State<GameplayPage> {
 
     if (onboarding.step5GameplayIntroComplete &&
         !onboarding.step6InfoRowComplete) {
-      return Showcase.withWidget(
+      return Showcase(
         key: onboarding.step6InfoRowKey,
+        title: '',
+        description: '',
+        tooltipBackgroundColor: Colors.transparent,
         disableMovingAnimation: true,
         targetPadding: EdgeInsets.symmetric(
           horizontal: screenWidth * 0.013, // ~5px on 393px screen
           vertical: screenHeight * 0.006, // ~5px on 852px screen
-        ),
-        container: BearMascotMessage(
-          message:
-              'See where your destination is, how far away you are, and how many points the challenge is worth.',
-          showBear: true,
-          bearAsset: 'standing',
-          bearLeftPercent: bearLeftPercent,
-          bearBottomPercent: bearBottomPercent,
-          messageLeftPercent: messageLeftPercent,
-          messageBottomPercent: messageBottomPercent,
-          onTap: () {
-            print("Tapped anywhere on step 6");
-            ShowcaseView.getNamed("gameplay_page").dismiss();
-            onboarding.completeStep6();
-          },
         ),
         child: infoRow,
       );
@@ -274,12 +295,6 @@ class _GameplayPageState extends State<GameplayPage> {
 
           double sectionSeperation = MediaQuery.of(context).size.width * 0.05;
 
-          // Positioning constants for onboarding bear/message
-          const double bearLeftPercent = -0.02;
-          const double bearBottomPercent = 0.18;
-          const double messageLeftPercent = 0.6;
-          const double messageBottomPercent = 0.40;
-
           // Start showcase when step 5 completes
           if (onboarding.step5GameplayIntroComplete &&
               !onboarding.step6InfoRowComplete) {
@@ -287,6 +302,8 @@ class _GameplayPageState extends State<GameplayPage> {
               if (mounted) {
                 ShowcaseView.getNamed("gameplay_page")
                     .startShowCase([onboarding.step6InfoRowKey]);
+                // Show bear overlay on top of showcase
+                _showBearOverlay();
               }
             });
           }
@@ -374,10 +391,6 @@ class _GameplayPageState extends State<GameplayPage> {
                                 sectionSeperation,
                                 screenWidth,
                                 screenHeight,
-                                bearLeftPercent,
-                                bearBottomPercent,
-                                messageLeftPercent,
-                                messageBottomPercent,
                               )
                             ]))),
                 Expanded(

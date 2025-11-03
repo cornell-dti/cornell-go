@@ -104,6 +104,7 @@ class _GameplayMapState extends State<GameplayMap> {
   // size variables for expanding picture for animation
 
   var pictureIcon = SvgPicture.asset("assets/icons/mapexpand.svg");
+  OverlayEntry? _bearOverlayEntry;
 
   /// Switch between the two sizes
   void _toggle() => setState(() {
@@ -118,6 +119,85 @@ class _GameplayMapState extends State<GameplayMap> {
           pictureAlign = Alignment.topRight;
         }
       });
+
+  void _removeBearOverlay() {
+    _bearOverlayEntry?.remove();
+    _bearOverlayEntry = null;
+  }
+
+  void _showImageToggleBearOverlay() {
+    _removeBearOverlay();
+    _bearOverlayEntry = OverlayEntry(
+      builder: (context) => BearMascotMessage(
+        message:
+            'Click on the zoom button to get a better idea of what the location looks like!',
+        showBear: true,
+        bearAsset: 'standing',
+        bearLeftPercent: -0.02,
+        bearBottomPercent: 0.18,
+        messageLeftPercent: 0.6,
+        messageBottomPercent: 0.40,
+        onTap: () {
+          print("Tapped anywhere on step 7 - expanding image");
+          _removeBearOverlay();
+          ShowcaseView.getNamed("gameplay_map").dismiss();
+          Provider.of<OnboardingModel>(context, listen: false).completeStep7();
+          _toggle();
+        },
+      ),
+    );
+    Overlay.of(context).insert(_bearOverlayEntry!);
+  }
+
+  void _showRecenterBearOverlay() {
+    _removeBearOverlay();
+    _bearOverlayEntry = OverlayEntry(
+      builder: (context) => BearMascotMessage(
+        message:
+            'Use the Recenter to return the map view to your current location so you can stay oriented.',
+        showBear: true,
+        bearAsset: 'popup',
+        bearLeftPercent: -0.095,
+        bearBottomPercent: 0.2,
+        messageLeftPercent: 0.55,
+        messageBottomPercent: 0.42,
+        onTap: () {
+          print("Tapped anywhere on step 9");
+          _removeBearOverlay();
+          ShowcaseView.getNamed("gameplay_map").dismiss();
+          Provider.of<OnboardingModel>(context, listen: false).completeStep9();
+        },
+      ),
+    );
+    Overlay.of(context).insert(_bearOverlayEntry!);
+  }
+
+  void _showHintBearOverlay() {
+    _removeBearOverlay();
+    _bearOverlayEntry = OverlayEntry(
+      builder: (context) => BearMascotMessage(
+        message:
+            'Stuck? Use a Hint to make the location circle smaller, helping you pinpoint the spot.',
+        showBear: true,
+        bearAsset: 'standing',
+        bearLeftPercent: -0.02,
+        bearBottomPercent: 0.18,
+        messageLeftPercent: 0.6,
+        messageBottomPercent: 0.40,
+        onTap: () {
+          print("Tapped anywhere on step 10");
+          _removeBearOverlay();
+          ShowcaseView.getNamed("gameplay_map").dismiss();
+          Provider.of<OnboardingModel>(context, listen: false).completeStep10();
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => BottomNavBar()),
+          );
+        },
+      ),
+    );
+    Overlay.of(context).insert(_bearOverlayEntry!);
+  }
 
   @override
   void initState() {
@@ -134,9 +214,6 @@ class _GameplayMapState extends State<GameplayMap> {
     }
     ShowcaseView.register(
       scope: "gameplay_map",
-      onFinish: () {
-        Provider.of<OnboardingModel>(context, listen: false).completeStep7();
-      },
     );
   }
 
@@ -155,6 +232,7 @@ class _GameplayMapState extends State<GameplayMap> {
 
   @override
   void dispose() {
+    _removeBearOverlay();
     positionStream.cancel();
     _disposeController();
     super.dispose();
@@ -415,23 +493,30 @@ class _GameplayMapState extends State<GameplayMap> {
     if (isExpanded &&
         onboarding.step7ImageToggleComplete &&
         !onboarding.step8ExpandedImageComplete) {
-      photoWidget = Showcase.withWidget(
+      photoWidget = Showcase(
         key: onboarding.step8ExpandedImageKey,
+        title: '',
+        description: '',
+        tooltipBackgroundColor: Colors.transparent,
         disableMovingAnimation: true,
-        targetPadding: EdgeInsets.all(0),
-        container: GestureDetector(
-          onTap: () {
-            print("Tapped anywhere on step 8");
-            ShowcaseView.getNamed("gameplay_map").dismiss();
-            onboarding.completeStep8();
-            _toggle();
-          },
-          child: Container(
-            width: screenWidth,
-            height: screenHeight,
-            color: Colors.transparent,
-          ),
-        ),
+        targetPadding: EdgeInsets.zero,
+        disposeOnTap: true,
+        onTargetClick: () {
+          onboarding.completeStep8();
+          _toggle(); // minimize the image
+          // (optional) immediately kick off Step 9
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              ShowcaseView.getNamed("gameplay_map")
+                  .startShowCase([onboarding.step9RecenterButtonKey]);
+              _showRecenterBearOverlay();
+            }
+          });
+        },
+        onBarrierClick: () {
+          onboarding.completeStep8();
+          _toggle();
+        },
         child: photoWidget,
       );
     }
@@ -478,29 +563,15 @@ class _GameplayMapState extends State<GameplayMap> {
     // 4. Step 7: Wrap imageToggle with showcase (small zoom button)
     if (onboarding.step6InfoRowComplete &&
         !onboarding.step7ImageToggleComplete) {
-      imageToggle = Showcase.withWidget(
+      imageToggle = Showcase(
         key: onboarding.step7ImageToggleKey,
+        title: '',
+        description: '',
+        tooltipBackgroundColor: Colors.transparent,
         disableMovingAnimation: true,
         targetPadding: EdgeInsets.symmetric(
           horizontal: screenWidth * 0.025, // ~10px on 393px screen
           vertical: screenHeight * 0.012, // ~10px on 852px screen
-        ),
-        container: BearMascotMessage(
-          message:
-              'Click on the zoom button to get a better idea of what the location looks like!',
-          showBear: true,
-          bearAsset: 'standing',
-          bearLeftPercent: -0.02,
-          bearBottomPercent: 0.18,
-          messageLeftPercent: 0.6,
-          messageBottomPercent: 0.40,
-          onTap: () {
-            print("Tapped anywhere on step 7 - expanding image");
-            ShowcaseView.getNamed("gameplay_map").dismiss();
-            onboarding.completeStep7();
-            // Expand the image to trigger step 8
-            _toggle();
-          },
         ),
         child: imageToggle,
       );
@@ -523,27 +594,15 @@ class _GameplayMapState extends State<GameplayMap> {
     // 2. Step 9: Wrap just the SVG with showcase
     if (onboarding.step8ExpandedImageComplete &&
         !onboarding.step9RecenterButtonComplete) {
-      svgIcon = Showcase.withWidget(
+      svgIcon = Showcase(
         key: onboarding.step9RecenterButtonKey,
+        title: '',
+        description: '',
+        tooltipBackgroundColor: Colors.transparent,
         disableMovingAnimation: true,
         targetPadding: EdgeInsets.symmetric(
           horizontal: screenWidth * 0.025, // ~10px on 393px screen
           vertical: screenHeight * 0.012, // ~10px on 852px screen
-        ),
-        container: BearMascotMessage(
-          message:
-              'Use the Recenter to return the map view to your current location so you can stay oriented.',
-          showBear: true,
-          bearAsset: 'popup',
-          bearLeftPercent: -0.095,
-          bearBottomPercent: 0.2,
-          messageLeftPercent: 0.55,
-          messageBottomPercent: 0.42,
-          onTap: () {
-            print("Tapped anywhere on step 9");
-            ShowcaseView.getNamed("gameplay_map").dismiss();
-            onboarding.completeStep9();
-          },
         ),
         child: svgIcon,
       );
@@ -621,29 +680,12 @@ class _GameplayMapState extends State<GameplayMap> {
     // 2. Step 10: Wrap entire hint button (button + counter) with showcase
     if (onboarding.step9RecenterButtonComplete &&
         !onboarding.step10HintButtonComplete) {
-      hintButton = Showcase.withWidget(
+      hintButton = Showcase(
         key: onboarding.step10HintButtonKey,
+        title: '',
+        description: '',
+        tooltipBackgroundColor: Colors.transparent,
         disableMovingAnimation: true,
-        container: BearMascotMessage(
-          message:
-              'Stuck? Use a Hint to make the location circle smaller, helping you pinpoint the spot.',
-          showBear: true,
-          bearAsset: 'standing',
-          bearLeftPercent: -0.02,
-          bearBottomPercent: 0.18,
-          messageLeftPercent: 0.6,
-          messageBottomPercent: 0.40,
-          onTap: () {
-            print("Tapped anywhere on step 10");
-            ShowcaseView.getNamed("gameplay_map").dismiss();
-            onboarding.completeStep10();
-            // Navigate back to home to show Profile tab highlight (step 11)
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => BottomNavBar()),
-            );
-          },
-        ),
         child: hintButton,
       );
     }
@@ -703,6 +745,8 @@ class _GameplayMapState extends State<GameplayMap> {
             if (mounted) {
               ShowcaseView.getNamed("gameplay_map")
                   .startShowCase([onboarding.step7ImageToggleKey]);
+              // Show bear overlay on top of showcase
+              _showImageToggleBearOverlay();
             }
           });
         }
@@ -715,6 +759,7 @@ class _GameplayMapState extends State<GameplayMap> {
             if (mounted) {
               ShowcaseView.getNamed("gameplay_map")
                   .startShowCase([onboarding.step8ExpandedImageKey]);
+              // No bear overlay for step 8 - just transparent full-screen tap
             }
           });
         }
@@ -726,6 +771,8 @@ class _GameplayMapState extends State<GameplayMap> {
             if (mounted) {
               ShowcaseView.getNamed("gameplay_map")
                   .startShowCase([onboarding.step9RecenterButtonKey]);
+              // Show bear overlay on top of showcase
+              _showRecenterBearOverlay();
             }
           });
         }
@@ -737,6 +784,8 @@ class _GameplayMapState extends State<GameplayMap> {
             if (mounted) {
               ShowcaseView.getNamed("gameplay_map")
                   .startShowCase([onboarding.step10HintButtonKey]);
+              // Show bear overlay on top of showcase
+              _showHintBearOverlay();
             }
           });
         }

@@ -45,8 +45,6 @@ class OnboardingModel extends ChangeNotifier {
   final GlobalKey step11ProfileTabKey = GlobalKey();
   final GlobalKey step12LeaderboardTabKey = GlobalKey();
 
-  // TODO: Add more flags and keys for each Figma screen (up to 12 total)
-
   /**
    * Mark step 0 (welcome overlay) complete
    */

@@ -87,6 +87,7 @@ class _JourneysPageState extends State<JourneysPage> {
   String selectedStatus = '';
 
   List<JourneyCellDto> eventData = [];
+  OverlayEntry? _bearOverlayEntry;
 
   @override
   void initState() {
@@ -110,8 +111,50 @@ class _JourneysPageState extends State<JourneysPage> {
 
   @override
   void dispose() {
+    _removeBearOverlay();
     // Don't unregister here - causes issues during hot restart
     super.dispose();
+  }
+
+  void _showBearOverlay(ApiClient apiClient) {
+    _removeBearOverlay(); // Remove existing if any
+
+    const double bearLeftPercent = -0.02;
+    const double bearBottomPercent = 0.12;
+    const double messageLeftPercent = 0.6;
+    const double messageBottomPercent = 0.35;
+
+    _bearOverlayEntry = OverlayEntry(
+      builder: (context) => BearMascotMessage(
+        message:
+            'Click on the first journey to learn more and start your first adventure!',
+        showBear: true,
+        bearAsset: 'standing',
+        bearLeftPercent: bearLeftPercent,
+        bearBottomPercent: bearBottomPercent,
+        messageLeftPercent: messageLeftPercent,
+        messageBottomPercent: messageBottomPercent,
+        onTap: () {
+          print("Tapped anywhere on step 4 - navigating to gameplay");
+          _removeBearOverlay();
+          ShowcaseView.getNamed("journeys_page").dismiss();
+          Provider.of<OnboardingModel>(context, listen: false).completeStep4();
+
+          // Set current event and navigate to gameplay
+          apiClient.serverApi?.setCurrentEvent(
+              SetCurrentEventDto(eventId: eventData[0].eventId));
+          Navigator.pushReplacement(
+              context, MaterialPageRoute(builder: (context) => GameplayPage()));
+        },
+      ),
+    );
+
+    Overlay.of(context).insert(_bearOverlayEntry!);
+  }
+
+  void _removeBearOverlay() {
+    _bearOverlayEntry?.remove();
+    _bearOverlayEntry = null;
   }
 
   void openFilter() {
@@ -136,12 +179,6 @@ class _JourneysPageState extends State<JourneysPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Positioning constants for onboarding bear/message
-    const double bearLeftPercent = -0.02;
-    const double bearBottomPercent = 0.12;
-    const double messageLeftPercent = 0.6;
-    const double messageBottomPercent = 0.35;
-
     return Scaffold(
         body: Container(
       width: double.infinity,
@@ -306,6 +343,8 @@ class _JourneysPageState extends State<JourneysPage> {
                         if (mounted) {
                           ShowcaseView.getNamed("journeys_page").startShowCase(
                               [onboarding.step4FirstJourneyCardKey]);
+                          // Show bear overlay on top of showcase
+                          _showBearOverlay(apiClient);
                         }
                       });
                     }
@@ -329,38 +368,15 @@ class _JourneysPageState extends State<JourneysPage> {
                             eventData[index].points,
                             eventData[index].eventId);
 
-                        // Wrap first journey with showcase for onboarding
+                        // Wrap first journey with showcase (no custom container)
                         if (index == 0 &&
                             !onboarding.step4FirstJourneyComplete) {
-                          return Showcase.withWidget(
+                          return Showcase(
                             key: onboarding.step4FirstJourneyCardKey,
+                            title: '',
+                            description: '',
+                            tooltipBackgroundColor: Colors.transparent,
                             disableMovingAnimation: true,
-                            container: BearMascotMessage(
-                              message:
-                                  'Click on the first journey to learn more and start your first adventure!',
-                              showBear: true,
-                              bearAsset: 'standing',
-                              bearLeftPercent: bearLeftPercent,
-                              bearBottomPercent: bearBottomPercent,
-                              messageLeftPercent: messageLeftPercent,
-                              messageBottomPercent: messageBottomPercent,
-                              onTap: () {
-                                print(
-                                    "Tapped anywhere on step 4 - navigating to gameplay");
-                                ShowcaseView.getNamed("journeys_page")
-                                    .dismiss();
-                                onboarding.completeStep4();
-
-                                // Set current event and navigate to gameplay
-                                apiClient.serverApi?.setCurrentEvent(
-                                    SetCurrentEventDto(
-                                        eventId: eventData[0].eventId));
-                                Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => GameplayPage()));
-                              },
-                            ),
                             child: journeyCell,
                           );
                         }

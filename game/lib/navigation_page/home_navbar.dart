@@ -44,6 +44,7 @@ class HomeNavBar extends StatefulWidget {
 
 class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
   late TabController _tabController;
+  OverlayEntry? _bearOverlayEntry;
 
   @override
   void initState() {
@@ -68,8 +69,40 @@ class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
 
   @override
   void dispose() {
+    _removeBearOverlay();
     _tabController.dispose();
     super.dispose();
+  }
+
+  void _showBearOverlay() {
+    _removeBearOverlay(); // Remove existing if any
+
+    _bearOverlayEntry = OverlayEntry(
+      builder: (context) => BearMascotMessage(
+        message: 'Click on the Journeys tab to go to the Journeys page.',
+        showBear: true,
+        bearAsset: 'standing',
+        bearLeftPercent: -0.02,
+        bearBottomPercent: 0.12,
+        messageLeftPercent: 0.6,
+        messageBottomPercent: 0.35,
+        onTap: () {
+          print("Tapped anywhere on step 2");
+          _removeBearOverlay();
+          ShowcaseView.getNamed("home_navbar").dismiss();
+          Provider.of<OnboardingModel>(context, listen: false).completeStep2();
+          // Switch to Journeys tab (index 1) to show step 3
+          _tabController.animateTo(1);
+        },
+      ),
+    );
+
+    Overlay.of(context).insert(_bearOverlayEntry!);
+  }
+
+  void _removeBearOverlay() {
+    _bearOverlayEntry?.remove();
+    _bearOverlayEntry = null;
   }
 
   /// Build Journeys tab with optional onboarding showcase
@@ -94,30 +127,16 @@ class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
     // Show showcase if step1 complete and step2 not complete
     if (onboarding.step1ChallengesComplete &&
         !onboarding.step2JourneysComplete) {
-      return Showcase.withWidget(
+      return Showcase(
         key: onboarding.step2JourneysTabKey,
+        title: '',
+        description: '',
+        tooltipBackgroundColor: Colors.transparent,
         disableMovingAnimation: true,
         targetShapeBorder: CircleBorder(),
         targetPadding: EdgeInsets.symmetric(
           horizontal: screenWidth * 0.076, // ~30px on 393px screen
           vertical: screenHeight * 0.059, // ~50px on 852px screen
-        ),
-        container: BearMascotMessage(
-          message: 'Click on the Journeys tab to go to the Journeys page.',
-          showBear: true,
-          bearAsset: 'standing',
-          bearLeftPercent: -0.02,
-          bearBottomPercent: 0.12,
-          messageLeftPercent: 0.6,
-          messageBottomPercent: 0.35,
-          onTap: () {
-            // Dismiss showcase when user taps anywhere
-            print("Tapped anywhere on step 2");
-            ShowcaseView.getNamed("home_navbar").dismiss();
-            onboarding.completeStep2();
-            // Switch to Journeys tab (index 1) to show step 3
-            _tabController.animateTo(1);
-          },
         ),
         child: journeysTab,
       );
@@ -139,6 +158,8 @@ class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
         if (mounted) {
           ShowcaseView.getNamed("home_navbar")
               .startShowCase([onboarding.step2JourneysTabKey]);
+          // Show bear overlay on top of showcase
+          _showBearOverlay();
         }
       });
     }
