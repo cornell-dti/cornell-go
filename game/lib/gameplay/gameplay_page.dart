@@ -68,12 +68,12 @@ class _GameplayPageState extends State<GameplayPage> {
 
   void _showBearOverlay() {
     _removeBearOverlay(); // Remove existing if any
-    
+
     const double bearLeftPercent = -0.02;
     const double bearBottomPercent = 0.18;
     const double messageLeftPercent = 0.6;
     const double messageBottomPercent = 0.40;
-    
+
     _bearOverlayEntry = OverlayEntry(
       builder: (context) => BearMascotMessage(
         message:
@@ -92,7 +92,7 @@ class _GameplayPageState extends State<GameplayPage> {
         },
       ),
     );
-    
+
     Overlay.of(context).insert(_bearOverlayEntry!);
   }
 

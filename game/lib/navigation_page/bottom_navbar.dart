@@ -377,7 +377,9 @@ class _BottomNavBarState extends State<BottomNavBar> {
             )),
 
         // LAYER 2: Step 0 - Welcome onboarding overlay (manual, no ShowcaseView)
-        if (!onboarding.step0WelcomeComplete)
+        // Wait for backend response before showing onboarding
+        if (!onboarding.isLoadingFromBackend &&
+            !onboarding.step0WelcomeComplete)
           GestureDetector(
             onTap: () {
               print('👆 Step 0: Dismissing welcome overlay');

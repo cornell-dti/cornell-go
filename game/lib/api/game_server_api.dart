@@ -45,13 +45,18 @@ class GameServerApi {
       completer.complete(arg);
     };
 
-    Future.delayed(Duration(seconds: 5))
-        .then((value) => completer.complete(null));
+    Future.delayed(Duration(seconds: 5)).then((value) {
+      if (!completer.isCompleted) {
+        completer.complete(null);
+      }
+    });
 
     _refreshEv = ev;
     _refreshDat = data;
     _refreshResolver = completionFunc;
 
+    // Note: Uncomment if you want to log all events (gets pretty spammy)
+    // print(ev);
     _socket.emitWithAck(ev, data, ack: completionFunc);
 
     return completer.future;

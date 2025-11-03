@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:game/api/game_api.dart';
+import 'package:game/api/game_client_dto.dart';
 
 /**
  * `OnboardingModel` - Manages onboarding state across the app using ChangeNotifier pattern.
@@ -15,6 +17,10 @@ import 'package:flutter/material.dart';
  * - TODO: Later integrate with backend database to check user.hasCompletedOnboarding
  */
 class OnboardingModel extends ChangeNotifier {
+  // Loading state: true until backend responds with user onboarding status
+  bool _isLoadingFromBackend = true;
+  bool get isLoadingFromBackend => _isLoadingFromBackend;
+
   // Completion flags for each onboarding step/page (session only)
   bool step0WelcomeComplete = false; // Welcome overlay (bottom_navbar)
   bool step1ChallengesComplete =
@@ -45,13 +51,40 @@ class OnboardingModel extends ChangeNotifier {
   final GlobalKey step11ProfileTabKey = GlobalKey();
   final GlobalKey step12LeaderboardTabKey = GlobalKey();
 
+  // Backend API client for persistence
+  final ApiClient _client;
+
+  /**
+   * Constructor - Initialize with API client and listen for backend updates
+   */
+  OnboardingModel(ApiClient client) : _client = client {
+    // Listen for user data updates from backend to sync onboarding status
+    client.clientApi.updateUserDataStream.listen((event) {
+      // Backend responded definitively - no longer loading
+      _isLoadingFromBackend = false;
+
+      if (event.user.hasCompletedOnboarding == true) {
+        // User has completed onboarding (from backend), skip all steps
+        _markAllStepsComplete();
+      } else {
+        print('Backend says onboarding NOT complete - showing onboarding');
+        // User hasn't completed onboarding, reset all flags and show it
+        _resetAllSteps();
+      }
+    });
+
+    // When connected, request user data to check onboarding status
+    client.clientApi.connectedStream.listen((event) {
+      client.serverApi?.requestUserData(RequestUserDataDto());
+    });
+  }
+
   /**
    * Mark step 0 (welcome overlay) complete
    */
   void completeStep0() {
     step0WelcomeComplete = true;
-    notifyListeners(); // Triggers ChallengesPage Consumer to rebuild
-    print('✅ Step 0: Welcome complete');
+    notifyListeners();
   }
 
   /**
@@ -60,7 +93,6 @@ class OnboardingModel extends ChangeNotifier {
   void completeStep1() {
     step1ChallengesComplete = true;
     notifyListeners();
-    print('✅ Step 1: Challenges page complete');
   }
 
   /**
@@ -69,7 +101,6 @@ class OnboardingModel extends ChangeNotifier {
   void completeStep2() {
     step2JourneysComplete = true;
     notifyListeners();
-    print('✅ Step 2: Journeys tab complete');
   }
 
   /**
@@ -78,7 +109,6 @@ class OnboardingModel extends ChangeNotifier {
   void completeStep3() {
     step3JourneysExplanationComplete = true;
     notifyListeners();
-    print('✅ Step 3: Journeys page explanation complete');
   }
 
   /**
@@ -87,7 +117,6 @@ class OnboardingModel extends ChangeNotifier {
   void completeStep4() {
     step4FirstJourneyComplete = true;
     notifyListeners();
-    print('✅ Step 4: First journey card complete');
   }
 
   /**
@@ -96,7 +125,6 @@ class OnboardingModel extends ChangeNotifier {
   void completeStep5() {
     step5GameplayIntroComplete = true;
     notifyListeners();
-    print('✅ Step 5: Gameplay map intro complete');
   }
 
   /**
@@ -105,7 +133,6 @@ class OnboardingModel extends ChangeNotifier {
   void completeStep6() {
     step6InfoRowComplete = true;
     notifyListeners();
-    print('✅ Step 6: Info row complete');
   }
 
   /**
@@ -114,7 +141,6 @@ class OnboardingModel extends ChangeNotifier {
   void completeStep7() {
     step7ImageToggleComplete = true;
     notifyListeners();
-    print('✅ Step 7: Image toggle button complete');
   }
 
   /**
@@ -123,7 +149,6 @@ class OnboardingModel extends ChangeNotifier {
   void completeStep8() {
     step8ExpandedImageComplete = true;
     notifyListeners();
-    print('✅ Step 8: Expanded image view complete');
   }
 
   /**
@@ -132,7 +157,6 @@ class OnboardingModel extends ChangeNotifier {
   void completeStep9() {
     step9RecenterButtonComplete = true;
     notifyListeners();
-    print('✅ Step 9: Recenter button complete');
   }
 
   /**
@@ -141,7 +165,6 @@ class OnboardingModel extends ChangeNotifier {
   void completeStep10() {
     step10HintButtonComplete = true;
     notifyListeners();
-    print('✅ Step 10: Hint button complete');
   }
 
   /**
@@ -150,7 +173,6 @@ class OnboardingModel extends ChangeNotifier {
   void completeStep11() {
     step11ProfileTabComplete = true;
     notifyListeners();
-    print('✅ Step 11: Profile tab complete');
   }
 
   /**
@@ -159,22 +181,31 @@ class OnboardingModel extends ChangeNotifier {
   void completeStep12() {
     step12LeaderboardTabComplete = true;
     notifyListeners();
-    print('✅ Step 12: Leaderboard tab complete');
   }
 
   /**
    * Mark step 13 (final goodbye overlay) complete
+   * Permanently saves completion status to database
    */
-  void completeStep13() {
+  Future<void> completeStep13() async {
     step13FinalComplete = true;
     notifyListeners();
-    print('✅ Step 13: Final onboarding complete! 🎉');
+
+    // Save completion to backend database permanently
+    try {
+      final result =
+          await _client.serverApi?.completeOnboarding(CompleteOnboardingDto());
+      print('✅ Backend: Onboarding completion saved to database');
+    } catch (e) {
+      print('Failed to save onboarding completion: $e');
+    }
   }
 
   /**
    * Reset all onboarding flags (for testing)
+   * Also resets completion status in database
    */
-  void reset() {
+  Future<void> reset() async {
     step0WelcomeComplete = false;
     step1ChallengesComplete = false;
     step2JourneysComplete = false;
@@ -191,22 +222,56 @@ class OnboardingModel extends ChangeNotifier {
     step13FinalComplete = false;
     notifyListeners();
     print('🔄 Onboarding reset');
+
+    // Reset on backend database too (for testing)
+    try {
+      await _client.serverApi?.resetOnboarding(ResetOnboardingDto());
+    } catch (e) {
+      print('Failed to reset onboarding: $e');
+    }
   }
 
   /**
-   * TODO: Check backend database for permanent completion status
-   * This should be called once at app startup to load user's onboarding status
-   * from the backend. For now, we show onboarding every app session.
-   * 
-   * Example:
-   * Future<void> loadFromDatabase(ApiClient client) async {
-   *   final user = await client.getCurrentUser();
-   *   if (user.hasCompletedOnboarding) {
-   *     step0WelcomeComplete = true;
-   *     step1ChallengesComplete = true;
-   *     // ... mark all as complete
-   *     notifyListeners();
-   *   }
-   * }
+   * Internal helper: Mark all onboarding steps as complete
+   * Called when backend indicates user has completed onboarding
    */
+  void _markAllStepsComplete() {
+    step0WelcomeComplete = true;
+    step1ChallengesComplete = true;
+    step2JourneysComplete = true;
+    step3JourneysExplanationComplete = true;
+    step4FirstJourneyComplete = true;
+    step5GameplayIntroComplete = true;
+    step6InfoRowComplete = true;
+    step7ImageToggleComplete = true;
+    step8ExpandedImageComplete = true;
+    step9RecenterButtonComplete = true;
+    step10HintButtonComplete = true;
+    step11ProfileTabComplete = true;
+    step12LeaderboardTabComplete = true;
+    step13FinalComplete = true;
+    notifyListeners();
+  }
+
+  /**
+   * Internal helper: Reset all onboarding steps to incomplete
+   * Called when backend indicates user needs to see onboarding (hasCompletedOnboarding: false)
+   */
+  void _resetAllSteps() {
+    step0WelcomeComplete = false;
+    step1ChallengesComplete = false;
+    step2JourneysComplete = false;
+    step3JourneysExplanationComplete = false;
+    step4FirstJourneyComplete = false;
+    step5GameplayIntroComplete = false;
+    step6InfoRowComplete = false;
+    step7ImageToggleComplete = false;
+    step8ExpandedImageComplete = false;
+    step9RecenterButtonComplete = false;
+    step10HintButtonComplete = false;
+    step11ProfileTabComplete = false;
+    step12LeaderboardTabComplete = false;
+    step13FinalComplete = false;
+    notifyListeners();
+  }
 }
