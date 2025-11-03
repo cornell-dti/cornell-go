@@ -12,6 +12,7 @@ import {
   AchievementTracker,
 } from '@prisma/client';
 import { ClientService } from '../client/client.service';
+import { UserService } from '../user/user.service';
 import { EventService } from '../event/event.service';
 import { AchievementService } from '../achievement/achievement.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -25,7 +26,6 @@ import { accessibleBy } from '@casl/prisma';
 import { Action } from '../casl/action.enum';
 import { subject } from '@casl/ability';
 import { defaultChallengeData } from '../organization/organization.service';
-import { connect } from 'http2';
 
 @Injectable()
 export class ChallengeService {
@@ -36,6 +36,7 @@ export class ChallengeService {
     private achievementService: AchievementService,
     private clientService: ClientService,
     private abilityFactory: CaslAbilityFactory,
+    private userService: UserService,
   ) {}
 
   /**
@@ -178,6 +179,18 @@ export class ChallengeService {
         curChallengeId: nextChallenge?.id ?? null,
       },
     });
+
+    //Send timer start event notif to user if next challenge has a timer length
+    if (nextChallenge?.timerLength) {
+      await this.clientService.sendEvent(
+        [`user/${user.id}`],
+        'startTimerForChallenge',
+        {
+          challengeId: nextChallenge.id,
+          timerLength: nextChallenge.timerLength,
+        },
+      );
+    }
 
     await this.log.logEvent(
       SessionLogEvent.COMPLETE_CHALLENGE,
