@@ -312,8 +312,8 @@ export class EventService {
         user.id
       } = p."B")
       order by ((ev."latitude" - ${data.latitudeF})^2 + (ev."longitude" - ${
-      data.longitudeF
-    })^2)
+        data.longitudeF
+      })^2)
       fetch first ${data.count ?? 4} rows only
     `;
     return evs;
@@ -370,8 +370,8 @@ export class EventService {
         ev.difficulty === DifficultyMode.EASY
           ? 'Easy'
           : ev.difficulty === DifficultyMode.NORMAL
-          ? 'Normal'
-          : 'Hard',
+            ? 'Normal'
+            : 'Hard',
       latitudeF: ev.latitude,
       longitudeF: ev.longitude,
     };
@@ -610,8 +610,8 @@ export class EventService {
         (event.difficulty === 'Easy'
           ? DifficultyMode.EASY
           : event.difficulty === 'Normal'
-          ? DifficultyMode.NORMAL
-          : DifficultyMode.HARD),
+            ? DifficultyMode.NORMAL
+            : DifficultyMode.HARD),
       latitude: event.latitudeF,
       longitude: event.longitudeF,
       category: event.category,
