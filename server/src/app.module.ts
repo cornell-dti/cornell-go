@@ -14,6 +14,7 @@ import { SessionLogModule } from './session-log/session-log.module';
 import { OrganizationModule } from './organization/organization.module';
 import { AchievementModule } from './achievement/achievement.module';
 import { CaslModule } from './casl/casl.module';
+import { QuizModule } from './quiz/quiz.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { CaslModule } from './casl/casl.module';
     SessionLogModule,
     OrganizationModule,
     CaslModule,
+    QuizModule,
   ],
   controllers: [],
   providers: [],
