@@ -49,7 +49,7 @@ class _GameplayPageState extends State<GameplayPage> {
     try {
       ShowcaseView.getNamed("gameplay_page").unregister();
     } catch (e) {
-      // Not registered yet, that's fine
+      // Not registered yet
     }
     ShowcaseView.register(
       scope: "gameplay_page",

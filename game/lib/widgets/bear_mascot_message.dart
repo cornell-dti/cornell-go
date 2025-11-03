@@ -34,10 +34,10 @@ class BearMascotMessage extends StatelessWidget {
     required this.message,
     this.showBear = true,
     this.bearAsset = 'standing',
-    this.bearLeftPercent = 0.1, // Default: 10% from left
-    this.bearBottomPercent = 0.15, // Default: 15% from bottom
-    this.messageLeftPercent = 0.5, // Default: 50% from left (centered)
-    this.messageBottomPercent = 0.4, // Default: 40% from bottom
+    this.bearLeftPercent = 0.1,
+    this.bearBottomPercent = 0.15,
+    this.messageLeftPercent = 0.5,
+    this.messageBottomPercent = 0.4,
     this.onTap,
   }) : super(key: key);
 
@@ -47,16 +47,13 @@ class BearMascotMessage extends StatelessWidget {
     final screenHeight = MediaQuery.of(context).size.height;
 
     // Responsive sizing based on Figma design (393x852)
-    final messageBoxWidth = screenWidth * 0.677; // 266/393
-    // Popup bear needs larger size to compensate for internal padding in asset
-    final bearWidth = bearAsset == 'popup'
-        ? screenWidth * 0.509 // 200/393 for popup (based on Figma)
-        : screenWidth * 0.437; // 172/393 for standing
-    final bearHeight = bearAsset == 'popup'
-        ? screenHeight * 0.317 // 270/852 for popup (based on Figma)
-        : screenHeight * 0.272; // 232/852 for standing
-    final arrowWidth = screenWidth * 0.102; // 40/393
-    final arrowHeight = screenHeight * 0.056; // 48/852
+    final messageBoxWidth = screenWidth * 0.677;
+    final bearWidth =
+        bearAsset == 'popup' ? screenWidth * 0.509 : screenWidth * 0.437;
+    final bearHeight =
+        bearAsset == 'popup' ? screenHeight * 0.317 : screenHeight * 0.272;
+    final arrowWidth = screenWidth * 0.102;
+    final arrowHeight = screenHeight * 0.056;
 
     return GestureDetector(
       onTap: onTap,
@@ -120,9 +117,8 @@ class BearMascotMessage extends StatelessWidget {
                   // Speech bubble tail pointing down-left toward bear
                   Transform.translate(
                     offset: Offset(
-                      -messageBoxWidth *
-                          0.35, // Move left ~35% of message box width
-                      -arrowHeight * 0.4, // Move up ~15% of arrow height
+                      -messageBoxWidth * 0.35,
+                      -arrowHeight * 0.4,
                     ),
                     child: SvgPicture.asset(
                       'assets/icons/bubblearrow.svg',

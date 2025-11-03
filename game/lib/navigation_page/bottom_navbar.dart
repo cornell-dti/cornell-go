@@ -72,7 +72,6 @@ class _BottomNavBarState extends State<BottomNavBar> {
   @override
   void initState() {
     super.initState();
-    // TODO: Later load user.hasCompletedOnboarding from backend database here
   }
 
   @override
@@ -80,6 +79,8 @@ class _BottomNavBarState extends State<BottomNavBar> {
     _removeBearOverlay();
     super.dispose();
   }
+
+  // -- Bear Onboarding Overlays --
 
   void _showProfileBearOverlay() {
     _removeBearOverlay(); // Remove existing if any
@@ -136,7 +137,8 @@ class _BottomNavBarState extends State<BottomNavBar> {
     _bearOverlayEntry = null;
   }
 
-  /// Build Profile tab with optional onboarding showcase
+  // -- Tab with optional onboarding showcases --
+
   BottomNavigationBarItem _buildProfileTab(
     OnboardingModel onboarding,
     double screenWidth,
@@ -189,7 +191,6 @@ class _BottomNavBarState extends State<BottomNavBar> {
     );
   }
 
-  /// Build Leaderboard tab with optional onboarding showcase
   BottomNavigationBarItem _buildLeaderboardTab(
     OnboardingModel onboarding,
     double screenWidth,
@@ -241,6 +242,8 @@ class _BottomNavBarState extends State<BottomNavBar> {
       label: 'Leaderboard',
     );
   }
+
+  // -- Main BottomNavBar Widget --
 
   @override
   Widget build(BuildContext context) {

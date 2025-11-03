@@ -79,114 +79,71 @@ class OnboardingModel extends ChangeNotifier {
     });
   }
 
-  /**
-   * Mark step 0 (welcome overlay) complete
-   */
   void completeStep0() {
     step0WelcomeComplete = true;
     notifyListeners();
   }
 
-  /**
-   * Mark step 1 (challenge card) complete
-   */
   void completeStep1() {
     step1ChallengesComplete = true;
     notifyListeners();
   }
 
-  /**
-   * Mark step 2 (journeys tab) complete
-   */
   void completeStep2() {
     step2JourneysComplete = true;
     notifyListeners();
   }
 
-  /**
-   * Mark step 3 (journeys page explanation) complete
-   */
   void completeStep3() {
     step3JourneysExplanationComplete = true;
     notifyListeners();
   }
 
-  /**
-   * Mark step 4 (first journey card) complete
-   */
   void completeStep4() {
     step4FirstJourneyComplete = true;
     notifyListeners();
   }
 
-  /**
-   * Mark step 5 (gameplay map intro) complete
-   */
   void completeStep5() {
     step5GameplayIntroComplete = true;
     notifyListeners();
   }
 
-  /**
-   * Mark step 6 (info row) complete
-   */
   void completeStep6() {
     step6InfoRowComplete = true;
     notifyListeners();
   }
 
-  /**
-   * Mark step 7 (image toggle button) complete
-   */
   void completeStep7() {
     step7ImageToggleComplete = true;
     notifyListeners();
   }
 
-  /**
-   * Mark step 8 (expanded image view) complete
-   */
   void completeStep8() {
     step8ExpandedImageComplete = true;
     notifyListeners();
   }
 
-  /**
-   * Mark step 9 (recenter button) complete
-   */
   void completeStep9() {
     step9RecenterButtonComplete = true;
     notifyListeners();
   }
 
-  /**
-   * Mark step 10 (hint button) complete
-   */
   void completeStep10() {
     step10HintButtonComplete = true;
     notifyListeners();
   }
 
-  /**
-   * Mark step 11 (profile tab) complete
-   */
   void completeStep11() {
     step11ProfileTabComplete = true;
     notifyListeners();
   }
 
-  /**
-   * Mark step 12 (leaderboard tab) complete
-   */
   void completeStep12() {
     step12LeaderboardTabComplete = true;
     notifyListeners();
   }
 
-  /**
-   * Mark step 13 (final goodbye overlay) complete
-   * Permanently saves completion status to database
-   */
   Future<void> completeStep13() async {
     step13FinalComplete = true;
     notifyListeners();
@@ -202,7 +159,7 @@ class OnboardingModel extends ChangeNotifier {
   }
 
   /**
-   * Reset all onboarding flags (for testing)
+   * Reset all onboarding flags
    * Also resets completion status in database
    */
   Future<void> reset() async {
@@ -223,7 +180,7 @@ class OnboardingModel extends ChangeNotifier {
     notifyListeners();
     print('🔄 Onboarding reset');
 
-    // Reset on backend database too (for testing)
+    // Reset on backend database
     try {
       await _client.serverApi?.resetOnboarding(ResetOnboardingDto());
     } catch (e) {

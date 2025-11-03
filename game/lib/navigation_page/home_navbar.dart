@@ -44,6 +44,7 @@ class HomeNavBar extends StatefulWidget {
 
 class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
   late TabController _tabController;
+  // Onboarding: overlay entry for bear mascot message prompting user to switch to Journeys tab
   OverlayEntry? _bearOverlayEntry;
 
   @override
@@ -51,6 +52,7 @@ class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
 
+    // Onboarding: Register showcase scope for highlighting Journeys tab (step 2)
     // Hot restart fix: unregister old instance if exists
     try {
       ShowcaseView.getNamed("home_navbar").unregister();
@@ -91,7 +93,7 @@ class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
           _removeBearOverlay();
           ShowcaseView.getNamed("home_navbar").dismiss();
           Provider.of<OnboardingModel>(context, listen: false).completeStep2();
-          // Switch to Journeys tab (index 1) to show step 3
+          // Onboarding: Switch to Journeys tab (index 1) to trigger step 3 explanation overlay
           _tabController.animateTo(1);
         },
       ),
@@ -106,6 +108,7 @@ class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
   }
 
   /// Build Journeys tab with optional onboarding showcase
+  /// Onboarding step 2: Highlights Journeys tab to guide user to switch from Challenges view
   Widget _buildJourneysTab(
     OnboardingModel onboarding,
     double screenWidth,
@@ -151,7 +154,7 @@ class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    // Start showcase when step1 completes
+    // Onboarding: Step 2 - Show showcase for Journeys tab after first challenge card is viewed
     if (onboarding.step1ChallengesComplete &&
         !onboarding.step2JourneysComplete) {
       WidgetsBinding.instance.addPostFrameCallback((_) {

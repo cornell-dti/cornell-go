@@ -104,9 +104,10 @@ class _GameplayMapState extends State<GameplayMap> {
   // size variables for expanding picture for animation
 
   var pictureIcon = SvgPicture.asset("assets/icons/mapexpand.svg");
+  // Onboarding: overlay entry for bear mascot messages during onboarding steps 7-10
   OverlayEntry? _bearOverlayEntry;
 
-  /// Switch between the two sizes
+  // Switch between the two sizes
   void _toggle() => setState(() {
         isExpanded = !isExpanded;
 
@@ -206,6 +207,7 @@ class _GameplayMapState extends State<GameplayMap> {
     streamStarted = startPositionStream();
     setStartingHintCircle();
 
+    // Onboarding: Register showcase scope for highlighting UI elements (steps 7-10)
     // Hot restart fix: Unregister old instance if it exists, then register new one
     try {
       ShowcaseView.getNamed("gameplay_map").unregister();
@@ -468,7 +470,7 @@ class _GameplayMapState extends State<GameplayMap> {
     }
   }
 
-  /// Build image toggle widget with optional onboarding showcase
+  // Build image toggle widget with optional onboarding showcase
   Widget _buildImageToggle(
     OnboardingModel onboarding,
     String imageUrl,
@@ -580,7 +582,7 @@ class _GameplayMapState extends State<GameplayMap> {
     return imageToggle;
   }
 
-  /// Build recenter button with optional onboarding showcase
+  // Build recenter button with optional onboarding showcase
   Widget _buildRecenterButton(
     OnboardingModel onboarding,
     double screenWidth,
@@ -624,7 +626,7 @@ class _GameplayMapState extends State<GameplayMap> {
     );
   }
 
-  /// Build hint button with optional onboarding showcase
+  // Build hint button with optional onboarding showcase
   Widget _buildHintButton(
     OnboardingModel onboarding,
     double screenWidth,
@@ -738,7 +740,7 @@ class _GameplayMapState extends State<GameplayMap> {
               "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png";
         }
 
-        // Start showcase when step 6 completes (small zoom button)
+        // Onboarding: Step 7 - Show showcase for image toggle button after info row explanation
         if (onboarding.step6InfoRowComplete &&
             !onboarding.step7ImageToggleComplete) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -751,7 +753,7 @@ class _GameplayMapState extends State<GameplayMap> {
           });
         }
 
-        // Start showcase when step 7 completes and image is expanded
+        // Onboarding: Step 8 - Show showcase for expanded image view
         if (isExpanded &&
             onboarding.step7ImageToggleComplete &&
             !onboarding.step8ExpandedImageComplete) {
@@ -764,7 +766,7 @@ class _GameplayMapState extends State<GameplayMap> {
           });
         }
 
-        // Start showcase when step 8 completes (recenter button)
+        // Onboarding: Step 9 - Show showcase for recenter button
         if (onboarding.step8ExpandedImageComplete &&
             !onboarding.step9RecenterButtonComplete) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -777,7 +779,7 @@ class _GameplayMapState extends State<GameplayMap> {
           });
         }
 
-        // Start showcase when step 9 completes (hint button)
+        // Onboarding: Step 10 - Final gameplay step showcases hint button, then navigates home
         if (onboarding.step9RecenterButtonComplete &&
             !onboarding.step10HintButtonComplete) {
           WidgetsBinding.instance.addPostFrameCallback((_) {

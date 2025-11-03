@@ -71,6 +71,7 @@ class _ChallengesPageState extends State<ChallengesPage> {
   String selectedDifficulty = '';
   String? mySearchText;
   List<ChallengeCellDto> eventData = [];
+  // Onboarding: overlay entry for bear mascot message explaining challenges
   OverlayEntry? _bearOverlayEntry;
 
   _ChallengesPageState(String? difficulty, List<String>? locations,
@@ -85,11 +86,12 @@ class _ChallengesPageState extends State<ChallengesPage> {
   void initState() {
     super.initState();
 
+    // Onboarding: Register showcase scope for highlighting first challenge card (step 1)
     // Hot restart fix: unregister old instance if exists
     try {
       ShowcaseView.getNamed("challenges_page").unregister();
     } catch (e) {
-      // Not registered yet, that's fine
+      // Not registered yet
     }
 
     // Register this page's showcase
@@ -285,7 +287,7 @@ class _ChallengesPageState extends State<ChallengesPage> {
                         }
                       }
 
-                      // Start showcase when step0 completes AND data is loaded
+                      // Onboarding: Step 1 - Show showcase for first challenge card after welcome overlay
                       if (onboarding.step0WelcomeComplete &&
                           !onboarding.step1ChallengesComplete &&
                           eventData.isNotEmpty) {
@@ -317,7 +319,7 @@ class _ChallengesPageState extends State<ChallengesPage> {
                               eventData[index].points,
                               eventData[index].eventId);
 
-                          // Wrap first challenge with regular showcase (no custom container)
+                          // Onboarding: Wrap first challenge card with showcase highlight
                           if (index == 0 &&
                               !onboarding.step1ChallengesComplete) {
                             return Showcase(

@@ -87,17 +87,19 @@ class _JourneysPageState extends State<JourneysPage> {
   String selectedStatus = '';
 
   List<JourneyCellDto> eventData = [];
+  // Onboarding: overlay entry for bear mascot message prompting user to tap first journey
   OverlayEntry? _bearOverlayEntry;
 
   @override
   void initState() {
     super.initState();
 
+    // Onboarding: Register showcase scope for highlighting first journey card (step 4)
     // Hot restart fix: unregister old instance if exists
     try {
       ShowcaseView.getNamed("journeys_page").unregister();
     } catch (e) {
-      // Not registered yet, that's fine
+      // Not registered yet
     }
 
     // Register this page's showcase
@@ -140,7 +142,7 @@ class _JourneysPageState extends State<JourneysPage> {
           ShowcaseView.getNamed("journeys_page").dismiss();
           Provider.of<OnboardingModel>(context, listen: false).completeStep4();
 
-          // Set current event and navigate to gameplay
+          // Onboarding: Navigate to gameplay page to continue onboarding flow
           apiClient.serverApi?.setCurrentEvent(
               SetCurrentEventDto(eventId: eventData[0].eventId));
           Navigator.pushReplacement(
@@ -333,7 +335,7 @@ class _JourneysPageState extends State<JourneysPage> {
                       }
                     }
 
-                    // Start showcase when step3 completes AND data is loaded
+                    // Onboarding: Step 4 - Show showcase for first journey card after journeys explanation
                     final onboarding =
                         Provider.of<OnboardingModel>(context, listen: true);
                     if (onboarding.step3JourneysExplanationComplete &&
@@ -368,7 +370,7 @@ class _JourneysPageState extends State<JourneysPage> {
                             eventData[index].points,
                             eventData[index].eventId);
 
-                        // Wrap first journey with showcase (no custom container)
+                        // Onboarding: Wrap first journey card with showcase highlight
                         if (index == 0 &&
                             !onboarding.step4FirstJourneyComplete) {
                           return Showcase(
