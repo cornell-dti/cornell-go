@@ -121,19 +121,25 @@ describe('UserModule E2E', () => {
       1,
       AuthType.DEVICE,
       'auth-onboarding-complete',
-      'UNDERGRADUATE'
+      'UNDERGRADUATE',
     );
 
-    const user = await userService.byAuth(AuthType.DEVICE, 'auth-onboarding-complete');
+    const user = await userService.byAuth(
+      AuthType.DEVICE,
+      'auth-onboarding-complete',
+    );
     expect(user).toBeDefined();
-    expect(user?.hasCompletedOnboarding).toBe(false); 
-    
-    //checks that the returned user has correct hasCompletedOnboarding 
+    expect(user?.hasCompletedOnboarding).toBe(false);
+
+    //checks that the returned user has correct hasCompletedOnboarding
     const updatedUser = await userService.completeOnboarding(user!);
     expect(updatedUser.hasCompletedOnboarding).toBe(true);
-    
-    //checks that the database has the correct hasCompletedOnboarding 
-    const reloadedUser = await userService.byAuth(AuthType.DEVICE, 'auth-onboarding-complete');
+
+    //checks that the database has the correct hasCompletedOnboarding
+    const reloadedUser = await userService.byAuth(
+      AuthType.DEVICE,
+      'auth-onboarding-complete',
+    );
     expect(reloadedUser?.hasCompletedOnboarding).toBe(true);
   });
 
@@ -151,19 +157,25 @@ describe('UserModule E2E', () => {
       1,
       AuthType.DEVICE,
       'auth-onboarding-reset',
-      'UNDERGRADUATE'
+      'UNDERGRADUATE',
     );
 
-    const user = await userService.byAuth(AuthType.DEVICE, 'auth-onboarding-reset');
+    const user = await userService.byAuth(
+      AuthType.DEVICE,
+      'auth-onboarding-reset',
+    );
     expect(user).toBeDefined();
-    
+
     const completedUser = await userService.completeOnboarding(user!);
     expect(completedUser.hasCompletedOnboarding).toBe(true);
-    
+
     const resetUser = await userService.resetOnboarding(completedUser);
     expect(resetUser.hasCompletedOnboarding).toBe(false);
-    
-    const reloadedUser = await userService.byAuth(AuthType.DEVICE, 'auth-onboarding-reset');
+
+    const reloadedUser = await userService.byAuth(
+      AuthType.DEVICE,
+      'auth-onboarding-reset',
+    );
     expect(reloadedUser?.hasCompletedOnboarding).toBe(false);
   });
 
