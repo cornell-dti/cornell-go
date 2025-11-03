@@ -83,6 +83,16 @@ cd game
 flutter run --dart-define="API_URL=https://example.com"
 ```
 
+### Use Device Preview (for testing multiple device sizes)
+
+```
+To enable, change USE_DEVICE_PREVIEW to true in game/lib/main.dart:
+
+const bool USE_DEVICE_PREVIEW = true;
+
+Note: Device Preview only works in debug mode, not in release builds.
+```
+
 ### Generate docs
 
 ```
