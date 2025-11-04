@@ -93,8 +93,7 @@ class _ChallengeCellState extends State<ChallengeCell> {
       this.eventId,
       // newly added field
       // this.totalDistance
-      this.distanceFromChallenge
-      );
+      this.distanceFromChallenge);
 
   @override
   Widget build(BuildContext context) {

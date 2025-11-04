@@ -39,7 +39,8 @@ class ChallengeCellDto {
   late String difficulty;
   late int points;
   late String eventId;
-  late double? distanceFromChallenge; // Distance from user's current location (null if not calculable)
+  late double?
+      distanceFromChallenge; // Distance from user's current location (null if not calculable)
 }
 
 class ChallengesPage extends StatefulWidget {
@@ -94,7 +95,8 @@ class _ChallengesPageState extends State<ChallengesPage> {
     try {
       // Get fresh location (GeoPoint.current() will get the most up-to-date location)
       GeoPoint location = await GeoPoint.current();
-      if (mounted) { // only set state if widget is still mounted
+      if (mounted) {
+        // only set state if widget is still mounted
         setState(() {
           currentUserLocation = location;
         });
@@ -237,7 +239,8 @@ class _ChallengesPageState extends State<ChallengesPage> {
                               distance = currentUserLocation!
                                   .distanceTo(challengeLocation);
                             } catch (e) {
-                              print("Error calculating distance: $e"); // not fatal but it will log the error
+                              print(
+                                  "Error calculating distance: $e"); // not fatal but it will log the error
                             }
                           }
 
@@ -268,10 +271,12 @@ class _ChallengesPageState extends State<ChallengesPage> {
                             b.distanceFromChallenge == null) {
                           return 0; // Both null, keep original order
                         }
-                        if (a.distanceFromChallenge == null) return 1; // a goes to end
-                        if (b.distanceFromChallenge == null) return -1; // b goes to end of list
-                        return a.distanceFromChallenge!
-                            .compareTo(b.distanceFromChallenge!); // Sort ascending
+                        if (a.distanceFromChallenge == null)
+                          return 1; // a goes to end
+                        if (b.distanceFromChallenge == null)
+                          return -1; // b goes to end of list
+                        return a.distanceFromChallenge!.compareTo(
+                            b.distanceFromChallenge!); // Sort ascending
                       });
 
                       // eventCells.forEach((Widget anEventCell) {
