@@ -2,6 +2,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/api/game_client_dto.dart';
+import 'package:game/model/user_model.dart';
+import 'package:game/model/event_model.dart';
+import 'package:game/model/tracker_model.dart';
 
 /**
  * `OnboardingModel` - Manages onboarding state across the app using ChangeNotifier pattern.
@@ -156,6 +159,46 @@ class OnboardingModel extends ChangeNotifier {
     } catch (e) {
       print('Failed to save onboarding completion: $e');
     }
+  }
+
+  /**
+   * Check if onboarding prerequisites are met
+   * Returns true if user has at least one uncompleted challenge AND one uncompleted journey
+   */
+  bool canStartOnboarding(
+      UserModel userModel, EventModel eventModel, TrackerModel trackerModel) {
+    final allowedEventIds = userModel.getAvailableEventIds();
+
+    bool hasUncompletedChallenge = false;
+    bool hasUncompletedJourney = false;
+
+    for (final eventId in allowedEventIds) {
+      final event = eventModel.getEventById(eventId);
+      if (event == null) continue;
+
+      final tracker = trackerModel.trackerByEventId(eventId);
+      final numberCompleted = tracker?.prevChallenges.length ?? 0;
+      final locationCount = event.challenges?.length ?? 0;
+      final isComplete = (numberCompleted == locationCount);
+
+      if (!isComplete) {
+        // Single challenge event
+        if (locationCount == 1) {
+          hasUncompletedChallenge = true;
+        }
+        // Journey event (multiple challenges)
+        else if (locationCount > 1) {
+          hasUncompletedJourney = true;
+        }
+      }
+
+      // Early exit if both conditions met
+      if (hasUncompletedChallenge && hasUncompletedJourney) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   /**

@@ -6,6 +6,9 @@ import 'package:game/profile/profile_page.dart';
 import 'package:game/splash_page/splash_page.dart';
 import 'package:provider/provider.dart';
 import 'package:game/model/onboarding_model.dart';
+import 'package:game/model/user_model.dart';
+import 'package:game/model/event_model.dart';
+import 'package:game/model/tracker_model.dart';
 import 'package:game/widgets/bear_mascot_message.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:showcaseview/showcaseview.dart';
@@ -250,6 +253,9 @@ class _BottomNavBarState extends State<BottomNavBar> {
     final client = Provider.of<ApiClient>(context);
     final onboarding = Provider.of<OnboardingModel>(
         context); // listen: true (default) so we rebuild on step completion
+    final userModel = Provider.of<UserModel>(context);
+    final eventModel = Provider.of<EventModel>(context);
+    final trackerModel = Provider.of<TrackerModel>(context);
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
@@ -382,7 +388,8 @@ class _BottomNavBarState extends State<BottomNavBar> {
         // LAYER 2: Step 0 - Welcome onboarding overlay (manual, no ShowcaseView)
         // Wait for backend response before showing onboarding
         if (!onboarding.isLoadingFromBackend &&
-            !onboarding.step0WelcomeComplete)
+            !onboarding.step0WelcomeComplete &&
+            onboarding.canStartOnboarding(userModel, eventModel, trackerModel))
           GestureDetector(
             onTap: () {
               print('👆 Step 0: Dismissing welcome overlay');
