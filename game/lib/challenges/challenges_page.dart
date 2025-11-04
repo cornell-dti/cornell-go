@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/api/game_client_dto.dart';
+import 'package:game/api/geopoint.dart'; //same package as preview.dart
 import 'package:game/model/challenge_model.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/group_model.dart';
@@ -26,6 +27,7 @@ class ChallengeCellDto {
     required this.difficulty,
     required this.points,
     required this.eventId,
+    this.distanceFromChallenge, // not required for challenge cell to be displayed
   });
   late String location;
   late String name;
@@ -37,6 +39,7 @@ class ChallengeCellDto {
   late String difficulty;
   late int points;
   late String eventId;
+  late double? distanceFromChallenge; // Distance from user's current location (null if not calculable)
 }
 
 class ChallengesPage extends StatefulWidget {
@@ -69,6 +72,7 @@ class _ChallengesPageState extends State<ChallengesPage> {
   String selectedDifficulty = '';
   String? mySearchText;
   List<ChallengeCellDto> eventData = [];
+  GeoPoint? currentUserLocation;
 
   _ChallengesPageState(String? difficulty, List<String>? locations,
       List<String>? categories, String? searchText) {
@@ -76,6 +80,29 @@ class _ChallengesPageState extends State<ChallengesPage> {
     selectedLocations = locations ?? [];
     selectedCategories = categories ?? [];
     mySearchText = searchText ?? '';
+  }
+
+// initialize widget state as normal + load user location
+  @override
+  void initState() {
+    super.initState();
+    _loadUserLocation();
+  }
+
+  /// Loads the user's current location for distance calculations
+  void _loadUserLocation() async {
+    try {
+      // Get fresh location (GeoPoint.current() will get the most up-to-date location)
+      GeoPoint location = await GeoPoint.current();
+      if (mounted) { // only set state if widget is still mounted
+        setState(() {
+          currentUserLocation = location;
+        });
+      }
+    } catch (e) {
+      print("Error loading user location: $e");
+      // Continue without location - challenges will show unsorted
+    }
   }
 
   @override
@@ -199,6 +226,21 @@ class _ChallengesPageState extends State<ChallengesPage> {
                             eventMatchesCategorySelection &&
                             eventMatchesLocationSelection &&
                             eventMatchesSearchText) {
+                          // distance calculations
+                          double? distance;
+                          if (currentUserLocation != null &&
+                              challenge.latF != null &&
+                              challenge.longF != null) {
+                            try {
+                              GeoPoint challengeLocation = GeoPoint(
+                                  challenge.latF!, challenge.longF!, 0);
+                              distance = currentUserLocation!
+                                  .distanceTo(challengeLocation);
+                            } catch (e) {
+                              print("Error calculating distance: $e"); // not fatal but it will log the error
+                            }
+                          }
+
                           eventData.add(ChallengeCellDto(
                             location:
                                 friendlyLocation[challenge.location] ?? "",
@@ -212,12 +254,25 @@ class _ChallengesPageState extends State<ChallengesPage> {
                                 friendlyDifficulty[event.difficulty] ?? "",
                             points: challenge.points ?? 0,
                             eventId: event.id,
+                            distanceFromChallenge: distance,
                           ));
                         } else if (event.id == groupModel.curEventId) {
                           apiClient.serverApi?.setCurrentEvent(
                               SetCurrentEventDto(eventId: ""));
                         }
                       }
+
+                      // Sort by distance (null distances go to the end)
+                      eventData.sort((a, b) {
+                        if (a.distanceFromChallenge == null &&
+                            b.distanceFromChallenge == null) {
+                          return 0; // Both null, keep original order
+                        }
+                        if (a.distanceFromChallenge == null) return 1; // a goes to end
+                        if (b.distanceFromChallenge == null) return -1; // b goes to end of list
+                        return a.distanceFromChallenge!
+                            .compareTo(b.distanceFromChallenge!); // Sort ascending
+                      });
 
                       // eventCells.forEach((Widget anEventCell) {
                       //   print("AnEventCell is " + anEventCell.toString());
@@ -238,7 +293,8 @@ class _ChallengesPageState extends State<ChallengesPage> {
                               eventData[index].description,
                               eventData[index].difficulty,
                               eventData[index].points,
-                              eventData[index].eventId);
+                              eventData[index].eventId,
+                              eventData[index].distanceFromChallenge);
                         },
                         physics: BouncingScrollPhysics(),
                         separatorBuilder: (context, index) {
