@@ -1,4 +1,13 @@
-import { ChallengeLocationDto } from '../challenge/challenge.dto';
+export enum LocationType {
+  EngQuad = 'ENG_QUAD',
+  ArtsQuad = 'ARTS_QUAD',
+  AgQuad = 'AG_QUAD',
+  NorthCampus = 'NORTH_CAMPUS',
+  WestCampus = 'WEST_CAMPUS',
+  Collegetown = 'COLLEGETOWN',
+  IthacaCommons = 'ITHACA_COMMONS',
+  Any = 'Any',
+}
 
 export enum AchievementTypeDto {
   TOTAL_POINTS = 'TOTAL_POINTS',

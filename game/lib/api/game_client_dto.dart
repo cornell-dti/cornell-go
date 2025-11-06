@@ -918,126 +918,37 @@ class EventDto {
   }
 
   EventDto.fromJson(Map<String, dynamic> fields) {
-    id = fields["id"];
-    requiredMembers = fields.containsKey('requiredMembers')
-        ? (fields["requiredMembers"])
-        : null;
-    name = fields.containsKey('name') ? (fields["name"]) : null;
-    description =
-        fields.containsKey('description') ? (fields["description"]) : null;
-    category = fields.containsKey('category')
-        ? (EventCategoryDto.values.byName(fields['category']))
-        : null;
-    timeLimitation = fields.containsKey('timeLimitation')
-        ? (EventTimeLimitationDto.values.byName(fields['timeLimitation']))
-        : null;
-    endTime = fields.containsKey('endTime') ? (fields["endTime"]) : null;
-    challenges = fields.containsKey('challenges')
-        ? (List<String>.from(fields['challenges']))
-        : null;
-    userFavorites = fields.containsKey('userFavorites')
-        ? (List<String>.from(fields['userFavorites']))
-        : null;
-    initialOrganizationId = fields.containsKey('initialOrganizationId')
-        ? (fields["initialOrganizationId"])
-        : null;
-    difficulty = fields.containsKey('difficulty')
-        ? (EventDifficultyDto.values.byName(fields['difficulty']))
-        : null;
-    indexable = fields.containsKey('indexable') ? (fields["indexable"]) : null;
-    longitudeF = fields.containsKey('longitudeF')
-        ? (fields["longitudeF"]!.toDouble())
-        : null;
-    latitudeF = fields.containsKey('latitudeF')
-        ? (fields["latitudeF"]!.toDouble())
-        : null;
+    id = fields['id'];
+    requiredMembers = fields['requiredMembers'];
+    name = fields['name'];
+    description = fields['description'];
+    category = fields['category'];
+    timeLimitation = fields['timeLimitation'];
+    endTime = fields['endTime'];
+    challengeIds = List<String>.from(fields['challengeIds']);
+    initialOrganizationId = fields['initialOrganizationId'];
+    difficulty = fields['difficulty'];
+    indexable = fields['indexable'];
+    longitude = fields['longitude'];
+    latitude = fields['latitude'];
+    userFavoriteIds = fields['userFavoriteIds'];
   }
 
-  void partialUpdate(EventDto other) {
-    id = other.id;
-    requiredMembers =
-        other.requiredMembers == null ? requiredMembers : other.requiredMembers;
-    name = other.name == null ? name : other.name;
-    description = other.description == null ? description : other.description;
-    category = other.category == null ? category : other.category;
-    timeLimitation =
-        other.timeLimitation == null ? timeLimitation : other.timeLimitation;
-    endTime = other.endTime == null ? endTime : other.endTime;
-    challenges = other.challenges == null ? challenges : other.challenges;
-    userFavorites =
-        other.userFavorites == null ? userFavorites : other.userFavorites;
-    initialOrganizationId = other.initialOrganizationId == null
-        ? initialOrganizationId
-        : other.initialOrganizationId;
-    difficulty = other.difficulty == null ? difficulty : other.difficulty;
-    indexable = other.indexable == null ? indexable : other.indexable;
-    longitudeF = other.longitudeF == null ? longitudeF : other.longitudeF;
-    latitudeF = other.latitudeF == null ? latitudeF : other.latitudeF;
-  }
-
-  EventDto({
-    required this.id,
-    this.requiredMembers,
-    this.name,
-    this.description,
-    this.category,
-    this.timeLimitation,
-    this.endTime,
-    this.challenges,
-    this.userFavorites,
-    this.initialOrganizationId,
-    this.difficulty,
-    this.indexable,
-    this.longitudeF,
-    this.latitudeF,
-  });
-
-  late String id;
-  late int? requiredMembers;
-  late String? name;
-  late String? description;
-  late EventCategoryDto? category;
-  late EventTimeLimitationDto? timeLimitation;
-  late String? endTime;
-  late List<String>? challenges;
-  late List<String>? userFavorites;
-  late String? initialOrganizationId;
-  late EventDifficultyDto? difficulty;
-  late bool? indexable;
-  late double? longitudeF;
-  late double? latitudeF;
-}
-
-class PrevChallengeDto {
-  Map<String, dynamic> toJson() {
-    Map<String, dynamic> fields = {};
-    fields['challengeId'] = challengeId;
-    fields['hintsUsed'] = hintsUsed;
-    fields['dateCompleted'] = dateCompleted;
-    return fields;
-  }
-
-  PrevChallengeDto.fromJson(Map<String, dynamic> fields) {
-    challengeId = fields["challengeId"];
-    hintsUsed = fields["hintsUsed"];
-    dateCompleted = fields["dateCompleted"];
-  }
-
-  void partialUpdate(PrevChallengeDto other) {
-    challengeId = other.challengeId;
-    hintsUsed = other.hintsUsed;
-    dateCompleted = other.dateCompleted;
-  }
-
-  PrevChallengeDto({
-    required this.challengeId,
-    required this.hintsUsed,
-    required this.dateCompleted,
-  });
-
-  late String challengeId;
-  late int hintsUsed;
-  late String dateCompleted;
+  String id = '';
+  int requiredMembers = 0;
+  String name = '';
+  String description = '';
+  String category = '';
+  String timeLimitation = '';
+  String endTime = '';
+  List<String>? userFavoriteIds = [];
+  List<String> challengeIds = [];
+  String? initialOrganizationId = '';
+  int minimumScore = 0;
+  String difficulty = '';
+  bool indexable = false;
+  double longitude = 0.0;
+  double latitude = 0.0;
 }
 
 class EventTrackerDto {

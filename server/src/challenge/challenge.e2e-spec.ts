@@ -18,9 +18,8 @@ import { ClientService } from '../client/client.service';
 import { GroupService } from '../group/group.service';
 import { OrganizationService } from '../organization/organization.service';
 import { ClientModule } from '../client/client.module';
-import { ChallengeDto, ChallengeLocationDto } from './challenge.dto';
-import { AppAbility, CaslAbilityFactory } from '../casl/casl-ability.factory';
-import { AchievementService } from '../achievement/achievement.service';
+import { ChallengeDto } from './challenge.dto';
+import { LocationType } from './challenge.dto';
 
 describe('ChallengeModule E2E', () => {
   let app: INestApplication;
@@ -140,7 +139,7 @@ describe('ChallengeModule E2E', () => {
       const chalDto: ChallengeDto = {
         id: '12345',
         name: 'test',
-        location: ChallengeLocationDto.ENG_QUAD,
+        location: LocationType['ENG_QUAD' as keyof typeof LocationType],
         description: 'chal dto',
         points: 1,
         imageUrl: 'url',
@@ -186,7 +185,7 @@ describe('ChallengeModule E2E', () => {
       const secondChalDto: ChallengeDto = {
         id: '123',
         name: 'test',
-        location: ChallengeLocationDto.ANY,
+        location: LocationType['ANY' as keyof typeof LocationType],
         description: 'chal dto',
         points: 1,
         imageUrl: 'update test',
@@ -209,7 +208,7 @@ describe('ChallengeModule E2E', () => {
       const chalDto: ChallengeDto = {
         id: chalID,
         name: 'test',
-        location: ChallengeLocationDto.ENG_QUAD,
+        location: LocationType['ENG_QUAD' as keyof typeof LocationType],
         description: 'chal dto',
         points: 1,
         imageUrl: 'update test',

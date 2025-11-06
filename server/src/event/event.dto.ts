@@ -56,14 +56,14 @@ export enum EventCategoryDto {
 
 export interface EventDto {
   id: string;
-  requiredMembers?: number;
-  name?: string;
-  description?: string;
-  category?: EventCategoryDto;
-  timeLimitation?: 'LIMITED_TIME' | 'PERPETUAL';
-  endTime?: string;
-  challenges?: string[];
-  userFavorites?: string[];
+  requiredMembers: number;
+  name: string;
+  description: string;
+  category: 'FOOD' | 'NATURE' | 'HISTORICAL' | 'CAFE' | 'DININGHALL' | 'DORM';
+  timeLimitation: 'LIMITED_TIME' | 'PERPETUAL';
+  endTime: string;
+  challengeIds: string[];
+  userFavoriteIds?: string[];
   initialOrganizationId?: string;
   difficulty?: 'Easy' | 'Normal' | 'Hard';
   indexable?: boolean;
