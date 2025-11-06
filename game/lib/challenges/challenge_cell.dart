@@ -189,7 +189,7 @@ class _ChallengeCellState extends State<ChallengeCell> {
                               style: TextStyle(
                                 color: Color.fromARGB(255, 110, 110, 110),
                                 fontSize:
-                                    MediaQuery.sizeOf(context).height * 0.016,
+                                    MediaQuery.sizeOf(context).height * 0.011,
                                 fontFamily: 'Poppins',
                               ),
                             ),
