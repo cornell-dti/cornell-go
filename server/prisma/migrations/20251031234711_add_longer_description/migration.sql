@@ -5,8 +5,8 @@
   - Added the required column `longDescription` to the `EventBase` table without a default value. This is not possible if the table is not empty.
 
 */
--- AlterTable
-ALTER TABLE "EventBase" ADD COLUMN     "longDescription" TEXT NOT NULL;
+-- AlterTable (skip if column already exists)
+ALTER TABLE "EventBase" ADD COLUMN IF NOT EXISTS "longDescription" TEXT NOT NULL DEFAULT '';
 
--- CreateIndex
-CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
+-- CreateIndex (skip if already exists)
+CREATE UNIQUE INDEX IF NOT EXISTS "User_username_key" ON "User"("username");
