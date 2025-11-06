@@ -84,6 +84,25 @@ class _GameplayMapState extends State<GameplayMap> {
   // cannot be found
   GeoPoint? currentLocation;
 
+  /* timer frontend plan
+  - check if a challenge has a timerlength
+  - if yes: initialize a Time Run, TimerStartedDto
+  - complete timer if time runs out, TimerCompletedDto
+  -- time's up modal; results button, have placeholder for extension 
+  -- challenge failed page
+  -- challenge completed page 
+
+  warnings: 
+  - get warnings from backend, + do warning TimerWarningDto 
+  
+  extension: 
+  - extend timer if the user requests it, TimerExtendedDto
+  -- lose points animation
+  -- refresh time left 
+  -- add in point deduction to challenge completed page
+  */ 
+  
+  // TODO initialize a TimeRun if the challenge has a timerlength 
   late TimeRun timer; //the timer for the challenge
   String timeLeft = "01:00"; //time left that is displayed to the user
   late double currentTime = 0.0;
@@ -128,6 +147,7 @@ class _GameplayMapState extends State<GameplayMap> {
     super.initState();
     streamStarted = startPositionStream();
     setStartingHintCircle();
+    // TODO init and start timer if challenge has a timerlength
     initTimer();
     startTimer();
   }
@@ -191,7 +211,7 @@ class _GameplayMapState extends State<GameplayMap> {
   void dispose() {
     positionStream.cancel();
     _disposeController();
-    timer.stop();
+    timer.stop(); // TODO stop a timer if the timer was started ; stop it when the time runs out 
     super.dispose();
   }
 
@@ -548,6 +568,7 @@ class _GameplayMapState extends State<GameplayMap> {
                 alignment: Alignment.center,
                 children: [
                   (currentTime < 300) ?
+                  // TODO switch to a responsive Container with dynamic colors
                   SvgPicture.asset( //turn timer red when less than 5 minutes left
                     "assets/icons/timerbg_red.svg"
                   ) :
