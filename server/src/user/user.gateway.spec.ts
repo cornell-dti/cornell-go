@@ -6,6 +6,9 @@ import { GroupService } from '../group/group.service';
 import { EventService } from '../event/event.service';
 import { AuthService } from '../auth/auth.service';
 import { OrganizationService } from '../organization/organization.service';
+import { AchievementService } from '../achievement/achievement.service';
+import { CaslAbilityFactory } from '../casl/casl-ability.factory';
+import { Reflector } from '@nestjs/core';
 
 describe('UserGateway', () => {
   let gateway: UserGateway;
@@ -37,6 +40,18 @@ describe('UserGateway', () => {
         {
           useValue: null,
           provide: OrganizationService,
+        },
+        {
+          useValue: null,
+          provide: AchievementService,
+        },
+        {
+          useValue: null,
+          provide: CaslAbilityFactory,
+        },
+        {
+          useValue: null,
+          provide: Reflector,
         },
       ],
     }).compile();

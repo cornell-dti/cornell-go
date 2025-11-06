@@ -112,6 +112,17 @@ npx prisma migrate dev --name my_migration
 
 ## Contributors
 
+### FA25
+
+- **Temi Adebowale** - TPM
+- **Amber Shen** - Developer
+- **Jimin Kim** - Developer
+- **Jason Guo** - Developer
+- **Jerry Chen** - Designer
+- **Carolyn Wang** - PM
+- **Cynthia Lan** - APM
+- **Grace Huang** - PMM
+
 ### SP25
 
 - **Temi Adebowale** - Developer
