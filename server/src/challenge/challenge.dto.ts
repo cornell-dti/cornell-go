@@ -1,3 +1,14 @@
+export enum LocationType {
+  EngQuad = 'ENG_QUAD',
+  ArtsQuad = 'ARTS_QUAD',
+  AgQuad = 'AG_QUAD',
+  NorthCampus = 'NORTH_CAMPUS',
+  WestCampus = 'WEST_CAMPUS',
+  Collegetown = 'COLLEGETOWN',
+  IthacaCommons = 'ITHACA_COMMONS',
+  Any = 'Any',
+}
+
 /** DTO for completedChallenge */
 export interface CompletedChallengeDto {}
 
@@ -17,16 +28,16 @@ export enum ChallengeLocationDto {
 
 export interface ChallengeDto {
   id: string;
-  name?: string;
-  location?: ChallengeLocationDto;
-  description?: string;
-  points?: number;
-  imageUrl?: string;
-  latF?: number;
-  longF?: number;
-  awardingRadiusF?: number;
-  closeRadiusF?: number;
-  linkedEventId?: string;
+  name: string;
+  location: LocationType;
+  description: string;
+  points: number;
+  imageUrl: string;
+  lat: number;
+  long: number;
+  awardingRadius: number;
+  closeRadius: number;
+  containingEventId: string;
 }
 
 /** DTO for requestChallengeData */
