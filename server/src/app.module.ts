@@ -20,7 +20,7 @@ import { TimerModule } from './timer/timer.module';
   imports: [
     ConfigModule.forRoot(),
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', '..', 'admin', 'build'),
+      rootPath: join(__dirname, '..', '..', '..', 'admin', 'build'),
     }),
     AuthModule,
     ClientModule,
