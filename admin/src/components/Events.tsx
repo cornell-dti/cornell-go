@@ -1,5 +1,5 @@
-import { useContext, useMemo, useState } from "react";
-import { DeleteModal } from "./DeleteModal";
+import { useContext, useMemo, useState } from 'react';
+import { DeleteModal } from './DeleteModal';
 import {
   EntryModal,
   EntryForm,
@@ -7,8 +7,8 @@ import {
   OptionEntryForm,
   FreeEntryForm,
   DateEntryForm,
-} from "./EntryModal";
-import { HButton } from "./HButton";
+} from './EntryModal';
+import { HButton } from './HButton';
 import {
   ButtonSizer,
   CenterText,
@@ -17,26 +17,26 @@ import {
   ListCardButtons,
   ListCardDescription,
   ListCardTitle,
-} from "./ListCard";
-import { SearchBar } from "./SearchBar";
-import { ServerDataContext } from "./ServerData";
+} from './ListCard';
+import { SearchBar } from './SearchBar';
+import { ServerDataContext } from './ServerData';
 
-import { compareTwoStrings } from "string-similarity";
+import { compareTwoStrings } from 'string-similarity';
 import {
   EventDifficultyDto,
   EventDto,
   EventTimeLimitationDto,
-} from "../all.dto";
-import { AlertModal } from "./AlertModal";
-import { EventCategoryDto } from "../all.dto";
+} from '../all.dto';
+import { AlertModal } from './AlertModal';
+import { EventCategoryDto } from '../all.dto';
 
 const categoryOptions = [
-  "FOOD",
-  "NATURE",
-  "HISTORICAL",
-  "CAFE",
-  "DININGHALL",
-  "DORM",
+  'FOOD',
+  'NATURE',
+  'HISTORICAL',
+  'CAFE',
+  'DININGHALL',
+  'DORM',
 ];
 
 function EventCard(props: {
@@ -48,24 +48,24 @@ function EventCard(props: {
 }) {
   const requiredText =
     props.event.requiredMembers && props.event.requiredMembers < 0
-      ? "Any Amount"
+      ? 'Any Amount'
       : props.event.requiredMembers;
 
   const timeLimitation =
-    props.event.timeLimitation === "LIMITED_TIME" ? "Limited" : "Unlimited";
+    props.event.timeLimitation === 'LIMITED_TIME' ? 'Limited' : 'Unlimited';
 
   const difficultyMode =
-    props.event.difficulty === "Easy"
-      ? "Easy"
-      : props.event.difficulty === "Normal"
-      ? "Normal"
-      : "Hard";
+    props.event.difficulty === 'Easy'
+      ? 'Easy'
+      : props.event.difficulty === 'Normal'
+      ? 'Normal'
+      : 'Hard';
 
   let categoryInput = props.event.category as string;
   const categoryType =
     categoryInput[0] + categoryInput.substring(1).toLowerCase();
 
-  const affirmOfBool = (val: boolean) => (val ? "Yes" : "No");
+  const affirmOfBool = (val: boolean) => (val ? 'Yes' : 'No');
 
   return (
     <>
@@ -82,17 +82,17 @@ function EventCard(props: {
         <ListCardBody>
           Id: <b>{props.event.id}</b>
           <br />
-          Available Until:{" "}
+          Available Until:{' '}
           <b>
             {props.event.endTime && new Date(props.event.endTime).toString()}
-          </b>{" "}
+          </b>{' '}
           <br />
           Required Players: <b>{requiredText}</b> <br />
           Time Limitation: <b>{timeLimitation}</b> <br />
           Challenge Count: <b>{props.event.challenges?.length}</b> <br />
           Difficulty: <b>{difficultyMode}</b> <br />
           Category: <b>{categoryType}</b> <br />
-          Publicly Visible: <b>{affirmOfBool(!!props.event.indexable)}</b>{" "}
+          Publicly Visible: <b>{affirmOfBool(!!props.event.indexable)}</b>{' '}
           <br />
         </ListCardBody>
         <ListCardButtons>
@@ -112,26 +112,26 @@ function EventCard(props: {
 // Default Form Creation
 function makeForm() {
   return [
-    { name: "Name", characterLimit: 256, value: "" },
-    { name: "Description", characterLimit: 2048, value: "" },
+    { name: 'Name', characterLimit: 256, value: '' },
+    { name: 'Description', characterLimit: 2048, value: '' },
     {
-      name: "Category",
+      name: 'Category',
       options: categoryOptions,
       value: 1,
     },
-    { name: "Required Members", value: -1, min: -1, max: 99 },
+    { name: 'Required Members', value: -1, min: -1, max: 99 },
     {
-      name: "Time Limitation",
-      options: ["Unlimited", "Limited"],
+      name: 'Time Limitation',
+      options: ['Unlimited', 'Limited'],
       value: 0,
     },
     {
-      name: "Difficulty",
-      options: ["Easy", "Normal", "Hard"],
+      name: 'Difficulty',
+      options: ['Easy', 'Normal', 'Hard'],
       value: 0,
     },
-    { name: "Publicly Visible", options: ["No", "Yes"], value: 0 },
-    { name: "Available Until", date: new Date("2050") },
+    { name: 'Publicly Visible', options: ['No', 'Yes'], value: 0 },
+    { name: 'Available Until', date: new Date('2050') },
   ] as EntryForm[];
 }
 
@@ -169,10 +169,10 @@ function fromForm(form: EntryForm[], id: string): EventDto {
 // DTO to Form Conversion
 function toForm(event: EventDto) {
   return [
-    { name: "Name", characterLimit: 256, value: event.name },
-    { name: "Description", characterLimit: 2048, value: event.description },
+    { name: 'Name', characterLimit: 256, value: event.name },
+    { name: 'Description', characterLimit: 2048, value: event.description },
     {
-      name: "Category",
+      name: 'Category',
       options: categoryOptions,
       value:
         event.category !== undefined
@@ -180,35 +180,35 @@ function toForm(event: EventDto) {
           : 0,
     },
     {
-      name: "Required Members",
+      name: 'Required Members',
       value: event.requiredMembers,
       min: -1,
       max: 99,
     },
     {
-      name: "Time Limitation",
-      options: ["Unlimited", "Limited"],
-      value: event.timeLimitation === "PERPETUAL" ? 0 : 1,
+      name: 'Time Limitation',
+      options: ['Unlimited', 'Limited'],
+      value: event.timeLimitation === 'PERPETUAL' ? 0 : 1,
     },
     {
-      name: "Difficulty",
-      options: ["Easy", "Normal", "Hard"],
+      name: 'Difficulty',
+      options: ['Easy', 'Normal', 'Hard'],
       value:
-        event.difficulty === "Easy" ? 0 : event.difficulty === "Normal" ? 1 : 2,
+        event.difficulty === 'Easy' ? 0 : event.difficulty === 'Normal' ? 1 : 2,
     },
     {
-      name: "Publicly Visible",
-      options: ["No", "Yes"],
+      name: 'Publicly Visible',
+      options: ['No', 'Yes'],
       value: event.indexable ? 1 : 0,
     },
-    { name: "Available Until", date: event.endTime && new Date(event.endTime) },
+    { name: 'Available Until', date: event.endTime && new Date(event.endTime) },
   ] as EntryForm[];
 }
 
 function makeCopyForm(orgOptions: string[], initialIndex: number) {
   return [
     {
-      name: "Target Organization",
+      name: 'Target Organization',
       options: orgOptions,
       value: initialIndex,
     },
@@ -229,8 +229,8 @@ export function Events() {
   }));
 
   const [form, setForm] = useState(() => makeForm());
-  const [currentId, setCurrentId] = useState("");
-  const [query, setQuery] = useState("");
+  const [currentId, setCurrentId] = useState('');
+  const [query, setQuery] = useState('');
   const selectedOrg = serverData.organizations.get(serverData.selectedOrg);
 
   return (
@@ -246,7 +246,7 @@ export function Events() {
         entryButtonText="CREATE"
         onEntry={() => {
           serverData.updateEvent({
-            ...fromForm(form, ""),
+            ...fromForm(form, ''),
             initialOrganizationId: serverData.selectedOrg,
           });
           setCreateModalOpen(false);
@@ -284,7 +284,7 @@ export function Events() {
             challenges: [],
             initialOrganizationId:
               copyForm.orgIds[(copyForm.form[0] as OptionEntryForm).value],
-            id: "",
+            id: '',
           });
           if (!evId) {
             setCopyModalOpen(false);
@@ -295,7 +295,7 @@ export function Events() {
             serverData.updateChallenge({
               ...chal,
               linkedEventId: evId,
-              id: "",
+              id: '',
             });
           }
           setCopyModalOpen(false);
@@ -306,7 +306,7 @@ export function Events() {
         form={copyForm.form}
       />
       <DeleteModal
-        objectName={serverData.events.get(currentId)?.name ?? ""}
+        objectName={serverData.events.get(currentId)?.name ?? ''}
         isOpen={isDeleteModalOpen}
         onClose={() => setDeleteModalOpen(false)}
         onDelete={() => {
@@ -323,9 +323,9 @@ export function Events() {
           setForm(makeForm());
           setCreateModalOpen(true);
         }}
-        onSearch={(query) => setQuery(query)}
+        onSearch={query => setQuery(query)}
       />
-      {serverData.selectedOrg === "" ? (
+      {serverData.selectedOrg === '' ? (
         <CenterText>Select an organization to view events</CenterText>
       ) : serverData.organizations.get(serverData.selectedOrg) ? (
         serverData.organizations?.get(serverData.selectedOrg)?.events
@@ -337,16 +337,16 @@ export function Events() {
         serverData.organizations
           .get(serverData.selectedOrg)
           ?.events?.map((evId: string) => serverData.events.get(evId)!)
-          .filter((ev?: EventDto) => !!ev) ?? []
+          .filter((ev?: EventDto) => !!ev) ?? [],
       )
         .sort(
           (a: EventDto, b: EventDto) =>
-            compareTwoStrings(b.name ?? "", query) -
-            compareTwoStrings(a.name ?? "", query) +
-            compareTwoStrings(b.description ?? "", query) -
-            compareTwoStrings(a.description ?? "", query)
+            compareTwoStrings(b.name ?? '', query) -
+            compareTwoStrings(a.name ?? '', query) +
+            compareTwoStrings(b.description ?? '', query) -
+            compareTwoStrings(a.description ?? '', query),
         )
-        .map((ev) => (
+        .map(ev => (
           <EventCard
             key={ev.id}
             event={ev}
@@ -362,16 +362,14 @@ export function Events() {
             }}
             onCopy={() => {
               const orgs = Array.from(serverData.organizations.values());
-              const myOrgIndex = orgs.findIndex(
-                (v) => v.id === selectedOrg?.id
-              );
+              const myOrgIndex = orgs.findIndex(v => v.id === selectedOrg?.id);
               setCurrentId(ev.id);
               setCopyForm({
                 form: makeCopyForm(
-                  orgs.map((org) => org.name ?? ""),
-                  myOrgIndex
+                  orgs.map(org => org.name ?? ''),
+                  myOrgIndex,
                 ),
-                orgIds: orgs.map((org) => org.id),
+                orgIds: orgs.map(org => org.id),
               });
               setCopyModalOpen(true);
             }}
