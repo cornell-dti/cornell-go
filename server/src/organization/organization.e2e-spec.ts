@@ -176,15 +176,12 @@ describe('OrganizationModule E2E', () => {
     );
 
     defaultEv = (await eventService.getEventById(
-      (
-        await eventService.getCurrentEventTrackerForUser(basicUser)
-      ).eventId,
+      (await eventService.getCurrentEventTrackerForUser(basicUser)).eventId,
     ))!;
 
     defaultChal = (await challengeService.getChallengeById(
-      (
-        await eventService.getCurrentEventTrackerForUser(basicUser)
-      ).curChallengeId!,
+      (await eventService.getCurrentEventTrackerForUser(basicUser))
+        .curChallengeId!,
     ))!;
 
     managerGroup = await groupService.getGroupForUser(managerUser);
