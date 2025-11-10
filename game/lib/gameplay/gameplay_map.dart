@@ -946,45 +946,58 @@ class _GameplayMapState extends State<GameplayMap> {
               top: MediaQuery.of(context).size.height *
                   0.02, // Adjust top position
               // left: MediaQuery.of(context).size.width * 0.5, // Adjust left position
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  (currentTime < 300)
-                      ?
-                      // TODO switch to a responsive Container with dynamic colors
-                      SvgPicture.asset(
-                          //turn timer red when less than 5 minutes left
-                          "assets/icons/timerbg_red.svg")
-                      : SvgPicture.asset("assets/icons/timerbg.svg"),
-                  Positioned(
-                    left: 15.5,
-                    top: 6,
-                    //Show a circular progress indicator
-                    child: Container(
+              child: Container(
+                margin: EdgeInsets.all(4), // 4px margin on all sides
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    //timer container
+                    Container(
+                      width: MediaQuery.of(context).size.width * 0.20,
+                      height: MediaQuery.of(context).size.height * 0.04,
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                      ),
-                      child: CustomPaint(
-                        size: Size(14, 14),
-                        painter:
-                            CircleSliceTimer(progress: currentTime / totalTime),
+                        color: currentTime < 300
+                            ? Color.fromARGB(255, 237, 86,
+                                86) //timer is red when < 5 min left
+                            : Color.fromARGB(
+                                255, 64, 64, 61), //grey color > 5 min left
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Color.fromARGB(
+                                64, 0, 0, 0), // #000000 with 25% opacity
+                            blurRadius: 4,
+                            offset: Offset(0, 4), // Position (0, 4)
+                          ),
+                        ],
                       ),
                     ),
-                  ),
-                  Positioned(
-                    right: 7,
-                    top: 3,
-                    child: Text(
-                      timeLeft,
-                      style: TextStyle(
-                          // fontFamily: Poppins,
-                          fontSize: 12.8,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white),
+                    // Timer icon and countdown with 8px margin between them
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Timer icon (circular progress indicator)
+                        Container(
+                          margin: EdgeInsets.only(
+                              right: 8), // 8px margin between icon and text
+                          child: CustomPaint(
+                            size: Size(20, 20), // Outer circle: 20px x 20px
+                            painter: CircleSliceTimer(
+                                progress: currentTime / totalTime),
+                          ),
+                        ),
+                        // Countdown text
+                        Text(
+                          timeLeft,
+                          style: TextStyle(
+                              fontSize: 12.8,
+                              fontWeight: FontWeight.w500, // Medium bold
+                              color: Colors.white),
+                        ),
+                      ],
                     ),
-                  )
-                ],
+                  ],
+                ),
               ),
             ),
             Container(
@@ -1256,26 +1269,38 @@ class CircleSliceTimer extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    Paint paint = Paint()
+    final center = Offset(size.width / 2, size.height / 2);
+
+    //outer circle of timer icon
+    Paint outerCirclePaint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.38;
+
+    canvas.drawCircle(center, size.width / 2, outerCirclePaint);
+
+    Paint innerCirclePaint = Paint()
       ..color = Colors.white
       ..style = PaintingStyle.fill;
 
-    Paint backgroundPaint = Paint()
-      ..color = Colors.grey
+    //inner white circle
+    final innerRadius = 7.0;
+    canvas.drawCircle(center, innerRadius, innerCirclePaint);
+
+    //draw gray arc that covers the inner circle as time decreases
+    Paint arcPaint = Paint()
+      ..color = Color.fromARGB(
+          255, 64, 64, 61) 
       ..style = PaintingStyle.fill;
 
-    canvas.drawCircle(
-        Offset(size.width / 2, size.height / 2), size.width / 2, paint);
-    double sweepAngle =
-        2 * pi * (1.0 - progress); //subtract from 1 so clockwise
+    double sweepAngle = 2 * pi * (1.0 - progress);
+
     canvas.drawArc(
-      Rect.fromCircle(
-          center: Offset(size.width / 2, size.height / 2),
-          radius: size.width / 2),
+      Rect.fromCircle(center: center, radius: innerRadius),
       -pi / 2,
       sweepAngle,
-      true,
-      backgroundPaint,
+      true, 
+      arcPaint,
     );
   }
 
