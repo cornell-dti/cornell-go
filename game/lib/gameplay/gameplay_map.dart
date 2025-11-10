@@ -106,9 +106,10 @@ class _GameplayMapState extends State<GameplayMap> {
 
   // TODO initialize a TimeRun if the challenge has a timerlength
   late TimeRun timer; //the timer for the challenge
-  String timeLeft = "01:00"; //time left that is displayed to the user
+  String timeLeft = "--:--"; //time left that is displayed to the user
   late double currentTime = 0.0;
-  int totalTime = 315;
+  int totalTime = 0; // Total timer length in seconds
+  bool hasTimer = false; // Whether the challenge has a timer
 
   int totalHints = 3;
   int numHintsLeft = 10;
@@ -242,21 +243,44 @@ class _GameplayMapState extends State<GameplayMap> {
       scope: "gameplay_map",
     );
     // TODO init and start timer if challenge has a timerlength
-    initTimer();
-    startTimer();
+    // Timer:
+
+    startTimerIfExists();
+  }
+
+  //start a timer if it exists for the challenge
+  void startTimerIfExists() {
+    final challengeModel = Provider.of<ChallengeModel>(context, listen: false);
+    final challenge = challengeModel.getChallengeById(widget.challengeId);
+
+    if (challenge?.timerLength != null && challenge!.timerLength! > 0) {
+      setState(() {
+        hasTimer = true;
+      });
+      initTimer(challenge.timerLength!);
+      startTimer();
+    } else {
+      //no timer, set default values
+      setState(() {
+        hasTimer = false;
+        timeLeft = "--:--";
+        currentTime = 0.0;
+      });
+    }
   }
 
   /**
    * Initializes a timer for the challenge. Currently starts at one minute.
    * Each second, the remaining minutes and seconds is shown.
    * */
-  void initTimer() {
+  void initTimer(int timerLength) {
+    totalTime = timerLength; // Set total time for progress calculation
     timer = TimeRun(
       series: 3,
       repetitions: 1,
       pauseSeries: 0,
       pauseRepeition: 0,
-      time: totalTime,
+      time: timerLength,
       onUpdate: (currentSeries, totalSeries, currentRepetition,
           totalRepetitions, currentSeconds, timePause, currentState) {
         int minutes = (currentSeconds / 60).floor();
@@ -942,64 +966,68 @@ class _GameplayMapState extends State<GameplayMap> {
                 },
               ),
             ),
-            Positioned(
-              top: MediaQuery.of(context).size.height *
-                  0.02, // Adjust top position
-              // left: MediaQuery.of(context).size.width * 0.5, // Adjust left position
-              child: Container(
-                margin: EdgeInsets.all(4), // 4px margin on all sides
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    //timer container
-                    Container(
-                      width: MediaQuery.of(context).size.width * 0.20,
-                      height: MediaQuery.of(context).size.height * 0.04,
-                      decoration: BoxDecoration(
-                        color: currentTime < 300
-                            ? Color.fromARGB(255, 237, 86,
-                                86) //timer is red when < 5 min left
-                            : Color.fromARGB(
-                                255, 64, 64, 61), //grey color > 5 min left
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Color.fromARGB(
-                                64, 0, 0, 0), // #000000 with 25% opacity
-                            blurRadius: 4,
-                            offset: Offset(0, 4), // Position (0, 4)
+            // Only show timer if challenge has a timer
+            if (hasTimer)
+              Positioned(
+                top: MediaQuery.of(context).size.height *
+                    0.02, // Adjust top position
+                // left: MediaQuery.of(context).size.width * 0.5, // Adjust left position
+                child: Container(
+                  margin: EdgeInsets.all(4), // 4px margin on all sides
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      //timer container
+                      Container(
+                        width: MediaQuery.of(context).size.width * 0.20,
+                        height: MediaQuery.of(context).size.height * 0.04,
+                        decoration: BoxDecoration(
+                          color: currentTime < 300
+                              ? Color.fromARGB(255, 237, 86,
+                                  86) //timer is red when < 5 min left
+                              : Color.fromARGB(
+                                  255, 64, 64, 61), //grey color > 5 min left
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Color.fromARGB(
+                                  64, 0, 0, 0), // #000000 with 25% opacity
+                              blurRadius: 4,
+                              offset: Offset(0, 4), // Position (0, 4)
+                            ),
+                          ],
+                        ),
+                      ),
+                      // Timer icon and countdown with 8px margin between them
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Timer icon (circular progress indicator)
+                          Container(
+                            margin: EdgeInsets.only(
+                                right: 8), // 8px margin between icon and text
+                            child: CustomPaint(
+                              size: Size(20, 20), // Outer circle: 20px x 20px
+                              painter: CircleSliceTimer(
+                                  progress: totalTime > 0
+                                      ? currentTime / totalTime
+                                      : 0.0),
+                            ),
+                          ),
+                          // Countdown text
+                          Text(
+                            timeLeft,
+                            style: TextStyle(
+                                fontSize: 12.8,
+                                fontWeight: FontWeight.w500, // Medium bold
+                                color: Colors.white),
                           ),
                         ],
                       ),
-                    ),
-                    // Timer icon and countdown with 8px margin between them
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Timer icon (circular progress indicator)
-                        Container(
-                          margin: EdgeInsets.only(
-                              right: 8), // 8px margin between icon and text
-                          child: CustomPaint(
-                            size: Size(20, 20), // Outer circle: 20px x 20px
-                            painter: CircleSliceTimer(
-                                progress: currentTime / totalTime),
-                          ),
-                        ),
-                        // Countdown text
-                        Text(
-                          timeLeft,
-                          style: TextStyle(
-                              fontSize: 12.8,
-                              fontWeight: FontWeight.w500, // Medium bold
-                              color: Colors.white),
-                        ),
-                      ],
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
             Container(
               margin: EdgeInsets.only(bottom: 70),
               child: ElevatedButton(
@@ -1289,8 +1317,7 @@ class CircleSliceTimer extends CustomPainter {
 
     //draw gray arc that covers the inner circle as time decreases
     Paint arcPaint = Paint()
-      ..color = Color.fromARGB(
-          255, 64, 64, 61) 
+      ..color = Color.fromARGB(255, 64, 64, 61)
       ..style = PaintingStyle.fill;
 
     double sweepAngle = 2 * pi * (1.0 - progress);
@@ -1299,7 +1326,7 @@ class CircleSliceTimer extends CustomPainter {
       Rect.fromCircle(center: center, radius: innerRadius),
       -pi / 2,
       sweepAngle,
-      true, 
+      true,
       arcPaint,
     );
   }

@@ -7,6 +7,266 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id                       String                     @id @default(uuid())
+  createdAt                DateTime                   @default(now())
+  updatedAt                DateTime                   @updatedAt
+  subject                  String                     @default("User")
+  authToken                String                     @unique
+  authType                 AuthType
+  username                 String                     @unique
+  year                     String
+  email                    String
+  hashedRefreshToken       String
+  administrator            Boolean
+  enrollmentType           EnrollmentType
+  score                    Int
+  isBanned                 Boolean                    @default(false)
+  groupId                  String
+  isRanked                 Boolean                    @default(true)
+  college                  String
+  interests                String[]
+  major                    String
+  hasCompletedOnboarding   Boolean
+  achievementTrackers      AchievementTracker[]
+  challengeTimers          ChallengeTimer[]
+  eventTrackers            EventTracker[]
+  hostOf                   Group?                     @relation("host")
+  completedChallenges      PrevChallenge[]            @relation("owner")
+  sessionLogEntries        SessionLogEntry[]
+  group                    Group                      @relation("member", fields: [groupId], references: [id])
+  EventBaseToUser          EventBaseToUser[]
+  orgManager               orgManager[]
+  orgToUser                orgToUser[]
+  prevChallengeParticipant prevChallengeParticipant[]
+}
+
+model Group {
+  id         String    @id @default(uuid())
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  subject    String    @default("Group")
+  friendlyId String    @unique
+  hostId     String?   @unique
+  curEventId String
+  curEvent   EventBase @relation(fields: [curEventId], references: [id])
+  host       User?     @relation("host", fields: [hostId], references: [id])
+  members    User[]    @relation("member")
+}
+
+model Challenge {
+  id             String          @id @default(uuid()) @map("id")
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  subject        String          @default("Challenge")
+  linkedEventId  String?
+  eventIndex     Int
+  name           String
+  location       LocationType
+  description    String
+  points         Int
+  imageUrl       String
+  latitude       Float
+  longitude      Float
+  awardingRadius Float
+  closeRadius    Float
+  timerLength    Int?
+  linkedEvent    EventBase?      @relation("all", fields: [linkedEventId], references: [id], onDelete: Cascade)
+  activeTrackers EventTracker[]
+  completions    PrevChallenge[]
+}
+
+model EventBase {
+  id              String             @id @default(uuid())
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  subject         String             @default("EventBase")
+  requiredMembers Int
+  name            String
+  description     String
+  timeLimitation  TimeLimitationType
+  indexable       Boolean
+  endTime         DateTime
+  latitude        Float
+  longitude       Float
+  difficulty      DifficultyMode
+  category        EventCategoryType
+  achievements    Achievement[]
+  challenges      Challenge[]        @relation("all")
+  trackers        EventTracker[]
+  activeGroups    Group[]
+  EventBaseToUser EventBaseToUser[]
+  eventOrgs       eventOrgs[]
+}
+
+model EventTracker {
+  id                  String          @id @default(uuid())
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+  subject             String          @default("EventTracker")
+  userId              String
+  score               Int
+  hintsUsed           Int
+  isRankedForEvent    Boolean         @default(true)
+  eventId             String
+  curChallengeId      String?
+  curChallenge        Challenge?      @relation(fields: [curChallengeId], references: [id])
+  event               EventBase       @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user                User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  completedChallenges PrevChallenge[]
+}
+
+model PrevChallenge {
+  id                       Int                        @id @default(autoincrement())
+  subject                  String                     @default("PrevChallenge")
+  userId                   String
+  challengeId              String
+  trackerId                String
+  hintsUsed                Int
+  timestamp                DateTime                   @default(now())
+  challenge                Challenge                  @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  tracker                  EventTracker               @relation(fields: [trackerId], references: [id], onDelete: Cascade)
+  user                     User                       @relation("owner", fields: [userId], references: [id], onDelete: Cascade)
+  prevChallengeParticipant prevChallengeParticipant[]
+}
+
+model Organization {
+  id                        String                      @id @default(uuid())
+  createdAt                 DateTime                    @default(now())
+  updatedAt                 DateTime                    @updatedAt
+  subject                   String                      @default("Organization")
+  name                      String
+  accessCode                String
+  specialUsage              OrganizationSpecialUsage
+  AchievementToOrganization AchievementToOrganization[]
+  eventOrgs                 eventOrgs[]
+  orgManager                orgManager[]
+  orgToUser                 orgToUser[]
+}
+
+model SessionLogEntry {
+  id         String          @id @default(uuid())
+  subject    String          @default("SessionLogEntry")
+  eventType  SessionLogEvent
+  data       String
+  timestamp  DateTime        @default(now())
+  userId     String?
+  linkedUser User?           @relation(fields: [userId], references: [id])
+}
+
+model Achievement {
+  id                        String                      @id @default(uuid())
+  createdAt                 DateTime                    @default(now())
+  updatedAt                 DateTime                    @updatedAt
+  subject                   String                      @default("Achievement")
+  requiredPoints            Int
+  name                      String
+  description               String
+  imageUrl                  String
+  linkedEventId             String?
+  locationType              LocationType
+  achievementType           AchievementType
+  linkedEvent               EventBase?                  @relation(fields: [linkedEventId], references: [id])
+  trackers                  AchievementTracker[]
+  AchievementToOrganization AchievementToOrganization[]
+}
+
+model AchievementTracker {
+  id            String      @id @default(uuid())
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  subject       String      @default("AchievementTracker")
+  progress      Int
+  dateComplete  DateTime?
+  achievementId String
+  userId        String
+  achievement   Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ChallengeTimer {
+  id                    String               @id @default(uuid())
+  subject               String               @default("ChallengeTimer")
+  timerLength           Int                  @default(600)
+  startTime             DateTime             @default(now())
+  endTime               DateTime?
+  currentStatus         ChallengeTimerStatus @default(ACTIVE)
+  warningMilestones     Int[]                @default([])
+  warningMilestonesSent Int[]                @default([])
+  lastWarningSent       DateTime?
+  userId                String
+  challengeId           String
+  user                  User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, challengeId])
+}
+
+model AchievementToOrganization {
+  A            String
+  B            String
+  Achievement  Achievement  @relation(fields: [A], references: [id], onDelete: Cascade)
+  Organization Organization @relation(fields: [B], references: [id], onDelete: Cascade)
+
+  @@id([A, B], map: "_AchievementToOrganization_AB_pkey")
+  @@index([B], map: "_AchievementToOrganization_B_index")
+  @@map("_AchievementToOrganization")
+}
+
+model EventBaseToUser {
+  A         String
+  B         String
+  EventBase EventBase @relation(fields: [A], references: [id], onDelete: Cascade)
+  User      User      @relation(fields: [B], references: [id], onDelete: Cascade)
+
+  @@id([A, B], map: "_EventBaseToUser_AB_pkey")
+  @@index([B], map: "_EventBaseToUser_B_index")
+  @@map("_EventBaseToUser")
+}
+
+model eventOrgs {
+  A            String
+  B            String
+  EventBase    EventBase    @relation(fields: [A], references: [id], onDelete: Cascade)
+  Organization Organization @relation(fields: [B], references: [id], onDelete: Cascade)
+
+  @@id([A, B], map: "_eventOrgs_AB_pkey")
+  @@index([B], map: "_eventOrgs_B_index")
+  @@map("_eventOrgs")
+}
+
+model orgManager {
+  A            String
+  B            String
+  Organization Organization @relation(fields: [A], references: [id], onDelete: Cascade)
+  User         User         @relation(fields: [B], references: [id], onDelete: Cascade)
+
+  @@id([A, B], map: "_orgManager_AB_pkey")
+  @@index([B], map: "_orgManager_B_index")
+  @@map("_orgManager")
+}
+
+model orgToUser {
+  A            String
+  B            String
+  Organization Organization @relation(fields: [A], references: [id], onDelete: Cascade)
+  User         User         @relation(fields: [B], references: [id], onDelete: Cascade)
+
+  @@id([A, B], map: "_orgToUser_AB_pkey")
+  @@index([B], map: "_orgToUser_B_index")
+  @@map("_orgToUser")
+}
+
+model prevChallengeParticipant {
+  A             Int
+  B             String
+  PrevChallenge PrevChallenge @relation(fields: [A], references: [id], onDelete: Cascade)
+  User          User          @relation(fields: [B], references: [id], onDelete: Cascade)
+
+  @@id([A, B], map: "_prevChallengeParticipant_AB_pkey")
+  @@index([B], map: "_prevChallengeParticipant_B_index")
+  @@map("_prevChallengeParticipant")
+}
+
 enum AuthType {
   GOOGLE
   APPLE
@@ -31,14 +291,14 @@ enum LocationType {
   ENG_QUAD
   ARTS_QUAD
   AG_QUAD
-  CENTRAL_CAMPUS
   NORTH_CAMPUS
   WEST_CAMPUS
-  CORNELL_ATHLETICS
-  VET_SCHOOL
   COLLEGETOWN
   ITHACA_COMMONS
   ANY
+  CENTRAL_CAMPUS
+  CORNELL_ATHLETICS
+  VET_SCHOOL
 }
 
 enum AchievementType {
@@ -55,117 +315,25 @@ enum DifficultyMode {
 }
 
 enum SessionLogEvent {
-  JOIN_GROUP //data = groupId
-  LEAVE_GROUP //data = groupId
-  LOGIN_USER //data = userId
-  CREATE_USER //data = userId
-  DELETE_USER //data = userId
-  EDIT_USERNAME //data = userId
-  SELECT_EVENT //data = eventId
-  DELETE_EVENT //data = eventId
-  SET_CHALLENGE //data = challengeId
-  DELETE_CHALLENGE //data = challengeId
-  COMPLETE_CHALLENGE //data = challengeId
-  DISCONNECT //data = ""
+  JOIN_GROUP
+  LEAVE_GROUP
+  LOGIN_USER
+  CREATE_USER
+  DELETE_USER
+  EDIT_USERNAME
+  SELECT_EVENT
+  DELETE_EVENT
+  SET_CHALLENGE
+  DELETE_CHALLENGE
+  COMPLETE_CHALLENGE
+  DISCONNECT
 }
 
 enum OrganizationSpecialUsage {
-  ///DEVICE_LOGIN is a device assigned-id that acts as a user login for non-Cornell users.
+  /// DEVICE_LOGIN is a device assigned-id that acts as a user login for non-Cornell users.
   DEVICE_LOGIN
   CORNELL_LOGIN
   NONE
-}
-
-model User {
-  id                  String               @id() @default(uuid())
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime             @updatedAt()
-  subject             String               @default("User")
-  authToken           String               @unique
-  authType            AuthType
-  username            String               @unique
-  year                String
-  college             String
-  major               String
-  interests           String[]
-  email               String
-  hashedRefreshToken  String
-  administrator       Boolean
-  enrollmentType      EnrollmentType
-  score               Int
-  isBanned            Boolean              @default(false)
-  group               Group                @relation("member", fields: [groupId], references: [id])
-  groupId             String
-  hostOf              Group?               @relation("host")
-  eventTrackers       EventTracker[]
-  favorites           EventBase[]
-  completedChallenges PrevChallenge[]      @relation("owner")
-  memberOf            Organization[]       @relation("orgToUser")
-  managerOf           Organization[]       @relation("orgManager")
-  isRanked            Boolean              @default(true)
-  participatedIn      PrevChallenge[]      @relation("prevChallengeParticipant")
-  sessionLogEntries   SessionLogEntry[]
-  achievementTrackers AchievementTracker[]
-  hasCompletedOnboarding Boolean
-  challengeTimers     ChallengeTimer[]
-}
-
-model Group {
-  id         String    @id @default(uuid())
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt()
-  subject    String    @default("Group")
-  friendlyId String    @unique
-  members    User[]    @relation("member")
-  host       User?     @relation("host", fields: [hostId], references: [id], onDelete: SetNull)
-  hostId     String?   @unique
-  curEvent   EventBase @relation(fields: [curEventId], references: [id])
-  curEventId String
-}
-
-model Challenge {
-  id             String           @id @default(uuid()) @map("id")
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt()
-  subject        String           @default("Challenge")
-  linkedEvent    EventBase?       @relation("all", fields: [linkedEventId], references: [id], onDelete: Cascade)
-  linkedEventId  String?
-  eventIndex     Int
-  name           String
-  location       LocationType
-  description    String
-  points         Int
-  imageUrl       String
-  latitude       Float
-  longitude      Float
-  awardingRadius Float
-  closeRadius    Float
-  completions    PrevChallenge[]
-  activeTrackers EventTracker[]
-  timerLength    Int?
-}
-
-model EventBase {
-  id              String             @id @default(uuid())
-  createdAt       DateTime           @default(now())
-  updatedAt       DateTime           @updatedAt()
-  subject         String             @default("EventBase")
-  requiredMembers Int
-  name            String
-  description     String
-  timeLimitation  TimeLimitationType
-  indexable       Boolean
-  endTime         DateTime
-  challenges      Challenge[]        @relation("all")
-  userFavorite    User[]
-  usedIn          Organization[]     @relation("eventOrgs")
-  trackers        EventTracker[]
-  activeGroups    Group[]
-  latitude        Float
-  longitude       Float
-  achievements    Achievement[]
-  difficulty      DifficultyMode
-  category        EventCategoryType
 }
 
 enum EventCategoryType {
@@ -177,117 +345,10 @@ enum EventCategoryType {
   DORM
 }
 
-model EventTracker {
-  id                  String          @id @default(uuid())
-  createdAt           DateTime        @default(now())
-  updatedAt           DateTime        @updatedAt()
-  subject             String          @default("EventTracker")
-  user                User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId              String
-  score               Int
-  hintsUsed           Int
-  isRankedForEvent    Boolean         @default(true)
-  event               EventBase       @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  eventId             String
-  curChallenge        Challenge?      @relation(fields: [curChallengeId], references: [id], onDelete: SetNull)
-  curChallengeId      String?
-  completedChallenges PrevChallenge[]
-}
-
-model PrevChallenge {
-  id           Int          @id @default(autoincrement())
-  subject      String       @default("PrevChallenge")
-  user         User         @relation("owner", fields: [userId], references: [id], onDelete: Cascade)
-  userId       String
-  participants User[]       @relation("prevChallengeParticipant")
-  challenge    Challenge    @relation(fields: [challengeId], references: [id], onDelete: Cascade)
-  challengeId  String
-  tracker      EventTracker @relation(fields: [trackerId], references: [id], onDelete: Cascade)
-  trackerId    String
-  hintsUsed    Int
-  timestamp    DateTime     @default(now())
-}
-
-model Organization {
-  id           String                   @id @default(uuid())
-  createdAt    DateTime                 @default(now())
-  updatedAt    DateTime                 @updatedAt()
-  subject      String                   @default("Organization")
-  name         String
-  accessCode   String
-  members      User[]                   @relation("orgToUser")
-  managers     User[]                   @relation("orgManager")
-  events       EventBase[]              @relation("eventOrgs")
-  specialUsage OrganizationSpecialUsage
-  achievements Achievement[]
-}
-
-model SessionLogEntry {
-  id         String          @id @default(uuid())
-  subject    String          @default("SessionLogEntry")
-  linkedUser User?           @relation(fields: [userId], references: [id])
-  eventType  SessionLogEvent
-  data       String
-  timestamp  DateTime        @default(now())
-  userId     String?
-}
-
-model Achievement {
-  id              String               @id @default(uuid())
-  createdAt       DateTime             @default(now())
-  updatedAt       DateTime             @updatedAt()
-  subject         String               @default("Achievement")
-  requiredPoints  Int
-  name            String
-  description     String
-  imageUrl        String
-  linkedEvent     EventBase?           @relation(fields: [linkedEventId], references: [id])
-  linkedEventId   String?
-  locationType    LocationType
-  achievementType AchievementType
-  trackers        AchievementTracker[]
-  organizations   Organization[]
-}
-
-model AchievementTracker {
-  id            String      @id @default(uuid())
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt()
-  subject       String      @default("AchievementTracker")
-  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  progress      Int
-  achievement   Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
-  dateComplete  DateTime?
-  achievementId String
-  userId        String
-}
-
 enum ChallengeTimerStatus {
   ACTIVE
   COMPLETED
   EXPIRED
   PAUSED
   CANCELLED
-}
-
-model ChallengeTimer {
-  id      String @id @default(uuid())
-  subject String @default("ChallengeTimer")
-
-  timerLength   Int                  @default(600) //in seconds
-  startTime     DateTime             @default(now())
-  endTime       DateTime?
-  currentStatus ChallengeTimerStatus @default(ACTIVE)
-
-  // warnings
-  warningMilestones     Int[]     @default([]) //milestones to send warnings for
-  warningMilestonesSent Int[]     @default([]) //which milestones have been sent
-  lastWarningSent       DateTime? //when last warning was sent
-
-  // relationships 
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId      String
-  challengeId String
-
-  @@unique([userId, challengeId]) //one timer per user per challenge
 }

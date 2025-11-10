@@ -444,6 +444,9 @@ class ChallengeDto {
     if (linkedEventId != null) {
       fields['linkedEventId'] = linkedEventId;
     }
+    if (timerLength != null) {
+      fields['timerLength'] = timerLength;
+    }
     return fields;
   }
 
@@ -467,6 +470,8 @@ class ChallengeDto {
         : null;
     linkedEventId =
         fields.containsKey('linkedEventId') ? (fields["linkedEventId"]) : null;
+    timerLength =
+        fields.containsKey('timerLength') ? (fields["timerLength"]) : null;
   }
 
   void partialUpdate(ChallengeDto other) {
@@ -484,6 +489,7 @@ class ChallengeDto {
         other.closeRadiusF == null ? closeRadiusF : other.closeRadiusF;
     linkedEventId =
         other.linkedEventId == null ? linkedEventId : other.linkedEventId;
+    timerLength = other.timerLength == null ? timerLength : other.timerLength;
   }
 
   ChallengeDto({
@@ -498,6 +504,7 @@ class ChallengeDto {
     this.awardingRadiusF,
     this.closeRadiusF,
     this.linkedEventId,
+    this.timerLength,
   });
 
   late String id;
@@ -511,6 +518,7 @@ class ChallengeDto {
   late double? awardingRadiusF;
   late double? closeRadiusF;
   late String? linkedEventId;
+  late int? timerLength;
 }
 
 class RequestChallengeDataDto {

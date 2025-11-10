@@ -292,6 +292,7 @@ export class ChallengeService {
       awardingRadiusF: ch.awardingRadius,
       closeRadiusF: ch.closeRadius,
       linkedEventId: ch.linkedEventId!,
+      timerLength: ch.timerLength ?? undefined,
     };
   }
 

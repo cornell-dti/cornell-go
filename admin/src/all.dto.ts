@@ -139,6 +139,7 @@ export interface ChallengeDto {
   awardingRadiusF?: number;
   closeRadiusF?: number;
   linkedEventId?: string;
+  timerLength?: number;
 }
 
 export interface RequestChallengeDataDto {
