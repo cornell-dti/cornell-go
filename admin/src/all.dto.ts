@@ -307,6 +307,39 @@ export interface UpdateOrganizationDataDto {
   deleted: boolean;
 }
 
+export interface TimerStartedDto {
+  timerId: string;
+  endTime: string;
+  challengeId: string;
+}
+
+export interface TimerExtendedDto {
+  timerId: string;
+  challengeId: string;
+  newEndTime: string;
+}
+
+export interface TimerCompletedDto {
+  timerId: string;
+  challengeId: string;
+  challengeCompleted: boolean;
+}
+
+export interface ExtendTimerDto {
+  challengeId: string;
+  endTime: string;
+}
+
+export interface StartChallengeTimerDto {
+  challengeId: string;
+}
+
+export interface TimerWarningDto {
+  challengeId: string;
+  milestone: number;
+  timeRemaining: number;
+}
+
 export interface CloseAccountDto {}
 
 export interface BanUserDto {

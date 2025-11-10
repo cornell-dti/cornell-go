@@ -121,6 +121,20 @@ export class ServerApi {
     >;
   }
 
+  startChallengeTimer(data: dto.StartChallengeTimerDto) {
+    return this.send('startChallengeTimer', data) as Promise<
+      string | undefined
+    >;
+  }
+
+  extendTimer(data: dto.ExtendTimerDto) {
+    return this.send('extendTimer', data) as Promise<string | undefined>;
+  }
+
+  completeTimer(data: dto.TimerCompletedDto) {
+    return this.send('completeTimer', data) as Promise<boolean | undefined>;
+  }
+
   requestAllUserData(data: dto.RequestAllUserDataDto) {
     return this.send('requestAllUserData', data) as Promise<number | undefined>;
   }
