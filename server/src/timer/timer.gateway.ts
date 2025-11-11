@@ -30,12 +30,15 @@ export class TimerGateway {
     @CallingUser() user: User,
     @MessageBody() data: StartChallengeTimerDto,
   ) {
+    // console.log(`[TimerGateway] startChallengeTimer called for challengeId=${data.challengeId}, userId=${user.id}`);
     const timer = await this.timerService.startTimer(data.challengeId, user.id);
+    // console.log(`[TimerGateway] Timer created: timerId=${timer.timerId}, endTime=${timer.endTime}`);
     await this.clientService.sendEvent([`user/${user.id}`], 'timerStarted', {
       timerId: timer.timerId,
       endTime: timer.endTime,
       challengeId: timer.challengeId,
     });
+    // console.log(`[TimerGateway] timerStarted event sent to user/${user.id}`);
     return timer.timerId;
   }
 

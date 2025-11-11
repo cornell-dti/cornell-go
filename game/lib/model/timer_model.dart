@@ -23,6 +23,8 @@ class TimerModel extends ChangeNotifier {
   TimerModel(ApiClient client) : _client = client {
     //listen for TimerStartedDto from backend
     client.clientApi.timerStartedStream.listen((event) {
+      // print(
+      //     "TimerModel: Received TimerStartedDto - timerId=${event.timerId}, challengeId=${event.challengeId}, endTime=${event.endTime}");
       _currentTimerId = event.timerId;
       _currentChallengeId = event.challengeId;
       _endTime = DateTime.parse(event.endTime);
@@ -65,6 +67,8 @@ class TimerModel extends ChangeNotifier {
 
   //send StartChallengeTimerDto to backend to start timer
   void startTimer(String challengeId) {
+    // print(
+    //     "TimerModel: Sending startTimer request for challengeId=$challengeId");
     _client.serverApi
         ?.startChallengeTimer(StartChallengeTimerDto(challengeId: challengeId));
   }

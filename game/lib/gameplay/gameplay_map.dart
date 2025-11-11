@@ -12,7 +12,6 @@ import 'dart:async';
 import 'dart:math';
 import 'package:game/gameplay/challenge_completed.dart';
 import 'package:game/utils/utility_functions.dart';
-import 'package:timerun/timerun.dart';
 import 'dart:ui' as ui;
 
 // for backend connection
@@ -24,6 +23,7 @@ import 'package:game/model/group_model.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/challenge_model.dart';
 import 'package:game/model/onboarding_model.dart';
+import 'package:game/model/timer_model.dart';
 import 'package:game/widgets/bear_mascot_message.dart';
 import 'package:showcaseview/showcaseview.dart';
 
@@ -104,12 +104,16 @@ class _GameplayMapState extends State<GameplayMap> {
   -- add in point deduction to challenge completed page
   */
 
-  // TODO initialize a TimeRun if the challenge has a timerlength
-  late TimeRun timer; //the timer for the challenge
+  // Timer
   String timeLeft = "--:--"; //time left that is displayed to the user
-  late double currentTime = 0.0;
-  int totalTime = 0; // Total timer length in seconds
-  bool hasTimer = false; // Whether the challenge has a timer
+  double currentTime = 0.0;
+  int totalTime = 0;
+  bool hasTimer = false;
+  Timer? _timerUpdateTimer; //periodic timer to update display every second
+  bool _periodicTimerStarted = false;
+  int _waitCount = 0; //counts how long we've been waiting for backend
+  static const int _maxWaitTime =
+      10; //max time in seconds to wait for backend to respond
 
   int totalHints = 3;
   int numHintsLeft = 10;
@@ -225,6 +229,76 @@ class _GameplayMapState extends State<GameplayMap> {
     Overlay.of(context).insert(_bearOverlayEntry!);
   }
 
+  /**
+   * Starts periodic updates to refresh timer display every second)
+   * Waits for backend to respond (isActive becomes true) before displaying
+   * Times out after _maxWaitTime seconds if backend doesn't respond
+   */
+  void _startTimerUpdates() {
+    if (_periodicTimerStarted) return; //already started
+    _periodicTimerStarted = true;
+    _waitCount = 0; //reset wait counter
+
+    _timerUpdateTimer?.cancel(); //cancel any existing timer
+
+    _timerUpdateTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+      final timerModel = Provider.of<TimerModel>(context, listen: false);
+
+      //wait for backend to respond - timer not active yet
+      if (!timerModel.isTimerForChallenge(widget.challengeId)) {
+        _waitCount++;
+        // if (_waitCount == 1) {
+        //   print(
+        //       "Timer: Waiting for backend response. isActive=${timerModel.isActive}, currentChallengeId=${timerModel.currentChallengeId}, waitingFor=${widget.challengeId}");
+        // }
+        if (_waitCount > _maxWaitTime) {
+          //if backend didn't respond in time, cancel timer and don't show it
+          timer.cancel();
+          _periodicTimerStarted = false;
+          setState(() {
+            hasTimer = false;
+            timeLeft = "--:--";
+            currentTime = 0.0;
+          });
+          print(
+              "Timer start timeout: Backend didn't respond within $_maxWaitTime seconds. isActive=${timerModel.isActive}, currentChallengeId=${timerModel.currentChallengeId}");
+          displayToast(
+              "Timer failed to start. Please try again.", Status.error);
+          return;
+        }
+        //wait for backend to respond
+        return;
+      }
+
+      //backend responded, reset wait counter and start displaying
+      _waitCount = 0;
+
+      final timeRemaining = timerModel.getTimeRemaining();
+
+      if (timeRemaining == null || timeRemaining <= 0) {
+        timer.cancel();
+        _periodicTimerStarted = false;
+        setState(() {
+          hasTimer = false;
+          timeLeft = "00:00";
+          currentTime = 0.0;
+        });
+        // TODO: timer ending logic
+        return;
+      }
+
+      final minutes = (timeRemaining / 60).floor();
+      final seconds = timeRemaining % 60;
+      final minutesStr = minutes.toString().padLeft(2, '0');
+      final secondsStr = seconds.toString().padLeft(2, '0');
+
+      setState(() {
+        timeLeft = "$minutesStr:$secondsStr";
+        currentTime = timeRemaining.toDouble();
+      });
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -242,86 +316,67 @@ class _GameplayMapState extends State<GameplayMap> {
     ShowcaseView.register(
       scope: "gameplay_map",
     );
-    // TODO init and start timer if challenge has a timerlength
-    // Timer:
 
-    startTimerIfExists();
-  }
-
-  //start a timer if it exists for the challenge
-  void startTimerIfExists() {
-    final challengeModel = Provider.of<ChallengeModel>(context, listen: false);
-    final challenge = challengeModel.getChallengeById(widget.challengeId);
-
-    if (challenge?.timerLength != null && challenge!.timerLength! > 0) {
-      setState(() {
-        hasTimer = true;
-      });
-      initTimer(challenge.timerLength!);
-      startTimer();
-    } else {
-      //no timer, set default values
-      setState(() {
-        hasTimer = false;
-        timeLeft = "--:--";
-        currentTime = 0.0;
-      });
-    }
+    // Timer: Initialize timer state (reset to false first)
+    _initializeTimer();
   }
 
   /**
-   * Initializes a timer for the challenge. Currently starts at one minute.
-   * Each second, the remaining minutes and seconds is shown.
-   * */
-  void initTimer(int timerLength) {
-    totalTime = timerLength; // Set total time for progress calculation
-    timer = TimeRun(
-      series: 3,
-      repetitions: 1,
-      pauseSeries: 0,
-      pauseRepeition: 0,
-      time: timerLength,
-      onUpdate: (currentSeries, totalSeries, currentRepetition,
-          totalRepetitions, currentSeconds, timePause, currentState) {
-        int minutes = (currentSeconds / 60).floor();
-        String minutes_str = minutes.toString();
-        if (minutes < 10) {
-          minutes_str = "0" + minutes_str;
-        }
-        int seconds = currentSeconds % 60;
-        String seconds_str = seconds.toString();
-        if (seconds < 10) {
-          seconds_str = "0" + seconds_str;
-        }
-        setState(() {
-          timeLeft = minutes_str + ":" + seconds_str;
-          currentTime = currentSeconds * 1.0;
-        });
-      },
-      onFinish: () {
-        print("TIMER DONE");
-        //TODO
-        //add 5 more min , subtract 25 points
-      },
-      onChange: (timerState) {
-        //TODO
-        //when 5 min new screen with cgo bear
-      },
-    );
-  }
+   * Initialize timer state for the current challenge
+   * Only sets hasTimer = true if challenge actually has a timerLength > 0
+   */
+  void _initializeTimer() {
+    //reset timer state 
+    setState(() {
+      hasTimer = false;
+      timeLeft = "--:--";
+      currentTime = 0.0;
+      totalTime = 0;
+      _periodicTimerStarted = false;
+      _waitCount = 0;
+    });
 
-  void startTimer() {
-    timer.play();
+    //cancel any existing timer
+    _timerUpdateTimer?.cancel();
+
+    //check if this challenge has a timer
+    final challengeModel = Provider.of<ChallengeModel>(context, listen: false);
+    final challenge = challengeModel.getChallengeById(widget.challengeId);
+    final timerModel = Provider.of<TimerModel>(context, listen: false);
+
+    // print(
+    //     "_initializeTimer: challengeId=${widget.challengeId}, challenge=${challenge?.id}, timerLength=${challenge?.timerLength}");
+
+    if (challenge?.timerLength != null && challenge!.timerLength! > 0) {
+      // print(
+      //     "Starting timer for challenge ${widget.challengeId} with length ${challenge.timerLength} seconds");
+      setState(() {
+        hasTimer = true;
+        totalTime = challenge.timerLength!;
+      });
+
+      //request backend to start timer (sends StartChallengeTimerDto)
+      timerModel.startTimer(widget.challengeId);
+
+      //start periodic timer, which won't display until backend responds
+      _startTimerUpdates();
+    } else {
+      print(
+          "No timer for challenge ${widget.challengeId} (timerLength=${challenge?.timerLength})");
+    }
   }
 
   @override
   void didUpdateWidget(GameplayMap oldWidget) {
-    // If challenge changed, reset hint state
+    //if challenge changed, reset hint state and timer state
     if (oldWidget.challengeId != widget.challengeId) {
       startingHintCenter = null;
       hintCenter = null;
       hintRadius = null;
       setStartingHintCircle();
+
+      //rset and reinitialize timer for new challenge
+      _initializeTimer();
     }
 
     super.didUpdateWidget(oldWidget);
@@ -332,9 +387,10 @@ class _GameplayMapState extends State<GameplayMap> {
     _removeBearOverlay();
     positionStream.cancel();
     _disposeController();
+    _timerUpdateTimer?.cancel(); //cancel periodic timer updates
+    _periodicTimerStarted = false;
+    _waitCount = 0; //reset wait counter
     super.dispose();
-    timer
-        .stop(); // TODO stop a timer if the timer was started ; stop it when the time runs out
   }
 
   Future<void> _disposeController() async {
@@ -826,6 +882,17 @@ class _GameplayMapState extends State<GameplayMap> {
           numHintsLeft = totalHints - tracker.hintsUsed;
         }
         var challenge = challengeModel.getChallengeById(widget.challengeId);
+
+        //re-initialize timer if challenge data loads after initState
+        if (challenge != null && !hasTimer && totalTime == 0) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted &&
+                challenge.timerLength != null &&
+                challenge.timerLength! > 0) {
+              _initializeTimer();
+            }
+          });
+        }
 
         if (challenge == null) {
           displayToast("Error getting challenge", Status.error);

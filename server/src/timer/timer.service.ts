@@ -31,8 +31,26 @@ export class TimerService {
       throw new Error('This challenge has no timer (timer length is not set)');
     }
     const endTime = this.calculateEndTime(challenge, 0);
-    const timer = await this.prisma.challengeTimer.create({
-      data: {
+    
+    //uses upsert to handle existing timers (e.g., if user reopens challenge)
+    const timer = await this.prisma.challengeTimer.upsert({
+      where: {
+        userId_challengeId: {
+          userId: userId,
+          challengeId: challengeId,
+        },
+      },
+      update: {
+        //reset timer if it already exists
+        timerLength: challenge.timerLength,
+        startTime: new Date(),
+        endTime: endTime,
+        currentStatus: ChallengeTimerStatus.ACTIVE,
+        warningMilestones: [300, 60, 30],
+        warningMilestonesSent: [],
+        lastWarningSent: null,
+      },
+      create: {
         challengeId: challengeId,
         userId: userId,
         timerLength: challenge.timerLength,
