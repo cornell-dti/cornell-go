@@ -357,6 +357,7 @@ export class EventService {
       id: ev.id,
       name: ev.name,
       description: ev.description,
+      longDescription: ev.longDescription,
       category: ev.category as EventCategoryDto,
       timeLimitation:
         ev.timeLimitation === TimeLimitationType.LIMITED_TIME
@@ -639,6 +640,10 @@ export class EventService {
         description:
           assignData.description?.substring(0, 2048) ??
           defaultEventData.description,
+        longDescription:
+          event.longDescription?.substring(0, 8192) ??
+          defaultEventData.longDescription ??
+          '',
         category: assignData.category ?? defaultEventData.category,
         timeLimitation: assignData.timeLimitation,
         endTime: assignData.endTime ?? defaultEventData.endTime,
