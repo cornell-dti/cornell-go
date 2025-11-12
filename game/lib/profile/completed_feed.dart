@@ -104,8 +104,8 @@ class CompletedFeedWidget extends StatelessWidget {
 
                   if (challenge != null) {
                     pictureList.add(imageUrl);
-                    locationList
-                        .add(friendlyLocation[challenge.location ?? ChallengeLocationDto.ANY]); // wrong ANY was being used
+                    locationList.add(friendlyLocation[challenge.location ??
+                        ChallengeLocationDto.ANY]); // wrong ANY was being used
                     totalPoints += challenge.points ?? 0;
                   }
                 }
@@ -115,7 +115,8 @@ class CompletedFeedWidget extends StatelessWidget {
                   pictures: pictureList,
                   type: type,
                   date: DateFormat("MMMM d, y").format(date),
-                  location: locationList.isNotEmpty ? locationList[0] : "Cornell",
+                  location:
+                      locationList.isNotEmpty ? locationList[0] : "Cornell",
                   difficulty: friendlyDifficulty[event.difficulty]!,
                   points: totalPoints,
                 );

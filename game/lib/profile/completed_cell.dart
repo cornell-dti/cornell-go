@@ -47,62 +47,64 @@ Widget completedCell(
                   fit: BoxFit.cover,
                 )),
           ),
-          Expanded( // this prevents overflow issues
+          Expanded(
+            // this prevents overflow issues
             child: Padding(
               padding: const EdgeInsets.only(left: 8.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                Text(
-                  name,
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
+                  Text(
+                    name,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                Text.rich( // for multiple fonts usage
-                  TextSpan(
-                    children: [
-                      TextSpan(
-                        text: "From " + type + " - ",
-                        style: TextStyle(color: Colors.grey, fontSize: 12),
-                      ),
-                      TextSpan(
-                        text: date,
-                        style: TextStyle(fontSize: 12),
-                      ),
-                    ],
+                  Text.rich(
+                    // for multiple fonts usage
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: "From " + type + " - ",
+                          style: TextStyle(color: Colors.grey, fontSize: 12),
+                        ),
+                        TextSpan(
+                          text: date,
+                          style: TextStyle(fontSize: 12),
+                        ),
+                      ],
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
                   ),
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 5.0),
-                  child: Container(
-                    width: 200,
-                    child: Row(children: [
-                      SvgPicture.asset(
-                        "assets/icons/bearcoins.svg",
-                        width: 20,
-                      ),
-                      Text(
-                          ' ' +
-                              calculateHintAdjustedPoints(
-                                      points, totalHintsUsed)
-                                  .toString() +
-                              "/" +
-                              points.toString() +
-                              " PTS",
-                          style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                              color: Color(0xFFC17E19)))
-                    ]),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 5.0),
+                    child: Container(
+                      width: 200,
+                      child: Row(children: [
+                        SvgPicture.asset(
+                          "assets/icons/bearcoins.svg",
+                          width: 20,
+                        ),
+                        Text(
+                            ' ' +
+                                calculateHintAdjustedPoints(
+                                        points, totalHintsUsed)
+                                    .toString() +
+                                "/" +
+                                points.toString() +
+                                " PTS",
+                            style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                                color: Color(0xFFC17E19)))
+                      ]),
+                    ),
                   ),
-                ),
-              ],
+                ],
               ),
             ),
           )
