@@ -139,6 +139,7 @@ export class CaslAbilityFactory {
         'trackedEvents',
         'favorites',
         'authType',
+        'hasCompletedOnboarding',
       ],
       {
         id: user.id,

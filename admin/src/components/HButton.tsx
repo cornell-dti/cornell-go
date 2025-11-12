@@ -1,6 +1,6 @@
-import styled, { css } from "styled-components";
+import styled, { css } from 'styled-components';
 
-export const HButton = styled.div<{ float?: "left" | "right" }>`
+export const HButton = styled.div<{ float?: 'left' | 'right' }>`
   display: inline-block;
   height: 30px;
   user-select: none;
@@ -20,7 +20,7 @@ export const HButton = styled.div<{ float?: "left" | "right" }>`
     background-color: rgb(220, 220, 255);
   }
 
-  ${(props) =>
+  ${props =>
     props.float &&
     css`
       float: ${props.float};

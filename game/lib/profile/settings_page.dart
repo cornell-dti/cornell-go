@@ -7,6 +7,11 @@ import 'package:game/main.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:game/model/onboarding_model.dart';
+import 'package:game/model/user_model.dart';
+import 'package:game/model/event_model.dart';
+import 'package:game/model/tracker_model.dart';
+import 'package:game/navigation_page/bottom_navbar.dart';
 
 final SUPPORT_URL =
     Uri.parse("https://sites.google.com/cornell.edu/cornellgosupport");
@@ -97,6 +102,73 @@ class SettingsPage extends StatelessWidget {
                         ),
                       ),
                     if (!isGuest) Divider(height: 1),
+                    if (!isGuest)
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                        ),
+                        child: TextButton(
+                          onPressed: () async {
+                            // Check if prerequisites are met before restarting tutorial
+                            final onboarding = Provider.of<OnboardingModel>(
+                                context,
+                                listen: false);
+                            final userModel =
+                                Provider.of<UserModel>(context, listen: false);
+                            final eventModel =
+                                Provider.of<EventModel>(context, listen: false);
+                            final trackerModel = Provider.of<TrackerModel>(
+                                context,
+                                listen: false);
+
+                            if (!onboarding.canStartOnboarding(
+                                userModel, eventModel, trackerModel)) {
+                              displayToast(
+                                  "Tutorial Unavailable", Status.error);
+                              return;
+                            }
+
+                            // Reset onboarding state and navigate to home
+                            await onboarding.reset();
+
+                            // Navigate back to home page where onboarding will auto-start
+                            if (context.mounted) {
+                              Navigator.of(context).pushAndRemoveUntil(
+                                MaterialPageRoute(
+                                    builder: (context) => BottomNavBar()),
+                                (route) => false,
+                              );
+                              displayToast(
+                                  "Tutorial restarted", Status.success);
+                            }
+                          },
+                          style: TextButton.styleFrom(
+                              padding: EdgeInsets.only(left: 20.0),
+                              alignment: Alignment.centerLeft,
+                              fixedSize: Size(constraints.maxWidth, 60)),
+                          child: Row(
+                            children: [
+                              Padding(
+                                padding: EdgeInsets.only(right: 20.0),
+                                child: SvgPicture.asset(
+                                  'assets/icons/reset.svg',
+                                  width: 14,
+                                  height: 14,
+                                ),
+                              ),
+                              Text(
+                                'Restart Tutorial',
+                                textAlign: TextAlign.left,
+                                style: TextStyle(
+                                    fontFamily: 'Poppins',
+                                    fontSize: 16,
+                                    color: Colors.black),
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                    if (!isGuest) Divider(height: 1),
                     Container(
                       decoration: BoxDecoration(
                         color: Colors.white,
@@ -161,7 +233,9 @@ class SettingsPage extends StatelessWidget {
                             Padding(
                               padding: EdgeInsets.only(right: 20.0),
                               child: SvgPicture.asset(
-                                'assets/icons/head.svg',
+                                'assets/icons/orgs.svg',
+                                width: 14,
+                                height: 14,
                               ),
                             ),
                             Text(

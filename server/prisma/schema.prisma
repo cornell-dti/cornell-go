@@ -106,6 +106,7 @@ model User {
   participatedIn      PrevChallenge[]      @relation("prevChallengeParticipant")
   sessionLogEntries   SessionLogEntry[]
   achievementTrackers AchievementTracker[]
+  hasCompletedOnboarding Boolean
 }
 
 model Group {
@@ -150,6 +151,7 @@ model EventBase {
   requiredMembers Int
   name            String
   description     String
+  longDescription String
   timeLimitation  TimeLimitationType
   indexable       Boolean
   endTime         DateTime
