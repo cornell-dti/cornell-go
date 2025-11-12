@@ -18,7 +18,7 @@ interface IntermediatePayload {
  * The `AuthService` class provides authentication-related functionality for the application,
  * including login, token management, and user verification.
  *
- * Now supports Google and Apple (OAuth), and device login. Only Cornell emails are allowed.
+ * Now supports Google and Apple (OAuth), and device login. Google and Apple accept any email.
  */
 @Injectable()
 export class AuthService {
@@ -145,15 +145,6 @@ export class AuthService {
 
     if (!idToken) {
       console.log('Id token was null!');
-      return null;
-    }
-
-    // Only enforce Cornell email requirement for Google and Device login, not Apple
-    if (
-      authType !== AuthType.APPLE &&
-      !idToken.email.endsWith('@cornell.edu')
-    ) {
-      console.log('Non cornell account was used!');
       return null;
     }
 

@@ -298,7 +298,19 @@ class _GameplayMapState extends State<GameplayMap> {
 
     try {
       final location = await GeoPoint.current();
-      currentLocation = location;
+      setState(() {
+        currentLocation = location;
+      });
+
+      // Immediately center the camera on the user's location
+      googleMapController.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(
+            target: LatLng(location.lat, location.long),
+            zoom: 16.5,
+          ),
+        ),
+      );
 
       positionStream = Geolocator.getPositionStream(
               locationSettings: GeoPoint.getLocationSettings())
