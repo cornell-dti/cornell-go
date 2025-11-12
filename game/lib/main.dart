@@ -1,9 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_config_plus/flutter_config_plus.dart';
+import 'package:device_preview/device_preview.dart';
 import 'package:game/api/geopoint.dart';
 import 'package:game/loading_page/loading_page.dart';
 import 'package:game/model/achievement_model.dart';
@@ -43,7 +45,7 @@ void main() async {
 
   // Define LOOPBACK and get API_URL from FlutterConfigPlus
   final LOOPBACK =
-      (Platform.isAndroid ? "http://10.0.2.2:8080" : "http://0.0.0.0:8080");
+      (Platform.isAndroid ? "http://10.0.2.2:8080" : "http://localhost:8080");
   API_URL = FlutterConfigPlus.get('API_URL') ?? LOOPBACK;
   print('Using API URL: $API_URL');
 

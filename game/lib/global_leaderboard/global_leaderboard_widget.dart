@@ -44,7 +44,7 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
       key: scaffoldKey,
       backgroundColor: Color.fromARGB(255, 255, 248, 241),
       appBar: AppBar(
-        toolbarHeight: MediaQuery.sizeOf(context).height * 0.1,
+        toolbarHeight: MediaQuery.sizeOf(context).height * 0.08,
         automaticallyImplyLeading: false,
         backgroundColor: Color.fromARGB(255, 237, 86, 86),
         flexibleSpace: FlexibleSpaceBar(

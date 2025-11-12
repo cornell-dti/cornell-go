@@ -88,7 +88,7 @@ class _AchievementsPageState extends State<AchievementsPage> {
             child: Scaffold(
               appBar: AppBar(
                 backgroundColor: Color.fromARGB(255, 237, 86, 86),
-                toolbarHeight: MediaQuery.of(context).size.height * 0.1,
+                toolbarHeight: MediaQuery.of(context).size.height * 0.08,
                 leading: Align(
                   alignment: Alignment.center,
                   child: IconButton(
