@@ -16,8 +16,7 @@ class LoadingBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Container(
-            width: MediaQuery.sizeOf(context).width * 0.49,
+        Flexible(
             child: LayoutBuilder(
                 builder: (BuildContext context, BoxConstraints constraints) {
               return Stack(children: [
@@ -63,11 +62,9 @@ class LoadingBar extends StatelessWidget {
                 ),
               ]);
             })),
-        Padding(
-          padding: const EdgeInsets.only(left: 8.0),
-          child: Text(
-            tasksFinished.toString() + "/" + totalTasks.toString(),
-          ),
+        SizedBox(width: 8),
+        Text(
+          tasksFinished.toString() + "/" + totalTasks.toString(),
         ),
       ],
     );

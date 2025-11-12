@@ -47,12 +47,13 @@ Widget completedCell(
                   fit: BoxFit.cover,
                 )),
           ),
-          Padding(
-            padding: const EdgeInsets.only(left: 8.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+          Expanded( // this prevents overflow issues
+            child: Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                 Text(
                   name,
                   overflow: TextOverflow.ellipsis,
@@ -61,14 +62,21 @@ Widget completedCell(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                Row(
-                  children: [
-                    Text(
-                      "From " + type + " - ",
-                      style: TextStyle(color: Colors.grey, fontSize: 12),
-                    ),
-                    Text(date)
-                  ],
+                Text.rich( // for multiple fonts usage
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: "From " + type + " - ",
+                        style: TextStyle(color: Colors.grey, fontSize: 12),
+                      ),
+                      TextSpan(
+                        text: date,
+                        style: TextStyle(fontSize: 12),
+                      ),
+                    ],
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
                 ),
                 Padding(
                   padding: const EdgeInsets.only(top: 5.0),
@@ -95,6 +103,7 @@ Widget completedCell(
                   ),
                 ),
               ],
+              ),
             ),
           )
         ],

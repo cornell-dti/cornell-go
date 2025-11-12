@@ -137,7 +137,18 @@ class _ProfilePageState extends State<ProfilePage> {
           }
           //Sort so that the most recent events are first
           completedEvents.sort((a, b) => b.item1.compareTo(a.item1));
-          return Column(
+
+          // Sort achievements by progress (least completed first) and take top 2
+          final sortedAchList = achList
+              .sortedBy((a, b) =>
+                  (a.$1.progress / // least completed first
+                          (a.$2.requiredPoints ?? 1))
+                      .compareTo(b.$1.progress / (b.$2.requiredPoints ?? 1)))
+              .take(2)
+              .toList();
+
+          return SingleChildScrollView(
+            child: Column(
             children: [
               // Green gradient background with blue oval
               Container(
@@ -193,6 +204,22 @@ class _ProfilePageState extends State<ProfilePage> {
                           'assets/icons/cloud.png',
                           fit: BoxFit.contain,
                         ),
+                      ),
+                    ),
+                    // Settings icon positioned on the right
+                    Positioned(
+                      right: screenWidth * 0.05, // will shift this to the right when hanger icon is introduced
+                      top: MediaQuery.of(context).padding.top, // for status bar
+                      child: IconButton(
+                        icon: Icon(Icons.settings,
+                            size: iconSize, color: Colors.black),
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      SettingsPage(isGuest)));
+                        },
                       ),
                     ),
                     // Centered bear.png image
@@ -343,9 +370,9 @@ class _ProfilePageState extends State<ProfilePage> {
                 )
               else
                 SizedBox(
-                  height: screenHeight * 0.21, // 25% of screen height
                   width: screenWidth * 0.85, // 85% of screen width
                   child: ListView.separated(
+                    shrinkWrap: true, // this prevents the list from being scrollable
                     itemCount: 2,
                     itemBuilder: (context, index) {
                       if (index >= completedEvents.length) {
@@ -385,7 +412,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           hintsUsed,
                           totalPoints);
                     },
-                    physics: BouncingScrollPhysics(),
+                    physics: NeverScrollableScrollPhysics(),
                     padding: EdgeInsets.only(top: 0),
                     separatorBuilder: (context, index) {
                       return SizedBox(
@@ -412,7 +439,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             builder: (context) => AchievementsPage()));
                       },
                       child: Text(
-                        'View Details →',
+                        'View All →',
                         style: TextStyle(
                           color: Colors.black,
                           fontSize: smallFontSize, // 3.5% of screen width
@@ -423,46 +450,55 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               ),
               //To be replaced with real data
-              Padding(
+              if (achList.isEmpty)
+                Padding(
+                  padding: EdgeInsets.only(top: screenHeight * 0.1),
+                  child: Center(
+                      child: Text(
+                    "No Available Achievements",
+                    style: TextStyle(
+                      fontSize: mediumFontSize,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.grey,
+                    ),
+                    textAlign: TextAlign.center,
+                  )))
+              else
+                Padding(
                   padding: EdgeInsets.symmetric(
                       horizontal: screenWidth * 0.075), // 7.5% of screen width
-                  child: achList.isEmpty
-                      ? Padding(
-                          padding: EdgeInsets.only(top: screenHeight * 0.1),
-                          child: Center(
-                              child: Text(
-                            "No Available Achievements",
-                            style: TextStyle(
-                              fontSize: mediumFontSize,
-                              fontWeight: FontWeight.w400,
-                              color: Colors.grey,
-                            ),
-                            textAlign: TextAlign.center,
-                          )))
-                      : Column(
-                          children: (achList
-                              .sortedBy((a, b) =>
-                                  (a.$1.progress / // least completed first
-                                          (a.$2.requiredPoints ?? 1))
-                                      .compareTo(b.$1.progress /
-                                          (b.$2.requiredPoints ?? 1)))
-                              .take(2)
-                              .map((e) => ([
-                                    AchievementCell(
-                                        e.$2.description ?? "",
-                                        SvgPicture.asset(e.$1.progress >=
-                                                (e.$2.requiredPoints ?? 0)
-                                            ? "assets/icons/achievementgold.svg"
-                                            : "assets/icons/achievementsilver.svg"),
-                                        e.$1.progress,
-                                        e.$2.requiredPoints ?? 0),
-                                    SizedBox(
-                                        height: screenHeight *
-                                            0.012), // 1.2% of screen height
-                                  ]))
-                              .expand((el) => el)
-                              .toList()))),
+                  child: SizedBox(
+                    width: screenWidth * 0.85, // 85% of screen width
+                    child: ListView.separated(
+                      shrinkWrap: true, // this prevents the list from being scrollable
+                      itemCount: 2,
+                      itemBuilder: (context, index) {
+                        if (index >= sortedAchList.length) {
+                          return Container();
+                        }
+                        final e = sortedAchList[index];
+                        return AchievementCell(
+                            e.$2.description ?? "",
+                            SvgPicture.asset(e.$1.progress >=
+                                    (e.$2.requiredPoints ?? 0)
+                                ? "assets/icons/achievementgold.svg"
+                                : "assets/icons/achievementsilver.svg"),
+                            e.$1.progress,
+                            e.$2.requiredPoints ?? 0);
+                      },
+                      physics: NeverScrollableScrollPhysics(),
+                      padding: EdgeInsets.only(top: 0),
+                      separatorBuilder: (context, index) {
+                        return SizedBox(
+                            height: screenHeight *
+                                0.012); // 1.2% of screen height
+                      },
+                    ),
+                  ),
+                ),
+              SizedBox(height: screenHeight * 0.02),
             ],
+            ),
           );
         }),
       ),
