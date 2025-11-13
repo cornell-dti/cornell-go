@@ -69,12 +69,18 @@ class _ProfilePageState extends State<ProfilePage> {
 
     // Calculate responsive sizes
     final headerHeight = screenHeight * 0.30;
-    final avatarSize = screenWidth * 0.22; // 22% of screen width
+    final bearWidth = screenWidth * 0.35; // 35% of screen width
+    final bearHeight =
+        screenWidth * 0.35 * (593 / 429); // Maintain bear's aspect ratio
     final iconSize = screenWidth * 0.075; // 7.5% of screen width
     final badgeWidth = screenWidth * 0.2; // 20% of screen width
     final badgeHeight = screenHeight * 0.03; // 3% of screen height
     final smallFontSize = screenWidth * 0.035;
     final mediumFontSize = screenWidth * 0.04;
+
+    // Responsive oval sizing
+    final ovalWidth = screenWidth * 1; //full width of screen
+    final ovalHeight = ovalWidth * (352 / 800); // Maintain aspect ratio
 
     return Scaffold(
       backgroundColor: Color.fromARGB(255, 255, 245, 234),
@@ -131,324 +137,374 @@ class _ProfilePageState extends State<ProfilePage> {
           }
           //Sort so that the most recent events are first
           completedEvents.sort((a, b) => b.item1.compareTo(a.item1));
-          return Column(
-            children: [
-              // Red curved header with profile information
-              Stack(
-                children: [
-                  // Custom curved container
-                  ClipPath(
-                    clipper: CustomCurveClipper(),
-                    child: Container(
-                      width: double.infinity,
-                      height: headerHeight,
-                      color:
-                          Color(0xFFED5656), // Coral red color from the design
+
+          // Sort achievements by progress (least completed first) and take top 2
+          final sortedAchList = achList
+              .sortedBy((a, b) => (a.$1.progress / // least completed first
+                      (a.$2.requiredPoints ?? 1))
+                  .compareTo(b.$1.progress / (b.$2.requiredPoints ?? 1)))
+              .take(2)
+              .toList();
+
+          return SingleChildScrollView(
+            child: Column(
+              children: [
+                // Green gradient background with blue oval
+                Container(
+                  width: double.infinity,
+                  height: headerHeight,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Color(0xFF58B171),
+                        Color(0xFF31B346),
+                      ],
                     ),
                   ),
-                  // Content inside the curved container
-                  Column(
+                  child: Stack(
                     children: [
-                      // Add padding for status bar
-                      SizedBox(height: MediaQuery.of(context).padding.top),
-                      // Profile section with settings icon
-                      Padding(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: screenWidth * 0.05),
-                        child: Stack(
-                          children: [
-                            // Settings icon positioned on the right
-                            Positioned(
-                              right: 0,
-                              top: 0,
-                              child: IconButton(
-                                icon: Icon(Icons.settings,
-                                    size: iconSize, color: Colors.white),
-                                onPressed: () {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              SettingsPage(isGuest)));
-                                },
-                              ),
+                      Positioned(
+                        top: -headerHeight *
+                            0.7, // Position to cut off more at top
+                        left: -ovalWidth /
+                            2, // Center the oval, the left edge starts halfway to left of screen
+                        child: Container(
+                          width: ovalWidth * 2,
+                          height: ovalHeight * 2,
+                          decoration: ShapeDecoration(
+                            color: const Color(0xFFB3EBF6),
+                            shape: OvalBorder(),
+                          ),
+                        ),
+                      ),
+                      // Sun icon in top left corner
+                      Positioned(
+                        top: MediaQuery.of(context).padding.top + 10,
+                        left: 45,
+                        child: Container(
+                          width: iconSize,
+                          height: iconSize,
+                          child: Image.asset(
+                            'assets/icons/sun.png',
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
+                      // Cloud icon positioned on layer above sun to partially cover it
+                      Positioned(
+                        top: MediaQuery.of(context).padding.top - 17,
+                        left: 30,
+                        child: Container(
+                          width: iconSize * 3,
+                          height: iconSize * 3,
+                          child: Image.asset(
+                            'assets/icons/cloud.png',
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
+                      // Settings icon positioned on the right
+                      Positioned(
+                        right: screenWidth *
+                            0.05, // will shift this to the right when hanger icon is introduced
+                        top: MediaQuery.of(context)
+                            .padding
+                            .top, // for status bar
+                        child: IconButton(
+                          icon: Icon(Icons.settings,
+                              size: iconSize, color: Colors.black),
+                          onPressed: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        SettingsPage(isGuest)));
+                          },
+                        ),
+                      ),
+                      // Centered bear.png image
+                      Center(
+                        child: Container(
+                          padding: EdgeInsets.only(
+                              top: MediaQuery.of(context).padding.top - 10),
+                          child: Container(
+                            width: bearWidth,
+                            height: bearHeight,
+                            child: Image.asset(
+                              'assets/icons/bear.png',
+                              fit: BoxFit.cover,
                             ),
-                            // Centered profile content
-                            Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  // Profile avatar
-                                  Container(
-                                    height: screenHeight * 0.14,
-                                    child: Stack(
-                                      alignment: Alignment.center,
-                                      children: [
-                                        // Avatar
-                                        Container(
-                                          decoration: BoxDecoration(
-                                            color: Colors.white,
-                                            shape: BoxShape.circle,
-                                          ),
-                                          child: SvgPicture.asset(
-                                            "assets/images/bear_profile.svg",
-                                            height: avatarSize,
-                                            width: avatarSize,
-                                          ),
-                                        ),
-                                        // Points badge
-                                        Positioned(
-                                          bottom: 0,
-                                          child: Container(
-                                            width: badgeWidth,
-                                            height: badgeHeight,
-                                            clipBehavior: Clip.antiAlias,
-                                            decoration: ShapeDecoration(
-                                              color: Color(0xFFC17E19),
-                                              shape: RoundedRectangleBorder(
-                                                side: BorderSide(
-                                                  width: 2,
-                                                  strokeAlign: BorderSide
-                                                      .strokeAlignCenter,
-                                                  color: Color(0xFFFFC737),
-                                                ),
-                                                borderRadius:
-                                                    BorderRadius.circular(100),
-                                              ),
-                                            ),
-                                            child: Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              children: [
-                                                Text(
-                                                  "${score} PTS",
-                                                  style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: smallFontSize,
-                                                    fontWeight: FontWeight.w600,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  // Add space between avatar/points and username
-                                  SizedBox(height: screenHeight * 0.015),
-                                  // Username
-                                  Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        username!,
-                                        style: TextStyle(
-                                          fontSize: screenWidth * 0.055,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
-                                          height: 1.2,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                      SizedBox(height: screenHeight * 0.002),
-                                      Text(
-                                        "@${username.toLowerCase().replaceAll(' ', '')}",
-                                        style: TextStyle(
-                                          fontSize: mediumFontSize,
-                                          color: Colors.white,
-                                          height: 1,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
                       ),
                     ],
                   ),
-                ],
-              ),
-              SizedBox(height: screenHeight * 0.018), // 2.5% of screen height
-              //Completed Events
-              Padding(
-                padding: EdgeInsets.symmetric(
-                    horizontal: screenWidth * 0.06), // 6% of screen width
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text("Completed",
-                        style: TextStyle(
-                            fontSize: mediumFontSize, // 4% of screen width
-                            fontWeight: FontWeight.bold)),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => CompletedFeedWidget()));
-                      },
-                      child: Text(
-                        'View All →',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: smallFontSize, // 3.5% of screen width
-                        ),
-                      ),
-                    )
-                  ],
                 ),
-              ),
-              if (completedEvents.isEmpty)
-                SizedBox(
-                  height: screenHeight * 0.21,
-                  width: screenWidth * 0.85,
-                  child: Center(
-                    child: Text(
-                      "No Completed Events",
-                      style: TextStyle(
-                        fontSize: mediumFontSize,
-                        fontWeight: FontWeight.w400,
-                        color: Colors.grey,
-                      ),
-                      textAlign: TextAlign.center,
+                // Profile header section
+                SizedBox(height: screenHeight * 0.018),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+                  child: Container(
+                    width: double.infinity,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: double.infinity,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                username!,
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: screenWidth * 0.055,
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w700,
+                                  height: 1.50,
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 2),
+                                clipBehavior: Clip.antiAlias,
+                                decoration: ShapeDecoration(
+                                  color: const Color(0xFFC17E19),
+                                  shape: RoundedRectangleBorder(
+                                    side: BorderSide(
+                                      width: 2,
+                                      strokeAlign: BorderSide.strokeAlignCenter,
+                                      color: const Color(0xFFFFC737),
+                                    ),
+                                    borderRadius: BorderRadius.circular(100),
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      '${score} PTS',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: smallFontSize,
+                                        fontFamily: 'Poppins',
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        SizedBox(
+                          width: double.infinity,
+                          child: Text(
+                            '@${username.toLowerCase().replaceAll(' ', '')}',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: mediumFontSize,
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.w500,
+                              height: 1.50,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                )
-              else
-                SizedBox(
-                  height: screenHeight * 0.21, // 25% of screen height
-                  width: screenWidth * 0.85, // 85% of screen width
-                  child: ListView.separated(
-                    itemCount: 2,
-                    itemBuilder: (context, index) {
-                      if (index >= completedEvents.length) {
-                        return Container();
-                      }
-                      var date = completedEvents[index].item1;
-                      var event = completedEvents[index].item2;
-                      var hintsUsed = completedEvents[index].item3;
-                      String formattedDate =
-                          DateFormat("MMMM d, y").format(date);
-                      var type = event.challenges!.length > 1
-                          ? "Journeys"
-                          : "Challenge";
-
-                      // Calculate totalPoints.
-                      var totalPoints = 0;
-                      var locationImage;
-                      for (var challengeId in event.challenges ?? []) {
-                        var challenge =
-                            challengeModel.getChallengeById(challengeId);
-                        locationImage = challenge?.imageUrl;
-                        if (locationImage == null || locationImage.length == 0)
-                          locationImage =
-                              "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png";
-                        if (challenge != null) {
-                          totalPoints += challenge.points ?? 0;
-                        }
-                      }
-
-                      return completedCell(
-                          context,
-                          event.name!,
-                          locationImage,
-                          type,
-                          formattedDate,
-                          friendlyDifficulty[event.difficulty]!,
-                          hintsUsed,
-                          totalPoints);
-                    },
-                    physics: BouncingScrollPhysics(),
-                    padding: EdgeInsets.only(top: 0),
-                    separatorBuilder: (context, index) {
-                      return SizedBox(
-                          height:
-                              screenHeight * 0.012); // 1.2% of screen height
-                    },
+                ),
+                SizedBox(height: screenHeight * 0.018), // 2.5% of screen height
+                //Completed Events
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                      horizontal: screenWidth * 0.06), // 6% of screen width
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text("Completed",
+                          style: TextStyle(
+                              fontSize: mediumFontSize, // 4% of screen width
+                              fontWeight: FontWeight.bold)),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => CompletedFeedWidget()));
+                        },
+                        child: Text(
+                          'View All →',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: smallFontSize, // 3.5% of screen width
+                          ),
+                        ),
+                      )
+                    ],
                   ),
                 ),
-              Padding(
-                padding: EdgeInsets.symmetric(
-                    horizontal: screenWidth * 0.06), // 6% of screen width
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text("Achievements",
-                        style: TextStyle(
-                            fontSize: mediumFontSize, // 4% of screen width
-                            fontWeight: FontWeight.bold)),
-                    TextButton(
-                      onPressed: () {
-                        // Handle button press, e.g., navigate to details page
-                        Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => AchievementsPage()));
-                      },
+                if (completedEvents.isEmpty)
+                  SizedBox(
+                    height: screenHeight * 0.21,
+                    width: screenWidth * 0.85,
+                    child: Center(
                       child: Text(
-                        'View Details →',
+                        "No Completed Events",
                         style: TextStyle(
-                          color: Colors.black,
-                          fontSize: smallFontSize, // 3.5% of screen width
+                          fontSize: mediumFontSize,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.grey,
                         ),
+                        textAlign: TextAlign.center,
                       ),
-                    )
-                  ],
-                ),
-              ),
-              //To be replaced with real data
-              Padding(
+                    ),
+                  )
+                else
+                  SizedBox(
+                    width: screenWidth * 0.85, // 85% of screen width
+                    child: ListView.separated(
+                      shrinkWrap:
+                          true, // this prevents the list from being scrollable
+                      itemCount: 2,
+                      itemBuilder: (context, index) {
+                        if (index >= completedEvents.length) {
+                          return Container();
+                        }
+                        var date = completedEvents[index].item1;
+                        var event = completedEvents[index].item2;
+                        var hintsUsed = completedEvents[index].item3;
+                        String formattedDate =
+                            DateFormat("MMMM d, y").format(date);
+                        var type = event.challenges!.length > 1
+                            ? "Journeys"
+                            : "Challenge";
+
+                        // Calculate totalPoints.
+                        var totalPoints = 0;
+                        var locationImage;
+                        for (var challengeId in event.challenges ?? []) {
+                          var challenge =
+                              challengeModel.getChallengeById(challengeId);
+                          locationImage = challenge?.imageUrl;
+                          if (locationImage == null ||
+                              locationImage.length == 0)
+                            locationImage =
+                                "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png";
+                          if (challenge != null) {
+                            totalPoints += challenge.points ?? 0;
+                          }
+                        }
+
+                        return completedCell(
+                            context,
+                            event.name!,
+                            locationImage,
+                            type,
+                            formattedDate,
+                            friendlyDifficulty[event.difficulty]!,
+                            hintsUsed,
+                            totalPoints);
+                      },
+                      physics: NeverScrollableScrollPhysics(),
+                      padding: EdgeInsets.only(top: 0),
+                      separatorBuilder: (context, index) {
+                        return SizedBox(
+                            height:
+                                screenHeight * 0.012); // 1.2% of screen height
+                      },
+                    ),
+                  ),
+                Padding(
                   padding: EdgeInsets.symmetric(
-                      horizontal: screenWidth * 0.075), // 7.5% of screen width
-                  child: achList.isEmpty
-                      ? Padding(
-                          padding: EdgeInsets.only(top: screenHeight * 0.1),
-                          child: Center(
-                              child: Text(
-                            "No Available Achievements",
-                            style: TextStyle(
-                              fontSize: mediumFontSize,
-                              fontWeight: FontWeight.w400,
-                              color: Colors.grey,
-                            ),
-                            textAlign: TextAlign.center,
-                          )))
-                      : Column(
-                          children: (achList
-                              .sortedBy((a, b) =>
-                                  (a.$1.progress / // least completed first
-                                          (a.$2.requiredPoints ?? 1))
-                                      .compareTo(b.$1.progress /
-                                          (b.$2.requiredPoints ?? 1)))
-                              .take(2)
-                              .map((e) => ([
-                                    AchievementCell(
-                                        e.$2.description ?? "",
-                                        SvgPicture.asset(e.$1.progress >=
-                                                (e.$2.requiredPoints ?? 0)
-                                            ? "assets/icons/achievementgold.svg"
-                                            : "assets/icons/achievementsilver.svg"),
-                                        e.$1.progress,
-                                        e.$2.requiredPoints ?? 0),
-                                    SizedBox(
-                                        height: screenHeight *
-                                            0.012), // 1.2% of screen height
-                                  ]))
-                              .expand((el) => el)
-                              .toList()))),
-            ],
+                      horizontal: screenWidth * 0.06), // 6% of screen width
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text("Achievements",
+                          style: TextStyle(
+                              fontSize: mediumFontSize, // 4% of screen width
+                              fontWeight: FontWeight.bold)),
+                      TextButton(
+                        onPressed: () {
+                          // Handle button press, e.g., navigate to details page
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => AchievementsPage()));
+                        },
+                        child: Text(
+                          'View All →',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: smallFontSize, // 3.5% of screen width
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+                //To be replaced with real data
+                if (achList.isEmpty)
+                  Padding(
+                      padding: EdgeInsets.only(top: screenHeight * 0.1),
+                      child: Center(
+                          child: Text(
+                        "No Available Achievements",
+                        style: TextStyle(
+                          fontSize: mediumFontSize,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.grey,
+                        ),
+                        textAlign: TextAlign.center,
+                      )))
+                else
+                  Padding(
+                    padding: EdgeInsets.symmetric(
+                        horizontal:
+                            screenWidth * 0.075), // 7.5% of screen width
+                    child: SizedBox(
+                      width: screenWidth * 0.85, // 85% of screen width
+                      child: ListView.separated(
+                        shrinkWrap:
+                            true, // this prevents the list from being scrollable
+                        itemCount: 2,
+                        itemBuilder: (context, index) {
+                          if (index >= sortedAchList.length) {
+                            return Container();
+                          }
+                          final e = sortedAchList[index];
+                          return AchievementCell(
+                              e.$2.description ?? "",
+                              SvgPicture.asset(
+                                  e.$1.progress >= (e.$2.requiredPoints ?? 0)
+                                      ? "assets/icons/achievementgold.svg"
+                                      : "assets/icons/achievementsilver.svg"),
+                              e.$1.progress,
+                              e.$2.requiredPoints ?? 0);
+                        },
+                        physics: NeverScrollableScrollPhysics(),
+                        padding: EdgeInsets.only(top: 0),
+                        separatorBuilder: (context, index) {
+                          return SizedBox(
+                              height: screenHeight *
+                                  0.012); // 1.2% of screen height
+                        },
+                      ),
+                    ),
+                  ),
+                SizedBox(height: screenHeight * 0.02),
+              ],
+            ),
           );
         }),
       ),
