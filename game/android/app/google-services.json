@@ -14,11 +14,43 @@
       },
       "oauth_client": [
         {
+          "client_id": "757523123677-68hj66qhpfd27dmjnp6q2vfp0bhn02ug.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cornellgo.CornellGO",
+            "certificate_hash": "4dfabc4a7b1cd3bd61894e8806ba04416284bfdb"
+          }
+        },
+        {
+          "client_id": "757523123677-6cc61v6ig8f44488cf6soicjhk82jtj6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cornellgo.CornellGO",
+            "certificate_hash": "d8e239502eb3e951f5154a07161e5e26ca82f074"
+          }
+        },
+        {
           "client_id": "757523123677-93vbdd71i7kh9c9an1mj7ck6kll5deer.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.cornellgo.CornellGO",
             "certificate_hash": "d6e7da6b98f7884510d3826068e668c5bb7ec89b"
+          }
+        },
+        {
+          "client_id": "757523123677-fn4mqgrcoefhs06b84372lq1retmg43a.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cornellgo.CornellGO",
+            "certificate_hash": "6ce0eac914f1b4a1cb8ae0ad52da931b17751dfb"
+          }
+        },
+        {
+          "client_id": "757523123677-m4fufpke393li5145b4ls01uetqetia6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cornellgo.CornellGO",
+            "certificate_hash": "a1bb4499620f301449d793d4b6c0acc1b6a964a7"
           }
         },
         {
@@ -30,11 +62,27 @@
           }
         },
         {
+          "client_id": "757523123677-s163ihcssnoplp66e7qqso1f7v1vdeeg.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cornellgo.CornellGO",
+            "certificate_hash": "c7370f8dfe1f2a8592918ef52aaabaaec833017a"
+          }
+        },
+        {
           "client_id": "757523123677-s7lm7n8b1vmppnh92pige13uvp722jma.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.cornellgo.CornellGO",
             "certificate_hash": "e8ec9df2de92f3ff018926aba9448be15c464a4e"
+          }
+        },
+        {
+          "client_id": "757523123677-ukssmj9gqn3pmr135b5oh6lcjr860mn0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cornellgo.CornellGO",
+            "certificate_hash": "a6ecfd9ea6ccb1f9fd1cd2112f2a9d7256de6017"
           }
         },
         {
@@ -45,6 +93,123 @@
       "api_key": [
         {
           "current_key": "AIzaSyCNuTQ0eTjwXde0NMNMFaO6c3u5AYlNiXA"
+        },
+        {
+          "current_key": "AIzaSyA1mWm2tCuEt_K5iZFAMaS5fgvYYm_up4U"
+        },
+        {
+          "current_key": "AIzaSyBBGoQlbjlNCBfxiob-mkm1TCougaHqcu4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "757523123677-2nv6haiqnvklhb134cgg5qe8bia4du4q.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "757523123677-5uct36sksguq3v4ngeec8ofc31ipf8hl.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.cornellgo.CornellGO"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:757523123677:android:cceaeea539435ade507a34",
+        "android_client_info": {
+          "package_name": "com.cornellgo.CornellGOApp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "757523123677-1bla8cselfpq6m4k63isdibav89n33o8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cornellgo.CornellGOApp",
+            "certificate_hash": "e8ec9df2de92f3ff018926aba9448be15c464a4e"
+          }
+        },
+        {
+          "client_id": "757523123677-42sm012p4u8ih7qfkbjco3ld0fch1oka.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cornellgo.CornellGOApp",
+            "certificate_hash": "d8e239502eb3e951f5154a07161e5e26ca82f074"
+          }
+        },
+        {
+          "client_id": "757523123677-bpeg96kg9kvlr343vb5n2nrb678sj78k.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cornellgo.CornellGOApp",
+            "certificate_hash": "a6ecfd9ea6ccb1f9fd1cd2112f2a9d7256de6017"
+          }
+        },
+        {
+          "client_id": "757523123677-ldi9igdat56v7qfr9f1i5tqv9gl3g71g.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cornellgo.CornellGOApp",
+            "certificate_hash": "4dfabc4a7b1cd3bd61894e8806ba04416284bfdb"
+          }
+        },
+        {
+          "client_id": "757523123677-n1cqmdamcda9vhsnb8gbbu5c9ovgf16r.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cornellgo.CornellGOApp",
+            "certificate_hash": "6ce0eac914f1b4a1cb8ae0ad52da931b17751dfb"
+          }
+        },
+        {
+          "client_id": "757523123677-ncmgh03ept169vubp01ig060j1v2f1ok.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cornellgo.CornellGOApp",
+            "certificate_hash": "d6e7da6b98f7884510d3826068e668c5bb7ec89b"
+          }
+        },
+        {
+          "client_id": "757523123677-r2d6u836fbh9cajf16mmqoviqa9oc7pr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cornellgo.CornellGOApp",
+            "certificate_hash": "48942102c610163af43caab359452832e7bdc189"
+          }
+        },
+        {
+          "client_id": "757523123677-rt5s054jp1pvambusr8tp1n8o66tq9cn.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cornellgo.CornellGOApp",
+            "certificate_hash": "c7370f8dfe1f2a8592918ef52aaabaaec833017a"
+          }
+        },
+        {
+          "client_id": "757523123677-srvb05rrf2lllsupd86gvga3el9vl9hs.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cornellgo.CornellGOApp",
+            "certificate_hash": "a1bb4499620f301449d793d4b6c0acc1b6a964a7"
+          }
+        },
+        {
+          "client_id": "757523123677-2nv6haiqnvklhb134cgg5qe8bia4du4q.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCNuTQ0eTjwXde0NMNMFaO6c3u5AYlNiXA"
+        },
+        {
+          "current_key": "AIzaSyA1mWm2tCuEt_K5iZFAMaS5fgvYYm_up4U"
         },
         {
           "current_key": "AIzaSyBBGoQlbjlNCBfxiob-mkm1TCougaHqcu4"
@@ -77,6 +242,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "757523123677-lpvh3bn1r33g2l1dlcbt4vvidpfhe2gb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cornellgo.game",
+            "certificate_hash": "6ce0eac914f1b4a1cb8ae0ad52da931b17751dfb"
+          }
+        },
+        {
           "client_id": "757523123677-q8lt36h21g5kcmvvqe07f5krldkb4k4i.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
@@ -92,6 +265,9 @@
       "api_key": [
         {
           "current_key": "AIzaSyCNuTQ0eTjwXde0NMNMFaO6c3u5AYlNiXA"
+        },
+        {
+          "current_key": "AIzaSyA1mWm2tCuEt_K5iZFAMaS5fgvYYm_up4U"
         },
         {
           "current_key": "AIzaSyBBGoQlbjlNCBfxiob-mkm1TCougaHqcu4"

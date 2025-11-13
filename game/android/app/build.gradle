@@ -33,7 +33,7 @@ apply from: project(':flutter_config_plus').projectDir.getPath() + "/dotenv.grad
 
 
 android {
-    namespace 'com.cornellgo.CornellGO'
+    namespace 'com.cornellgo.CornellGOApp'
     compileSdkVersion 35
 
     sourceSets {
@@ -42,9 +42,9 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId 'com.cornellgo.CornellGO'
+        applicationId 'com.cornellgo.CornellGOApp'
         minSdkVersion 23
-        targetSdkVersion 34
+        targetSdkVersion 35
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
     }
