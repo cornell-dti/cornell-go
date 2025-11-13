@@ -1,7 +1,6 @@
-version: "3.3"
 services:
   postgres:
-    image: postgres
+    image: postgres:17
     restart: unless-stopped
     environment:
       POSTGRES_DB: postgres
@@ -23,7 +22,7 @@ services:
       retries: 6
   server:
     ports:
-      - "8080:80"
+      - "8080:8080"
       - "9229:9229"
     environment:
       NO_SSL: true

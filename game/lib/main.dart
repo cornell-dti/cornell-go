@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -6,6 +7,8 @@ import 'package:flutter_config_plus/flutter_config_plus.dart';
 import 'package:game/api/geopoint.dart';
 import 'package:game/loading_page/loading_page.dart';
 import 'package:game/model/achievement_model.dart';
+import 'package:device_preview/device_preview.dart';
+import 'package:game/model/onboarding_model.dart';
 
 // imports for google maps
 import 'dart:io' show Platform;
@@ -26,6 +29,7 @@ import 'package:game/widget/game_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:game/color_palette.dart';
 
+const bool USE_DEVICE_PREVIEW = false;
 final storage = FlutterSecureStorage();
 late final String API_URL;
 late final ApiClient client;
@@ -60,7 +64,14 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
 
-  runApp(MyApp());
+  runApp(
+    USE_DEVICE_PREVIEW
+        ? DevicePreview(
+            enabled: !kReleaseMode,
+            builder: (context) => MyApp(),
+          )
+        : MyApp(),
+  );
 }
 
 Completer<AndroidMapRenderer?>? _initializedRendererCompleter;
@@ -99,6 +110,8 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider.value(value: client),
         ChangeNotifierProvider(create: (_) => UserModel(client), lazy: false),
+        ChangeNotifierProvider(
+            create: (_) => OnboardingModel(client), lazy: false),
         ChangeNotifierProvider(create: (_) => GroupModel(client), lazy: false),
         ChangeNotifierProvider(create: (_) => EventModel(client), lazy: false),
         ChangeNotifierProvider(
@@ -116,6 +129,9 @@ class MyApp extends StatelessWidget {
       ],
       child: GameWidget(
         child: MaterialApp(
+          useInheritedMediaQuery: USE_DEVICE_PREVIEW,
+          locale: USE_DEVICE_PREVIEW ? DevicePreview.locale(context) : null,
+          builder: USE_DEVICE_PREVIEW ? DevicePreview.appBuilder : null,
           title: 'CornellGO!',
           localizationsDelegates: [
             GlobalMaterialLocalizations.delegate,

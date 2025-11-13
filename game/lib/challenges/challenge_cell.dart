@@ -33,6 +33,7 @@ class ChallengeCell extends StatefulWidget {
   final String difficulty;
   final int points;
   final String eventId;
+  final double? distanceFromChallenge;
 
   const ChallengeCell(
       this.location,
@@ -45,6 +46,7 @@ class ChallengeCell extends StatefulWidget {
       this.difficulty,
       this.points,
       this.eventId,
+      this.distanceFromChallenge,
       {Key? key})
       : super(key: key);
 
@@ -59,7 +61,8 @@ class ChallengeCell extends StatefulWidget {
       description,
       difficulty,
       points,
-      eventId);
+      eventId,
+      distanceFromChallenge);
 }
 
 class _ChallengeCellState extends State<ChallengeCell> {
@@ -75,6 +78,7 @@ class _ChallengeCellState extends State<ChallengeCell> {
   final String eventId;
   // newly added field
   // final int totalDistance;
+  final double? distanceFromChallenge;
 
   _ChallengeCellState(
       this.location,
@@ -86,10 +90,10 @@ class _ChallengeCellState extends State<ChallengeCell> {
       this.description,
       this.difficulty,
       this.points,
-      this.eventId
+      this.eventId,
       // newly added field
       // this.totalDistance
-      );
+      this.distanceFromChallenge);
 
   @override
   Widget build(BuildContext context) {
@@ -172,6 +176,24 @@ class _ChallengeCellState extends State<ChallengeCell> {
                               ),
                             ),
                           ),
+                          //match formatting of previous distance display and text above (text shown adjacent to this icon)
+                          if (distanceFromChallenge != null) ...[
+                            Icon(Icons.directions_walk,
+                                size: MediaQuery.sizeOf(context).height * 0.02,
+                                color: Color.fromARGB(255, 110, 110, 110)),
+                            Text(
+                              ' ' +
+                                  (distanceFromChallenge! / 1609.34)
+                                      .toStringAsFixed(1) +
+                                  ' mi away',
+                              style: TextStyle(
+                                color: Color.fromARGB(255, 110, 110, 110),
+                                fontSize:
+                                    MediaQuery.sizeOf(context).height * 0.011,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                     ),

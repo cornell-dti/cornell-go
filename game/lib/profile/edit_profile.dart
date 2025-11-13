@@ -6,6 +6,8 @@ import 'package:game/progress_indicators/circular_progress_indicator.dart';
 import 'package:game/model/user_model.dart';
 import 'package:provider/provider.dart';
 
+import '../utils/utility_functions.dart';
+
 /**
  * `EditProfileWidget` - A form interface for editing user profile information.
  * 
@@ -15,6 +17,12 @@ import 'package:provider/provider.dart';
  * options and text input for the username. The widget automatically detects changes to
  * enable/disable the update button and communicates with the UserModel to persist changes.
  * 
+ * The conditions for the update button to be enabled are:
+ * - Username is not empty and is at least 3 characters long
+ * - College is not empty
+ * - Major is not empty
+ * - Graduation Year is not empty
+ * - At least one field has been changed from its original value 
  */
 class EditProfileWidget extends StatefulWidget {
   EditProfileWidget({
@@ -313,7 +321,9 @@ class _EditProfileState extends State<EditProfileWidget> {
           String? currMajor = userModel.userData?.major;
 
           // Initialize fields only if they haven't been already
-          if (newUsername == null) newUsername = currUsername ?? '';
+          if (newUsername == null) {
+            newUsername = currUsername ?? '';
+          }
 
           if (newYear == null) {
             newYear = currYear;
@@ -461,6 +471,13 @@ class _EditProfileState extends State<EditProfileWidget> {
                                 onPressed: !fieldsChanged()
                                     ? null
                                     : () {
+                                        if (newUsername == null ||
+                                            newUsername!.trim().length < 3) {
+                                          displayToast(
+                                              "Username must be 3 or more characters",
+                                              Status.error);
+                                          return;
+                                        }
                                         userModel.updateUserData(
                                             userModel.userData?.id ?? "",
                                             newUsername,

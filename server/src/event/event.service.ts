@@ -312,8 +312,8 @@ export class EventService {
         user.id
       } = p."B")
       order by ((ev."latitude" - ${data.latitudeF})^2 + (ev."longitude" - ${
-      data.longitudeF
-    })^2)
+        data.longitudeF
+      })^2)
       fetch first ${data.count ?? 4} rows only
     `;
     return evs;
@@ -357,6 +357,7 @@ export class EventService {
       id: ev.id,
       name: ev.name,
       description: ev.description,
+      longDescription: ev.longDescription,
       category: ev.category as EventCategoryDto,
       timeLimitation:
         ev.timeLimitation === TimeLimitationType.LIMITED_TIME
@@ -370,8 +371,8 @@ export class EventService {
         ev.difficulty === DifficultyMode.EASY
           ? 'Easy'
           : ev.difficulty === DifficultyMode.NORMAL
-          ? 'Normal'
-          : 'Hard',
+            ? 'Normal'
+            : 'Hard',
       latitudeF: ev.latitude,
       longitudeF: ev.longitude,
     };
@@ -610,8 +611,8 @@ export class EventService {
         (event.difficulty === 'Easy'
           ? DifficultyMode.EASY
           : event.difficulty === 'Normal'
-          ? DifficultyMode.NORMAL
-          : DifficultyMode.HARD),
+            ? DifficultyMode.NORMAL
+            : DifficultyMode.HARD),
       latitude: event.latitudeF,
       longitude: event.longitudeF,
       category: event.category,
@@ -639,6 +640,10 @@ export class EventService {
         description:
           assignData.description?.substring(0, 2048) ??
           defaultEventData.description,
+        longDescription:
+          event.longDescription?.substring(0, 8192) ??
+          defaultEventData.longDescription ??
+          '',
         category: assignData.category ?? defaultEventData.category,
         timeLimitation: assignData.timeLimitation,
         endTime: assignData.endTime ?? defaultEventData.endTime,

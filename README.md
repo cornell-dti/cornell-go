@@ -83,6 +83,16 @@ cd game
 flutter run --dart-define="API_URL=https://example.com"
 ```
 
+### Use Device Preview (for testing multiple device sizes)
+
+```
+To enable, change USE_DEVICE_PREVIEW to true in game/lib/main.dart:
+
+const bool USE_DEVICE_PREVIEW = true;
+
+Note: Device Preview only works in debug mode, not in release builds.
+```
+
 ### Generate docs
 
 ```
@@ -111,6 +121,17 @@ npx prisma migrate dev --name my_migration
 ```
 
 ## Contributors
+
+### FA25
+
+- **Temi Adebowale** - TPM
+- **Amber Shen** - Developer
+- **Jimin Kim** - Developer
+- **Jason Guo** - Developer
+- **Jerry Chen** - Designer
+- **Carolyn Wang** - PM
+- **Cynthia Lan** - APM
+- **Grace Huang** - PMM
 
 ### SP25
 

@@ -6,6 +6,8 @@ import { UserService } from '../user/user.service';
 import { GroupService } from '../group/group.service';
 import { EventService } from '../event/event.service';
 import { AuthService } from '../auth/auth.service';
+import { CaslAbilityFactory } from '../casl/casl-ability.factory';
+import { Reflector } from '@nestjs/core';
 
 describe('ChallengeGateway', () => {
   let gateway: ChallengeGateway;
@@ -37,6 +39,14 @@ describe('ChallengeGateway', () => {
         {
           useValue: null,
           provide: AuthService,
+        },
+        {
+          useValue: null,
+          provide: CaslAbilityFactory,
+        },
+        {
+          useValue: null,
+          provide: Reflector,
         },
       ],
     }).compile();
