@@ -15,6 +15,7 @@ import 'package:game/utils/utility_functions.dart';
 import 'dart:math';
 
 import 'package:flutter_svg/flutter_svg.dart';
+
 /**
  * Displays Challenge Failed page
  */
@@ -194,6 +195,20 @@ class _ChallengeFailedState extends State<ChallengeFailedPage> {
 
       return Scaffold(
           body: Stack(children: [
+        //black to gray gradient background for sky
+        Container(
+            height: MediaQuery.of(context).size.height,
+            width: MediaQuery.of(context).size.width,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.black,
+                  Color(0xFFD5D5D5),
+                ],
+              ),
+            )),
         Container(
             height: MediaQuery.of(context).size.height,
             width: MediaQuery.of(context).size.width,
