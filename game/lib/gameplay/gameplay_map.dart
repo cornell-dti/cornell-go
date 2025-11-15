@@ -11,6 +11,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:async';
 import 'dart:math';
 import 'package:game/gameplay/challenge_completed.dart';
+import 'package:game/gameplay/challenge_failed.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'dart:ui' as ui;
 
@@ -77,6 +78,7 @@ class _GameplayMapState extends State<GameplayMap> {
   late StreamSubscription<Position> positionStream;
   // Whether location streaming has begun
   late Future<bool> streamStarted;
+  StreamSubscription<TimerCompletedDto>? _timerCompletedSubscription;
 
   // User is by default centered around some location on Cornell's campus.
   // User should only be at these coords briefly before map is moved to user's
@@ -135,6 +137,10 @@ class _GameplayMapState extends State<GameplayMap> {
   var pictureIcon = SvgPicture.asset("assets/icons/mapexpand.svg");
   // Onboarding: overlay entry for bear mascot messages during onboarding steps 7-10
   OverlayEntry? _bearOverlayEntry;
+
+  // Timer: overlay entry for Time's Up message when timer expires
+  OverlayEntry? _timerModalOverlay;
+  bool _timerModalShowing = false; //flag to prevent multiple overlays
 
   // Switch between the two sizes
   void _toggle() => setState(() {
@@ -283,7 +289,8 @@ class _GameplayMapState extends State<GameplayMap> {
           timeLeft = "00:00";
           currentTime = 0.0;
         });
-        // TODO: timer ending logic
+        //tell backend timer expired, backend sends TimerCompletedDto via stream, which will trigger _handleTimerExpiration() and make Time's Up modal appear
+        timerModel.completeTimer(widget.challengeId);
         return;
       }
 
@@ -319,14 +326,15 @@ class _GameplayMapState extends State<GameplayMap> {
 
     // Timer: Initialize timer state (reset to false first)
     _initializeTimer();
+    //listen for timer expiration from backend
+    _setupTimerExpirationListener();
   }
 
   /**
-   * Initialize timer state for the current challenge
+   * Initialize timer state for the current challenge / reset timer state
    * Only sets hasTimer = true if challenge actually has a timerLength > 0
    */
   void _initializeTimer() {
-    //reset timer state 
     setState(() {
       hasTimer = false;
       timeLeft = "--:--";
@@ -344,12 +352,7 @@ class _GameplayMapState extends State<GameplayMap> {
     final challenge = challengeModel.getChallengeById(widget.challengeId);
     final timerModel = Provider.of<TimerModel>(context, listen: false);
 
-    // print(
-    //     "_initializeTimer: challengeId=${widget.challengeId}, challenge=${challenge?.id}, timerLength=${challenge?.timerLength}");
-
     if (challenge?.timerLength != null && challenge!.timerLength! > 0) {
-      // print(
-      //     "Starting timer for challenge ${widget.challengeId} with length ${challenge.timerLength} seconds");
       setState(() {
         hasTimer = true;
         totalTime = challenge.timerLength!;
@@ -375,7 +378,10 @@ class _GameplayMapState extends State<GameplayMap> {
       hintRadius = null;
       setStartingHintCircle();
 
-      //rset and reinitialize timer for new challenge
+      //remove timer modal if showing
+      _removeTimerModal();
+
+      //reset and reinitialize timer for new challenge
       _initializeTimer();
     }
 
@@ -385,11 +391,13 @@ class _GameplayMapState extends State<GameplayMap> {
   @override
   void dispose() {
     _removeBearOverlay();
+    _removeTimerModal();
     positionStream.cancel();
     _disposeController();
     _timerUpdateTimer?.cancel(); //cancel periodic timer updates
     _periodicTimerStarted = false;
     _waitCount = 0; //reset wait counter
+    _timerCompletedSubscription?.cancel(); //cancel timer completion listener
     super.dispose();
   }
 
@@ -1065,8 +1073,10 @@ class _GameplayMapState extends State<GameplayMap> {
                           ],
                         ),
                       ),
-                      // Timer icon and countdown with 8px margin between them
+                      // Timer icon and countdown centered
                       Row(
+                        mainAxisAlignment:
+                            MainAxisAlignment.center, // Center the row contents
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           // Timer icon (circular progress indicator)
@@ -1085,9 +1095,10 @@ class _GameplayMapState extends State<GameplayMap> {
                           Text(
                             timeLeft,
                             style: TextStyle(
-                                fontSize: 12.8,
-                                fontWeight: FontWeight.w500, // Medium bold
-                                color: Colors.white),
+                                fontSize: 14.0,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                decoration: TextDecoration.none),
                           ),
                         ],
                       ),
@@ -1188,6 +1199,260 @@ class _GameplayMapState extends State<GameplayMap> {
       }),
     );
     // });
+  }
+
+  /**
+   * Listens for timer expiration (TimerCompletedDto) from backend and then calls _handleTimerExpiration
+   */
+  void _setupTimerExpirationListener() {
+    final client = Provider.of<ApiClient>(context, listen: false);
+
+    // cancel any existing subscriptions
+    _timerCompletedSubscription?.cancel();
+
+    _timerCompletedSubscription =
+        client.clientApi.timerCompletedStream.listen((event) {
+      if (event.challengeId == widget.challengeId &&
+          mounted &&
+          !_timerModalShowing) {
+        _timerModalShowing = true;
+
+        _handleTimerExpiration();
+      } else {
+      }
+    });
+  }
+
+  /**
+   * Handles timer expiration in frontend - shows "Time's Up" modal 
+   * Note: challenge is NOT completed
+   */
+  void _handleTimerExpiration() {
+
+    if (!mounted || _timerModalShowing != true) {
+      return;
+    }
+
+    _timerUpdateTimer?.cancel();
+    _periodicTimerStarted = false;
+
+    // add time's up overlay
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_timerModalShowing) return;
+
+      _timerModalOverlay = OverlayEntry(
+        opaque: false,
+        builder: (overlayContext) => Stack(
+          children: [
+            // Dimmed game map as background for modal overlay
+            GestureDetector(
+              onTap: () {}, 
+              child: Container(
+                color: Colors.black.withOpacity(0.3), 
+              ),
+            ),
+            Center(
+              child: _buildTimesUpModal(),
+            ),
+          ],
+        ),
+      );
+
+      Overlay.of(context).insert(_timerModalOverlay!);
+    });
+  }
+
+  void _removeTimerModal() {
+    if (_timerModalOverlay != null) {
+      try {
+        _timerModalOverlay?.remove();
+        _timerModalOverlay?.dispose();
+      } catch (e) {
+        debugPrint("Error removing timer modal overlay: $e");
+      }
+      _timerModalOverlay = null;
+    }
+    _timerModalShowing = false;
+  }
+
+  /**
+   * Builds the "Time's Up" modal dialog with Results and Extension buttons
+   */
+  Widget _buildTimesUpModal() {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    return Center(
+      child: Material(
+        type: MaterialType.transparency, 
+        child: Container(
+          constraints: BoxConstraints(
+            maxWidth:
+                screenWidth * 0.85, 
+          ),
+          decoration: BoxDecoration(
+            color: Colors.white, 
+            borderRadius: BorderRadius.circular(9),
+          ),
+          padding: EdgeInsets.only(
+            top: screenHeight * 0.019, //~16px
+            bottom: screenHeight * 0.028, //~24px
+            left: screenWidth * 0.041, //~16px
+            right: screenWidth * 0.041, //~16px
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // SVG image
+              SvgPicture.asset(
+                'assets/images/niki_head_sweat.svg',
+                alignment: Alignment.center,
+              ),
+              // Title
+              Container(
+                margin: EdgeInsets.only(bottom: screenHeight * 0.005), //~5px
+                child: Text(
+                  "Time's Up!",
+                  style: TextStyle(
+                    fontSize: screenWidth * 0.061, //~24px
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+              // Message
+              Container(
+                margin: EdgeInsets.only(bottom: screenHeight * 0.019), //~16px
+                child: Text(
+                  "Want more time? Earn 5 more minutes of exploring for 25 points!",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: screenWidth * 0.036, //~14px
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Results button (width 86px, height 40px)
+                  SizedBox(
+                    width:
+                        screenWidth * 0.210, // ~82px
+                    height: screenHeight * 0.047, // ~40px on 852px screen
+                    child: ElevatedButton(
+                      onPressed: () {
+                        // remove overlay before we switch pages
+                        if (_timerModalOverlay != null) {
+                          _timerModalOverlay?.remove();
+                          _timerModalOverlay?.dispose();
+                          _timerModalOverlay = null;
+                        }
+                        _timerModalShowing = false;
+
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ChallengeFailedPage(
+                              challengeId: widget.challengeId,
+                            ),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        side:
+                            BorderSide(color: Color.fromARGB(255, 237, 86, 86)),
+                        padding: EdgeInsets.zero,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                              screenWidth * 0.025), //~10px
+                        ),
+                      ),
+                      child: Text(
+                        "Results",
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: screenWidth * 0.036, //~14px
+                          fontWeight: FontWeight.w500,
+                          color: Color.fromARGB(255, 237, 86, 86),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                      width: screenWidth * 0.033), //~13px
+                  // Extension button (width 200px, height 40px)
+                  SizedBox(
+                    width:
+                        screenWidth * 0.478, // ~187px
+                    height: screenHeight * 0.047, // ~40px
+                    child: ElevatedButton(
+                      onPressed: () {
+                        _removeTimerModal(); // Close modal
+                        _extendTimer();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color.fromARGB(255, 237, 86, 86),
+                        padding: EdgeInsets.only(
+                          left:
+                              screenWidth * 0.010, //~4px
+                          right: screenWidth * 0.020, //~8px
+                          top: screenHeight * 0.011, //~9px
+                          bottom: screenHeight * 0.011, //~9px
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                              screenWidth * 0.025), //~10px
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment:
+                            MainAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text("+ 5 Min for ",
+                              style: TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: screenWidth *
+                                      0.033, //~13px
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white)),
+                          SvgPicture.asset('assets/icons/bearcoins.svg',
+                              width: screenWidth *
+                                  0.041, //~16px
+                              height: screenWidth * 0.041),
+                          Flexible(
+                            child: Text(" 25 Pt",
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                    fontFamily: 'Poppins',
+                                    fontSize: screenWidth *
+                                        0.033, //~13px
+                                    color: Color(0xFFFFC737))),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /**
+   * TODO: Extends the timer - requests extension from backend
+   * later in challenge compelted page should show point deduction
+   * in times up modal extension button should have losing color animation to indicate not much time to make a choice 
+   */
+  void _extendTimer() {
+    displayToast("Unable to extend timer (UNIMPLEMENTED)", Status.error);
   }
 
   /** Returns whether the user is at the challenge location */

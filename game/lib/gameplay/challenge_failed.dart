@@ -128,19 +128,9 @@ class _ChallengeFailedState extends State<ChallengeFailedPage> {
       var eventId = groupModel.curEventId;
       var event = eventModel.getEventById(eventId ?? "");
       var tracker = trackerModel.trackerByEventId(eventId ?? "");
-      if (tracker == null || tracker.prevChallenges.length == 0) {
+      if (tracker == null) {
         return CircularIndicator();
       }
-      // if (tracker == null) {
-      //   return Text("tracker is null");
-      // }
-      // if (tracker.prevChallenges.length == 0) {
-      //   return Text("tracker prevchallenges has 0 length");
-      // }
-      // if (tracker.prevChallenges.last.challengeId != widget.challengeId) {
-      //   return Text(
-      //       "tracker last completed challenge does not match passed in challenge id");
-      // }
 
       // if this event is a journey
       if ((event?.challenges?.length ?? 0) > 1)
@@ -148,13 +138,19 @@ class _ChallengeFailedState extends State<ChallengeFailedPage> {
         journeyCompleted =
             tracker.prevChallenges.length == (event?.challenges?.length ?? 0);
 
-      var challenge = challengeModel
-          .getChallengeById(tracker.prevChallenges.last.challengeId);
+      // Use the failed challengeId instead of last completed challenge since challenge failed
+      var challenge = challengeModel.getChallengeById(widget.challengeId);
 
       if (challenge == null) {
         return Scaffold(
           body: Text("No challenge data"),
         );
+      }
+
+      // Get hints used for the failed challenge
+      int failedChallengeHintsUsed = 0;
+      if (tracker.curChallengeId == widget.challengeId) {
+        failedChallengeHintsUsed = tracker.hintsUsed;
       }
 
       // build list of completed challenge text fields to display later
@@ -242,10 +238,12 @@ class _ChallengeFailedState extends State<ChallengeFailedPage> {
                 Container(
                   padding: EdgeInsets.only(bottom: 15),
                   child: Text(
-                    challenge.description ?? "NO DESCRIPTION",
+                    "You were unable to find " +
+                        (challenge.description ?? "NO DESCRIPTION") +
+                        ".",
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 14.0,
+                      fontSize: 16.0,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -256,20 +254,9 @@ class _ChallengeFailedState extends State<ChallengeFailedPage> {
                       alignment: Alignment.centerLeft,
                       child: LoadingBar(tracker.prevChallenges.length,
                           event?.challenges?.length ?? 0)),
-                Container(
-                  padding: EdgeInsets.only(left: 30, bottom: 10),
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Points',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
                 if (!journeyPage) ...[
-                  if (tracker.prevChallenges.last.hintsUsed > 0)
+                  // Show hint penalty only if hints were used for the failed challenge
+                  if (failedChallengeHintsUsed > 0)
                     Container(
                         margin:
                             EdgeInsets.only(left: 30, bottom: 10, right: 30),
@@ -280,7 +267,7 @@ class _ChallengeFailedState extends State<ChallengeFailedPage> {
                               fit: BoxFit.cover,
                             ),
                             Text(
-                              "   Used ${tracker.prevChallenges.last.hintsUsed} hint${tracker.prevChallenges.last.hintsUsed > 1 ? 's' : ''}",
+                              "   Used $failedChallengeHintsUsed hint${failedChallengeHintsUsed > 1 ? 's' : ''}",
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 16.0,
@@ -292,8 +279,8 @@ class _ChallengeFailedState extends State<ChallengeFailedPage> {
                               () {
                                 int basePoints = challenge.points ?? 0;
                                 int adjustedPoints =
-                                    calculateHintAdjustedPoints(basePoints,
-                                        tracker.prevChallenges.last.hintsUsed);
+                                    calculateHintAdjustedPoints(
+                                        basePoints, failedChallengeHintsUsed);
                                 int penalty = basePoints - adjustedPoints;
                                 return "- $penalty points";
                               }(),
@@ -314,7 +301,7 @@ class _ChallengeFailedState extends State<ChallengeFailedPage> {
                 Text(
                   journeyPage
                       ? "Points Earned: " + total_pts.toString()
-                      : "Points Lost: " + total_pts.toString(),
+                      : "Points Earned: " + total_pts.toString(),
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 25.0,
