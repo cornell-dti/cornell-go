@@ -106,6 +106,7 @@ model User {
   participatedIn         PrevChallenge[]      @relation("prevChallengeParticipant")
   sessionLogEntries      SessionLogEntry[]
   achievementTrackers    AchievementTracker[]
+  challengeTimers        ChallengeTimer[]
   hasCompletedOnboarding Boolean
 }
 
@@ -139,6 +140,7 @@ model Challenge {
   longitude      Float
   awardingRadius Float
   closeRadius    Float
+  timerLength    Int?
   completions    PrevChallenge[]
   activeTrackers EventTracker[]
 }
@@ -259,4 +261,31 @@ model AchievementTracker {
   dateComplete  DateTime?
   achievementId String
   userId        String
+}
+
+enum ChallengeTimerStatus {
+  ACTIVE
+  COMPLETED
+  EXPIRED
+  PAUSED
+  CANCELLED
+}
+
+model ChallengeTimer {
+  id                    String               @id @default(uuid())
+  subject               String               @default("ChallengeTimer")
+  timerLength           Int                  @default(600) //in seconds
+  startTime             DateTime             @default(now())
+  endTime               DateTime?
+  currentStatus         ChallengeTimerStatus @default(ACTIVE)
+  // warnings
+  warningMilestones     Int[]                @default([]) //milestones to send warnings for
+  warningMilestonesSent Int[]                @default([]) //which milestones have been sent
+  lastWarningSent       DateTime? //when last warning was sent
+  // relationships 
+  user                  User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId                String
+  challengeId           String
+
+  @@unique([userId, challengeId]) //one timer per user per challenge
 }
