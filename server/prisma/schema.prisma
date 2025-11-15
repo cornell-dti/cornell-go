@@ -107,7 +107,7 @@ model User {
   sessionLogEntries      SessionLogEntry[]
   achievementTrackers    AchievementTracker[]
   UserQuizAnswer         UserQuizAnswer[]
-  hasCompletedOnboarding Boolean
+  hasCompletedOnboarding Boolean              @default(false)
 }
 
 model Group {
