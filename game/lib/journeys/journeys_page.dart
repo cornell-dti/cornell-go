@@ -31,6 +31,7 @@ class JourneyCellDto {
     required this.locationCount,
     required this.numberCompleted,
     required this.description,
+    required this.longDescription,
     required this.difficulty,
     required this.points,
     required this.eventId,
@@ -44,6 +45,7 @@ class JourneyCellDto {
   late int locationCount;
   late int numberCompleted;
   late String description;
+  late String longDescription;
   late String difficulty;
   late int points;
   late String eventId;
@@ -324,6 +326,7 @@ class _JourneysPageState extends State<JourneysPage> {
                           locationCount: locationCount,
                           numberCompleted: numberCompleted,
                           description: event.description ?? "",
+                          longDescription: event.longDescription ?? "",
                           difficulty:
                               friendlyDifficulty[event.difficulty] ?? "",
                           points: totalPoints,
@@ -363,6 +366,7 @@ class _JourneysPageState extends State<JourneysPage> {
                             eventData[index].location,
                             eventData[index].imgUrl,
                             eventData[index].description,
+                            eventData[index].longDescription,
                             eventData[index].locationCount,
                             eventData[index].numberCompleted,
                             eventData[index].complete,

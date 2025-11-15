@@ -170,7 +170,6 @@ class _ChallengesPageState extends State<ChallengesPage> {
   @override
   Widget build(BuildContext context) {
     final onboarding = Provider.of<OnboardingModel>(context, listen: true);
-
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(

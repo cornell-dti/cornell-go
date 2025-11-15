@@ -54,32 +54,26 @@ class _AchievementCellState extends State<AchievementCell> {
           child: Row(
             children: [
               Container(margin: EdgeInsets.only(right: 12), child: thumbnail),
-              Column(
-                mainAxisSize: MainAxisSize.max,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Container(
-                      width: MediaQuery.sizeOf(context).width * 0.45,
-                      child: Text(
-                        description,
-                        maxLines: 2,
-                        overflow: TextOverflow.clip,
-                        style: TextStyle(
-                          color: Color.fromARGB(204, 0, 0, 0),
-                          fontSize: 14,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w500,
-                        ),
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.max,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      description,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: Color.fromARGB(204, 0, 0, 0),
+                        fontSize: 14,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
-                  ),
-                  Align(
-                      alignment: Alignment.bottomCenter,
-                      child: LoadingBar(this.tasksFinished, this.totalTasks)),
-                ],
+                    LoadingBar(this.tasksFinished, this.totalTasks),
+                  ],
+                ),
               )
             ],
           ),

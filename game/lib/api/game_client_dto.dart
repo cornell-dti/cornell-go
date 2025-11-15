@@ -892,6 +892,9 @@ class EventDto {
     if (description != null) {
       fields['description'] = description;
     }
+    if (longDescription != null) {
+      fields['longDescription'] = longDescription;
+    }
     if (category != null) {
       fields['category'] = category!.name;
     }
@@ -933,6 +936,9 @@ class EventDto {
     name = fields.containsKey('name') ? (fields["name"]) : null;
     description =
         fields.containsKey('description') ? (fields["description"]) : null;
+    longDescription = fields.containsKey('longDescription')
+        ? (fields["longDescription"])
+        : null;
     category = fields.containsKey('category')
         ? (EventCategoryDto.values.byName(fields['category']))
         : null;
@@ -967,6 +973,8 @@ class EventDto {
         other.requiredMembers == null ? requiredMembers : other.requiredMembers;
     name = other.name == null ? name : other.name;
     description = other.description == null ? description : other.description;
+    longDescription =
+        other.longDescription == null ? longDescription : other.longDescription;
     category = other.category == null ? category : other.category;
     timeLimitation =
         other.timeLimitation == null ? timeLimitation : other.timeLimitation;
@@ -988,6 +996,7 @@ class EventDto {
     this.requiredMembers,
     this.name,
     this.description,
+    this.longDescription,
     this.category,
     this.timeLimitation,
     this.endTime,
@@ -1004,6 +1013,7 @@ class EventDto {
   late int? requiredMembers;
   late String? name;
   late String? description;
+  late String? longDescription;
   late EventCategoryDto? category;
   late EventTimeLimitationDto? timeLimitation;
   late String? endTime;

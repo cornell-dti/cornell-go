@@ -336,6 +336,97 @@ enum OrganizationSpecialUsage {
   NONE
 }
 
+model User {
+  id                  String               @id() @default(uuid())
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt()
+  subject             String               @default("User")
+  authToken           String               @unique
+  authType            AuthType
+  username            String               @unique
+  year                String
+  college             String
+  major               String
+  interests           String[]
+  email               String
+  hashedRefreshToken  String
+  administrator       Boolean
+  enrollmentType      EnrollmentType
+  score               Int
+  isBanned            Boolean              @default(false)
+  group               Group                @relation("member", fields: [groupId], references: [id])
+  groupId             String
+  hostOf              Group?               @relation("host")
+  eventTrackers       EventTracker[]
+  favorites           EventBase[]
+  completedChallenges PrevChallenge[]      @relation("owner")
+  memberOf            Organization[]       @relation("orgToUser")
+  managerOf           Organization[]       @relation("orgManager")
+  isRanked            Boolean              @default(true)
+  participatedIn      PrevChallenge[]      @relation("prevChallengeParticipant")
+  sessionLogEntries   SessionLogEntry[]
+  achievementTrackers AchievementTracker[]
+  hasCompletedOnboarding Boolean
+}
+
+model Group {
+  id         String    @id @default(uuid())
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt()
+  subject    String    @default("Group")
+  friendlyId String    @unique
+  members    User[]    @relation("member")
+  host       User?     @relation("host", fields: [hostId], references: [id], onDelete: SetNull)
+  hostId     String?   @unique
+  curEvent   EventBase @relation(fields: [curEventId], references: [id])
+  curEventId String
+}
+
+model Challenge {
+  id             String          @id @default(uuid()) @map("id")
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt()
+  subject        String          @default("Challenge")
+  linkedEvent    EventBase?      @relation("all", fields: [linkedEventId], references: [id], onDelete: Cascade)
+  linkedEventId  String?
+  eventIndex     Int
+  name           String
+  location       LocationType
+  description    String
+  points         Int
+  imageUrl       String
+  latitude       Float
+  longitude      Float
+  awardingRadius Float
+  closeRadius    Float
+  completions    PrevChallenge[]
+  activeTrackers EventTracker[]
+}
+
+model EventBase {
+  id              String             @id @default(uuid())
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt()
+  subject         String             @default("EventBase")
+  requiredMembers Int
+  name            String
+  description     String
+  longDescription String
+  timeLimitation  TimeLimitationType
+  indexable       Boolean
+  endTime         DateTime
+  challenges      Challenge[]        @relation("all")
+  userFavorite    User[]
+  usedIn          Organization[]     @relation("eventOrgs")
+  trackers        EventTracker[]
+  activeGroups    Group[]
+  latitude        Float
+  longitude       Float
+  achievements    Achievement[]
+  difficulty      DifficultyMode
+  category        EventCategoryType
+}
+
 enum EventCategoryType {
   FOOD
   NATURE
