@@ -71,6 +71,8 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
     "Weill Cornell Medicine"
   ];
 
+  /// Graduation Year Selection Options
+  /// A predefined list of graduation years for user selection during onboarding process and profile editing.
   List<String> _years = [
     "2025",
     "2026",

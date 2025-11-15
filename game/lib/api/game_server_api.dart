@@ -43,16 +43,25 @@ class GameServerApi {
       }
 
       completer.complete(arg);
+      if (completer.isCompleted) {
+        return;
+      }
+
+      completer.complete(arg);
     };
 
-    Future.delayed(Duration(seconds: 5))
-        .then((value) => completer.complete(null));
+    Future.delayed(Duration(seconds: 5)).then((value) {
+      if (!completer.isCompleted) {
+        completer.complete(null);
+      }
+    });
 
     _refreshEv = ev;
     _refreshDat = data;
     _refreshResolver = completionFunc;
 
-    print(ev);
+    // Note: Uncomment if you want to log all events (gets pretty spammy)
+    // print(ev);
     _socket.emitWithAck(ev, data, ack: completionFunc);
 
     return completer.future;
@@ -146,6 +155,12 @@ class GameServerApi {
 
   Future<bool?> joinOrganization(JoinOrganizationDto dto) async =>
       await _invokeWithRefresh("joinOrganization", dto.toJson());
+
+  Future<bool?> completeOnboarding(CompleteOnboardingDto dto) async =>
+      await _invokeWithRefresh("completeOnboarding", dto.toJson());
+
+  Future<bool?> resetOnboarding(ResetOnboardingDto dto) async =>
+      await _invokeWithRefresh("resetOnboarding", dto.toJson());
 
   Future<bool?> closeAccount(CloseAccountDto dto) async =>
       await _invokeWithRefresh("closeAccount", dto.toJson());
