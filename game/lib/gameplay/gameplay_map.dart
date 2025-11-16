@@ -1061,8 +1061,8 @@ class _GameplayMapState extends State<GameplayMap> {
                     },
                     icon: SvgPicture.asset(
                       'assets/icons/bearcoins.svg',
-                      height: 19,
-                      width: 19,
+                      height: 24,
+                      width: 24,
                     ),
                     label: Text(
                       "+10 PTS",
