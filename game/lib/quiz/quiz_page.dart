@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:game/gameplay/challenge_completed.dart';
+import 'point_breakdown_page.dart';
 
 /// Provider that manages the quiz state, including question tracking,
 /// answer selection, point calculation, and shuffle logic.
@@ -358,19 +359,22 @@ class _QuizScreen extends StatelessWidget {
 
   /// Final summary dialog shown after the last quiz question
   void _showFinal(BuildContext context, int pts) {
-    showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
-              title: const Text('Quiz Complete!'),
-              content: Text(
-                  'You earned $pts points.\nLeaderboard feature coming soon 🙂'),
-              actions: [
-                TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('Close'))
-              ],
-            ));
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => PointBreakdownPage(
+          challenge1Points: 100,
+          challenge2Points: 100,
+          quizPoints: pts,
+          totalPoints: 100 + 100 + pts,
+          answeredQuestions: 3,
+          totalQuestions: 3,
+          onReturnHome: () {
+            Navigator.pop(context);
+            Navigator.pop(context);
+          },
+        ),
+      ),
+    );
   }
 }
