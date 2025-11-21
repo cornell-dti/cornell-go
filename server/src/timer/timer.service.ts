@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ClientService } from '../client/client.service';
 import { Challenge, ChallengeTimerStatus } from '@prisma/client';
@@ -8,6 +8,7 @@ import {
   TimerCompletedDto,
   TimerWarningDto,
 } from '../timer/timer.dto';
+import { ChallengeService } from '../challenge/challenge.service';
 
 const EXTENSION_LENGTH = 5 * 60 * 1000; // 5 minutes
 const EXTENSION_COST = 0.25; // 25% of the challenge points
@@ -17,6 +18,8 @@ export class TimerService {
   constructor(
     private readonly prisma: PrismaService,
     private clientService: ClientService,
+    @Inject(forwardRef(() => ChallengeService))
+    private challengeService: ChallengeService,
   ) {}
 
   /** Start a timer for a challenge */
@@ -46,6 +49,8 @@ export class TimerService {
         startTime: new Date(),
         endTime: endTime,
         currentStatus: ChallengeTimerStatus.ACTIVE,
+        extensionsUsed: 0, //reset extensions when restarting timer
+        originalBasePoints: challenge.points, //store original base points
         warningMilestones: [300, 60, 30],
         warningMilestonesSent: [],
         lastWarningSent: null,
@@ -57,6 +62,8 @@ export class TimerService {
         startTime: new Date(),
         endTime: endTime,
         currentStatus: ChallengeTimerStatus.ACTIVE,
+        extensionsUsed: 0,
+        originalBasePoints: challenge.points, //store original base points
         warningMilestones: [300, 60, 30],
         warningMilestonesSent: [],
         lastWarningSent: null,
@@ -119,8 +126,8 @@ export class TimerService {
 
   /** Extends a timer for a challenge
    * - updates the end time of the timer
-   * - deducts the extension cost from the user's score (25%)
-   * - if the timer cannot be extended (the user's score is not enough), an error is thrown
+   * - deducts the extension cost from the challenge's points (25%)
+   * - if the timer cannot be extended (the challenge's points are not enough), an error is thrown
    */
   async extendTimer(
     challengeId: string,
@@ -135,7 +142,7 @@ export class TimerService {
     }
     const canExtend = await this.canExtendTimer(userId, challengeId);
     if (!canExtend) {
-      throw new Error('Cannot extend timer: Insufficient coins');
+      throw new Error('Cannot extend timer: Insufficient points');
     }
 
     const challenge = await this.prisma.challenge.findUniqueOrThrow({
@@ -145,18 +152,36 @@ export class TimerService {
       throw new Error('Challenge not found');
     }
 
-    const newEndTime = this.calculateEndTime(challenge, 1);
-    const extensionCost = this.calculateExtensionCost(challenge.points);
+    // calculate extension cost from challenge's original base points: 25% of original base points
+    const extensionCost = this.calculateExtensionCost(timer.originalBasePoints);
 
-    await this.prisma.user.update({
-      where: { id: timer.user.id },
-      data: { score: { decrement: extensionCost } },
-    });
+    const newExtensionsUsed = timer.extensionsUsed + 1;
+    const newEndTime = this.calculateEndTime(challenge, newExtensionsUsed);
 
+    // update timer with new end time and increment extensions used
     await this.prisma.challengeTimer.update({
       where: { id: timer.id },
-      data: { endTime: newEndTime },
+      data: { 
+        endTime: newEndTime,
+        extensionsUsed: newExtensionsUsed,
+      },
     });
+
+    // update challenge points - deduct extension cost
+    await this.prisma.challenge.update({
+      where: { id: challengeId },
+      data: {
+        points: { decrement: extensionCost },
+      },
+    });
+
+    // emit challenge update to frontend so ChallengeModel gets updated points
+    const updatedChallenge = await this.prisma.challenge.findUniqueOrThrow({
+      where: { id: challengeId },
+    });
+    if (updatedChallenge) {
+      await this.challengeService.emitUpdateChallengeData(updatedChallenge, false);
+    }
 
     return {
       timerId: timer.id,
@@ -270,14 +295,11 @@ export class TimerService {
     );
   }
 
-  /** Checks if a timer can be extended by seeing if the user has a high enough score to allow for a deduction of points when an extension is used */
+  /** Checks if a timer can be extended by seeing if the challenge has enough points remaining
+   * Each extension costs 25% of the challenge's base points - deduct from challenge points, 
+   * After the user completes the challenge, they get the challenge's base points - extensions used * extension cost
+   */
   async canExtendTimer(userId: string, challengeId: string): Promise<boolean> {
-    const user = await this.prisma.user.findUniqueOrThrow({
-      where: { id: userId },
-    });
-    if (!user) {
-      return false;
-    }
     const challenge = await this.prisma.challenge.findUniqueOrThrow({
       where: { id: challengeId },
     });
@@ -294,7 +316,14 @@ export class TimerService {
     if (timer.currentStatus != ChallengeTimerStatus.ACTIVE) {
       return false;
     }
-    if (user.score < this.calculateExtensionCost(challenge.points)) {
+    
+    // Use original base points stored in timer (not current challenge.points which may be decremented)
+    const extensionCost = this.calculateExtensionCost(timer.originalBasePoints);
+    
+    // Calculate remaining points: original base points - (extensions used * cost per extension)
+    const remainingPoints = timer.originalBasePoints - (timer.extensionsUsed * extensionCost);
+    
+    if (remainingPoints < extensionCost) {
       return false;
     }
     return true;

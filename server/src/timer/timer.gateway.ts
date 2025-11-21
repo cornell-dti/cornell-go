@@ -47,16 +47,23 @@ export class TimerGateway {
     @CallingUser() user: User,
     @MessageBody() data: ExtendTimerDto,
   ) {
-    const timer = await this.timerService.extendTimer(
-      data.challengeId,
-      user.id,
-    );
-    await this.clientService.sendEvent([`user/${user.id}`], 'timerExtended', {
-      timerId: timer.timerId,
-      challengeId: timer.challengeId,
-      newEndTime: timer.newEndTime,
-    });
-    return timer.timerId;
+    try {
+      const timer = await this.timerService.extendTimer(
+        data.challengeId,
+        user.id,
+      );
+      await this.clientService.sendEvent([`user/${user.id}`], 'timerExtended', {
+        timerId: timer.timerId,
+        challengeId: timer.challengeId,
+        newEndTime: timer.newEndTime,
+      });
+      return timer.timerId;
+    } catch (error) {
+      // Send error to frontend instead of throwing
+      const errorMessage = error instanceof Error ? error.message : 'Failed to extend timer';
+      await this.clientService.emitErrorData(user, errorMessage);
+      return null;
+    }
   }
 
   @SubscribeMessage('completeTimer')

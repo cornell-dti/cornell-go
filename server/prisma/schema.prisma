@@ -278,6 +278,8 @@ model ChallengeTimer {
   startTime             DateTime             @default(now())
   endTime               DateTime?
   currentStatus         ChallengeTimerStatus @default(ACTIVE)
+  extensionsUsed        Int                  @default(0) //number of extensions used for this timer
+  originalBasePoints    Int //original points challenge would give (if no extensions used)
   // warnings
   warningMilestones     Int[]                @default([]) //milestones to send warnings for
   warningMilestonesSent Int[]                @default([]) //which milestones have been sent

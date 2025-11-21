@@ -31,7 +31,7 @@ CREATE TABLE "ChallengeTimer" (
 CREATE UNIQUE INDEX "ChallengeTimer_userId_challengeId_key" ON "ChallengeTimer"("userId", "challengeId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
+CREATE UNIQUE INDEX IF NOT EXISTS "User_username_key" ON "User"("username");
 
 -- AddForeignKey
 ALTER TABLE "ChallengeTimer" ADD CONSTRAINT "ChallengeTimer_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;

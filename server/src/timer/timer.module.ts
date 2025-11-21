@@ -5,6 +5,7 @@ import { AuthModule } from '../auth/auth.module';
 import { CaslModule } from '../casl/casl.module';
 import { TimerService } from './timer.service';
 import { TimerGateway } from './timer.gateway';
+import { ChallengeModule } from '../challenge/challenge.module';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { TimerGateway } from './timer.gateway';
     ClientModule,
     forwardRef(() => AuthModule),
     CaslModule,
+    forwardRef(() => ChallengeModule),
   ],
   providers: [TimerService, TimerGateway],
   exports: [TimerService],

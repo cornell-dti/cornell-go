@@ -24,5 +24,6 @@ import { CaslModule } from '../casl/casl.module';
     AchievementModule,
   ],
   providers: [ChallengeGateway, ChallengeService],
+  exports: [ChallengeService],
 })
 export class ChallengeModule {}
