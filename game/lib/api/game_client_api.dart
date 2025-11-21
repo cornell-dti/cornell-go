@@ -80,6 +80,26 @@ class GameClientApi {
   final disconnectedController = StreamController<bool>.broadcast(sync: true);
   Stream<bool> get disconnectedStream => disconnectedController.stream;
 
+  final _timerStartedController =
+      StreamController<TimerStartedDto>.broadcast(sync: true);
+  Stream<TimerStartedDto> get timerStartedStream =>
+      _timerStartedController.stream;
+  
+  final _timerExtendedController =
+      StreamController<TimerExtendedDto>.broadcast(sync: true);
+  Stream<TimerExtendedDto> get timerExtendedStream =>
+      _timerExtendedController.stream;
+  
+  final _timerCompletedController =
+      StreamController<TimerCompletedDto>.broadcast(sync: true);
+  Stream<TimerCompletedDto> get timerCompletedStream =>
+      _timerCompletedController.stream;
+  
+  final _timerWarningController =
+      StreamController<TimerWarningDto>.broadcast(sync: true);
+  Stream<TimerWarningDto> get timerWarningStream =>
+      _timerWarningController.stream;
+
   void connectSocket(Socket sock) {
     sock.onReconnect((data) => _reconnectedController.add(true));
     sock.onReconnecting((data) => _reconnectingController.add(true));
@@ -144,6 +164,22 @@ class GameClientApi {
         "updateLeaderPosition",
         (data) => _updateLeaderPositionController
             .add(UpdateLeaderPositionDto.fromJson(data)));
+
+    sock.on(
+        "timerStarted",
+        (data) => _timerStartedController.add(TimerStartedDto.fromJson(data)));
+
+    sock.on(
+        "timerExtended",
+        (data) => _timerExtendedController.add(TimerExtendedDto.fromJson(data)));
+
+    sock.on(
+        "timerCompleted",
+        (data) => _timerCompletedController.add(TimerCompletedDto.fromJson(data)));
+
+    sock.on(
+        "timerWarning",
+        (data) => _timerWarningController.add(TimerWarningDto.fromJson(data)));
 
     _connectedController.add(true);
   }
