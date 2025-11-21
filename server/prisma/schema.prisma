@@ -77,36 +77,37 @@ enum OrganizationSpecialUsage {
 }
 
 model User {
-  id                  String               @id() @default(uuid())
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime             @updatedAt()
-  subject             String               @default("User")
-  authToken           String               @unique
-  authType            AuthType
-  username            String               @unique
-  year                String
-  college             String
-  major               String
-  interests           String[]
-  email               String
-  hashedRefreshToken  String
-  administrator       Boolean
-  enrollmentType      EnrollmentType
-  score               Int
-  isBanned            Boolean              @default(false)
-  group               Group                @relation("member", fields: [groupId], references: [id])
-  groupId             String
-  hostOf              Group?               @relation("host")
-  eventTrackers       EventTracker[]
-  favorites           EventBase[]
-  completedChallenges PrevChallenge[]      @relation("owner")
-  memberOf            Organization[]       @relation("orgToUser")
-  managerOf           Organization[]       @relation("orgManager")
-  isRanked            Boolean              @default(true)
-  participatedIn      PrevChallenge[]      @relation("prevChallengeParticipant")
-  sessionLogEntries   SessionLogEntry[]
-  achievementTrackers AchievementTracker[]
-  hasCompletedOnboarding Boolean
+  id                     String               @id() @default(uuid())
+  createdAt              DateTime             @default(now())
+  updatedAt              DateTime             @updatedAt()
+  subject                String               @default("User")
+  authToken              String               @unique
+  authType               AuthType
+  username               String               @unique
+  year                   String
+  college                String
+  major                  String
+  interests              String[]
+  email                  String
+  hashedRefreshToken     String
+  administrator          Boolean
+  enrollmentType         EnrollmentType
+  score                  Int
+  isBanned               Boolean              @default(false)
+  group                  Group                @relation("member", fields: [groupId], references: [id])
+  groupId                String
+  hostOf                 Group?               @relation("host")
+  eventTrackers          EventTracker[]
+  favorites              EventBase[]
+  completedChallenges    PrevChallenge[]      @relation("owner")
+  memberOf               Organization[]       @relation("orgToUser")
+  managerOf              Organization[]       @relation("orgManager")
+  isRanked               Boolean              @default(true)
+  participatedIn         PrevChallenge[]      @relation("prevChallengeParticipant")
+  sessionLogEntries      SessionLogEntry[]
+  achievementTrackers    AchievementTracker[]
+  UserQuizAnswer         UserQuizAnswer[]
+  hasCompletedOnboarding Boolean              @default(false)
 }
 
 model Group {
@@ -141,6 +142,7 @@ model Challenge {
   closeRadius    Float
   completions    PrevChallenge[]
   activeTrackers EventTracker[]
+  QuizQuestion   QuizQuestion[]
 }
 
 model EventBase {
@@ -259,4 +261,53 @@ model AchievementTracker {
   dateComplete  DateTime?
   achievementId String
   userId        String
+}
+
+model QuizQuestion {
+  id          String    @id @default(cuid())
+  challengeId String
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+
+  questionText String
+  explanation  String?
+  difficulty   Int     @default(1)
+  pointValue   Int     @default(10)
+
+  answers     QuizAnswer[]
+  userAnswers UserQuizAnswer[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("QuizQuestion")
+}
+
+model QuizAnswer {
+  id         String       @id @default(cuid())
+  questionId String
+  question   QuizQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  answerText String
+  isCorrect  Boolean @default(false)
+
+  userSelections UserQuizAnswer[]
+
+  @@map("QuizAnswer")
+}
+
+model UserQuizAnswer {
+  id               String       @id @default(cuid())
+  userId           String
+  user             User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  questionId       String
+  question         QuizQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  selectedAnswerId String
+  selectedAnswer   QuizAnswer   @relation(fields: [selectedAnswerId], references: [id])
+
+  isCorrect    Boolean
+  pointsEarned Int
+  answeredAt   DateTime @default(now())
+
+  @@unique([userId, questionId]) // Enforce one attempt per question
+  @@map("UserQuizAnswer")
 }
