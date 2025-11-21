@@ -35,6 +35,7 @@ describe('TimerModule E2E', () => {
             requiredMembers: 1,
             name: 'e2e',
             description: 'e2e',
+            longDescription: 'e2e long description',
             timeLimitation: 'PERPETUAL',
             indexable: true,
             endTime: new Date(Date.now() + 3600_000),
@@ -73,6 +74,7 @@ describe('TimerModule E2E', () => {
             group: { connect: { id: group.id } },
             hashedRefreshToken: 'hashed_refresh_token_placeholder',
             administrator: false,
+            hasCompletedOnboarding: false,
         },
     });
 
