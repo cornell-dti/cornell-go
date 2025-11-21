@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/api/game_client_dto.dart';
@@ -73,10 +74,61 @@ class TimerModel extends ChangeNotifier {
         ?.startChallengeTimer(StartChallengeTimerDto(challengeId: challengeId));
   }
 
-  //send ExtendTimerDto to backend to extend timer
-  void extendTimer(String challengeId, DateTime currentEndTime) {
-    _client.serverApi?.extendTimer(ExtendTimerDto(
-        challengeId: challengeId, endTime: currentEndTime.toIso8601String()));
+  
+  // tries to extend timer: returns null if success, error message if fail (frontend displays error message)
+  Future<String?> extendTimer(
+      String challengeId, DateTime currentEndTime) async {
+    final completer = Completer<String?>();
+    late Timer timeoutTimer;
+    late StreamSubscription extendedSubscription;
+    late StreamSubscription errorSubscription;
+
+    // timeout for if backend doesn't respond within 5 seconds
+    timeoutTimer = Timer(Duration(seconds: 5), () {
+      if (!completer.isCompleted) {
+        completer.complete('Request timeout');
+      }
+    });
+
+    // listen for TimerExtendedDto from backend - completes with null if success
+    extendedSubscription =
+        _client.clientApi.timerExtendedStream.listen((event) {
+      if (event.challengeId == challengeId && !completer.isCompleted) {
+        completer.complete(
+            null); 
+      }
+    });
+
+    // listen for errors from backend, and complete with error message if error is related to timer extension
+    errorSubscription = _client.clientApi.updateErrorDataStream.listen((error) {
+      final errorMessage = error.message.toLowerCase();
+      if (errorMessage.contains('timer') ||
+          errorMessage.contains('challenge') ||
+          errorMessage.contains('extend') ||
+          errorMessage.contains('coin')) {
+        if (!completer.isCompleted) {
+          completer.complete(error.message);
+        }
+      }
+    });
+
+    try {
+      // send ExtendTimerDto to backend to extend timer
+      final result = await _client.serverApi?.extendTimer(ExtendTimerDto(
+          challengeId: challengeId, endTime: currentEndTime.toIso8601String()));
+
+      if (result == null && !completer.isCompleted) {
+        completer.complete('Failed to extend timer');
+      }
+
+      final errorMessage = await completer.future;
+      return errorMessage; 
+    } finally {
+      // clean up
+      timeoutTimer.cancel();
+      await extendedSubscription.cancel();
+      await errorSubscription.cancel();
+    }
   }
 
   //send TimerCompletedDto to backend to complete timer

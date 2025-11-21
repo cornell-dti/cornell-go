@@ -135,7 +135,7 @@ export class TimerService {
     }
     const canExtend = await this.canExtendTimer(userId, challengeId);
     if (!canExtend) {
-      throw new Error('Cannot extend timer');
+      throw new Error('Cannot extend timer: Insufficient coins');
     }
 
     const challenge = await this.prisma.challenge.findUniqueOrThrow({
@@ -270,7 +270,7 @@ export class TimerService {
     );
   }
 
-  /** Checks if a timer can be extended by seeing if the user has a high enoughscore to allow for a deduction of points when an extension is used */
+  /** Checks if a timer can be extended by seeing if the user has a high enough score to allow for a deduction of points when an extension is used */
   async canExtendTimer(userId: string, challengeId: string): Promise<boolean> {
     const user = await this.prisma.user.findUniqueOrThrow({
       where: { id: userId },

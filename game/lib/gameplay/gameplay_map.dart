@@ -1218,8 +1218,7 @@ class _GameplayMapState extends State<GameplayMap> {
         _timerModalShowing = true;
 
         _handleTimerExpiration();
-      } else {
-      }
+      } else {}
     });
   }
 
@@ -1228,7 +1227,6 @@ class _GameplayMapState extends State<GameplayMap> {
    * Note: challenge is NOT completed
    */
   void _handleTimerExpiration() {
-
     if (!mounted || _timerModalShowing != true) {
       return;
     }
@@ -1246,9 +1244,9 @@ class _GameplayMapState extends State<GameplayMap> {
           children: [
             // Dimmed game map as background for modal overlay
             GestureDetector(
-              onTap: () {}, 
+              onTap: () {},
               child: Container(
-                color: Colors.black.withOpacity(0.3), 
+                color: Colors.black.withOpacity(0.3),
               ),
             ),
             Center(
@@ -1284,14 +1282,13 @@ class _GameplayMapState extends State<GameplayMap> {
 
     return Center(
       child: Material(
-        type: MaterialType.transparency, 
+        type: MaterialType.transparency,
         child: Container(
           constraints: BoxConstraints(
-            maxWidth:
-                screenWidth * 0.85, 
+            maxWidth: screenWidth * 0.85,
           ),
           decoration: BoxDecoration(
-            color: Colors.white, 
+            color: Colors.white,
             borderRadius: BorderRadius.circular(9),
           ),
           padding: EdgeInsets.only(
@@ -1339,8 +1336,7 @@ class _GameplayMapState extends State<GameplayMap> {
                 children: [
                   // Results button (width 86px, height 40px)
                   SizedBox(
-                    width:
-                        screenWidth * 0.210, // ~82px
+                    width: screenWidth * 0.210, // ~82px
                     height: screenHeight * 0.047, // ~40px on 852px screen
                     child: ElevatedButton(
                       onPressed: () {
@@ -1382,23 +1378,22 @@ class _GameplayMapState extends State<GameplayMap> {
                       ),
                     ),
                   ),
-                  SizedBox(
-                      width: screenWidth * 0.033), //~13px
+                  SizedBox(width: screenWidth * 0.033), //~13px
                   // Extension button (width 200px, height 40px)
                   SizedBox(
-                    width:
-                        screenWidth * 0.478, // ~187px
+                    width: screenWidth * 0.478, // ~187px
                     height: screenHeight * 0.047, // ~40px
                     child: ElevatedButton(
-                      onPressed: () {
-                        _removeTimerModal(); // Close modal
-                        _extendTimer();
+                      onPressed: () async {
+                        final success = await _extendTimer();
+                        if (success) {
+                          _removeTimerModal(); // Close modal if timer extended successfully; otherwise leave open for user to return home/retry extending timer
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Color.fromARGB(255, 237, 86, 86),
                         padding: EdgeInsets.only(
-                          left:
-                              screenWidth * 0.010, //~4px
+                          left: screenWidth * 0.010, //~4px
                           right: screenWidth * 0.020, //~8px
                           top: screenHeight * 0.011, //~9px
                           bottom: screenHeight * 0.011, //~9px
@@ -1409,28 +1404,24 @@ class _GameplayMapState extends State<GameplayMap> {
                         ),
                       ),
                       child: Row(
-                        mainAxisAlignment:
-                            MainAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text("+ 5 Min for ",
                               style: TextStyle(
                                   fontFamily: 'Poppins',
-                                  fontSize: screenWidth *
-                                      0.033, //~13px
+                                  fontSize: screenWidth * 0.033, //~13px
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white)),
                           SvgPicture.asset('assets/icons/bearcoins.svg',
-                              width: screenWidth *
-                                  0.041, //~16px
+                              width: screenWidth * 0.041, //~16px
                               height: screenWidth * 0.041),
                           Flexible(
                             child: Text(" 25 Pt",
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
                                     fontFamily: 'Poppins',
-                                    fontSize: screenWidth *
-                                        0.033, //~13px
+                                    fontSize: screenWidth * 0.033, //~13px
                                     color: Color(0xFFFFC737))),
                           ),
                         ],
@@ -1447,12 +1438,43 @@ class _GameplayMapState extends State<GameplayMap> {
   }
 
   /**
-   * TODO: Extends the timer - requests extension from backend
-   * later in challenge compelted page should show point deduction
-   * in times up modal extension button should have losing color animation to indicate not much time to make a choice 
+   * Extends the timer - requests extensions from backend
+   * returns true if extension succeeds, false if it fails
+   * TODO later in challenge compelted page should show point deduction
+   * TODO in times up modal extension button should have losing color animation to indicate not much time to make a choice 
+   * add animation to point deduction of currnent coins (check figma)
    */
-  void _extendTimer() {
-    displayToast("Unable to extend timer (UNIMPLEMENTED)", Status.error);
+  Future<bool> _extendTimer() async {
+    final timerModel = Provider.of<TimerModel>(context, listen: false);
+
+    // get current end time and extend timer
+    final currentEndTime = timerModel.endTime;
+    if (currentEndTime == null) {
+      displayToast("Unable to extend timer", Status.error);
+      return false;
+    }
+
+    // extend timer by 5 minutes (300 seconds)
+    final newEndTime = currentEndTime.add(Duration(seconds: 300));
+    final errorMessage =
+        await timerModel.extendTimer(widget.challengeId, newEndTime);
+
+    if (errorMessage != null) {
+      // check if it's specifically an insufficient coins error
+      if (errorMessage.toLowerCase().contains('insufficient coins') ||
+          errorMessage.toLowerCase().contains('cannot extend timer')) {
+        displayToast(
+            "Unable to extend timer: Insufficient coins", Status.error);
+      } else {
+        // other timer-related errors
+        displayToast("Unable to extend timer: $errorMessage", Status.error);
+      }
+      return false;
+    }
+
+    // success - timerExtended event will update the timer automatically
+    // TODO: Show point deduction animation when backend confirms
+    return true;
   }
 
   /** Returns whether the user is at the challenge location */
