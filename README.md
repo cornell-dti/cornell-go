@@ -54,6 +54,13 @@ cd server
 npx prisma studio
 ```
 
+### Run Database Seed Script (Mock DB Data) 
+
+```
+cd server
+npx prisma db seed
+```
+
 ### Update API using backend DTOs
 
 ```
