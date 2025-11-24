@@ -110,13 +110,38 @@ class ChallengeFailedPage extends StatefulWidget {
   State<ChallengeFailedPage> createState() => _ChallengeFailedState();
 }
 
-class _ChallengeFailedState extends State<ChallengeFailedPage> {
+class _ChallengeFailedState extends State<ChallengeFailedPage>
+    with SingleTickerProviderStateMixin {
   bool journeyPage = false;
   bool journeyCompleted = false;
+  late AnimationController _lightningController;
+  late Animation<double> _lightningAnimation;
 
   @override
   void initState() {
     super.initState();
+    // Create animation controller for lightning flash (flash twice over 2 seconds)
+    _lightningController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 2000),
+    );
+
+    // Create animation that goes from 0 to 1, with two flashes
+    _lightningAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _lightningController,
+        curve: Curves.easeInOut,
+      ),
+    );
+
+    // Start animation when page loads
+    _lightningController.forward();
+  }
+
+  @override
+  void dispose() {
+    _lightningController.dispose();
+    super.dispose();
   }
 
   @override
@@ -212,6 +237,60 @@ class _ChallengeFailedState extends State<ChallengeFailedPage> {
               'assets/images/challenge-failed-bg.svg',
               fit: BoxFit.cover,
             )),
+        /** Animated lightning bolts overlay
+         * - Two lightning bolts appear next to the original lightning bolts and flash twice over two seconds
+         * - both flashes are 0.45 seconds long; the opacity changes depending on the time elapsed
+         */
+        AnimatedBuilder(
+          animation: _lightningAnimation,
+          builder: (context, child) {
+            double opacity = 0.0;
+            double progress = _lightningAnimation.value;
+
+            // First flash
+            if (progress < 0.45) {
+              double flash1Progress = progress / 0.45;
+              opacity = flash1Progress < 0.5
+                  ? flash1Progress * 2 // Fade in
+                  : (1.0 - flash1Progress) * 2; // Fade out
+            }
+            // Second flash
+            else if (progress >= 0.55) {
+              double flash2Progress = (progress - 0.55) / 0.45;
+              opacity = flash2Progress < 0.5
+                  ? flash2Progress * 2
+                  : (1.0 - flash2Progress) * 2;
+            }
+
+            return Opacity(
+              opacity: opacity,
+              child: Stack(
+                children: [
+                  // First lightning bolt (positioned at x=271, y=89 in 393x852 viewBox)
+                  Positioned(
+                    left: MediaQuery.of(context).size.width * (271 / 393),
+                    top: MediaQuery.of(context).size.height * (89 / 852),
+                    child: SvgPicture.asset(
+                      'assets/images/lightning_1.svg',
+                      width: 65,
+                      height: 197,
+                    ),
+                  ),
+                  // Second lightning bolt (positioned at x=105, y=135 in 393x852 viewBox)
+                  Positioned(
+                    left: MediaQuery.of(context).size.width * (105 / 393),
+                    top: MediaQuery.of(context).size.height * (135 / 852),
+                    child: SvgPicture.asset(
+                      'assets/images/lightning_2.svg',
+                      width: 39,
+                      height: 118,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
         Container(
             margin: EdgeInsets.only(
                 top: MediaQuery.of(context).size.height * 0.47,
