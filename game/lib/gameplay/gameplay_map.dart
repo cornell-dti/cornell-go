@@ -73,12 +73,14 @@ class GameplayMap extends StatefulWidget {
 
 class _GameplayMapState extends State<GameplayMap> {
   final METERS_TO_DEGREES = 111139;
+  final EXTENSION_TIME = 300; // 5 minutes (300 seconds)
 
   late Completer<GoogleMapController> mapCompleter = Completer();
   late StreamSubscription<Position> positionStream;
   // Whether location streaming has begun
   late Future<bool> streamStarted;
   StreamSubscription<TimerCompletedDto>? _timerCompletedSubscription;
+  StreamSubscription<TimerExtendedDto>? _timerExtendedSubscription;
 
   // User is by default centered around some location on Cornell's campus.
   // User should only be at these coords briefly before map is moved to user's
@@ -328,6 +330,8 @@ class _GameplayMapState extends State<GameplayMap> {
     _initializeTimer();
     //listen for timer expiration from backend
     _setupTimerExpirationListener();
+    //listen for timer extension from backend
+    _setupTimerExtensionListener();
   }
 
   /**
@@ -398,6 +402,7 @@ class _GameplayMapState extends State<GameplayMap> {
     _periodicTimerStarted = false;
     _waitCount = 0; //reset wait counter
     _timerCompletedSubscription?.cancel(); //cancel timer completion listener
+    _timerExtendedSubscription?.cancel(); //cancel timer extension listener
     super.dispose();
   }
 
@@ -1223,6 +1228,30 @@ class _GameplayMapState extends State<GameplayMap> {
   }
 
   /**
+   * Listens for timer extension (TimerExtendedDto) from backend and restarts timer display
+   */
+  void _setupTimerExtensionListener() {
+    final client = Provider.of<ApiClient>(context, listen: false);
+
+    // cancel any existing subscriptions
+    _timerExtendedSubscription?.cancel();
+
+    _timerExtendedSubscription =
+        client.clientApi.timerExtendedStream.listen((event) {
+      if (event.challengeId == widget.challengeId && mounted) {
+        // Restart timer display when timer is extended
+        setState(() {
+          hasTimer = true;
+          totalTime +=
+              EXTENSION_TIME; // Add 5 minutes (300 seconds) to total time for extension
+          _periodicTimerStarted = false; // Reset so timer can restart
+        });
+        _startTimerUpdates(); // Restart the periodic updates
+      }
+    });
+  }
+
+  /**
    * Handles timer expiration in frontend - shows "Time's Up" modal 
    * Note: challenge is NOT completed
    */
@@ -1322,7 +1351,7 @@ class _GameplayMapState extends State<GameplayMap> {
               Container(
                 margin: EdgeInsets.only(bottom: screenHeight * 0.019), //~16px
                 child: Text(
-                  "Want more time? Earn 5 more minutes of exploring for 25 points!",
+                  "Want more time? Earn 5 more minutes of exploring for ${(widget.points * 0.25).floor()} points!",
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: screenWidth * 0.036, //~14px
@@ -1417,7 +1446,7 @@ class _GameplayMapState extends State<GameplayMap> {
                               width: screenWidth * 0.041, //~16px
                               height: screenWidth * 0.041),
                           Flexible(
-                            child: Text(" 25 Pt",
+                            child: Text(" ${(widget.points * 0.25).floor()} Pt",
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
                                     fontFamily: 'Poppins',
@@ -1473,6 +1502,15 @@ class _GameplayMapState extends State<GameplayMap> {
     }
 
     // success - timerExtended event will update the timer automatically
+    // Restart periodic timer updates to display the extended timer
+    setState(() {
+      hasTimer = true;
+      totalTime +=
+          EXTENSION_TIME; // Add 5 minutes (300 seconds) to total time for extension
+      _periodicTimerStarted = false; // Reset so timer can restart
+    });
+    _startTimerUpdates(); // Restart the periodic updates
+
     // TODO: Show point deduction animation when backend confirms
     return true;
   }
