@@ -1239,14 +1239,16 @@ class _GameplayMapState extends State<GameplayMap> {
     _timerExtendedSubscription =
         client.clientApi.timerExtendedStream.listen((event) {
       if (event.challengeId == widget.challengeId && mounted) {
-        // Restart timer display when timer is extended
+        // Update timer display when timer is extended
         setState(() {
           hasTimer = true;
           totalTime +=
               EXTENSION_TIME; // Add 5 minutes (300 seconds) to total time for extension
-          _periodicTimerStarted = false; // Reset so timer can restart
         });
-        _startTimerUpdates(); // Restart the periodic updates
+        // restart timer updates if they were stopped
+        if (!_periodicTimerStarted) {
+          _startTimerUpdates();
+        }
       }
     });
   }
@@ -1501,15 +1503,12 @@ class _GameplayMapState extends State<GameplayMap> {
       return false;
     }
 
-    // success - timerExtended event will update the timer automatically
-    // Restart periodic timer updates to display the extended timer
+    // success - timerExtended event will update the timer automatically via stream
     setState(() {
       hasTimer = true;
       totalTime +=
           EXTENSION_TIME; // Add 5 minutes (300 seconds) to total time for extension
-      _periodicTimerStarted = false; // Reset so timer can restart
     });
-    _startTimerUpdates(); // Restart the periodic updates
 
     // TODO: Show point deduction animation when backend confirms
     return true;

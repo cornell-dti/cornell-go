@@ -124,14 +124,19 @@ export class TimerService {
     challengeId: string,
     userId: string,
   ): Promise<TimerCompletedDto> {
-    //end timer
-    const timer = await this.prisma.challengeTimer.findFirstOrThrow({
+    const timer = await this.prisma.challengeTimer.findFirst({
       where: { challengeId: challengeId, userId: userId },
       include: { user: true },
     });
 
     if (!timer) {
-      throw new Error('Timer not found');
+      // timer already deleted/completed
+      console.log(`Warning: Timer not found for challenge ${challengeId}, userId ${userId}. Scheduled completion may be stale.`);
+      return {
+        timerId: '',
+        challengeId: challengeId,
+        challengeCompleted: false,
+      };
     }
 
     // Mark timer as completed
@@ -263,23 +268,30 @@ export class TimerService {
 
   /** Sends a warning for a timer at given milestones
    * - updates timer's warningMilestonesSent and lastWarningSent
+   * - Returns null if timer not found or not active (e.g., timer was restarted/completed)
    */
   async sendWarning(
     challengeId: string,
     userId: string,
     milestone: number,
-  ): Promise<TimerWarningDto> {
+  ): Promise<TimerWarningDto | null> {
     const timer = await this.prisma.challengeTimer.findFirst({
       where: { challengeId: challengeId, userId: userId },
     });
     if (!timer) {
-      throw new Error('Timer not found');
+      // Timer was deleted/completed - scheduled warning is stale, ignore it
+      console.log(`Warning: Timer not found for challenge ${challengeId}, userId ${userId}. Scheduled warning may be stale.`);
+      return null;
     }
     if (timer.currentStatus != ChallengeTimerStatus.ACTIVE) {
-      throw new Error('Timer is not active');
+      // Timer is no longer active - scheduled warning is stale, ignore it
+      console.log(`Warning: Timer is not active for challenge ${challengeId}, userId ${userId}. Scheduled warning may be stale.`);
+      return null;
     }
     if (timer.warningMilestonesSent.includes(milestone)) {
-      throw new Error('Warning milestone already sent');
+      // Warning already sent (possibly by a restarted timer) - ignore
+      console.log(`Warning: Milestone ${milestone} already sent for challenge ${challengeId}, userId ${userId}.`);
+      return null;
     }
 
     if (!timer.endTime) {

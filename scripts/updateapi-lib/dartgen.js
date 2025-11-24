@@ -277,8 +277,12 @@ function getDartServerApiFile(apiDefs) {
         completer.complete(arg);
       };
 
-      Future.delayed(Duration(seconds: 5))
-          .then((value) => completer.complete(null));
+      // Set up timeout - only complete if not already completed
+      Future.delayed(Duration(seconds: 5)).then((value) {
+        if (!completer.isCompleted) {
+          completer.complete(null);
+        }
+      });
 
       _refreshEv = ev;
       _refreshDat = data;
