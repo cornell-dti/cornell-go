@@ -236,6 +236,7 @@ export class TimerService {
 
   /** Schedules warning for a timer at given milestones
    * - schedules warnings for each milestone based on the end time of the timer (ex. if milestone has 30, sends a warning at endtime-30: 30 seconds left)
+   * - schedules warnings 2 seconds early to account for setTimeout inaccuracy, processing time, and network delay
    */
   async scheduleWarnings(
     challengeId: string,
@@ -251,9 +252,10 @@ export class TimerService {
     }
 
     const milestones = timer.warningMilestones;
+    const EARLY_BUFFER_MS = 1500; // 2 seconds early to compensate for delays
 
     for (const milestone of milestones) {
-      const warningTime = new Date(endTime.getTime() - milestone * 1000); //convert to milliseconds
+      const warningTime = new Date(endTime.getTime() - milestone * 1000 - EARLY_BUFFER_MS);
       const now = new Date();
 
       if (warningTime > now) {
@@ -267,8 +269,9 @@ export class TimerService {
   }
 
   /** Sends a warning for a timer at given milestones
-   * - updates timer's warningMilestonesSent and lastWarningSent
+   * - Updates timer's warningMilestonesSent and lastWarningSent
    * - Returns null if timer not found or not active (e.g., timer was restarted/completed)
+   * - Also validates that the warning is still relevant in case of timer restarting (time remaining is close to milestone)
    */
   async sendWarning(
     challengeId: string,
@@ -302,6 +305,28 @@ export class TimerService {
       0,
       Math.floor((timer.endTime.getTime() - Date.now()) / 1000),
     );
+
+    // Check if timer was recently restarted - if startTime is very recent, old warnings are stale
+    const timeSinceStart = Math.floor((Date.now() - timer.startTime.getTime()) / 1000);
+    const expectedTimeSinceStart = timer.timerLength - milestone;
+    
+    if (timeSinceStart < expectedTimeSinceStart - 5) {
+      console.log(`Warning: Milestone ${milestone} warning is stale - timer was likely restarted. Time since start: ${timeSinceStart}s, expected: ~${expectedTimeSinceStart}s for challenge ${challengeId}, userId ${userId}.`);
+      return null;
+    }
+
+    // Ensure time remaining is within 5 seconds of milestone
+    const timeDifference = Math.abs(timeRemaining - milestone);
+    if (timeDifference > 5) {
+      console.log(`Warning: Milestone ${milestone} warning is stale for challenge ${challengeId}, userId ${userId}. Time remaining: ${timeRemaining}, expected: ~${milestone}.`);
+      return null;
+    }
+
+    // Ensure time remaining is within 3 seconds of milestone
+    if (timeRemaining < milestone - 3) {
+      console.log(`Warning: Milestone ${milestone} warning is too late for challenge ${challengeId}, userId ${userId}. Time remaining: ${timeRemaining}, milestone: ${milestone}.`);
+      return null;
+    }
 
     const warningDto: TimerWarningDto = {
       challengeId: challengeId,

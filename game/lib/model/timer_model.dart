@@ -15,8 +15,7 @@ class TimerModel extends ChangeNotifier {
   DateTime? _endTime;
   bool _isActive = false;
   int _extensionsUsed = 0; // Track extensions used for current challenge
-  int?
-      _currentWarning; // null = no warning, otherwise milestone value (300, 60, or 30)
+  int? _currentWarning; // null = no warning, otherwise milestone value (300, 60, or 30)
   int _timeRemaining = 0;
 
   //getter functions

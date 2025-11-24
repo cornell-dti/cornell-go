@@ -81,6 +81,7 @@ class _GameplayMapState extends State<GameplayMap> {
   late Future<bool> streamStarted;
   StreamSubscription<TimerCompletedDto>? _timerCompletedSubscription;
   StreamSubscription<TimerExtendedDto>? _timerExtendedSubscription;
+  StreamSubscription<TimerWarningDto>? _timerWarningSubscription;
 
   // User is by default centered around some location on Cornell's campus.
   // User should only be at these coords briefly before map is moved to user's
@@ -143,6 +144,50 @@ class _GameplayMapState extends State<GameplayMap> {
   // Timer: overlay entry for Time's Up message when timer expires
   OverlayEntry? _timerModalOverlay;
   bool _timerModalShowing = false; //flag to prevent multiple overlays
+
+  // Timer: current warning overlay entry for Niki warning the user of how much time is left
+  OverlayEntry? _timerWarningOverlay;
+
+  void _removeTimerWarning() {
+    _timerWarningOverlay?.remove();
+    _timerWarningOverlay = null;
+  }
+
+  void _displayTimerWarning(String timeLeft) {
+    _removeTimerWarning();
+
+    _timerWarningOverlay = OverlayEntry(
+      builder: (context) => BearMascotMessage(
+        message: '$timeLeft left!',
+        showBear: true,
+        bearAsset: 'popup',
+        bearLeftPercent: -0.095,
+        bearBottomPercent: 0.2,
+        messageLeftPercent: 0.55,
+        messageBottomPercent: 0.42,
+        messageBoxWidthPercent: 0.45,
+        textStyle: const TextStyle(
+          fontFamily: 'Poppins',
+          fontSize: 16,
+          fontWeight: FontWeight.w800,
+          color: Color(0xFFED5656),
+          height: 1.5,
+          decoration: TextDecoration.none,
+        ),
+      ),
+    );
+    Overlay.of(context).insert(_timerWarningOverlay!);
+
+    // auto-dismiss after 1 second
+    Timer(Duration(seconds: 1), () {
+      if (mounted) {
+        _removeTimerWarning();
+        // clear warning after 1 second in TimerModel
+        final timerModel = Provider.of<TimerModel>(context, listen: false);
+        timerModel.clearWarning();
+      }
+    });
+  }
 
   // Switch between the two sizes
   void _toggle() => setState(() {
@@ -332,6 +377,8 @@ class _GameplayMapState extends State<GameplayMap> {
     _setupTimerExpirationListener();
     //listen for timer extension from backend
     _setupTimerExtensionListener();
+    //listen for timer warning from backend
+    _setupTimerWarningListener();
   }
 
   /**
@@ -396,6 +443,7 @@ class _GameplayMapState extends State<GameplayMap> {
   void dispose() {
     _removeBearOverlay();
     _removeTimerModal();
+    _removeTimerWarning();
     positionStream.cancel();
     _disposeController();
     _timerUpdateTimer?.cancel(); //cancel periodic timer updates
@@ -403,6 +451,7 @@ class _GameplayMapState extends State<GameplayMap> {
     _waitCount = 0; //reset wait counter
     _timerCompletedSubscription?.cancel(); //cancel timer completion listener
     _timerExtendedSubscription?.cancel(); //cancel timer extension listener
+    _timerWarningSubscription?.cancel(); //cancel timer warning listener
     super.dispose();
   }
 
@@ -1204,6 +1253,35 @@ class _GameplayMapState extends State<GameplayMap> {
       }),
     );
     // });
+  }
+
+  /** Formats time remaining in seconds to fit warning message (e.g., "5 minutes", "1 minute", "30 seconds") */
+  String _formatTimeRemaining(int seconds) {
+    if (seconds >= 60) {
+      // round to nearest minute to ensure "5 minutes" doesn't show up as "4 minutes" due to delay
+      final minutes = ((seconds + 30) / 60).floor();
+      return minutes == 1 ? "1 minute" : "$minutes minutes";
+    } else {
+      return "$seconds seconds";
+    }
+  }
+
+  /** Listens for timer warning (TimerWarningDto) from backend and displays bear popup
+   * - shows a popup animation of Niki warning the user of how much time is left 
+   * - auto-dismisses after 1 second
+   */
+  void _setupTimerWarningListener() {
+    final client = Provider.of<ApiClient>(context, listen: false);
+
+    _timerWarningSubscription?.cancel();
+
+    _timerWarningSubscription =
+        client.clientApi.timerWarningStream.listen((event) {
+      if (event.challengeId == widget.challengeId && mounted) {
+        final timeLeft = _formatTimeRemaining(event.milestone);
+        _displayTimerWarning(timeLeft);
+      }
+    });
   }
 
   /**
