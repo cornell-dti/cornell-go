@@ -15,6 +15,9 @@ class TimerModel extends ChangeNotifier {
   DateTime? _endTime;
   bool _isActive = false;
   int _extensionsUsed = 0; // Track extensions used for current challenge
+  int?
+      _currentWarning; // null = no warning, otherwise milestone value (300, 60, or 30)
+  int _timeRemaining = 0;
 
   //getter functions
   String? get currentTimerId => _currentTimerId;
@@ -22,6 +25,11 @@ class TimerModel extends ChangeNotifier {
   DateTime? get endTime => _endTime;
   bool get isActive => _isActive;
   int get extensionsUsed => _extensionsUsed;
+  int? get currentWarning => _currentWarning;
+  int get timeRemaining => _timeRemaining;
+
+  // check if there's an active warning to display
+  bool get hasWarning => _currentWarning != null;
 
   TimerModel(ApiClient client) : _client = client {
     //listen for TimerStartedDto from backend
@@ -32,8 +40,9 @@ class TimerModel extends ChangeNotifier {
       _currentChallengeId = event.challengeId;
       _endTime = DateTime.parse(event.endTime);
       _isActive = true;
-      _extensionsUsed =
-          event.extensionsUsed; // Preserve extensions from backend
+      _extensionsUsed = event.extensionsUsed; // Preserve extensions from backend
+      _currentWarning = null;
+      _timeRemaining = 0;
       notifyListeners();
     });
 
@@ -51,15 +60,19 @@ class TimerModel extends ChangeNotifier {
     client.clientApi.timerCompletedStream.listen((event) {
       if (event.challengeId == _currentChallengeId) {
         _isActive = false;
+        _currentWarning = null;
+        _timeRemaining = 0;
         notifyListeners();
       }
     });
 
     //listen for TimerWarningDto from backend
     client.clientApi.timerWarningStream.listen((event) {
-      print(
-          "Timer warning: ${event.timeRemaining} seconds remaining (milestone: ${event.milestone})");
-      notifyListeners(); // TODO: this notifies UI to show warning; show warning in UI
+      if (event.challengeId == _currentChallengeId) {
+        _currentWarning = event.milestone;
+        _timeRemaining = event.timeRemaining;
+        notifyListeners();
+      }
     });
 
     //reset timer state when connected
@@ -69,6 +82,8 @@ class TimerModel extends ChangeNotifier {
       _endTime = null;
       _isActive = false;
       _extensionsUsed = 0; // Reset extensions when disconnected
+      _currentWarning = null;
+      _timeRemaining = 0;
       notifyListeners();
     });
   }
@@ -157,5 +172,12 @@ class TimerModel extends ChangeNotifier {
   //check if timer is for a specific challenge
   bool isTimerForChallenge(String challengeId) {
     return _isActive && _currentChallengeId == challengeId;
+  }
+
+  // clear the current warning (for UI to call after displaying warning)
+  void clearWarning() {
+    _currentWarning = null;
+    _timeRemaining = 0;
+    notifyListeners();
   }
 }
