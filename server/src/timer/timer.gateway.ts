@@ -24,7 +24,7 @@ export class TimerGateway {
     private timerService: TimerService,
   ) {}
 
-  //use sendEvent instead of sendProtected/emit... since timer events are just notifications and dont check data
+  // Use sendEvent instead of sendProtected/emit... since timer events are just notifications and don't check data
   @SubscribeMessage('startChallengeTimer')
   async startChallengeTimer(
     @CallingUser() user: User,

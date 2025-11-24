@@ -157,9 +157,9 @@ class _ChallengeFailedState extends State<ChallengeFailedPage>
         return CircularIndicator();
       }
 
-      // if this event is a journey
+      // If this event is a journey
       if ((event?.challenges?.length ?? 0) > 1)
-        // determine whether the journey is done
+        // Determine whether the journey is done
         journeyCompleted =
             tracker.prevChallenges.length == (event?.challenges?.length ?? 0);
 
@@ -178,7 +178,7 @@ class _ChallengeFailedState extends State<ChallengeFailedPage>
         failedChallengeHintsUsed = tracker.hintsUsed;
       }
 
-      // build list of completed challenge text fields to display later
+      // Build list of completed challenge text fields to display later
       var total_pts = 0;
       List<Widget> completedChallenges = [];
       for (PrevChallengeDto prevChal in tracker.prevChallenges) {
@@ -216,7 +216,7 @@ class _ChallengeFailedState extends State<ChallengeFailedPage>
 
       return Scaffold(
           body: Stack(children: [
-        //black to gray gradient background for sky
+        // Black to gray gradient background for sky
         Container(
             height: MediaQuery.of(context).size.height,
             width: MediaQuery.of(context).size.width,

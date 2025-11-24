@@ -18,7 +18,7 @@ class TimerModel extends ChangeNotifier {
   int? _currentWarning; // null = no warning, otherwise milestone value (300, 60, or 30)
   int _timeRemaining = 0;
 
-  //getter functions
+  // Getter functions
   String? get currentTimerId => _currentTimerId;
   String? get currentChallengeId => _currentChallengeId;
   DateTime? get endTime => _endTime;
@@ -27,14 +27,12 @@ class TimerModel extends ChangeNotifier {
   int? get currentWarning => _currentWarning;
   int get timeRemaining => _timeRemaining;
 
-  // check if there's an active warning to display
+  // Check if there's an active warning to display
   bool get hasWarning => _currentWarning != null;
 
   TimerModel(ApiClient client) : _client = client {
-    //listen for TimerStartedDto from backend
+    // Listen for TimerStartedDto from backend
     client.clientApi.timerStartedStream.listen((event) {
-      // print(
-      //     "TimerModel: Received TimerStartedDto - timerId=${event.timerId}, challengeId=${event.challengeId}, endTime=${event.endTime}");
       _currentTimerId = event.timerId;
       _currentChallengeId = event.challengeId;
       _endTime = DateTime.parse(event.endTime);
@@ -45,7 +43,7 @@ class TimerModel extends ChangeNotifier {
       notifyListeners();
     });
 
-    //listen for TimerExtendedDto from backend
+    // Listen for TimerExtendedDto from backend
     client.clientApi.timerExtendedStream.listen((event) {
       if (event.challengeId == _currentChallengeId) {
         _endTime = DateTime.parse(event.newEndTime);
@@ -55,7 +53,7 @@ class TimerModel extends ChangeNotifier {
       }
     });
 
-    //listen for TimerCompletedDto from backend
+    // Listen for TimerCompletedDto from backend
     client.clientApi.timerCompletedStream.listen((event) {
       if (event.challengeId == _currentChallengeId) {
         _isActive = false;
@@ -65,7 +63,7 @@ class TimerModel extends ChangeNotifier {
       }
     });
 
-    //listen for TimerWarningDto from backend
+    // Listen for TimerWarningDto from backend
     client.clientApi.timerWarningStream.listen((event) {
       if (event.challengeId == _currentChallengeId) {
         _currentWarning = event.milestone;
@@ -74,7 +72,7 @@ class TimerModel extends ChangeNotifier {
       }
     });
 
-    //reset timer state when connected
+    // Reset timer state when connected
     client.clientApi.connectedStream.listen((event) {
       _currentTimerId = null;
       _currentChallengeId = null;
@@ -87,15 +85,13 @@ class TimerModel extends ChangeNotifier {
     });
   }
 
-  //send StartChallengeTimerDto to backend to start timer
+  // Send StartChallengeTimerDto to backend to start timer
   void startTimer(String challengeId) {
-    // print(
-    //     "TimerModel: Sending startTimer request for challengeId=$challengeId");
     _client.serverApi
         ?.startChallengeTimer(StartChallengeTimerDto(challengeId: challengeId));
   }
 
-  // tries to extend timer: returns null if success, error message if fail (frontend displays error message)
+  // Tries to extend timer: returns null if success, error message if fail (frontend displays error message)
   Future<String?> extendTimer(
       String challengeId, DateTime currentEndTime) async {
     final completer = Completer<String?>();
@@ -103,14 +99,14 @@ class TimerModel extends ChangeNotifier {
     late StreamSubscription extendedSubscription;
     late StreamSubscription errorSubscription;
 
-    // timeout for if backend doesn't respond within 5 seconds
+    // Timeout for if backend doesn't respond within 5 seconds
     timeoutTimer = Timer(Duration(seconds: 5), () {
       if (!completer.isCompleted) {
         completer.complete('Request timeout');
       }
     });
 
-    // listen for TimerExtendedDto from backend - completes with null if success
+    // Listen for TimerExtendedDto from backend - completes with null if success
     extendedSubscription =
         _client.clientApi.timerExtendedStream.listen((event) {
       if (event.challengeId == challengeId && !completer.isCompleted) {
@@ -118,7 +114,7 @@ class TimerModel extends ChangeNotifier {
       }
     });
 
-    // listen for errors from backend, and complete with error message if error is related to timer extension
+    // Listen for errors from backend, and complete with error message if error is related to timer extension
     errorSubscription = _client.clientApi.updateErrorDataStream.listen((error) {
       final errorMessage = error.message.toLowerCase();
       if (errorMessage.contains('timer') ||
@@ -132,7 +128,7 @@ class TimerModel extends ChangeNotifier {
     });
 
     try {
-      // send ExtendTimerDto to backend to extend timer
+      // Send ExtendTimerDto to backend to extend timer
       final result = await _client.serverApi?.extendTimer(ExtendTimerDto(
           challengeId: challengeId, endTime: currentEndTime.toIso8601String()));
 
@@ -143,14 +139,14 @@ class TimerModel extends ChangeNotifier {
       final errorMessage = await completer.future;
       return errorMessage;
     } finally {
-      // clean up
+      // Clean up
       timeoutTimer.cancel();
       await extendedSubscription.cancel();
       await errorSubscription.cancel();
     }
   }
 
-  //send TimerCompletedDto to backend to complete timer
+  // Send TimerCompletedDto to backend to complete timer
   void completeTimer(String challengeId) {
     if (_currentTimerId != null) {
       _client.serverApi?.completeTimer(TimerCompletedDto(
@@ -161,19 +157,19 @@ class TimerModel extends ChangeNotifier {
     }
   }
 
-  //calculate remaining time in seconds
+  // Calculate remaining time in seconds
   int? getTimeRemaining() {
     if (_endTime == null || !_isActive) return null;
     final remaining = _endTime!.difference(DateTime.now()).inSeconds;
     return remaining > 0 ? remaining : 0;
   }
 
-  //check if timer is for a specific challenge
+  // Check if timer is for a specific challenge
   bool isTimerForChallenge(String challengeId) {
     return _isActive && _currentChallengeId == challengeId;
   }
 
-  // clear the current warning (for UI to call after displaying warning)
+  // Clear the current warning (for UI to call after displaying warning)
   void clearWarning() {
     _currentWarning = null;
     _timeRemaining = 0;

@@ -35,7 +35,7 @@ export class TimerService {
     }
     const endTime = this.calculateEndTime(challenge, 0);
     
-    // check if timer already exists to get originalBasePoints 
+    // Check if timer already exists to get originalBasePoints 
     const existingTimer = await this.prisma.challengeTimer.findFirst({
       where: {
         userId: userId,
@@ -43,12 +43,12 @@ export class TimerService {
       },
     });
     
-    // use originalBasePoints from existing timer if available
+    // Use originalBasePoints from existing timer if available
     const originalBasePoints = existingTimer?.originalBasePoints || challenge.points;
-    // preserve extensionsUsed from existing timer (don't reset on timer restart)
+    // Preserve extensionsUsed from existing timer (don't reset on timer restart)
     const preservedExtensionsUsed = existingTimer?.extensionsUsed || 0;
     
-    // uses upsert to handle existing timers (e.g., if user reopens challenge)
+    // Uses upsert to handle existing timers (e.g., if user reopens challenge)
     const timer = await this.prisma.challengeTimer.upsert({
       where: {
         userId_challengeId: {
@@ -57,7 +57,7 @@ export class TimerService {
         },
       },
       update: {
-        // reset timer if it already exists, but preserve extensionsUsed
+        // Reset timer if it already exists, but preserve extensionsUsed
         timerLength: challenge.timerLength,
         startTime: new Date(),
         endTime: endTime,
@@ -84,7 +84,7 @@ export class TimerService {
 
     console.log('timer original base points', timer.originalBasePoints);
     
-    // restore challenge points to original value when restarting timer
+    // Restore challenge points to original value when restarting timer
     if (challenge.points !== originalBasePoints) {
       await this.prisma.challenge.update({
         where: { id: challengeId },
@@ -93,7 +93,7 @@ export class TimerService {
         },
       });
       
-      // emit challenge update to frontend so ChallengeModel gets updated points
+      // Emit challenge update to frontend so ChallengeModel gets updated points
       const updatedChallenge = await this.prisma.challenge.findUniqueOrThrow({
         where: { id: challengeId },
       });
@@ -102,7 +102,7 @@ export class TimerService {
       }
     }
 
-    //schedule warnings and auto-completion if not in e2e testing
+    // Schedule warnings and auto-completion if not in e2e testing
     if (!process.env.TESTING_E2E) {
       await this.scheduleWarnings(challengeId, userId, endTime);
       const completion_delay = endTime.getTime() - Date.now();
@@ -130,7 +130,7 @@ export class TimerService {
     });
 
     if (!timer) {
-      // timer already deleted/completed
+      // Timer already deleted/completed
       console.log(`Warning: Timer not found for challenge ${challengeId}, userId ${userId}. Scheduled completion may be stale.`);
       return {
         timerId: '',
@@ -148,7 +148,7 @@ export class TimerService {
       },
     });
 
-    //complete the challenge, send to client service -
+    // Complete the challenge, send to client service -
     await this.clientService.sendEvent(
       [`user/${userId}`],
       'challengeCompleted',
@@ -190,7 +190,7 @@ export class TimerService {
       throw new Error('Challenge not found');
     }
 
-    // calculate extension cost from challenge's original base points: 25% of original base points
+    // Calculate extension cost from challenge's original base points: 25% of original base points
     const extensionCost = this.calculateExtensionCost(timer.originalBasePoints);
 
     const newExtensionsUsed = timer.extensionsUsed + 1;
@@ -198,7 +198,7 @@ export class TimerService {
     const currentEndTime = timer.endTime || new Date();
     const newEndTime = new Date(currentEndTime.getTime() + EXTENSION_LENGTH);
 
-    // update timer with new end time, increment extensions used, set status back to ACTIVE, and reset warnings
+    // Update timer with new end time, increment extensions used, set status back to ACTIVE, and reset warnings
     await this.prisma.challengeTimer.update({
       where: { id: timer.id },
       data: { 
@@ -209,7 +209,7 @@ export class TimerService {
       },
     });
 
-    // reschedule warnings and auto-completion for the extended timer
+    // Reschedule warnings and auto-completion for the extended timer
     if (!process.env.TESTING_E2E) {
       await this.scheduleWarnings(challengeId, userId, newEndTime);
       const completion_delay = newEndTime.getTime() - Date.now();
@@ -254,12 +254,12 @@ export class TimerService {
     const milestones = timer.warningMilestones;
     const EARLY_BUFFER_MS = 2000; // 2 seconds early to compensate for delays
 
-    // calculate actual time remaining (in seconds) from endTime, accounting for extensions
+    // Calculate actual time remaining (in seconds) from endTime, accounting for extensions
     const now = new Date();
     const actualTimeRemaining = Math.max(0, Math.floor((endTime.getTime() - now.getTime()) / 1000));
 
     for (const milestone of milestones) {
-      // don't schedule warnings if the actual time remaining is shorter than the milestone
+      // Don't schedule warnings if the actual time remaining is shorter than the milestone
       if (milestone > actualTimeRemaining) {
         continue;
       }
@@ -267,9 +267,9 @@ export class TimerService {
       const warningTime = new Date(endTime.getTime() - milestone * 1000 - EARLY_BUFFER_MS);
 
       if (warningTime > now) {
-        const delay = warningTime.getTime() - now.getTime(); //how long until warning should be sent
+        const delay = warningTime.getTime() - now.getTime(); // How long until warning should be sent
         setTimeout(async () => {
-          // send warning if delay is > 0
+          // Send warning if delay is > 0
           await this.sendWarning(challengeId, userId, milestone);
         }, delay);
       }

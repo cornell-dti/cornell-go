@@ -18,7 +18,7 @@ export interface TimerExtendedDto {
 export interface TimerCompletedDto {
   timerId: string;
   challengeId: string;
-  challengeCompleted: boolean; //true if completed, false if failed
+  challengeCompleted: boolean; // true if completed, false if failed
 }
 
 export interface ExtendTimerDto {
@@ -32,6 +32,6 @@ export interface StartChallengeTimerDto {
 
 export interface TimerWarningDto {
   challengeId: string;
-  milestone: number; //milestone (300s passed, 60s passed, 30s passed)
-  timeRemaining: number; //seconds remaining
+  milestone: number; // milestone (300s passed, 60s passed, 30s passed)
+  timeRemaining: number; // seconds remaining
 }
