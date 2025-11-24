@@ -45,6 +45,8 @@ export class TimerService {
     
     // use originalBasePoints from existing timer if available
     const originalBasePoints = existingTimer?.originalBasePoints || challenge.points;
+    // preserve extensionsUsed from existing timer (don't reset on timer restart)
+    const preservedExtensionsUsed = existingTimer?.extensionsUsed || 0;
     
     // uses upsert to handle existing timers (e.g., if user reopens challenge)
     const timer = await this.prisma.challengeTimer.upsert({
@@ -55,12 +57,12 @@ export class TimerService {
         },
       },
       update: {
-        // reset timer if it already exists
+        // reset timer if it already exists, but preserve extensionsUsed
         timerLength: challenge.timerLength,
         startTime: new Date(),
         endTime: endTime,
         currentStatus: ChallengeTimerStatus.ACTIVE,
-        extensionsUsed: 0, //reset extensions when restarting timer
+        extensionsUsed: preservedExtensionsUsed, 
         warningMilestones: [300, 60, 30],
         warningMilestonesSent: [],
         lastWarningSent: null,
@@ -113,6 +115,7 @@ export class TimerService {
       timerId: timer.id,
       endTime: endTime.toISOString(),
       challengeId: challengeId,
+      extensionsUsed: timer.extensionsUsed,
     };
   }
 

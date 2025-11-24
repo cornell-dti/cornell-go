@@ -32,7 +32,8 @@ class TimerModel extends ChangeNotifier {
       _currentChallengeId = event.challengeId;
       _endTime = DateTime.parse(event.endTime);
       _isActive = true;
-      _extensionsUsed = 0; // Reset extensions when timer starts
+      _extensionsUsed =
+          event.extensionsUsed; // Preserve extensions from backend
       notifyListeners();
     });
 

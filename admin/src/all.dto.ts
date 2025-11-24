@@ -313,6 +313,7 @@ export interface TimerStartedDto {
   timerId: string;
   endTime: string;
   challengeId: string;
+  extensionsUsed: number;
 }
 
 export interface TimerExtendedDto {

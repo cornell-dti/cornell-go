@@ -37,6 +37,7 @@ export class TimerGateway {
       timerId: timer.timerId,
       endTime: timer.endTime,
       challengeId: timer.challengeId,
+      extensionsUsed: timer.extensionsUsed,
     });
     // console.log(`[TimerGateway] timerStarted event sent to user/${user.id}`);
     return timer.timerId;
