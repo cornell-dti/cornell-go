@@ -35,7 +35,18 @@ export class TimerService {
     }
     const endTime = this.calculateEndTime(challenge, 0);
     
-    //uses upsert to handle existing timers (e.g., if user reopens challenge)
+    // check if timer already exists to get originalBasePoints 
+    const existingTimer = await this.prisma.challengeTimer.findFirst({
+      where: {
+        userId: userId,
+        challengeId: challengeId,
+      },
+    });
+    
+    // use originalBasePoints from existing timer if available
+    const originalBasePoints = existingTimer?.originalBasePoints || challenge.points;
+    
+    // uses upsert to handle existing timers (e.g., if user reopens challenge)
     const timer = await this.prisma.challengeTimer.upsert({
       where: {
         userId_challengeId: {
@@ -44,13 +55,12 @@ export class TimerService {
         },
       },
       update: {
-        //reset timer if it already exists
+        // reset timer if it already exists
         timerLength: challenge.timerLength,
         startTime: new Date(),
         endTime: endTime,
         currentStatus: ChallengeTimerStatus.ACTIVE,
         extensionsUsed: 0, //reset extensions when restarting timer
-        originalBasePoints: challenge.points, //store original base points
         warningMilestones: [300, 60, 30],
         warningMilestonesSent: [],
         lastWarningSent: null,
@@ -69,6 +79,26 @@ export class TimerService {
         lastWarningSent: null,
       },
     });
+
+    console.log('timer original base points', timer.originalBasePoints);
+    
+    // restore challenge points to original value when restarting timer
+    if (challenge.points !== originalBasePoints) {
+      await this.prisma.challenge.update({
+        where: { id: challengeId },
+        data: {
+          points: originalBasePoints,
+        },
+      });
+      
+      // emit challenge update to frontend so ChallengeModel gets updated points
+      const updatedChallenge = await this.prisma.challenge.findUniqueOrThrow({
+        where: { id: challengeId },
+      });
+      if (updatedChallenge) {
+        await this.challengeService.emitUpdateChallengeData(updatedChallenge, false);
+      }
+    }
 
     //schedule warnings and auto-completion if not in e2e testing
     if (!process.env.TESTING_E2E) {
@@ -158,35 +188,33 @@ export class TimerService {
     const newExtensionsUsed = timer.extensionsUsed + 1;
     const newEndTime = this.calculateEndTime(challenge, newExtensionsUsed);
 
-    // update timer with new end time and increment extensions used
+    // update timer with new end time, increment extensions used, set status back to ACTIVE, and reset warnings
     await this.prisma.challengeTimer.update({
       where: { id: timer.id },
       data: { 
         endTime: newEndTime,
         extensionsUsed: newExtensionsUsed,
+        currentStatus: ChallengeTimerStatus.ACTIVE, 
+        warningMilestonesSent: [],
       },
     });
 
-    // update challenge points - deduct extension cost
-    await this.prisma.challenge.update({
-      where: { id: challengeId },
-      data: {
-        points: { decrement: extensionCost },
-      },
-    });
-
-    // emit challenge update to frontend so ChallengeModel gets updated points
-    const updatedChallenge = await this.prisma.challenge.findUniqueOrThrow({
-      where: { id: challengeId },
-    });
-    if (updatedChallenge) {
-      await this.challengeService.emitUpdateChallengeData(updatedChallenge, false);
+    // reschedule warnings and auto-completion for the extended timer
+    if (!process.env.TESTING_E2E) {
+      await this.scheduleWarnings(challengeId, userId, newEndTime);
+      const completion_delay = newEndTime.getTime() - Date.now();
+      if (completion_delay > 0) {
+        setTimeout(async () => {
+          await this.completeTimer(challengeId, userId);
+        }, completion_delay);
+      }
     }
 
     return {
       timerId: timer.id,
       challengeId: challengeId,
       newEndTime: newEndTime.toISOString(),
+      extensionsUsed: newExtensionsUsed,
     };
   }
 
@@ -311,19 +339,35 @@ export class TimerService {
     });
 
     if (!timer) {
+      console.log('canExtendTimer: Timer not found');
       return false;
     }
-    if (timer.currentStatus != ChallengeTimerStatus.ACTIVE) {
+    if (timer.currentStatus != ChallengeTimerStatus.ACTIVE && 
+        timer.currentStatus != ChallengeTimerStatus.COMPLETED) {
+      console.log(`canExtendTimer: Timer status is ${timer.currentStatus}, must be ACTIVE or COMPLETED`);
       return false;
     }
     
     // Use original base points stored in timer (not current challenge.points which may be decremented)
     const extensionCost = this.calculateExtensionCost(timer.originalBasePoints);
+    console.log('extensionCost', extensionCost);
     
     // Calculate remaining points: original base points - (extensions used * cost per extension)
     const remainingPoints = timer.originalBasePoints - (timer.extensionsUsed * extensionCost);
+    console.log('remainingPoints', remainingPoints);
+    
+    console.log('canExtendTimer debug:', {
+      timerId: timer.id,
+      originalBasePoints: timer.originalBasePoints,
+      extensionsUsed: timer.extensionsUsed,
+      extensionCost,
+      remainingPoints,
+      challengePoints: challenge.points,
+      canExtend: remainingPoints >= extensionCost,
+    });
     
     if (remainingPoints < extensionCost) {
+      console.log(`canExtendTimer: Insufficient points. Remaining: ${remainingPoints}, Required: ${extensionCost}`);
       return false;
     }
     return true;

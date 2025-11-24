@@ -60,6 +60,23 @@ export class ChallengeService {
     return award;
   }
 
+  /**
+   * Calculate extension-adjusted points
+   * Each extension costs 25% of original base points
+   * Formula: originalBasePoints - (extensionsUsed * 0.25 * originalBasePoints)
+   */
+  private calculateExtensionAdjustedPoints(
+    originalBasePoints: number,
+    extensionsUsed: number,
+  ): number {
+    const EXTENSION_COST = 0.25; // 25% per extension
+    const totalDeduction = extensionsUsed * EXTENSION_COST * originalBasePoints;
+    const adjustedPoints = originalBasePoints - totalDeduction;
+    
+    // Ensure points don't go below 0
+    return Math.max(0, Math.floor(adjustedPoints));
+  }
+
   /** Get challenges with prev challenges for a given user */
   async getChallengesByIdsForAbility(
     ability: AppAbility,
@@ -161,8 +178,25 @@ export class ChallengeService {
 
     const nextChallenge = await this.nextChallenge(eventTracker);
 
+    // get timer information to account for extensions
+    const timer = await this.prisma.challengeTimer.findFirst({
+      where: {
+        userId: user.id,
+        challengeId: eventTracker.curChallengeId,
+      },
+    });
+
+    // use originalBasePoints from timer if available, otherwise use current challenge points
+    const originalBasePoints = timer?.originalBasePoints || curChallenge.points;
+    const extensionsUsed = timer?.extensionsUsed || 0;
+
+    // apply extension deduction, then apply hint adjustment
+    const extensionAdjustedPoints = this.calculateExtensionAdjustedPoints(
+      originalBasePoints,
+      extensionsUsed,
+    );
     const deltaScore = this.calculateHintAdjustedPoints(
-      curChallenge.points,
+      extensionAdjustedPoints,
       eventTracker.hintsUsed,
     );
 

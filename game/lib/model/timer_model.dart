@@ -14,12 +14,14 @@ class TimerModel extends ChangeNotifier {
   String? _currentChallengeId;
   DateTime? _endTime;
   bool _isActive = false;
+  int _extensionsUsed = 0; // Track extensions used for current challenge
 
   //getter functions
   String? get currentTimerId => _currentTimerId;
   String? get currentChallengeId => _currentChallengeId;
   DateTime? get endTime => _endTime;
   bool get isActive => _isActive;
+  int get extensionsUsed => _extensionsUsed;
 
   TimerModel(ApiClient client) : _client = client {
     //listen for TimerStartedDto from backend
@@ -30,6 +32,7 @@ class TimerModel extends ChangeNotifier {
       _currentChallengeId = event.challengeId;
       _endTime = DateTime.parse(event.endTime);
       _isActive = true;
+      _extensionsUsed = 0; // Reset extensions when timer starts
       notifyListeners();
     });
 
@@ -37,6 +40,8 @@ class TimerModel extends ChangeNotifier {
     client.clientApi.timerExtendedStream.listen((event) {
       if (event.challengeId == _currentChallengeId) {
         _endTime = DateTime.parse(event.newEndTime);
+        _isActive = true; // Reactivate timer when extended
+        _extensionsUsed = event.extensionsUsed; // Update extensions count
         notifyListeners();
       }
     });
@@ -62,6 +67,7 @@ class TimerModel extends ChangeNotifier {
       _currentChallengeId = null;
       _endTime = null;
       _isActive = false;
+      _extensionsUsed = 0; // Reset extensions when disconnected
       notifyListeners();
     });
   }
@@ -74,7 +80,6 @@ class TimerModel extends ChangeNotifier {
         ?.startChallengeTimer(StartChallengeTimerDto(challengeId: challengeId));
   }
 
-  
   // tries to extend timer: returns null if success, error message if fail (frontend displays error message)
   Future<String?> extendTimer(
       String challengeId, DateTime currentEndTime) async {
@@ -94,8 +99,7 @@ class TimerModel extends ChangeNotifier {
     extendedSubscription =
         _client.clientApi.timerExtendedStream.listen((event) {
       if (event.challengeId == challengeId && !completer.isCompleted) {
-        completer.complete(
-            null); 
+        completer.complete(null);
       }
     });
 
@@ -122,7 +126,7 @@ class TimerModel extends ChangeNotifier {
       }
 
       final errorMessage = await completer.future;
-      return errorMessage; 
+      return errorMessage;
     } finally {
       // clean up
       timeoutTimer.cancel();

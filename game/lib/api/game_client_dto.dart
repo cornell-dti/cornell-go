@@ -1577,6 +1577,7 @@ class TimerExtendedDto {
     fields['timerId'] = timerId;
     fields['challengeId'] = challengeId;
     fields['newEndTime'] = newEndTime;
+    fields['extensionsUsed'] = extensionsUsed;
     return fields;
   }
 
@@ -1584,23 +1585,27 @@ class TimerExtendedDto {
     timerId = fields["timerId"];
     challengeId = fields["challengeId"];
     newEndTime = fields["newEndTime"];
+    extensionsUsed = fields["extensionsUsed"];
   }
 
   void partialUpdate(TimerExtendedDto other) {
     timerId = other.timerId;
     challengeId = other.challengeId;
     newEndTime = other.newEndTime;
+    extensionsUsed = other.extensionsUsed;
   }
 
   TimerExtendedDto({
     required this.timerId,
     required this.challengeId,
     required this.newEndTime,
+    required this.extensionsUsed,
   });
 
   late String timerId;
   late String challengeId;
   late String newEndTime;
+  late int extensionsUsed;
 }
 
 class TimerCompletedDto {

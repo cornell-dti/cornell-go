@@ -56,6 +56,7 @@ export class TimerGateway {
         timerId: timer.timerId,
         challengeId: timer.challengeId,
         newEndTime: timer.newEndTime,
+        extensionsUsed: timer.extensionsUsed,
       });
       return timer.timerId;
     } catch (error) {

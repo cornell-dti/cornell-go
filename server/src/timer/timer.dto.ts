@@ -12,6 +12,7 @@ export interface TimerExtendedDto {
   timerId: string;
   challengeId: string;
   newEndTime: string;
+  extensionsUsed: number;
 }
 export interface TimerCompletedDto {
   timerId: string;
