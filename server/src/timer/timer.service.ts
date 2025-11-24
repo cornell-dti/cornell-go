@@ -252,16 +252,19 @@ export class TimerService {
     }
 
     const milestones = timer.warningMilestones;
-    const EARLY_BUFFER_MS = 1500; // 2 seconds early to compensate for delays
+    const EARLY_BUFFER_MS = 2000; // 2 seconds early to compensate for delays
+
+    // calculate actual time remaining (in seconds) from endTime, accounting for extensions
+    const now = new Date();
+    const actualTimeRemaining = Math.max(0, Math.floor((endTime.getTime() - now.getTime()) / 1000));
 
     for (const milestone of milestones) {
-      // don't schedule warnings if timer is shorter than warnings
-      if (milestone > timer.timerLength) {
+      // don't schedule warnings if the actual time remaining is shorter than the milestone
+      if (milestone > actualTimeRemaining) {
         continue;
       }
 
       const warningTime = new Date(endTime.getTime() - milestone * 1000 - EARLY_BUFFER_MS);
-      const now = new Date();
 
       if (warningTime > now) {
         const delay = warningTime.getTime() - now.getTime(); //how long until warning should be sent
