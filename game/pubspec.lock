@@ -1170,14 +1170,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.4"
-  timerun:
-    dependency: "direct main"
-    description:
-      name: timerun
-      sha256: eaacf896dd5f744520754a0df54e9875778d482112d38bf147f0b068825d2e7a
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.8.3"
   tuple:
     dependency: "direct main"
     description:
