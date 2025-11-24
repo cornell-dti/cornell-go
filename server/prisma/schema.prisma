@@ -206,6 +206,7 @@ model PrevChallenge {
   tracker      EventTracker @relation(fields: [trackerId], references: [id], onDelete: Cascade)
   trackerId    String
   hintsUsed    Int
+  extensionsUsed Int          @default(0)
   timestamp    DateTime     @default(now())
 }
 

@@ -160,6 +160,15 @@ export class ChallengeService {
       return null;
     }
 
+    // get timer information to account for extensions (before creating PrevChallenge)
+    const timer = await this.prisma.challengeTimer.findFirst({
+      where: {
+        userId: user.id,
+        challengeId: eventTracker.curChallengeId,
+      },
+    });
+    const extensionsUsed = timer?.extensionsUsed || 0;
+
     await this.prisma.prevChallenge.create({
       data: {
         userId: user.id,
@@ -169,6 +178,7 @@ export class ChallengeService {
         },
         trackerId: eventTracker.id,
         hintsUsed: eventTracker.hintsUsed,
+        extensionsUsed: extensionsUsed,
       },
     });
 
@@ -178,17 +188,8 @@ export class ChallengeService {
 
     const nextChallenge = await this.nextChallenge(eventTracker);
 
-    // get timer information to account for extensions
-    const timer = await this.prisma.challengeTimer.findFirst({
-      where: {
-        userId: user.id,
-        challengeId: eventTracker.curChallengeId,
-      },
-    });
-
     // use originalBasePoints from timer if available, otherwise use current challenge points
     const originalBasePoints = timer?.originalBasePoints || curChallenge.points;
-    const extensionsUsed = timer?.extensionsUsed || 0;
 
     // apply extension deduction, then apply hint adjustment
     const extensionAdjustedPoints = this.calculateExtensionAdjustedPoints(

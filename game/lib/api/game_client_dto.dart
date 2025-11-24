@@ -1031,6 +1031,9 @@ class PrevChallengeDto {
     Map<String, dynamic> fields = {};
     fields['challengeId'] = challengeId;
     fields['hintsUsed'] = hintsUsed;
+    if (extensionsUsed != null) {
+      fields['extensionsUsed'] = extensionsUsed;
+    }
     fields['dateCompleted'] = dateCompleted;
     return fields;
   }
@@ -1038,23 +1041,30 @@ class PrevChallengeDto {
   PrevChallengeDto.fromJson(Map<String, dynamic> fields) {
     challengeId = fields["challengeId"];
     hintsUsed = fields["hintsUsed"];
+    extensionsUsed = fields.containsKey('extensionsUsed')
+        ? (fields["extensionsUsed"])
+        : null;
     dateCompleted = fields["dateCompleted"];
   }
 
   void partialUpdate(PrevChallengeDto other) {
     challengeId = other.challengeId;
     hintsUsed = other.hintsUsed;
+    extensionsUsed =
+        other.extensionsUsed == null ? extensionsUsed : other.extensionsUsed;
     dateCompleted = other.dateCompleted;
   }
 
   PrevChallengeDto({
     required this.challengeId,
     required this.hintsUsed,
+    this.extensionsUsed,
     required this.dateCompleted,
   });
 
   late String challengeId;
   late int hintsUsed;
+  late int? extensionsUsed;
   late String dateCompleted;
 }
 

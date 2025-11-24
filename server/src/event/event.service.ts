@@ -423,6 +423,7 @@ export class EventService {
       prevChallenges: prevChallenges.map(pc => ({
         challengeId: pc.challengeId,
         hintsUsed: pc.hintsUsed,
+        extensionsUsed: pc.extensionsUsed ?? 0, // Default to 0 for backwards compatibility
         dateCompleted: pc.timestamp.toUTCString(),
       })),
     };
