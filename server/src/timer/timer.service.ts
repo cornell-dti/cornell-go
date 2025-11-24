@@ -255,6 +255,11 @@ export class TimerService {
     const EARLY_BUFFER_MS = 1500; // 2 seconds early to compensate for delays
 
     for (const milestone of milestones) {
+      // don't schedule warnings if timer is shorter than warnings
+      if (milestone > timer.timerLength) {
+        continue;
+      }
+
       const warningTime = new Date(endTime.getTime() - milestone * 1000 - EARLY_BUFFER_MS);
       const now = new Date();
 
