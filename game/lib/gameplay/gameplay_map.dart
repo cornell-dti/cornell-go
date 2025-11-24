@@ -71,7 +71,8 @@ class GameplayMap extends StatefulWidget {
   State<GameplayMap> createState() => _GameplayMapState();
 }
 
-class _GameplayMapState extends State<GameplayMap> {
+class _GameplayMapState extends State<GameplayMap>
+    with SingleTickerProviderStateMixin {
   final METERS_TO_DEGREES = 111139;
   final EXTENSION_TIME = 300; // 5 minutes (300 seconds)
 
@@ -146,7 +147,9 @@ class _GameplayMapState extends State<GameplayMap> {
   // Timer: overlay entry for Time's Up message when timer expires
   OverlayEntry? _timerModalOverlay;
   bool _timerModalShowing = false; //flag to prevent multiple overlays
-
+  AnimationController? _extensionAnimationController; // Animation controller for extension button countdown
+  Animation<double>? _extensionAnimation; // Animation value from 1.0 to 0.0
+  static const int EXTENSION_CHOICE_TIME = 10; // 10 seconds to choose whether or not to extend a timer
   // Timer: current warning overlay entry for Niki warning the user of how much time is left
   OverlayEntry? _timerWarningOverlay;
 
@@ -474,6 +477,7 @@ class _GameplayMapState extends State<GameplayMap> {
     _timerCompletedSubscription?.cancel(); //cancel timer completion listener
     _timerExtendedSubscription?.cancel(); //cancel timer extension listener
     _timerWarningSubscription?.cancel(); //cancel timer warning listener
+    _extensionAnimationController?.dispose(); //dispose extension animation controller
     super.dispose();
   }
 
@@ -1134,8 +1138,7 @@ class _GameplayMapState extends State<GameplayMap> {
                         height: MediaQuery.of(context).size.height * 0.04,
                         decoration: BoxDecoration(
                           color: _showWarningColors
-                              ? Color.fromARGB(
-                                  204, 0, 0, 0)
+                              ? Color.fromARGB(204, 0, 0, 0)
                               : (currentTime < 300
                                   ? Color.fromARGB(
                                       255, 237, 86, 86) // red when < 5 min left
@@ -1347,11 +1350,21 @@ class _GameplayMapState extends State<GameplayMap> {
     _timerExtendedSubscription =
         client.clientApi.timerExtendedStream.listen((event) {
       if (event.challengeId == widget.challengeId && mounted) {
-        // Update timer display when timer is extended
+        // update timer display when timer is extended
+        final timerModel = Provider.of<TimerModel>(context, listen: false);
+        final newTimeRemaining = timerModel.getTimeRemaining();
+
         setState(() {
           hasTimer = true;
           totalTime +=
               EXTENSION_TIME; // Add 5 minutes (300 seconds) to total time for extension
+          // update currentTime to reflect the new time remaining after extension
+          if (newTimeRemaining != null) {
+            currentTime = newTimeRemaining.toDouble();
+          }
+          // reset warning colors when timer is extended
+          _showWarningColors = false;
+          _hasStartedFlashing = false;
         });
         // restart timer updates if they were stopped
         if (!_periodicTimerStarted) {
@@ -1372,6 +1385,29 @@ class _GameplayMapState extends State<GameplayMap> {
 
     _timerUpdateTimer?.cancel();
     _periodicTimerStarted = false;
+
+    // start animation for extension choice countdown
+    _extensionAnimationController?.dispose();
+    _extensionAnimationController = AnimationController(
+      vsync: this,
+      duration: Duration(seconds: EXTENSION_CHOICE_TIME),
+    );
+    _extensionAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
+      CurvedAnimation(
+        parent: _extensionAnimationController!,
+        curve: Curves.linear,
+      ),
+    );
+
+    // listen to animation updates to rebuild overlay
+    _extensionAnimationController!.addListener(() {
+      if (mounted && _timerModalShowing && _timerModalOverlay != null) {
+        _timerModalOverlay!.markNeedsBuild();
+      }
+    });
+
+    // start the animation
+    _extensionAnimationController!.forward();
 
     // add time's up overlay
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -1409,6 +1445,9 @@ class _GameplayMapState extends State<GameplayMap> {
       }
       _timerModalOverlay = null;
     }
+    _extensionAnimationController?.dispose();
+    _extensionAnimationController = null;
+    _extensionAnimation = null;
     _timerModalShowing = false;
   }
 
@@ -1518,53 +1557,102 @@ class _GameplayMapState extends State<GameplayMap> {
                     ),
                   ),
                   SizedBox(width: screenWidth * 0.033), //~13px
-                  // Extension button (width 200px, height 40px)
+                  // Extension button (width 200px, height 40px) with sliding color indicator
                   SizedBox(
                     width: screenWidth * 0.478, // ~187px
                     height: screenHeight * 0.047, // ~40px
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        final success = await _extendTimer();
-                        if (success) {
-                          _removeTimerModal(); // Close modal if timer extended successfully; otherwise leave open for user to return home/retry extending timer
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color.fromARGB(255, 237, 86, 86),
-                        padding: EdgeInsets.only(
-                          left: screenWidth * 0.010, //~4px
-                          right: screenWidth * 0.020, //~8px
-                          top: screenHeight * 0.011, //~9px
-                          bottom: screenHeight * 0.011, //~9px
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                              screenWidth * 0.025), //~10px
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text("+ 5 Min for ",
-                              style: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: screenWidth * 0.033, //~13px
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white)),
-                          SvgPicture.asset('assets/icons/bearcoins.svg',
-                              width: screenWidth * 0.041, //~16px
-                              height: screenWidth * 0.041),
-                          Flexible(
-                            child: Text(" ${(widget.points * 0.25).floor()} Pt",
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                    fontFamily: 'Poppins',
-                                    fontSize: screenWidth * 0.033, //~13px
-                                    color: Color(0xFFFFC737))),
+                    child: Stack(
+                      children: [
+                        // Base container with faded color (full size, always visible)
+                        Positioned.fill(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Color(0xFFF08988), // Faded color
+                              borderRadius: BorderRadius.circular(
+                                  screenWidth * 0.025), //~10px
+                            ),
                           ),
-                        ],
-                      ),
+                        ),
+                        // Overlay with normal red color that shrinks from right to left
+                        if (_extensionAnimationController?.status !=
+                            AnimationStatus.completed)
+                          Positioned.fill(
+                            child: IgnorePointer(
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(
+                                    screenWidth * 0.025), //~10px
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: FractionallySizedBox(
+                                    widthFactor:
+                                        _extensionAnimation?.value ?? 0.0,
+                                    child: Container(
+                                      color: Color.fromARGB(
+                                          255, 237, 86, 86), // Normal red
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        Positioned.fill(
+                          child: ElevatedButton(
+                            onPressed: _extensionAnimationController?.status ==
+                                    AnimationStatus.completed
+                                ? () {
+                                    displayToast(
+                                        "Sorry, time has run out to choose the extension. Please Return Home.",
+                                        Status.error);
+                                  }
+                                : () async {
+                                    final success = await _extendTimer();
+                                    if (success) {
+                                      _removeTimerModal(); // close modal if timer extended successfully; otherwise leave open for user to return home/retry extending timer
+                                    }
+                                  },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors
+                                  .transparent,
+                              shadowColor: Colors.transparent,
+                              elevation: 0,
+                              padding: EdgeInsets.only(
+                                left: screenWidth * 0.010, //~4px
+                                right: screenWidth * 0.020, //~8px
+                                top: screenHeight * 0.011, //~9px
+                                bottom: screenHeight * 0.011, //~9px
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(
+                                    screenWidth * 0.025), //~10px
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text("+ 5 Min for ",
+                                    style: TextStyle(
+                                        fontFamily: 'Poppins',
+                                        fontSize: screenWidth * 0.033, //~13px
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white)),
+                                SvgPicture.asset('assets/icons/bearcoins.svg',
+                                    width: screenWidth * 0.041, //~16px
+                                    height: screenWidth * 0.041),
+                                Flexible(
+                                  child: Text(
+                                      " ${(widget.points * 0.25).floor()} Pt",
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                          fontFamily: 'Poppins',
+                                          fontSize: screenWidth * 0.033, //~13px
+                                          color: Color(0xFFFFC737))),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -1807,28 +1895,33 @@ class CircleSliceTimer extends CustomPainter {
 
     canvas.drawCircle(center, size.width / 2, outerCirclePaint);
 
-    Paint innerCirclePaint = Paint()
+    final innerRadius = 7.0;
+
+    //draw white background circle first (full circle - remaining time)
+    Paint whiteCirclePaint = Paint()
       ..color = iconColor
       ..style = PaintingStyle.fill;
 
-    //inner white circle
-    final innerRadius = 7.0;
-    canvas.drawCircle(center, innerRadius, innerCirclePaint);
+    canvas.drawCircle(center, innerRadius, whiteCirclePaint);
 
-    //draw gray arc that covers the inner circle as time decreases
-    Paint arcPaint = Paint()
-      ..color = Color.fromARGB(255, 64, 64, 61)
-      ..style = PaintingStyle.fill;
+    //draw gray arc on top showing elapsed time (grows clockwise from top)
+    // elapsed progress = 1.0 - progress (how much time has passed)
+    double elapsedProgress = 1.0 - progress;
+    if (elapsedProgress > 0) {
+      Paint grayArcPaint = Paint()
+        ..color = Color.fromARGB(255, 64, 64, 61)
+        ..style = PaintingStyle.fill;
 
-    double sweepAngle = 2 * pi * (1.0 - progress);
+      double sweepAngle = 2 * pi * elapsedProgress;
 
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: innerRadius),
-      -pi / 2,
-      sweepAngle,
-      true,
-      arcPaint,
-    );
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: innerRadius),
+        -pi / 2,
+        sweepAngle,
+        true,
+        grayArcPaint,
+      );
+    }
   }
 
   @override
