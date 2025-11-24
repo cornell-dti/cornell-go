@@ -189,7 +189,9 @@ export class TimerService {
     const extensionCost = this.calculateExtensionCost(timer.originalBasePoints);
 
     const newExtensionsUsed = timer.extensionsUsed + 1;
-    const newEndTime = this.calculateEndTime(challenge, newExtensionsUsed);
+    // Add 5 minutes to the current end time (or current time if timer already expired)
+    const currentEndTime = timer.endTime || new Date();
+    const newEndTime = new Date(currentEndTime.getTime() + EXTENSION_LENGTH);
 
     // update timer with new end time, increment extensions used, set status back to ACTIVE, and reset warnings
     await this.prisma.challengeTimer.update({
