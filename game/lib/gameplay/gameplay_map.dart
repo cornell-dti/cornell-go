@@ -119,6 +119,8 @@ class _GameplayMapState extends State<GameplayMap> {
   int _waitCount = 0; //counts how long we've been waiting for backend
   static const int _maxWaitTime =
       10; //max time in seconds to wait for backend to respond
+  bool _showWarningColors = false; // show warning colors when 5 seconds left
+  bool _hasStartedFlashing = false; // track if flashing animation has started
 
   int totalHints = 3;
   int numHintsLeft = 10;
@@ -346,6 +348,24 @@ class _GameplayMapState extends State<GameplayMap> {
       final minutesStr = minutes.toString().padLeft(2, '0');
       final secondsStr = seconds.toString().padLeft(2, '0');
 
+      // Start flashing when 5 seconds left: flash twice then stay on
+      if (timeRemaining <= 5 && !_hasStartedFlashing) {
+        _hasStartedFlashing = true;
+        setState(() => _showWarningColors = true);
+        Future.delayed(Duration(milliseconds: 300), () {
+          if (mounted) setState(() => _showWarningColors = false);
+        });
+        Future.delayed(Duration(milliseconds: 600), () {
+          if (mounted) setState(() => _showWarningColors = true);
+        });
+        Future.delayed(Duration(milliseconds: 900), () {
+          if (mounted) setState(() => _showWarningColors = false);
+        });
+        Future.delayed(Duration(milliseconds: 1200), () {
+          if (mounted) setState(() => _showWarningColors = true);
+        });
+      }
+
       setState(() {
         timeLeft = "$minutesStr:$secondsStr";
         currentTime = timeRemaining.toDouble();
@@ -393,6 +413,8 @@ class _GameplayMapState extends State<GameplayMap> {
       totalTime = 0;
       _periodicTimerStarted = false;
       _waitCount = 0;
+      _showWarningColors = false;
+      _hasStartedFlashing = false;
     });
 
     //cancel any existing timer
@@ -1111,11 +1133,14 @@ class _GameplayMapState extends State<GameplayMap> {
                         width: MediaQuery.of(context).size.width * 0.20,
                         height: MediaQuery.of(context).size.height * 0.04,
                         decoration: BoxDecoration(
-                          color: currentTime < 300
-                              ? Color.fromARGB(255, 237, 86,
-                                  86) //timer is red when < 5 min left
-                              : Color.fromARGB(
-                                  255, 64, 64, 61), //grey color > 5 min left
+                          color: _showWarningColors
+                              ? Color.fromARGB(
+                                  204, 0, 0, 0)
+                              : (currentTime < 300
+                                  ? Color.fromARGB(
+                                      255, 237, 86, 86) // red when < 5 min left
+                                  : Color.fromARGB(
+                                      255, 64, 64, 61)), // grey > 5 min left
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
@@ -1142,7 +1167,10 @@ class _GameplayMapState extends State<GameplayMap> {
                               painter: CircleSliceTimer(
                                   progress: totalTime > 0
                                       ? currentTime / totalTime
-                                      : 0.0),
+                                      : 0.0,
+                                  iconColor: _showWarningColors
+                                      ? Color(0xFFFF8080) // #FF8080
+                                      : Colors.white),
                             ),
                           ),
                           // Countdown text
@@ -1151,7 +1179,9 @@ class _GameplayMapState extends State<GameplayMap> {
                             style: TextStyle(
                                 fontSize: 14.0,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.white,
+                                color: _showWarningColors
+                                    ? Color(0xFFFF8080)
+                                    : Colors.white,
                                 decoration: TextDecoration.none),
                           ),
                         ],
@@ -1761,8 +1791,9 @@ class _GameplayMapState extends State<GameplayMap> {
  * */
 class CircleSliceTimer extends CustomPainter {
   final double progress;
+  final Color iconColor;
 
-  CircleSliceTimer({required this.progress});
+  CircleSliceTimer({required this.progress, this.iconColor = Colors.white});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -1770,14 +1801,14 @@ class CircleSliceTimer extends CustomPainter {
 
     //outer circle of timer icon
     Paint outerCirclePaint = Paint()
-      ..color = Colors.white
+      ..color = iconColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.38;
 
     canvas.drawCircle(center, size.width / 2, outerCirclePaint);
 
     Paint innerCirclePaint = Paint()
-      ..color = Colors.white
+      ..color = iconColor
       ..style = PaintingStyle.fill;
 
     //inner white circle
