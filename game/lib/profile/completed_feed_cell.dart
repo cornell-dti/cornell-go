@@ -22,7 +22,8 @@ class CompletedChallengeFull extends StatefulWidget {
   final String date;
   final String location;
   final String difficulty;
-  final int points;
+  final int adjustedPoints;
+  final int originalPoints;
 
   CompletedChallengeFull({
     Key? key,
@@ -32,7 +33,8 @@ class CompletedChallengeFull extends StatefulWidget {
     required this.date,
     required this.location,
     required this.difficulty,
-    required this.points,
+    required this.adjustedPoints,
+    required this.originalPoints,
   }) : super(key: key);
 
   @override
@@ -251,7 +253,12 @@ class _CompletedChallengeFullState extends State<CompletedChallengeFull> {
                                     "assets/icons/bearcoins.svg",
                                     width: 25,
                                   ),
-                                  Text(' ' + widget.points.toString() + " PTS",
+                                  Text(
+                                      ' ' +
+                                          widget.adjustedPoints.toString() +
+                                          "/" +
+                                          widget.originalPoints.toString() +
+                                          " PTS",
                                       style: TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.w500,

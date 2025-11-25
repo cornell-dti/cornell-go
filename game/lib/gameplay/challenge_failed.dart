@@ -9,7 +9,6 @@ import 'package:game/api/game_client_dto.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/tracker_model.dart';
-import 'package:game/model/timer_model.dart';
 import 'package:game/model/group_model.dart';
 import 'package:game/model/challenge_model.dart';
 import 'package:game/utils/utility_functions.dart';
@@ -17,6 +16,9 @@ import 'dart:math';
 
 import 'package:flutter_svg/flutter_svg.dart';
 
+/**
+ * Displays Challenge Failed page
+ */
 class LoadingBar extends StatelessWidget {
   final int totalTasks;
   final int tasksFinished;
@@ -97,57 +99,72 @@ class LoadingBar extends StatelessWidget {
   }
 }
 
-class ChallengeCompletedPage extends StatefulWidget {
+class ChallengeFailedPage extends StatefulWidget {
   final String challengeId;
-  const ChallengeCompletedPage({
+  const ChallengeFailedPage({
     Key? key,
     required this.challengeId,
   }) : super(key: key);
 
   @override
-  State<ChallengeCompletedPage> createState() => _ChallengeCompletedState();
+  State<ChallengeFailedPage> createState() => _ChallengeFailedState();
 }
 
-class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
+class _ChallengeFailedState extends State<ChallengeFailedPage>
+    with SingleTickerProviderStateMixin {
   bool journeyPage = false;
   bool journeyCompleted = false;
+  late AnimationController _lightningController;
+  late Animation<double> _lightningAnimation;
 
   @override
   void initState() {
     super.initState();
+    // Create animation controller for lightning flash (flash twice over 2 seconds)
+    _lightningController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 2000),
+    );
+
+    // Create animation that goes from 0 to 1, with two flashes
+    _lightningAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _lightningController,
+        curve: Curves.easeInOut,
+      ),
+    );
+
+    // Start animation when page loads
+    _lightningController.forward();
+  }
+
+  @override
+  void dispose() {
+    _lightningController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer6<ChallengeModel, EventModel, TrackerModel, TimerModel,
-            ApiClient, GroupModel>(
-        builder: (context, challengeModel, eventModel, trackerModel, timerModel,
-            apiClient, groupModel, _) {
+    return Consumer5<ChallengeModel, EventModel, TrackerModel, ApiClient,
+            GroupModel>(
+        builder: (context, challengeModel, eventModel, trackerModel, apiClient,
+            groupModel, _) {
       var eventId = groupModel.curEventId;
       var event = eventModel.getEventById(eventId ?? "");
       var tracker = trackerModel.trackerByEventId(eventId ?? "");
-      if (tracker == null || tracker.prevChallenges.length == 0) {
+      if (tracker == null) {
         return CircularIndicator();
       }
-      // if (tracker == null) {
-      //   return Text("tracker is null");
-      // }
-      // if (tracker.prevChallenges.length == 0) {
-      //   return Text("tracker prevchallenges has 0 length");
-      // }
-      // if (tracker.prevChallenges.last.challengeId != widget.challengeId) {
-      //   return Text(
-      //       "tracker last completed challenge does not match passed in challenge id");
-      // }
 
-      // if this event is a journey
+      // If this event is a journey
       if ((event?.challenges?.length ?? 0) > 1)
-        // determine whether the journey is done
+        // Determine whether the journey is done
         journeyCompleted =
             tracker.prevChallenges.length == (event?.challenges?.length ?? 0);
 
-      var challenge = challengeModel
-          .getChallengeById(tracker.prevChallenges.last.challengeId);
+      // Use the failed challengeId instead of last completed challenge since challenge failed
+      var challenge = challengeModel.getChallengeById(widget.challengeId);
 
       if (challenge == null) {
         return Scaffold(
@@ -155,12 +172,13 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
         );
       }
 
-      // get extensions used from TimerModel (check if timer was for this challenge)
-      int extensionsUsed = (timerModel.currentChallengeId == challenge.id)
-          ? timerModel.extensionsUsed
-          : 0;
+      // Get hints used for the failed challenge
+      int failedChallengeHintsUsed = 0;
+      if (tracker.curChallengeId == widget.challengeId) {
+        failedChallengeHintsUsed = tracker.hintsUsed;
+      }
 
-      // build list of completed challenge text fields to display later
+      // Build list of completed challenge text fields to display later
       var total_pts = 0;
       List<Widget> completedChallenges = [];
       for (PrevChallengeDto prevChal in tracker.prevChallenges) {
@@ -198,13 +216,81 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
 
       return Scaffold(
           body: Stack(children: [
+        // Black to gray gradient background for sky
+        Container(
+            height: MediaQuery.of(context).size.height,
+            width: MediaQuery.of(context).size.width,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.black,
+                  Color(0xFFD5D5D5),
+                ],
+              ),
+            )),
         Container(
             height: MediaQuery.of(context).size.height,
             width: MediaQuery.of(context).size.width,
             child: SvgPicture.asset(
-              'assets/images/challenge-completed-bg.svg', // Replace with your SVG file path
+              'assets/images/challenge-failed-bg.svg',
               fit: BoxFit.cover,
             )),
+        /** Animated lightning bolts overlay
+         * - Two lightning bolts appear next to the original lightning bolts and flash twice over two seconds
+         * - both flashes are 0.45 seconds long; the opacity changes depending on the time elapsed
+         */
+        AnimatedBuilder(
+          animation: _lightningAnimation,
+          builder: (context, child) {
+            double opacity = 0.0;
+            double progress = _lightningAnimation.value;
+
+            // First flash
+            if (progress < 0.45) {
+              double flash1Progress = progress / 0.45;
+              opacity = flash1Progress < 0.5
+                  ? flash1Progress * 2 // Fade in
+                  : (1.0 - flash1Progress) * 2; // Fade out
+            }
+            // Second flash
+            else if (progress >= 0.55) {
+              double flash2Progress = (progress - 0.55) / 0.45;
+              opacity = flash2Progress < 0.5
+                  ? flash2Progress * 2
+                  : (1.0 - flash2Progress) * 2;
+            }
+
+            return Opacity(
+              opacity: opacity,
+              child: Stack(
+                children: [
+                  // First lightning bolt (positioned at x=271, y=89 in 393x852 viewBox)
+                  Positioned(
+                    left: MediaQuery.of(context).size.width * (271 / 393),
+                    top: MediaQuery.of(context).size.height * (89 / 852),
+                    child: SvgPicture.asset(
+                      'assets/images/lightning_1.svg',
+                      width: 65,
+                      height: 197,
+                    ),
+                  ),
+                  // Second lightning bolt (positioned at x=105, y=135 in 393x852 viewBox)
+                  Positioned(
+                    left: MediaQuery.of(context).size.width * (105 / 393),
+                    top: MediaQuery.of(context).size.height * (135 / 852),
+                    child: SvgPicture.asset(
+                      'assets/images/lightning_2.svg',
+                      width: 39,
+                      height: 118,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
         Container(
             margin: EdgeInsets.only(
                 top: MediaQuery.of(context).size.height * 0.47,
@@ -220,7 +306,7 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                         ? (journeyCompleted
                             ? "Journey Complete"
                             : "Journey in Progress!")
-                        : 'Challenge Complete!',
+                        : 'Challenge Failed!',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 24.0,
@@ -231,10 +317,12 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                 Container(
                   padding: EdgeInsets.only(bottom: 15),
                   child: Text(
-                    challenge.description ?? "NO DESCRIPTION",
+                    "You were unable to find " +
+                        (challenge.description ?? "NO DESCRIPTION") +
+                        ".",
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 14.0,
+                      fontSize: 16.0,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -245,82 +333,9 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                       alignment: Alignment.centerLeft,
                       child: LoadingBar(tracker.prevChallenges.length,
                           event?.challenges?.length ?? 0)),
-                Container(
-                  padding: EdgeInsets.only(left: 30, bottom: 10),
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Points',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
                 if (!journeyPage) ...[
-                  Container(
-                      margin: EdgeInsets.only(left: 30, bottom: 10, right: 30),
-                      child: Row(
-                        children: [
-                          SvgPicture.asset(
-                            'assets/icons/locationCompleted.svg',
-                            fit: BoxFit.cover,
-                          ),
-                          Text(
-                            "   Found Location",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16.0,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Spacer(),
-                          Text(
-                            "+ " +
-                                (challenge.points ?? 0).toString() +
-                                " points",
-                            style:
-                                TextStyle(color: Colors.white, fontSize: 16.0),
-                          ),
-                        ],
-                      )),
-                  if (extensionsUsed > 0)
-                    Container(
-                        margin:
-                            EdgeInsets.only(left: 30, bottom: 10, right: 30),
-                        child: Row(
-                          children: [
-                            SvgPicture.asset(
-                              'assets/icons/timer_icon_purple.svg',
-                              fit: BoxFit.cover,
-                            ),
-                            Text(
-                              "   +${extensionsUsed * 5} Minutes",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16.0,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Spacer(),
-                            Text(
-                              () {
-                                int basePoints = challenge.points ?? 0;
-                                int extensionAdjustedPoints =
-                                    calculateExtensionAdjustedPoints(
-                                        basePoints, extensionsUsed);
-                                int penalty =
-                                    basePoints - extensionAdjustedPoints;
-                                return "- $penalty points";
-                              }(),
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16.0,
-                              ),
-                            ),
-                          ],
-                        )),
-                  if (tracker.prevChallenges.last.hintsUsed > 0)
+                  // Show hint penalty only if hints were used for the failed challenge
+                  if (failedChallengeHintsUsed > 0)
                     Container(
                         margin:
                             EdgeInsets.only(left: 30, bottom: 10, right: 30),
@@ -331,7 +346,7 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                               fit: BoxFit.cover,
                             ),
                             Text(
-                              "   Used ${tracker.prevChallenges.last.hintsUsed} hint${tracker.prevChallenges.last.hintsUsed > 1 ? 's' : ''}",
+                              "   Used $failedChallengeHintsUsed hint${failedChallengeHintsUsed > 1 ? 's' : ''}",
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 16.0,
@@ -343,8 +358,8 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                               () {
                                 int basePoints = challenge.points ?? 0;
                                 int adjustedPoints =
-                                    calculateHintAdjustedPoints(basePoints,
-                                        tracker.prevChallenges.last.hintsUsed);
+                                    calculateHintAdjustedPoints(
+                                        basePoints, failedChallengeHintsUsed);
                                 int penalty = basePoints - adjustedPoints;
                                 return "- $penalty points";
                               }(),
@@ -364,20 +379,8 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                 SizedBox(height: 10),
                 Text(
                   journeyPage
-                      ? "Total Points: " + total_pts.toString()
-                      : "Points Earned: " +
-                          () {
-                            int basePoints = challenge.points ?? 0;
-                            // First apply extension deduction, then hint adjustment
-                            int extensionAdjustedPoints =
-                                calculateExtensionAdjustedPoints(
-                                    basePoints, extensionsUsed);
-                            int finalAdjustedPoints =
-                                calculateHintAdjustedPoints(
-                                    extensionAdjustedPoints,
-                                    tracker.prevChallenges.last.hintsUsed);
-                            return finalAdjustedPoints.toString();
-                          }(),
+                      ? "Points Earned: " + total_pts.toString()
+                      : "Points Earned: " + total_pts.toString(),
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 25.0,

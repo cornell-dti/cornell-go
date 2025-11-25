@@ -102,6 +102,7 @@ export interface EventDto {
 export interface PrevChallengeDto {
   challengeId: string;
   hintsUsed: number;
+  extensionsUsed?: number;
   dateCompleted: string;
 }
 

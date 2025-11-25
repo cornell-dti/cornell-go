@@ -12,6 +12,7 @@ import {
   AchievementTracker,
 } from '@prisma/client';
 import { ClientService } from '../client/client.service';
+import { UserService } from '../user/user.service';
 import { EventService } from '../event/event.service';
 import { AchievementService } from '../achievement/achievement.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -25,7 +26,6 @@ import { accessibleBy } from '@casl/prisma';
 import { Action } from '../casl/action.enum';
 import { subject } from '@casl/ability';
 import { defaultChallengeData } from '../organization/organization.service';
-import { connect } from 'http2';
 
 @Injectable()
 export class ChallengeService {
@@ -36,6 +36,7 @@ export class ChallengeService {
     private achievementService: AchievementService,
     private clientService: ClientService,
     private abilityFactory: CaslAbilityFactory,
+    private userService: UserService,
   ) {}
 
   /**
@@ -57,6 +58,23 @@ export class ChallengeService {
     const award = Math.max(minAllowed, Math.min(rounded, basePoints));
 
     return award;
+  }
+
+  /**
+   * Calculate extension-adjusted points
+   * Each extension costs 25% of original base points
+   * Formula: originalBasePoints - (extensionsUsed * 0.25 * originalBasePoints)
+   */
+  private calculateExtensionAdjustedPoints(
+    originalBasePoints: number,
+    extensionsUsed: number,
+  ): number {
+    const EXTENSION_COST = 0.25; // 25% per extension
+    const totalDeduction = extensionsUsed * EXTENSION_COST * originalBasePoints;
+    const adjustedPoints = originalBasePoints - totalDeduction;
+    
+    // Ensure points don't go below 0
+    return Math.max(0, Math.floor(adjustedPoints));
   }
 
   /** Get challenges with prev challenges for a given user */
@@ -142,6 +160,15 @@ export class ChallengeService {
       return null;
     }
 
+    // get timer information to account for extensions (before creating PrevChallenge)
+    const timer = await this.prisma.challengeTimer.findFirst({
+      where: {
+        userId: user.id,
+        challengeId: eventTracker.curChallengeId,
+      },
+    });
+    const extensionsUsed = timer?.extensionsUsed || 0;
+
     await this.prisma.prevChallenge.create({
       data: {
         userId: user.id,
@@ -151,6 +178,7 @@ export class ChallengeService {
         },
         trackerId: eventTracker.id,
         hintsUsed: eventTracker.hintsUsed,
+        extensionsUsed: extensionsUsed,
       },
     });
 
@@ -160,8 +188,16 @@ export class ChallengeService {
 
     const nextChallenge = await this.nextChallenge(eventTracker);
 
+    // use originalBasePoints from timer if available, otherwise use current challenge points
+    const originalBasePoints = timer?.originalBasePoints || curChallenge.points;
+
+    // apply extension deduction, then apply hint adjustment
+    const extensionAdjustedPoints = this.calculateExtensionAdjustedPoints(
+      originalBasePoints,
+      extensionsUsed,
+    );
     const deltaScore = this.calculateHintAdjustedPoints(
-      curChallenge.points,
+      extensionAdjustedPoints,
       eventTracker.hintsUsed,
     );
 
@@ -178,6 +214,18 @@ export class ChallengeService {
         curChallengeId: nextChallenge?.id ?? null,
       },
     });
+
+    //Send timer start event notif to user if next challenge has a timer length
+    if (nextChallenge?.timerLength) {
+      await this.clientService.sendEvent(
+        [`user/${user.id}`],
+        'startTimerForChallenge',
+        {
+          challengeId: nextChallenge.id,
+          timerLength: nextChallenge.timerLength,
+        },
+      );
+    }
 
     await this.log.logEvent(
       SessionLogEvent.COMPLETE_CHALLENGE,
@@ -279,6 +327,7 @@ export class ChallengeService {
       awardingRadiusF: ch.awardingRadius,
       closeRadiusF: ch.closeRadius,
       linkedEventId: ch.linkedEventId!,
+      timerLength: ch.timerLength ?? undefined,
     };
   }
 

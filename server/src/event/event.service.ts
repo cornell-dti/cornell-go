@@ -220,6 +220,18 @@ export class EventService {
       },
     });
 
+    //Emit timer start event for the first challenge if it has a timer length
+    if (closestChallenge.timerLength) {
+      await this.clientService.sendEvent(
+        [`user/${user.id}`],
+        'startTimerForChallenge',
+        {
+          challengeId: closestChallenge.id,
+          timerLength: closestChallenge.timerLength,
+        },
+      );
+    }
+
     const progress = await this.prisma.eventTracker.create({
       data: {
         score: 0,
@@ -230,6 +242,15 @@ export class EventService {
         userId: user.id,
       },
     });
+
+    //Start timer for the first challenge if it has a timer length
+    // if (closestChallenge.timerLength) {
+    //   try {
+    //     await this.challengeService.startTimer(closestChallenge.id, user.id);
+    //   } catch (error) {
+    //     console.warn(`Failed to start timer for challenge ${closestChallenge.id}:`, error);
+    //   }
+    // }
 
     return progress;
   }
@@ -402,6 +423,7 @@ export class EventService {
       prevChallenges: prevChallenges.map(pc => ({
         challengeId: pc.challengeId,
         hintsUsed: pc.hintsUsed,
+        extensionsUsed: pc.extensionsUsed ?? 0, // Default to 0 for backwards compatibility
         dateCompleted: pc.timestamp.toUTCString(),
       })),
     };

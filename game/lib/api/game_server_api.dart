@@ -45,6 +45,7 @@ class GameServerApi {
       completer.complete(arg);
     };
 
+    // Set up timeout - only complete if not already completed
     Future.delayed(Duration(seconds: 5)).then((value) {
       if (!completer.isCompleted) {
         completer.complete(null);
@@ -55,8 +56,7 @@ class GameServerApi {
     _refreshDat = data;
     _refreshResolver = completionFunc;
 
-    // Note: Uncomment if you want to log all events (gets pretty spammy)
-    // print(ev);
+    print(ev);
     _socket.emitWithAck(ev, data, ack: completionFunc);
 
     return completer.future;
@@ -126,6 +126,15 @@ class GameServerApi {
 
   Future<String?> updateOrganizationData(UpdateOrganizationDataDto dto) async =>
       await _invokeWithRefresh("updateOrganizationData", dto.toJson());
+
+  Future<String?> startChallengeTimer(StartChallengeTimerDto dto) async =>
+      await _invokeWithRefresh("startChallengeTimer", dto.toJson());
+
+  Future<String?> extendTimer(ExtendTimerDto dto) async =>
+      await _invokeWithRefresh("extendTimer", dto.toJson());
+
+  Future<bool?> completeTimer(TimerCompletedDto dto) async =>
+      await _invokeWithRefresh("completeTimer", dto.toJson());
 
   Future<int?> requestAllUserData(RequestAllUserDataDto dto) async =>
       await _invokeWithRefresh("requestAllUserData", dto.toJson());

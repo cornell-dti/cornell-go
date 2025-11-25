@@ -20,7 +20,8 @@ Widget completedCell(
     String date,
     String difficulty,
     int totalHintsUsed,
-    int points) {
+    int adjustedPoints,
+    int originalPoints) {
   return Container(
       width: MediaQuery.sizeOf(context).width * 0.85,
       height: MediaQuery.sizeOf(context).height * 0.11,
@@ -91,11 +92,9 @@ Widget completedCell(
                         ),
                         Text(
                             ' ' +
-                                calculateHintAdjustedPoints(
-                                        points, totalHintsUsed)
-                                    .toString() +
+                                adjustedPoints.toString() +
                                 "/" +
-                                points.toString() +
+                                originalPoints.toString() +
                                 " PTS",
                             style: TextStyle(
                                 fontSize: 13,
