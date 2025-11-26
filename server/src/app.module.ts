@@ -14,6 +14,7 @@ import { SessionLogModule } from './session-log/session-log.module';
 import { OrganizationModule } from './organization/organization.module';
 import { AchievementModule } from './achievement/achievement.module';
 import { CaslModule } from './casl/casl.module';
+import { AvatarModule } from './avatar/avatar.module';
 
 @Module({
   imports: [
@@ -32,8 +33,9 @@ import { CaslModule } from './casl/casl.module';
     SessionLogModule,
     OrganizationModule,
     CaslModule,
+    AvatarModule,
   ],
   controllers: [],
   providers: [],
 })
-export class AppModule {}
+export class AppModule { }

@@ -25,6 +25,12 @@ import {
   AchievementTrackerDto,
   UpdateAchievementDataDto,
 } from '../achievement/achievement.dto';
+import {
+  UpdateBearItemsDataDto,
+  UpdatePurchaseResultDto,
+  UpdateUserBearLoadoutDataDto,
+  UpdateUserInventoryDataDto,
+} from '../avatar/avatar.dto';
 import { ExtractSubjectType } from '@casl/ability';
 
 export type ClientApiDef = {
@@ -40,6 +46,10 @@ export type ClientApiDef = {
   updateGroupData: UpdateGroupDataDto;
   updateOrganizationData: UpdateOrganizationDataDto;
   updateLeaderPosition: UpdateLeaderPositionDto;
+  updateBearItemsData: UpdateBearItemsDataDto;
+  updateUserInventoryData: UpdateUserInventoryDataDto;
+  updateUserBearLoadoutData: UpdateUserBearLoadoutDataDto;
+  updatePurchaseResult: UpdatePurchaseResultDto;
 };
 
 @Injectable()
@@ -48,7 +58,7 @@ export class ClientService {
     private gateway: ClientGateway,
     private abilityFactory: CaslAbilityFactory,
     private prisma: PrismaService,
-  ) {}
+  ) { }
 
   public subscribe(user: User, resourceId: string) {
     if (process.env.TESTING_E2E === 'true') {
