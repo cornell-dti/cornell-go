@@ -39,6 +39,12 @@ import {
   QuizErrorDto,
   QuizProgressDto,
 } from '../quiz/quiz.dto';
+import {
+  UpdateBearItemsDataDto,
+  UpdatePurchaseResultDto,
+  UpdateUserBearLoadoutDataDto,
+  UpdateUserInventoryDataDto,
+} from '../avatar/avatar.dto';
 import { ExtractSubjectType } from '@casl/ability';
 
 export type ClientApiDef = {
@@ -64,6 +70,10 @@ export type ClientApiDef = {
   quizResult: QuizResultDto;
   quizError: QuizErrorDto;
   quizProgress: QuizProgressDto;
+  updateBearItemsData: UpdateBearItemsDataDto;
+  updateUserInventoryData: UpdateUserInventoryDataDto;
+  updateUserBearLoadoutData: UpdateUserBearLoadoutDataDto;
+  updatePurchaseResult: UpdatePurchaseResultDto;
 };
 
 @Injectable()
@@ -72,7 +82,7 @@ export class ClientService {
     private gateway: ClientGateway,
     private abilityFactory: CaslAbilityFactory,
     private prisma: PrismaService,
-  ) {}
+  ) { }
 
   public subscribe(user: User, resourceId: string) {
     if (process.env.TESTING_E2E === 'true') {

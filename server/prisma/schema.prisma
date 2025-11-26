@@ -108,6 +108,8 @@ model User {
   achievementTrackers    AchievementTracker[]
   challengeTimers        ChallengeTimer[]
   UserQuizAnswer         UserQuizAnswer[]
+  bearInventories        UserBearInventory[]
+  bearEquipped           UserBearEquipped[]
   hasCompletedOnboarding Boolean              @default(false)
 }
 
@@ -346,4 +348,57 @@ model UserQuizAnswer {
 
   @@unique([userId, questionId]) // Enforce one attempt per question
   @@map("UserQuizAnswer")
+}
+
+// BUILD-A-BEAR MODELS
+enum BearSlot {
+  EYES
+  MOUTH
+  COLOR
+  ACCESSORY
+}
+
+model BearItem {
+  id          String              @id @default(uuid())
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt()
+  name        String
+  slot        BearSlot
+  cost       Int
+
+  assetKey   String
+  mimeType   String?
+  zIndex     Int?
+
+  isDefault   Boolean             @default(false)
+  inventories UserBearInventory[]
+  equipped    UserBearEquipped[]
+}
+
+model UserBearInventory {
+  id           String   @id @default(uuid())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt()
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
+  bearItem     BearItem @relation(fields: [bearItemId], references: [id], onDelete: Cascade)
+  bearItemId   String
+  acquiredDate DateTime @default(now())
+
+  @@unique([userId, bearItemId])
+}
+
+model UserBearEquipped {
+  id         String   @id @default(uuid())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt()
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String
+  bearItem   BearItem @relation(fields: [bearItemId], references: [id], onDelete: Cascade)
+  bearItemId String
+  slot       BearSlot
+
+  @@unique([userId, slot])
 }
