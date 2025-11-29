@@ -2,7 +2,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
-import 'package:game/gameplay/challenge_completed.dart';
 import 'point_breakdown_page.dart';
 
 /// Provider that manages the quiz state, including question tracking,
@@ -53,7 +52,6 @@ class QuizProvider extends ChangeNotifier {
   String get question => _questionBank[_curIdx]['question'];
   List<String> get answers => _answers;
   String get correctAnswer => _questionBank[_curIdx]['correct'];
-  bool get isLast => _curIdx == _questionBank.length - 1;
 
   /// Shuffle to a new question (if remaining shuffles exist and answer not yet submitted)
   void shuffle() {
@@ -84,18 +82,6 @@ class QuizProvider extends ChangeNotifier {
     submitted = true;
     correct = _answers[selectedIdx!] == correctAnswer;
     if (correct == true) totalPoints += 10;
-    notifyListeners();
-  }
-
-  /// Move to next question in the quiz
-  void nextQuestion() {
-    if (isLast) return;
-    _curIdx++;
-    _answers = List<String>.from(_questionBank[_curIdx]['answers']);
-    shuffleLeft = 3;
-    selectedIdx = null;
-    submitted = false;
-    correct = null;
     notifyListeners();
   }
 }
@@ -338,11 +324,7 @@ class _QuizScreen extends StatelessWidget {
                   child: OutlinedButton(
                     onPressed: () {
                       Navigator.pop(context);
-                      if (quiz.isLast) {
-                        _showFinal(context, quiz.totalPoints);
-                      } else {
-                        quiz.nextQuestion();
-                      }
+                      _showFinal(context, quiz.totalPoints);
                     },
                     style: OutlinedButton.styleFrom(
                         side: const BorderSide(color: Color(0xFFE95755))),
