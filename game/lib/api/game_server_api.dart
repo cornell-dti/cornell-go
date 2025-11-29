@@ -43,6 +43,11 @@ class GameServerApi {
       }
 
       completer.complete(arg);
+      if (completer.isCompleted) {
+        return;
+      }
+
+      completer.complete(arg);
     };
 
     Future.delayed(Duration(seconds: 5)).then((value) {
