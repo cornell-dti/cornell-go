@@ -190,6 +190,7 @@ class SplashPageWidget extends StatelessWidget {
             child: SvgPicture.asset(
               'assets/images/splash.svg',
               width: MediaQuery.of(context).size.width + 10,
+              height: MediaQuery.of(context).size.height + 10,
             ),
           ),
           Column(

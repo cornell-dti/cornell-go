@@ -43,10 +43,15 @@ void main() async {
   // Load environment variables from .env file
   await FlutterConfigPlus.loadEnvVariables();
 
-  // Define LOOPBACK and get API_URL from FlutterConfigPlus
-  final LOOPBACK =
+  // Define LOOPBACK and get API_URL from dart-define OR .env file
+  final localServerURL =
       (Platform.isAndroid ? "http://10.0.2.2:8080" : "http://localhost:8080");
-  API_URL = FlutterConfigPlus.get('API_URL') ?? LOOPBACK;
+
+  // First try dart-define (for production builds), then .env file (for development), then fallback to loopback
+  API_URL = const String.fromEnvironment('API_URL', defaultValue: '').isEmpty
+      ? (FlutterConfigPlus.get('API_URL') ?? localServerURL)
+      : const String.fromEnvironment('API_URL');
+
   print('Using API URL: $API_URL');
 
   // Initialize API client
