@@ -43,11 +43,6 @@ class GameServerApi {
       }
 
       completer.complete(arg);
-      if (completer.isCompleted) {
-        return;
-      }
-
-      completer.complete(arg);
     };
 
     Future.delayed(Duration(seconds: 5)).then((value) {
@@ -60,8 +55,7 @@ class GameServerApi {
     _refreshDat = data;
     _refreshResolver = completionFunc;
 
-    // Note: Uncomment if you want to log all events (gets pretty spammy)
-    // print(ev);
+    print(ev);
     _socket.emitWithAck(ev, data, ack: completionFunc);
 
     return completer.future;
@@ -164,4 +158,16 @@ class GameServerApi {
 
   Future<bool?> closeAccount(CloseAccountDto dto) async =>
       await _invokeWithRefresh("closeAccount", dto.toJson());
+
+  Future<void> requestQuizQuestion(RequestQuizQuestionDto dto) async =>
+      await _invokeWithRefresh("requestQuizQuestion", dto.toJson());
+
+  Future<void> shuffleQuizQuestion(ShuffleQuizQuestionDto dto) async =>
+      await _invokeWithRefresh("shuffleQuizQuestion", dto.toJson());
+
+  Future<void> submitQuizAnswer(SubmitQuizAnswerDto dto) async =>
+      await _invokeWithRefresh("submitQuizAnswer", dto.toJson());
+
+  Future<void> getQuizProgress(String challengeId) async =>
+      await _invokeWithRefresh("getQuizProgress", {"challengeId": challengeId});
 }
