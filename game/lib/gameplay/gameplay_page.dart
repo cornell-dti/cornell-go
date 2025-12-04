@@ -235,7 +235,11 @@ class _GameplayPageState extends State<GameplayPage> {
   void startPositionStream() async {
     GeoPoint.current().then(
       (location) {
-        currentLocation = location;
+        if (mounted) {
+          setState(() {
+            currentLocation = location;
+          });
+        }
       },
     );
 

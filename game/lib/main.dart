@@ -1,9 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_config_plus/flutter_config_plus.dart';
+import 'package:device_preview/device_preview.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:game/api/geopoint.dart';
 import 'package:game/api/notification_service.dart';
@@ -47,10 +49,15 @@ void main() async {
   // Load environment variables from .env file
   await FlutterConfigPlus.loadEnvVariables();
 
-  // Define LOOPBACK and get API_URL from FlutterConfigPlus
-  final LOOPBACK =
-      (Platform.isAndroid ? "http://10.0.2.2:8080" : "http://0.0.0.0:8080");
-  API_URL = FlutterConfigPlus.get('API_URL') ?? LOOPBACK;
+  // Define LOOPBACK and get API_URL from dart-define OR .env file
+  final localServerURL =
+      (Platform.isAndroid ? "http://10.0.2.2:8080" : "http://localhost:8080");
+
+  // First try dart-define (for production builds), then .env file (for development), then fallback to loopback
+  API_URL = const String.fromEnvironment('API_URL', defaultValue: '').isEmpty
+      ? (FlutterConfigPlus.get('API_URL') ?? localServerURL)
+      : const String.fromEnvironment('API_URL');
+
   print('Using API URL: $API_URL');
 
   // Initialize API client
