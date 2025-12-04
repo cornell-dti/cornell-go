@@ -24,6 +24,7 @@ import 'package:game/model/onboarding_model.dart';
 import 'package:game/widgets/bear_mascot_message.dart';
 import 'package:showcaseview/showcaseview.dart';
 import 'package:game/quiz/quiz_page.dart';
+import 'package:game/gameplay/arrival_dialog.dart';
 
 /*
 
@@ -917,8 +918,11 @@ class _GameplayMapState extends State<GameplayMap> {
                           elevation: 16,
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(10),
-                            child: displayDialog(
-                                context, hasArrived, chalId, chalName),
+                            child: ArrivalDialog(
+                              hasArrived: hasArrived,
+                              challengeId: chalId,
+                              challengeName: chalName,
+                            ),
                           ),
                         ),
                       );
@@ -972,215 +976,4 @@ class _GameplayMapState extends State<GameplayMap> {
         widget.awardingRadius;
   }
 
-  Container displayDialog(BuildContext context, hasArrived, String challengeId,
-      String? challengeName) {
-    final name = challengeName ?? "";
-    return hasArrived
-        ? Container(
-            // margin: EdgeInsetsDirectional.only(start: 50, end: 50),
-            color: Colors.white,
-            padding: EdgeInsets.all(25),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                    margin: EdgeInsets.only(top: 5),
-                    child: Text(
-                      "Congratulations!",
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    )),
-                Container(
-                    margin: EdgeInsets.only(bottom: 10),
-                    child: Text(
-                      "You've arrived at ${name}!",
-                      style:
-                          TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
-                    )),
-                Container(
-                  margin: EdgeInsets.only(bottom: 10),
-                  width: MediaQuery.of(context).size.width,
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(10.0))),
-                  child: SvgPicture.asset('assets/images/arrived.svg',
-                      fit: BoxFit.cover),
-                ),
-                Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                  ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ChallengeCompletedPage(
-                              challengeId: challengeId,
-                            ),
-                          ),
-                        );
-                      },
-                      style: ButtonStyle(
-                        padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
-                            EdgeInsets.symmetric(
-                                horizontal:
-                                    (MediaQuery.devicePixelRatioOf(context) < 3
-                                        ? 6
-                                        : 10))),
-                        shape:
-                            MaterialStateProperty.all<RoundedRectangleBorder>(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                                7.3), // Adjust the radius as needed
-                          ),
-                        ),
-                        side: MaterialStateProperty.all<BorderSide>(
-                          BorderSide(
-                            color: Color.fromARGB(
-                                255, 237, 86, 86), // Specify the border color
-                            width: 2.0, // Specify the border width
-                          ),
-                        ),
-                        backgroundColor:
-                            MaterialStateProperty.all<Color>(Colors.white),
-                      ),
-                      child: Text("Point Breakdown",
-                          style: TextStyle(
-                              fontSize:
-                                  MediaQuery.devicePixelRatioOf(context) < 3
-                                      ? 12
-                                      : 14,
-                              color: Color.fromARGB(255, 237, 86, 86)))),
-                  const SizedBox(width: 10),
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => QuizPage()),
-                      );
-                    },
-                    icon: SvgPicture.asset(
-                      'assets/icons/bearcoins.svg',
-                      height: 24,
-                      width: 24,
-                    ),
-                    label: Text(
-                      "+10 PTS",
-                      style: TextStyle(
-                        fontSize: MediaQuery.devicePixelRatioOf(context) < 3
-                            ? 12
-                            : 14,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    style: ButtonStyle(
-                      padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
-                        EdgeInsets.symmetric(
-                          horizontal: MediaQuery.devicePixelRatioOf(context) < 3
-                              ? 3
-                              : 7,
-                        ),
-                      ),
-                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                        RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(7.3),
-                        ),
-                      ),
-                      backgroundColor: MaterialStateProperty.all<Color>(
-                        Color(0xFFED5656),
-                      ),
-                    ),
-                  ),
-                ])
-              ],
-            ),
-          )
-        : Container(
-            color: Colors.white,
-            padding: EdgeInsets.all(20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                    margin: EdgeInsets.only(top: 5),
-                    child: Text(
-                      "Nearly There!",
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
-                    )),
-                Container(
-                    margin: EdgeInsets.only(bottom: 10),
-                    child: Text(
-                        "You're close, but not there yet." +
-                            (numHintsLeft > 0
-                                ? " Use a hint if needed! Each hint reduces reward by ~15%. Using all 3 hints yields half the points."
-                                : ""),
-                        style: TextStyle(
-                            fontSize: 14, fontWeight: FontWeight.w400))),
-                Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                  ElevatedButton(
-                      onPressed: () => Navigator.pop(context, false),
-                      style: ButtonStyle(
-                        padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
-                            EdgeInsets.symmetric(
-                                horizontal:
-                                    (MediaQuery.devicePixelRatioOf(context) < 3
-                                        ? 10
-                                        : 15))),
-                        shape:
-                            MaterialStateProperty.all<RoundedRectangleBorder>(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                                7.3), // Adjust the radius as needed
-                          ),
-                        ),
-                        side: MaterialStateProperty.all<BorderSide>(
-                          BorderSide(
-                            color: Color.fromARGB(
-                                255, 237, 86, 86), // Specify the border color
-                            width: 2.0, // Specify the border width
-                          ),
-                        ),
-                        backgroundColor:
-                            MaterialStateProperty.all<Color>(Colors.white),
-                      ),
-                      child: Text("Nevermind",
-                          style: TextStyle(
-                              fontSize:
-                                  MediaQuery.devicePixelRatioOf(context) < 3
-                                      ? 12
-                                      : 14,
-                              color: Color.fromARGB(255, 237, 86, 86)))),
-                  if (numHintsLeft > 0) Spacer(),
-                  if (numHintsLeft > 0)
-                    ElevatedButton(
-                        onPressed: () =>
-                            {useHint(), Navigator.pop(context, false)},
-                        style: ButtonStyle(
-                          padding:
-                              MaterialStateProperty.all<EdgeInsetsGeometry>(
-                                  EdgeInsets.only(left: 15, right: 15)),
-                          shape:
-                              MaterialStateProperty.all<RoundedRectangleBorder>(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(7.3),
-                            ),
-                          ),
-                          backgroundColor: MaterialStateProperty.all<Color>(
-                              Color.fromARGB(255, 237, 86, 86)),
-                        ),
-                        child: Text("Use Hint (${numHintsLeft} Left)",
-                            style: TextStyle(
-                                fontSize:
-                                    MediaQuery.devicePixelRatioOf(context) < 3
-                                        ? 12
-                                        : 14,
-                                color: Colors.white))),
-                ])
-              ],
-            ),
-          );
-  }
 }
