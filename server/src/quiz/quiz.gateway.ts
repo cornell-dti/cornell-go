@@ -8,7 +8,11 @@ import {
 import { Server, Socket } from 'socket.io';
 import { UseGuards } from '@nestjs/common';
 import { UserGuard } from '../auth/jwt-auth.guard';
+import { CallingUser } from '../auth/calling-user.decorator';
+import { User } from '@prisma/client';
 import { QuizService } from './quiz.service';
+import { EventService } from '../event/event.service';
+import { UserService } from '../user/user.service';
 import {
   RequestQuizQuestionDto,
   ShuffleQuizQuestionDto,
@@ -33,7 +37,11 @@ export class QuizGateway {
   @WebSocketServer()
   server!: Server;
 
-  constructor(private readonly quizService: QuizService) {}
+  constructor(
+    private readonly quizService: QuizService,
+    private readonly eventService: EventService,
+    private readonly userService: UserService,
+  ) { }
 
   /**
    * Handle request for a quiz question
@@ -41,20 +49,14 @@ export class QuizGateway {
    */
   @SubscribeMessage('requestQuizQuestion')
   async handleRequestQuestion(
+    @CallingUser() user: User,
     @MessageBody() data: RequestQuizQuestionDto,
     @ConnectedSocket() client: Socket,
   ): Promise<void> {
     try {
-      const user = (client as any).data?._authenticatedUserEntity;
-      const userId = user?.id;
-
-      if (!userId) {
-        throw new Error('User not authenticated');
-      }
-
       const question = await this.quizService.getRandomQuestion(
         data.challengeId,
-        userId,
+        user.id,
       );
 
       client.emit('quizQuestion', question);
@@ -77,20 +79,14 @@ export class QuizGateway {
    */
   @SubscribeMessage('shuffleQuizQuestion')
   async handleShuffleQuestion(
+    @CallingUser() user: User,
     @MessageBody() data: ShuffleQuizQuestionDto,
     @ConnectedSocket() client: Socket,
   ): Promise<void> {
     try {
-      const user = (client as any).data?._authenticatedUserEntity;
-      const userId = user?.id;
-
-      if (!userId) {
-        throw new Error('User not authenticated');
-      }
-
       const question = await this.quizService.shuffleQuestion(
         data.challengeId,
-        userId,
+        user.id,
         data.currentQuestionId,
       );
 
@@ -112,28 +108,32 @@ export class QuizGateway {
    */
   @SubscribeMessage('submitQuizAnswer')
   async handleSubmitAnswer(
+    @CallingUser() user: User,
     @MessageBody() data: SubmitQuizAnswerDto,
     @ConnectedSocket() client: Socket,
   ): Promise<void> {
     try {
-      const user = (client as any).data?._authenticatedUserEntity;
-      const userId = user?.id;
-
-      if (!userId) {
-        throw new Error('User not authenticated');
-      }
-
       const result = await this.quizService.submitAnswer(
-        userId,
+        user.id,
         data.questionId,
         data.selectedAnswerId,
       );
 
       client.emit('quizResult', result);
-      this.server.emit('scoreUpdate', {
-        userId,
-        newScore: result.newTotalScore,
+
+      // Get the event tracker to get event score
+      const eventTracker = await this.eventService.getCurrentEventTrackerForUser(user);
+
+      // Emit updateLeaderPosition event to update leaderboards
+      await this.eventService.emitUpdateLeaderPosition({
+        playerId: user.id,
+        newTotalScore: result.newTotalScore,
+        newEventScore: eventTracker.score,
+        eventId: eventTracker.eventId,
       });
+
+      // Emit updateUserData event to update profile page
+      await this.userService.emitUpdateUserData(user, false, false, user);
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error occurred';
@@ -159,20 +159,14 @@ export class QuizGateway {
    */
   @SubscribeMessage('getQuizProgress')
   async handleGetProgress(
+    @CallingUser() user: User,
     @MessageBody() data: { challengeId: string },
     @ConnectedSocket() client: Socket,
   ): Promise<void> {
     try {
-      const user = (client as any).data?._authenticatedUserEntity;
-      const userId = user?.id;
-
-      if (!userId) {
-        throw new Error('User not authenticated');
-      }
-
       const progress = await this.quizService.getQuizProgress(
         data.challengeId,
-        userId,
+        user.id,
       );
 
       client.emit('quizProgress', progress);
