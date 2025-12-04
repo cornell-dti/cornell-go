@@ -272,6 +272,7 @@ model QuizQuestion {
   explanation  String?
   difficulty   Int     @default(1)
   pointValue   Int     @default(10)
+  category     EventCategoryType
 
   answers     QuizAnswer[]
   userAnswers UserQuizAnswer[]

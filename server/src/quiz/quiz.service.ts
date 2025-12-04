@@ -8,7 +8,7 @@ import { QuizQuestionDto, QuizResultDto, QuizProgressDto } from './quiz.dto';
 
 @Injectable()
 export class QuizService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   /**
    * Get a random unanswered question for a challenge
@@ -54,6 +54,7 @@ export class QuizService {
       })),
       pointValue: selectedQuestion.pointValue,
       challengeId: selectedQuestion.challengeId,
+      category: selectedQuestion.category,
     };
   }
 
@@ -103,6 +104,7 @@ export class QuizService {
       })),
       pointValue: selectedQuestion.pointValue,
       challengeId: selectedQuestion.challengeId,
+      category: selectedQuestion.category,
     };
   }
 

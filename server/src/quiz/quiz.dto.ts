@@ -24,6 +24,7 @@ export interface QuizQuestionDto {
   answers: QuizAnswerOptionDto[];
   pointValue: number;
   challengeId: string;
+  category: string;
 }
 
 /** User's answer submission */
@@ -55,8 +56,8 @@ export interface QuizProgressDto {
 export interface QuizErrorDto {
   message: string;
   code:
-    | 'NO_QUESTIONS'
-    | 'ALREADY_ANSWERED'
-    | 'INVALID_QUESTION'
-    | 'INVALID_ANSWER';
+  | 'NO_QUESTIONS'
+  | 'ALREADY_ANSWERED'
+  | 'INVALID_QUESTION'
+  | 'INVALID_ANSWER';
 }
