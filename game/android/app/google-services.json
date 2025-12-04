@@ -176,6 +176,14 @@
           }
         },
         {
+          "client_id": "757523123677-qsdp280h3vno82au48d1kmdrplfv2jif.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cornellgo.CornellGOApp",
+            "certificate_hash": "6f83fd2f3d241fca615500f34fe79e3962a7f1e2"
+          }
+        },
+        {
           "client_id": "757523123677-r2d6u836fbh9cajf16mmqoviqa9oc7pr.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
