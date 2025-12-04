@@ -1,114 +1,177 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
-import 'point_breakdown_page.dart';
+import 'package:game/api/game_api.dart';
+import 'package:game/api/game_client_dto.dart';
+import 'package:game/model/quiz_model.dart';
+import 'package:game/model/event_model.dart';
+import 'package:game/model/tracker_model.dart';
+import 'package:game/model/group_model.dart';
+import 'package:game/model/challenge_model.dart';
+import 'package:game/gameplay/challenge_completed.dart';
+import 'package:game/gameplay/gameplay_page.dart';
+import 'package:game/utils/utility_functions.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:confetti/confetti.dart';
+import 'dart:math';
 
-/// Provider that manages the quiz state, including question tracking,
-/// answer selection, point calculation, and shuffle logic.
-class QuizProvider extends ChangeNotifier {
-  // List of all quiz questions and associated metadata.
-  final List<Map<String, dynamic>> _questionBank = [
-    {
-      'category': 'Physical',
-      'question': 'What is the item the statue is holding in his right hand?',
-      'answers': ['Book', 'Torch', 'Sword', 'Pen'],
-      'correct': 'Torch',
-    },
-    {
-      'category': 'History',
-      'question': 'What was one of Andrew Dickson White’s key contributions?',
-      'answers': [
-        'Created Cornell’s medical school.',
-        'Co‑founded the university.',
-        'Designed first graduate programs.',
-        'Funded the library.'
-      ],
-      'correct': 'Co‑founded the university.',
-    },
-    {
-      'category': 'History',
-      'question': 'Which animal is Cornell’s unofficial mascot?',
-      'answers': ['Bear', 'Big Red', 'Dragon', 'Panther'],
-      'correct': 'Big Red',
-    },
-  ];
-
-  final _rng = Random(); // For shuffling questions
-  int _curIdx = 0; // Index of current question
-  List<String> _answers = []; // Shuffled answer list
-  int shuffleLeft = 3; // Shuffle attempts remaining
-  int? selectedIdx; // Index of selected answer
-  bool submitted = false; // Whether the user has submitted the answer
-  bool? correct; // Whether the submitted answer is correct
-  int totalPoints = 0; // Cumulative points
-
-  QuizProvider() {
-    _answers = List<String>.from(_questionBank.first['answers']);
-  }
-
-  // Getters to expose relevant quiz data
-  String get category => _questionBank[_curIdx]['category'];
-  String get question => _questionBank[_curIdx]['question'];
-  List<String> get answers => _answers;
-  String get correctAnswer => _questionBank[_curIdx]['correct'];
-
-  /// Shuffle to a new question (if remaining shuffles exist and answer not yet submitted)
-  void shuffle() {
-    if (shuffleLeft == 0 || submitted) return;
-    int newIdx = _curIdx;
-    while (newIdx == _curIdx) {
-      newIdx = _rng.nextInt(_questionBank.length);
-    }
-    _curIdx = newIdx;
-    _answers = List<String>.from(_questionBank[_curIdx]['answers']);
-    _answers.shuffle();
-    selectedIdx = null;
-    shuffleLeft--;
-    notifyListeners();
-  }
-
-  /// Record user's selected answer index
-  void selectAnswer(int i) {
-    if (!submitted) {
-      selectedIdx = i;
-      notifyListeners();
-    }
-  }
-
-  /// Submit the selected answer, update points if correct
-  void submit() {
-    if (selectedIdx == null || submitted) return;
-    submitted = true;
-    correct = _answers[selectedIdx!] == correctAnswer;
-    if (correct == true) totalPoints += 10;
-    notifyListeners();
-  }
-}
-
-/// Entry widget for quiz page that initializes the provider
+/// Entry widget for quiz page that uses the existing QuizModel
 class QuizPage extends StatelessWidget {
-  const QuizPage({Key? key}) : super(key: key);
+  final String challengeId;
+
+  const QuizPage({Key? key, required this.challengeId}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => QuizProvider(),
-      child: const _QuizScreen(),
-    );
+    // Use the existing QuizModel from the provider tree
+    final quizModel = Provider.of<QuizModel>(context, listen: false);
+    // Request question when page loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      quizModel.requestQuestion(challengeId);
+    });
+    
+    return _QuizScreen(challengeId: challengeId);
   }
 }
 
 /// Main quiz UI screen
-class _QuizScreen extends StatelessWidget {
-  const _QuizScreen({Key? key}) : super(key: key);
+class _QuizScreen extends StatefulWidget {
+  final String challengeId;
+
+  const _QuizScreen({Key? key, required this.challengeId}) : super(key: key);
+
+  @override
+  State<_QuizScreen> createState() => _QuizScreenState();
+}
+
+class _QuizScreenState extends State<_QuizScreen> {
+  bool _hasShownResultDialog = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Reset the dialog flag when the quiz screen initializes
+    _hasShownResultDialog = false;
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<QuizProvider>(builder: (context, quiz, _) {
-      // Show result dialog immediately after submission
-      if (quiz.submitted) {
-        Future.microtask(() => _showResultDialog(context, quiz));
+    return Consumer<QuizModel>(
+      builder: (context, quizModel, _) {
+      // Show result dialog immediately after submission (only for current challenge)
+        if (quizModel.isSubmitted &&
+            quizModel.lastResult != null &&
+            quizModel.currentChallengeId == widget.challengeId &&
+            !_hasShownResultDialog) {
+          _hasShownResultDialog = true;
+          Future.microtask(() => _showResultDialog(context, quizModel));
+        }
+
+        // Handle NO_QUESTIONS error by automatically navigating away
+        if (quizModel.errorMessage != null && 
+            quizModel.errorMessage!.toLowerCase().contains('no available questions') &&
+            !quizModel.isLoading) {
+          // Check if this is a journey and navigate accordingly
+          final eventModel = Provider.of<EventModel>(context, listen: false);
+          final trackerModel = Provider.of<TrackerModel>(context, listen: false);
+          final groupModel = Provider.of<GroupModel>(context, listen: false);
+          
+          final eventId = groupModel.curEventId;
+          final event = eventModel.getEventById(eventId ?? "");
+          final tracker = trackerModel.trackerByEventId(eventId ?? "");
+          final isJourney = (event?.challenges?.length ?? 0) > 1;
+          final journeyCompleted = isJourney && tracker != null &&
+              tracker.prevChallenges.length >= (event?.challenges?.length ?? 0);
+          
+          // Navigate away immediately
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              Navigator.pop(context);
+              if (isJourney && !journeyCompleted) {
+                // Journey not completed - go to next challenge
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => GameplayPage()),
+                );
+              } else {
+                // Journey completed OR single challenge - show point breakdown
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ChallengeCompletedPage(
+                      challengeId: widget.challengeId,
+                    ),
+                  ),
+                );
+              }
+            }
+          });
+          return const SizedBox.shrink();
+        }
+        
+        // Show error if any (other than NO_QUESTIONS)
+        if (quizModel.errorMessage != null && 
+            !quizModel.errorMessage!.toLowerCase().contains('no available questions') &&
+            !quizModel.isLoading) {
+          Future.microtask(() => _showErrorDialog(context, quizModel));
+        }
+
+        // Show loading indicator
+        if (quizModel.isLoading && quizModel.currentQuestion == null) {
+          return Scaffold(
+            backgroundColor: const Color(0xFFF9F5F1),
+            appBar: AppBar(
+              backgroundColor: const Color(0xFFE95755),
+              elevation: 0,
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                onPressed: () => Navigator.pop(context),
+              ),
+              title: const Text('Quiz', style: TextStyle(color: Colors.white)),
+              centerTitle: true,
+            ),
+            body: const Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+
+        // Show error state if no question available
+        if (quizModel.currentQuestion == null && !quizModel.isLoading) {
+          return Scaffold(
+            backgroundColor: const Color(0xFFF9F5F1),
+            appBar: AppBar(
+              backgroundColor: const Color(0xFFE95755),
+              elevation: 0,
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                onPressed: () => Navigator.pop(context),
+              ),
+              title: const Text('Quiz', style: TextStyle(color: Colors.white)),
+              centerTitle: true,
+            ),
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    'No quiz questions available',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Go Back'),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        final question = quizModel.currentQuestion;
+        if (question == null) {
+          return const SizedBox.shrink();
       }
 
       return Scaffold(
@@ -118,83 +181,140 @@ class _QuizScreen extends StatelessWidget {
           elevation: 0,
           leading: IconButton(
               icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () => Navigator.pop(context)),
+              onPressed: () => Navigator.pop(context),
+            ),
           title: const Text('Quiz', style: TextStyle(color: Colors.white)),
           centerTitle: true,
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(children: [
-            _header(quiz),
-            const SizedBox(height: 16),
-            _questionCard(quiz),
-            const SizedBox(height: 16),
-            _answerList(quiz),
-            const Spacer(),
-            _submitBtn(quiz),
-          ]),
-        ),
+         body: Stack(
+           children: [
+             Padding(
+               padding: const EdgeInsets.all(16),
+               child: Column(children: [
+                 _questionCard(context, quizModel, question),
+                 const SizedBox(height: 16),
+                 _answerList(quizModel, question),
+               ]),
+             ),
+             // Submit button at same position as Return Home button
+             Positioned(
+               left: 16,
+               right: 16,
+               bottom: MediaQuery.sizeOf(context).height * 0.05,
+               child: _submitBtn(quizModel),
+             ),
+           ],
+         ),
       );
-    });
+      },
+    );
   }
 
-  /// Category + Points header bar
-  Widget _header(QuizProvider quiz) {
-    return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-      // Quiz category label
-      Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        decoration: BoxDecoration(
-            color: const Color(0xFFEFEFEF),
-            borderRadius: BorderRadius.circular(12)),
-        child: Text(quiz.category,
-            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
-      ),
-      // Points display
-      Row(children: [
-        SvgPicture.asset('assets/icons/bearcoins.svg',
-            height: 18, width: 18, color: const Color(0xFFC17E19)),
-        const SizedBox(width: 4),
-        Text('${quiz.totalPoints} PTS',
-            style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFFC17E19))),
-      ]),
-    ]);
-  }
-
-  /// Displays the current question and a shuffle button
-  Widget _questionCard(QuizProvider quiz) {
+  /// Displays the current question with category, points, and shuffle button
+  Widget _questionCard(BuildContext context, QuizModel quizModel, QuizQuestionDto question) {
+    // Get category from question (if available) or fall back to event category
+    EventCategoryDto? category;
+    if (question.category != null) {
+      try {
+        category = EventCategoryDto.values.firstWhere(
+          (e) => e.name == question.category,
+        );
+      } catch (e) {
+        category = null;
+      }
+    }
+    
+    // Fall back to event category if question doesn't have one
+    if (category == null) {
+      final eventModel = Provider.of<EventModel>(context, listen: false);
+      final challengeModel = Provider.of<ChallengeModel>(context, listen: false);
+      final groupModel = Provider.of<GroupModel>(context, listen: false);
+      
+      final challenge = challengeModel.getChallengeById(question.challengeId);
+      final eventId = challenge?.linkedEventId ?? groupModel.curEventId;
+      final event = eventModel.getEventById(eventId ?? "");
+      category = event?.category;
+    }
+    
+    final categoryText = category != null 
+        ? friendlyCategory[category] ?? category.name 
+        : "Quiz";
+    
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
           color: Colors.white, borderRadius: BorderRadius.circular(12)),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(quiz.question,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 8),
-        OutlinedButton(
-          onPressed: quiz.shuffle,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Category and Points row at the top
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Category label on the left
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                    color: const Color(0xFFF9EDDA),
+                    borderRadius: BorderRadius.circular(12)),
+                child: Text(
+                  categoryText,
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+                ),
+              ),
+              // Points display on the right
+              Row(children: [
+                SvgPicture.asset('assets/icons/bearcoins.svg',
+                    height: 18, width: 18),
+                const SizedBox(width: 4),
+                Text(
+                  '${question.pointValue} PTS',
+                  style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFFC17E19)),
+                ),
+              ]),
+            ],
+          ),
+          const SizedBox(height: 12),
+          // Question text (left-aligned)
+          Text(
+            question.questionText,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.left,
+          ),
+          // Shuffle button on bottom right
+          if (quizModel.shufflesRemaining > 0 && !quizModel.isSubmitted) ...[
+            const SizedBox(height: 12),
+            Align(
+              alignment: Alignment.centerRight,
+              child: OutlinedButton(
+                onPressed: () => quizModel.shuffleQuestion(),
           style: OutlinedButton.styleFrom(
               side: const BorderSide(color: Color(0xFFE95755)),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8))),
-          child: Text('Shuffle (${quiz.shuffleLeft})',
+                child: Text(
+                  'Shuffle (${quizModel.shufflesRemaining})',
               style: const TextStyle(
-                  color: Color(0xFFE95755), fontWeight: FontWeight.w600)),
-        )
-      ]),
+                      color: Color(0xFFE95755), fontWeight: FontWeight.w600),
+                ),
+              ),
+            ),
+          ]
+        ],
+      ),
     );
   }
 
   /// Generates tappable list of answer options
-  Widget _answerList(QuizProvider quiz) {
+  Widget _answerList(QuizModel quizModel, QuizQuestionDto question) {
     return Column(
-      children: List.generate(quiz.answers.length, (idx) {
-        final active = quiz.selectedIdx == idx;
+      children: List.generate(question.answers.length, (idx) {
+        final active = quizModel.selectedAnswerIndex == idx;
         return GestureDetector(
-          onTap: () => quiz.selectAnswer(idx),
+          onTap: () => quizModel.selectAnswer(idx),
           child: Container(
             width: double.infinity,
             margin: const EdgeInsets.only(bottom: 16),
@@ -207,11 +327,13 @@ class _QuizScreen extends StatelessWidget {
                   width: 1.5),
             ),
             child: Center(
-              child: Text(quiz.answers[idx],
+              child: Text(
+                question.answers[idx].answerText,
                   style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
-                      color: active ? const Color(0xFFE95755) : Colors.black)),
+                    color: active ? const Color(0xFFE95755) : Colors.black),
+              ),
             ),
           ),
         );
@@ -220,59 +342,114 @@ class _QuizScreen extends StatelessWidget {
   }
 
   /// Submit button to finalize the answer
-  Widget _submitBtn(QuizProvider quiz) {
-    final enabled = quiz.selectedIdx != null;
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: enabled ? quiz.submit : null,
-        style: ElevatedButton.styleFrom(
-            backgroundColor:
-                const Color(0xFFE95755).withOpacity(enabled ? 1 : 0.6),
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12))),
-        child: const Text('Submit',
-            style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.white)),
-      ),
+  Widget _submitBtn(QuizModel quizModel) {
+    final enabled = quizModel.selectedAnswerIndex != null &&
+        !quizModel.isSubmitted &&
+        !quizModel.isLoading;
+    return ElevatedButton(
+      onPressed: enabled ? () => quizModel.submitAnswer() : null,
+      style: ElevatedButton.styleFrom(
+          backgroundColor:
+              const Color(0xFFE95755).withOpacity(enabled ? 1 : 0.6),
+          padding: const EdgeInsets.only(right: 15, left: 15, top: 10, bottom: 10),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10))),
+      child: quizModel.isLoading
+          ? const SizedBox(
+              height: 20,
+              width: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
+            )
+          : Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Submit',
+                  style: TextStyle(
+                      fontSize: 21,
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.w400,
+                      color: Color(0xFFFFFFFF)),
+                ),
+              ],
+            ),
     );
   }
 
   /// Modal that shows up after answer submission
   Future<void> _showResultDialog(
-      BuildContext context, QuizProvider quiz) async {
+      BuildContext context, QuizModel quizModel) async {
     if (ModalRoute.of(context)?.isCurrent != true) return;
+
+    final result = quizModel.lastResult;
+    if (result == null) return;
+
+    // Create confetti controller for correct answers
+    final confettiController = ConfettiController(duration: const Duration(seconds: 3));
 
     await showDialog(
         barrierDismissible: false,
         barrierColor: Colors.black.withOpacity(0.5),
         context: context,
-        builder: (_) {
-          final isCorrect = quiz.correct ?? false;
-          return Dialog(
-            insetPadding:
-                const EdgeInsets.symmetric(horizontal: 60, vertical: 24),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            child: Padding(
-              padding: const EdgeInsets.all(18),
-              child: Column(mainAxisSize: MainAxisSize.min, children: [
+        builder: (dialogContext) {
+          // Check if this is a journey (multi-challenge event) and if it's completed
+          final eventModel = Provider.of<EventModel>(context, listen: false);
+          final trackerModel = Provider.of<TrackerModel>(context, listen: false);
+          final groupModel = Provider.of<GroupModel>(context, listen: false);
+          
+          final eventId = groupModel.curEventId;
+          final event = eventModel.getEventById(eventId ?? "");
+          final tracker = trackerModel.trackerByEventId(eventId ?? "");
+          final isJourney = (event?.challenges?.length ?? 0) > 1;
+          
+          // Check if journey is completed (all challenges done)
+          final journeyCompleted = isJourney && tracker != null &&
+              tracker.prevChallenges.length >= (event?.challenges?.length ?? 0);
+          
+          final isCorrect = result.isCorrect;
+          
+          // Play confetti if correct
+          if (isCorrect) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              confettiController.play();
+            });
+          }
+          
+          return Stack(
+            children: [
+              Dialog(
+                insetPadding:
+                    const EdgeInsets.symmetric(horizontal: 60, vertical: 24),
+                shape:
+                    RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Stack(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(18),
+                        child: Column(mainAxisSize: MainAxisSize.min, children: [
                 // Dialog header
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(isCorrect ? 'Correct!' : 'Sorry…',
+                        Text(
+                          isCorrect ? 'Correct!' : 'Sorry…',
                         style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                             color: isCorrect
                                 ? const Color(0xFF58B171)
-                                : const Color(0xFFE95755))),
+                                  : const Color(0xFFE95755)),
+                        ),
                     InkWell(
-                        onTap: () => Navigator.pop(context),
+                            onTap: () {
+                              confettiController.stop();
+                              Navigator.pop(context);
+                            },
                         child: const Icon(Icons.close, size: 18))
                   ],
                 ),
@@ -280,23 +457,28 @@ class _QuizScreen extends StatelessWidget {
 
                 // Body depending on correctness
                 if (isCorrect) ...[
-                  SvgPicture.asset('assets/icons/confetti.svg',
-                      height: 80, width: 80),
-                  const SizedBox(height: 16),
                   const Text(
-                    "Yay! You've earned points to move up the leaderboard.",
+                        "Yay! You've earned points to\nmove up the leaderboard.",
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 14),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                        style: TextStyle(fontSize: 14, color: Colors.black87),
+                      ),
+                      const SizedBox(height: 16),
+                      // Large bearcoin icon and points display
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
                     SvgPicture.asset('assets/icons/bearcoins.svg',
-                        height: 18, width: 18),
-                    const SizedBox(width: 4),
-                    const Text('+10 PTS',
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w600)),
-                  ]),
+                              height: 40, width: 40),
+                          Text(
+                            '+10 PTS',
+                            style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFFC17E19)), // Golden-brown color
+                          ),
+                        ],
+                      ),
                 ] else ...[
                   RichText(
                       textAlign: TextAlign.center,
@@ -306,7 +488,7 @@ class _QuizScreen extends StatelessWidget {
                           children: [
                             const TextSpan(text: 'The correct answer was '),
                             TextSpan(
-                                text: quiz.correctAnswer,
+                                text: result.correctAnswerText,
                                 style: const TextStyle(
                                     fontWeight: FontWeight.bold)),
                             const TextSpan(text: '.')
@@ -323,40 +505,128 @@ class _QuizScreen extends StatelessWidget {
                   width: double.infinity,
                   child: OutlinedButton(
                     onPressed: () {
+                      confettiController.stop();
                       Navigator.pop(context);
-                      _showFinal(context, quiz.totalPoints);
+                      // For journeys: if completed, show point breakdown; otherwise go to next challenge
+                      // For single challenges: always show point breakdown
+                      if (isJourney && !journeyCompleted) {
+                        // Journey not completed - go to next challenge
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => GameplayPage(),
+                          ),
+                        );
+                      } else {
+                        // Journey completed OR single challenge - show point breakdown
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ChallengeCompletedPage(
+                              challengeId: widget.challengeId,
+                            ),
+                          ),
+                        );
+                      }
                     },
-                    style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Color(0xFFE95755))),
-                    child: Text('Results',
-                        style: const TextStyle(
-                            color: Color(0xFFE95755), fontSize: 14)),
+                    style: ButtonStyle(
+                      padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
+                          EdgeInsets.symmetric(
+                              horizontal:
+                                  (MediaQuery.devicePixelRatioOf(context) < 3
+                                      ? 6
+                                      : 10))),
+                      shape:
+                          MaterialStateProperty.all<RoundedRectangleBorder>(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                              7.3), // Adjust the radius as needed
+                        ),
+                      ),
+                      side: MaterialStateProperty.all<BorderSide>(
+                        BorderSide(
+                          color: Color.fromARGB(
+                              255, 237, 86, 86), // Specify the border color
+                          width: 2.0, // Specify the border width
+                        ),
+                      ),
+                      backgroundColor:
+                          MaterialStateProperty.all<Color>(Colors.white),
+                    ),
+                    child: Text(
+                      (isJourney && !journeyCompleted) ? 'Next Challenge' : 'Point Breakdown',
+                      style: TextStyle(
+                          fontSize:
+                              MediaQuery.devicePixelRatioOf(context) < 3
+                                  ? 12
+                                  : 14,
+                          color: Color.fromARGB(255, 237, 86, 86)),
+                    ),
                   ),
                 ),
-              ]),
-            ),
+                        ]),
+                      ),
+                      // Confetti overlay for correct answers - constrained to dialog
+                      if (isCorrect)
+                        Positioned.fill(
+                          child: IgnorePointer(
+                            child: Align(
+                              alignment: Alignment.topCenter,
+                              child: ConfettiWidget(
+                                confettiController: confettiController,
+                                blastDirection: pi / 2, // Downward
+                                maxBlastForce: 5,
+                                minBlastForce: 2,
+                                emissionFrequency: 0.05,
+                                numberOfParticles: 5,
+                                gravity: 0.1,
+                                shouldLoop: false,
+                                colors: const [
+                                  Colors.green,
+                                  Colors.blue,
+                                  Colors.pink,
+                                  Colors.orange,
+                                  Colors.purple,
+                                  Colors.yellow,
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           );
-        });
+        }).then((_) {
+      // Clean up confetti controller when dialog is dismissed
+      confettiController.dispose();
+    });
   }
 
-  /// Final summary dialog shown after the last quiz question
-  void _showFinal(BuildContext context, int pts) {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => PointBreakdownPage(
-          challenge1Points: 100,
-          challenge2Points: 100,
-          quizPoints: pts,
-          totalPoints: 100 + 100 + pts,
-          answeredQuestions: 3,
-          totalQuestions: 3,
-          onReturnHome: () {
-            Navigator.pop(context);
+  /// Show error dialog
+  Future<void> _showErrorDialog(
+      BuildContext context, QuizModel quizModel) async {
+    if (ModalRoute.of(context)?.isCurrent != true) return;
+
+    await showDialog(
+        barrierDismissible: true,
+        context: context,
+        builder: (_) {
+          return AlertDialog(
+            title: const Text('Error'),
+            content: Text(quizModel.errorMessage ?? 'An error occurred'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  quizModel.clearError();
             Navigator.pop(context);
           },
+                child: const Text('OK'),
         ),
-      ),
+            ],
     );
+        });
   }
 }
