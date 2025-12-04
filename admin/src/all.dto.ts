@@ -56,6 +56,13 @@ export enum EventDifficultyDto {
   Hard = 'Hard',
 }
 
+export enum QuizErrorCodeDto {
+  NO_QUESTIONS = 'NO_QUESTIONS',
+  ALREADY_ANSWERED = 'ALREADY_ANSWERED',
+  INVALID_QUESTION = 'INVALID_QUESTION',
+  INVALID_ANSWER = 'INVALID_ANSWER',
+}
+
 export enum SetAuthToOAuthProviderDto {
   apple = 'apple',
   google = 'google',
@@ -306,6 +313,55 @@ export interface RequestOrganizationDataDto {
 export interface UpdateOrganizationDataDto {
   organization: OrganizationDto;
   deleted: boolean;
+}
+
+export interface RequestQuizQuestionDto {
+  challengeId: string;
+}
+
+export interface ShuffleQuizQuestionDto {
+  challengeId: string;
+  currentQuestionId?: string;
+}
+
+export interface QuizAnswerOptionDto {
+  id: string;
+  answerText: string;
+}
+
+export interface QuizQuestionDto {
+  id: string;
+  questionText: string;
+  answers: QuizAnswerOptionDto[];
+  pointValue: number;
+  challengeId: string;
+}
+
+export interface SubmitQuizAnswerDto {
+  questionId: string;
+  selectedAnswerId: string;
+}
+
+export interface QuizResultDto {
+  isCorrect: boolean;
+  pointsEarned: number;
+  explanation?: string;
+  correctAnswerText: string;
+  newTotalScore: number;
+}
+
+export interface QuizProgressDto {
+  challengeId: string;
+  totalQuestions: number;
+  answeredQuestions: number;
+  remainingQuestions: number;
+  isComplete: boolean;
+  totalPointsEarned: number;
+}
+
+export interface QuizErrorDto {
+  message: string;
+  code: QuizErrorCodeDto;
 }
 
 export interface CloseAccountDto {}
