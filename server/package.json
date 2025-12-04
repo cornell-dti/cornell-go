@@ -38,6 +38,7 @@
     "apple-signin-auth": "^1.7.5",
     "censor-sensor": "^1.0.6",
     "dotenv": "^10.0.0",
+    "firebase-admin": "^13.6.0",
     "friendly-words": "^1.2.0",
     "google-auth-library": "^7.14.1",
     "passport": "^0.6.0",

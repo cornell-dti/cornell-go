@@ -4,7 +4,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_config_plus/flutter_config_plus.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:game/api/geopoint.dart';
+import 'package:game/api/notification_service.dart';
 import 'package:game/loading_page/loading_page.dart';
 import 'package:game/model/achievement_model.dart';
 import 'package:device_preview/device_preview.dart';
@@ -38,6 +40,10 @@ void main() async {
   // Initialize Flutter bindings first - required for ALL plugins
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Initialize Firebase
+  await Firebase.initializeApp();
+  print('Firebase initialized');
+
   // Load environment variables from .env file
   await FlutterConfigPlus.loadEnvVariables();
 
@@ -49,6 +55,14 @@ void main() async {
 
   // Initialize API client
   client = ApiClient(storage, API_URL);
+
+  // Initialize notification service with callback to send token to server
+  await NotificationService().initialize(
+    onTokenRefresh: (token) {
+      // Send FCM token to server when available or refreshed
+      client.updateFcmToken(token);
+    },
+  );
 
   // Init Google Maps platform
   final GoogleMapsFlutterPlatform platform = GoogleMapsFlutterPlatform.instance;

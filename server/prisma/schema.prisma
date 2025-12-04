@@ -77,35 +77,36 @@ enum OrganizationSpecialUsage {
 }
 
 model User {
-  id                  String               @id() @default(uuid())
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime             @updatedAt()
-  subject             String               @default("User")
-  authToken           String               @unique
-  authType            AuthType
-  username            String               @unique
-  year                String
-  college             String
-  major               String
-  interests           String[]
-  email               String
-  hashedRefreshToken  String
-  administrator       Boolean
-  enrollmentType      EnrollmentType
-  score               Int
-  isBanned            Boolean              @default(false)
-  group               Group                @relation("member", fields: [groupId], references: [id])
-  groupId             String
-  hostOf              Group?               @relation("host")
-  eventTrackers       EventTracker[]
-  favorites           EventBase[]
-  completedChallenges PrevChallenge[]      @relation("owner")
-  memberOf            Organization[]       @relation("orgToUser")
-  managerOf           Organization[]       @relation("orgManager")
-  isRanked            Boolean              @default(true)
-  participatedIn      PrevChallenge[]      @relation("prevChallengeParticipant")
-  sessionLogEntries   SessionLogEntry[]
-  achievementTrackers AchievementTracker[]
+  id                     String               @id() @default(uuid())
+  createdAt              DateTime             @default(now())
+  updatedAt              DateTime             @updatedAt()
+  subject                String               @default("User")
+  authToken              String               @unique
+  authType               AuthType
+  username               String               @unique
+  year                   String
+  college                String
+  major                  String
+  interests              String[]
+  email                  String
+  hashedRefreshToken     String
+  administrator          Boolean
+  enrollmentType         EnrollmentType
+  score                  Int
+  isBanned               Boolean              @default(false)
+  fcmToken               String? // Firebase Cloud Messaging token for push notifications
+  group                  Group                @relation("member", fields: [groupId], references: [id])
+  groupId                String
+  hostOf                 Group?               @relation("host")
+  eventTrackers          EventTracker[]
+  favorites              EventBase[]
+  completedChallenges    PrevChallenge[]      @relation("owner")
+  memberOf               Organization[]       @relation("orgToUser")
+  managerOf              Organization[]       @relation("orgManager")
+  isRanked               Boolean              @default(true)
+  participatedIn         PrevChallenge[]      @relation("prevChallengeParticipant")
+  sessionLogEntries      SessionLogEntry[]
+  achievementTrackers    AchievementTracker[]
   hasCompletedOnboarding Boolean
 }
 

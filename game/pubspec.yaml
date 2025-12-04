@@ -25,6 +25,9 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
+  # Firebase
+  firebase_core: ^3.8.1
+  firebase_messaging: ^15.1.6
   sliding_up_panel: ^2.0.0+1
   velocity_x:
   flutter_blurhash:
