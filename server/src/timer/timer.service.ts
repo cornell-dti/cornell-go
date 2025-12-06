@@ -107,7 +107,7 @@ export class TimerService {
       await this.scheduleWarnings(challengeId, userId, endTime);
       const completion_delay = endTime.getTime() - Date.now();
       setTimeout(async () => {
-        await this.completeTimer(challengeId, userId);
+        await this.completeTimer(challengeId, userId, false); // challenge failed so challengeCompleted = false
       }, completion_delay);
     }
 
@@ -119,10 +119,14 @@ export class TimerService {
     };
   }
 
-  /** Completes a timer for a challenge, and completes the challenge once the timer is completed */
+  /** Completes a timer for a challenge
+   * If challengeCompleted is true, the challenge was successfully completed
+   * If challengeCompleted is false, the timer expired and the challenge failed
+   */
   async completeTimer(
     challengeId: string,
     userId: string,
+    challengeCompleted: boolean,
   ): Promise<TimerCompletedDto> {
     const timer = await this.prisma.challengeTimer.findFirst({
       where: { challengeId: challengeId, userId: userId },
@@ -139,26 +143,42 @@ export class TimerService {
       };
     }
 
-    // Mark timer as completed
+    // If timer is already completed or expired, don't process again (prevents race conditions)
+    if (
+      timer.currentStatus === ChallengeTimerStatus.COMPLETED ||
+      timer.currentStatus === ChallengeTimerStatus.EXPIRED
+    ) {
+      return {
+        timerId: timer.id,
+        challengeId: challengeId,
+        challengeCompleted: timer.currentStatus === ChallengeTimerStatus.COMPLETED,
+      };
+    }
+
+    // Mark timer as COMPLETED if challenge was completed, EXPIRED if timer ran out
     await this.prisma.challengeTimer.update({
       where: { id: timer.id },
       data: {
         endTime: new Date(),
-        currentStatus: ChallengeTimerStatus.COMPLETED,
+        currentStatus: challengeCompleted
+          ? ChallengeTimerStatus.COMPLETED
+          : ChallengeTimerStatus.EXPIRED,
       },
     });
 
-    // Complete the challenge, send to client service -
-    await this.clientService.sendEvent(
-      [`user/${userId}`],
-      'challengeCompleted',
-      { challengeId, userId },
-    );
+    // Complete the challenge if challengeCompleted = true and send to client service
+    if (challengeCompleted) {
+      await this.clientService.sendEvent(
+        [`user/${userId}`],
+        'challengeCompleted',
+        { challengeId, userId },
+      );
+    }
 
     return {
       timerId: timer.id,
       challengeId: challengeId,
-      challengeCompleted: true,
+      challengeCompleted: challengeCompleted,
     };
   }
 
@@ -215,7 +235,7 @@ export class TimerService {
       const completion_delay = newEndTime.getTime() - Date.now();
       if (completion_delay > 0) {
         setTimeout(async () => {
-          await this.completeTimer(challengeId, userId);
+          await this.completeTimer(challengeId, userId, false);
         }, completion_delay);
       }
     }
@@ -393,8 +413,9 @@ export class TimerService {
       return false;
     }
     if (timer.currentStatus != ChallengeTimerStatus.ACTIVE && 
-        timer.currentStatus != ChallengeTimerStatus.COMPLETED) {
-      console.log(`canExtendTimer: Timer status is ${timer.currentStatus}, must be ACTIVE or COMPLETED`);
+        timer.currentStatus != ChallengeTimerStatus.COMPLETED &&
+        timer.currentStatus != ChallengeTimerStatus.EXPIRED) {
+      console.log(`canExtendTimer: Timer status is ${timer.currentStatus}, must be ACTIVE, COMPLETED, or EXPIRED`);
       return false;
     }
     

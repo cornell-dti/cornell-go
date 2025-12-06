@@ -81,6 +81,7 @@ export class TimerGateway {
     const timer = await this.timerService.completeTimer(
       data.challengeId,
       user.id,
+      data.challengeCompleted,
     );
     await this.clientService.sendEvent([`user/${user.id}`], 'timerCompleted', {
       timerId: timer.timerId,

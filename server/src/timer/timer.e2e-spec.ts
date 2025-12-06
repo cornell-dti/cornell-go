@@ -129,15 +129,26 @@ describe('TimerModule E2E', () => {
     expect(new Date(extendedTimer.newEndTime).getTime()).toBeGreaterThan(oldEndTime);
   });
 
-  it('should properly complete a timer', async () => {
+  it('should properly complete a timer when challenge is completed', async () => {
     const timerService = moduleRef.get<TimerService>(TimerService);
     const timer = await timerService.startTimer('123', '456');
 
-    const completedTimer = await timerService.completeTimer('123', '456');
+    const completedTimer = await timerService.completeTimer('123', '456', true);
     expect(completedTimer).toBeDefined();
     expect(completedTimer.timerId).toBeDefined();
     expect(completedTimer.challengeId).toBeDefined();
     expect(completedTimer.challengeCompleted).toBeTruthy();
+  });
+
+  it('should properly expire a timer when challenge fails', async () => {
+    const timerService = moduleRef.get<TimerService>(TimerService);
+    const timer = await timerService.startTimer('123', '456');
+
+    const expiredTimer = await timerService.completeTimer('123', '456', false);
+    expect(expiredTimer).toBeDefined();
+    expect(expiredTimer.timerId).toBeDefined();
+    expect(expiredTimer.challengeId).toBeDefined();
+    expect(expiredTimer.challengeCompleted).toBeFalsy();
   });
 
   afterAll(async () => {

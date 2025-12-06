@@ -10,6 +10,7 @@ import {
   LocationType,
   Achievement,
   AchievementTracker,
+  ChallengeTimerStatus,
 } from '@prisma/client';
 import { ClientService } from '../client/client.service';
 import { UserService } from '../user/user.service';
@@ -168,6 +169,17 @@ export class ChallengeService {
       },
     });
     const extensionsUsed = timer?.extensionsUsed || 0;
+
+    // If timer exists and is still active, mark it as COMPLETED since challenge was manually completed
+    if (timer && timer.currentStatus === ChallengeTimerStatus.ACTIVE) {
+      await this.prisma.challengeTimer.update({
+        where: { id: timer.id },
+        data: {
+          endTime: new Date(),
+          currentStatus: ChallengeTimerStatus.COMPLETED,
+        },
+      });
+    }
 
     await this.prisma.prevChallenge.create({
       data: {
