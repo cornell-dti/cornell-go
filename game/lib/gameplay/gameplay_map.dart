@@ -1580,7 +1580,7 @@ class _GameplayMapState extends State<GameplayMap>
                                     AnimationStatus.completed
                                 ? () {
                                     displayToast(
-                                        "Sorry, time has run out to choose the extension. Please Return Home.",
+                                        "Sorry, time has run out to choose the extension. Please click Results.",
                                         Status.error);
                                   }
                                 : () async {

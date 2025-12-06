@@ -185,8 +185,11 @@ class _ChallengeFailedState extends State<ChallengeFailedPage>
         var completedChal =
             challengeModel.getChallengeById(prevChal.challengeId);
         if (completedChal == null) continue;
+        int extensionsUsed = prevChal.extensionsUsed ?? 0;
+        int extensionAdjustedPoints = calculateExtensionAdjustedPoints(
+            completedChal.points ?? 0, extensionsUsed);
         var pts = calculateHintAdjustedPoints(
-            completedChal.points ?? 0, prevChal.hintsUsed);
+            extensionAdjustedPoints, prevChal.hintsUsed);
         total_pts += pts;
 
         completedChallenges.add(Container(
@@ -318,7 +321,7 @@ class _ChallengeFailedState extends State<ChallengeFailedPage>
                   padding: EdgeInsets.only(bottom: 15),
                   child: Text(
                     "You were unable to find " +
-                        (challenge.description ?? "NO DESCRIPTION") +
+                        (challenge.name ?? "this challenge") +
                         ".",
                     style: TextStyle(
                       color: Colors.white,
@@ -484,7 +487,7 @@ class _ChallengeFailedState extends State<ChallengeFailedPage>
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
                                           Text(
-                                            "Next Challenge ",
+                                            "Redo Challenge ",
                                             style: TextStyle(
                                                 fontFamily: 'Poppins',
                                                 fontSize: 20,
