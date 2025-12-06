@@ -167,8 +167,11 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
         var completedChal =
             challengeModel.getChallengeById(prevChal.challengeId);
         if (completedChal == null) continue;
+        int basePoints = completedChal.points ?? 0;
+        int extensionAdjustedPoints = calculateExtensionAdjustedPoints(
+            basePoints, prevChal.extensionsUsed ?? 0);
         var pts = calculateHintAdjustedPoints(
-            completedChal.points ?? 0, prevChal.hintsUsed);
+            extensionAdjustedPoints, prevChal.hintsUsed);
         total_pts += pts;
 
         completedChallenges.add(Container(
@@ -277,7 +280,13 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                           Spacer(),
                           Text(
                             "+ " +
-                                (challenge.points ?? 0).toString() +
+                                () {
+                                  int basePoints = challenge.points ?? 0;
+                                  int extensionAdjustedPoints =
+                                      calculateExtensionAdjustedPoints(
+                                          basePoints, extensionsUsed);
+                                  return extensionAdjustedPoints.toString();
+                                }() +
                                 " points",
                             style:
                                 TextStyle(color: Colors.white, fontSize: 16.0),
