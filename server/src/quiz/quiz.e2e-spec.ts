@@ -266,6 +266,7 @@ describe('Quiz Module E2E', () => {
         questionText: 'What is 2 + 2?',
         pointValue: 10,
         explanation: 'Basic math',
+        category: 'FOOD',
         answers: {
           create: [
             { answerText: '4', isCorrect: true },
@@ -287,6 +288,7 @@ describe('Quiz Module E2E', () => {
         challengeId: testChallengeId,
         questionText: 'What is 3 + 3?',
         pointValue: 10,
+        category: 'FOOD',
         answers: {
           create: [
             { answerText: '6', isCorrect: true },
