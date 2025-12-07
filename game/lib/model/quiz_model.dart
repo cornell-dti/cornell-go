@@ -18,7 +18,7 @@ class QuizModel extends ChangeNotifier {
   bool _isSubmitted = false;
   QuizResultDto? _lastResult;
   String? _errorMessage;
-  
+
   // Track quiz points per challenge (challengeId -> points earned)
   Map<String, int> _pointsByChallenge = {};
   int _totalPointsEarned = 0; // Total across all challenges
@@ -33,7 +33,7 @@ class QuizModel extends ChangeNotifier {
   QuizResultDto? get lastResult => _lastResult;
   String? get errorMessage => _errorMessage;
   int get totalPointsEarned => _totalPointsEarned;
-  
+
   // Get quiz points for a specific challenge
   int getPointsForChallenge(String challengeId) {
     return _pointsByChallenge[challengeId] ?? 0;
@@ -58,8 +58,9 @@ class QuizModel extends ChangeNotifier {
       _isLoading = false;
       if (result.isCorrect && _currentChallengeId != null) {
         // Update points for this specific challenge
-        _pointsByChallenge[_currentChallengeId!] = 
-            (_pointsByChallenge[_currentChallengeId!] ?? 0) + result.pointsEarned;
+        _pointsByChallenge[_currentChallengeId!] =
+            (_pointsByChallenge[_currentChallengeId!] ?? 0) +
+                result.pointsEarned;
         // Update total points across all challenges
         _totalPointsEarned += result.pointsEarned;
       }

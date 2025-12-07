@@ -29,7 +29,7 @@ class QuizPage extends StatelessWidget {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       quizModel.requestQuestion(challengeId);
     });
-    
+
     return _QuizScreen(challengeId: challengeId);
   }
 }
@@ -58,7 +58,7 @@ class _QuizScreenState extends State<_QuizScreen> {
   Widget build(BuildContext context) {
     return Consumer<QuizModel>(
       builder: (context, quizModel, _) {
-      // Show result dialog immediately after submission (only for current challenge)
+        // Show result dialog immediately after submission (only for current challenge)
         if (quizModel.isSubmitted &&
             quizModel.lastResult != null &&
             quizModel.currentChallengeId == widget.challengeId &&
@@ -68,21 +68,25 @@ class _QuizScreenState extends State<_QuizScreen> {
         }
 
         // Handle NO_QUESTIONS error by automatically navigating away
-        if (quizModel.errorMessage != null && 
-            quizModel.errorMessage!.toLowerCase().contains('no available questions') &&
+        if (quizModel.errorMessage != null &&
+            quizModel.errorMessage!
+                .toLowerCase()
+                .contains('no available questions') &&
             !quizModel.isLoading) {
           // Check if this is a journey and navigate accordingly
           final eventModel = Provider.of<EventModel>(context, listen: false);
-          final trackerModel = Provider.of<TrackerModel>(context, listen: false);
+          final trackerModel =
+              Provider.of<TrackerModel>(context, listen: false);
           final groupModel = Provider.of<GroupModel>(context, listen: false);
-          
+
           final eventId = groupModel.curEventId;
           final event = eventModel.getEventById(eventId ?? "");
           final tracker = trackerModel.trackerByEventId(eventId ?? "");
           final isJourney = (event?.challenges?.length ?? 0) > 1;
-          final journeyCompleted = isJourney && tracker != null &&
+          final journeyCompleted = isJourney &&
+              tracker != null &&
               tracker.prevChallenges.length >= (event?.challenges?.length ?? 0);
-          
+
           // Navigate away immediately
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
@@ -108,10 +112,12 @@ class _QuizScreenState extends State<_QuizScreen> {
           });
           return const SizedBox.shrink();
         }
-        
+
         // Show error if any (other than NO_QUESTIONS)
-        if (quizModel.errorMessage != null && 
-            !quizModel.errorMessage!.toLowerCase().contains('no available questions') &&
+        if (quizModel.errorMessage != null &&
+            !quizModel.errorMessage!
+                .toLowerCase()
+                .contains('no available questions') &&
             !quizModel.isLoading) {
           Future.microtask(() => _showErrorDialog(context, quizModel));
         }
@@ -172,46 +178,47 @@ class _QuizScreenState extends State<_QuizScreen> {
         final question = quizModel.currentQuestion;
         if (question == null) {
           return const SizedBox.shrink();
-      }
+        }
 
-      return Scaffold(
-        backgroundColor: const Color(0xFFF9F5F1),
-        appBar: AppBar(
-          backgroundColor: const Color(0xFFE95755),
-          elevation: 0,
-          leading: IconButton(
+        return Scaffold(
+          backgroundColor: const Color(0xFFF9F5F1),
+          appBar: AppBar(
+            backgroundColor: const Color(0xFFE95755),
+            elevation: 0,
+            leading: IconButton(
               icon: const Icon(Icons.arrow_back, color: Colors.white),
               onPressed: () => Navigator.pop(context),
             ),
-          title: const Text('Quiz', style: TextStyle(color: Colors.white)),
-          centerTitle: true,
-        ),
-         body: Stack(
-           children: [
-             Padding(
-               padding: const EdgeInsets.all(16),
-               child: Column(children: [
-                 _questionCard(context, quizModel, question),
-                 const SizedBox(height: 16),
-                 _answerList(quizModel, question),
-               ]),
-             ),
-             // Submit button at same position as Return Home button
-             Positioned(
-               left: 16,
-               right: 16,
-               bottom: MediaQuery.sizeOf(context).height * 0.05,
-               child: _submitBtn(quizModel),
-             ),
-           ],
-         ),
-      );
+            title: const Text('Quiz', style: TextStyle(color: Colors.white)),
+            centerTitle: true,
+          ),
+          body: Stack(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(children: [
+                  _questionCard(context, quizModel, question),
+                  const SizedBox(height: 16),
+                  _answerList(quizModel, question),
+                ]),
+              ),
+              // Submit button at same position as Return Home button
+              Positioned(
+                left: 16,
+                right: 16,
+                bottom: MediaQuery.sizeOf(context).height * 0.05,
+                child: _submitBtn(quizModel),
+              ),
+            ],
+          ),
+        );
       },
     );
   }
 
   /// Displays the current question with category, points, and shuffle button
-  Widget _questionCard(BuildContext context, QuizModel quizModel, QuizQuestionDto question) {
+  Widget _questionCard(
+      BuildContext context, QuizModel quizModel, QuizQuestionDto question) {
     // Get category from question (if available) or fall back to event category
     EventCategoryDto? category;
     if (question.category != null) {
@@ -223,23 +230,23 @@ class _QuizScreenState extends State<_QuizScreen> {
         category = null;
       }
     }
-    
+
     // Fall back to event category if question doesn't have one
     if (category == null) {
       final eventModel = Provider.of<EventModel>(context, listen: false);
-      final challengeModel = Provider.of<ChallengeModel>(context, listen: false);
+      final challengeModel =
+          Provider.of<ChallengeModel>(context, listen: false);
       final groupModel = Provider.of<GroupModel>(context, listen: false);
-      
+
       final challenge = challengeModel.getChallengeById(question.challengeId);
       final eventId = challenge?.linkedEventId ?? groupModel.curEventId;
       final event = eventModel.getEventById(eventId ?? "");
       category = event?.category;
     }
-    
-    final categoryText = category != null 
-        ? friendlyCategory[category] ?? category.name 
-        : "Quiz";
-    
+
+    final categoryText =
+        category != null ? friendlyCategory[category] ?? category.name : "Quiz";
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -259,7 +266,8 @@ class _QuizScreenState extends State<_QuizScreen> {
                     borderRadius: BorderRadius.circular(12)),
                 child: Text(
                   categoryText,
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+                  style: const TextStyle(
+                      fontSize: 12, fontWeight: FontWeight.w500),
                 ),
               ),
               // Points display on the right
@@ -291,13 +299,13 @@ class _QuizScreenState extends State<_QuizScreen> {
               alignment: Alignment.centerRight,
               child: OutlinedButton(
                 onPressed: () => quizModel.shuffleQuestion(),
-          style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: Color(0xFFE95755)),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8))),
+                style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Color(0xFFE95755)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8))),
                 child: Text(
                   'Shuffle (${quizModel.shufflesRemaining})',
-              style: const TextStyle(
+                  style: const TextStyle(
                       color: Color(0xFFE95755), fontWeight: FontWeight.w600),
                 ),
               ),
@@ -329,9 +337,9 @@ class _QuizScreenState extends State<_QuizScreen> {
             child: Center(
               child: Text(
                 question.answers[idx].answerText,
-                  style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
+                style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
                     color: active ? const Color(0xFFE95755) : Colors.black),
               ),
             ),
@@ -351,9 +359,10 @@ class _QuizScreenState extends State<_QuizScreen> {
       style: ElevatedButton.styleFrom(
           backgroundColor:
               const Color(0xFFE95755).withOpacity(enabled ? 1 : 0.6),
-          padding: const EdgeInsets.only(right: 15, left: 15, top: 10, bottom: 10),
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10))),
+          padding:
+              const EdgeInsets.only(right: 15, left: 15, top: 10, bottom: 10),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
       child: quizModel.isLoading
           ? const SizedBox(
               height: 20,
@@ -388,7 +397,8 @@ class _QuizScreenState extends State<_QuizScreen> {
     if (result == null) return;
 
     // Create confetti controller for correct answers
-    final confettiController = ConfettiController(duration: const Duration(seconds: 3));
+    final confettiController =
+        ConfettiController(duration: const Duration(seconds: 3));
 
     await showDialog(
         barrierDismissible: false,
@@ -397,173 +407,187 @@ class _QuizScreenState extends State<_QuizScreen> {
         builder: (dialogContext) {
           // Check if this is a journey (multi-challenge event) and if it's completed
           final eventModel = Provider.of<EventModel>(context, listen: false);
-          final trackerModel = Provider.of<TrackerModel>(context, listen: false);
+          final trackerModel =
+              Provider.of<TrackerModel>(context, listen: false);
           final groupModel = Provider.of<GroupModel>(context, listen: false);
-          
+
           final eventId = groupModel.curEventId;
           final event = eventModel.getEventById(eventId ?? "");
           final tracker = trackerModel.trackerByEventId(eventId ?? "");
           final isJourney = (event?.challenges?.length ?? 0) > 1;
-          
+
           // Check if journey is completed (all challenges done)
-          final journeyCompleted = isJourney && tracker != null &&
+          final journeyCompleted = isJourney &&
+              tracker != null &&
               tracker.prevChallenges.length >= (event?.challenges?.length ?? 0);
-          
+
           final isCorrect = result.isCorrect;
-          
+
           // Play confetti if correct
           if (isCorrect) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               confettiController.play();
             });
           }
-          
+
           return Stack(
             children: [
               Dialog(
                 insetPadding:
                     const EdgeInsets.symmetric(horizontal: 60, vertical: 24),
-                shape:
-                    RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(12),
                   child: Stack(
                     children: [
                       Padding(
                         padding: const EdgeInsets.all(18),
-                        child: Column(mainAxisSize: MainAxisSize.min, children: [
-                // Dialog header
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                        Text(
-                          isCorrect ? 'Correct!' : 'Sorry…',
-                        style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: isCorrect
-                                ? const Color(0xFF58B171)
-                                  : const Color(0xFFE95755)),
-                        ),
-                    InkWell(
-                            onTap: () {
-                              confettiController.stop();
-                              Navigator.pop(context);
-                            },
-                        child: const Icon(Icons.close, size: 18))
-                  ],
-                ),
-                const SizedBox(height: 12),
-
-                // Body depending on correctness
-                if (isCorrect) ...[
-                  const Text(
-                        "Yay! You've earned points to\nmove up the leaderboard.",
-                    textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 14, color: Colors.black87),
-                      ),
-                      const SizedBox(height: 16),
-                      // Large bearcoin icon and points display
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                    SvgPicture.asset('assets/icons/bearcoins.svg',
-                              height: 40, width: 40),
-                          Text(
-                            '+10 PTS',
-                            style: const TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFFC17E19)), // Golden-brown color
+                        child:
+                            Column(mainAxisSize: MainAxisSize.min, children: [
+                          // Dialog header
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                isCorrect ? 'Correct!' : 'Sorry…',
+                                style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: isCorrect
+                                        ? const Color(0xFF58B171)
+                                        : const Color(0xFFE95755)),
+                              ),
+                              InkWell(
+                                  onTap: () {
+                                    confettiController.stop();
+                                    Navigator.pop(context);
+                                  },
+                                  child: const Icon(Icons.close, size: 18))
+                            ],
                           ),
-                        ],
-                      ),
-                ] else ...[
-                  RichText(
-                      textAlign: TextAlign.center,
-                      text: TextSpan(
-                          style: const TextStyle(
-                              color: Colors.black, fontSize: 14),
-                          children: [
-                            const TextSpan(text: 'The correct answer was '),
-                            TextSpan(
-                                text: result.correctAnswerText,
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold)),
-                            const TextSpan(text: '.')
-                          ])),
-                  const SizedBox(height: 12),
-                  Image.asset('assets/images/cryingbear.png',
-                      height: 80, width: 80),
-                ],
+                          const SizedBox(height: 12),
 
-                const SizedBox(height: 16),
+                          // Body depending on correctness
+                          if (isCorrect) ...[
+                            const Text(
+                              "Yay! You've earned points to\nmove up the leaderboard.",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  fontSize: 14, color: Colors.black87),
+                            ),
+                            const SizedBox(height: 16),
+                            // Large bearcoin icon and points display
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                SvgPicture.asset('assets/icons/bearcoins.svg',
+                                    height: 40, width: 40),
+                                Text(
+                                  '+10 PTS',
+                                  style: const TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(
+                                          0xFFC17E19)), // Golden-brown color
+                                ),
+                              ],
+                            ),
+                          ] else ...[
+                            RichText(
+                                textAlign: TextAlign.center,
+                                text: TextSpan(
+                                    style: const TextStyle(
+                                        color: Colors.black, fontSize: 14),
+                                    children: [
+                                      const TextSpan(
+                                          text: 'The correct answer was '),
+                                      TextSpan(
+                                          text: result.correctAnswerText,
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.bold)),
+                                      const TextSpan(text: '.')
+                                    ])),
+                            const SizedBox(height: 12),
+                            Image.asset('assets/images/cryingbear.png',
+                                height: 80, width: 80),
+                          ],
 
-                // Navigation button
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton(
-                    onPressed: () {
-                      confettiController.stop();
-                      Navigator.pop(context);
-                      // For journeys: if completed, show point breakdown; otherwise go to next challenge
-                      // For single challenges: always show point breakdown
-                      if (isJourney && !journeyCompleted) {
-                        // Journey not completed - go to next challenge
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => GameplayPage(),
-                          ),
-                        );
-                      } else {
-                        // Journey completed OR single challenge - show point breakdown
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ChallengeCompletedPage(
-                              challengeId: widget.challengeId,
+                          const SizedBox(height: 16),
+
+                          // Navigation button
+                          SizedBox(
+                            width: double.infinity,
+                            child: OutlinedButton(
+                              onPressed: () {
+                                confettiController.stop();
+                                Navigator.pop(context);
+                                // For journeys: if completed, show point breakdown; otherwise go to next challenge
+                                // For single challenges: always show point breakdown
+                                if (isJourney && !journeyCompleted) {
+                                  // Journey not completed - go to next challenge
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => GameplayPage(),
+                                    ),
+                                  );
+                                } else {
+                                  // Journey completed OR single challenge - show point breakdown
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          ChallengeCompletedPage(
+                                        challengeId: widget.challengeId,
+                                      ),
+                                    ),
+                                  );
+                                }
+                              },
+                              style: ButtonStyle(
+                                padding: MaterialStateProperty.all<
+                                        EdgeInsetsGeometry>(
+                                    EdgeInsets.symmetric(
+                                        horizontal:
+                                            (MediaQuery.devicePixelRatioOf(
+                                                        context) <
+                                                    3
+                                                ? 6
+                                                : 10))),
+                                shape: MaterialStateProperty.all<
+                                    RoundedRectangleBorder>(
+                                  RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(
+                                        7.3), // Adjust the radius as needed
+                                  ),
+                                ),
+                                side: MaterialStateProperty.all<BorderSide>(
+                                  BorderSide(
+                                    color: Color.fromARGB(255, 237, 86,
+                                        86), // Specify the border color
+                                    width: 2.0, // Specify the border width
+                                  ),
+                                ),
+                                backgroundColor:
+                                    MaterialStateProperty.all<Color>(
+                                        Colors.white),
+                              ),
+                              child: Text(
+                                (isJourney && !journeyCompleted)
+                                    ? 'Next Challenge'
+                                    : 'Point Breakdown',
+                                style: TextStyle(
+                                    fontSize:
+                                        MediaQuery.devicePixelRatioOf(context) <
+                                                3
+                                            ? 12
+                                            : 14,
+                                    color: Color.fromARGB(255, 237, 86, 86)),
+                              ),
                             ),
                           ),
-                        );
-                      }
-                    },
-                    style: ButtonStyle(
-                      padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
-                          EdgeInsets.symmetric(
-                              horizontal:
-                                  (MediaQuery.devicePixelRatioOf(context) < 3
-                                      ? 6
-                                      : 10))),
-                      shape:
-                          MaterialStateProperty.all<RoundedRectangleBorder>(
-                        RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                              7.3), // Adjust the radius as needed
-                        ),
-                      ),
-                      side: MaterialStateProperty.all<BorderSide>(
-                        BorderSide(
-                          color: Color.fromARGB(
-                              255, 237, 86, 86), // Specify the border color
-                          width: 2.0, // Specify the border width
-                        ),
-                      ),
-                      backgroundColor:
-                          MaterialStateProperty.all<Color>(Colors.white),
-                    ),
-                    child: Text(
-                      (isJourney && !journeyCompleted) ? 'Next Challenge' : 'Point Breakdown',
-                      style: TextStyle(
-                          fontSize:
-                              MediaQuery.devicePixelRatioOf(context) < 3
-                                  ? 12
-                                  : 14,
-                          color: Color.fromARGB(255, 237, 86, 86)),
-                    ),
-                  ),
-                ),
                         ]),
                       ),
                       // Confetti overlay for correct answers - constrained to dialog
@@ -621,12 +645,12 @@ class _QuizScreenState extends State<_QuizScreen> {
               TextButton(
                 onPressed: () {
                   quizModel.clearError();
-            Navigator.pop(context);
-          },
+                  Navigator.pop(context);
+                },
                 child: const Text('OK'),
-        ),
+              ),
             ],
-    );
+          );
         });
   }
 }

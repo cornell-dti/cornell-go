@@ -975,5 +975,4 @@ class _GameplayMapState extends State<GameplayMap> {
     return currentLocation!.distanceTo(widget.targetLocation) <=
         widget.awardingRadius;
   }
-
 }

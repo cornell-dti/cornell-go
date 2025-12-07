@@ -75,13 +75,11 @@ class GameClientApi {
 
   final _quizResultController =
       StreamController<QuizResultDto>.broadcast(sync: true);
-  Stream<QuizResultDto> get quizResultStream =>
-      _quizResultController.stream;
+  Stream<QuizResultDto> get quizResultStream => _quizResultController.stream;
 
   final _quizErrorController =
       StreamController<QuizErrorDto>.broadcast(sync: true);
-  Stream<QuizErrorDto> get quizErrorStream =>
-      _quizErrorController.stream;
+  Stream<QuizErrorDto> get quizErrorStream => _quizErrorController.stream;
 
   final _quizProgressController =
       StreamController<QuizProgressDto>.broadcast(sync: true);

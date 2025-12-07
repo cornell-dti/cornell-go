@@ -90,16 +90,17 @@ class _ArrivedDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final name = challengeName ?? "";
-    
+
     // Check if this is a journey completed or single challenge
     final eventId = groupModel.curEventId;
     final event = eventModel.getEventById(eventId ?? "");
     final tracker = trackerModel.trackerByEventId(eventId ?? "");
     final isJourney = (event?.challenges?.length ?? 0) > 1;
-    final journeyCompleted = isJourney && tracker != null &&
+    final journeyCompleted = isJourney &&
+        tracker != null &&
         tracker.prevChallenges.length >= (event?.challenges?.length ?? 0);
     final shouldCheckQuiz = journeyCompleted || !isJourney;
-    
+
     return Container(
       color: Colors.white,
       padding: EdgeInsets.all(25),
@@ -111,15 +112,13 @@ class _ArrivedDialog extends StatelessWidget {
               margin: EdgeInsets.only(top: 5),
               child: Text(
                 "Congratulations!",
-                style:
-                    TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               )),
           Container(
               margin: EdgeInsets.only(bottom: 10),
               child: Text(
                 "You've arrived at ${name}!",
-                style:
-                    TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
               )),
           Container(
             margin: EdgeInsets.only(bottom: 10),
@@ -133,14 +132,15 @@ class _ArrivedDialog extends StatelessWidget {
           FutureBuilder<QuizProgressDto?>(
             future: _checkQuizAvailability(apiClient, challengeId),
             builder: (context, snapshot) {
-              final hasQuiz = snapshot.hasData && 
-                  snapshot.data != null && 
+              final hasQuiz = snapshot.hasData &&
+                  snapshot.data != null &&
                   snapshot.data!.totalQuestions > 0;
-              
+
               return _ButtonRow(
                 challengeId: challengeId,
                 hasQuiz: hasQuiz,
-                isJourneyInProgress: !shouldCheckQuiz, // Journey in progress if not completed/single
+                isJourneyInProgress:
+                    !shouldCheckQuiz, // Journey in progress if not completed/single
               );
             },
           ),
@@ -150,19 +150,20 @@ class _ArrivedDialog extends StatelessWidget {
   }
 
   /// Check if challenge has quiz questions available
-  Future<QuizProgressDto?> _checkQuizAvailability(ApiClient apiClient, String challengeId) async {
+  Future<QuizProgressDto?> _checkQuizAvailability(
+      ApiClient apiClient, String challengeId) async {
     final completer = Completer<QuizProgressDto?>();
     late StreamSubscription subscription;
-    
+
     subscription = apiClient.clientApi.quizProgressStream.listen((progress) {
       if (progress.challengeId == challengeId && !completer.isCompleted) {
         completer.complete(progress);
       }
     });
-    
+
     // Request quiz progress
     apiClient.serverApi?.getQuizProgress(challengeId);
-    
+
     // Wait for response or timeout
     try {
       final result = await completer.future.timeout(
@@ -220,37 +221,32 @@ class _ButtonRow extends StatelessWidget {
                 );
               }
             },
-          style: ButtonStyle(
-            padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
-                EdgeInsets.symmetric(
-                    horizontal:
-                        (MediaQuery.devicePixelRatioOf(context) < 3
-                            ? 6
-                            : 10))),
-            shape:
-                MaterialStateProperty.all<RoundedRectangleBorder>(
-              RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(
-                    7.3), // Adjust the radius as needed
+            style: ButtonStyle(
+              padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
+                  EdgeInsets.symmetric(
+                      horizontal: (MediaQuery.devicePixelRatioOf(context) < 3
+                          ? 6
+                          : 10))),
+              shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                RoundedRectangleBorder(
+                  borderRadius:
+                      BorderRadius.circular(7.3), // Adjust the radius as needed
+                ),
               ),
-            ),
-            side: MaterialStateProperty.all<BorderSide>(
-              BorderSide(
-                color: Color.fromARGB(
-                    255, 237, 86, 86), // Specify the border color
-                width: 2.0, // Specify the border width
+              side: MaterialStateProperty.all<BorderSide>(
+                BorderSide(
+                  color: Color.fromARGB(
+                      255, 237, 86, 86), // Specify the border color
+                  width: 2.0, // Specify the border width
+                ),
               ),
+              backgroundColor: MaterialStateProperty.all<Color>(Colors.white),
             ),
-            backgroundColor:
-                MaterialStateProperty.all<Color>(Colors.white),
-          ),
             child: Text(
                 isJourneyInProgress ? "Next Challenge" : "Point Breakdown",
                 style: TextStyle(
                     fontSize:
-                        MediaQuery.devicePixelRatioOf(context) < 3
-                            ? 12
-                            : 14,
+                        MediaQuery.devicePixelRatioOf(context) < 3 ? 12 : 14,
                     color: Color.fromARGB(255, 237, 86, 86)))),
         // Show quiz button if quiz exists
         if (hasQuiz) ...[
@@ -275,9 +271,7 @@ class _ButtonRow extends StatelessWidget {
             label: Text(
               "+10 PTS",
               style: TextStyle(
-                fontSize: MediaQuery.devicePixelRatioOf(context) < 3
-                    ? 12
-                    : 14,
+                fontSize: MediaQuery.devicePixelRatioOf(context) < 3 ? 12 : 14,
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
               ),
@@ -285,9 +279,8 @@ class _ButtonRow extends StatelessWidget {
             style: ButtonStyle(
               padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
                 EdgeInsets.symmetric(
-                  horizontal: MediaQuery.devicePixelRatioOf(context) < 3
-                      ? 3
-                      : 7,
+                  horizontal:
+                      MediaQuery.devicePixelRatioOf(context) < 3 ? 3 : 7,
                 ),
               ),
               shape: MaterialStateProperty.all<RoundedRectangleBorder>(
@@ -305,4 +298,3 @@ class _ButtonRow extends StatelessWidget {
     );
   }
 }
-

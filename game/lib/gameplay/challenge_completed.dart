@@ -184,13 +184,13 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
       var eventId = groupModel.curEventId;
       var event = eventModel.getEventById(eventId ?? "");
       var tracker = trackerModel.trackerByEventId(eventId ?? "");
-      
+
       if (tracker == null || tracker.prevChallenges.length == 0) {
         return CircularIndicator();
       }
 
       final isJourney = (event?.challenges?.length ?? 0) > 1;
-      
+
       if (isJourney) {
         journeyCompleted =
             tracker.prevChallenges.length == (event?.challenges?.length ?? 0);
@@ -208,7 +208,7 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
       // Build list of completed challenge text fields for journeys
       var total_pts = 0;
       List<Widget> completedChallenges = [];
-      
+
       for (PrevChallengeDto prevChal in tracker.prevChallenges) {
         var completedChal =
             challengeModel.getChallengeById(prevChal.challengeId);
@@ -253,19 +253,20 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
 
       // Determine quiz points to display
       int displayQuizPoints = 0;
-      
+
       if (isJourney && journeyCompleted) {
         // For completed journey: use accumulated quiz points from all challenges
         displayQuizPoints = totalQuizPoints;
       } else if (!isJourney) {
         // For single challenge: use quiz points specifically earned for THIS challenge
         displayQuizPoints = quizModel.getPointsForChallenge(challenge.id);
-        
+
         // Debug: print quiz state
         print('🎯 Single Challenge Quiz Debug:');
         print('  currentChallengeId: ${quizModel.currentChallengeId}');
         print('  challenge.id: ${challenge.id}');
-        print('  points for this challenge: ${quizModel.getPointsForChallenge(challenge.id)}');
+        print(
+            '  points for this challenge: ${quizModel.getPointsForChallenge(challenge.id)}');
         print('  totalPointsEarned (all): ${quizModel.totalPointsEarned}');
         print('  displayQuizPoints: $displayQuizPoints');
       }
@@ -274,7 +275,7 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
       int basePoints = challenge.points ?? 0;
       int hintAdjustedPoints = calculateHintAdjustedPoints(
           basePoints, tracker.prevChallenges.last.hintsUsed);
-      
+
       int finalTotalPoints = isJourney && journeyCompleted
           ? total_pts + displayQuizPoints
           : hintAdjustedPoints + displayQuizPoints;
