@@ -10,7 +10,7 @@ describe('Quiz Module E2E', () => {
   let moduleRef: TestingModule;
   let quizService: QuizService;
   let prisma: PrismaService;
-  
+
   // Test data IDs
   let testUserId: string;
   let testChallengeId: string;
@@ -71,7 +71,7 @@ describe('Quiz Module E2E', () => {
       // Answers should be in different order (statistically likely)
       const order1 = question1.answers.map(a => a.id).join(',');
       const order2 = question2.answers.map(a => a.id).join(',');
-      
+
       // This might occasionally fail due to randomness, but very unlikely
       expect(order1).not.toBe(order2);
     });
@@ -317,10 +317,7 @@ describe('Quiz Module E2E', () => {
     });
     await prisma.user.deleteMany({
       where: {
-        OR: [
-          { id: testUserId },
-          { email: { contains: '@test.com' } },
-        ],
+        OR: [{ id: testUserId }, { email: { contains: '@test.com' } }],
       },
     });
   }

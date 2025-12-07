@@ -41,7 +41,7 @@ export class QuizGateway {
     private readonly quizService: QuizService,
     private readonly eventService: EventService,
     private readonly userService: UserService,
-  ) { }
+  ) {}
 
   /**
    * Handle request for a quiz question
@@ -122,7 +122,8 @@ export class QuizGateway {
       client.emit('quizResult', result);
 
       // Get the event tracker to get event score
-      const eventTracker = await this.eventService.getCurrentEventTrackerForUser(user);
+      const eventTracker =
+        await this.eventService.getCurrentEventTrackerForUser(user);
 
       // Emit updateLeaderPosition event to update leaderboards
       await this.eventService.emitUpdateLeaderPosition({

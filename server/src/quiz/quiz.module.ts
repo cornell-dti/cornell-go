@@ -15,4 +15,4 @@ import { UserModule } from '../user/user.module';
   providers: [QuizService, QuizGateway, PrismaService],
   exports: [QuizService],
 })
-export class QuizModule { }
+export class QuizModule {}
