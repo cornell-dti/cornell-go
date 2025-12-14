@@ -69,7 +69,8 @@ class GameplayMap extends StatefulWidget {
   State<GameplayMap> createState() => _GameplayMapState();
 }
 
-class _GameplayMapState extends State<GameplayMap> {
+class _GameplayMapState extends State<GameplayMap>
+    with TickerProviderStateMixin {
   final METERS_TO_DEGREES = 111139;
 
   late Completer<GoogleMapController> mapCompleter = Completer();
@@ -95,6 +96,44 @@ class _GameplayMapState extends State<GameplayMap> {
 
   // Add this to your state variables (After isExapnded)
   bool isArrivedButtonEnabled = true;
+  bool isHintDialogOpen = false;
+  bool isHintAnimationInProgress = false;
+  bool isHintButtonIlluminated = false;
+
+  // Animation controllers for hint flow
+  late AnimationController _circleShrinkController;
+  late Animation<double> _circleShrinkAnimation;
+  double? _oldHintRadius;
+  double? _newHintRadius;
+
+  // Animation controllers for zoom animations
+  late AnimationController _zoomStage1Controller;
+  late AnimationController _zoomStage2Controller;
+  late Animation<double> _zoomStage1Animation;
+  late Animation<double> _zoomStage2Animation;
+
+  // Store animation listeners for cleanup
+  VoidCallback? _stage1Listener;
+  VoidCallback? _stage2Listener;
+
+  // Animation controllers for bear hint animation
+  late AnimationController _bearSlideInController;
+  late AnimationController _bearRotateController;
+  late AnimationController _speechBubbleFadeController;
+  late AnimationController _bearFadeController;
+  late AnimationController _bearSlideOutController;
+  late Animation<double> _bearSlideInAnimation;
+  late Animation<double> _bearRotateAnimation;
+  late Animation<double> _speechBubbleFadeAnimation;
+  late Animation<double> _bearFadeAnimation;
+  late Animation<double> _bearSlideOutAnimation;
+
+  // Bear animation overlay
+  OverlayEntry? _hintBearOverlayEntry;
+
+  // Track current camera position for smooth animations
+  LatLng? _currentCameraPosition;
+  double? _currentZoom;
 
   // whether the picture is expanded over the map
   bool isExpanded = false;
@@ -124,6 +163,46 @@ class _GameplayMapState extends State<GameplayMap> {
   void _removeBearOverlay() {
     _bearOverlayEntry?.remove();
     _bearOverlayEntry = null;
+  }
+
+  void _removeHintBearOverlay() {
+    _hintBearOverlayEntry?.remove();
+    _hintBearOverlayEntry = null;
+  }
+
+  /**
+   * Shows the bear hint animation overlay
+   */
+  void _showHintBearAnimation() {
+    _removeHintBearOverlay();
+
+    // Reset all bear animation controllers to ensure clean start
+    try {
+      _bearSlideInController.reset();
+      _bearRotateController.reset();
+      _speechBubbleFadeController.reset();
+      _bearFadeController.reset();
+      _bearSlideOutController.reset();
+    } catch (e) {
+      // Controllers not initialized yet (e.g., during hot reload)
+      // They will be reset when the animation actually starts
+    }
+
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    _hintBearOverlayEntry = OverlayEntry(
+      builder: (context) => _HintBearAnimationWidget(
+        bearSlideInAnimation: _bearSlideInAnimation,
+        bearRotateAnimation: _bearRotateAnimation,
+        speechBubbleFadeAnimation: _speechBubbleFadeAnimation,
+        bearFadeAnimation: _bearFadeAnimation,
+        bearSlideOutAnimation: _bearSlideOutAnimation,
+        screenWidth: screenWidth,
+        screenHeight: screenHeight,
+      ),
+    );
+    Overlay.of(context).insert(_hintBearOverlayEntry!);
   }
 
   void _showImageToggleBearOverlay() {
@@ -207,6 +286,114 @@ class _GameplayMapState extends State<GameplayMap> {
     streamStarted = startPositionStream();
     setStartingHintCircle();
 
+    // Initialize animation controllers
+    _circleShrinkController = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
+
+    _zoomStage1Controller = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+
+    _zoomStage2Controller = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+
+    // Initialize bear hint animation controllers
+    _bearSlideInController = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
+
+    _bearRotateController = AnimationController(
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    );
+
+    _speechBubbleFadeController = AnimationController(
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    );
+
+    _bearFadeController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+
+    _bearSlideOutController = AnimationController(
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    );
+
+    // Create animation for circle shrinking
+    _circleShrinkAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _circleShrinkController,
+        curve: Curves.easeInOut,
+      ),
+    );
+
+    // Create zoom animations
+    _zoomStage1Animation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _zoomStage1Controller,
+        curve: Curves.elasticOut,
+      ),
+    );
+
+    _zoomStage2Animation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _zoomStage2Controller,
+        curve: Curves.elasticOut,
+      ),
+    );
+
+    // Create bear hint animations
+    _bearSlideInAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _bearSlideInController,
+        curve: Curves.easeOut,
+      ),
+    );
+
+    _bearRotateAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _bearRotateController,
+        curve: Curves.easeOut,
+      ),
+    );
+
+    _speechBubbleFadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _speechBubbleFadeController,
+        curve: Curves.easeIn,
+      ),
+    );
+
+    _bearFadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _bearFadeController,
+        curve: Curves.easeInOut,
+      ),
+    );
+
+    _bearSlideOutAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _bearSlideOutController,
+        curve: Curves.easeIn,
+      ),
+    );
+
+    // Add listener to update UI during circle animation
+    _circleShrinkController.addListener(() {
+      if (isHintAnimationInProgress) {
+        setState(() {});
+      }
+    });
+
     // Onboarding: Register showcase scope for highlighting UI elements (steps 7-10)
     // Hot restart fix: Unregister old instance if it exists, then register new one
     try {
@@ -235,8 +422,17 @@ class _GameplayMapState extends State<GameplayMap> {
   @override
   void dispose() {
     _removeBearOverlay();
+    _removeHintBearOverlay();
     positionStream.cancel();
     _disposeController();
+    _circleShrinkController.dispose();
+    _zoomStage1Controller.dispose();
+    _zoomStage2Controller.dispose();
+    _bearSlideInController.dispose();
+    _bearRotateController.dispose();
+    _speechBubbleFadeController.dispose();
+    _bearFadeController.dispose();
+    _bearSlideOutController.dispose();
     super.dispose();
   }
 
@@ -430,23 +626,43 @@ class _GameplayMapState extends State<GameplayMap> {
     setState(() {});
   }
 
-  /** 
-   * Handles logic to use a hint. This includes updating hints left, 
-   * calculating the updated radius of the hint circle, and changing the
-   * location of the hint center such that it still contains the awarding
-   * radius.
+  /**
+   * Calculates the appropriate zoom level to ensure a circle of given radius
+   * (in meters) is fully visible on screen with some padding.
+   * 
+   * @param radiusMeters - The radius of the circle in meters
+   * @param centerLat - The latitude of the circle center (affects meters per pixel)
+   * @param screenWidthPixels - The actual screen width in pixels
+   * @param paddingFactor - Factor to add padding (default 2.5 means 150% extra space)
+   * @returns The maximum zoom level that keeps the circle in frame
    */
-  void useHint() {
-    if (numHintsLeft > 0 && hintCenter != null && startingHintCenter != null) {
-      // update event tracker with new hints left value
-      var eventId = Provider.of<GroupModel>(context, listen: false).curEventId;
-      if (eventId == null) {
-        displayToast("Could not get event", Status.error);
-      } else {
-        Provider.of<TrackerModel>(context, listen: false)
-            .useEventTrackerHint(eventId);
-      }
+  double _calculateZoomForRadius(
+      double radiusMeters, double centerLat, double screenWidthPixels,
+      {double paddingFactor = 2.5}) {
+    // Diameter of circle in meters (with generous padding to ensure it fits)
+    // Use diameter * paddingFactor to ensure the entire circle fits with margin
+    final double diameterWithPadding = radiusMeters * 2 * paddingFactor;
 
+    // Calculate how many meters per pixel we need to show the circle
+    final double metersPerPixel = diameterWithPadding / screenWidthPixels;
+
+    // Google Maps zoom formula: metersPerPixel = 156543.03392 * cos(lat) / 2^zoom
+    // Solving for zoom: zoom = log2(156543.03392 * cos(lat) / metersPerPixel)
+    final double metersPerPixelAtEquator = 156543.03392;
+    final double cosLat = cos(centerLat * pi / 180.0);
+    final double zoom =
+        log(metersPerPixelAtEquator * cosLat / metersPerPixel) / ln2;
+
+    // Clamp zoom to reasonable bounds (typically 10-20 for street level)
+    return zoom.clamp(10.0, 20.0);
+  }
+
+  /**
+   * Calculates the new hint values (radius and center) without applying them.
+   * Returns a map with 'radius' and 'center' keys, or null if calculation fails.
+   */
+  Map<String, dynamic>? _calculateNewHintValues() {
+    if (numHintsLeft > 0 && hintCenter != null && startingHintCenter != null) {
       // Calculate total hints: backend hints + this new hint we're about to use
       int totalHintsUsed = widget.startingHintsUsed + 1;
 
@@ -463,11 +679,387 @@ class _GameplayMapState extends State<GameplayMap> {
           (startingHintCenter!.lat - widget.targetLocation.lat) * 0.33;
       double newLong = hintCenter!.long -
           (startingHintCenter!.long - widget.targetLocation.long) * 0.33;
-      hintRadius = newRadius;
-      hintCenter = GeoPoint(newLat, newLong, 0);
-      // updates the widget's state, causing it to rebuild
-      setState(() {});
+
+      return {
+        'radius': newRadius,
+        'center': GeoPoint(newLat, newLong, 0),
+      };
     }
+    return null;
+  }
+
+  /** 
+   * Handles logic to use a hint. This includes updating hints left, 
+   * calculating the updated radius of the hint circle, and changing the
+   * location of the hint center such that it still contains the awarding
+   * radius.
+   */
+  void useHint() {
+    var newValues = _calculateNewHintValues();
+    if (newValues == null) {
+      return;
+    }
+
+    // update event tracker with new hints left value
+    var eventId = Provider.of<GroupModel>(context, listen: false).curEventId;
+    if (eventId == null) {
+      displayToast("Could not get event", Status.error);
+      return;
+    } else {
+      Provider.of<TrackerModel>(context, listen: false)
+          .useEventTrackerHint(eventId);
+    }
+
+    hintRadius = newValues['radius'] as double;
+    hintCenter = newValues['center'] as GeoPoint;
+    // updates the widget's state, causing it to rebuild
+    setState(() {});
+  }
+
+  void _openHintDialog() {
+    setState(() {
+      isHintDialogOpen = true;
+      isHintButtonIlluminated = true;
+    });
+
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+      barrierColor: Colors.transparent,
+      transitionDuration: const Duration(milliseconds: 300),
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        return FadeTransition(
+          opacity: CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeInOut,
+          ),
+          child: child,
+        );
+      },
+      pageBuilder: (dialogContext, animation, secondaryAnimation) {
+        return Container(
+          child: Dialog(
+            elevation: 16,
+            insetPadding: EdgeInsets.zero,
+            child: SizedBox(
+              width: 334,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: displayHintDialog(dialogContext),
+              ),
+            ),
+          ),
+        );
+      },
+    ).then((_) {
+      if (mounted && !isHintAnimationInProgress) {
+        setState(() {
+          isHintDialogOpen = false;
+          isHintButtonIlluminated = false;
+        });
+      }
+    });
+  }
+
+  void _startHintAnimationFlow() {
+    if (!(numHintsLeft > 0 &&
+        hintCenter != null &&
+        startingHintCenter != null)) {
+      setState(() {
+        isHintDialogOpen = false;
+        isHintAnimationInProgress = false;
+        isHintButtonIlluminated = false;
+      });
+      return;
+    }
+
+    final previousHints = numHintsLeft;
+
+    setState(() {
+      isHintDialogOpen = false;
+      isHintAnimationInProgress = true;
+    });
+
+    useHint();
+
+    setState(() {
+      numHintsLeft = max(previousHints - 1, 0);
+    });
+
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        isHintAnimationInProgress = false;
+        isHintButtonIlluminated = false;
+      });
+    });
+  }
+
+  /**
+   * Animation flow for using a hint
+   */
+  Future<void> _startHintAnimationFlowWithAnimations() async {
+    if (!(numHintsLeft > 0 &&
+        hintCenter != null &&
+        startingHintCenter != null)) {
+      setState(() {
+        isHintDialogOpen = false;
+        isHintAnimationInProgress = false;
+        isHintButtonIlluminated = false;
+      });
+      return;
+    }
+
+    final previousHints = numHintsLeft;
+
+    // Store old radius before updating
+    _oldHintRadius = hintRadius ?? defaultHintRadius;
+
+    setState(() {
+      isHintDialogOpen = false;
+      isHintAnimationInProgress = true;
+      isHintButtonIlluminated = true;
+    });
+
+    // Calculate new hint values using existing logic
+    var newValues = _calculateNewHintValues();
+    if (newValues == null) {
+      setState(() {
+        isHintAnimationInProgress = false;
+        isHintButtonIlluminated = false;
+      });
+      return;
+    }
+
+    // Update event tracker
+    var eventId = Provider.of<GroupModel>(context, listen: false).curEventId;
+    if (eventId == null) {
+      displayToast("Could not get event", Status.error);
+      setState(() {
+        isHintAnimationInProgress = false;
+        isHintButtonIlluminated = false;
+      });
+      return;
+    }
+
+    Provider.of<TrackerModel>(context, listen: false)
+        .useEventTrackerHint(eventId);
+
+    _newHintRadius = newValues['radius'] as double;
+    hintCenter = newValues['center'] as GeoPoint;
+
+    setState(() {
+      numHintsLeft = max(previousHints - 1, 0);
+    });
+
+    GoogleMapController googleMapController = await mapCompleter.future;
+
+    // Helper function to calculate intermediate position
+    LatLng _offsetTowards(LatLng from, LatLng to, double t) {
+      return LatLng(
+        from.latitude + (to.latitude - from.latitude) * t,
+        from.longitude + (to.longitude - from.longitude) * t,
+      );
+    }
+
+    // Step 1: Zoom into the blue circle with two-part animation using AnimationControllers
+    if (hintCenter != null) {
+      final finalTarget = LatLng(hintCenter!.lat, hintCenter!.long);
+      await Future.delayed(const Duration(milliseconds: 1000));
+
+      // Use current camera position if available, otherwise use current location
+      final startPosition = _currentCameraPosition ??
+          (currentLocation != null
+              ? LatLng(currentLocation!.lat, currentLocation!.long)
+              : _center);
+
+      // Calculate intermediate target
+      final intermediateTarget =
+          _offsetTowards(startPosition, finalTarget, 0.7);
+
+      // Get current zoom or use default
+      final startZoom = _currentZoom ?? 16.0;
+
+      final screenWidth = MediaQuery.of(context).size.width;
+      final screenHeight = MediaQuery.of(context).size.height;
+      final screenSizePixels = min(screenWidth, screenHeight);
+
+      final circleRadius = _newHintRadius ?? hintRadius ?? defaultHintRadius;
+      final double paddingFactor = circleRadius < 60 ? 4.0 : 2.5;
+      final calculatedZoom = _calculateZoomForRadius(
+          circleRadius, finalTarget.latitude, screenSizePixels,
+          paddingFactor: paddingFactor);
+
+      // Ensure the circle always fits on screen
+      final targetZoom = min(calculatedZoom, 18.0).clamp(startZoom, 18.0);
+
+      final intermediateZoom = startZoom + (targetZoom - startZoom) * 0.6;
+
+      try {
+        if (_zoomStage1Controller.isAnimating) {
+          _zoomStage1Controller.stop();
+        }
+        _zoomStage1Controller.reset();
+      } catch (e) {
+        // Fallback: if controllers aren't initialized, use simple animation
+        await googleMapController.animateCamera(
+          CameraUpdate.newCameraPosition(
+            CameraPosition(
+              target: intermediateTarget,
+              zoom: intermediateZoom,
+            ),
+          ),
+        );
+        await Future.delayed(const Duration(milliseconds: 300));
+        await googleMapController.animateCamera(
+          CameraUpdate.newCameraPosition(
+            CameraPosition(
+              target: finalTarget,
+              zoom: 18.0,
+            ),
+          ),
+        );
+        return;
+      }
+
+      // Set up animation values for Stage 1
+      final stage1StartZoom = startZoom;
+      final stage1EndZoom = intermediateZoom;
+      final stage1StartPos = startPosition;
+      final stage1EndPos = intermediateTarget;
+
+      _stage1Listener = () {
+        final t = _zoomStage1Animation.value;
+        final currentZoom =
+            stage1StartZoom + (stage1EndZoom - stage1StartZoom) * t;
+        final currentPos = _offsetTowards(stage1StartPos, stage1EndPos, t);
+
+        googleMapController.moveCamera(
+          CameraUpdate.newCameraPosition(
+            CameraPosition(
+              target: currentPos,
+              zoom: currentZoom,
+            ),
+          ),
+        );
+      };
+
+      _zoomStage1Controller.addListener(_stage1Listener!);
+      await _zoomStage1Controller.forward();
+      if (_stage1Listener != null) {
+        _zoomStage1Controller.removeListener(_stage1Listener!);
+        _stage1Listener = null;
+      }
+
+      await Future.delayed(const Duration(milliseconds: 300));
+
+      // Stage 2: Animate to final position with elastic bo
+      try {
+        if (_zoomStage2Controller.isAnimating) {
+          _zoomStage2Controller.stop();
+        }
+        _zoomStage2Controller.reset();
+      } catch (e) {
+        return;
+      }
+
+      // Set up animation values for Stage 2
+      final stage2StartZoom = intermediateZoom;
+      final stage2EndZoom = targetZoom;
+      final stage2StartPos = intermediateTarget;
+      final stage2EndPos = finalTarget;
+
+      _stage2Listener = () {
+        final t = _zoomStage2Animation.value;
+        final currentZoom =
+            stage2StartZoom + (stage2EndZoom - stage2StartZoom) * t;
+        final currentPos = _offsetTowards(stage2StartPos, stage2EndPos, t);
+
+        googleMapController.moveCamera(
+          CameraUpdate.newCameraPosition(
+            CameraPosition(
+              target: currentPos,
+              zoom: currentZoom,
+            ),
+          ),
+        );
+      };
+
+      _zoomStage2Controller.addListener(_stage2Listener!);
+      await _zoomStage2Controller.forward();
+      if (_stage2Listener != null) {
+        _zoomStage2Controller.removeListener(_stage2Listener!);
+        _stage2Listener = null;
+      }
+    }
+
+    _showHintBearAnimation();
+
+    // Phase 1: Slide in halfway with 15 degree tilt
+    _bearSlideInController.reset();
+    await _bearSlideInController.animateTo(0.5);
+
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    // Phase 2: Rotate back to normal while sliding in fully
+    _bearRotateController.reset();
+    await Future.wait([
+      _bearSlideInController.forward(), // Continue from 0.5 to 1.0
+      _bearRotateController.forward(), // Rotate from 15 to 0 degrees
+    ]);
+
+    // Phase 3: Speech bubble fades in
+    _speechBubbleFadeController.reset();
+    await _speechBubbleFadeController.forward();
+
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    // Animate circle shrinking
+    _circleShrinkController.reset();
+    hintRadius = _oldHintRadius;
+    setState(() {});
+
+    await _circleShrinkController.forward();
+
+    // Update to final radius after animation
+    hintRadius = _newHintRadius;
+    setState(() {});
+
+    await Future.delayed(const Duration(milliseconds: 1000));
+    // Phase 4: Fade to hint_animation3.svg with "Goodluck!" message
+    _bearFadeController.reset();
+    await _bearFadeController.forward();
+
+    await Future.delayed(const Duration(milliseconds: 1000));
+
+    // Phase 5: Slide bear out left and fade out speech bubble
+    try {
+      _bearSlideOutController.reset();
+      await Future.wait([
+        _bearSlideOutController.forward(),
+        _speechBubbleFadeController.reverse(),
+      ]);
+    } catch (e) {}
+
+    _removeHintBearOverlay();
+
+    // Step 3: Recenter camera
+    recenterCamera();
+
+    // Step 4: Remove grey overlay after a short delay
+    await Future.delayed(const Duration(milliseconds: 300));
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      isHintAnimationInProgress = false;
+      isHintButtonIlluminated = false;
+    });
   }
 
   // Build image toggle widget with optional onboarding showcase
@@ -632,28 +1224,38 @@ class _GameplayMapState extends State<GameplayMap> {
     double screenWidth,
     double screenHeight,
   ) {
+    final bool shouldHighlight = isHintDialogOpen ||
+        isHintButtonIlluminated ||
+        isHintAnimationInProgress;
+    final Color iconColor = shouldHighlight
+        ? const Color(0xFFFFAA5B)
+        : (numHintsLeft == 0
+            ? const Color.fromARGB(255, 217, 217, 217)
+            : const Color.fromARGB(255, 131, 90, 124));
+    final Color hintCountColor = shouldHighlight
+        ? const Color(0xFFFFAA5B)
+        : (numHintsLeft == 0
+            ? const Color.fromARGB(255, 217, 217, 217)
+            : const Color.fromARGB(255, 131, 90, 124));
+
     // 1. Build complete hint button with counter badge (without padding)
     Widget hintButton = Stack(
       children: [
         // hint button
         FloatingActionButton.extended(
           heroTag: "hint_button",
-          onPressed: useHint,
+          onPressed: _openHintDialog,
           label: SvgPicture.asset("assets/icons/maphint.svg",
-              colorFilter: ColorFilter.mode(
-                  numHintsLeft == 0
-                      ? Color.fromARGB(255, 217, 217, 217)
-                      : Color.fromARGB(255, 131, 90, 124),
-                  BlendMode.srcIn)),
-          backgroundColor: Color.fromARGB(255, 255, 255, 255),
-          shape: CircleBorder(),
+              colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn)),
+          backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+          shape: const CircleBorder(),
         ),
         // num hints left counter
         Positioned(
           top: 0,
           right: 0,
           child: Container(
-            padding: EdgeInsets.all(5.0),
+            padding: const EdgeInsets.all(5.0),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: Colors.white,
@@ -667,9 +1269,7 @@ class _GameplayMapState extends State<GameplayMap> {
             child: Text(
               numHintsLeft.toString(),
               style: TextStyle(
-                color: numHintsLeft == 0
-                    ? Color.fromARGB(255, 217, 217, 217)
-                    : Color.fromARGB(255, 131, 90, 124),
+                color: hintCountColor,
                 fontSize: 15,
                 fontWeight: FontWeight.bold,
               ),
@@ -819,6 +1419,10 @@ class _GameplayMapState extends State<GameplayMap> {
               },
               child: GoogleMap(
                 onMapCreated: _onMapCreated,
+                onCameraMove: (CameraPosition position) {
+                  _currentCameraPosition = position.target;
+                  _currentZoom = position.zoom;
+                },
                 compassEnabled: false,
                 myLocationButtonEnabled: false,
                 zoomControlsEnabled: false,
@@ -850,7 +1454,19 @@ class _GameplayMapState extends State<GameplayMap> {
                         ? LatLng(hintCenter!.lat, hintCenter!.long)
                         : _center,
                     radius: () {
-                      double radiusValue = hintRadius ?? defaultHintRadius;
+                      // Use animated radius if animation is in progress
+                      double radiusValue;
+                      if (isHintAnimationInProgress &&
+                          _oldHintRadius != null &&
+                          _newHintRadius != null &&
+                          _circleShrinkAnimation.value < 1.0) {
+                        // Interpolate between old and new radius during animation
+                        radiusValue = _oldHintRadius! +
+                            (_newHintRadius! - _oldHintRadius!) *
+                                _circleShrinkAnimation.value;
+                      } else {
+                        radiusValue = hintRadius ?? defaultHintRadius;
+                      }
 
                       // Safety check to prevent crashes
                       if (radiusValue.isNaN ||
@@ -933,6 +1549,21 @@ class _GameplayMapState extends State<GameplayMap> {
                 },
               ),
             ),
+            _buildImageToggle(
+              onboarding,
+              imageUrl,
+              screenWidth,
+              screenHeight,
+            ),
+            if (isHintAnimationInProgress)
+              Positioned.fill(
+                child: AbsorbPointer(
+                  absorbing: true,
+                  child: Container(
+                    color: const Color.fromARGB(128, 217, 217, 217),
+                  ),
+                ),
+              ),
             Positioned(
               bottom: 0,
               right: 10,
@@ -950,12 +1581,6 @@ class _GameplayMapState extends State<GameplayMap> {
                   ),
                 ],
               ),
-            ),
-            _buildImageToggle(
-              onboarding,
-              imageUrl,
-              screenWidth,
-              screenHeight,
             ),
           ],
         );
@@ -1098,8 +1723,10 @@ class _GameplayMapState extends State<GameplayMap> {
                   if (numHintsLeft > 0) Spacer(),
                   if (numHintsLeft > 0)
                     ElevatedButton(
-                        onPressed: () =>
-                            {useHint(), Navigator.pop(context, false)},
+                        onPressed: () {
+                          Navigator.pop(context, false);
+                          _startHintAnimationFlow();
+                        },
                         style: ButtonStyle(
                           padding:
                               MaterialStateProperty.all<EdgeInsetsGeometry>(
@@ -1124,5 +1751,517 @@ class _GameplayMapState extends State<GameplayMap> {
               ],
             ),
           );
+  }
+
+  Widget displayHintDialog(BuildContext context) {
+    return Container(
+      height: 335,
+      width: 334,
+      padding: const EdgeInsets.all(16),
+      decoration: ShapeDecoration(
+        color: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(9.14),
+        ),
+      ),
+      child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: 16,
+          children: [
+            Container(
+              width: 302,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                spacing: 16,
+                children: [
+                  Container(
+                    width: double.infinity,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      spacing: 21,
+                      children: [
+                        Container(
+                          width: double.infinity,
+                          height: 23,
+                          child: Wrap(
+                            alignment: WrapAlignment.end,
+                            runAlignment: WrapAlignment.start,
+                            spacing: 8,
+                            runSpacing: 0,
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.of(context).pop();
+                                  setState(() {
+                                    isHintDialogOpen = false;
+                                    isHintButtonIlluminated = false;
+                                  });
+                                },
+                                child: Container(
+                                  width: 24,
+                                  height: 24,
+                                  clipBehavior: Clip.antiAlias,
+                                  decoration: BoxDecoration(),
+                                  child: SvgPicture.asset(
+                                    'assets/icons/cancel.svg',
+                                    width: 24,
+                                    height: 24,
+                                    fit: BoxFit.contain,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          width: 302,
+                          child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              spacing: 16,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    SvgPicture.asset(
+                                      numHintsLeft <= 0
+                                          ? 'assets/icons/sweating_bear.svg'
+                                          : 'assets/icons/hint_popup.svg',
+                                      width: numHintsLeft <= 0 ? 134 : 186.72,
+                                      height: numHintsLeft <= 0 ? 110 : null,
+                                      fit: BoxFit.contain,
+                                    ),
+                                  ],
+                                ),
+                              ]),
+                        ),
+                        Container(
+                          width: double.infinity,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            spacing: 12,
+                            children: [
+                              Container(
+                                width: double.infinity,
+                                clipBehavior: Clip.antiAlias,
+                                decoration: BoxDecoration(),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  spacing: 4,
+                                  children: [
+                                    Text(
+                                      numHintsLeft <= 0
+                                          ? "You're out of Hints!"
+                                          : 'Want to use a Hint?',
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 24,
+                                        fontFamily: 'Poppins',
+                                        fontWeight: FontWeight.w700,
+                                        height: 1.30,
+                                      ),
+                                    ),
+                                    numHintsLeft <= 0
+                                        ? Text(
+                                            "Hints refresh on Monday or Buy One",
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 14,
+                                              fontFamily: 'Poppins',
+                                              fontWeight: FontWeight.w400,
+                                            ),
+                                          )
+                                        : Text.rich(
+                                            TextSpan(
+                                              children: [
+                                                TextSpan(
+                                                  text: 'You have ',
+                                                  style: TextStyle(
+                                                    color: Colors.black,
+                                                    fontSize: 14,
+                                                    fontFamily: 'Poppins',
+                                                    fontWeight: FontWeight.w400,
+                                                  ),
+                                                ),
+                                                TextSpan(
+                                                  text: numHintsLeft.toString(),
+                                                  style: TextStyle(
+                                                    color:
+                                                        const Color(0xFFE95755),
+                                                    fontSize: 14,
+                                                    fontFamily: 'Poppins',
+                                                    fontWeight: FontWeight.w700,
+                                                  ),
+                                                ),
+                                                TextSpan(
+                                                  text: numHintsLeft == 1
+                                                      ? ' hint left for the week!'
+                                                      : ' hints left for the week!',
+                                                  style: TextStyle(
+                                                    color: Colors.black,
+                                                    fontSize: 14,
+                                                    fontFamily: 'Poppins',
+                                                    fontWeight: FontWeight.w400,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          spacing: 15,
+                          children: [
+                            SizedBox(
+                              width: 118,
+                              height: 40,
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                  setState(() {
+                                    isHintDialogOpen = false;
+                                    isHintButtonIlluminated = false;
+                                  });
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.white,
+                                  elevation: 0,
+                                  padding: const EdgeInsets.all(10),
+                                  minimumSize: const Size.fromHeight(40),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    side: BorderSide(
+                                      width: 1.5,
+                                      color: numHintsLeft <= 0
+                                          ? const Color(0xFFED5656)
+                                          : const Color(0xFFEC5555),
+                                    ),
+                                  ),
+                                ),
+                                child: Text(
+                                  "Nevermind",
+                                  style: TextStyle(
+                                    fontFamily: 'Poppins',
+                                    fontSize: 14,
+                                    color: numHintsLeft <= 0
+                                        ? const Color(0xFFED5656)
+                                        : const Color(0xFFEC5555),
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              width: 118,
+                              height: 40,
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                  if (numHintsLeft > 0) {
+                                    _startHintAnimationFlowWithAnimations();
+                                  } else {
+                                    // TODO: Implement buy hint functionality
+                                  }
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: numHintsLeft <= 0
+                                      ? const Color(0xFFED5656)
+                                      : const Color(0xFFEC5555),
+                                  elevation: 0,
+                                  padding: const EdgeInsets.all(10),
+                                  minimumSize: const Size.fromHeight(40),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                                child: numHintsLeft <= 0
+                                    ? Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Text(
+                                            "Buy",
+                                            style: TextStyle(
+                                              fontFamily: 'Poppins',
+                                              fontSize: 14,
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 4),
+                                          SvgPicture.asset(
+                                            'assets/icons/bearcoins.svg',
+                                            width: 16,
+                                            height: 16,
+                                            fit: BoxFit.contain,
+                                          ),
+                                          const SizedBox(width: 4),
+                                          const Text(
+                                            "20",
+                                            style: TextStyle(
+                                              fontFamily: 'Poppins',
+                                              fontSize: 14,
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
+                                      )
+                                    : const Text(
+                                        "Use one Hint",
+                                        style: TextStyle(
+                                          fontFamily: 'Poppins',
+                                          fontSize: 14,
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ]),
+    );
+  }
+}
+
+/**
+ * Widget for the bear hint animation overlay
+ */
+class _HintBearAnimationWidget extends StatefulWidget {
+  final Animation<double> bearSlideInAnimation;
+  final Animation<double> bearRotateAnimation;
+  final Animation<double> speechBubbleFadeAnimation;
+  final Animation<double> bearFadeAnimation;
+  final Animation<double> bearSlideOutAnimation;
+  final double screenWidth;
+  final double screenHeight;
+
+  const _HintBearAnimationWidget({
+    required this.bearSlideInAnimation,
+    required this.bearRotateAnimation,
+    required this.speechBubbleFadeAnimation,
+    required this.bearFadeAnimation,
+    required this.bearSlideOutAnimation,
+    required this.screenWidth,
+    required this.screenHeight,
+  });
+
+  @override
+  State<_HintBearAnimationWidget> createState() =>
+      _HintBearAnimationWidgetState();
+}
+
+class _HintBearAnimationWidgetState extends State<_HintBearAnimationWidget> {
+  String _currentMessage = "Here is your hint!";
+  late VoidCallback _fadeListener;
+  bool _messageChanged = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Listen to fade animation to switch message when it starts
+    _fadeListener = () {
+      if (widget.bearFadeAnimation.value > 0.0 && !_messageChanged) {
+        if (mounted) {
+          setState(() {
+            _currentMessage = "Goodluck!";
+            _messageChanged = true;
+          });
+        }
+      }
+    };
+    widget.bearFadeAnimation.addListener(_fadeListener);
+
+    widget.bearFadeAnimation.addStatusListener((status) {
+      if (status == AnimationStatus.forward && !_messageChanged) {
+        if (mounted) {
+          setState(() {
+            _currentMessage = "Goodluck!";
+            _messageChanged = true;
+          });
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    widget.bearFadeAnimation.removeListener(_fadeListener);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final screenWidth = widget.screenWidth;
+    final screenHeight = widget.screenHeight;
+
+    // Bear sizing and positioning
+    final bearWidth = screenWidth * 0.25;
+    final bearHeight = screenHeight * 0.22;
+    final bearLeft = 0.0;
+    final bearBottom = screenHeight * 0.045;
+
+    return IgnorePointer(
+      child: SizedBox(
+        width: screenWidth,
+        height: screenHeight,
+        child: Stack(
+          children: [
+            // Bear image
+            AnimatedBuilder(
+              animation: Listenable.merge([
+                widget.bearSlideInAnimation,
+                widget.bearRotateAnimation,
+                widget.bearFadeAnimation,
+                widget.bearSlideOutAnimation,
+              ]),
+              builder: (context, child) {
+                final slideInProgress = widget.bearSlideInAnimation.value;
+                final slideOutProgress = widget.bearSlideOutAnimation.value;
+                final baseX =
+                    bearLeft - (bearWidth * 1.6) * (1.0 - slideInProgress);
+                final bearX = baseX - (bearWidth * slideOutProgress);
+
+                final rotationDegrees =
+                    (15.0 - widget.bearRotateAnimation.value * 15.0) *
+                        (pi / 180.0);
+
+                final bearOpacity2 = 1.0 - widget.bearFadeAnimation.value;
+                final bearOpacity3 = widget.bearFadeAnimation.value;
+
+                return Positioned(
+                  left: bearX,
+                  bottom: bearBottom,
+                  child: Stack(
+                    children: [
+                      Opacity(
+                        opacity: bearOpacity2,
+                        child: Transform.rotate(
+                          angle: widget.bearFadeAnimation.value > 0.0
+                              ? 0.0
+                              : rotationDegrees,
+                          alignment: Alignment.center,
+                          child: SvgPicture.asset(
+                            'assets/icons/hint_animation2.svg',
+                            width: bearWidth,
+                            height: bearHeight,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
+                      Opacity(
+                        opacity: bearOpacity3,
+                        child: Transform.translate(
+                          offset: Offset(0, bearHeight * -0.08),
+                          child: SvgPicture.asset(
+                            'assets/icons/hint_animation3.svg',
+                            width: bearWidth * 1.15,
+                            height: bearHeight * 1.15,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+            // Speech bubble
+            AnimatedBuilder(
+              animation: widget.speechBubbleFadeAnimation,
+              builder: (context, child) {
+                final messageBoxWidth = _currentMessage == "Goodluck!"
+                    ? screenWidth * 0.3
+                    : screenWidth * 0.4;
+                final messageLeft = _currentMessage == "Goodluck!"
+                    ? screenWidth * 0.28
+                    : screenWidth * 0.38;
+                final messageBottom = screenHeight * 0.265;
+                final arrowWidth = screenWidth * 0.1;
+                final arrowHeight = screenHeight * 0.04;
+
+                return Positioned(
+                  left: messageLeft - (messageBoxWidth / 2),
+                  bottom: messageBottom,
+                  child: Opacity(
+                    opacity: widget.speechBubbleFadeAnimation.value,
+                    child: Material(
+                      color: Colors.transparent,
+                      elevation: 8,
+                      shadowColor: Colors.black.withOpacity(0.5),
+                      borderRadius: BorderRadius.circular(8),
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          // Bubble
+                          Container(
+                            width: messageBoxWidth,
+                            constraints: const BoxConstraints(maxWidth: 300),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 8),
+                            child: Text(
+                              _currentMessage,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontFamily: 'Poppins',
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.red,
+                                height: 1.5,
+                              ),
+                            ),
+                          ),
+
+                          // Arrow
+                          Positioned(
+                            left: messageBoxWidth * 0.2,
+                            bottom: -arrowHeight * 0.6,
+                            child: SvgPicture.asset(
+                              'assets/icons/bubblearrow.svg',
+                              width: arrowWidth,
+                              height: arrowHeight,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
