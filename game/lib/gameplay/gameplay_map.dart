@@ -1768,7 +1768,6 @@ class _GameplayMapState extends State<GameplayMap>
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
-          spacing: 16,
           children: [
             Container(
               width: 302,
@@ -1776,7 +1775,6 @@ class _GameplayMapState extends State<GameplayMap>
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
-                spacing: 16,
                 children: [
                   Container(
                     width: double.infinity,
@@ -1784,7 +1782,6 @@ class _GameplayMapState extends State<GameplayMap>
                       mainAxisSize: MainAxisSize.min,
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.center,
-                      spacing: 21,
                       children: [
                         Container(
                           width: double.infinity,
@@ -1819,13 +1816,13 @@ class _GameplayMapState extends State<GameplayMap>
                             ],
                           ),
                         ),
+                        const SizedBox(height: 21),
                         Container(
                           width: 302,
                           child: Column(
                               mainAxisSize: MainAxisSize.min,
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.center,
-                              spacing: 16,
                               children: [
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
@@ -1842,13 +1839,13 @@ class _GameplayMapState extends State<GameplayMap>
                                 ),
                               ]),
                         ),
+                        const SizedBox(height: 21),
                         Container(
                           width: double.infinity,
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.center,
-                            spacing: 12,
                             children: [
                               Container(
                                 width: double.infinity,
@@ -1858,7 +1855,6 @@ class _GameplayMapState extends State<GameplayMap>
                                   mainAxisSize: MainAxisSize.min,
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   crossAxisAlignment: CrossAxisAlignment.center,
-                                  spacing: 4,
                                   children: [
                                     Text(
                                       numHintsLeft <= 0
@@ -1872,6 +1868,7 @@ class _GameplayMapState extends State<GameplayMap>
                                         height: 1.30,
                                       ),
                                     ),
+                                    const SizedBox(height: 4),
                                     numHintsLeft <= 0
                                         ? Text(
                                             "Hints refresh on Monday or Buy One",
@@ -1921,6 +1918,7 @@ class _GameplayMapState extends State<GameplayMap>
                                   ],
                                 ),
                               ),
+                              const SizedBox(height: 12),
                             ],
                           ),
                         ),
@@ -1928,7 +1926,6 @@ class _GameplayMapState extends State<GameplayMap>
                           mainAxisSize: MainAxisSize.min,
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.center,
-                          spacing: 15,
                           children: [
                             SizedBox(
                               width: 118,
@@ -1969,6 +1966,7 @@ class _GameplayMapState extends State<GameplayMap>
                                 ),
                               ),
                             ),
+                            const SizedBox(width: 15),
                             SizedBox(
                               width: 118,
                               height: 40,
