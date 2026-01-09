@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:flutter_config/flutter_config.dart';
+import 'package:flutter_config_plus/flutter_config_plus.dart';
+import 'package:game/api/geopoint.dart';
 import 'package:game/loading_page/loading_page.dart';
 import 'package:game/model/achievement_model.dart';
+import 'package:device_preview/device_preview.dart';
+import 'package:game/model/onboarding_model.dart';
 
 // imports for google maps
 import 'dart:io' show Platform;
@@ -24,32 +29,54 @@ import 'package:game/widget/game_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:game/color_palette.dart';
 
-const ENV_URL = String.fromEnvironment('API_URL', defaultValue: "");
-
+const bool USE_DEVICE_PREVIEW = false;
 final storage = FlutterSecureStorage();
-final LOOPBACK =
-    (Platform.isAndroid ? "http://10.0.2.2:8080" : "http://0.0.0.0:8080");
-final API_URL = ENV_URL == "" ? LOOPBACK : ENV_URL;
+late final String API_URL;
+late final ApiClient client;
 
 void main() async {
-  print(API_URL);
+  // Initialize Flutter bindings first - required for ALL plugins
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Load environment variables from .env file
+  await FlutterConfigPlus.loadEnvVariables();
+
+  // Define LOOPBACK and get API_URL from FlutterConfigPlus
+  final LOOPBACK =
+      (Platform.isAndroid ? "http://10.0.2.2:8080" : "http://0.0.0.0:8080");
+  API_URL = FlutterConfigPlus.get('API_URL') ?? LOOPBACK;
+  print('Using API URL: $API_URL');
+
+  // Initialize API client
+  client = ApiClient(storage, API_URL);
+
+  // Init Google Maps platform
   final GoogleMapsFlutterPlatform platform = GoogleMapsFlutterPlatform.instance;
   // should only apply to Android - needs to be tested for iOS
   if (platform is GoogleMapsFlutterAndroid) {
     (platform).useAndroidViewSurface = true;
     initializeMapRenderer();
   }
-  // load environment variables
-  WidgetsFlutterBinding.ensureInitialized(); // Required by FlutterConfig
-  await FlutterConfig.loadEnvVariables();
 
-  runApp(MyApp());
+  // Set preferred orientations to portrait only
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+
+  runApp(
+    USE_DEVICE_PREVIEW
+        ? DevicePreview(
+            enabled: !kReleaseMode,
+            builder: (context) => MyApp(),
+          )
+        : MyApp(),
+  );
 }
 
 Completer<AndroidMapRenderer?>? _initializedRendererCompleter;
 
 /// Initializes map renderer to the `latest` renderer type.
-///
 /// The renderer must be requested before creating GoogleMap instances,
 /// as the renderer can be initialized only once per application context.
 Future<AndroidMapRenderer?> initializeMapRenderer() async {
@@ -64,61 +91,62 @@ Future<AndroidMapRenderer?> initializeMapRenderer() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final GoogleMapsFlutterPlatform platform = GoogleMapsFlutterPlatform.instance;
-  unawaited((platform as GoogleMapsFlutterAndroid)
-      .initializeWithRenderer(AndroidMapRenderer.latest)
-      .then((AndroidMapRenderer initializedRenderer) =>
-          completer.complete(initializedRenderer)));
-
+  unawaited(
+    (platform as GoogleMapsFlutterAndroid)
+        .initializeWithRenderer(AndroidMapRenderer.latest)
+        .then(
+          (AndroidMapRenderer initializedRenderer) =>
+              completer.complete(initializedRenderer),
+        ),
+  );
   return completer.future;
 }
-
-final client = ApiClient(storage, API_URL);
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-        providers: [
-          ChangeNotifierProvider.value(value: client),
-          ChangeNotifierProvider(
-            create: (_) => UserModel(client),
-            lazy: false,
+      providers: [
+        ChangeNotifierProvider.value(value: client),
+        ChangeNotifierProvider(create: (_) => UserModel(client), lazy: false),
+        ChangeNotifierProvider(
+            create: (_) => OnboardingModel(client), lazy: false),
+        ChangeNotifierProvider(create: (_) => GroupModel(client), lazy: false),
+        ChangeNotifierProvider(create: (_) => EventModel(client), lazy: false),
+        ChangeNotifierProvider(
+          create: (_) => AchievementModel(client),
+          lazy: false,
+        ),
+        ChangeNotifierProvider(
+          create: (_) => TrackerModel(client),
+          lazy: false,
+        ),
+        ChangeNotifierProvider(
+          create: (_) => ChallengeModel(client),
+          lazy: false,
+        ),
+      ],
+      child: GameWidget(
+        child: MaterialApp(
+          useInheritedMediaQuery: USE_DEVICE_PREVIEW,
+          locale: USE_DEVICE_PREVIEW ? DevicePreview.locale(context) : null,
+          builder: USE_DEVICE_PREVIEW ? DevicePreview.appBuilder : null,
+          title: 'CornellGO!',
+          localizationsDelegates: [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [Locale('en', '')],
+          theme: ThemeData(
+            fontFamily: 'Poppins',
+            primarySwatch: ColorPalette.BigRed,
+            useMaterial3: false,
           ),
-          ChangeNotifierProvider(
-            create: (_) => GroupModel(client),
-            lazy: false,
-          ),
-          ChangeNotifierProvider(
-            create: (_) => EventModel(client),
-            lazy: false,
-          ),
-          ChangeNotifierProvider(
-            create: (_) => AchievementModel(client),
-            lazy: false,
-          ),
-          ChangeNotifierProvider(
-            create: (_) => TrackerModel(client),
-            lazy: false,
-          ),
-          ChangeNotifierProvider(
-            create: (_) => ChallengeModel(client),
-            lazy: false,
-          )
-        ],
-        child: GameWidget(
-            child: MaterialApp(
-                title: 'CornellGO!',
-                localizationsDelegates: [
-                  GlobalMaterialLocalizations.delegate,
-                  GlobalWidgetsLocalizations.delegate,
-                  GlobalCupertinoLocalizations.delegate,
-                ],
-                supportedLocales: const [Locale('en', '')],
-                theme: ThemeData(
-                    fontFamily: 'Poppins',
-                    primarySwatch: ColorPalette.BigRed,
-                    useMaterial3: false),
-                home: LoadingPageWidget(client.tryRelog()))));
+          home: LoadingPageWidget(client.tryRelog()),
+        ),
+      ),
+    );
   }
 }

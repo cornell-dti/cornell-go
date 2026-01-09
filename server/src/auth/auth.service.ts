@@ -19,6 +19,19 @@ interface IntermediatePayload {
  * including login, token management, and user verification.
  *
  * Now supports Google and Apple (OAuth), and device login. Only Cornell emails are allowed.
+ * The service integrates with `UserService` for user retrieval and registration and uses `PrismaService`
+ * for database interactions. It also utilizes JWT for secure token generation and verification.
+ *
+ * @param prisma - Injected `PrismaService` for database operations.
+ * @param jwtService - Injected `JwtService` for handling JWT authentication.
+ * @param userService - Injected `UserService` to manage user-related operations.
+ *
+ * @returns Provides authentication-related functionalities, including:
+ * - Verifying Google and Apple ID tokens.
+ * - Handling user login and registration.
+ * - Issuing and refreshing JWT tokens.
+ * - Retrieving users by authentication tokens.
+ * - Checking if a user manages any organizations.
  */
 @Injectable()
 export class AuthService {
@@ -143,12 +156,17 @@ export class AuthService {
         break;
     }
 
-    if (!idToken || !idToken.email.endsWith('@cornell.edu')) {
-      if (!idToken) {
-        console.log('Id token was null!');
-      } else {
-        console.log('Non cornell account was used!');
-      }
+    if (!idToken) {
+      console.log('Id token was null!');
+      return null;
+    }
+
+    // Only enforce Cornell email requirement for Google and Device login, not Apple
+    if (
+      authType !== AuthType.APPLE &&
+      !idToken.email.endsWith('@cornell.edu')
+    ) {
+      console.log('Non cornell account was used!');
       return null;
     }
 

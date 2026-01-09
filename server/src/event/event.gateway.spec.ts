@@ -4,6 +4,8 @@ import { ClientService } from '../client/client.service';
 import { EventService } from './event.service';
 import { OrganizationService } from '../organization/organization.service';
 import { AuthService } from '../auth/auth.service';
+import { CaslAbilityFactory } from '../casl/casl-ability.factory';
+import { Reflector } from '@nestjs/core';
 
 describe('EventGateway', () => {
   let gateway: EventGateway;
@@ -27,6 +29,14 @@ describe('EventGateway', () => {
         {
           useValue: null,
           provide: AuthService,
+        },
+        {
+          useValue: null,
+          provide: CaslAbilityFactory,
+        },
+        {
+          useValue: null,
+          provide: Reflector,
         },
       ],
     }).compile();

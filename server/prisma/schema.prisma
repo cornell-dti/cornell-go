@@ -83,7 +83,7 @@ model User {
   subject             String               @default("User")
   authToken           String               @unique
   authType            AuthType
-  username            String
+  username            String               @unique
   year                String
   college             String
   major               String
@@ -106,6 +106,7 @@ model User {
   participatedIn      PrevChallenge[]      @relation("prevChallengeParticipant")
   sessionLogEntries   SessionLogEntry[]
   achievementTrackers AchievementTracker[]
+  hasCompletedOnboarding Boolean
 }
 
 model Group {
@@ -150,6 +151,7 @@ model EventBase {
   requiredMembers Int
   name            String
   description     String
+  longDescription String
   timeLimitation  TimeLimitationType
   indexable       Boolean
   endTime         DateTime

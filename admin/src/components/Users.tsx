@@ -1,8 +1,8 @@
-import { useContext, useEffect, useState } from "react";
-import { UserDto } from "../all.dto";
-import { ServerDataContext } from "./ServerData";
-import GridTable from "@nadavshaar/react-grid-table";
-import userEvent from "@testing-library/user-event";
+import { useContext, useEffect, useState } from 'react';
+import { UserDto } from '../all.dto';
+import { ServerDataContext } from './ServerData';
+import GridTable from '@nadavshaar/react-grid-table';
+import userEvent from '@testing-library/user-event';
 
 const EDIT_SVG = (
   <svg
@@ -85,7 +85,7 @@ const BLOCK_SVG = (
 );
 
 const styles = {
-  select: { margin: "0 20px" },
+  select: { margin: '0 20px' },
   buttonsCellContainer: {
     padding: "0 20px",
     width: "100%",
@@ -96,43 +96,43 @@ const styles = {
     gap: "3px",
   },
   editButton: {
-    background: "#f3f3f3",
-    outline: "none",
-    cursor: "pointer",
+    background: '#f3f3f3',
+    outline: 'none',
+    cursor: 'pointer',
     padding: 4,
-    display: "inline-flex",
-    border: "none",
-    borderRadius: "50%",
-    boxShadow: "1px 1px 2px 0px rgb(0 0 0 / .3)",
+    display: 'inline-flex',
+    border: 'none',
+    borderRadius: '50%',
+    boxShadow: '1px 1px 2px 0px rgb(0 0 0 / .3)',
   },
   buttonsCellEditorContainer: {
-    height: "100%",
-    width: "100%",
-    display: "inline-flex",
-    padding: "0 20px",
-    justifyContent: "flex-end",
-    alignItems: "center",
+    height: '100%',
+    width: '100%',
+    display: 'inline-flex',
+    padding: '0 20px',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
   },
   cancelButton: {
-    background: "#f3f3f3",
-    outline: "none",
-    cursor: "pointer",
+    background: '#f3f3f3',
+    outline: 'none',
+    cursor: 'pointer',
     marginRight: 10,
     padding: 2,
-    display: "inline-flex",
-    border: "none",
-    borderRadius: "50%",
-    boxShadow: "1px 1px 2px 0px rgb(0 0 0 / .3)",
+    display: 'inline-flex',
+    border: 'none',
+    borderRadius: '50%',
+    boxShadow: '1px 1px 2px 0px rgb(0 0 0 / .3)',
   },
   saveButton: {
-    background: "#f3f3f3",
-    outline: "none",
-    cursor: "pointer",
+    background: '#f3f3f3',
+    outline: 'none',
+    cursor: 'pointer',
     padding: 2,
-    display: "inline-flex",
-    border: "none",
-    borderRadius: "50%",
-    boxShadow: "1px 1px 2px 0px rgb(0 0 0 / .3)",
+    display: 'inline-flex',
+    border: 'none',
+    borderRadius: '50%',
+    boxShadow: '1px 1px 2px 0px rgb(0 0 0 / .3)',
   },
 };
 
@@ -149,36 +149,36 @@ function toForm(user: any) {
 function getColumns(setRowsData: any, serverData: any) {
   return [
     {
-      id: "checkbox",
+      id: 'checkbox',
       visible: true,
       pinned: true,
-      width: "54px",
+      width: '54px',
     },
     {
       id: 1,
-      field: "username",
-      label: "Username",
+      field: 'username',
+      label: 'Username',
     },
     {
       id: 2,
-      field: "id",
-      label: "Id",
+      field: 'id',
+      label: 'Id',
       editable: false,
     },
     {
       id: 3,
-      field: "groupId",
-      label: "GroupId",
+      field: 'groupId',
+      label: 'GroupId',
       editable: false,
     },
     {
       id: 4,
-      field: "email",
-      label: "Email",
+      field: 'email',
+      label: 'Email',
     },
     {
-      id: "buttons",
-      width: "max-content",
+      id: 'buttons',
+      width: 'max-content',
       pinned: true,
       sortable: false,
       resizable: false,
@@ -193,7 +193,7 @@ function getColumns(setRowsData: any, serverData: any) {
           <button
             title="Edit"
             style={styles.editButton}
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation();
               tableManager.rowEditApi.setEditRowId(data.id);
             }}
@@ -257,7 +257,7 @@ function getColumns(setRowsData: any, serverData: any) {
           <button
             title="Cancel"
             style={styles.cancelButton}
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation();
               tableManager.rowEditApi.setEditRowId(null);
             }}
@@ -267,13 +267,11 @@ function getColumns(setRowsData: any, serverData: any) {
           <button
             title="Save"
             style={styles.saveButton}
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation();
 
               let rowsClone = [...tableManager.rowsApi.rows];
-              let updatedRowIndex = rowsClone.findIndex(
-                (r) => r.id === data.id
-              );
+              let updatedRowIndex = rowsClone.findIndex(r => r.id === data.id);
               rowsClone[updatedRowIndex] = data;
 
               setRowsData(rowsClone);
@@ -294,7 +292,7 @@ function getColumns(setRowsData: any, serverData: any) {
 export function Users() {
   const serverData = useContext(ServerDataContext);
   const [rowsData, setRowsData] = useState(
-    Array.from(serverData.users.values()).map((us) => toForm(us))
+    Array.from(serverData.users.values()).map(us => toForm(us)),
   );
 
   return (

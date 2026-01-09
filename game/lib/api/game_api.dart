@@ -7,10 +7,60 @@ import 'package:game/api/game_client_dto.dart';
 import 'package:game/api/game_server_api.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:http/http.dart' as http;
 import 'package:game/api/geopoint.dart';
+
+enum AuthProviderType { google, apple }
+
+/** 
+ * ApiClient Class - Core authentication and API communication manager.
+ * 
+ * A ChangeNotifier class that manages authentication state, socket connections,
+ * and API communication for the entire application.
+ * 
+ * @remarks
+ * This class serves as the central hub for all API-related functionality:
+ * - Authentication state management (Google Sign-In, Apple Sign-In, device login)
+ * - Socket connection handling and management
+ * - Token management (access and refresh tokens)
+ * - Stream management through GameClientApi
+ * - Server API access through GameServerApi
+ * 
+ * The class uses a multi-layered approach:
+ * - ApiClient: Top-level manager and state coordinator
+ * - GameClientApi: Manages streams for UI updates
+ * - GameServerApi: Handles server-side communication
+ * 
+ * Key Features:
+ * - Automatic token refresh
+ * - Persistent authentication through secure storage
+ * - Socket connection management
+ * - Google Sign-In integration
+ * - Apple Sign-In integration
+ * - Device-based authentication
+ * 
+ * @example
+ * ```dart
+ * final apiClient = Provider.of<ApiClient>(context);
+ * 
+ * // Listen to connection state
+ * StreamBuilder(
+ *   stream: apiClient.clientApi.disconnectedStream,
+ *   builder: (context, snapshot) {
+ *     // Handle connection state changes
+ *   }
+ * );
+ * 
+ * // Perform authentication
+ * await apiClient.connectGoogle(googleAccount, ...);
+ * ```
+ * 
+ * @see GameClientApi for stream management
+ * @see GameServerApi for server communication
+ */
 
 class ApiClient extends ChangeNotifier {
   final FlutterSecureStorage _storage;
@@ -20,8 +70,10 @@ class ApiClient extends ChangeNotifier {
     ],
   );
 
+  // The ApiClient manages the socket and authentication state while the ClientApi manages the streams that components listen to
   final String _apiUrl;
   final Uri _googleLoginUrl;
+  final Uri _appleLoginUrl; // Apple Sign-In endpoint
   final Uri _deviceLoginUrl;
   final Uri _refreshUrl;
   final GameClientApi _clientApi;
@@ -39,9 +91,10 @@ class ApiClient extends ChangeNotifier {
   ApiClient(FlutterSecureStorage storage, String apiUrl)
       : _storage = storage,
         _apiUrl = apiUrl,
-        _googleLoginUrl = Uri.parse(apiUrl + "/google"),
-        _deviceLoginUrl = Uri.parse(apiUrl + "/device-login"),
-        _refreshUrl = Uri.parse(apiUrl + "/refresh-access"),
+        _googleLoginUrl = Uri.parse(apiUrl).resolve("google"),
+        _appleLoginUrl = Uri.parse(apiUrl).resolve("apple"),
+        _deviceLoginUrl = Uri.parse(apiUrl).resolve("device-login"),
+        _refreshUrl = Uri.parse(apiUrl).resolve("refresh-access"),
         _clientApi = GameClientApi();
 
   void _createSocket(bool refreshing) async {
@@ -57,13 +110,24 @@ class ApiClient extends ChangeNotifier {
         IO.OptionBuilder()
             .setTransports(["websocket"])
             .disableAutoConnect()
-            .disableReconnection()
             .setAuth({'token': _accessToken})
             .build());
 
     socket.onDisconnect((data) {
-      _serverApi = null;
-      notifyListeners();
+      print("Server Disconnected!");
+      // Check if user is logged out
+      if (_refreshToken == null) {
+        _serverApi = null;
+        notifyListeners();
+      }
+    });
+
+    socket.onReconnectFailed((_) async {
+      // Try to reconnect
+      final refreshResult = await _accessRefresher();
+      if (!refreshResult) {
+        _serverApi = null;
+      }
     });
 
     socket.onConnect((data) {
@@ -171,6 +235,30 @@ class ApiClient extends ChangeNotifier {
         noRegister: true);
   }
 
+  // Connects to server using Apple Sign-In credentials with full registration
+  // Uses Apple identity token and user-provided registration details
+  Future<http.Response?> connectApple(
+      AuthorizationCredentialAppleID credential,
+      String year,
+      LoginEnrollmentTypeDto enrollmentType,
+      String username,
+      String college,
+      String major,
+      List<String> interests) async {
+    return connect(credential.identityToken ?? "", _appleLoginUrl, year,
+        enrollmentType, username, college, major, interests,
+        noRegister: false);
+  }
+
+  // Connects to server using Apple Sign-In credentials without registration
+  // Used for existing users who just want to sign in
+  Future<http.Response?> connectAppleNoRegister(
+      AuthorizationCredentialAppleID credential) async {
+    return connect(credential.identityToken ?? "", _appleLoginUrl, "",
+        LoginEnrollmentTypeDto.GUEST, "", "", "", [],
+        noRegister: true);
+  }
+
   Future<http.Response?> connect(
       String idToken,
       Uri url,
@@ -181,22 +269,33 @@ class ApiClient extends ChangeNotifier {
       String major,
       List<String> interests,
       {bool noRegister = false}) async {
-    final pos = await GeoPoint.current();
+    // Location at registration is optional
+    double? lat;
+    double? long;
+
+    try {
+      final pos = await GeoPoint.current();
+      lat = pos.lat;
+      long = pos.long;
+      print('Location obtained for login: $lat, $long');
+    } catch (e) {
+      // lat and long remain null, server will use defaults
+      print('Location not available during login, proceeding without it: $e');
+    }
 
     final loginDto = LoginDto(
         idToken: idToken,
-        latF: pos.lat,
+        latF: lat,
         enrollmentType: enrollmentType,
         year: year,
         username: username,
         college: college,
         major: major,
         interests: interests.join(","),
-        longF: pos.long,
+        longF: long,
         aud: Platform.isIOS ? LoginAudDto.ios : LoginAudDto.android,
         noRegister: noRegister);
-    /*
-    if (post != null) { */
+
     final loginResponse = await http.post(url,
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
@@ -219,16 +318,35 @@ class ApiClient extends ChangeNotifier {
       print("Failed to connect to server!");
       return null;
     }
-    /*
-    }
-    print("Failed to get location data!");
-    return null;
-    */
   }
 
   Future<GoogleSignInAccount?> signinGoogle() async {
     final account = await _googleSignIn.signIn();
     return account;
+  }
+
+  // Initiates Apple Sign-In flow and returns credentials
+  // Requests email and full name scopes for user identification
+  Future<AuthorizationCredentialAppleID?> signinApple() async {
+    try {
+      // Check if Apple Sign-In is available on this device
+      if (!await SignInWithApple.isAvailable()) {
+        print('Apple Sign-In is not available on this device');
+        return null;
+      }
+
+      final credential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+      );
+      return credential;
+    } catch (e) {
+      print('Apple Sign-In error: $e');
+      print('Error type: ${e.runtimeType}');
+      return null;
+    }
   }
 
   Future<void> disconnect() async {
@@ -245,10 +363,26 @@ class ApiClient extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> checkUserExists(String idToken) async {
+  // Generic method to check if a user exists for any auth provider
+  Future<bool> checkUserExists(
+      AuthProviderType authType, String idToken) async {
     try {
-      final uri = _googleLoginUrl.replace(
-        path: '${_googleLoginUrl.path}/check-user',
+      final Uri baseUrl;
+      final String providerName;
+
+      switch (authType) {
+        case AuthProviderType.google:
+          baseUrl = _googleLoginUrl;
+          providerName = 'Google';
+          break;
+        case AuthProviderType.apple:
+          baseUrl = _appleLoginUrl;
+          providerName = 'Apple';
+          break;
+      }
+
+      final uri = baseUrl.replace(
+        path: '${baseUrl.path}/check-user',
         queryParameters: {'idToken': idToken},
       );
       final response = await http.get(uri);
@@ -257,10 +391,11 @@ class ApiClient extends ChangeNotifier {
         final responseData = jsonDecode(response.body);
         return responseData['exists'];
       }
-      print('Failed to check user. Status code: ${response.statusCode}');
+      print(
+          'Failed to check $providerName user. Status code: ${response.statusCode}');
       return false;
     } catch (e) {
-      print('Error occurred while checking user: $e');
+      print('Error occurred while checking $authType user: $e');
       return false;
     }
   }

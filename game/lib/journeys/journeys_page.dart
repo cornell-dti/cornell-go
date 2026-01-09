@@ -10,10 +10,16 @@ import 'package:game/model/group_model.dart';
 import 'package:game/model/tracker_model.dart';
 import 'package:game/model/challenge_model.dart';
 import 'package:game/model/user_model.dart';
+import 'package:game/model/onboarding_model.dart';
+import 'package:game/widgets/bear_mascot_message.dart';
+import 'package:game/gameplay/gameplay_page.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:provider/provider.dart';
+import 'package:showcaseview/showcaseview.dart';
 import 'package:velocity_x/velocity_x.dart';
 
+/** A Data Transfer Object that holds information about a challenge 
+ * cell in the UI */
 class JourneyCellDto {
   JourneyCellDto({
     required this.location,
@@ -25,6 +31,7 @@ class JourneyCellDto {
     required this.locationCount,
     required this.numberCompleted,
     required this.description,
+    required this.longDescription,
     required this.difficulty,
     required this.points,
     required this.eventId,
@@ -38,6 +45,7 @@ class JourneyCellDto {
   late int locationCount;
   late int numberCompleted;
   late String description;
+  late String longDescription;
   late String difficulty;
   late int points;
   late String eventId;
@@ -67,12 +75,91 @@ class JourneysPage extends StatefulWidget {
   State<JourneysPage> createState() => _JourneysPageState();
 }
 
+/**
+ * '_JourneysPageState' - Manages and displays a list of journeys, filtered by criteria such as difficulty, name, and more.
+ * 
+ * @remarks
+ * This class handles the layout and logic for displaying journeys on the Journeys page. 
+ * It builds `Journey` widgets and applies any filters set by the search bar
+ * or user selections to show only the relevant journeys.
+ */
 class _JourneysPageState extends State<JourneysPage> {
   List<String> selectedCategories = [];
   List<String> selectedLocations = [];
   String selectedStatus = '';
 
   List<JourneyCellDto> eventData = [];
+  // Onboarding: overlay entry for bear mascot message prompting user to tap first journey
+  OverlayEntry? _bearOverlayEntry;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Onboarding: Register showcase scope for highlighting first journey card (step 4)
+    // Hot restart fix: unregister old instance if exists
+    try {
+      ShowcaseView.getNamed("journeys_page").unregister();
+    } catch (e) {
+      // Not registered yet
+    }
+
+    // Register this page's showcase
+    ShowcaseView.register(
+      scope: "journeys_page",
+      onFinish: () {
+        Provider.of<OnboardingModel>(context, listen: false).completeStep4();
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _removeBearOverlay();
+    // Don't unregister here - causes issues during hot restart
+    super.dispose();
+  }
+
+  void _showBearOverlay(ApiClient apiClient) {
+    _removeBearOverlay(); // Remove existing if any
+
+    const double bearLeftPercent = -0.02;
+    const double bearBottomPercent = 0.12;
+    const double messageLeftPercent = 0.6;
+    const double messageBottomPercent = 0.35;
+
+    _bearOverlayEntry = OverlayEntry(
+      builder: (context) => BearMascotMessage(
+        message:
+            'Click on the first journey to learn more and start your first adventure!',
+        showBear: true,
+        bearAsset: 'standing',
+        bearLeftPercent: bearLeftPercent,
+        bearBottomPercent: bearBottomPercent,
+        messageLeftPercent: messageLeftPercent,
+        messageBottomPercent: messageBottomPercent,
+        onTap: () {
+          print("Tapped anywhere on step 4 - navigating to gameplay");
+          _removeBearOverlay();
+          ShowcaseView.getNamed("journeys_page").dismiss();
+          Provider.of<OnboardingModel>(context, listen: false).completeStep4();
+
+          // Onboarding: Navigate to gameplay page to continue onboarding flow
+          apiClient.serverApi?.setCurrentEvent(
+              SetCurrentEventDto(eventId: eventData[0].eventId));
+          Navigator.pushReplacement(
+              context, MaterialPageRoute(builder: (context) => GameplayPage()));
+        },
+      ),
+    );
+
+    Overlay.of(context).insert(_bearOverlayEntry!);
+  }
+
+  void _removeBearOverlay() {
+    _bearOverlayEntry?.remove();
+    _bearOverlayEntry = null;
+  }
 
   void openFilter() {
     showModalBottomSheet(
@@ -160,51 +247,57 @@ class _JourneysPageState extends State<JourneysPage> {
 
                       final challengeLocation = challenge.location?.name ?? "";
                       final challengeName = challenge.name ?? "";
+                      final String eventName = event.name ?? "";
 
                       bool eventMatchesDifficultySelection = true;
                       bool eventMatchesCategorySelection = true;
                       bool eventMatchesLocationSelection = true;
                       bool eventMatchesSearchText = true;
-                      String? searchTerm = widget.mySearchText;
+                      String searchTerm = widget.mySearchText ?? "";
 
-                      if (searchTerm?.length == 0) {
-                        eventMatchesSearchText = true;
-                        if (widget.myDifficulty?.length == 0 ||
-                            widget.myDifficulty == event.difficulty?.name)
-                          eventMatchesDifficultySelection = true;
-                        else
-                          eventMatchesDifficultySelection = false;
+                      if (widget.myDifficulty?.length == 0 ||
+                          widget.myDifficulty == event.difficulty?.name)
+                        eventMatchesDifficultySelection = true;
+                      else
+                        eventMatchesDifficultySelection = false;
 
-                        if (widget.myLocations?.isNotEmpty ?? false) {
-                          if (widget.myLocations?.contains(challengeLocation) ??
-                              false)
-                            eventMatchesLocationSelection = true;
-                          else
-                            eventMatchesLocationSelection = false;
-                        } else
+                      if (widget.myLocations?.isNotEmpty ?? false) {
+                        if (widget.myLocations?.contains(challengeLocation) ??
+                            false)
                           eventMatchesLocationSelection = true;
+                        else
+                          eventMatchesLocationSelection = false;
+                      } else
+                        eventMatchesLocationSelection = true;
 
-                        if (widget.myCategories?.isNotEmpty ?? false) {
-                          if (widget.myCategories
-                                  ?.contains(event.category?.name) ??
-                              false)
-                            eventMatchesCategorySelection = true;
-                          else
-                            eventMatchesCategorySelection = false;
-                        } else
+                      if (widget.myCategories?.isNotEmpty ?? false) {
+                        if (widget.myCategories
+                                ?.contains(event.category?.name) ??
+                            false)
                           eventMatchesCategorySelection = true;
+                        else
+                          eventMatchesCategorySelection = false;
+                      } else
+                        eventMatchesCategorySelection = true;
+
+                      if (searchTerm.length == 0) {
+                        eventMatchesSearchText = true;
                       } else {
-                        if (searchTerm != null &&
-                            challengeLocation
-                                .toLowerCase()
-                                .contains(searchTerm.toLowerCase())) {
+                        if (challengeLocation
+                            .toLowerCase()
+                            .contains(searchTerm.toLowerCase())) {
                           eventMatchesSearchText = true;
                         } else {
                           eventMatchesSearchText = false;
-                          if (searchTerm != null &&
-                              challengeName
-                                  .toLowerCase()
-                                  .contains(searchTerm.toLowerCase())) {
+                          if (challengeName
+                              .toLowerCase()
+                              .contains(searchTerm.toLowerCase())) {
+                            eventMatchesSearchText = true;
+                          } else
+                            eventMatchesSearchText = false;
+                          if (eventName
+                              .toLowerCase()
+                              .contains(searchTerm.toLowerCase())) {
                             eventMatchesSearchText = true;
                           } else
                             eventMatchesSearchText = false;
@@ -233,6 +326,7 @@ class _JourneysPageState extends State<JourneysPage> {
                           locationCount: locationCount,
                           numberCompleted: numberCompleted,
                           description: event.description ?? "",
+                          longDescription: event.longDescription ?? "",
                           difficulty:
                               friendlyDifficulty[event.difficulty] ?? "",
                           points: totalPoints,
@@ -243,24 +337,57 @@ class _JourneysPageState extends State<JourneysPage> {
                             ?.setCurrentEvent(SetCurrentEventDto(eventId: ""));
                       }
                     }
+
+                    // Onboarding: Step 4 - Show showcase for first journey card after journeys explanation
+                    final onboarding =
+                        Provider.of<OnboardingModel>(context, listen: true);
+                    if (onboarding.step3JourneysExplanationComplete &&
+                        !onboarding.step4FirstJourneyComplete &&
+                        eventData.isNotEmpty) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (mounted) {
+                          ShowcaseView.getNamed("journeys_page").startShowCase(
+                              [onboarding.step4FirstJourneyCardKey]);
+                          // Show bear overlay on top of showcase
+                          _showBearOverlay(apiClient);
+                        }
+                      });
+                    }
+
                     return ListView.separated(
                       padding: const EdgeInsets.symmetric(horizontal: 3),
                       itemCount: eventData.length,
                       itemBuilder: (context, index) {
-                        return JourneyCell(
-                            key: UniqueKey(),
+                        final journeyCell = JourneyCell(
+                            key: index == 0 ? null : UniqueKey(),
                             eventData[index].name,
                             eventData[index].lat,
                             eventData[index].long,
                             eventData[index].location,
                             eventData[index].imgUrl,
                             eventData[index].description,
+                            eventData[index].longDescription,
                             eventData[index].locationCount,
                             eventData[index].numberCompleted,
                             eventData[index].complete,
                             eventData[index].difficulty,
                             eventData[index].points,
                             eventData[index].eventId);
+
+                        // Onboarding: Wrap first journey card with showcase highlight
+                        if (index == 0 &&
+                            !onboarding.step4FirstJourneyComplete) {
+                          return Showcase(
+                            key: onboarding.step4FirstJourneyCardKey,
+                            title: '',
+                            description: '',
+                            tooltipBackgroundColor: Colors.transparent,
+                            disableMovingAnimation: true,
+                            child: journeyCell,
+                          );
+                        }
+
+                        return journeyCell;
                       },
                       physics: BouncingScrollPhysics(),
                       separatorBuilder: (context, index) {

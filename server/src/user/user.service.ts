@@ -99,6 +99,7 @@ export class UserService {
           (process.env.DEVELOPMENT === 'true' &&
             !(process.env.TESTING_E2E === 'true')),
         isRanked: true,
+        hasCompletedOnboarding: false,
       },
     });
 
@@ -176,6 +177,30 @@ export class UserService {
       data: {
         isBanned,
       },
+    });
+  }
+
+  /**
+   * Marks a user as having completed onboarding
+   * @param user the user which has completed onboarding
+   * @returns A promise containing the updated user
+   */
+  async completeOnboarding(user: User): Promise<User> {
+    return await this.prisma.user.update({
+      where: { id: user.id },
+      data: { hasCompletedOnboarding: true },
+    });
+  }
+
+  /**
+   * Resets a user's completed onboarding status to false
+   * @param user the user who's onboarding is being reset
+   * @returns A promise containing the updated user
+   */
+  async resetOnboarding(user: User): Promise<User> {
+    return await this.prisma.user.update({
+      where: { id: user.id },
+      data: { hasCompletedOnboarding: false },
     });
   }
 
@@ -259,6 +284,7 @@ export class UserService {
       year: joinedUser.year,
       score: joinedUser.score,
       groupId: joinedUser.group.friendlyId,
+      hasCompletedOnboarding: joinedUser.hasCompletedOnboarding,
       isBanned: joinedUser.isBanned,
       authType: (
         joinedUser.authType as string

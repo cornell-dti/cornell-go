@@ -22,25 +22,32 @@ import 'package:game/model/tracker_model.dart';
 import 'package:game/model/group_model.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/challenge_model.dart';
+import 'package:game/model/onboarding_model.dart';
+import 'package:game/widgets/bear_mascot_message.dart';
+import 'package:showcaseview/showcaseview.dart';
 
-/// GameplayMap Widget
-///
-/// Displays an interactive map for gameplay, showing the user's location,
-/// hint circles, and challenge-related information.
-///
-/// @remarks
-/// This widget is responsible for handling user location updates, displaying
-/// hints, and managing the challenge completion process. It uses Google Maps
-/// for rendering the map and integrates with various game-related models and
-/// APIs to provide a seamless gameplay experience.
-///
-/// @param challengeId - The unique identifier for the current challenge.
-/// @param targetLocation - The GeoPoint representing the target location for the challenge.
-/// @param awardingRadius - The radius (in meters) within which the challenge is considered complete.
-/// @param points - The number of points awarded for completing this challenge.
-/// @param startingHintsUsed - The number of hints already used for this challenge.
-///
-/// @returns A StatefulWidget that renders the gameplay map and associated UI elements
+/*
+
+* GameplayMap Widget
+*
+* Displays an interactive map for gameplay, showing the user's location,
+* hint circles, and challenge-related information.
+*
+* @remarks
+* This widget is responsible for handling user location updates, displaying
+* hints, and managing the challenge completion process. It uses Google Maps
+* for rendering the map and integrates with various game-related models and
+* APIs to provide a seamless gameplay experience.
+*
+* @param challengeId - The unique identifier for the current challenge.
+* @param targetLocation - The GeoPoint representing the target location for the challenge.
+* @param awardingRadius - The radius (in meters) within which the challenge is considered complete.
+* @param points - The number of points awarded for completing this challenge.
+* @param startingHintsUsed - The number of hints already used for this challenge.
+*
+* @returns A StatefulWidget that renders the gameplay map and associated UI elements
+
+*/
 
 class GameplayMap extends StatefulWidget {
   final String challengeId;
@@ -86,22 +93,148 @@ class _GameplayMapState extends State<GameplayMap> {
   double defaultHintRadius = 200.0;
   double? hintRadius;
 
-  // whether the picture is expanded over the map
-  bool isExpanded = false;
-
   // Add this to your state variables (After isExapnded)
   bool isArrivedButtonEnabled = true;
 
+  // whether the picture is expanded over the map
+  bool isExpanded = false;
+  double pictureWidth = 80, pictureHeight = 80;
+  Alignment pictureAlign = Alignment.topRight;
+
+  // size variables for expanding picture for animation
+
+  var pictureIcon = SvgPicture.asset("assets/icons/mapexpand.svg");
+  // Onboarding: overlay entry for bear mascot messages during onboarding steps 7-10
+  OverlayEntry? _bearOverlayEntry;
+
+  // Switch between the two sizes
+  void _toggle() => setState(() {
+        isExpanded = !isExpanded;
+
+        if (isExpanded) {
+          pictureHeight = MediaQuery.of(context).size.height * 0.60;
+          pictureWidth = MediaQuery.of(context).size.width * 0.90;
+          pictureAlign = Alignment.topCenter;
+        } else {
+          pictureHeight = pictureWidth = 80;
+          pictureAlign = Alignment.topRight;
+        }
+      });
+
+  void _removeBearOverlay() {
+    _bearOverlayEntry?.remove();
+    _bearOverlayEntry = null;
+  }
+
+  void _showImageToggleBearOverlay() {
+    _removeBearOverlay();
+    _bearOverlayEntry = OverlayEntry(
+      builder: (context) => BearMascotMessage(
+        message:
+            'Click on the zoom button to get a better idea of what the location looks like!',
+        showBear: true,
+        bearAsset: 'standing',
+        bearLeftPercent: -0.02,
+        bearBottomPercent: 0.18,
+        messageLeftPercent: 0.6,
+        messageBottomPercent: 0.40,
+        onTap: () {
+          print("Tapped anywhere on step 7 - expanding image");
+          _removeBearOverlay();
+          ShowcaseView.getNamed("gameplay_map").dismiss();
+          Provider.of<OnboardingModel>(context, listen: false).completeStep7();
+          _toggle();
+        },
+      ),
+    );
+    Overlay.of(context).insert(_bearOverlayEntry!);
+  }
+
+  void _showRecenterBearOverlay() {
+    _removeBearOverlay();
+    _bearOverlayEntry = OverlayEntry(
+      builder: (context) => BearMascotMessage(
+        message:
+            'Use the Recenter to return the map view to your current location so you can stay oriented.',
+        showBear: true,
+        bearAsset: 'popup',
+        bearLeftPercent: -0.095,
+        bearBottomPercent: 0.2,
+        messageLeftPercent: 0.55,
+        messageBottomPercent: 0.42,
+        onTap: () {
+          print("Tapped anywhere on step 9");
+          _removeBearOverlay();
+          ShowcaseView.getNamed("gameplay_map").dismiss();
+          Provider.of<OnboardingModel>(context, listen: false).completeStep9();
+        },
+      ),
+    );
+    Overlay.of(context).insert(_bearOverlayEntry!);
+  }
+
+  void _showHintBearOverlay() {
+    _removeBearOverlay();
+    _bearOverlayEntry = OverlayEntry(
+      builder: (context) => BearMascotMessage(
+        message:
+            'Stuck? Use a Hint to make the location circle smaller, helping you pinpoint the spot.',
+        showBear: true,
+        bearAsset: 'standing',
+        bearLeftPercent: -0.02,
+        bearBottomPercent: 0.18,
+        messageLeftPercent: 0.6,
+        messageBottomPercent: 0.40,
+        onTap: () {
+          print("Tapped anywhere on step 10");
+          _removeBearOverlay();
+          ShowcaseView.getNamed("gameplay_map").dismiss();
+          Provider.of<OnboardingModel>(context, listen: false).completeStep10();
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => BottomNavBar()),
+          );
+        },
+      ),
+    );
+    Overlay.of(context).insert(_bearOverlayEntry!);
+  }
+
   @override
   void initState() {
-    setCustomMarkerIcon();
     super.initState();
+    setCustomMarkerIcon();
     streamStarted = startPositionStream();
     setStartingHintCircle();
+
+    // Onboarding: Register showcase scope for highlighting UI elements (steps 7-10)
+    // Hot restart fix: Unregister old instance if it exists, then register new one
+    try {
+      ShowcaseView.getNamed("gameplay_map").unregister();
+    } catch (e) {
+      // Not registered yet, that's fine
+    }
+    ShowcaseView.register(
+      scope: "gameplay_map",
+    );
+  }
+
+  @override
+  void didUpdateWidget(GameplayMap oldWidget) {
+    // If challenge changed, reset hint state
+    if (oldWidget.challengeId != widget.challengeId) {
+      startingHintCenter = null;
+      hintCenter = null;
+      hintRadius = null;
+      setStartingHintCircle();
+    }
+
+    super.didUpdateWidget(oldWidget);
   }
 
   @override
   void dispose() {
+    _removeBearOverlay();
     positionStream.cancel();
     _disposeController();
     super.dispose();
@@ -121,10 +254,12 @@ class _GameplayMapState extends State<GameplayMap> {
    * hints used for this challenge already.
    */
   void setStartingHintCircle() {
-    hintRadius = defaultHintRadius -
+    double calculation = defaultHintRadius -
         (defaultHintRadius - widget.awardingRadius) *
             0.33 *
             widget.startingHintsUsed;
+
+    hintRadius = calculation;
     if (hintRadius == null) {
       hintRadius = defaultHintRadius;
     }
@@ -161,45 +296,64 @@ class _GameplayMapState extends State<GameplayMap> {
   Future<bool> startPositionStream() async {
     GoogleMapController googleMapController = await mapCompleter.future;
 
-    GeoPoint.current().then(
-      (location) {
-        currentLocation = location;
-      },
-    );
+    try {
+      final location = await GeoPoint.current();
+      currentLocation = location;
 
-    positionStream = Geolocator.getPositionStream(
-            locationSettings: GeoPoint.getLocationSettings())
-        .listen((Position? newPos) {
-      // prints user coordinates - useful for debugging
-      // print(newPos == null
-      //     ? 'Unknown'
-      //     : '${newPos.latitude.toString()}, ${newPos.longitude.toString()}');
+      positionStream = Geolocator.getPositionStream(
+              locationSettings: GeoPoint.getLocationSettings())
+          .listen((Position? newPos) {
+        // prints user coordinates - useful for debugging
+        // print(newPos == null
+        //     ? 'Unknown'
+        //     : '${newPos.latitude.toString()}, ${newPos.longitude.toString()}');
 
-      // putting the animate camera logic in here seems to not work
-      // could be useful to debug later?
-      currentLocation = newPos == null
-          ? GeoPoint(_center.latitude, _center.longitude, 0)
-          : GeoPoint(newPos.latitude, newPos.longitude, newPos.heading);
-      setState(() {});
-    });
+        // putting the animate camera logic in here seems to not work
+        // could be useful to debug later?
+        currentLocation = newPos == null
+            ? GeoPoint(_center.latitude, _center.longitude, 0)
+            : GeoPoint(newPos.latitude, newPos.longitude, newPos.heading);
+        setState(() {});
+      });
 
-    positionStream.onData((newPos) {
-      currentLocation =
-          GeoPoint(newPos.latitude, newPos.longitude, newPos.heading);
+      positionStream.onData((newPos) {
+        currentLocation =
+            GeoPoint(newPos.latitude, newPos.longitude, newPos.heading);
 
-      // upon new user location data, moves map camera to be centered around
-      // new position and sets zoom.
-      googleMapController.animateCamera(
-        CameraUpdate.newCameraPosition(
-          CameraPosition(
-            target: LatLng(newPos.latitude, newPos.longitude),
-            zoom: 16.5,
+        // upon new user location data, moves map camera to be centered around
+        // new position and sets zoom.
+        googleMapController.animateCamera(
+          CameraUpdate.newCameraPosition(
+            CameraPosition(
+              target: LatLng(newPos.latitude, newPos.longitude),
+              zoom: 16.5,
+            ),
           ),
-        ),
-      );
-      setState(() {});
-    });
-    return true;
+        );
+        setState(() {});
+      });
+
+      return true;
+    } catch (e) {
+      print('Failed to get location: $e');
+
+      displayToast("Not able to receive location. Please check permissions.",
+          Status.error);
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Future.delayed(Duration(seconds: 1), () {
+          if (mounted) {
+            // if the page state is still active, navigate to bottom navbar
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (context) => BottomNavBar()),
+              (route) => false,
+            );
+          }
+        });
+      });
+
+      return false;
+    }
   }
 
   /**
@@ -293,10 +447,18 @@ class _GameplayMapState extends State<GameplayMap> {
             .useEventTrackerHint(eventId);
       }
 
-      // decreases radius by 0.33 upon each hint press
-      // after 3 hints, hint radius will equal that of the awarding radius
-      double newRadius = (hintRadius ?? defaultHintRadius) -
-          (defaultHintRadius - widget.awardingRadius) * 0.33;
+      // Calculate total hints: backend hints + this new hint we're about to use
+      int totalHintsUsed = widget.startingHintsUsed + 1;
+
+      // Calculate radius from default, accounting for ALL hints used on this challenge
+      double calculatedRadius = defaultHintRadius -
+          (defaultHintRadius - widget.awardingRadius) * 0.33 * totalHintsUsed;
+
+      // Ensure radius never goes below awarding radius (safety check)
+      double newRadius = calculatedRadius < widget.awardingRadius
+          ? widget.awardingRadius
+          : calculatedRadius;
+
       double newLat = hintCenter!.lat -
           (startingHintCenter!.lat - widget.targetLocation.lat) * 0.33;
       double newLong = hintCenter!.long -
@@ -308,11 +470,234 @@ class _GameplayMapState extends State<GameplayMap> {
     }
   }
 
-  // size variables for expanding picture for animation
-  var pictureWidth = 80.0;
-  var pictureHeight = 80.0;
-  var pictureIcon = SvgPicture.asset("assets/icons/mapexpand.svg");
-  var pictureAlign = Alignment.topRight;
+  // Build image toggle widget with optional onboarding showcase
+  Widget _buildImageToggle(
+    OnboardingModel onboarding,
+    String imageUrl,
+    double screenWidth,
+    double screenHeight,
+  ) {
+    // 1. Build base photo widget
+    Widget photoWidget = Align(
+      alignment: pictureAlign,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: Image.network(
+          imageUrl,
+          fit: BoxFit.cover,
+          width: pictureWidth,
+          height: pictureHeight,
+        ),
+      ),
+    );
+
+    // 2. Step 8: Wrap photoWidget with showcase if expanded (do this before building imageToggle)
+    if (isExpanded &&
+        onboarding.step7ImageToggleComplete &&
+        !onboarding.step8ExpandedImageComplete) {
+      photoWidget = Showcase(
+        key: onboarding.step8ExpandedImageKey,
+        title: '',
+        description: '',
+        tooltipBackgroundColor: Colors.transparent,
+        disableMovingAnimation: true,
+        targetPadding: EdgeInsets.zero,
+        disposeOnTap: true,
+        onTargetClick: () {
+          onboarding.completeStep8();
+          _toggle(); // minimize the image
+          // (optional) immediately kick off Step 9
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              ShowcaseView.getNamed("gameplay_map")
+                  .startShowCase([onboarding.step9RecenterButtonKey]);
+              _showRecenterBearOverlay();
+            }
+          });
+        },
+        onBarrierClick: () {
+          onboarding.completeStep8();
+          _toggle();
+        },
+        child: photoWidget,
+      );
+    }
+
+    // 3. Build complete image toggle (photo + exit button)
+    Widget imageToggle = Positioned(
+      top: screenWidth * 0.05,
+      right: screenWidth * 0.05,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 100),
+        width: pictureWidth,
+        height: pictureHeight,
+        child: Stack(
+          children: [
+            photoWidget,
+            Positioned(
+              top: 4,
+              right: 4,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  print("ICON TAPPED!"); // Debug print
+                  _toggle();
+                },
+                child: Container(
+                  width: 60, // Larger invisible hit-area
+                  height: 60,
+                  alignment: Alignment.topRight,
+                  child: SvgPicture.asset(
+                    isExpanded
+                        ? 'assets/icons/mapexit.svg'
+                        : 'assets/icons/mapexpand.svg',
+                    width: 40,
+                    height: 40,
+                  ),
+                ),
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+
+    // 4. Step 7: Wrap imageToggle with showcase (small zoom button)
+    if (onboarding.step6InfoRowComplete &&
+        !onboarding.step7ImageToggleComplete) {
+      imageToggle = Showcase(
+        key: onboarding.step7ImageToggleKey,
+        title: '',
+        description: '',
+        tooltipBackgroundColor: Colors.transparent,
+        disableMovingAnimation: true,
+        targetPadding: EdgeInsets.symmetric(
+          horizontal: screenWidth * 0.025, // ~10px on 393px screen
+          vertical: screenHeight * 0.012, // ~10px on 852px screen
+        ),
+        child: imageToggle,
+      );
+    }
+
+    return imageToggle;
+  }
+
+  // Build recenter button with optional onboarding showcase
+  Widget _buildRecenterButton(
+    OnboardingModel onboarding,
+    double screenWidth,
+    double screenHeight,
+  ) {
+    // 1. Build base SVG icon
+    Widget svgIcon = SvgPicture.asset("assets/icons/maprecenter.svg",
+        colorFilter: ColorFilter.mode(
+            Color.fromARGB(255, 131, 90, 124), BlendMode.srcIn));
+
+    // 2. Step 9: Wrap just the SVG with showcase
+    if (onboarding.step8ExpandedImageComplete &&
+        !onboarding.step9RecenterButtonComplete) {
+      svgIcon = Showcase(
+        key: onboarding.step9RecenterButtonKey,
+        title: '',
+        description: '',
+        tooltipBackgroundColor: Colors.transparent,
+        disableMovingAnimation: true,
+        targetPadding: EdgeInsets.symmetric(
+          horizontal: screenWidth * 0.025, // ~10px on 393px screen
+          vertical: screenHeight * 0.012, // ~10px on 852px screen
+        ),
+        child: svgIcon,
+      );
+    }
+
+    // 3. Build button with the (potentially wrapped) SVG icon
+    Widget button = FloatingActionButton.extended(
+      heroTag: "recenter_button",
+      onPressed: recenterCamera,
+      label: svgIcon,
+      backgroundColor: Color.fromARGB(255, 255, 255, 255),
+      shape: CircleBorder(),
+    );
+
+    // 4. Add padding outside everything
+    return Padding(
+      padding: EdgeInsets.only(bottom: 150.0),
+      child: button,
+    );
+  }
+
+  // Build hint button with optional onboarding showcase
+  Widget _buildHintButton(
+    OnboardingModel onboarding,
+    double screenWidth,
+    double screenHeight,
+  ) {
+    // 1. Build complete hint button with counter badge (without padding)
+    Widget hintButton = Stack(
+      children: [
+        // hint button
+        FloatingActionButton.extended(
+          heroTag: "hint_button",
+          onPressed: useHint,
+          label: SvgPicture.asset("assets/icons/maphint.svg",
+              colorFilter: ColorFilter.mode(
+                  numHintsLeft == 0
+                      ? Color.fromARGB(255, 217, 217, 217)
+                      : Color.fromARGB(255, 131, 90, 124),
+                  BlendMode.srcIn)),
+          backgroundColor: Color.fromARGB(255, 255, 255, 255),
+          shape: CircleBorder(),
+        ),
+        // num hints left counter
+        Positioned(
+          top: 0,
+          right: 0,
+          child: Container(
+            padding: EdgeInsets.all(5.0),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.3),
+                  blurRadius: 5,
+                ),
+              ],
+            ),
+            child: Text(
+              numHintsLeft.toString(),
+              style: TextStyle(
+                color: numHintsLeft == 0
+                    ? Color.fromARGB(255, 217, 217, 217)
+                    : Color.fromARGB(255, 131, 90, 124),
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+
+    // 2. Step 10: Wrap entire hint button (button + counter) with showcase
+    if (onboarding.step9RecenterButtonComplete &&
+        !onboarding.step10HintButtonComplete) {
+      hintButton = Showcase(
+        key: onboarding.step10HintButtonKey,
+        title: '',
+        description: '',
+        tooltipBackgroundColor: Colors.transparent,
+        disableMovingAnimation: true,
+        child: hintButton,
+      );
+    }
+
+    // 3. Add padding outside showcase
+    return Container(
+      padding: EdgeInsets.only(bottom: 15.0),
+      child: hintButton,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -322,8 +707,12 @@ class _GameplayMapState extends State<GameplayMap> {
     //       return !snapshot.hasData
     //           ? CircularIndicator()
     final client = Provider.of<ApiClient>(context);
+    final onboarding = Provider.of<OnboardingModel>(context);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
 
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
         colorSchemeSeed: Colors.green[700],
@@ -351,20 +740,74 @@ class _GameplayMapState extends State<GameplayMap> {
               "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png";
         }
 
-        return Scaffold(
-            body: Stack(
+        // Onboarding: Step 7 - Show showcase for image toggle button after info row explanation
+        if (onboarding.step6InfoRowComplete &&
+            !onboarding.step7ImageToggleComplete) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              ShowcaseView.getNamed("gameplay_map")
+                  .startShowCase([onboarding.step7ImageToggleKey]);
+              // Show bear overlay on top of showcase
+              _showImageToggleBearOverlay();
+            }
+          });
+        }
+
+        // Onboarding: Step 8 - Show showcase for expanded image view
+        if (isExpanded &&
+            onboarding.step7ImageToggleComplete &&
+            !onboarding.step8ExpandedImageComplete) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              ShowcaseView.getNamed("gameplay_map")
+                  .startShowCase([onboarding.step8ExpandedImageKey]);
+              // No bear overlay for step 8 - just transparent full-screen tap
+            }
+          });
+        }
+
+        // Onboarding: Step 9 - Show showcase for recenter button
+        if (onboarding.step8ExpandedImageComplete &&
+            !onboarding.step9RecenterButtonComplete) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              ShowcaseView.getNamed("gameplay_map")
+                  .startShowCase([onboarding.step9RecenterButtonKey]);
+              // Show bear overlay on top of showcase
+              _showRecenterBearOverlay();
+            }
+          });
+        }
+
+        // Onboarding: Step 10 - Final gameplay step showcases hint button, then navigates home
+        if (onboarding.step9RecenterButtonComplete &&
+            !onboarding.step10HintButtonComplete) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              ShowcaseView.getNamed("gameplay_map")
+                  .startShowCase([onboarding.step10HintButtonKey]);
+              // Show bear overlay on top of showcase
+              _showHintBearOverlay();
+            }
+          });
+        }
+
+        return Stack(
           alignment: Alignment.bottomCenter,
           children: [
             StreamBuilder(
                 stream: client.clientApi.disconnectedStream,
                 builder: ((context, snapshot) {
+                  // Redirect to login if server api is null
                   if (client.serverApi == null) {
                     WidgetsBinding.instance.addPostFrameCallback((_) {
-                      Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => SplashPageWidget()));
-                      displayToast("Lost connection!", Status.success);
+                      // Clear entire navigation stack and push to login screen
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(
+                            builder: (context) => SplashPageWidget()),
+                        (route) => false,
+                      );
+                      displayToast("Signed out", Status.success);
                     });
                   }
 
@@ -385,8 +828,8 @@ class _GameplayMapState extends State<GameplayMap> {
                 initialCameraPosition: CameraPosition(
                   target: currentLocation == null
                       ? _center
-                      : LatLng(currentLocation!.lat, currentLocation!.lat),
-                  zoom: 11,
+                      : LatLng(currentLocation!.lat, currentLocation!.long),
+                  zoom: 16,
                 ),
                 markers: {
                   Marker(
@@ -406,7 +849,19 @@ class _GameplayMapState extends State<GameplayMap> {
                     center: hintCenter != null
                         ? LatLng(hintCenter!.lat, hintCenter!.long)
                         : _center,
-                    radius: (hintRadius ?? defaultHintRadius),
+                    radius: () {
+                      double radiusValue = hintRadius ?? defaultHintRadius;
+
+                      // Safety check to prevent crashes
+                      if (radiusValue.isNaN ||
+                          radiusValue.isInfinite ||
+                          radiusValue <= 0) {
+                        return widget.awardingRadius
+                            .clamp(10.0, defaultHintRadius);
+                      }
+                      return radiusValue.clamp(
+                          widget.awardingRadius, defaultHintRadius);
+                    }(),
                     strokeColor: Color.fromARGB(80, 30, 41, 143),
                     strokeWidth: 2,
                     fillColor: Color.fromARGB(80, 83, 134, 237),
@@ -483,125 +938,27 @@ class _GameplayMapState extends State<GameplayMap> {
               right: 10,
               child: Column(
                 children: [
-                  Container(
-                    padding: EdgeInsets.only(bottom: 15.0),
-                    child: Stack(
-                      children: [
-                        // hint button
-                        FloatingActionButton.extended(
-                          onPressed: useHint,
-                          label: SvgPicture.asset("assets/icons/maphint.svg",
-                              colorFilter: ColorFilter.mode(
-                                  numHintsLeft == 0
-                                      ? Color.fromARGB(255, 217, 217, 217)
-                                      : Color.fromARGB(255, 131, 90, 124),
-                                  BlendMode.srcIn)),
-                          backgroundColor: Color.fromARGB(255, 255, 255, 255),
-                          shape: CircleBorder(),
-                        ),
-                        // num hints left counter
-                        Positioned(
-                          top: 0,
-                          right: 0,
-                          child: Container(
-                            padding: EdgeInsets.all(5.0),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.white,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.3),
-                                  blurRadius: 5,
-                                ),
-                              ],
-                            ),
-                            child: Text(
-                              numHintsLeft.toString(),
-                              style: TextStyle(
-                                color: numHintsLeft == 0
-                                    ? Color.fromARGB(255, 217, 217, 217)
-                                    : Color.fromARGB(255, 131, 90, 124),
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                  _buildHintButton(
+                    onboarding,
+                    screenWidth,
+                    screenHeight,
                   ),
-                  Padding(
-                    padding: EdgeInsets.only(bottom: 150.0),
-                    child: FloatingActionButton.extended(
-                      onPressed: recenterCamera,
-                      label: SvgPicture.asset("assets/icons/maprecenter.svg",
-                          colorFilter: ColorFilter.mode(
-                              Color.fromARGB(255, 131, 90, 124),
-                              BlendMode.srcIn)),
-                      backgroundColor: Color.fromARGB(255, 255, 255, 255),
-                      shape: CircleBorder(),
-                    ),
+                  _buildRecenterButton(
+                    onboarding,
+                    screenWidth,
+                    screenHeight,
                   ),
                 ],
               ),
             ),
-            Positioned(
-              // expandable image in top right of map
-              // padding: EdgeInsets.only(left: 10.0, right: 10, top: 0.0),
-              top: MediaQuery.of(context).size.width * 0.05,
-              right: MediaQuery.of(context).size.width * 0.05,
-              child: GestureDetector(
-                onTap: () {
-                  isExpanded
-                      ? setState(() {
-                          isExpanded = false;
-                          pictureHeight = 80.0;
-                          pictureWidth = 80.0;
-                          pictureIcon =
-                              SvgPicture.asset("assets/icons/mapexpand.svg");
-                          pictureAlign = Alignment.topRight;
-                        })
-                      : setState(() {
-                          isExpanded = true;
-                          pictureHeight =
-                              MediaQuery.of(context).size.height * 0.6;
-                          pictureWidth =
-                              MediaQuery.of(context).size.width * 0.90;
-                          pictureIcon =
-                              SvgPicture.asset("assets/icons/mapexit.svg");
-                          pictureAlign = Alignment.topCenter;
-                        });
-                },
-                child: AnimatedContainer(
-                  duration: Duration(milliseconds: 100),
-                  width: pictureWidth,
-                  height: pictureHeight,
-                  child: Stack(
-                    children: [
-                      Container(
-                        alignment: pictureAlign,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: Image.network(
-                            imageUrl,
-                            fit: BoxFit.cover,
-                            width: pictureWidth,
-                            height: pictureHeight,
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.all(4.0),
-                        child: Container(
-                            alignment: Alignment.topRight, child: pictureIcon),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+            _buildImageToggle(
+              onboarding,
+              imageUrl,
+              screenWidth,
+              screenHeight,
             ),
           ],
-        ));
+        );
       }),
     );
     // });
@@ -698,9 +1055,9 @@ class _GameplayMapState extends State<GameplayMap> {
                 Container(
                     margin: EdgeInsets.only(bottom: 10),
                     child: Text(
-                        "You’re close, but not there yet." +
+                        "You're close, but not there yet." +
                             (numHintsLeft > 0
-                                ? "Use a hint if needed! Hints use 25 points."
+                                ? " Use a hint if needed! Each hint reduces reward by ~15%. Using all 3 hints yields half the points."
                                 : ""),
                         style: TextStyle(
                             fontSize: 14, fontWeight: FontWeight.w400))),

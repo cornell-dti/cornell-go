@@ -3,16 +3,19 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/api/game_client_dto.dart';
+import 'package:game/api/geopoint.dart'; //same package as preview.dart
 import 'package:game/model/challenge_model.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/group_model.dart';
 import 'package:game/model/tracker_model.dart';
 import 'package:game/model/user_model.dart';
+import 'package:game/model/onboarding_model.dart';
 import 'package:game/utils/utility_functions.dart';
+import 'package:game/widgets/bear_mascot_message.dart';
 import 'package:provider/provider.dart';
+import 'package:showcaseview/showcaseview.dart';
 import 'package:velocity_x/velocity_x.dart';
 import 'challenge_cell.dart';
-import 'package:game/journeys/filter_form.dart';
 
 class ChallengeCellDto {
   ChallengeCellDto({
@@ -26,6 +29,7 @@ class ChallengeCellDto {
     required this.difficulty,
     required this.points,
     required this.eventId,
+    this.distanceFromChallenge, // not required for challenge cell to be displayed
   });
   late String location;
   late String name;
@@ -37,6 +41,8 @@ class ChallengeCellDto {
   late String difficulty;
   late int points;
   late String eventId;
+  late double?
+      distanceFromChallenge; // Distance from user's current location (null if not calculable)
 }
 
 class ChallengesPage extends StatefulWidget {
@@ -69,6 +75,9 @@ class _ChallengesPageState extends State<ChallengesPage> {
   String selectedDifficulty = '';
   String? mySearchText;
   List<ChallengeCellDto> eventData = [];
+  GeoPoint? currentUserLocation;
+  // Onboarding: overlay entry for bear mascot message explaining challenges
+  OverlayEntry? _bearOverlayEntry;
 
   _ChallengesPageState(String? difficulty, List<String>? locations,
       List<String>? categories, String? searchText) {
@@ -79,7 +88,88 @@ class _ChallengesPageState extends State<ChallengesPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _loadUserLocation();
+
+    // Onboarding: Register showcase scope for highlighting first challenge card (step 1)
+    // Hot restart fix: unregister old instance if exists
+    try {
+      ShowcaseView.getNamed("challenges_page").unregister();
+    } catch (e) {
+      // Not registered yet
+    }
+
+    // Register this page's showcase
+    ShowcaseView.register(
+      scope: "challenges_page",
+      onFinish: () {
+        Provider.of<OnboardingModel>(context, listen: false).completeStep1();
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _removeBearOverlay();
+    super.dispose();
+  }
+
+  void _showBearOverlay() {
+    _removeBearOverlay(); // Remove existing if any
+
+    const double bearLeftPercent = -0.095;
+    const double bearBottomPercent = 0.08;
+    const double messageLeftPercent = 0.56;
+    const double messageBottomPercent = 0.31;
+
+    _bearOverlayEntry = OverlayEntry(
+      builder: (context) => BearMascotMessage(
+        message:
+            'This is the Challenge page. A Challenge is a single quest that takes you to one or more campus spots.',
+        showBear: true,
+        bearAsset: 'popup',
+        bearLeftPercent: bearLeftPercent,
+        bearBottomPercent: bearBottomPercent,
+        messageLeftPercent: messageLeftPercent,
+        messageBottomPercent: messageBottomPercent,
+        onTap: () {
+          print("Tapped anywhere on step 1");
+          _removeBearOverlay();
+          ShowcaseView.getNamed("challenges_page").dismiss();
+          Provider.of<OnboardingModel>(context, listen: false).completeStep1();
+        },
+      ),
+    );
+
+    Overlay.of(context).insert(_bearOverlayEntry!);
+  }
+
+  void _removeBearOverlay() {
+    _bearOverlayEntry?.remove();
+    _bearOverlayEntry = null;
+  }
+
+  /// Loads the user's current location for distance calculations
+  void _loadUserLocation() async {
+    try {
+      // Get fresh location (GeoPoint.current() will get the most up-to-date location)
+      GeoPoint location = await GeoPoint.current();
+      if (mounted) {
+        // only set state if widget is still mounted
+        setState(() {
+          currentUserLocation = location;
+        });
+      }
+    } catch (e) {
+      print("Error loading user location: $e");
+      // Continue without location - challenges will show unsorted
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final onboarding = Provider.of<OnboardingModel>(context, listen: true);
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -199,6 +289,22 @@ class _ChallengesPageState extends State<ChallengesPage> {
                             eventMatchesCategorySelection &&
                             eventMatchesLocationSelection &&
                             eventMatchesSearchText) {
+                          // distance calculations
+                          double? distance;
+                          if (currentUserLocation != null &&
+                              challenge.latF != null &&
+                              challenge.longF != null) {
+                            try {
+                              GeoPoint challengeLocation = GeoPoint(
+                                  challenge.latF!, challenge.longF!, 0);
+                              distance = currentUserLocation!
+                                  .distanceTo(challengeLocation);
+                            } catch (e) {
+                              print(
+                                  "Error calculating distance: $e"); // not fatal but it will log the error
+                            }
+                          }
+
                           eventData.add(ChallengeCellDto(
                             location:
                                 friendlyLocation[challenge.location] ?? "",
@@ -212,6 +318,7 @@ class _ChallengesPageState extends State<ChallengesPage> {
                                 friendlyDifficulty[event.difficulty] ?? "",
                             points: challenge.points ?? 0,
                             eventId: event.id,
+                            distanceFromChallenge: distance,
                           ));
                         } else if (event.id == groupModel.curEventId) {
                           apiClient.serverApi?.setCurrentEvent(
@@ -219,15 +326,40 @@ class _ChallengesPageState extends State<ChallengesPage> {
                         }
                       }
 
-                      // eventCells.forEach((Widget anEventCell) {
-                      //   print("AnEventCell is " + anEventCell.toString());
-                      // });
+                      // Sort by distance (null distances go to the end)
+                      eventData.sort((a, b) {
+                        if (a.distanceFromChallenge == null &&
+                            b.distanceFromChallenge == null) {
+                          return 0; // Both null, keep original order
+                        }
+                        if (a.distanceFromChallenge == null)
+                          return 1; // a goes to end
+                        if (b.distanceFromChallenge == null)
+                          return -1; // b goes to end of list
+                        return a.distanceFromChallenge!.compareTo(
+                            b.distanceFromChallenge!); // Sort ascending
+                      });
+
+                      // Onboarding: Step 1 - Show showcase for first challenge card after welcome overlay
+                      if (onboarding.step0WelcomeComplete &&
+                          !onboarding.step1ChallengesComplete &&
+                          eventData.isNotEmpty) {
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          if (mounted) {
+                            ShowcaseView.getNamed("challenges_page")
+                                .startShowCase(
+                                    [onboarding.step1ChallengeCardKey]);
+                            // Show bear overlay on top of showcase
+                            _showBearOverlay();
+                          }
+                        });
+                      }
 
                       return ListView.separated(
                         padding: const EdgeInsets.symmetric(horizontal: 3),
                         itemCount: eventData.length,
                         itemBuilder: (context, index) {
-                          return ChallengeCell(
+                          final challengeCell = ChallengeCell(
                               key: UniqueKey(),
                               eventData[index].location,
                               eventData[index].name,
@@ -238,7 +370,23 @@ class _ChallengesPageState extends State<ChallengesPage> {
                               eventData[index].description,
                               eventData[index].difficulty,
                               eventData[index].points,
-                              eventData[index].eventId);
+                              eventData[index].eventId,
+                              eventData[index].distanceFromChallenge);
+
+                          // Onboarding: Wrap first challenge card with showcase highlight
+                          if (index == 0 &&
+                              !onboarding.step1ChallengesComplete) {
+                            return Showcase(
+                              key: onboarding.step1ChallengeCardKey,
+                              title: '',
+                              description: '',
+                              tooltipBackgroundColor: Colors.transparent,
+                              disableMovingAnimation: true,
+                              child: challengeCell,
+                            );
+                          }
+
+                          return challengeCell;
                         },
                         physics: BouncingScrollPhysics(),
                         separatorBuilder: (context, index) {
