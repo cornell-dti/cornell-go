@@ -16,7 +16,7 @@ import 'package:game/api/geopoint.dart';
 enum AuthProviderType { google, apple }
 
 /** 
- * ApiClient Class - Core authentication and API communication manager.
+ * ApiClient Class - Core authentication and API communication
  * 
  * A ChangeNotifier class that manages authentication state, socket connections,
  * and API communication for the entire application.
