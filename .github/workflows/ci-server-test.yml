@@ -1,6 +1,11 @@
 name: Run server tests CI
 
-on: pull_request
+on:
+  push:
+    branches:
+      - '**' # Matches every branch
+  pull_request:
+    branches: [master]
 
 jobs:
   build:
