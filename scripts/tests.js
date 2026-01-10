@@ -28,7 +28,7 @@ async function main() {
   if (testType === "UNIT") {
     try {
       console.log("Executing unit tests");
-      execSync(`BUILDKIT_PROGRESS=plain docker compose build --progress=plain server && docker compose up --no-deps server --exit-code-from server`, { stdio: "inherit" });
+      execSync(`docker compose up --no-deps --build server --exit-code-from server`, { stdio: "inherit" });
       console.log("Tests ran successfully!");
     } catch (err) {
       console.log("Test execution failed!");
