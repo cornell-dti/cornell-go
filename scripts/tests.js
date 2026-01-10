@@ -23,12 +23,12 @@ async function main() {
   process.env[`TESTING_${testType}`] = "true";
 
   console.log("Stopping postgres (if running)");
-  execSync(`docker compose stop postgres`);
+  execSync(`docker compose stop postgres`, { stdio: "inherit" });
 
   if (testType === "UNIT") {
     try {
       console.log("Executing unit tests");
-      execSync(`docker compose up --no-deps --build server --exit-code-from server`);
+      execSync(`docker compose up --no-deps --build server --exit-code-from server`, { stdio: "inherit" });
       console.log("Tests ran successfully!");
     } catch (err) {
       console.log("Test execution failed!");
@@ -48,16 +48,16 @@ async function main() {
 
     try {
       console.log("Setting up test database");
-      execSync("npm run dbreset");
+      execSync("npm run dbreset", { stdio: "inherit" });
       console.log("Executing e2e tests");
-      execSync(`docker compose up --build --no-attach postgres --exit-code-from server`);
+      execSync(`docker compose up --no-attach postgres --exit-code-from server`, { stdio: "inherit" });
       console.log("Tests ran successfully!");
     } catch (err) {
       console.log("Test execution failed!");
       process.exitCode = 1;
     } finally {
       console.log("Stopping postgres (if running)");
-      execSync(`docker compose stop postgres`);
+      execSync(`docker compose stop postgres`, { stdio: "inherit" });
       if (saveOldPostgres) {
         console.log("Deleting test database");
         rmSync("./postgres-data", { recursive: true, force: true });
