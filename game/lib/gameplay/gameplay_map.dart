@@ -13,6 +13,7 @@ import 'dart:math';
 import 'package:game/gameplay/challenge_completed.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'dart:ui' as ui;
+import 'package:flutter_compass/flutter_compass.dart';
 
 // for backend connection
 import 'package:provider/provider.dart';
@@ -74,6 +75,7 @@ class _GameplayMapState extends State<GameplayMap> {
 
   late Completer<GoogleMapController> mapCompleter = Completer();
   late StreamSubscription<Position> positionStream;
+  StreamSubscription<CompassEvent>? _compassSubscription;
   // Whether location streaming has begun
   late Future<bool> streamStarted;
 
@@ -92,6 +94,7 @@ class _GameplayMapState extends State<GameplayMap> {
   GeoPoint? hintCenter;
   double defaultHintRadius = 200.0;
   double? hintRadius;
+  double _compassHeading = 0.0;
 
   // Add this to your state variables (After isExapnded)
   bool isArrivedButtonEnabled = true;
@@ -207,6 +210,15 @@ class _GameplayMapState extends State<GameplayMap> {
     streamStarted = startPositionStream();
     setStartingHintCircle();
 
+    // Listen to compass events for marker rotation
+    _compassSubscription = FlutterCompass.events?.listen((event) {
+      if (mounted && event.heading != null) {
+        setState(() {
+          _compassHeading = event.heading!;
+        });
+      }
+    });
+
     // Onboarding: Register showcase scope for highlighting UI elements (steps 7-10)
     // Hot restart fix: Unregister old instance if it exists, then register new one
     try {
@@ -235,6 +247,7 @@ class _GameplayMapState extends State<GameplayMap> {
   @override
   void dispose() {
     _removeBearOverlay();
+    _compassSubscription?.cancel();
     positionStream.cancel();
     _disposeController();
     super.dispose();
@@ -839,8 +852,7 @@ class _GameplayMapState extends State<GameplayMap> {
                         ? _center
                         : LatLng(currentLocation!.lat, currentLocation!.long),
                     anchor: Offset(0.5, 0.5),
-                    rotation:
-                        currentLocation == null ? 0 : currentLocation!.heading,
+                    rotation: _compassHeading,
                   ),
                 },
                 circles: {
