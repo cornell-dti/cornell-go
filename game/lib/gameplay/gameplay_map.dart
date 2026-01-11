@@ -295,9 +295,15 @@ class _GameplayMapState extends State<GameplayMap> {
    */
   Future<bool> startPositionStream() async {
     GoogleMapController googleMapController = await mapCompleter.future;
+    if (!mounted) {
+      return false;
+    }
 
     try {
       final location = await GeoPoint.current();
+      if (!mounted) {
+        return false;
+      }
       setState(() {
         currentLocation = location;
       });
@@ -315,6 +321,9 @@ class _GameplayMapState extends State<GameplayMap> {
       positionStream = Geolocator.getPositionStream(
               locationSettings: GeoPoint.getLocationSettings())
           .listen((Position? newPos) {
+        if (!mounted) {
+          return;
+        }
         // prints user coordinates - useful for debugging
         // print(newPos == null
         //     ? 'Unknown'
@@ -329,6 +338,9 @@ class _GameplayMapState extends State<GameplayMap> {
       });
 
       positionStream.onData((newPos) {
+        if (!mounted) {
+          return;
+        }
         currentLocation =
             GeoPoint(newPos.latitude, newPos.longitude, newPos.heading);
 
@@ -374,6 +386,9 @@ class _GameplayMapState extends State<GameplayMap> {
    */
   void recenterCamera() async {
     GoogleMapController googleMapController = await mapCompleter.future;
+    if (!mounted) {
+      return;
+    }
 
     if (currentLocation == null) {
       return;
@@ -393,6 +408,9 @@ class _GameplayMapState extends State<GameplayMap> {
     // around new position and sets zoom. This causes the map to follow the
     // user as they move.
     positionStream.onData((newPos) {
+      if (!mounted) {
+        return;
+      }
       currentLocation =
           GeoPoint(newPos.latitude, newPos.longitude, newPos.heading);
 
@@ -414,6 +432,9 @@ class _GameplayMapState extends State<GameplayMap> {
    */
   void cancelRecenterCamera() async {
     positionStream.onData((newPos) {
+      if (!mounted) {
+        return;
+      }
       currentLocation =
           GeoPoint(newPos.latitude, newPos.longitude, newPos.heading);
       setState(() {});
