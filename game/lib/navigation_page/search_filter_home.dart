@@ -80,11 +80,7 @@ class _SearchFilterBarState extends State<SearchFilterBar>
               // Search bar section
               Padding(
                 padding: EdgeInsets.only(
-                    top: Platform.isIOS
-                        ? deviceHeight * 0.01
-                        : MediaQuery.of(context).padding.top +
-                            deviceHeight * 0.01, // Android padding
-                    bottom: deviceHeight * 0.01),
+                    top: deviceHeight * 0.01, bottom: deviceHeight * 0.01),
                 child: Stack(
                   children: [
                     SingleChildScrollView(

@@ -15,6 +15,8 @@ class GeoPoint {
   // Static cache for last retrieved location (in-memory only)
   static GeoPoint? _lastLocation;
   static GeoPoint? get lastLocation => _lastLocation;
+  static DateTime? _lastLocationAt;
+  static const Duration _cacheMaxAge = Duration(seconds: 30);
 
   GeoPoint(
     double lat,
@@ -61,6 +63,16 @@ class GeoPoint {
             'Location permissions are permanently denied, we cannot request permissions.');
       }
 
+      // FASTEST PATH: Check our in-memory cache first (instant), but only if fresh
+      if (_lastLocation != null && _lastLocationAt != null) {
+        final cacheAge = DateTime.now().difference(_lastLocationAt!);
+        if (cacheAge <= _cacheMaxAge) {
+          print(
+              "Using in-memory cached location (age ${cacheAge.inSeconds}s): ${_lastLocation!.lat}, ${_lastLocation!.long}");
+          return _lastLocation!;
+        }
+      }
+
       // FAST PATH: Try to get last known position first (milliseconds)
       try {
         Position? lastPosition = await Geolocator.getLastKnownPosition();
@@ -71,6 +83,7 @@ class GeoPoint {
           // Store in static cache
           _lastLocation = GeoPoint(lastPosition.latitude,
               lastPosition.longitude, lastPosition.heading);
+          _lastLocationAt = DateTime.now();
 
           // Start getting current position in background for better accuracy
           Geolocator.getCurrentPosition(
@@ -78,6 +91,7 @@ class GeoPoint {
               .then((pos) {
             print("Got updated location: ${pos.latitude}, ${pos.longitude}");
             _lastLocation = GeoPoint(pos.latitude, pos.longitude, pos.heading);
+            _lastLocationAt = DateTime.now();
           }).catchError((e) {
             print("Error getting current position: $e");
           });
@@ -99,6 +113,7 @@ class GeoPoint {
 
       // Store in static cache
       _lastLocation = GeoPoint(pos.latitude, pos.longitude, pos.heading);
+      _lastLocationAt = DateTime.now();
       return _lastLocation!;
     } catch (e) {
       print(e);

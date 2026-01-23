@@ -49,15 +49,51 @@ const SAVE_SVG = (
   </svg>
 );
 
+const DELETE_SVG = (
+  <svg
+    height="20"
+    viewBox="0 0 20 20"
+    width="20"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M5 5l10 10M5 15L15 5"
+      fill="none"
+      stroke="#f44336"
+      strokeWidth="2"
+    />
+  </svg>
+);
+
+const BLOCK_SVG = (
+  <svg
+    height="20"
+    viewBox="0 0 20 20"
+    width="20"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <circle
+      cx="10"
+      cy="10"
+      r="9"
+      stroke="#ff9800"
+      strokeWidth="2"
+      fill="none"
+    />
+    <line x1="5" y1="5" x2="15" y2="15" stroke="#ff9800" strokeWidth="2" />
+  </svg>
+);
+
 const styles = {
   select: { margin: '0 20px' },
   buttonsCellContainer: {
-    padding: '0 20px',
-    width: '100%',
-    height: '100%',
-    display: 'flex',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
+    padding: "0 20px",
+    width: "100%",
+    height: "100%",
+    display: "flex",
+    justifyContent: "flex-end",
+    alignItems: "center",
+    gap: "3px",
   },
   editButton: {
     background: '#f3f3f3',
@@ -106,6 +142,7 @@ function toForm(user: any) {
     id: user.id,
     groupId: user.groupId,
     email: user.email,
+    isBanned: user.isBanned,
   };
 }
 
@@ -162,6 +199,50 @@ function getColumns(setRowsData: any, serverData: any) {
             }}
           >
             {EDIT_SVG}
+          </button>
+          <button
+            title="Block/Unblock"
+            style={styles.cancelButton}
+            onClick={async (e) => {
+              e.stopPropagation();
+
+              // Toggle isBanned status
+              const newStatus = !data.isBanned;
+              await serverData.banUser(data.id, newStatus);
+              data.isBanned = newStatus;
+
+              setRowsData((prevRows: any[]) =>
+                prevRows.map((row) =>
+                  row.id === data.id ? { ...row, isBanned: newStatus } : row
+                )
+              );
+              alert(
+                `User ${data.username} has been ${
+                  newStatus ? "blocked" : "unblocked"
+                }.`
+              );
+            }}
+          >
+            {BLOCK_SVG}
+          </button>
+          <button
+            title="Delete"
+            style={styles.cancelButton}
+            onClick={(e) => {
+              e.stopPropagation();
+
+              if (
+                window.confirm("Are you sure you want to delete this user?")
+              ) {
+                setRowsData((prevRows: any[]) =>
+                  prevRows.filter((row) => row.id !== data.id)
+                );
+                serverData.users.delete(data.id);
+                serverData.deleteUser(data.id);
+              }
+            }}
+          >
+            {DELETE_SVG}
           </button>
         </div>
       ),
