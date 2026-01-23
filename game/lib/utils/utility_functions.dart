@@ -283,6 +283,7 @@ int calculateExtensionAdjustedPoints(int originalPoints, int extensionsUsed) {
   final deduction = (originalPoints * EXTENSION_COST * extensionsUsed).floor();
   return (originalPoints - deduction).clamp(0, originalPoints);
 }
+
 /// Matches an event based on difficulty, location, category, and search text
 bool eventMatchesFilters({
   required EventDto event,
