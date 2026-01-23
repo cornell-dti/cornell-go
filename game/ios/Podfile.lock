@@ -46,6 +46,8 @@ PODS:
     - GoogleUtilities/UserDefaults (~> 8.0)
     - PromisesObjC (~> 2.4)
   - Flutter (1.0.0)
+  - flutter_compass (0.0.1):
+    - Flutter
   - flutter_config_plus (0.0.1):
     - Flutter
   - flutter_secure_storage (6.0.0):
@@ -159,6 +161,7 @@ DEPENDENCIES:
   - Firebase
   - Firebase/Analytics
   - Flutter (from `Flutter`)
+  - flutter_compass (from `.symlinks/plugins/flutter_compass/ios`)
   - flutter_config_plus (from `.symlinks/plugins/flutter_config_plus/ios`)
   - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
   - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
@@ -196,6 +199,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/device_info_plus/ios"
   Flutter:
     :path: Flutter
+  flutter_compass:
+    :path: ".symlinks/plugins/flutter_compass/ios"
   flutter_config_plus:
     :path: ".symlinks/plugins/flutter_config_plus/ios"
   flutter_secure_storage:
@@ -232,6 +237,7 @@ SPEC CHECKSUMS:
   FirebaseCoreInternal: ac26d09a70c730e497936430af4e60fb0c68ec4e
   FirebaseInstallations: 58cf94dabf1e2bb2fa87725a9be5c2249171cda0
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
+  flutter_compass: b236ab69b61545cce89fd58527f401a7587d5cc1
   flutter_config_plus: f980f190875b1d53f7d7bfc242f65d844faf561d
   flutter_secure_storage: 1ed9476fba7e7a782b22888f956cce43e2c62f13
   fluttertoast: 2c67e14dce98bbdb200df9e1acf610d7a6264ea1

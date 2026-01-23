@@ -34,7 +34,7 @@ class SettingsPage extends StatelessWidget {
         backgroundColor: Color.fromARGB(255, 255, 248, 241),
         appBar: AppBar(
           backgroundColor: Color.fromARGB(255, 237, 86, 86),
-          toolbarHeight: MediaQuery.of(context).size.height * 0.1,
+          toolbarHeight: MediaQuery.of(context).size.height * 0.08,
           leading: Align(
             alignment: Alignment.center,
             child: IconButton(

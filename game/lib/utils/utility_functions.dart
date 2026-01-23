@@ -247,7 +247,7 @@ final Map<EventCategoryDto, String> friendlyCategory = {
 /**
  * Calculate hint-adjusted points using the "Half-after-3" system
  * 0 hints = full points; 3 hints = exactly half points; 1-2 hints linearly reduce
- * 
+ *
  * @param basePoints - Original challenge points
  * @param hintsUsed - Number of hints used (0-3)
  * @returns Points awarded after hint penalty
@@ -282,4 +282,47 @@ int calculateExtensionAdjustedPoints(int originalPoints, int extensionsUsed) {
   const double EXTENSION_COST = 0.25; // 25% per extension
   final deduction = (originalPoints * EXTENSION_COST * extensionsUsed).floor();
   return (originalPoints - deduction).clamp(0, originalPoints);
+}
+/// Matches an event based on difficulty, location, category, and search text
+bool eventMatchesFilters({
+  required EventDto event,
+  required String? difficulty,
+  required List<String>? locations,
+  required List<String>? categories,
+  required String? searchText,
+  required String challengeLocation,
+  String? challengeName,
+}) {
+  // Check difficulty
+  final matchesDifficulty =
+      (difficulty?.length ?? 0) == 0 || difficulty == event.difficulty?.name;
+
+  // Check locations
+  final matchesLocation = locations == null ||
+      locations.isEmpty ||
+      locations.contains(challengeLocation);
+
+  // Check categories
+  final matchesCategory = categories == null ||
+      categories.isEmpty ||
+      categories.contains(event.category?.name);
+
+  // Check search text
+  final searchTerm = searchText?.toLowerCase() ?? '';
+  final matchesSearch = searchTerm.isEmpty ||
+      challengeLocation.toLowerCase().contains(searchTerm) ||
+      (event.name ?? "").toLowerCase().contains(searchTerm) ||
+      (challengeName ?? "").toLowerCase().contains(searchTerm);
+
+  return matchesDifficulty &&
+      matchesLocation &&
+      matchesCategory &&
+      matchesSearch;
+}
+
+/// Returns a valid image URL or a default placeholder if the input is null or empty
+String getValidImageUrl(String? imageUrl) {
+  return (imageUrl == null || imageUrl.isEmpty)
+      ? "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png"
+      : imageUrl;
 }

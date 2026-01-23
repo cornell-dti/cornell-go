@@ -14,6 +14,7 @@ import 'package:game/gameplay/challenge_completed.dart';
 import 'package:game/gameplay/challenge_failed.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'dart:ui' as ui;
+import 'package:flutter_compass/flutter_compass.dart';
 
 // for backend connection
 import 'package:provider/provider.dart';
@@ -81,6 +82,7 @@ class _GameplayMapState extends State<GameplayMap>
 
   late Completer<GoogleMapController> mapCompleter = Completer();
   late StreamSubscription<Position> positionStream;
+  StreamSubscription<CompassEvent>? _compassSubscription;
   // Whether location streaming has begun
   late Future<bool> streamStarted;
 
@@ -121,6 +123,7 @@ class _GameplayMapState extends State<GameplayMap>
   GeoPoint? hintCenter;
   double defaultHintRadius = 200.0;
   double? hintRadius;
+  double _compassHeading = 0.0;
 
   // Add this to your state variables (After isExapnded)
   bool isArrivedButtonEnabled = true;
@@ -380,6 +383,15 @@ class _GameplayMapState extends State<GameplayMap>
     streamStarted = startPositionStream();
     setStartingHintCircle();
 
+    // Listen to compass events for marker rotation
+    _compassSubscription = FlutterCompass.events?.listen((event) {
+      if (mounted && event.heading != null) {
+        setState(() {
+          _compassHeading = event.heading!;
+        });
+      }
+    });
+
     // Onboarding: Register showcase scope for highlighting UI elements (steps 7-10)
     // Hot restart fix: Unregister old instance if it exists, then register new one
     try {
@@ -519,6 +531,7 @@ class _GameplayMapState extends State<GameplayMap>
     _removeBearOverlay();
     _removeTimerModal();
     _removeTimerWarning();
+    _compassSubscription?.cancel();
     positionStream.cancel();
     _disposeController();
     _timerUpdateTimer?.cancel(); // Cancel periodic timer updates
@@ -588,14 +601,35 @@ class _GameplayMapState extends State<GameplayMap>
    */
   Future<bool> startPositionStream() async {
     GoogleMapController googleMapController = await mapCompleter.future;
+    if (!mounted) {
+      return false;
+    }
 
     try {
       final location = await GeoPoint.current();
-      currentLocation = location;
+      if (!mounted) {
+        return false;
+      }
+      setState(() {
+        currentLocation = location;
+      });
+
+      // Immediately center the camera on the user's location
+      googleMapController.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(
+            target: LatLng(location.lat, location.long),
+            zoom: 16.5,
+          ),
+        ),
+      );
 
       positionStream = Geolocator.getPositionStream(
               locationSettings: GeoPoint.getLocationSettings())
           .listen((Position? newPos) {
+        if (!mounted) {
+          return;
+        }
         // prints user coordinates - useful for debugging
         // print(newPos == null
         //     ? 'Unknown'
@@ -610,6 +644,9 @@ class _GameplayMapState extends State<GameplayMap>
       });
 
       positionStream.onData((newPos) {
+        if (!mounted) {
+          return;
+        }
         currentLocation =
             GeoPoint(newPos.latitude, newPos.longitude, newPos.heading);
 
@@ -655,6 +692,9 @@ class _GameplayMapState extends State<GameplayMap>
    */
   void recenterCamera() async {
     GoogleMapController googleMapController = await mapCompleter.future;
+    if (!mounted) {
+      return;
+    }
 
     if (currentLocation == null) {
       return;
@@ -674,6 +714,9 @@ class _GameplayMapState extends State<GameplayMap>
     // around new position and sets zoom. This causes the map to follow the
     // user as they move.
     positionStream.onData((newPos) {
+      if (!mounted) {
+        return;
+      }
       currentLocation =
           GeoPoint(newPos.latitude, newPos.longitude, newPos.heading);
 
@@ -695,6 +738,9 @@ class _GameplayMapState extends State<GameplayMap>
    */
   void cancelRecenterCamera() async {
     positionStream.onData((newPos) {
+      if (!mounted) {
+        return;
+      }
       currentLocation =
           GeoPoint(newPos.latitude, newPos.longitude, newPos.heading);
       setState(() {});
@@ -1143,8 +1189,7 @@ class _GameplayMapState extends State<GameplayMap>
                         ? _center
                         : LatLng(currentLocation!.lat, currentLocation!.long),
                     anchor: Offset(0.5, 0.5),
-                    rotation:
-                        currentLocation == null ? 0 : currentLocation!.heading,
+                    rotation: _compassHeading,
                   ),
                 },
                 circles: {
