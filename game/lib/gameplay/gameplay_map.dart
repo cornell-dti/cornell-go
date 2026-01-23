@@ -72,9 +72,12 @@ class GameplayMap extends StatefulWidget {
 }
 
 class _GameplayMapState extends State<GameplayMap>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   final METERS_TO_DEGREES = 111139;
-  final EXTENSION_TIME = 300; // 5 minutes (300 seconds)
+
+  /// Extension duration in seconds (5 minutes).
+  /// IMPORTANT: Must stay in sync with EXTENSION_LENGTH_MS in server/src/timer/timer.service.ts (in milliseconds).
+  static const int EXTENSION_TIME_SECONDS = 300;
 
   late Completer<GoogleMapController> mapCompleter = Completer();
   late StreamSubscription<Position> positionStream;
@@ -98,12 +101,16 @@ class _GameplayMapState extends State<GameplayMap>
   Timer? _timerUpdateTimer; // Periodic timer to update display every second
   bool _periodicTimerStarted = false;
   int _waitCount = 0; // Counts how long we've been waiting for backend
-  static const int _maxWaitTime = 10; // Max time in seconds to wait for backend to respond
+
+  /// Maximum time (in seconds) to wait for backend to respond when starting a timer.
+  /// After this timeout, the timer UI will show an error and reset.
+  static const int _maxBackendWaitTimeSeconds = 10;
 
   // Stream subscriptions for timer events
   StreamSubscription<TimerCompletedDto>? _timerCompletedSubscription;
   StreamSubscription<TimerExtendedDto>? _timerExtendedSubscription;
   StreamSubscription<TimerWarningDto>? _timerWarningSubscription;
+  StreamSubscription<TimerStartedDto>? _timerStartedSubscription;
 
   bool _showWarningColors = false; // Show warning colors when 5 seconds left
   bool _hasStartedFlashing = false; // Track if flashing animation has started
@@ -132,13 +139,21 @@ class _GameplayMapState extends State<GameplayMap>
   // Timer: overlay entry for Time's Up message when timer expires
   OverlayEntry? _timerModalOverlay;
   bool _timerModalShowing = false; // Flag to prevent multiple overlays
-  OverlayEntry? _timerWarningOverlay; // Current warning overlay entry for Niki warning the user of how much time is left
+
+  // Flag to track when "Congratulations" dialog is showing after challenge completion
+  bool _arrivedDialogShowing = false;
+  OverlayEntry?
+      _timerWarningOverlay; // Current warning overlay entry for Niki warning the user of how much time is left
 
   // Timer: animation for extension button countdown
   AnimationController? _extensionAnimationController;
   Animation<double>? _extensionAnimation;
-  static const int EXTENSION_CHOICE_TIME = 10; // the user has 10 seconds to choose whether or not to extend a timer
-  
+
+  /// Time window (in seconds) for the user to decide whether to extend the timer
+  /// after the "Time's Up" modal appears. The extension button shows a countdown
+  /// animation during this period; after it expires, the button becomes disabled.
+  static const int _extensionChoiceWindowSeconds = 10;
+
   void _removeTimerWarning() {
     _timerWarningOverlay?.remove();
     _timerWarningOverlay = null;
@@ -276,7 +291,7 @@ class _GameplayMapState extends State<GameplayMap>
   /**
    * Starts periodic updates to refresh timer display every second)
    * Waits for backend to respond (isActive becomes true) before displaying
-   * Times out after _maxWaitTime seconds if backend doesn't respond
+   * Times out after _maxBackendWaitTimeSeconds if backend doesn't respond
    */
   void _startTimerUpdates() {
     if (_periodicTimerStarted) return; // Timer already started
@@ -291,7 +306,7 @@ class _GameplayMapState extends State<GameplayMap>
       // Wait for backend to respond - timer not active yet
       if (!timerModel.isTimerForChallenge(widget.challengeId)) {
         _waitCount++;
-        if (_waitCount > _maxWaitTime) {
+        if (_waitCount > _maxBackendWaitTimeSeconds) {
           // If backend didn't respond in time, cancel timer and don't show it
           timer.cancel();
           _periodicTimerStarted = false;
@@ -301,7 +316,7 @@ class _GameplayMapState extends State<GameplayMap>
             currentTime = 0.0;
           });
           print(
-              "Timer start timeout: Backend didn't respond within $_maxWaitTime seconds. isActive=${timerModel.isActive}, currentChallengeId=${timerModel.currentChallengeId}");
+              "Timer start timeout: Backend didn't respond within $_maxBackendWaitTimeSeconds seconds. isActive=${timerModel.isActive}, currentChallengeId=${timerModel.currentChallengeId}");
           displayToast(
               "Timer failed to start. Please try again.", Status.error);
           return;
@@ -376,11 +391,13 @@ class _GameplayMapState extends State<GameplayMap>
       scope: "gameplay_map",
     );
 
-    // Timer: Initialize timer state (reset to false first)
-    _initializeTimer();
+    // Timer: Set up listeners first (before sending requests)
+    _setupTimerStartedListener(); // Listen for timer started from backend
     _setupTimerExpirationListener(); // Listen for timer expiration from backend
     _setupTimerExtensionListener(); // Listen for timer extension from backend
     _setupTimerWarningListener(); // Listen for timer warning from backend
+    // Initialize timer state (this sends request to backend)
+    _initializeTimer();
   }
 
   /**
@@ -406,12 +423,21 @@ class _GameplayMapState extends State<GameplayMap>
     final challengeModel = Provider.of<ChallengeModel>(context, listen: false);
     final challenge = challengeModel.getChallengeById(widget.challengeId);
     final timerModel = Provider.of<TimerModel>(context, listen: false);
+    final onboarding = Provider.of<OnboardingModel>(context, listen: false);
 
     if (challenge?.timerLength != null && challenge!.timerLength! > 0) {
       setState(() {
         hasTimer = true;
         totalTime = challenge.timerLength!;
       });
+
+      // DON'T start timer if user is still in onboarding (step 5 is the gameplay intro overlay)
+      // Timer will start naturally when user navigates to challenge after completing onboarding
+      if (!onboarding.step5GameplayIntroComplete) {
+        print(
+            "Timer not started for challenge ${widget.challengeId} - onboarding not complete");
+        return;
+      }
 
       // Request backend to start timer (sends StartChallengeTimerDto)
       timerModel.startTimer(widget.challengeId);
@@ -424,10 +450,52 @@ class _GameplayMapState extends State<GameplayMap>
     }
   }
 
+  /**
+   * Listens for timer started (TimerStartedDto) from backend
+   * Calculates totalTime as: originalTimerLength + (extensionsUsed * EXTENSION_TIME_SECONDS)
+   * This ensures progress = remainingTime / totalAllocatedTime
+   */
+  void _setupTimerStartedListener() {
+    final client = Provider.of<ApiClient>(context, listen: false);
+
+    // cancel any existing subscription
+    _timerStartedSubscription?.cancel();
+
+    _timerStartedSubscription =
+        client.clientApi.timerStartedStream.listen((event) {
+      if (event.challengeId == widget.challengeId && mounted) {
+        final timerModel = Provider.of<TimerModel>(context, listen: false);
+        final timeRemaining = timerModel.getTimeRemaining();
+        final challengeModel =
+            Provider.of<ChallengeModel>(context, listen: false);
+        final challenge = challengeModel.getChallengeById(widget.challengeId);
+
+        if (challenge?.timerLength != null &&
+            timeRemaining != null &&
+            timeRemaining > 0) {
+          setState(() {
+            // If timer has been extended, show progress relative to EXTENSION_TIME_SECONDS (5 min)
+            // This ensures the circle shows correct progress when coming back after logout
+            // Otherwise use original timer length
+            totalTime = event.extensionsUsed > 0
+                ? EXTENSION_TIME_SECONDS
+                : challenge!.timerLength!;
+            currentTime = timeRemaining.toDouble();
+          });
+        }
+      }
+    });
+  }
+
   @override
   void didUpdateWidget(GameplayMap oldWidget) {
     // If challenge changed, reset hint state and timer state
     if (oldWidget.challengeId != widget.challengeId) {
+      // Save whether modal/dialog was showing before removing it
+      // If showing, user is navigating away (to failed/completed page)
+      final wasTimerModalShowing = _timerModalShowing;
+      final wasArrivedDialogShowing = _arrivedDialogShowing;
+
       startingHintCenter = null;
       hintCenter = null;
       hintRadius = null;
@@ -436,8 +504,11 @@ class _GameplayMapState extends State<GameplayMap>
       // Remove timer modal if showing
       _removeTimerModal();
 
-      // Reset and reinitialize timer for new challenge
-      _initializeTimer();
+      // DON'T start timer for new challenge if any modal/dialog was showing
+      // (user is about to navigate away to completion/failed page)
+      if (!wasTimerModalShowing && !wasArrivedDialogShowing) {
+        _initializeTimer();
+      }
     }
 
     super.didUpdateWidget(oldWidget);
@@ -456,7 +527,9 @@ class _GameplayMapState extends State<GameplayMap>
     _timerCompletedSubscription?.cancel(); //cancel timer completion listener
     _timerExtendedSubscription?.cancel(); //cancel timer extension listener
     _timerWarningSubscription?.cancel(); //cancel timer warning listener
-    _extensionAnimationController?.dispose(); //dispose extension animation controller
+    _timerStartedSubscription?.cancel(); //cancel timer started listener
+    _extensionAnimationController
+        ?.dispose(); //dispose extension animation controller
     super.dispose();
   }
 
@@ -1209,8 +1282,17 @@ class _GameplayMapState extends State<GameplayMap>
                       chalName = await apiClient.serverApi
                           ?.completedChallenge(CompletedChallengeDto());
                     }
+                    // Stop timer when challenge is successfully completed
+                    // This prevents "Time's Up" modal from appearing while congratulations dialog is showing
+                    _timerUpdateTimer?.cancel();
+                    _periodicTimerStarted = false;
+                    setState(() {
+                      hasTimer = false;
+                    });
                   }
                   final chalId = widget.challengeId;
+                  // Track that dialog is showing (prevents timer from starting for next challenge)
+                  _arrivedDialogShowing = true;
                   showDialog(
                     context: context,
                     barrierDismissible: !hasArrived,
@@ -1228,9 +1310,10 @@ class _GameplayMapState extends State<GameplayMap>
                       );
                     },
                   ).then((_) {
-                    // Re-enable the button after the dialog is closed
+                    // Re-enable the button and clear dialog flag after the dialog is closed
                     setState(() {
                       isArrivedButtonEnabled = true;
+                      _arrivedDialogShowing = false;
                     });
                   });
                 },
@@ -1318,7 +1401,8 @@ class _GameplayMapState extends State<GameplayMap>
   }
 
   /**
-   * Listens for timer extension (TimerExtendedDto) from backend and restarts timer display
+   * Listens for timer extension (TimerExtendedDto) from backend and updates timer display
+   * Adds EXTENSION_TIME_SECONDS to totalTime so progress shows remaining / total allocated time
    */
   void _setupTimerExtensionListener() {
     final client = Provider.of<ApiClient>(context, listen: false);
@@ -1331,15 +1415,15 @@ class _GameplayMapState extends State<GameplayMap>
       if (event.challengeId == widget.challengeId && mounted) {
         // update timer display when timer is extended
         final timerModel = Provider.of<TimerModel>(context, listen: false);
-        final newTimeRemaining = timerModel.getTimeRemaining();
+        final timeRemaining = timerModel.getTimeRemaining();
 
         setState(() {
           hasTimer = true;
-          totalTime +=
-              EXTENSION_TIME; // Add 5 minutes (300 seconds) to total time for extension
-          // update currentTime to reflect the new time remaining after extension
-          if (newTimeRemaining != null) {
-            currentTime = newTimeRemaining.toDouble();
+          // Set totalTime to EXTENSION_TIME_SECONDS (5 min) so progress circle
+          // represents time remaining out of the extension time
+          if (timeRemaining != null) {
+            currentTime = timeRemaining.toDouble();
+            totalTime = EXTENSION_TIME_SECONDS;
           }
           // reset warning colors when timer is extended
           _showWarningColors = false;
@@ -1369,7 +1453,7 @@ class _GameplayMapState extends State<GameplayMap>
     _extensionAnimationController?.dispose();
     _extensionAnimationController = AnimationController(
       vsync: this,
-      duration: Duration(seconds: EXTENSION_CHOICE_TIME),
+      duration: Duration(seconds: _extensionChoiceWindowSeconds),
     );
     _extensionAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
       CurvedAnimation(
@@ -1497,22 +1581,40 @@ class _GameplayMapState extends State<GameplayMap>
                     height: screenHeight * 0.047, // ~40px on 852px screen
                     child: ElevatedButton(
                       onPressed: () {
-                        // remove overlay before we switch pages
-                        if (_timerModalOverlay != null) {
-                          _timerModalOverlay?.remove();
-                          _timerModalOverlay?.dispose();
-                          _timerModalOverlay = null;
-                        }
-                        _timerModalShowing = false;
+                        final timerModel =
+                            Provider.of<TimerModel>(context, listen: false);
+                        final client =
+                            Provider.of<ApiClient>(context, listen: false);
 
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ChallengeFailedPage(
-                              challengeId: widget.challengeId,
-                            ),
-                          ),
-                        );
+                        // Listen for challengeFailed event from backend, then navigate
+                        late StreamSubscription<ChallengeFailedDto>
+                            subscription;
+                        subscription = client.clientApi.challengeFailedStream
+                            .listen((event) {
+                          if (event.challengeId == widget.challengeId) {
+                            subscription.cancel();
+
+                            // Remove overlay before navigating
+                            if (_timerModalOverlay != null) {
+                              _timerModalOverlay?.remove();
+                              _timerModalOverlay?.dispose();
+                              _timerModalOverlay = null;
+                            }
+                            _timerModalShowing = false;
+
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ChallengeFailedPage(
+                                  challengeId: widget.challengeId,
+                                ),
+                              ),
+                            );
+                          }
+                        });
+
+                        // Tell backend to immediately fail the challenge (skip grace period)
+                        timerModel.completeTimer(widget.challengeId);
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
@@ -1590,8 +1692,7 @@ class _GameplayMapState extends State<GameplayMap>
                                     }
                                   },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors
-                                  .transparent,
+                              backgroundColor: Colors.transparent,
                               shadowColor: Colors.transparent,
                               elevation: 0,
                               padding: EdgeInsets.only(
@@ -1676,10 +1777,9 @@ class _GameplayMapState extends State<GameplayMap>
     }
 
     // Success - timerExtended event will update the timer automatically via stream
+    // The stream listener (_setupTimerExtensionListener) handles resetting totalTime and currentTime
     setState(() {
       hasTimer = true;
-      totalTime +=
-          EXTENSION_TIME; // Add 5 minutes (300 seconds) to total time for extension
     });
     return true;
   }

@@ -30,6 +30,7 @@ import {
   TimerExtendedDto,
   TimerCompletedDto,
   TimerWarningDto,
+  ChallengeFailedDto,
 } from '../timer/timer.dto';
 import { ExtractSubjectType } from '@casl/ability';
 
@@ -50,6 +51,7 @@ export type ClientApiDef = {
   timerExtended: TimerExtendedDto;
   timerCompleted: TimerCompletedDto;
   timerWarning: TimerWarningDto;
+  challengeFailed: ChallengeFailedDto;
 };
 
 @Injectable()

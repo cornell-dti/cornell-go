@@ -116,18 +116,25 @@ class CompletedFeedWidget extends StatelessWidget {
                       // Calculate adjusted points: first apply extension deduction, then hint adjustment
                       int basePoints = challenge.points ?? 0;
                       totalOriginalPoints += basePoints; // Sum original points
-                      int extensionsUsed = 0;
-                      try {
-                        extensionsUsed = prevChallenge.extensionsUsed ?? 0;
-                      } catch (e) {
-                        extensionsUsed = 0;
+
+                      // If challenge was failed (timer expired), award 0 points
+                      if (prevChallenge.failed == true) {
+                        // Failed challenges earn 0 points
+                        totalAdjustedPoints += 0;
+                      } else {
+                        int extensionsUsed = 0;
+                        try {
+                          extensionsUsed = prevChallenge.extensionsUsed ?? 0;
+                        } catch (e) {
+                          extensionsUsed = 0;
+                        }
+                        int extensionAdjustedPoints =
+                            calculateExtensionAdjustedPoints(
+                                basePoints, extensionsUsed);
+                        int finalAdjustedPoints = calculateHintAdjustedPoints(
+                            extensionAdjustedPoints, prevChallenge.hintsUsed);
+                        totalAdjustedPoints += finalAdjustedPoints;
                       }
-                      int extensionAdjustedPoints =
-                          calculateExtensionAdjustedPoints(
-                              basePoints, extensionsUsed);
-                      int finalAdjustedPoints = calculateHintAdjustedPoints(
-                          extensionAdjustedPoints, prevChallenge.hintsUsed);
-                      totalAdjustedPoints += finalAdjustedPoints;
                     }
                   }
                 }

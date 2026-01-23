@@ -104,6 +104,7 @@ export interface PrevChallengeDto {
   hintsUsed: number;
   extensionsUsed?: number;
   dateCompleted: string;
+  failed?: boolean; // True if challenge was failed due to timer expiration
 }
 
 /** DTO for event tracker in updateEventTrackerData */

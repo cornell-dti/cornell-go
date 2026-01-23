@@ -129,16 +129,6 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
       if (tracker == null || tracker.prevChallenges.length == 0) {
         return CircularIndicator();
       }
-      // if (tracker == null) {
-      //   return Text("tracker is null");
-      // }
-      // if (tracker.prevChallenges.length == 0) {
-      //   return Text("tracker prevchallenges has 0 length");
-      // }
-      // if (tracker.prevChallenges.last.challengeId != widget.challengeId) {
-      //   return Text(
-      //       "tracker last completed challenge does not match passed in challenge id");
-      // }
 
       // if this event is a journey
       if ((event?.challenges?.length ?? 0) > 1)
@@ -168,10 +158,17 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
             challengeModel.getChallengeById(prevChal.challengeId);
         if (completedChal == null) continue;
         int basePoints = completedChal.points ?? 0;
-        int extensionAdjustedPoints = calculateExtensionAdjustedPoints(
-            basePoints, prevChal.extensionsUsed ?? 0);
-        var pts = calculateHintAdjustedPoints(
-            extensionAdjustedPoints, prevChal.hintsUsed);
+
+        // Calculate points: 0 if failed, otherwise apply extension and hint adjustments
+        int pts;
+        if (prevChal.failed == true) {
+          pts = 0;
+        } else {
+          int extensionAdjustedPoints = calculateExtensionAdjustedPoints(
+              basePoints, prevChal.extensionsUsed ?? 0);
+          pts = calculateHintAdjustedPoints(
+              extensionAdjustedPoints, prevChal.hintsUsed);
+        }
         total_pts += pts;
 
         completedChallenges.add(Container(
@@ -192,7 +189,9 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                 ),
                 Spacer(),
                 Text(
-                  "+ " + pts.toString() + " points",
+                  prevChal.failed == true
+                      ? "0 points"
+                      : "+ " + pts.toString() + " points",
                   style: TextStyle(color: Colors.white, fontSize: 16.0),
                 ),
               ],
@@ -215,6 +214,7 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                 right: 20),
             height: MediaQuery.of(context).size.height * 0.53,
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Container(
                   padding: EdgeInsets.only(bottom: 12),

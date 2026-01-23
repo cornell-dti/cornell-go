@@ -116,6 +116,7 @@ class _ChallengeFailedState extends State<ChallengeFailedPage>
   bool journeyCompleted = false;
   late AnimationController _lightningController;
   late Animation<double> _lightningAnimation;
+  bool _hasRequestedTracker = false;
 
   @override
   void initState() {
@@ -136,6 +137,26 @@ class _ChallengeFailedState extends State<ChallengeFailedPage>
 
     // Start animation when page loads
     _lightningController.forward();
+
+    // Request fresh tracker data after first frame
+    // This ensures we have the latest prevChallenges (including the failed one)
+    // and curChallengeId (already updated to next challenge by backend)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _requestFreshTrackerData();
+    });
+  }
+
+  void _requestFreshTrackerData() {
+    if (_hasRequestedTracker) return;
+    _hasRequestedTracker = true;
+
+    final apiClient = Provider.of<ApiClient>(context, listen: false);
+    final groupModel = Provider.of<GroupModel>(context, listen: false);
+    final eventId = groupModel.curEventId;
+    if (eventId != null) {
+      apiClient.serverApi?.requestEventTrackerData(
+          RequestEventTrackerDataDto(trackedEvents: [eventId]));
+    }
   }
 
   @override
@@ -185,11 +206,18 @@ class _ChallengeFailedState extends State<ChallengeFailedPage>
         var completedChal =
             challengeModel.getChallengeById(prevChal.challengeId);
         if (completedChal == null) continue;
-        int extensionsUsed = prevChal.extensionsUsed ?? 0;
-        int extensionAdjustedPoints = calculateExtensionAdjustedPoints(
-            completedChal.points ?? 0, extensionsUsed);
-        var pts = calculateHintAdjustedPoints(
-            extensionAdjustedPoints, prevChal.hintsUsed);
+
+        // Calculate points: 0 if failed, otherwise apply extension and hint adjustments
+        int pts;
+        if (prevChal.failed == true) {
+          pts = 0;
+        } else {
+          int extensionsUsed = prevChal.extensionsUsed ?? 0;
+          int extensionAdjustedPoints = calculateExtensionAdjustedPoints(
+              completedChal.points ?? 0, extensionsUsed);
+          pts = calculateHintAdjustedPoints(
+              extensionAdjustedPoints, prevChal.hintsUsed);
+        }
         total_pts += pts;
 
         completedChallenges.add(Container(
@@ -210,7 +238,9 @@ class _ChallengeFailedState extends State<ChallengeFailedPage>
                 ),
                 Spacer(),
                 Text(
-                  "+ " + pts.toString() + " points",
+                  prevChal.failed == true
+                      ? "0 points"
+                      : "+ " + pts.toString() + " points",
                   style: TextStyle(color: Colors.white, fontSize: 16.0),
                 ),
               ],
@@ -301,6 +331,7 @@ class _ChallengeFailedState extends State<ChallengeFailedPage>
                 right: 20),
             height: MediaQuery.of(context).size.height * 0.53,
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Container(
                   padding: EdgeInsets.only(bottom: 12),
@@ -449,12 +480,13 @@ class _ChallengeFailedState extends State<ChallengeFailedPage>
                                               10), // button's shape,
                                         ),
                                       ),
-                                      onPressed: () =>
-                                          Navigator.pushReplacement(
-                                              context,
-                                              MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      BottomNavBar())),
+                                      onPressed: () {
+                                        Navigator.pushReplacement(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    BottomNavBar()));
+                                      },
                                       child: Text(
                                         "Leave",
                                         style: TextStyle(
@@ -478,16 +510,18 @@ class _ChallengeFailedState extends State<ChallengeFailedPage>
                                             10), // button's shape,
                                       ),
                                     ),
-                                    onPressed: () => Navigator.pushReplacement(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                GameplayPage())),
+                                    onPressed: () {
+                                      Navigator.pushReplacement(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  GameplayPage()));
+                                    },
                                     child: Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
                                           Text(
-                                            "Redo Challenge ",
+                                            "Next Challenge ",
                                             style: TextStyle(
                                                 fontFamily: 'Poppins',
                                                 fontSize: 20,

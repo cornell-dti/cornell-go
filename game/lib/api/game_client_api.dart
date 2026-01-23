@@ -88,6 +88,11 @@ class GameClientApi {
   Stream<TimerWarningDto> get timerWarningStream =>
       _timerWarningController.stream;
 
+  final _challengeFailedController =
+      StreamController<ChallengeFailedDto>.broadcast(sync: true);
+  Stream<ChallengeFailedDto> get challengeFailedStream =>
+      _challengeFailedController.stream;
+
   final _reconnectedController = StreamController<bool>.broadcast(sync: true);
   Stream<bool> get reconnectedStream => _reconnectedController.stream;
 
@@ -180,6 +185,11 @@ class GameClientApi {
 
     sock.on("timerWarning",
         (data) => _timerWarningController.add(TimerWarningDto.fromJson(data)));
+
+    sock.on(
+        "challengeFailed",
+        (data) =>
+            _challengeFailedController.add(ChallengeFailedDto.fromJson(data)));
 
     _connectedController.add(true);
   }

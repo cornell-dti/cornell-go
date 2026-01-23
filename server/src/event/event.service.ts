@@ -243,15 +243,6 @@ export class EventService {
       },
     });
 
-    //Start timer for the first challenge if it has a timer length
-    // if (closestChallenge.timerLength) {
-    //   try {
-    //     await this.challengeService.startTimer(closestChallenge.id, user.id);
-    //   } catch (error) {
-    //     console.warn(`Failed to start timer for challenge ${closestChallenge.id}:`, error);
-    //   }
-    // }
-
     return progress;
   }
 
@@ -425,6 +416,7 @@ export class EventService {
         hintsUsed: pc.hintsUsed,
         extensionsUsed: pc.extensionsUsed ?? 0, // Default to 0 for backwards compatibility
         dateCompleted: pc.timestamp.toUTCString(),
+        failed: pc.failed, // True if challenge was failed due to timer expiration
       })),
     };
   }

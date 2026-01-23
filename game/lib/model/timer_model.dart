@@ -15,8 +15,12 @@ class TimerModel extends ChangeNotifier {
   DateTime? _endTime;
   bool _isActive = false;
   int _extensionsUsed = 0; // Track extensions used for current challenge
-  int? _currentWarning; // null = no warning, otherwise milestone value (300, 60, or 30)
+  int?
+      _currentWarning; // null = no warning, otherwise milestone value (300, 60, or 30)
   int _timeRemaining = 0;
+  bool _challengeFailed =
+      false; // True when challenge fails due to timer expiration
+  String? _failedChallengeId; // ID of the challenge that failed
 
   // Getter functions
   String? get currentTimerId => _currentTimerId;
@@ -26,6 +30,8 @@ class TimerModel extends ChangeNotifier {
   int get extensionsUsed => _extensionsUsed;
   int? get currentWarning => _currentWarning;
   int get timeRemaining => _timeRemaining;
+  bool get challengeFailed => _challengeFailed;
+  String? get failedChallengeId => _failedChallengeId;
 
   // Check if there's an active warning to display
   bool get hasWarning => _currentWarning != null;
@@ -37,7 +43,8 @@ class TimerModel extends ChangeNotifier {
       _currentChallengeId = event.challengeId;
       _endTime = DateTime.parse(event.endTime);
       _isActive = true;
-      _extensionsUsed = event.extensionsUsed; // Preserve extensions from backend
+      _extensionsUsed =
+          event.extensionsUsed; // Preserve extensions from backend
       _currentWarning = null;
       _timeRemaining = 0;
       notifyListeners();
@@ -72,6 +79,16 @@ class TimerModel extends ChangeNotifier {
       }
     });
 
+    // Listen for ChallengeFailedDto from backend (timer expired)
+    client.clientApi.challengeFailedStream.listen((event) {
+      _challengeFailed = true;
+      _failedChallengeId = event.challengeId;
+      _isActive = false;
+      _currentWarning = null;
+      _timeRemaining = 0;
+      notifyListeners();
+    });
+
     // Reset timer state when connected
     client.clientApi.connectedStream.listen((event) {
       _currentTimerId = null;
@@ -81,6 +98,8 @@ class TimerModel extends ChangeNotifier {
       _extensionsUsed = 0; // Reset extensions when disconnected
       _currentWarning = null;
       _timeRemaining = 0;
+      _challengeFailed = false;
+      _failedChallengeId = null;
       notifyListeners();
     });
   }
@@ -173,6 +192,13 @@ class TimerModel extends ChangeNotifier {
   void clearWarning() {
     _currentWarning = null;
     _timeRemaining = 0;
+    notifyListeners();
+  }
+
+  // Clear the challengeFailed state (for UI to call after showing "Time's Up" modal)
+  void clearChallengeFailed() {
+    _challengeFailed = false;
+    _failedChallengeId = null;
     notifyListeners();
   }
 }

@@ -12,6 +12,7 @@ import {
   OptionEntryForm,
   MapEntryForm,
   NumberEntryForm,
+  CheckboxNumberEntryForm,
 } from './EntryModal';
 import { HButton } from './HButton';
 import {
@@ -72,7 +73,13 @@ function ChallengeCard(props: {
         <b>{props.challenge.longF}</b> <br />
         Awarding Distance: <b>{props.challenge.awardingRadiusF} meters</b>{' '}
         <br />
-        Close Distance: <b>{props.challenge.closeRadiusF} meters</b>
+        Close Distance: <b>{props.challenge.closeRadiusF} meters</b> <br />
+        Timer:{' '}
+        <b>
+          {props.challenge.timerLength
+            ? `${Math.floor(props.challenge.timerLength / 60)}m ${props.challenge.timerLength % 60}s`
+            : 'None'}
+        </b>
       </ListCardBody>
       <ListCardButtons>
         <HButton onClick={props.onUp}>UP</HButton>
@@ -105,6 +112,14 @@ function makeForm(): EntryForm[] {
     { name: 'Image URL', characterLimit: 2048, value: '' },
     { name: 'Awarding Distance (meters)', min: 1, max: 1000, value: 1 },
     { name: 'Close Distance (meters)', min: 1, max: 1000, value: 1 },
+    {
+      name: 'Enable Timer',
+      checked: false,
+      value: 300,
+      min: 60,
+      max: 3600,
+      numberLabel: 'Timer Length (seconds)',
+    },
   ];
 }
 
@@ -154,6 +169,14 @@ function toForm(challenge: ChallengeDto) {
       max: 1000,
       value: challenge.closeRadiusF ?? 0,
     },
+    {
+      name: 'Enable Timer',
+      checked: (challenge.timerLength ?? 0) > 0,
+      value: challenge.timerLength ?? 300,
+      min: 60,
+      max: 3600,
+      numberLabel: 'Timer Length (seconds)',
+    },
   ];
 }
 
@@ -162,6 +185,7 @@ function fromForm(
   eventId: string,
   id: string,
 ): ChallengeDto {
+  const timerForm = form[8] as CheckboxNumberEntryForm;
   return {
     id,
     name: (form[2] as FreeEntryForm).value,
@@ -174,6 +198,7 @@ function fromForm(
     awardingRadiusF: (form[6] as NumberEntryForm).value,
     closeRadiusF: (form[7] as NumberEntryForm).value,
     linkedEventId: eventId,
+    timerLength: timerForm.checked ? timerForm.value : undefined,
   };
 }
 

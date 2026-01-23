@@ -229,6 +229,7 @@ export interface PrevChallengeDto {
   hintsUsed: number;
   extensionsUsed?: number;
   dateCompleted: string;
+  failed?: boolean;
 }
 
 export interface EventTrackerDto {
@@ -343,6 +344,11 @@ export interface TimerWarningDto {
   challengeId: string;
   milestone: number;
   timeRemaining: number;
+}
+
+export interface ChallengeFailedDto {
+  challengeId: string;
+  userId: string;
 }
 
 export interface CloseAccountDto {}

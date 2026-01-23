@@ -233,6 +233,24 @@ class _JourneysPageState extends State<JourneysPage> {
 
                       if (challenge == null) continue;
 
+                      // Onboarding: Skip journeys with timed challenges during onboarding (only after journeys explanation)
+                      final onboarding =
+                          Provider.of<OnboardingModel>(context, listen: false);
+                      if (onboarding.step3JourneysExplanationComplete &&
+                          !onboarding.step4FirstJourneyComplete) {
+                        bool eventHasTimer = false;
+                        for (var challengeId in event.challenges ?? []) {
+                          var chal =
+                              challengeModel.getChallengeById(challengeId);
+                          if (chal?.timerLength != null &&
+                              chal!.timerLength! > 0) {
+                            eventHasTimer = true;
+                            break;
+                          }
+                        }
+                        if (eventHasTimer) continue;
+                      }
+
                       for (var challengeId in event.challenges ?? []) {
                         var challenge =
                             challengeModel.getChallengeById(challengeId);

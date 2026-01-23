@@ -1035,6 +1035,9 @@ class PrevChallengeDto {
       fields['extensionsUsed'] = extensionsUsed;
     }
     fields['dateCompleted'] = dateCompleted;
+    if (failed != null) {
+      fields['failed'] = failed;
+    }
     return fields;
   }
 
@@ -1045,6 +1048,7 @@ class PrevChallengeDto {
         ? (fields["extensionsUsed"])
         : null;
     dateCompleted = fields["dateCompleted"];
+    failed = fields.containsKey('failed') ? (fields["failed"]) : null;
   }
 
   void partialUpdate(PrevChallengeDto other) {
@@ -1053,6 +1057,7 @@ class PrevChallengeDto {
     extensionsUsed =
         other.extensionsUsed == null ? extensionsUsed : other.extensionsUsed;
     dateCompleted = other.dateCompleted;
+    failed = other.failed == null ? failed : other.failed;
   }
 
   PrevChallengeDto({
@@ -1060,12 +1065,14 @@ class PrevChallengeDto {
     required this.hintsUsed,
     this.extensionsUsed,
     required this.dateCompleted,
+    this.failed,
   });
 
   late String challengeId;
   late int hintsUsed;
   late int? extensionsUsed;
   late String dateCompleted;
+  late bool? failed;
 }
 
 class EventTrackerDto {
@@ -1734,6 +1741,33 @@ class TimerWarningDto {
   late String challengeId;
   late int milestone;
   late int timeRemaining;
+}
+
+class ChallengeFailedDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['challengeId'] = challengeId;
+    fields['userId'] = userId;
+    return fields;
+  }
+
+  ChallengeFailedDto.fromJson(Map<String, dynamic> fields) {
+    challengeId = fields["challengeId"];
+    userId = fields["userId"];
+  }
+
+  void partialUpdate(ChallengeFailedDto other) {
+    challengeId = other.challengeId;
+    userId = other.userId;
+  }
+
+  ChallengeFailedDto({
+    required this.challengeId,
+    required this.userId,
+  });
+
+  late String challengeId;
+  late String userId;
 }
 
 class CloseAccountDto {

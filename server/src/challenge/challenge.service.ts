@@ -73,7 +73,7 @@ export class ChallengeService {
     const EXTENSION_COST = 0.25; // 25% per extension
     const totalDeduction = extensionsUsed * EXTENSION_COST * originalBasePoints;
     const adjustedPoints = originalBasePoints - totalDeduction;
-    
+
     // Ensure points don't go below 0
     return Math.max(0, Math.floor(adjustedPoints));
   }
@@ -276,6 +276,132 @@ export class ChallengeService {
     return null;
   }
 
+  /**
+   * Fail a challenge due to timer expiration.
+   * Awards 0 points and progresses to next challenge in journey.
+   * Returns the challenge name if successful, null otherwise.
+   */
+  async failChallenge(user: User, challengeId: string): Promise<string | null> {
+    const groupMembers = await this.prisma.user.findMany({
+      where: { groupId: user.groupId },
+    });
+
+    const eventTracker: EventTracker =
+      await this.eventService.getCurrentEventTrackerForUser(user);
+
+    // Verify the challenge being failed is the current challenge
+    if (eventTracker.curChallengeId !== challengeId) {
+      console.log(
+        `failChallenge: Challenge ${challengeId} is not the current challenge (${eventTracker.curChallengeId})`,
+      );
+      return null;
+    }
+
+    const alreadyDone =
+      (await this.prisma.prevChallenge.count({
+        where: {
+          userId: user.id,
+          challengeId: challengeId,
+          trackerId: eventTracker.id,
+        },
+      })) > 0;
+
+    if (alreadyDone) {
+      console.log(`failChallenge: Challenge ${challengeId} already completed`);
+      return null;
+    }
+
+    // Get timer information
+    const timer = await this.prisma.challengeTimer.findFirst({
+      where: {
+        userId: user.id,
+        challengeId: challengeId,
+      },
+    });
+    const extensionsUsed = timer?.extensionsUsed || 0;
+
+    // Create PrevChallenge record with failed=true
+    await this.prisma.prevChallenge.create({
+      data: {
+        userId: user.id,
+        challengeId: challengeId,
+        participants: {
+          connect: groupMembers.map(m => ({ id: m.id })),
+        },
+        trackerId: eventTracker.id,
+        hintsUsed: eventTracker.hintsUsed,
+        extensionsUsed: extensionsUsed,
+        failed: true, // Mark as failed
+      },
+    });
+
+    const curChallenge = await this.prisma.challenge.findUniqueOrThrow({
+      where: { id: challengeId },
+    });
+
+    const nextChallenge = await this.nextChallenge(eventTracker);
+
+    // Award 0 points for failed challenge
+    const deltaScore = 0;
+
+    // Update event tracker to move to next challenge (don't update user score)
+    const newEvTracker = await this.prisma.eventTracker.update({
+      where: { id: eventTracker.id },
+      data: {
+        hintsUsed: 0,
+        curChallengeId: nextChallenge?.id ?? null,
+      },
+    });
+
+    // Send timer start event if next challenge has a timer
+    if (nextChallenge?.timerLength) {
+      await this.clientService.sendEvent(
+        [`user/${user.id}`],
+        'startTimerForChallenge',
+        {
+          challengeId: nextChallenge.id,
+          timerLength: nextChallenge.timerLength,
+        },
+      );
+    }
+
+    await this.log.logEvent(
+      SessionLogEvent.COMPLETE_CHALLENGE,
+      curChallenge.id,
+      user.id,
+    );
+
+    // Check if the failed challenge completes a journey
+    const isJourneyCompleted =
+      (await this.prisma.challenge.count({
+        where: {
+          linkedEvent: { id: eventTracker.eventId },
+          completions: { none: { userId: user.id } },
+        },
+      })) === 0;
+
+    await this.achievementService.checkAchievementProgress(
+      user,
+      eventTracker,
+      deltaScore,
+      isJourneyCompleted,
+    );
+
+    await this.eventService.emitUpdateLeaderPosition({
+      playerId: user.id,
+      newTotalScore: user.score, // Score unchanged
+      newEventScore: newEvTracker.score,
+      eventId: newEvTracker.eventId,
+    });
+
+    const updatedChal = await this.getChallengeById(curChallenge.id);
+    if (updatedChal != null) {
+      await this.emitUpdateChallengeData(updatedChal, false);
+      return updatedChal.name;
+    }
+    return null;
+  }
+
   async getUserCompletionDate(user: User, challenge: Challenge) {
     return (
       (
@@ -379,6 +505,7 @@ export class ChallengeService {
         longitude: challenge.longF,
         awardingRadius: challenge.awardingRadiusF,
         closeRadius: challenge.closeRadiusF,
+        timerLength: challenge.timerLength ?? null,
       };
 
       const data = await this.abilityFactory.filterInaccessible(
@@ -417,6 +544,7 @@ export class ChallengeService {
         closeRadius: challenge.closeRadiusF ?? defaultChallengeData.closeRadius,
         eventIndex: (maxIndexChallenge._max.eventIndex ?? -1) + 1,
         linkedEventId: challenge.linkedEventId,
+        timerLength: challenge.timerLength ?? null,
       };
 
       chal = await this.prisma.challenge.create({

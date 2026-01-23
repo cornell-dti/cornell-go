@@ -31,7 +31,10 @@ export class TimerGateway {
     @MessageBody() data: StartChallengeTimerDto,
   ) {
     try {
-      const timer = await this.timerService.startTimer(data.challengeId, user.id);
+      const timer = await this.timerService.startTimer(
+        data.challengeId,
+        user.id,
+      );
       await this.clientService.sendEvent([`user/${user.id}`], 'timerStarted', {
         timerId: timer.timerId,
         endTime: timer.endTime,
@@ -41,8 +44,12 @@ export class TimerGateway {
       return timer.timerId;
     } catch (error) {
       // Send error to frontend instead of throwing
-      const errorMessage = error instanceof Error ? error.message : 'Failed to start timer';
-      console.error(`[TimerGateway] Error starting timer for challenge ${data.challengeId}, userId ${user.id}:`, errorMessage);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Failed to start timer';
+      console.error(
+        `[TimerGateway] Error starting timer for challenge ${data.challengeId}, userId ${user.id}:`,
+        errorMessage,
+      );
       await this.clientService.emitErrorData(user, errorMessage);
       return null;
     }
@@ -53,10 +60,16 @@ export class TimerGateway {
     @CallingUser() user: User,
     @MessageBody() data: ExtendTimerDto,
   ) {
+    console.log(
+      `[TimerGateway] extendTimer called for challenge ${data.challengeId}, userId ${user.id}`,
+    );
     try {
       const timer = await this.timerService.extendTimer(
         data.challengeId,
         user.id,
+      );
+      console.log(
+        `[TimerGateway] extendTimer SUCCESS: newEndTime=${timer.newEndTime}, extensionsUsed=${timer.extensionsUsed}`,
       );
       await this.clientService.sendEvent([`user/${user.id}`], 'timerExtended', {
         timerId: timer.timerId,
@@ -67,7 +80,12 @@ export class TimerGateway {
       return timer.timerId;
     } catch (error) {
       // Send error to frontend instead of throwing
-      const errorMessage = error instanceof Error ? error.message : 'Failed to extend timer';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Failed to extend timer';
+      console.error(
+        `[TimerGateway] extendTimer ERROR for challenge ${data.challengeId}, userId ${user.id}:`,
+        error,
+      );
       await this.clientService.emitErrorData(user, errorMessage);
       return null;
     }
@@ -78,16 +96,28 @@ export class TimerGateway {
     @CallingUser() user: User,
     @MessageBody() data: TimerCompletedDto,
   ) {
-    const timer = await this.timerService.completeTimer(
-      data.challengeId,
-      user.id,
-      data.challengeCompleted,
-    );
-    await this.clientService.sendEvent([`user/${user.id}`], 'timerCompleted', {
-      timerId: timer.timerId,
-      challengeId: timer.challengeId,
-      challengeCompleted: timer.challengeCompleted,
-    });
-    return timer.challengeCompleted;
+    try {
+      const timer = await this.timerService.completeTimer(
+        data.challengeId,
+        user.id,
+        data.challengeCompleted,
+      );
+      await this.clientService.sendEvent(
+        [`user/${user.id}`],
+        'timerCompleted',
+        {
+          timerId: timer.timerId,
+          challengeId: timer.challengeId,
+          challengeCompleted: timer.challengeCompleted,
+        },
+      );
+      return timer.challengeCompleted;
+    } catch (error) {
+      // Send error to frontend instead of throwing
+      const errorMessage =
+        error instanceof Error ? error.message : 'Failed to complete timer';
+      await this.clientService.emitErrorData(user, errorMessage);
+      return null;
+    }
   }
 }

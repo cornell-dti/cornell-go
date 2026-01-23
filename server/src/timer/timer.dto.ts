@@ -35,3 +35,8 @@ export interface TimerWarningDto {
   milestone: number; // milestone (300s passed, 60s passed, 30s passed)
   timeRemaining: number; // seconds remaining
 }
+
+export interface ChallengeFailedDto {
+  challengeId: string;
+  userId: string;
+}

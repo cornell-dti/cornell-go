@@ -268,4 +268,9 @@ export class ServerApi {
     this.socket.removeAllListeners('timerWarning');
     this.socket.on('timerWarning', data => callback(data));
   }
+
+  onChallengeFailed(callback: (data: dto.ChallengeFailedDto) => void) {
+    this.socket.removeAllListeners('challengeFailed');
+    this.socket.on('challengeFailed', data => callback(data));
+  }
 }

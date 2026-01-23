@@ -196,18 +196,19 @@ model EventTracker {
 }
 
 model PrevChallenge {
-  id           Int          @id @default(autoincrement())
-  subject      String       @default("PrevChallenge")
-  user         User         @relation("owner", fields: [userId], references: [id], onDelete: Cascade)
-  userId       String
-  participants User[]       @relation("prevChallengeParticipant")
-  challenge    Challenge    @relation(fields: [challengeId], references: [id], onDelete: Cascade)
-  challengeId  String
-  tracker      EventTracker @relation(fields: [trackerId], references: [id], onDelete: Cascade)
-  trackerId    String
-  hintsUsed    Int
+  id             Int          @id @default(autoincrement())
+  subject        String       @default("PrevChallenge")
+  user           User         @relation("owner", fields: [userId], references: [id], onDelete: Cascade)
+  userId         String
+  participants   User[]       @relation("prevChallengeParticipant")
+  challenge      Challenge    @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  challengeId    String
+  tracker        EventTracker @relation(fields: [trackerId], references: [id], onDelete: Cascade)
+  trackerId      String
+  hintsUsed      Int
   extensionsUsed Int          @default(0)
-  timestamp    DateTime     @default(now())
+  timestamp      DateTime     @default(now())
+  failed         Boolean      @default(false) // True if challenge was failed due to timer expiration
 }
 
 model Organization {
@@ -266,6 +267,7 @@ model AchievementTracker {
 
 enum ChallengeTimerStatus {
   ACTIVE
+  GRACE_PERIOD // Timer expired but waiting for potential extension (prevents race condition)
   COMPLETED
   EXPIRED
   PAUSED
