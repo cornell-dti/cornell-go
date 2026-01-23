@@ -270,78 +270,22 @@ class _JourneysPageState extends State<JourneysPage> {
                             final challengeLocation =
                                 challenge.location?.name ?? "";
                             final challengeName = challenge.name ?? "";
-                            final String eventName = event.name ?? "";
 
-                            bool eventMatchesDifficultySelection = true;
-                            bool eventMatchesCategorySelection = true;
-                            bool eventMatchesLocationSelection = true;
-                            bool eventMatchesSearchText = true;
-                            String searchTerm = widget.mySearchText ?? "";
+                            bool eventMatchesFiltersResult = eventMatchesFilters(
+                              event: event,
+                              difficulty: widget.myDifficulty,
+                              locations: widget.myLocations,
+                              categories: widget.myCategories,
+                              searchText: widget.mySearchText,
+                              challengeLocation: challengeLocation,
+                              challengeName: challengeName,
+                            );
 
-                            if (widget.myDifficulty?.length == 0 ||
-                                widget.myDifficulty == event.difficulty?.name)
-                              eventMatchesDifficultySelection = true;
-                            else
-                              eventMatchesDifficultySelection = false;
-
-                            if (widget.myLocations?.isNotEmpty ?? false) {
-                              if (widget.myLocations?.contains(
-                                    challengeLocation,
-                                  ) ??
-                                  false)
-                                eventMatchesLocationSelection = true;
-                              else
-                                eventMatchesLocationSelection = false;
-                            } else
-                              eventMatchesLocationSelection = true;
-
-                            if (widget.myCategories?.isNotEmpty ?? false) {
-                              if (widget.myCategories?.contains(
-                                    event.category?.name,
-                                  ) ??
-                                  false)
-                                eventMatchesCategorySelection = true;
-                              else
-                                eventMatchesCategorySelection = false;
-                            } else
-                              eventMatchesCategorySelection = true;
-
-                            if (searchTerm.length == 0) {
-                              eventMatchesSearchText = true;
-                            } else {
-                              if (challengeLocation.toLowerCase().contains(
-                                    searchTerm.toLowerCase(),
-                                  )) {
-                                eventMatchesSearchText = true;
-                              } else {
-                                eventMatchesSearchText = false;
-                                if (challengeName.toLowerCase().contains(
-                                      searchTerm.toLowerCase(),
-                                    )) {
-                                  eventMatchesSearchText = true;
-                                } else
-                                  eventMatchesSearchText = false;
-                                if (eventName.toLowerCase().contains(
-                                      searchTerm.toLowerCase(),
-                                    )) {
-                                  eventMatchesSearchText = true;
-                                } else
-                                  eventMatchesSearchText = false;
-                              }
-                            }
-
-                            var imageUrl = challenge.imageUrl;
-                            if (imageUrl == null || imageUrl.length == 0) {
-                              imageUrl =
-                                  "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png";
-                            }
+                            var imageUrl = getValidImageUrl(challenge.imageUrl);
 
                             if (!complete &&
                                 !timeTillExpire.isNegative &&
-                                eventMatchesDifficultySelection &&
-                                eventMatchesCategorySelection &&
-                                eventMatchesLocationSelection &&
-                                eventMatchesSearchText) {
+                                eventMatchesFiltersResult) {
                               eventData.add(
                                 JourneyCellDto(
                                   location:
@@ -439,9 +383,7 @@ class _JourneysPageState extends State<JourneysPage> {
                 ),
               ],
             ),
-            // ],
           ),
-          // ),
         ),
       ),
     );

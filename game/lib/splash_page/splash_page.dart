@@ -1,8 +1,9 @@
-/* This file is the login page for the app. It is called splash because of an old design choice that we didn't change. It allows the user to sign in with their Cornell email through google sign in, Apple sign in (iOS only), or continue as a guest (Android only). When the user tries to log in, we verify the user with their information, the important ones being authentication and location. */
+/* This file is the login page for the app. It is called splash because of an old design choice that we didn't change
+. It allows the user to sign in with their Cornell email through google sign in, Apple sign in (iOS only), or unrestricted Google sign in (Android only). 
+When the user tries to log in, we verify the user with their information, the important ones being authentication and location. */
 
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:game/api/game_client_dto.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:provider/provider.dart';
@@ -93,7 +94,6 @@ class SplashPageWidget extends StatelessWidget {
   }
 
   // Builds Apple Sign-In button for iOS users
-  // Replaces the "Continue as Guest" option with Apple authentication
   Widget _buildAppleSignInButton(ApiClient client) {
     return Consumer<ApiClient>(
       builder: (context, apiClient, child) {
@@ -191,6 +191,7 @@ class SplashPageWidget extends StatelessWidget {
             child: SvgPicture.asset(
               'assets/images/splash.svg',
               width: MediaQuery.of(context).size.width + 10,
+              height: MediaQuery.of(context).size.height + 10,
             ),
           ),
           Column(

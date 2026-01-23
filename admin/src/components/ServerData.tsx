@@ -158,6 +158,9 @@ export function ServerDataProvider(props: { children: ReactNode }) {
       deleteUser(id: string) {
         return sock.updateUserData({ user: { id }, deleted: true });
       },
+      banUser(userId: string, isBanned: boolean) {
+        return sock.banUser({ userId, isBanned });
+      },
       updateGroup(group: GroupDto) {
         return sock.updateGroupData({ group, deleted: false });
       },

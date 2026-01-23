@@ -192,7 +192,11 @@ class _PreviewState extends State<Preview> {
    */
   void startPositionStream() async {
     GeoPoint.current().then((location) {
-      currentLocation = location;
+      if (mounted) {
+        setState(() {
+          currentLocation = location;
+        });
+      }
     });
 
     positionStream = Geolocator.getPositionStream(
