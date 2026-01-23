@@ -8,6 +8,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:provider/provider.dart';
 import 'package:game/api/game_api.dart';
+import 'package:game/api/game_client_dto.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:game/register_page/register_page.dart';
 import 'package:flutter_svg/flutter_svg.dart';
