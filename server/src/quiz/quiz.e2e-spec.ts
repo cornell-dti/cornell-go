@@ -63,17 +63,23 @@ describe('Quiz Module E2E', () => {
         testChallengeId,
         testUserId,
       );
-      const question2 = await quizService.getRandomQuestion(
-        testChallengeId,
-        testUserId,
-      );
+      const order1 = question1.answers!.map(a => a.id).join(',');
 
-      // Answers should be in different order (statistically likely)
-      const order1 = question1.answers.map(a => a.id).join(',');
-      const order2 = question2.answers.map(a => a.id).join(',');
+      // Retry up to 5 times to avoid flaky test due to randomness
+      let foundDifferentOrder = false;
+      for (let i = 0; i < 5; i++) {
+        const question2 = await quizService.getRandomQuestion(
+          testChallengeId,
+          testUserId,
+        );
+        const order2 = question2.answers!.map(a => a.id).join(',');
+        if (order1 !== order2) {
+          foundDifferentOrder = true;
+          break;
+        }
+      }
 
-      // This might occasionally fail due to randomness, but very unlikely
-      expect(order1).not.toBe(order2);
+      expect(foundDifferentOrder).toBe(true);
     });
 
     it('should shuffle to a different question', async () => {

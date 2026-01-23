@@ -25,6 +25,13 @@ import {
   AchievementTrackerDto,
   UpdateAchievementDataDto,
 } from '../achievement/achievement.dto';
+import {
+  UpdateQuizQuestionDataDto,
+  QuizQuestionDto,
+  QuizResultDto,
+  QuizErrorDto,
+  QuizProgressDto,
+} from '../quiz/quiz.dto';
 import { ExtractSubjectType } from '@casl/ability';
 
 export type ClientApiDef = {
@@ -40,6 +47,11 @@ export type ClientApiDef = {
   updateGroupData: UpdateGroupDataDto;
   updateOrganizationData: UpdateOrganizationDataDto;
   updateLeaderPosition: UpdateLeaderPositionDto;
+  updateQuizQuestionData: UpdateQuizQuestionDataDto;
+  quizQuestion: QuizQuestionDto;
+  quizResult: QuizResultDto;
+  quizError: QuizErrorDto;
+  quizProgress: QuizProgressDto;
 };
 
 @Injectable()

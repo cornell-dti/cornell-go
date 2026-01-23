@@ -67,10 +67,7 @@ void main() async {
 
   runApp(
     USE_DEVICE_PREVIEW
-        ? DevicePreview(
-            enabled: !kReleaseMode,
-            builder: (context) => MyApp(),
-          )
+        ? DevicePreview(enabled: !kReleaseMode, builder: (context) => MyApp())
         : MyApp(),
   );
 }
@@ -112,7 +109,9 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider.value(value: client),
         ChangeNotifierProvider(create: (_) => UserModel(client), lazy: false),
         ChangeNotifierProvider(
-            create: (_) => OnboardingModel(client), lazy: false),
+          create: (_) => OnboardingModel(client),
+          lazy: false,
+        ),
         ChangeNotifierProvider(create: (_) => GroupModel(client), lazy: false),
         ChangeNotifierProvider(create: (_) => EventModel(client), lazy: false),
         ChangeNotifierProvider(
@@ -127,10 +126,7 @@ class MyApp extends StatelessWidget {
           create: (_) => ChallengeModel(client),
           lazy: false,
         ),
-        ChangeNotifierProvider(
-          create: (_) => QuizModel(client),
-          lazy: false,
-        ),
+        ChangeNotifierProvider(create: (_) => QuizModel(client), lazy: false),
       ],
       child: GameWidget(
         child: MaterialApp(

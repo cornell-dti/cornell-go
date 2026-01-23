@@ -3,12 +3,27 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
+import { QuizQuestion, QuizAnswer, User } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
-import { QuizQuestionDto, QuizResultDto, QuizProgressDto } from './quiz.dto';
+import { ClientService } from '../client/client.service';
+import { AppAbility, CaslAbilityFactory } from '../casl/casl-ability.factory';
+import { accessibleBy } from '@casl/prisma';
+import { Action } from '../casl/action.enum';
+import {
+  QuizQuestionDto,
+  QuizAnswerDto,
+  QuizResultDto,
+  QuizProgressDto,
+  UpdateQuizQuestionDataDto,
+} from './quiz.dto';
 
 @Injectable()
 export class QuizService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly clientService: ClientService,
+    private readonly abilityFactory: CaslAbilityFactory,
+  ) {}
 
   /**
    * Get a random unanswered question for a challenge
@@ -32,12 +47,19 @@ export class QuizService {
       },
     });
 
-    if (availableQuestions.length === 0) {
+    // Filter to only valid questions (at least 2 answers, exactly one correct)
+    const validQuestions = availableQuestions.filter(q => {
+      if (!q.answers || q.answers.length < 2) return false;
+      const correctCount = q.answers.filter(a => a.isCorrect).length;
+      return correctCount === 1;
+    });
+
+    if (validQuestions.length === 0) {
       throw new NotFoundException('No available questions for this challenge');
     }
 
-    const randomIndex = Math.floor(Math.random() * availableQuestions.length);
-    const selectedQuestion = availableQuestions[randomIndex];
+    const randomIndex = Math.floor(Math.random() * validQuestions.length);
+    const selectedQuestion = validQuestions[randomIndex];
 
     const shuffledAnswers = this.shuffleArray<{
       id: string;
@@ -83,12 +105,19 @@ export class QuizService {
       },
     });
 
-    if (availableQuestions.length === 0) {
+    // Filter to only valid questions (at least 2 answers, exactly one correct)
+    const validQuestions = availableQuestions.filter(q => {
+      if (!q.answers || q.answers.length < 2) return false;
+      const correctCount = q.answers.filter(a => a.isCorrect).length;
+      return correctCount === 1;
+    });
+
+    if (validQuestions.length === 0) {
       throw new NotFoundException('No available questions for this challenge');
     }
 
-    const randomIndex = Math.floor(Math.random() * availableQuestions.length);
-    const selectedQuestion = availableQuestions[randomIndex];
+    const randomIndex = Math.floor(Math.random() * validQuestions.length);
+    const selectedQuestion = validQuestions[randomIndex];
     const shuffledAnswers = this.shuffleArray<{
       id: string;
       answerText: string;
@@ -275,5 +304,211 @@ export class QuizService {
       [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
     return shuffled;
+  }
+
+  // ============================================
+  // Admin methods for quiz question management
+  // ============================================
+
+  /**
+   * Get all quiz questions for a challenge (with answers, for admin editing)
+   * @param challengeId - Challenge ID
+   * @returns Array of quiz questions with answers
+   */
+  async getQuestionsByChallenge(
+    challengeId: string,
+  ): Promise<(QuizQuestion & { answers: QuizAnswer[] })[]> {
+    return await this.prisma.quizQuestion.findMany({
+      where: { challengeId },
+      include: { answers: true },
+      orderBy: { createdAt: 'asc' },
+    });
+  }
+
+  /**
+   * Get a single quiz question by ID
+   * @param id - Question ID
+   * @returns Quiz question with answers or null
+   */
+  async getQuestionById(
+    id: string,
+  ): Promise<(QuizQuestion & { answers: QuizAnswer[] }) | null> {
+    return await this.prisma.quizQuestion.findFirst({
+      where: { id },
+      include: { answers: true },
+    });
+  }
+
+  /**
+   * Create or update a quiz question with answers
+   * @param ability - CASL ability for permission checking
+   * @param dto - Quiz question data
+   * @returns Created/updated question or null if unauthorized
+   */
+  async upsertQuestionFromDto(
+    ability: AppAbility,
+    dto: QuizQuestionDto,
+  ): Promise<(QuizQuestion & { answers: QuizAnswer[] }) | null> {
+    // Check if updating existing or creating new
+    let question = await this.getQuestionById(dto.id);
+
+    // Permission check: can user update the challenge that owns this question?
+    const challengeId = dto.challengeId ?? question?.challengeId ?? '';
+    const canUpdateChallenge =
+      (await this.prisma.challenge.count({
+        where: {
+          AND: [
+            accessibleBy(ability, Action.Update).Challenge,
+            { id: challengeId },
+          ],
+        },
+      })) > 0;
+
+    if (!canUpdateChallenge) return null;
+
+    if (question) {
+      // Update existing question
+      question = await this.prisma.quizQuestion.update({
+        where: { id: question.id },
+        data: {
+          questionText: dto.questionText?.substring(0, 2048),
+          explanation: dto.explanation?.substring(0, 2048),
+          difficulty: dto.difficulty ?? 1,
+          pointValue: dto.pointValue ?? 10,
+          category: dto.category ?? 'HISTORICAL',
+        },
+        include: { answers: true },
+      });
+
+      // Handle answers update: delete old, create new
+      // Note: UserQuizAnswer.selectedAnswerId is set to null automatically via onDelete: SetNull
+      if (dto.answers && dto.answers.length > 0) {
+        await this.prisma.quizAnswer.deleteMany({
+          where: { questionId: question.id },
+        });
+        await this.prisma.quizAnswer.createMany({
+          data: dto.answers.map(a => ({
+            questionId: question!.id,
+            answerText: a.answerText.substring(0, 1024),
+            isCorrect: a.isCorrect ?? false,
+          })),
+        });
+        // Refetch with new answers
+        question = await this.getQuestionById(question.id);
+      }
+    } else {
+      // Create new question
+      if (!dto.challengeId) return null;
+
+      question = await this.prisma.quizQuestion.create({
+        data: {
+          challengeId: dto.challengeId,
+          questionText: dto.questionText?.substring(0, 2048) ?? '',
+          explanation: dto.explanation?.substring(0, 2048),
+          difficulty: dto.difficulty ?? 1,
+          pointValue: dto.pointValue ?? 10,
+          category: dto.category ?? 'HISTORICAL',
+          answers: {
+            create:
+              dto.answers?.map(a => ({
+                answerText: a.answerText.substring(0, 1024),
+                isCorrect: a.isCorrect ?? false,
+              })) ?? [],
+          },
+        },
+        include: { answers: true },
+      });
+
+      console.log(`Created quiz question ${question.id}`);
+    }
+
+    return question;
+  }
+
+  /**
+   * Delete a quiz question
+   * @param ability - CASL ability for permission checking
+   * @param questionId - Question ID to delete
+   * @returns true if deleted, false if unauthorized or not found
+   */
+  async removeQuestion(
+    ability: AppAbility,
+    questionId: string,
+  ): Promise<boolean> {
+    const question = await this.getQuestionById(questionId);
+    if (!question) return false;
+
+    // Permission check: can user update the challenge that owns this question?
+    const canUpdateChallenge =
+      (await this.prisma.challenge.count({
+        where: {
+          AND: [
+            accessibleBy(ability, Action.Update).Challenge,
+            { id: question.challengeId },
+          ],
+        },
+      })) > 0;
+
+    if (!canUpdateChallenge) return false;
+
+    await this.prisma.quizQuestion.delete({
+      where: { id: questionId },
+    });
+
+    console.log(`Deleted quiz question ${questionId}`);
+    return true;
+  }
+
+  /**
+   * Emit quiz question update via WebSocket
+   * @param question - Question that was updated
+   * @param deleted - Whether the question was deleted
+   * @param target - Optional specific user to send to
+   */
+  async emitUpdateQuizQuestionData(
+    question: QuizQuestion & { answers: QuizAnswer[] },
+    deleted: boolean,
+    target?: User,
+  ) {
+    const dto: UpdateQuizQuestionDataDto = {
+      question: deleted ? { id: question.id } : this.dtoForQuestion(question),
+      deleted,
+    };
+
+    await this.clientService.sendProtected(
+      'updateQuizQuestionData',
+      target ?? question.challengeId,
+      dto,
+      {
+        id: question.id,
+        dtoField: 'question',
+        subject: 'QuizQuestion',
+        prismaStore: this.prisma.quizQuestion,
+      },
+    );
+  }
+
+  /**
+   * Convert question entity to DTO
+   * @param question - Question with answers
+   * @returns QuizQuestionDto
+   */
+  dtoForQuestion(
+    question: QuizQuestion & { answers: QuizAnswer[] },
+  ): QuizQuestionDto {
+    return {
+      id: question.id,
+      challengeId: question.challengeId,
+      questionText: question.questionText,
+      explanation: question.explanation ?? undefined,
+      difficulty: question.difficulty,
+      pointValue: question.pointValue,
+      category: question.category,
+      answers: question.answers.map(a => ({
+        id: a.id,
+        answerText: a.answerText,
+        isCorrect: a.isCorrect,
+      })),
+    };
   }
 }

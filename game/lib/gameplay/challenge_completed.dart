@@ -22,66 +22,69 @@ class LoadingBar extends StatelessWidget {
   final int totalTasks;
   final int tasksFinished;
 
-  const LoadingBar(
-    this.tasksFinished,
-    this.totalTasks,
-  );
+  const LoadingBar(this.tasksFinished, this.totalTasks);
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
         Container(
-            width: MediaQuery.sizeOf(context).width * 0.66,
-            height: 20,
-            child: LayoutBuilder(
-                builder: (BuildContext context, BoxConstraints constraints) {
-              return Stack(children: [
-                Container(
-                  width: constraints.maxWidth,
-                  height: constraints.maxHeight,
-                  alignment: Alignment.centerLeft,
-                  child: Container(
-                    decoration: new BoxDecoration(
-                      color: Color.fromARGB(255, 241, 241, 241),
-                      shape: BoxShape.rectangle,
-                      borderRadius: BorderRadius.all(Radius.circular(16.0)),
+          width: MediaQuery.sizeOf(context).width * 0.66,
+          height: 20,
+          child: LayoutBuilder(
+            builder: (BuildContext context, BoxConstraints constraints) {
+              return Stack(
+                children: [
+                  Container(
+                    width: constraints.maxWidth,
+                    height: constraints.maxHeight,
+                    alignment: Alignment.centerLeft,
+                    child: Container(
+                      decoration: new BoxDecoration(
+                        color: Color.fromARGB(255, 241, 241, 241),
+                        shape: BoxShape.rectangle,
+                        borderRadius: BorderRadius.all(Radius.circular(16.0)),
+                      ),
                     ),
                   ),
-                ),
-                Container(
-                  width: (totalTasks > 0 ? tasksFinished / totalTasks : 0) *
-                      constraints.maxWidth,
-                  height: constraints.maxHeight,
-                  alignment: Alignment.centerLeft,
-                  child: Container(
-                    decoration: new BoxDecoration(
-                      color: Color.fromARGB(197, 237, 86, 86),
-                      shape: BoxShape.rectangle,
-                      borderRadius: BorderRadius.all(Radius.circular(16.0)),
+                  Container(
+                    width: (totalTasks > 0 ? tasksFinished / totalTasks : 0) *
+                        constraints.maxWidth,
+                    height: constraints.maxHeight,
+                    alignment: Alignment.centerLeft,
+                    child: Container(
+                      decoration: new BoxDecoration(
+                        color: Color.fromARGB(197, 237, 86, 86),
+                        shape: BoxShape.rectangle,
+                        borderRadius: BorderRadius.all(Radius.circular(16.0)),
+                      ),
                     ),
                   ),
-                ),
-                Container(
-                  height: 5,
-                  width: max(
+                  Container(
+                    height: 5,
+                    width: max(
                       (totalTasks > 0 ? tasksFinished / totalTasks : 0) *
                               constraints.maxWidth -
                           16,
-                      0),
-                  margin: EdgeInsets.only(left: 8, top: 3),
-                  alignment: Alignment.centerLeft,
-                  decoration: new BoxDecoration(
-                    color: Color(0x99F3C6C6),
-                    shape: BoxShape.rectangle,
-                    borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                      0,
+                    ),
+                    margin: EdgeInsets.only(left: 8, top: 3),
+                    alignment: Alignment.centerLeft,
+                    decoration: new BoxDecoration(
+                      color: Color(0x99F3C6C6),
+                      shape: BoxShape.rectangle,
+                      borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                    ),
                   ),
-                ),
-              ]);
-            })),
+                ],
+              );
+            },
+          ),
+        ),
         Expanded(
-            flex: 2,
-            child: Row(children: [
+          flex: 2,
+          child: Row(
+            children: [
               Text(" "),
               SvgPicture.asset("assets/icons/pin.svg"),
               Text(
@@ -91,8 +94,10 @@ class LoadingBar extends StatelessWidget {
                   fontSize: 16.0,
                   fontWeight: FontWeight.bold,
                 ),
-              )
-            ]))
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }
@@ -100,10 +105,8 @@ class LoadingBar extends StatelessWidget {
 
 class ChallengeCompletedPage extends StatefulWidget {
   final String challengeId;
-  const ChallengeCompletedPage({
-    Key? key,
-    required this.challengeId,
-  }) : super(key: key);
+  const ChallengeCompletedPage({Key? key, required this.challengeId})
+      : super(key: key);
 
   @override
   State<ChallengeCompletedPage> createState() => _ChallengeCompletedState();
@@ -120,8 +123,11 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
     super.initState();
   }
 
-  Future<void> _fetchQuizPointsForJourney(ApiClient apiClient,
-      List<PrevChallengeDto> prevChallenges, EventModel eventModel) async {
+  Future<void> _fetchQuizPointsForJourney(
+    ApiClient apiClient,
+    List<PrevChallengeDto> prevChallenges,
+    EventModel eventModel,
+  ) async {
     if (isLoadingQuizPoints) return;
 
     setState(() {
@@ -135,15 +141,18 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
     int receivedCount = 0;
 
     // Listen for quiz progress responses
-    final subscription =
-        apiClient.clientApi.quizProgressStream.listen((progress) {
+    final subscription = apiClient.clientApi.quizProgressStream.listen((
+      progress,
+    ) {
       if (mounted) {
         setState(() {
           if (!quizPointsByChallenge.containsKey(progress.challengeId)) {
             quizPointsByChallenge[progress.challengeId] =
                 progress.totalPointsEarned;
-            totalQuizPoints = quizPointsByChallenge.values
-                .fold(0, (sum, points) => sum + points);
+            totalQuizPoints = quizPointsByChallenge.values.fold(
+              0,
+              (sum, points) => sum + points,
+            );
             receivedCount++;
 
             if (receivedCount >= expectedChallenges && !completer.isCompleted) {
@@ -156,12 +165,15 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
 
     // Request quiz progress for each challenge
     for (var prevChallenge in prevChallenges) {
-      apiClient.serverApi?.getQuizProgress(prevChallenge.challengeId);
+      apiClient.serverApi?.getQuizProgress(
+        RequestQuizQuestionDto(challengeId: prevChallenge.challengeId),
+      );
     }
 
+    // Wait for all responses with timeout (1s per challenge)
     try {
       await completer.future.timeout(
-        Duration(seconds: 2),
+        Duration(seconds: 1 * expectedChallenges),
         onTimeout: () {},
       );
     } catch (e) {}
@@ -178,445 +190,526 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
   @override
   Widget build(BuildContext context) {
     return Consumer6<ChallengeModel, EventModel, TrackerModel, ApiClient,
-            GroupModel, QuizModel>(
-        builder: (context, challengeModel, eventModel, trackerModel, apiClient,
-            groupModel, quizModel, _) {
-      var eventId = groupModel.curEventId;
-      var event = eventModel.getEventById(eventId ?? "");
-      var tracker = trackerModel.trackerByEventId(eventId ?? "");
+        GroupModel, QuizModel>(
+      builder: (
+        context,
+        challengeModel,
+        eventModel,
+        trackerModel,
+        apiClient,
+        groupModel,
+        quizModel,
+        _,
+      ) {
+        var eventId = groupModel.curEventId;
+        var event = eventModel.getEventById(eventId ?? "");
+        var tracker = trackerModel.trackerByEventId(eventId ?? "");
 
-      if (tracker == null || tracker.prevChallenges.length == 0) {
-        return CircularIndicator();
-      }
+        if (tracker == null || tracker.prevChallenges.length == 0) {
+          return CircularIndicator();
+        }
 
-      final isJourney = (event?.challenges?.length ?? 0) > 1;
+        final isJourney = (event?.challenges?.length ?? 0) > 1;
 
-      if (isJourney) {
-        journeyCompleted =
-            tracker.prevChallenges.length == (event?.challenges?.length ?? 0);
-      }
+        if (isJourney) {
+          journeyCompleted =
+              tracker.prevChallenges.length == (event?.challenges?.length ?? 0);
+        }
 
-      var challenge = challengeModel
-          .getChallengeById(tracker.prevChallenges.last.challengeId);
-
-      if (challenge == null) {
-        return Scaffold(
-          body: Text("No challenge data"),
+        var challenge = challengeModel.getChallengeById(
+          tracker.prevChallenges.last.challengeId,
         );
-      }
 
-      // Build list of completed challenge text fields for journeys
-      var total_pts = 0;
-      List<Widget> completedChallenges = [];
+        if (challenge == null) {
+          return Scaffold(body: Text("No challenge data"));
+        }
 
-      for (PrevChallengeDto prevChal in tracker.prevChallenges) {
-        var completedChal =
-            challengeModel.getChallengeById(prevChal.challengeId);
-        if (completedChal == null) continue;
+        // Build list of completed challenge text fields for journeys
+        var total_pts = 0;
+        List<Widget> completedChallenges = [];
 
-        int basePoints = completedChal.points ?? 0;
-        var pts = calculateHintAdjustedPoints(basePoints, prevChal.hintsUsed);
-        total_pts += pts;
+        for (PrevChallengeDto prevChal in tracker.prevChallenges) {
+          var completedChal = challengeModel.getChallengeById(
+            prevChal.challengeId,
+          );
+          if (completedChal == null) continue;
 
-        completedChallenges.add(Container(
-            margin: EdgeInsets.only(left: 30, bottom: 10, right: 30),
-            child: Row(
-              children: [
-                SvgPicture.asset(
-                  'assets/icons/locationCompleted.svg',
-                  fit: BoxFit.cover,
-                ),
-                Text(
-                  "   " + (completedChal.name ?? ""),
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16.0,
-                    fontWeight: FontWeight.bold,
+          int basePoints = completedChal.points ?? 0;
+          var pts = calculateHintAdjustedPoints(basePoints, prevChal.hintsUsed);
+          total_pts += pts;
+
+          completedChallenges.add(
+            Container(
+              margin: EdgeInsets.only(left: 30, bottom: 10, right: 30),
+              child: Row(
+                children: [
+                  SvgPicture.asset(
+                    'assets/icons/locationCompleted.svg',
+                    fit: BoxFit.cover,
                   ),
-                ),
-                Spacer(),
-                Text(
-                  pts.toString(),
-                  style: TextStyle(color: Colors.white, fontSize: 16.0),
-                ),
-              ],
-            )));
-      }
-
-      // Fetch quiz points for journeys when completed
-      if (isJourney && journeyCompleted && !isLoadingQuizPoints) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          _fetchQuizPointsForJourney(
-              apiClient, tracker.prevChallenges, eventModel);
-        });
-      }
-
-      // Determine quiz points to display
-      int displayQuizPoints = 0;
-
-      if (isJourney && journeyCompleted) {
-        // For completed journey: use accumulated quiz points from all challenges
-        displayQuizPoints = totalQuizPoints;
-      } else if (!isJourney) {
-        // For single challenge: use quiz points specifically earned for THIS challenge
-        displayQuizPoints = quizModel.getPointsForChallenge(challenge.id);
-
-        // Debug: print quiz state
-        print('🎯 Single Challenge Quiz Debug:');
-        print('  currentChallengeId: ${quizModel.currentChallengeId}');
-        print('  challenge.id: ${challenge.id}');
-        print(
-            '  points for this challenge: ${quizModel.getPointsForChallenge(challenge.id)}');
-        print('  totalPointsEarned (all): ${quizModel.totalPointsEarned}');
-        print('  displayQuizPoints: $displayQuizPoints');
-      }
-
-      // Calculate final total points
-      int basePoints = challenge.points ?? 0;
-      int hintAdjustedPoints = calculateHintAdjustedPoints(
-          basePoints, tracker.prevChallenges.last.hintsUsed);
-
-      int finalTotalPoints = isJourney && journeyCompleted
-          ? total_pts + displayQuizPoints
-          : hintAdjustedPoints + displayQuizPoints;
-
-      return Scaffold(
-          body: Stack(children: [
-        Container(
-            height: MediaQuery.of(context).size.height,
-            width: MediaQuery.of(context).size.width,
-            child: SvgPicture.asset(
-              'assets/images/challenge-completed-bg.svg',
-              fit: BoxFit.cover,
-            )),
-        Container(
-            margin: EdgeInsets.only(
-                top: MediaQuery.of(context).size.height * 0.47,
-                left: 20,
-                right: 20),
-            height: MediaQuery.of(context).size.height * 0.53,
-            child: Column(
-              children: [
-                Container(
-                  padding: EdgeInsets.only(bottom: 12),
-                  child: Text(
-                    isJourney
-                        ? (journeyCompleted
-                            ? "Journey Complete"
-                            : "Challenge Complete!")
-                        : 'Challenge Complete!',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                Container(
-                  padding: EdgeInsets.only(bottom: 15),
-                  child: Text(
-                    challenge.description ?? "NO DESCRIPTION",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 14.0,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-                // Progress bar for journeys
-                if (isJourney)
-                  Container(
-                    padding: EdgeInsets.only(left: 30, right: 30, bottom: 20),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Container(
-                            height: 22,
-                            child: LayoutBuilder(
-                              builder: (BuildContext context,
-                                  BoxConstraints constraints) {
-                                final totalChallenges =
-                                    event?.challenges?.length ?? 0;
-                                final completedChallenges =
-                                    tracker.prevChallenges.length;
-                                final progress = totalChallenges > 0
-                                    ? completedChallenges / totalChallenges
-                                    : 0.0;
-
-                                return Stack(children: [
-                                  // Background
-                                  Container(
-                                    width: constraints.maxWidth,
-                                    height: constraints.maxHeight,
-                                    alignment: Alignment.centerLeft,
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        color:
-                                            Color.fromARGB(255, 241, 241, 241),
-                                        shape: BoxShape.rectangle,
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(16.0)),
-                                      ),
-                                    ),
-                                  ),
-                                  // Progress fill
-                                  Container(
-                                    width: progress * constraints.maxWidth,
-                                    height: constraints.maxHeight,
-                                    alignment: Alignment.centerLeft,
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        color: Color.fromARGB(230, 237, 86, 86),
-                                        shape: BoxShape.rectangle,
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(16.0)),
-                                      ),
-                                    ),
-                                  ),
-                                  // Inner highlight
-                                  Container(
-                                    height: 5,
-                                    width: max(
-                                        progress * constraints.maxWidth - 16,
-                                        0),
-                                    margin: EdgeInsets.only(left: 8, top: 3),
-                                    alignment: Alignment.centerLeft,
-                                    decoration: BoxDecoration(
-                                      color: Color.fromARGB(153, 243, 198, 198),
-                                      shape: BoxShape.rectangle,
-                                      borderRadius: BorderRadius.all(
-                                          Radius.circular(5.0)),
-                                    ),
-                                  ),
-                                ]);
-                              },
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 8),
-                        SvgPicture.asset("assets/icons/pin.svg"),
-                        SizedBox(width: 5),
-                        Text(
-                          "${tracker.prevChallenges.length}/${event?.challenges?.length ?? 0}",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            fontFamily: 'Poppins',
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                Container(
-                  padding: EdgeInsets.only(left: 30, bottom: 10),
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Points',
+                  Text(
+                    "   " + (completedChal.name ?? ""),
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16.0,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                ),
-                // Content area
-                if (isJourney && journeyCompleted) ...[
-                  // Scrollable list for completed journey
-                  Expanded(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ...completedChallenges,
-                          // Show quiz points breakdown if any challenges had quizzes
-                          if (displayQuizPoints > 0)
-                            Container(
-                                margin: EdgeInsets.only(
-                                    left: 30, bottom: 10, right: 30),
-                                child: Row(
-                                  children: [
-                                    SvgPicture.asset(
-                                      'assets/icons/quiz.svg',
-                                      fit: BoxFit.cover,
-                                    ),
-                                    Text(
-                                      "   Quiz Bonus",
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 16.0,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    Spacer(),
-                                    Text(
-                                      "+ $displayQuizPoints",
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 16.0,
-                                      ),
-                                    ),
-                                  ],
-                                )),
-                        ],
-                      ),
-                    ),
+                  Spacer(),
+                  Text(
+                    pts.toString(),
+                    style: TextStyle(color: Colors.white, fontSize: 16.0),
                   ),
-                ] else ...[
-                  // Single challenge or incomplete journey
-                  Container(
-                      margin: EdgeInsets.only(left: 30, bottom: 10, right: 30),
-                      child: Row(
-                        children: [
-                          SvgPicture.asset(
-                            'assets/icons/locationCompleted.svg',
-                            fit: BoxFit.cover,
-                          ),
-                          Text(
-                            "   Found Location",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16.0,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Spacer(),
-                          Text(
-                            "+ ${challenge.points ?? 0}",
-                            style:
-                                TextStyle(color: Colors.white, fontSize: 16.0),
-                          ),
-                        ],
-                      )),
-                  if (tracker.prevChallenges.last.hintsUsed > 0)
-                    Container(
-                        margin:
-                            EdgeInsets.only(left: 30, bottom: 10, right: 30),
-                        child: Row(
-                          children: [
-                            SvgPicture.asset(
-                              'assets/icons/hint.svg',
-                              fit: BoxFit.cover,
-                            ),
-                            Text(
-                              "   Used ${tracker.prevChallenges.last.hintsUsed} hint${tracker.prevChallenges.last.hintsUsed > 1 ? 's' : ''}",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16.0,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Spacer(),
-                            Text(
-                              () {
-                                int basePoints = challenge.points ?? 0;
-                                int adjustedPoints =
-                                    calculateHintAdjustedPoints(basePoints,
-                                        tracker.prevChallenges.last.hintsUsed);
-                                int penalty = basePoints - adjustedPoints;
-                                return "- $penalty points";
-                              }(),
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16.0,
-                              ),
-                            ),
-                          ],
-                        )),
-                  // Show quiz points for single challenge if quiz was completed correctly
-                  if (displayQuizPoints > 0)
-                    Container(
-                        margin:
-                            EdgeInsets.only(left: 30, bottom: 10, right: 30),
-                        child: Row(
-                          children: [
-                            SvgPicture.asset(
-                              'assets/icons/quiz.svg',
-                              fit: BoxFit.cover,
-                            ),
-                            Text(
-                              "   Quiz Bonus",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16.0,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Spacer(),
-                            Text(
-                              "+ $displayQuizPoints",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16.0,
-                              ),
-                            ),
-                          ],
-                        )),
                 ],
-                // Total points section
-                SizedBox(height: 10),
-                Text(
-                  "Total Points: $finalTotalPoints",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 25.0,
-                    fontWeight: FontWeight.bold,
-                  ),
+              ),
+            ),
+          );
+        }
+
+        // Fetch quiz points for journeys when completed
+        if (isJourney && journeyCompleted && !isLoadingQuizPoints) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _fetchQuizPointsForJourney(
+              apiClient,
+              tracker.prevChallenges,
+              eventModel,
+            );
+          });
+        }
+
+        // Determine quiz points to display
+        int displayQuizPoints = 0;
+
+        if (isJourney && journeyCompleted) {
+          // For completed journey: use accumulated quiz points from all challenges
+          displayQuizPoints = totalQuizPoints;
+        } else if (!isJourney) {
+          // For single challenge: use quiz points specifically earned for THIS challenge
+          displayQuizPoints = quizModel.getPointsForChallenge(challenge.id);
+        }
+
+        // Calculate final total points
+        int basePoints = challenge.points ?? 0;
+        int hintAdjustedPoints = calculateHintAdjustedPoints(
+          basePoints,
+          tracker.prevChallenges.last.hintsUsed,
+        );
+
+        int finalTotalPoints = isJourney && journeyCompleted
+            ? total_pts + displayQuizPoints
+            : hintAdjustedPoints + displayQuizPoints;
+
+        return Scaffold(
+          body: Stack(
+            children: [
+              Container(
+                height: MediaQuery.of(context).size.height,
+                width: MediaQuery.of(context).size.width,
+                child: SvgPicture.asset(
+                  'assets/images/challenge-completed-bg.svg',
+                  fit: BoxFit.cover,
                 ),
-                Spacer(),
-                Container(
-                  alignment: Alignment.bottomCenter,
-                  margin: EdgeInsets.only(
-                      bottom: MediaQuery.sizeOf(context).height * 0.05),
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color.fromARGB(255, 237, 86, 86),
-                      padding: EdgeInsets.only(
-                          right: 15, left: 15, top: 10, bottom: 10),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    child: Row(mainAxisSize: MainAxisSize.min, children: [
-                      Text(
+              ),
+              Container(
+                margin: EdgeInsets.only(
+                  top: MediaQuery.of(context).size.height * 0.47,
+                  left: 20,
+                  right: 20,
+                ),
+                height: MediaQuery.of(context).size.height * 0.53,
+                child: Column(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.only(bottom: 12),
+                      child: Text(
                         isJourney
                             ? (journeyCompleted
-                                ? "Return Home "
-                                : "Next Challenge ")
-                            : "Return Home ",
+                                ? "Journey Complete"
+                                : "Challenge Complete!")
+                            : 'Challenge Complete!',
                         style: TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 21,
-                            fontWeight: FontWeight.w400,
-                            color: Color(0xFFFFFFFF)),
+                          color: Colors.white,
+                          fontSize: 24.0,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                      SvgPicture.asset("assets/icons/forwardcarrot.svg")
-                    ]),
-                    onPressed: () {
-                      if (isJourney) {
-                        if (journeyCompleted) {
-                          Navigator.pushReplacement(
+                    ),
+                    Container(
+                      padding: EdgeInsets.only(bottom: 15),
+                      child: Text(
+                        challenge.description ?? "NO DESCRIPTION",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14.0,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    // Progress bar for journeys
+                    if (isJourney)
+                      Container(
+                        padding: EdgeInsets.only(
+                          left: 30,
+                          right: 30,
+                          bottom: 20,
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Container(
+                                height: 22,
+                                child: LayoutBuilder(
+                                  builder: (
+                                    BuildContext context,
+                                    BoxConstraints constraints,
+                                  ) {
+                                    final totalChallenges =
+                                        event?.challenges?.length ?? 0;
+                                    final completedChallenges =
+                                        tracker.prevChallenges.length;
+                                    final progress = totalChallenges > 0
+                                        ? completedChallenges / totalChallenges
+                                        : 0.0;
+
+                                    return Stack(
+                                      children: [
+                                        // Background
+                                        Container(
+                                          width: constraints.maxWidth,
+                                          height: constraints.maxHeight,
+                                          alignment: Alignment.centerLeft,
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              color: Color.fromARGB(
+                                                255,
+                                                241,
+                                                241,
+                                                241,
+                                              ),
+                                              shape: BoxShape.rectangle,
+                                              borderRadius: BorderRadius.all(
+                                                Radius.circular(16.0),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        // Progress fill
+                                        Container(
+                                          width:
+                                              progress * constraints.maxWidth,
+                                          height: constraints.maxHeight,
+                                          alignment: Alignment.centerLeft,
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              color: Color.fromARGB(
+                                                230,
+                                                237,
+                                                86,
+                                                86,
+                                              ),
+                                              shape: BoxShape.rectangle,
+                                              borderRadius: BorderRadius.all(
+                                                Radius.circular(16.0),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        // Inner highlight
+                                        Container(
+                                          height: 5,
+                                          width: max(
+                                            progress * constraints.maxWidth -
+                                                16,
+                                            0,
+                                          ),
+                                          margin: EdgeInsets.only(
+                                            left: 8,
+                                            top: 3,
+                                          ),
+                                          alignment: Alignment.centerLeft,
+                                          decoration: BoxDecoration(
+                                            color: Color.fromARGB(
+                                              153,
+                                              243,
+                                              198,
+                                              198,
+                                            ),
+                                            shape: BoxShape.rectangle,
+                                            borderRadius: BorderRadius.all(
+                                              Radius.circular(5.0),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 8),
+                            SvgPicture.asset("assets/icons/pin.svg"),
+                            SizedBox(width: 5),
+                            Text(
+                              "${tracker.prevChallenges.length}/${event?.challenges?.length ?? 0}",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    Container(
+                      padding: EdgeInsets.only(left: 30, bottom: 10),
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Points',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    // Content area
+                    if (isJourney && journeyCompleted) ...[
+                      // Scrollable list for completed journey
+                      Expanded(
+                        child: SingleChildScrollView(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              ...completedChallenges,
+                              // Show quiz points breakdown if any challenges had quizzes
+                              if (displayQuizPoints > 0)
+                                Container(
+                                  margin: EdgeInsets.only(
+                                    left: 30,
+                                    bottom: 10,
+                                    right: 30,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      SvgPicture.asset(
+                                        'assets/icons/quiz.svg',
+                                        fit: BoxFit.cover,
+                                      ),
+                                      Text(
+                                        "   Quiz Bonus",
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 16.0,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      Spacer(),
+                                      Text(
+                                        "+ $displayQuizPoints",
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 16.0,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ] else ...[
+                      // Single challenge or incomplete journey
+                      Container(
+                        margin: EdgeInsets.only(
+                          left: 30,
+                          bottom: 10,
+                          right: 30,
+                        ),
+                        child: Row(
+                          children: [
+                            SvgPicture.asset(
+                              'assets/icons/locationCompleted.svg',
+                              fit: BoxFit.cover,
+                            ),
+                            Text(
+                              "   Found Location",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16.0,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Spacer(),
+                            Text(
+                              "+ ${challenge.points ?? 0}",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16.0,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (tracker.prevChallenges.last.hintsUsed > 0)
+                        Container(
+                          margin: EdgeInsets.only(
+                            left: 30,
+                            bottom: 10,
+                            right: 30,
+                          ),
+                          child: Row(
+                            children: [
+                              SvgPicture.asset(
+                                'assets/icons/hint.svg',
+                                fit: BoxFit.cover,
+                              ),
+                              Text(
+                                "   Used ${tracker.prevChallenges.last.hintsUsed} hint${tracker.prevChallenges.last.hintsUsed > 1 ? 's' : ''}",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16.0,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Spacer(),
+                              Text(
+                                () {
+                                  int basePoints = challenge.points ?? 0;
+                                  int adjustedPoints =
+                                      calculateHintAdjustedPoints(
+                                    basePoints,
+                                    tracker.prevChallenges.last.hintsUsed,
+                                  );
+                                  int penalty = basePoints - adjustedPoints;
+                                  return "- $penalty points";
+                                }(),
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16.0,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      // Show quiz points for single challenge if quiz was completed correctly
+                      if (displayQuizPoints > 0)
+                        Container(
+                          margin: EdgeInsets.only(
+                            left: 30,
+                            bottom: 10,
+                            right: 30,
+                          ),
+                          child: Row(
+                            children: [
+                              SvgPicture.asset(
+                                'assets/icons/quiz.svg',
+                                fit: BoxFit.cover,
+                              ),
+                              Text(
+                                "   Quiz Bonus",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16.0,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Spacer(),
+                              Text(
+                                "+ $displayQuizPoints",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16.0,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                    ],
+                    // Total points section
+                    SizedBox(height: 10),
+                    Text(
+                      "Total Points: $finalTotalPoints",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 25.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Spacer(),
+                    Container(
+                      alignment: Alignment.bottomCenter,
+                      margin: EdgeInsets.only(
+                        bottom: MediaQuery.sizeOf(context).height * 0.05,
+                      ),
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color.fromARGB(255, 237, 86, 86),
+                          padding: EdgeInsets.only(
+                            right: 15,
+                            left: 15,
+                            top: 10,
+                            bottom: 10,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              isJourney
+                                  ? (journeyCompleted
+                                      ? "Return Home "
+                                      : "Next Challenge ")
+                                  : "Return Home ",
+                              style: TextStyle(
+                                fontFamily: 'Poppins',
+                                fontSize: 21,
+                                fontWeight: FontWeight.w400,
+                                color: Color(0xFFFFFFFF),
+                              ),
+                            ),
+                            SvgPicture.asset("assets/icons/forwardcarrot.svg"),
+                          ],
+                        ),
+                        onPressed: () {
+                          if (isJourney) {
+                            if (journeyCompleted) {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => BottomNavBar(),
+                                ),
+                              );
+                            } else {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => GameplayPage(),
+                                ),
+                              );
+                            }
+                          } else {
+                            Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => BottomNavBar()));
-                        } else {
-                          Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => GameplayPage()));
-                        }
-                      } else {
-                        Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => BottomNavBar()));
-                      }
-                    },
-                  ),
+                                builder: (context) => BottomNavBar(),
+                              ),
+                            );
+                          }
+                        },
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            )),
-      ]));
-    });
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 }

@@ -231,7 +231,7 @@ SPEC CHECKSUMS:
   FirebaseCore: 8542de610f35f86196ba26cdb2544565a5157c8e
   FirebaseCoreInternal: ac26d09a70c730e497936430af4e60fb0c68ec4e
   FirebaseInstallations: 58cf94dabf1e2bb2fa87725a9be5c2249171cda0
-  Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
+  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
   flutter_config_plus: f980f190875b1d53f7d7bfc242f65d844faf561d
   flutter_secure_storage: 1ed9476fba7e7a782b22888f956cce43e2c62f13
   fluttertoast: 2c67e14dce98bbdb200df9e1acf610d7a6264ea1
@@ -250,10 +250,10 @@ SPEC CHECKSUMS:
   path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
   permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
-  shared_preferences_foundation: fcdcbc04712aee1108ac7fda236f363274528f78
-  sign_in_with_apple: f3bf75217ea4c2c8b91823f225d70230119b8440
-  sqflite_darwin: 5a7236e3b501866c1c9befc6771dfd73ffb8702d
-  url_launcher_ios: 5334b05cef931de560670eeae103fd3e431ac3fe
+  shared_preferences_foundation: 9e1978ff2562383bd5676f64ec4e9aa8fa06a6f7
+  sign_in_with_apple: c5dcc141574c8c54d5ac99dd2163c0c72ad22418
+  sqflite_darwin: 20b2a3a3b70e43edae938624ce550a3cbf66a3d0
+  url_launcher_ios: 694010445543906933d732453a59da0a173ae33d
 
 PODFILE CHECKSUM: 7ff705ec6d9fa21074c3c6068173a9880280145e
 

@@ -27,10 +27,12 @@ class AchievementModel extends ChangeNotifier {
     client.clientApi.connectedStream.listen((event) {
       _achievementsById.clear();
 
-      client.serverApi
-          ?.requestAchievementData(RequestAchievementDataDto(achievements: []));
-      client.serverApi
-          ?.requestAchievementTrackerData(RequestAchievementTrackerDataDto());
+      client.serverApi?.requestAchievementData(
+        RequestAchievementDataDto(achievements: []),
+      );
+      client.serverApi?.requestAchievementTrackerData(
+        RequestAchievementTrackerDataDto(),
+      );
 
       notifyListeners();
     });
@@ -46,7 +48,8 @@ class AchievementModel extends ChangeNotifier {
       return _achievementsById[id];
     } else {
       _client.serverApi?.requestAchievementData(
-          RequestAchievementDataDto(achievements: [id]));
+        RequestAchievementDataDto(achievements: [id]),
+      );
       return null;
     }
   }

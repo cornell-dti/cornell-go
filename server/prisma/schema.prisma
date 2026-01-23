@@ -272,7 +272,7 @@ model QuizQuestion {
   explanation  String?
   difficulty   Int     @default(1)
   pointValue   Int     @default(10)
-  category     EventCategoryType
+  category     String  @default("HISTORICAL")
 
   answers     QuizAnswer[]
   userAnswers UserQuizAnswer[]
@@ -302,8 +302,8 @@ model UserQuizAnswer {
   user             User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   questionId       String
   question         QuizQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
-  selectedAnswerId String
-  selectedAnswer   QuizAnswer   @relation(fields: [selectedAnswerId], references: [id])
+  selectedAnswerId String?
+  selectedAnswer   QuizAnswer?  @relation(fields: [selectedAnswerId], references: [id], onDelete: SetNull)
 
   isCorrect    Boolean
   pointsEarned Int

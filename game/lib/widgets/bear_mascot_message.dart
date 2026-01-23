@@ -101,7 +101,9 @@ class BearMascotMessage extends StatelessWidget {
                       ],
                     ),
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 21, vertical: 20),
+                      horizontal: 21,
+                      vertical: 20,
+                    ),
                     child: Text(
                       message,
                       style: const TextStyle(
@@ -116,10 +118,7 @@ class BearMascotMessage extends StatelessWidget {
                   ),
                   // Speech bubble tail pointing down-left toward bear
                   Transform.translate(
-                    offset: Offset(
-                      -messageBoxWidth * 0.35,
-                      -arrowHeight * 0.4,
-                    ),
+                    offset: Offset(-messageBoxWidth * 0.35, -arrowHeight * 0.4),
                     child: SvgPicture.asset(
                       'assets/icons/bubblearrow.svg',
                       width: arrowWidth,

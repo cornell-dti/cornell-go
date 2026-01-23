@@ -109,24 +109,29 @@ class _ArrivedDialog extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-              margin: EdgeInsets.only(top: 5),
-              child: Text(
-                "Congratulations!",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              )),
+            margin: EdgeInsets.only(top: 5),
+            child: Text(
+              "Congratulations!",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ),
           Container(
-              margin: EdgeInsets.only(bottom: 10),
-              child: Text(
-                "You've arrived at ${name}!",
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
-              )),
+            margin: EdgeInsets.only(bottom: 10),
+            child: Text(
+              "You've arrived at ${name}!",
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
+            ),
+          ),
           Container(
             margin: EdgeInsets.only(bottom: 10),
             width: MediaQuery.of(context).size.width,
             decoration: BoxDecoration(
-                borderRadius: BorderRadius.all(Radius.circular(10.0))),
-            child: SvgPicture.asset('assets/images/arrived.svg',
-                fit: BoxFit.cover),
+              borderRadius: BorderRadius.all(Radius.circular(10.0)),
+            ),
+            child: SvgPicture.asset(
+              'assets/images/arrived.svg',
+              fit: BoxFit.cover,
+            ),
           ),
           // Check quiz availability for all cases
           FutureBuilder<QuizProgressDto?>(
@@ -151,7 +156,9 @@ class _ArrivedDialog extends StatelessWidget {
 
   /// Check if challenge has quiz questions available
   Future<QuizProgressDto?> _checkQuizAvailability(
-      ApiClient apiClient, String challengeId) async {
+    ApiClient apiClient,
+    String challengeId,
+  ) async {
     final completer = Completer<QuizProgressDto?>();
     late StreamSubscription subscription;
 
@@ -162,7 +169,9 @@ class _ArrivedDialog extends StatelessWidget {
     });
 
     // Request quiz progress
-    apiClient.serverApi?.getQuizProgress(challengeId);
+    apiClient.serverApi?.getQuizProgress(
+      RequestQuizQuestionDto(challengeId: challengeId),
+    );
 
     // Wait for response or timeout
     try {
@@ -197,16 +206,15 @@ class _ButtonRow extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        ElevatedButton(
+        Flexible(
+          child: ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
               if (isJourneyInProgress) {
                 // Journey in progress - go to next challenge (GameplayPage)
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => GameplayPage(),
-                  ),
+                  MaterialPageRoute(builder: (context) => GameplayPage()),
                 );
               } else {
                 // Journey completed or single challenge - go directly to ChallengeCompletedPage
@@ -214,82 +222,98 @@ class _ButtonRow extends StatelessWidget {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => ChallengeCompletedPage(
-                      challengeId: challengeId,
-                    ),
+                    builder: (context) =>
+                        ChallengeCompletedPage(challengeId: challengeId),
                   ),
                 );
               }
             },
             style: ButtonStyle(
               padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
-                  EdgeInsets.symmetric(
-                      horizontal: (MediaQuery.devicePixelRatioOf(context) < 3
-                          ? 6
-                          : 10))),
+                EdgeInsets.symmetric(
+                  horizontal:
+                      (MediaQuery.devicePixelRatioOf(context) < 3 ? 6 : 10),
+                ),
+              ),
               shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                 RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.circular(7.3), // Adjust the radius as needed
+                  borderRadius: BorderRadius.circular(
+                    7.3,
+                  ), // Adjust the radius as needed
                 ),
               ),
               side: MaterialStateProperty.all<BorderSide>(
                 BorderSide(
                   color: Color.fromARGB(
-                      255, 237, 86, 86), // Specify the border color
+                    255,
+                    237,
+                    86,
+                    86,
+                  ), // Specify the border color
                   width: 2.0, // Specify the border width
                 ),
               ),
               backgroundColor: MaterialStateProperty.all<Color>(Colors.white),
             ),
-            child: Text(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
                 isJourneyInProgress ? "Next Challenge" : "Point Breakdown",
                 style: TextStyle(
-                    fontSize:
-                        MediaQuery.devicePixelRatioOf(context) < 3 ? 12 : 14,
-                    color: Color.fromARGB(255, 237, 86, 86)))),
+                  fontSize:
+                      MediaQuery.devicePixelRatioOf(context) < 3 ? 12 : 14,
+                  color: Color.fromARGB(255, 237, 86, 86),
+                ),
+              ),
+            ),
+          ),
+        ),
         // Show quiz button if quiz exists
         if (hasQuiz) ...[
           const SizedBox(width: 10),
-          ElevatedButton.icon(
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => QuizPage(
-                    challengeId: challengeId,
+          Flexible(
+            child: ElevatedButton.icon(
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => QuizPage(challengeId: challengeId),
+                  ),
+                );
+              },
+              icon: SvgPicture.asset(
+                'assets/icons/bearcoins.svg',
+                height: 20,
+                width: 20,
+              ),
+              label: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  "+10 PTS",
+                  style: TextStyle(
+                    fontSize:
+                        MediaQuery.devicePixelRatioOf(context) < 3 ? 12 : 14,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-              );
-            },
-            icon: SvgPicture.asset(
-              'assets/icons/bearcoins.svg',
-              height: 24,
-              width: 24,
-            ),
-            label: Text(
-              "+10 PTS",
-              style: TextStyle(
-                fontSize: MediaQuery.devicePixelRatioOf(context) < 3 ? 12 : 14,
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
               ),
-            ),
-            style: ButtonStyle(
-              padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
-                EdgeInsets.symmetric(
-                  horizontal:
-                      MediaQuery.devicePixelRatioOf(context) < 3 ? 3 : 7,
+              style: ButtonStyle(
+                padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
+                  EdgeInsets.symmetric(
+                    horizontal:
+                        MediaQuery.devicePixelRatioOf(context) < 3 ? 6 : 10,
+                  ),
                 ),
-              ),
-              shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(7.3),
+                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(7.3),
+                  ),
                 ),
-              ),
-              backgroundColor: MaterialStateProperty.all<Color>(
-                Color(0xFFED5656),
+                backgroundColor: MaterialStateProperty.all<Color>(
+                  Color(0xFFED5656),
+                ),
               ),
             ),
           ),

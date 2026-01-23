@@ -68,6 +68,11 @@ class GameClientApi {
   Stream<UpdateLeaderPositionDto> get updateLeaderPositionStream =>
       _updateLeaderPositionController.stream;
 
+  final _updateQuizQuestionDataController =
+      StreamController<UpdateQuizQuestionDataDto>.broadcast(sync: true);
+  Stream<UpdateQuizQuestionDataDto> get updateQuizQuestionDataStream =>
+      _updateQuizQuestionDataController.stream;
+
   final _quizQuestionController =
       StreamController<QuizQuestionDto>.broadcast(sync: true);
   Stream<QuizQuestionDto> get quizQuestionStream =>
@@ -162,6 +167,11 @@ class GameClientApi {
         "updateLeaderPosition",
         (data) => _updateLeaderPositionController
             .add(UpdateLeaderPositionDto.fromJson(data)));
+
+    sock.on(
+        "updateQuizQuestionData",
+        (data) => _updateQuizQuestionDataController
+            .add(UpdateQuizQuestionDataDto.fromJson(data)));
 
     sock.on("quizQuestion",
         (data) => _quizQuestionController.add(QuizQuestionDto.fromJson(data)));

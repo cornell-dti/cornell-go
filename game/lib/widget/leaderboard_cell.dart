@@ -9,7 +9,12 @@ import 'package:game/utils/utility_functions.dart';
  * @param isUser: whether the cell is the current user and should be hilighted
  */
 Widget leaderBoardCell(
-    context, String name, int position, int points, bool isUser) {
+  context,
+  String name,
+  int position,
+  int points,
+  bool isUser,
+) {
   //Creating the styles to use for the position, name, and points
   var posStyle = TextStyle(
     color: Color(0xFF474747),
@@ -35,69 +40,60 @@ Widget leaderBoardCell(
   );
 
   return Container(
-      decoration: ShapeDecoration(
-        // Leaderboard cell is highlighted if it is the user
-        color: (isUser) ? Color(0xFFFFF8F1) : Colors.white,
-        shape: RoundedRectangleBorder(
-          side: (isUser)
-              ? BorderSide(width: 2, color: Color(0xFFFBDDAF))
-              : BorderSide.none,
-          borderRadius: BorderRadius.circular(10),
+    decoration: ShapeDecoration(
+      // Leaderboard cell is highlighted if it is the user
+      color: (isUser) ? Color(0xFFFFF8F1) : Colors.white,
+      shape: RoundedRectangleBorder(
+        side: (isUser)
+            ? BorderSide(width: 2, color: Color(0xFFFBDDAF))
+            : BorderSide.none,
+        borderRadius: BorderRadius.circular(10),
+      ),
+    ),
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 13),
+      child: Container(
+        height: MediaQuery.sizeOf(context).height * 0.075,
+        child: Row(
+          children: [
+            // Position number
+            Text(
+              position.toString() + ".",
+              style: posStyle,
+              textAlign: TextAlign.center,
+            ),
+            // Avatar
+            Padding(
+              padding: const EdgeInsets.only(left: 12.0),
+              child: Container(
+                width: 30,
+                height: 30,
+                decoration: BoxDecoration(
+                  color: constructColorFromUserName(name),
+                  borderRadius: BorderRadius.circular(15),
+                ),
+              ),
+            ),
+            // Name - takes remaining space
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(left: 10, right: 10),
+                child: Text(
+                  name,
+                  style: nameStyle,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+              ),
+            ),
+            // Points - fixed width to prevent overflow
+            Text(
+              points.toString() + " pts",
+              style: pointStyle,
+            ),
+          ],
         ),
       ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 13),
-        child: ClipRRect(
-          child: Container(
-            width: MediaQuery.sizeOf(context).width * 0.65,
-            height: MediaQuery.sizeOf(context).height * 0.075,
-            child: Row(
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      child: Row(
-                        children: [
-                          Text(position.toString() + ".",
-                              style: posStyle, textAlign: TextAlign.center),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 12.0),
-                            child: Container(
-                              width: 30,
-                              height: 30,
-                              decoration: BoxDecoration(
-                                  color: constructColorFromUserName(name),
-                                  borderRadius: BorderRadius.circular(15)),
-                            ),
-                          )
-                        ],
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 10, right: 5),
-                      child: Container(
-                        width: MediaQuery.of(context).size.width * 0.3,
-                        child: Text(
-                          name,
-                          style: nameStyle,
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                Container(
-                  child: Text(
-                    points.toString() + " points",
-                    style: pointStyle,
-                  ),
-                )
-              ],
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            ),
-          ),
-        ),
-      ));
+    ),
+  );
 }

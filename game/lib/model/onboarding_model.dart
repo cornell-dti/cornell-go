@@ -153,8 +153,9 @@ class OnboardingModel extends ChangeNotifier {
 
     // Save completion to backend database permanently
     try {
-      final result =
-          await _client.serverApi?.completeOnboarding(CompleteOnboardingDto());
+      final result = await _client.serverApi?.completeOnboarding(
+        CompleteOnboardingDto(),
+      );
       print('✅ Backend: Onboarding completion saved to database');
     } catch (e) {
       print('Failed to save onboarding completion: $e');
@@ -166,7 +167,10 @@ class OnboardingModel extends ChangeNotifier {
    * Returns true if user has at least one uncompleted challenge AND one uncompleted journey
    */
   bool canStartOnboarding(
-      UserModel userModel, EventModel eventModel, TrackerModel trackerModel) {
+    UserModel userModel,
+    EventModel eventModel,
+    TrackerModel trackerModel,
+  ) {
     final allowedEventIds = userModel.getAvailableEventIds();
 
     bool hasUncompletedChallenge = false;

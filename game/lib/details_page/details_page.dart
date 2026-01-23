@@ -7,13 +7,13 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:game/details_page/dropdown_widget.dart';
 
 class DetailsPageWidget extends StatefulWidget {
-  DetailsPageWidget(
-      {Key? key,
-      required LoginEnrollmentTypeDto this.userType,
-      required String? this.idToken,
-      GoogleSignInAccount? this.googleUser,
-      AuthorizationCredentialAppleID? this.appleUser})
-      : super(key: key);
+  DetailsPageWidget({
+    Key? key,
+    required LoginEnrollmentTypeDto this.userType,
+    required String? this.idToken,
+    GoogleSignInAccount? this.googleUser,
+    AuthorizationCredentialAppleID? this.appleUser,
+  }) : super(key: key);
   final scaffoldKey = GlobalKey<ScaffoldState>();
   final LoginEnrollmentTypeDto userType;
   final String? idToken;
@@ -68,7 +68,7 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
     "Cornell Tech",
     "Law School",
     "Veterinary Medicine",
-    "Weill Cornell Medicine"
+    "Weill Cornell Medicine",
   ];
 
   /// Graduation Year Selection Options
@@ -80,7 +80,7 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
     "2028",
     "2029",
     "2030",
-    "Alumni"
+    "Alumni",
   ];
 
   Map<String, List<String>> _majors = {
@@ -106,13 +106,13 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
       "Landscape Architecture",
       "Nutritional Sciences",
       "Plant Sciences",
-      "Viticulture & Enology"
+      "Viticulture & Enology",
     ],
     "Architecture, Art and Planning": [
       "Architecture",
       "Fine Arts",
       "History of Architecture",
-      "Urban and Regional Studies"
+      "Urban and Regional Studies",
     ],
     "Business": ["Applied Economics and Management", "Hotel Administration"],
     "Engineering": [
@@ -129,7 +129,7 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
       "Information Science, Systems, and Technology",
       "Materials Science and Engineering",
       "Mechanical Engineering",
-      "Operations Research and Engineering"
+      "Operations Research and Engineering",
     ],
     "Arts and Sciences": [
       "Africana Studies",
@@ -174,7 +174,7 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
       "Sociology",
       "Spanish",
       "Statistical Science",
-      "Undecided"
+      "Undecided",
     ],
     "Human Ecology": [
       "Design and Environmental Analysis",
@@ -184,7 +184,7 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
       "Human Biology, Health, and Society",
       "Human Development",
       "Nutritional Sciences",
-      "Undecided"
+      "Undecided",
     ],
     "Industrial and Labor Relations (ILR)": [],
     "Public Policy": ["Health Care Policy", "Public Policy"],
@@ -193,12 +193,12 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
       "Computer Science",
       "Information Science",
       "Information Science, Systems, and Technology",
-      "Statistical Science"
+      "Statistical Science",
     ],
     "Cornell Tech": [],
     "Law School": [],
     "Veterinary Medicine": [],
-    "Weill Cornell Medicine": []
+    "Weill Cornell Medicine": [],
   };
 
   @override
@@ -220,63 +220,81 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.only(
-                top: 20.0, left: 25, right: 25, bottom: 30),
+              top: 20.0,
+              left: 25,
+              right: 25,
+              bottom: 30,
+            ),
             child: Form(
               key: _formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   TextButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      child: SvgPicture.asset("assets/icons/back.svg")),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: SvgPicture.asset("assets/icons/back.svg"),
+                  ),
                   SvgPicture.asset("assets/images/details_progress.svg"),
                   SizedBox(height: 40.0),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("Username*",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                          )),
+                      Text(
+                        "Username*",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
                       TextFormField(
                         onChanged: (newValue) => setState(() {
                           _name = newValue;
                         }),
                         decoration: const InputDecoration(
                           contentPadding: EdgeInsets.only(
-                              left: 20.0, right: 20.0, top: 10, bottom: 10),
+                            left: 20.0,
+                            right: 20.0,
+                            top: 10,
+                            bottom: 10,
+                          ),
                           labelStyle: TextStyle(
-                              color: Color.fromARGB(51, 0, 0, 0),
-                              fontWeight: FontWeight.w400),
+                            color: Color.fromARGB(51, 0, 0, 0),
+                            fontWeight: FontWeight.w400,
+                          ),
                           labelText: 'e.g. CornellianLover123',
                           enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                  color: Color.fromARGB(51, 0, 0, 0),
-                                  width: 1.5),
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(10.0))),
+                            borderSide: BorderSide(
+                              color: Color.fromARGB(51, 0, 0, 0),
+                              width: 1.5,
+                            ),
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(10.0),
+                            ),
+                          ),
                           focusedBorder: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(10.0)),
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(10.0),
+                            ),
                             borderSide: BorderSide(
                               color: Color.fromARGB(255, 255, 170, 91),
                               width: 1.5,
                             ),
                           ),
                           errorBorder: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(10.0)),
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(10.0),
+                            ),
                             borderSide: BorderSide(
                               color: Color.fromARGB(153, 233, 87, 85),
                               width: 1.5,
                             ),
                           ),
                           focusedErrorBorder: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(10.0)),
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(10.0),
+                            ),
                             borderSide: BorderSide(
                               color: Color.fromARGB(153, 233, 87, 85),
                               width: 1.5,
@@ -301,50 +319,56 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("College",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                          )),
+                      Text(
+                        "College",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
                       DropdownWidget(
                         null,
                         _colleges,
                         notifyParent: (val) => {
                           setState(() {
                             _college = val;
-                          })
+                          }),
                         },
-                      )
+                      ),
                     ],
                   ),
                   SizedBox(height: 20),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("Major",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                          )),
-                      majorDropdown
+                      Text(
+                        "Major",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      majorDropdown,
                     ],
                   ),
                   SizedBox(height: 20),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("Graduation Year",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                          )),
+                      Text(
+                        "Graduation Year",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
                       DropdownWidget(
                         null,
                         _years,
                         notifyParent: (val) {
                           _year = val;
                         },
-                      )
+                      ),
                     ],
                   ),
                   SizedBox(height: MediaQuery.of(context).size.height * 0.1),
@@ -368,23 +392,30 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
                       }
                     },
                     style: ButtonStyle(
-                        shape: MaterialStatePropertyAll<OutlinedBorder>(
-                            RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10.0))),
-                        backgroundColor: MaterialStatePropertyAll<Color>(
-                            Color.fromARGB(255, 233, 87, 85))),
+                      shape: MaterialStatePropertyAll<OutlinedBorder>(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                      ),
+                      backgroundColor: MaterialStatePropertyAll<Color>(
+                        Color.fromARGB(255, 233, 87, 85),
+                      ),
+                    ),
                     child: Container(
-                        width: 345,
-                        height: 50,
-                        child: Align(
-                          alignment: Alignment.center,
-                          child: Text("Continue",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              )),
-                        )),
+                      width: 345,
+                      height: 50,
+                      child: Align(
+                        alignment: Alignment.center,
+                        child: Text(
+                          "Continue",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),

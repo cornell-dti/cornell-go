@@ -24,36 +24,38 @@ class CompletedFeedWidget extends StatelessWidget {
     );
 
     return Scaffold(
-        backgroundColor: Color.fromARGB(255, 255, 248, 241),
-        appBar: AppBar(
-          backgroundColor: Color.fromARGB(255, 237, 86, 86),
-          toolbarHeight: MediaQuery.of(context).size.height * 0.1,
-          leading: Align(
-            alignment: Alignment.center,
-            child: IconButton(
-              icon: Icon(Icons.navigate_before),
-              color: Colors.white,
-              onPressed: () => Navigator.pop(context),
-            ),
+      backgroundColor: Color.fromARGB(255, 255, 248, 241),
+      appBar: AppBar(
+        backgroundColor: Color.fromARGB(255, 237, 86, 86),
+        toolbarHeight: MediaQuery.of(context).size.height * 0.1,
+        leading: Align(
+          alignment: Alignment.center,
+          child: IconButton(
+            icon: Icon(Icons.navigate_before),
+            color: Colors.white,
+            onPressed: () => Navigator.pop(context),
           ),
-          title: Padding(
-            padding:
-                EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.01),
-            child: Text(
-              'Completed',
-              style: headerStyle,
-            ),
-          ),
-          centerTitle: true, // Still useful for horizontal centering
-          actions: [],
         ),
-        body: Consumer4<UserModel, EventModel, TrackerModel, ChallengeModel>(
-            builder: (context, userModel, eventModel, trackerModel,
-                challengeModel, child) {
+        title: Padding(
+          padding: EdgeInsets.only(
+            top: MediaQuery.of(context).size.height * 0.01,
+          ),
+          child: Text('Completed', style: headerStyle),
+        ),
+        centerTitle: true, // Still useful for horizontal centering
+        actions: [],
+      ),
+      body: Consumer4<UserModel, EventModel, TrackerModel, ChallengeModel>(
+        builder: (
+          context,
+          userModel,
+          eventModel,
+          trackerModel,
+          challengeModel,
+          child,
+        ) {
           if (userModel.userData == null) {
-            return Center(
-              child: CircularProgressIndicator(),
-            );
+            return Center(child: CircularProgressIndicator());
           }
 
           List<Tuple2<DateTime, EventDto>> completedEvents = [];
@@ -73,8 +75,9 @@ class CompletedFeedWidget extends StatelessWidget {
               // prevChallenges.last will throw StateError if prevChallenges
               // is empty, meaning the challenge was not completed properly
               var completedDate = tracker.prevChallenges.last.dateCompleted;
-              DateTime date =
-                  DateFormat("E, d MMM y HH:mm:ss").parse(completedDate);
+              DateTime date = DateFormat(
+                "E, d MMM y HH:mm:ss",
+              ).parse(completedDate);
               completedEvents.add(Tuple2<DateTime, EventDto>(date, event));
             } catch (e) {
               displayToast("Error with completing challenge", Status.error);
@@ -84,44 +87,48 @@ class CompletedFeedWidget extends StatelessWidget {
           completedEvents.sort((a, b) => b.item1.compareTo(a.item1));
           final itemCount = completedEvents.length;
           return ListView.builder(
-              itemBuilder: (context, index) {
-                var event = completedEvents[index].item2;
-                var date = completedEvents[index].item1;
-                var type =
-                    event.challenges!.length > 1 ? "Journeys" : "Challenge";
+            itemBuilder: (context, index) {
+              var event = completedEvents[index].item2;
+              var date = completedEvents[index].item1;
+              var type =
+                  event.challenges!.length > 1 ? "Journeys" : "Challenge";
 
-                var pictureList = <String>[];
-                var locationList = [];
-                var totalPoints = 0;
+              var pictureList = <String>[];
+              var locationList = [];
+              var totalPoints = 0;
 
-                for (var challengeId in event.challenges ?? []) {
-                  var challenge = challengeModel.getChallengeById(challengeId);
-                  var imageUrl = challenge?.imageUrl;
-                  if (imageUrl == null || imageUrl.length == 0) {
-                    imageUrl =
-                        "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png";
-                  }
-
-                  if (challenge != null) {
-                    pictureList.add(imageUrl);
-                    locationList.add(friendlyLocation[challenge.location ??
-                        ChallengeLocationDto.ANY]); // wrong ANY was being used
-                    totalPoints += challenge.points ?? 0;
-                  }
+              for (var challengeId in event.challenges ?? []) {
+                var challenge = challengeModel.getChallengeById(challengeId);
+                var imageUrl = challenge?.imageUrl;
+                if (imageUrl == null || imageUrl.length == 0) {
+                  imageUrl =
+                      "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png";
                 }
 
-                return CompletedChallengeFull(
-                  name: event.name!,
-                  pictures: pictureList,
-                  type: type,
-                  date: DateFormat("MMMM d, y").format(date),
-                  location:
-                      locationList.isNotEmpty ? locationList[0] : "Cornell",
-                  difficulty: friendlyDifficulty[event.difficulty]!,
-                  points: totalPoints,
-                );
-              },
-              itemCount: itemCount);
-        }));
+                if (challenge != null) {
+                  pictureList.add(imageUrl);
+                  locationList.add(
+                    friendlyLocation[
+                        challenge.location ?? ChallengeLocationDto.ANY],
+                  ); // wrong ANY was being used
+                  totalPoints += challenge.points ?? 0;
+                }
+              }
+
+              return CompletedChallengeFull(
+                name: event.name!,
+                pictures: pictureList,
+                type: type,
+                date: DateFormat("MMMM d, y").format(date),
+                location: locationList.isNotEmpty ? locationList[0] : "Cornell",
+                difficulty: friendlyDifficulty[event.difficulty]!,
+                points: totalPoints,
+              );
+            },
+            itemCount: itemCount,
+          );
+        },
+      ),
+    );
   }
 }

@@ -11,20 +11,23 @@ export interface ShuffleQuizQuestionDto {
   currentQuestionId?: string;
 }
 
-/** Individual answer option for a quiz question */
-export interface QuizAnswerOptionDto {
-  id: string;
+/** Quiz answer - isCorrect is optional (omitted for users, included for admin) */
+export interface QuizAnswerDto {
+  id?: string;
   answerText: string;
+  isCorrect?: boolean;
 }
 
-/** Complete quiz question with shuffled answer options */
+/** Quiz question - all fields optional for flexibility */
 export interface QuizQuestionDto {
   id: string;
-  questionText: string;
-  answers: QuizAnswerOptionDto[];
-  pointValue: number;
-  challengeId: string;
-  category: string;
+  challengeId?: string;
+  questionText?: string;
+  explanation?: string;
+  difficulty?: number;
+  pointValue?: number;
+  category?: string;
+  answers?: QuizAnswerDto[];
 }
 
 /** User's answer submission */
@@ -60,4 +63,10 @@ export interface QuizErrorDto {
     | 'ALREADY_ANSWERED'
     | 'INVALID_QUESTION'
     | 'INVALID_ANSWER';
+}
+
+/** Update/delete quiz question (follows UpdateChallengeDataDto pattern) */
+export interface UpdateQuizQuestionDataDto {
+  question: QuizQuestionDto;
+  deleted: boolean;
 }

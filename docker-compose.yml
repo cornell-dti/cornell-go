@@ -25,6 +25,7 @@ services:
       - "8080:8080"
       - "9229:9229"
     environment:
+      PORT: 8080
       NO_SSL: true
       DEVELOPMENT: true
       DATABASE_URL: postgresql://postgres:test@postgres:5432/postgres

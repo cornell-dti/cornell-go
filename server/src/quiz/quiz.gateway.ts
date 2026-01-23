@@ -9,10 +9,14 @@ import { Server, Socket } from 'socket.io';
 import { UseGuards } from '@nestjs/common';
 import { UserGuard } from '../auth/jwt-auth.guard';
 import { CallingUser } from '../auth/calling-user.decorator';
+import { UserAbility } from '../casl/user-ability.decorator';
+import { AppAbility } from '../casl/casl-ability.factory';
+import { PoliciesGuard } from '../casl/policy.guard';
 import { User } from '@prisma/client';
 import { QuizService } from './quiz.service';
 import { EventService } from '../event/event.service';
 import { UserService } from '../user/user.service';
+import { ClientService } from '../client/client.service';
 import {
   RequestQuizQuestionDto,
   ShuffleQuizQuestionDto,
@@ -21,6 +25,7 @@ import {
   QuizResultDto,
   QuizProgressDto,
   QuizErrorDto,
+  UpdateQuizQuestionDataDto,
 } from './quiz.dto';
 
 /**
@@ -32,7 +37,7 @@ import {
     origin: '*',
   },
 })
-@UseGuards(UserGuard)
+@UseGuards(UserGuard, PoliciesGuard)
 export class QuizGateway {
   @WebSocketServer()
   server!: Server;
@@ -41,6 +46,7 @@ export class QuizGateway {
     private readonly quizService: QuizService,
     private readonly eventService: EventService,
     private readonly userService: UserService,
+    private readonly clientService: ClientService,
   ) {}
 
   /**
@@ -52,7 +58,7 @@ export class QuizGateway {
     @CallingUser() user: User,
     @MessageBody() data: RequestQuizQuestionDto,
     @ConnectedSocket() client: Socket,
-  ): Promise<void> {
+  ): Promise<boolean> {
     try {
       const question = await this.quizService.getRandomQuestion(
         data.challengeId,
@@ -60,6 +66,7 @@ export class QuizGateway {
       );
 
       client.emit('quizQuestion', question);
+      return true;
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error occurred';
@@ -70,6 +77,7 @@ export class QuizGateway {
           : 'INVALID_QUESTION',
       };
       client.emit('quizError', errorResponse);
+      return false;
     }
   }
 
@@ -82,7 +90,7 @@ export class QuizGateway {
     @CallingUser() user: User,
     @MessageBody() data: ShuffleQuizQuestionDto,
     @ConnectedSocket() client: Socket,
-  ): Promise<void> {
+  ): Promise<boolean> {
     try {
       const question = await this.quizService.shuffleQuestion(
         data.challengeId,
@@ -91,6 +99,7 @@ export class QuizGateway {
       );
 
       client.emit('quizQuestion', question);
+      return true;
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error occurred';
@@ -99,6 +108,7 @@ export class QuizGateway {
         code: 'INVALID_QUESTION',
       };
       client.emit('quizError', errorResponse);
+      return false;
     }
   }
 
@@ -111,7 +121,7 @@ export class QuizGateway {
     @CallingUser() user: User,
     @MessageBody() data: SubmitQuizAnswerDto,
     @ConnectedSocket() client: Socket,
-  ): Promise<void> {
+  ): Promise<boolean> {
     try {
       const result = await this.quizService.submitAnswer(
         user.id,
@@ -135,6 +145,7 @@ export class QuizGateway {
 
       // Emit updateUserData event to update profile page
       await this.userService.emitUpdateUserData(user, false, false, user);
+      return true;
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error occurred';
@@ -151,6 +162,7 @@ export class QuizGateway {
         code: errorCode,
       };
       client.emit('quizError', errorResponse);
+      return false;
     }
   }
 
@@ -161,9 +173,9 @@ export class QuizGateway {
   @SubscribeMessage('getQuizProgress')
   async handleGetProgress(
     @CallingUser() user: User,
-    @MessageBody() data: { challengeId: string },
+    @MessageBody() data: RequestQuizQuestionDto,
     @ConnectedSocket() client: Socket,
-  ): Promise<void> {
+  ): Promise<boolean> {
     try {
       const progress = await this.quizService.getQuizProgress(
         data.challengeId,
@@ -171,6 +183,7 @@ export class QuizGateway {
       );
 
       client.emit('quizProgress', progress);
+      return true;
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error occurred';
@@ -179,6 +192,73 @@ export class QuizGateway {
         code: 'INVALID_QUESTION',
       };
       client.emit('quizError', errorResponse);
+      return false;
     }
+  }
+
+  // ============================================
+  // Admin handlers for quiz question management
+  // ============================================
+
+  /**
+   * Request all quiz questions for a challenge (admin)
+   * Emits: updateQuizQuestionData for each question
+   */
+  @SubscribeMessage('requestQuizQuestions')
+  async handleRequestQuizQuestions(
+    @UserAbility() ability: AppAbility,
+    @CallingUser() user: User,
+    @MessageBody() data: RequestQuizQuestionDto,
+  ): Promise<number> {
+    const questions = await this.quizService.getQuestionsByChallenge(
+      data.challengeId,
+    );
+
+    for (const question of questions) {
+      await this.quizService.emitUpdateQuizQuestionData(question, false, user);
+    }
+
+    return questions.length;
+  }
+
+  /**
+   * Create, update, or delete a quiz question (admin)
+   * Follows the UpdateChallengeDataDto pattern
+   */
+  @SubscribeMessage('updateQuizQuestionData')
+  async handleUpdateQuizQuestionData(
+    @UserAbility() ability: AppAbility,
+    @CallingUser() user: User,
+    @MessageBody() data: UpdateQuizQuestionDataDto,
+  ): Promise<string | undefined> {
+    let question = await this.quizService.getQuestionById(data.question.id);
+
+    if (data.deleted) {
+      if (
+        !question ||
+        !(await this.quizService.removeQuestion(ability, question.id))
+      ) {
+        return;
+      }
+
+      await this.quizService.emitUpdateQuizQuestionData(question, true);
+    } else {
+      question = await this.quizService.upsertQuestionFromDto(
+        ability,
+        data.question,
+      );
+
+      if (!question) {
+        await this.clientService.emitErrorData(
+          user,
+          'Failed to upsert quiz question!',
+        );
+        return;
+      }
+
+      await this.quizService.emitUpdateQuizQuestionData(question, false);
+    }
+
+    return question.id;
   }
 }

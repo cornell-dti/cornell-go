@@ -16,11 +16,7 @@ class GeoPoint {
   static GeoPoint? _lastLocation;
   static GeoPoint? get lastLocation => _lastLocation;
 
-  GeoPoint(
-    double lat,
-    double long,
-    double heading,
-  ) {
+  GeoPoint(double lat, double long, double heading) {
     _lat = lat;
     _long = long;
     _heading = heading;
@@ -58,7 +54,8 @@ class GeoPoint {
         // Permissions are denied forever, handle appropriately.
         print("permissions denied");
         return Future.error(
-            'Location permissions are permanently denied, we cannot request permissions.');
+          'Location permissions are permanently denied, we cannot request permissions.',
+        );
       }
 
       // FAST PATH: Try to get last known position first (milliseconds)
@@ -66,18 +63,28 @@ class GeoPoint {
         Position? lastPosition = await Geolocator.getLastKnownPosition();
         if (lastPosition != null) {
           print(
-              "Using last known position: ${lastPosition.latitude}, ${lastPosition.longitude}");
+            "Using last known position: ${lastPosition.latitude}, ${lastPosition.longitude}",
+          );
 
           // Store in static cache
-          _lastLocation = GeoPoint(lastPosition.latitude,
-              lastPosition.longitude, lastPosition.heading);
+          _lastLocation = GeoPoint(
+            lastPosition.latitude,
+            lastPosition.longitude,
+            lastPosition.heading,
+          );
 
           // Start getting current position in background for better accuracy
           Geolocator.getCurrentPosition(
-                  desiredAccuracy: LocationAccuracy.medium)
-              .then((pos) {
-            print("Got updated location: ${pos.latitude}, ${pos.longitude}");
-            _lastLocation = GeoPoint(pos.latitude, pos.longitude, pos.heading);
+            desiredAccuracy: LocationAccuracy.medium,
+          ).then((pos) {
+            print(
+              "Got updated location: ${pos.latitude}, ${pos.longitude}",
+            );
+            _lastLocation = GeoPoint(
+              pos.latitude,
+              pos.longitude,
+              pos.heading,
+            );
           }).catchError((e) {
             print("Error getting current position: $e");
           });
@@ -92,9 +99,10 @@ class GeoPoint {
       // SLOW PATH: If no last known position, wait for current position
       print("Getting location");
       final pos = await Geolocator.getCurrentPosition(
-          // Ideally we would use best accuracy, but it doesn't work for some reason
-          // desiredAccuracy: LocationAccuracy.best
-          desiredAccuracy: LocationAccuracy.medium);
+        // Ideally we would use best accuracy, but it doesn't work for some reason
+        // desiredAccuracy: LocationAccuracy.best
+        desiredAccuracy: LocationAccuracy.medium,
+      );
       print("Got location: ${pos.latitude}, ${pos.longitude}");
 
       // Store in static cache
@@ -119,18 +127,19 @@ class GeoPoint {
 
     if (Platform.isAndroid) {
       locationSettings = AndroidSettings(
-          accuracy: LocationAccuracy.high,
-          distanceFilter: 100,
-          forceLocationManager: true,
-          intervalDuration: const Duration(seconds: 10),
-          //(Optional) Set foreground notification config to keep the app alive
-          //when going to the background
-          foregroundNotificationConfig: const ForegroundNotificationConfig(
-            notificationText:
-                "CornellGO will continue to receive your location even when you aren't using it",
-            notificationTitle: "Running in Background",
-            enableWakeLock: true,
-          ));
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 100,
+        forceLocationManager: true,
+        intervalDuration: const Duration(seconds: 10),
+        //(Optional) Set foreground notification config to keep the app alive
+        //when going to the background
+        foregroundNotificationConfig: const ForegroundNotificationConfig(
+          notificationText:
+              "CornellGO will continue to receive your location even when you aren't using it",
+          notificationTitle: "Running in Background",
+          enableWakeLock: true,
+        ),
+      );
     } else if (Platform.isIOS || Platform.isMacOS) {
       locationSettings = AppleSettings(
         accuracy: LocationAccuracy.high,

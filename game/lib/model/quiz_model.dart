@@ -7,12 +7,14 @@ import 'package:game/api/game_client_dto.dart';
  * QuizModel - Manages quiz state and syncs with backend using ChangeNotifier
  */
 class QuizModel extends ChangeNotifier {
+  static const int maxShuffles = 3;
+
   final ApiClient _client;
 
   // Quiz state
   String? _currentChallengeId;
   QuizQuestionDto? _currentQuestion;
-  int _shufflesRemaining = 3;
+  int _shufflesRemaining = maxShuffles;
   int? _selectedAnswerIndex;
   bool _isLoading = false;
   bool _isSubmitted = false;
@@ -78,7 +80,7 @@ class QuizModel extends ChangeNotifier {
     _client.clientApi.connectedStream.listen((event) {
       _currentChallengeId = null;
       _currentQuestion = null;
-      _shufflesRemaining = 3;
+      _shufflesRemaining = maxShuffles;
       _selectedAnswerIndex = null;
       _isLoading = false;
       _isSubmitted = false;
@@ -94,7 +96,7 @@ class QuizModel extends ChangeNotifier {
     _currentChallengeId = challengeId;
     _isLoading = true;
     _errorMessage = null;
-    _shufflesRemaining = 3; // Reset shuffles for new question
+    _shufflesRemaining = maxShuffles; // Reset shuffles for new question
     _isSubmitted = false; // Reset submission state
     _lastResult = null; // Clear previous result
     _selectedAnswerIndex = null; // Clear previous selection
@@ -148,7 +150,7 @@ class QuizModel extends ChangeNotifier {
     notifyListeners();
 
     final selectedAnswerId =
-        _currentQuestion!.answers[_selectedAnswerIndex!].id;
+        _currentQuestion!.answers![_selectedAnswerIndex!].id!;
 
     _client.serverApi?.submitQuizAnswer(
       SubmitQuizAnswerDto(
@@ -168,7 +170,7 @@ class QuizModel extends ChangeNotifier {
   void reset() {
     _currentChallengeId = null;
     _currentQuestion = null;
-    _shufflesRemaining = 3;
+    _shufflesRemaining = maxShuffles;
     _selectedAnswerIndex = null;
     _isLoading = false;
     _isSubmitted = false;

@@ -80,78 +80,89 @@ class _AchievementsPageState extends State<AchievementsPage> {
     );
 
     return Container(
-        decoration: BoxDecoration(
-          color: Color(0xFFED5656),
-        ),
-        child: SafeArea(
-            bottom: false,
-            child: Scaffold(
-              appBar: AppBar(
-                backgroundColor: Color.fromARGB(255, 237, 86, 86),
-                toolbarHeight: MediaQuery.of(context).size.height * 0.1,
-                leading: Align(
-                  alignment: Alignment.center,
-                  child: IconButton(
-                    icon: Icon(Icons.navigate_before),
-                    color: Colors.white,
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ),
-                title: Padding(
-                  padding: EdgeInsets.only(
-                      top: MediaQuery.of(context).size.height * 0.01),
-                  child: Text(
-                    'Achievements',
-                    style: headerStyle,
-                  ),
-                ),
-                centerTitle: true, // Still useful for horizontal centering
-                actions: [],
+      decoration: BoxDecoration(color: Color(0xFFED5656)),
+      child: SafeArea(
+        bottom: false,
+        child: Scaffold(
+          appBar: AppBar(
+            backgroundColor: Color.fromARGB(255, 237, 86, 86),
+            toolbarHeight: MediaQuery.of(context).size.height * 0.1,
+            leading: Align(
+              alignment: Alignment.center,
+              child: IconButton(
+                icon: Icon(Icons.navigate_before),
+                color: Colors.white,
+                onPressed: () => Navigator.pop(context),
               ),
-              body: Container(
-                  width: double.infinity,
-                  height: double.infinity,
-                  decoration: BoxDecoration(
-                    color: Color.fromARGB(255, 255, 248, 241),
-                  ),
-                  child: Padding(
-                    padding: EdgeInsets.all(30),
-                    child: Column(
-                      children: [
-                        Expanded(child: Consumer4<AchievementModel, ApiClient,
-                                UserModel, GroupModel>(
-                            builder: (context, achModel, apiClient, userModel,
-                                groupModel, child) {
-                          final achIds = userModel.getAvailableAchievementIds();
-                          final achList = achModel.getAvailableTrackerPairs(
-                            allowedAchievementIds: achIds,
-                          );
+            ),
+            title: Padding(
+              padding: EdgeInsets.only(
+                top: MediaQuery.of(context).size.height * 0.01,
+              ),
+              child: Text('Achievements', style: headerStyle),
+            ),
+            centerTitle: true, // Still useful for horizontal centering
+            actions: [],
+          ),
+          body: Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: BoxDecoration(
+              color: Color.fromARGB(255, 255, 248, 241),
+            ),
+            child: Padding(
+              padding: EdgeInsets.all(30),
+              child: Column(
+                children: [
+                  Expanded(
+                    child: Consumer4<AchievementModel, ApiClient, UserModel,
+                        GroupModel>(
+                      builder: (
+                        context,
+                        achModel,
+                        apiClient,
+                        userModel,
+                        groupModel,
+                        child,
+                      ) {
+                        final achIds = userModel.getAvailableAchievementIds();
+                        final achList = achModel.getAvailableTrackerPairs(
+                          allowedAchievementIds: achIds,
+                        );
 
-                          return ListView.separated(
-                            padding: const EdgeInsets.symmetric(horizontal: 3),
-                            itemCount: achList.length,
-                            itemBuilder: (context, index) {
-                              // Check if the achievement is completed
-                              bool completed = achList[index].$1.progress >=
-                                  (achList[index].$2.requiredPoints ?? 0);
-                              return AchievementCell(
-                                  key: UniqueKey(),
-                                  achList[index].$2.description ?? "",
-                                  SvgPicture.asset(completed
-                                      ? "assets/icons/achievementgold.svg"
-                                      : "assets/icons/achievementsilver.svg"),
-                                  achList[index].$1.progress,
-                                  achList[index].$2.requiredPoints ?? 0);
-                            },
-                            physics: BouncingScrollPhysics(),
-                            separatorBuilder: (context, index) {
-                              return SizedBox(height: 10);
-                            },
-                          );
-                        }))
-                      ],
+                        return ListView.separated(
+                          padding: const EdgeInsets.symmetric(horizontal: 3),
+                          itemCount: achList.length,
+                          itemBuilder: (context, index) {
+                            // Check if the achievement is completed
+                            bool completed = achList[index].$1.progress >=
+                                (achList[index].$2.requiredPoints ?? 0);
+                            return AchievementCell(
+                              key: UniqueKey(),
+                              achList[index].$2.description ?? "",
+                              SvgPicture.asset(
+                                completed
+                                    ? "assets/icons/achievementgold.svg"
+                                    : "assets/icons/achievementsilver.svg",
+                              ),
+                              achList[index].$1.progress,
+                              achList[index].$2.requiredPoints ?? 0,
+                            );
+                          },
+                          physics: BouncingScrollPhysics(),
+                          separatorBuilder: (context, index) {
+                            return SizedBox(height: 10);
+                          },
+                        );
+                      },
                     ),
-                  )),
-            )));
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

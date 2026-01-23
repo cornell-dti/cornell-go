@@ -14,6 +14,7 @@ import {
   UserDto,
   OrganizationDto,
   AchievementDto,
+  QuizQuestionDto,
 } from '../all.dto';
 
 import { ServerApi } from './ServerApi';
@@ -27,6 +28,7 @@ const defaultData = {
   organizations: new Map<string, OrganizationDto>(),
   users: new Map<string, UserDto>(),
   groups: new Map<string, GroupDto>(),
+  quizQuestions: new Map<string, QuizQuestionDto>(),
   selectedEvent: '' as string,
   selectedOrg: '' as string,
   errors: new Map<string, UpdateErrorDto>(),
@@ -78,6 +80,17 @@ const defaultData = {
     return undefined;
   },
   async deleteGroup(id: string): Promise<boolean | undefined> {
+    return undefined;
+  },
+  async updateQuizQuestion(
+    question: QuizQuestionDto,
+  ): Promise<string | undefined> {
+    return undefined;
+  },
+  async deleteQuizQuestion(id: string): Promise<string | undefined> {
+    return undefined;
+  },
+  async requestQuizQuestions(challengeId: string): Promise<number | undefined> {
     return undefined;
   },
 };
@@ -165,6 +178,15 @@ export function ServerDataProvider(props: { children: ReactNode }) {
           organization: { id },
           deleted: true,
         });
+      },
+      updateQuizQuestion(question: QuizQuestionDto) {
+        return sock.updateQuizQuestionData({ question, deleted: false });
+      },
+      deleteQuizQuestion(id: string) {
+        return sock.updateQuizQuestionData({ question: { id }, deleted: true });
+      },
+      requestQuizQuestions(challengeId: string) {
+        return sock.requestQuizQuestions({ challengeId });
       },
     }),
     [serverData, setServerData, sock],
@@ -286,6 +308,17 @@ export function ServerDataProvider(props: { children: ReactNode }) {
     });
     sock.onUpdateErrorData(data => {
       serverData.errors.set('Error', data);
+      setTimeout(() => setServerData({ ...serverData }), 0);
+    });
+    sock.onUpdateQuizQuestionData(data => {
+      if (data.deleted) {
+        serverData.quizQuestions.delete(data.question.id);
+      } else {
+        serverData.quizQuestions.set(
+          (data.question as QuizQuestionDto).id,
+          data.question as QuizQuestionDto,
+        );
+      }
       setTimeout(() => setServerData({ ...serverData }), 0);
     });
   }, [sock, serverData, setServerData]);

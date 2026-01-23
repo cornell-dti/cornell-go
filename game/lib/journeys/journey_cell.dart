@@ -8,84 +8,85 @@ class LoadingBar extends StatelessWidget {
   final int totalTasks;
   final int tasksFinished;
 
-  const LoadingBar(
-    this.tasksFinished,
-    this.totalTasks,
-  );
+  const LoadingBar(this.tasksFinished, this.totalTasks);
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Container(
-            width: MediaQuery.sizeOf(context).width * 0.7,
+        Expanded(
+          child: Container(
             height: 22,
             child: LayoutBuilder(
-                builder: (BuildContext context, BoxConstraints constraints) {
-              return Stack(children: [
-                Container(
-                  width: constraints.maxWidth,
-                  height: constraints.maxHeight,
-                  alignment: Alignment.centerLeft,
-                  child: Container(
-                    decoration: new BoxDecoration(
-                      color: Color.fromARGB(255, 241, 241, 241),
-                      shape: BoxShape.rectangle,
-                      borderRadius: BorderRadius.all(Radius.circular(16.0)),
+              builder: (BuildContext context, BoxConstraints constraints) {
+                return Stack(
+                  children: [
+                    Container(
+                      width: constraints.maxWidth,
+                      height: constraints.maxHeight,
+                      alignment: Alignment.centerLeft,
+                      child: Container(
+                        decoration: new BoxDecoration(
+                          color: Color.fromARGB(255, 241, 241, 241),
+                          shape: BoxShape.rectangle,
+                          borderRadius: BorderRadius.all(Radius.circular(16.0)),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-                Container(
-                  width: (totalTasks > 0 ? tasksFinished / totalTasks : 0) *
-                      constraints.maxWidth,
-                  height: constraints.maxHeight,
-                  alignment: Alignment.centerLeft,
-                  child: Container(
-                    decoration: new BoxDecoration(
-                      color: Color.fromARGB(197, 237, 86, 86),
-                      shape: BoxShape.rectangle,
-                      borderRadius: BorderRadius.all(Radius.circular(16.0)),
+                    Container(
+                      width: (totalTasks > 0 ? tasksFinished / totalTasks : 0) *
+                          constraints.maxWidth,
+                      height: constraints.maxHeight,
+                      alignment: Alignment.centerLeft,
+                      child: Container(
+                        decoration: new BoxDecoration(
+                          color: Color.fromARGB(197, 237, 86, 86),
+                          shape: BoxShape.rectangle,
+                          borderRadius: BorderRadius.all(Radius.circular(16.0)),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-                Container(
-                  height: 5,
-                  width: max(
-                      (totalTasks > 0 ? tasksFinished / totalTasks : 0) *
-                              constraints.maxWidth -
-                          16,
-                      0),
-                  margin: EdgeInsets.only(left: 8, top: 3),
-                  alignment: Alignment.centerLeft,
-                  decoration: new BoxDecoration(
-                    color: Color(0x99F3C6C6),
-                    shape: BoxShape.rectangle,
-                    borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                  ),
-                ),
-              ]);
-            })),
+                    Container(
+                      height: 5,
+                      width: max(
+                        (totalTasks > 0 ? tasksFinished / totalTasks : 0) *
+                                constraints.maxWidth -
+                            16,
+                        0,
+                      ),
+                      margin: EdgeInsets.only(left: 8, top: 3),
+                      alignment: Alignment.centerLeft,
+                      decoration: new BoxDecoration(
+                        color: Color(0x99F3C6C6),
+                        shape: BoxShape.rectangle,
+                        borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
         Container(
           //width: 50,
-          child: Row(children: [
-            SizedBox(
-              width: 8,
-            ),
-            SvgPicture.asset("assets/icons/pin.svg"),
-            SizedBox(
-              width: 5,
-            ),
-            Text(
-              tasksFinished.toString() + "/" + totalTasks.toString(),
-              style: TextStyle(
-                color: Color.fromARGB(255, 110, 110, 110),
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                fontFamily: 'Poppins',
+          child: Row(
+            children: [
+              SizedBox(width: 8),
+              SvgPicture.asset("assets/icons/pin.svg"),
+              SizedBox(width: 5),
+              Text(
+                tasksFinished.toString() + "/" + totalTasks.toString(),
+                style: TextStyle(
+                  color: Color.fromARGB(255, 110, 110, 110),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: 'Poppins',
+                ),
               ),
-            ),
-          ]),
-        )
+            ],
+          ),
+        ),
       ],
     );
   }
@@ -107,37 +108,38 @@ class JourneyCell extends StatefulWidget {
   final String id;
 
   const JourneyCell(
-      this.journeyName,
-      this.challengeLat,
-      this.challengeLong,
-      this.location,
-      this.imgUrl,
-      this.description,
-      this.longDescription,
-      this.locationCount,
-      this.numberCompleted,
-      this.isCompleted,
-      this.difficulty,
-      this.points,
-      this.id,
-      {Key? key})
-      : super(key: key);
+    this.journeyName,
+    this.challengeLat,
+    this.challengeLong,
+    this.location,
+    this.imgUrl,
+    this.description,
+    this.longDescription,
+    this.locationCount,
+    this.numberCompleted,
+    this.isCompleted,
+    this.difficulty,
+    this.points,
+    this.id, {
+    Key? key,
+  }) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _JourneyCellState(
-      journeyName,
-      challengeLat,
-      challengeLong,
-      location,
-      imgUrl,
-      description,
-      longDescription,
-      locationCount,
-      numberCompleted,
-      isCompleted,
-      difficulty,
-      points,
-      id);
+        journeyName,
+        challengeLat,
+        challengeLong,
+        location,
+        imgUrl,
+        description,
+        longDescription,
+        locationCount,
+        numberCompleted,
+        isCompleted,
+        difficulty,
+        points,
+        id,
+      );
 }
 
 class _JourneyCellState extends State<JourneyCell> {
@@ -178,36 +180,33 @@ class _JourneyCellState extends State<JourneyCell> {
     return GestureDetector(
       onTap: () async {
         await showModalBottomSheet(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(10.0)),
-            ),
-            context: context,
-            isScrollControlled: true,
-            builder: (
-              BuildContext context,
-            ) =>
-                Preview(
-                    journeyName,
-                    challengeLat,
-                    challengeLong,
-                    longDescription ?? description,
-                    imgUrl,
-                    difficulty,
-                    points,
-                    PreviewType.JOURNEY,
-                    location,
-                    id,
-                    locationCount: locationCount,
-                    numberCompleted: numberCompleted));
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(10.0)),
+          ),
+          context: context,
+          isScrollControlled: true,
+          builder: (BuildContext context) => Preview(
+            journeyName,
+            challengeLat,
+            challengeLong,
+            longDescription ?? description,
+            imgUrl,
+            difficulty,
+            points,
+            PreviewType.JOURNEY,
+            location,
+            id,
+            locationCount: locationCount,
+            numberCompleted: numberCompleted,
+          ),
+        );
       },
       child: Container(
         width: MediaQuery.sizeOf(context).width * 0.9,
         height: MediaQuery.sizeOf(context).height * 0.3,
         decoration: BoxDecoration(
           color: Colors.white,
-          border: Border.all(
-            color: Color.fromARGB(255, 255, 255, 255),
-          ),
+          border: Border.all(color: Color.fromARGB(255, 255, 255, 255)),
           borderRadius: BorderRadius.circular(10),
           boxShadow: [
             BoxShadow(
@@ -222,17 +221,19 @@ class _JourneyCellState extends State<JourneyCell> {
           alignment: Alignment.topCenter,
           children: [
             Container(
-                width: double.infinity,
-                height: MediaQuery.sizeOf(context).height * 0.15,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(10),
-                      topRight: Radius.circular(10)),
-                  image: DecorationImage(
-                    fit: BoxFit.cover,
-                    image: NetworkImage(imgUrl),
-                  ),
-                )),
+              width: double.infinity,
+              height: MediaQuery.sizeOf(context).height * 0.15,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(10),
+                  topRight: Radius.circular(10),
+                ),
+                image: DecorationImage(
+                  fit: BoxFit.cover,
+                  image: NetworkImage(imgUrl),
+                ),
+              ),
+            ),
             Positioned(
               top: 10.0,
               left: 16.0,
@@ -271,17 +272,21 @@ class _JourneyCellState extends State<JourneyCell> {
             Positioned(
               bottom: 0,
               left: 0,
+              right: 0,
               child: Container(
-                width: MediaQuery.sizeOf(context).width,
                 decoration: ShapeDecoration(
                   color: Colors.white,
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.only(
-                          bottomLeft: Radius.circular(10),
-                          bottomRight: Radius.circular(10))),
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(10),
+                      bottomRight: Radius.circular(10),
+                    ),
+                  ),
                 ),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 17.0, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 17.0,
+                  vertical: 8,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -296,6 +301,8 @@ class _JourneyCellState extends State<JourneyCell> {
                     ),
                     Text(
                       widget.description,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: Colors.black,
                         fontSize: 14,
@@ -310,7 +317,9 @@ class _JourneyCellState extends State<JourneyCell> {
                           width: 70,
                           height: 25,
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 2, vertical: 2),
+                            horizontal: 2,
+                            vertical: 2,
+                          ),
                           decoration: ShapeDecoration(
                             color: Color(0xFFF9EDDA),
                             shape: RoundedRectangleBorder(
@@ -330,17 +339,22 @@ class _JourneyCellState extends State<JourneyCell> {
                           ),
                         ),
                         SizedBox(width: 8),
-                        Row(children: [
-                          SvgPicture.asset(
-                            "assets/icons/bearcoins.svg",
-                            width: 25,
-                          ),
-                          Text(' ' + points.toString() + " PTS",
+                        Row(
+                          children: [
+                            SvgPicture.asset(
+                              "assets/icons/bearcoins.svg",
+                              width: 25,
+                            ),
+                            Text(
+                              ' ' + points.toString() + " PTS",
                               style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                  color: Color(0xFFC17E19)))
-                        ]),
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: Color(0xFFC17E19),
+                              ),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                     Padding(

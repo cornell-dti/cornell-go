@@ -56,14 +56,14 @@ class GameplayMap extends StatefulWidget {
   final int points;
   final int startingHintsUsed;
 
-  const GameplayMap(
-      {Key? key,
-      required this.challengeId,
-      required this.targetLocation,
-      required this.awardingRadius,
-      required this.points,
-      required this.startingHintsUsed})
-      : super(key: key);
+  const GameplayMap({
+    Key? key,
+    required this.challengeId,
+    required this.targetLocation,
+    required this.awardingRadius,
+    required this.points,
+    required this.startingHintsUsed,
+  }) : super(key: key);
 
   @override
   State<GameplayMap> createState() => _GameplayMapState();
@@ -142,7 +142,10 @@ class _GameplayMapState extends State<GameplayMap> {
           print("Tapped anywhere on step 7 - expanding image");
           _removeBearOverlay();
           ShowcaseView.getNamed("gameplay_map").dismiss();
-          Provider.of<OnboardingModel>(context, listen: false).completeStep7();
+          Provider.of<OnboardingModel>(
+            context,
+            listen: false,
+          ).completeStep7();
           _toggle();
         },
       ),
@@ -166,7 +169,10 @@ class _GameplayMapState extends State<GameplayMap> {
           print("Tapped anywhere on step 9");
           _removeBearOverlay();
           ShowcaseView.getNamed("gameplay_map").dismiss();
-          Provider.of<OnboardingModel>(context, listen: false).completeStep9();
+          Provider.of<OnboardingModel>(
+            context,
+            listen: false,
+          ).completeStep9();
         },
       ),
     );
@@ -189,7 +195,10 @@ class _GameplayMapState extends State<GameplayMap> {
           print("Tapped anywhere on step 10");
           _removeBearOverlay();
           ShowcaseView.getNamed("gameplay_map").dismiss();
-          Provider.of<OnboardingModel>(context, listen: false).completeStep10();
+          Provider.of<OnboardingModel>(
+            context,
+            listen: false,
+          ).completeStep10();
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => BottomNavBar()),
@@ -214,9 +223,7 @@ class _GameplayMapState extends State<GameplayMap> {
     } catch (e) {
       // Not registered yet, that's fine
     }
-    ShowcaseView.register(
-      scope: "gameplay_map",
-    );
+    ShowcaseView.register(scope: "gameplay_map");
   }
 
   @override
@@ -301,8 +308,8 @@ class _GameplayMapState extends State<GameplayMap> {
       currentLocation = location;
 
       positionStream = Geolocator.getPositionStream(
-              locationSettings: GeoPoint.getLocationSettings())
-          .listen((Position? newPos) {
+        locationSettings: GeoPoint.getLocationSettings(),
+      ).listen((Position? newPos) {
         // prints user coordinates - useful for debugging
         // print(newPos == null
         //     ? 'Unknown'
@@ -317,8 +324,11 @@ class _GameplayMapState extends State<GameplayMap> {
       });
 
       positionStream.onData((newPos) {
-        currentLocation =
-            GeoPoint(newPos.latitude, newPos.longitude, newPos.heading);
+        currentLocation = GeoPoint(
+          newPos.latitude,
+          newPos.longitude,
+          newPos.heading,
+        );
 
         // upon new user location data, moves map camera to be centered around
         // new position and sets zoom.
@@ -337,8 +347,10 @@ class _GameplayMapState extends State<GameplayMap> {
     } catch (e) {
       print('Failed to get location: $e');
 
-      displayToast("Not able to receive location. Please check permissions.",
-          Status.error);
+      displayToast(
+        "Not able to receive location. Please check permissions.",
+        Status.error,
+      );
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Future.delayed(Duration(seconds: 1), () {
@@ -381,8 +393,11 @@ class _GameplayMapState extends State<GameplayMap> {
     // around new position and sets zoom. This causes the map to follow the
     // user as they move.
     positionStream.onData((newPos) {
-      currentLocation =
-          GeoPoint(newPos.latitude, newPos.longitude, newPos.heading);
+      currentLocation = GeoPoint(
+        newPos.latitude,
+        newPos.longitude,
+        newPos.heading,
+      );
 
       googleMapController.animateCamera(
         CameraUpdate.newCameraPosition(
@@ -402,18 +417,26 @@ class _GameplayMapState extends State<GameplayMap> {
    */
   void cancelRecenterCamera() async {
     positionStream.onData((newPos) {
-      currentLocation =
-          GeoPoint(newPos.latitude, newPos.longitude, newPos.heading);
+      currentLocation = GeoPoint(
+        newPos.latitude,
+        newPos.longitude,
+        newPos.heading,
+      );
       setState(() {});
     });
   }
 
   Future<Uint8List> getBytesFromAsset(String path, int width) async {
     ByteData data = await rootBundle.load(path);
-    ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(),
-        targetWidth: width, targetHeight: width);
+    ui.Codec codec = await ui.instantiateImageCodec(
+      data.buffer.asUint8List(),
+      targetWidth: width,
+      targetHeight: width,
+    );
     ui.FrameInfo fi = await codec.getNextFrame();
-    return (await fi.image.toByteData(format: ui.ImageByteFormat.png))!
+    return (await fi.image.toByteData(
+      format: ui.ImageByteFormat.png,
+    ))!
         .buffer
         .asUint8List();
   }
@@ -424,8 +447,10 @@ class _GameplayMapState extends State<GameplayMap> {
    */
   BitmapDescriptor currentLocationIcon = BitmapDescriptor.defaultMarker;
   void setCustomMarkerIcon() async {
-    Uint8List newMarker =
-        await getBytesFromAsset('assets/icons/userlocation.png', 200);
+    Uint8List newMarker = await getBytesFromAsset(
+      'assets/icons/userlocation.png',
+      200,
+    );
     currentLocationIcon = BitmapDescriptor.fromBytes(newMarker);
     setState(() {});
   }
@@ -443,8 +468,10 @@ class _GameplayMapState extends State<GameplayMap> {
       if (eventId == null) {
         displayToast("Could not get event", Status.error);
       } else {
-        Provider.of<TrackerModel>(context, listen: false)
-            .useEventTrackerHint(eventId);
+        Provider.of<TrackerModel>(
+          context,
+          listen: false,
+        ).useEventTrackerHint(eventId);
       }
 
       // Calculate total hints: backend hints + this new hint we're about to use
@@ -509,8 +536,9 @@ class _GameplayMapState extends State<GameplayMap> {
           // (optional) immediately kick off Step 9
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
-              ShowcaseView.getNamed("gameplay_map")
-                  .startShowCase([onboarding.step9RecenterButtonKey]);
+              ShowcaseView.getNamed(
+                "gameplay_map",
+              ).startShowCase([onboarding.step9RecenterButtonKey]);
               _showRecenterBearOverlay();
             }
           });
@@ -556,7 +584,7 @@ class _GameplayMapState extends State<GameplayMap> {
                   ),
                 ),
               ),
-            )
+            ),
           ],
         ),
       ),
@@ -589,9 +617,13 @@ class _GameplayMapState extends State<GameplayMap> {
     double screenHeight,
   ) {
     // 1. Build base SVG icon
-    Widget svgIcon = SvgPicture.asset("assets/icons/maprecenter.svg",
-        colorFilter: ColorFilter.mode(
-            Color.fromARGB(255, 131, 90, 124), BlendMode.srcIn));
+    Widget svgIcon = SvgPicture.asset(
+      "assets/icons/maprecenter.svg",
+      colorFilter: ColorFilter.mode(
+        Color.fromARGB(255, 131, 90, 124),
+        BlendMode.srcIn,
+      ),
+    );
 
     // 2. Step 9: Wrap just the SVG with showcase
     if (onboarding.step8ExpandedImageComplete &&
@@ -620,10 +652,7 @@ class _GameplayMapState extends State<GameplayMap> {
     );
 
     // 4. Add padding outside everything
-    return Padding(
-      padding: EdgeInsets.only(bottom: 150.0),
-      child: button,
-    );
+    return Padding(padding: EdgeInsets.only(bottom: 150.0), child: button);
   }
 
   // Build hint button with optional onboarding showcase
@@ -639,12 +668,15 @@ class _GameplayMapState extends State<GameplayMap> {
         FloatingActionButton.extended(
           heroTag: "hint_button",
           onPressed: useHint,
-          label: SvgPicture.asset("assets/icons/maphint.svg",
-              colorFilter: ColorFilter.mode(
-                  numHintsLeft == 0
-                      ? Color.fromARGB(255, 217, 217, 217)
-                      : Color.fromARGB(255, 131, 90, 124),
-                  BlendMode.srcIn)),
+          label: SvgPicture.asset(
+            "assets/icons/maphint.svg",
+            colorFilter: ColorFilter.mode(
+              numHintsLeft == 0
+                  ? Color.fromARGB(255, 217, 217, 217)
+                  : Color.fromARGB(255, 131, 90, 124),
+              BlendMode.srcIn,
+            ),
+          ),
           backgroundColor: Color.fromARGB(255, 255, 255, 255),
           shape: CircleBorder(),
         ),
@@ -658,10 +690,7 @@ class _GameplayMapState extends State<GameplayMap> {
               shape: BoxShape.circle,
               color: Colors.white,
               boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.3),
-                  blurRadius: 5,
-                ),
+                BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 5),
               ],
             ),
             child: Text(
@@ -693,10 +722,7 @@ class _GameplayMapState extends State<GameplayMap> {
     }
 
     // 3. Add padding outside showcase
-    return Container(
-      padding: EdgeInsets.only(bottom: 15.0),
-      child: hintButton,
-    );
+    return Container(padding: EdgeInsets.only(bottom: 15.0), child: hintButton);
   }
 
   @override
@@ -713,89 +739,98 @@ class _GameplayMapState extends State<GameplayMap> {
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        colorSchemeSeed: Colors.green[700],
-      ),
+      theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.green[700]),
       home: Consumer5<EventModel, GroupModel, TrackerModel, ChallengeModel,
-              ApiClient>(
-          builder: (context, eventModel, groupModel, trackerModel,
-              challengeModel, apiClient, child) {
-        EventTrackerDto? tracker =
-            trackerModel.trackerByEventId(groupModel.curEventId ?? "");
-        if (tracker == null) {
-          displayToast("Error getting event tracker", Status.error);
-        } else if ((tracker.curChallengeId ?? '') == widget.challengeId) {
-          numHintsLeft = totalHints - tracker.hintsUsed;
-        }
-        var challenge = challengeModel.getChallengeById(widget.challengeId);
+          ApiClient>(
+        builder: (
+          context,
+          eventModel,
+          groupModel,
+          trackerModel,
+          challengeModel,
+          apiClient,
+          child,
+        ) {
+          EventTrackerDto? tracker = trackerModel.trackerByEventId(
+            groupModel.curEventId ?? "",
+          );
+          if (tracker == null) {
+            displayToast("Error getting event tracker", Status.error);
+          } else if ((tracker.curChallengeId ?? '') == widget.challengeId) {
+            numHintsLeft = totalHints - tracker.hintsUsed;
+          }
+          var challenge = challengeModel.getChallengeById(widget.challengeId);
 
-        if (challenge == null) {
-          displayToast("Error getting challenge", Status.error);
-        }
+          if (challenge == null) {
+            displayToast("Error getting challenge", Status.error);
+          }
 
-        var imageUrl = challenge?.imageUrl;
-        if (imageUrl == null || imageUrl.length == 0) {
-          imageUrl =
-              "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png";
-        }
+          var imageUrl = challenge?.imageUrl;
+          if (imageUrl == null || imageUrl.length == 0) {
+            imageUrl =
+                "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png";
+          }
 
-        // Onboarding: Step 7 - Show showcase for image toggle button after info row explanation
-        if (onboarding.step6InfoRowComplete &&
-            !onboarding.step7ImageToggleComplete) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
-              ShowcaseView.getNamed("gameplay_map")
-                  .startShowCase([onboarding.step7ImageToggleKey]);
-              // Show bear overlay on top of showcase
-              _showImageToggleBearOverlay();
-            }
-          });
-        }
+          // Onboarding: Step 7 - Show showcase for image toggle button after info row explanation
+          if (onboarding.step6InfoRowComplete &&
+              !onboarding.step7ImageToggleComplete) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                ShowcaseView.getNamed(
+                  "gameplay_map",
+                ).startShowCase([onboarding.step7ImageToggleKey]);
+                // Show bear overlay on top of showcase
+                _showImageToggleBearOverlay();
+              }
+            });
+          }
 
-        // Onboarding: Step 8 - Show showcase for expanded image view
-        if (isExpanded &&
-            onboarding.step7ImageToggleComplete &&
-            !onboarding.step8ExpandedImageComplete) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
-              ShowcaseView.getNamed("gameplay_map")
-                  .startShowCase([onboarding.step8ExpandedImageKey]);
-              // No bear overlay for step 8 - just transparent full-screen tap
-            }
-          });
-        }
+          // Onboarding: Step 8 - Show showcase for expanded image view
+          if (isExpanded &&
+              onboarding.step7ImageToggleComplete &&
+              !onboarding.step8ExpandedImageComplete) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                ShowcaseView.getNamed(
+                  "gameplay_map",
+                ).startShowCase([onboarding.step8ExpandedImageKey]);
+                // No bear overlay for step 8 - just transparent full-screen tap
+              }
+            });
+          }
 
-        // Onboarding: Step 9 - Show showcase for recenter button
-        if (onboarding.step8ExpandedImageComplete &&
-            !onboarding.step9RecenterButtonComplete) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
-              ShowcaseView.getNamed("gameplay_map")
-                  .startShowCase([onboarding.step9RecenterButtonKey]);
-              // Show bear overlay on top of showcase
-              _showRecenterBearOverlay();
-            }
-          });
-        }
+          // Onboarding: Step 9 - Show showcase for recenter button
+          if (onboarding.step8ExpandedImageComplete &&
+              !onboarding.step9RecenterButtonComplete) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                ShowcaseView.getNamed(
+                  "gameplay_map",
+                ).startShowCase([onboarding.step9RecenterButtonKey]);
+                // Show bear overlay on top of showcase
+                _showRecenterBearOverlay();
+              }
+            });
+          }
 
-        // Onboarding: Step 10 - Final gameplay step showcases hint button, then navigates home
-        if (onboarding.step9RecenterButtonComplete &&
-            !onboarding.step10HintButtonComplete) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
-              ShowcaseView.getNamed("gameplay_map")
-                  .startShowCase([onboarding.step10HintButtonKey]);
-              // Show bear overlay on top of showcase
-              _showHintBearOverlay();
-            }
-          });
-        }
+          // Onboarding: Step 10 - Final gameplay step showcases hint button, then navigates home
+          if (onboarding.step9RecenterButtonComplete &&
+              !onboarding.step10HintButtonComplete) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                ShowcaseView.getNamed(
+                  "gameplay_map",
+                ).startShowCase([onboarding.step10HintButtonKey]);
+                // Show bear overlay on top of showcase
+                _showHintBearOverlay();
+              }
+            });
+          }
 
-        return Stack(
-          alignment: Alignment.bottomCenter,
-          children: [
-            StreamBuilder(
+          return Stack(
+            alignment: Alignment.bottomCenter,
+            children: [
+              StreamBuilder(
                 stream: client.clientApi.disconnectedStream,
                 builder: ((context, snapshot) {
                   // Redirect to login if server api is null
@@ -804,7 +839,8 @@ class _GameplayMapState extends State<GameplayMap> {
                       // Clear entire navigation stack and push to login screen
                       Navigator.of(context).pushAndRemoveUntil(
                         MaterialPageRoute(
-                            builder: (context) => SplashPageWidget()),
+                          builder: (context) => SplashPageWidget(),
+                        ),
                         (route) => false,
                       );
                       displayToast("Signed out", Status.success);
@@ -812,157 +848,171 @@ class _GameplayMapState extends State<GameplayMap> {
                   }
 
                   return Container();
-                })),
-            Listener(
-              onPointerDown: (e) {
-                cancelRecenterCamera();
-              },
-              child: GoogleMap(
-                onMapCreated: _onMapCreated,
-                compassEnabled: false,
-                myLocationButtonEnabled: false,
-                zoomControlsEnabled: false,
-                myLocationEnabled: false,
-                mapToolbarEnabled: false,
-                mapType: MapType.normal,
-                initialCameraPosition: CameraPosition(
-                  target: currentLocation == null
-                      ? _center
-                      : LatLng(currentLocation!.lat, currentLocation!.long),
-                  zoom: 16,
-                ),
-                markers: {
-                  Marker(
-                    markerId: const MarkerId("currentLocation"),
-                    icon: currentLocationIcon,
-                    position: currentLocation == null
-                        ? _center
-                        : LatLng(currentLocation!.lat, currentLocation!.long),
-                    anchor: Offset(0.5, 0.5),
-                    rotation:
-                        currentLocation == null ? 0 : currentLocation!.heading,
-                  ),
-                },
-                circles: {
-                  Circle(
-                    circleId: CircleId("hintCircle"),
-                    center: hintCenter != null
-                        ? LatLng(hintCenter!.lat, hintCenter!.long)
-                        : _center,
-                    radius: () {
-                      double radiusValue = hintRadius ?? defaultHintRadius;
-
-                      // Safety check to prevent crashes
-                      if (radiusValue.isNaN ||
-                          radiusValue.isInfinite ||
-                          radiusValue <= 0) {
-                        return widget.awardingRadius
-                            .clamp(10.0, defaultHintRadius);
-                      }
-                      return radiusValue.clamp(
-                          widget.awardingRadius, defaultHintRadius);
-                    }(),
-                    strokeColor: Color.fromARGB(80, 30, 41, 143),
-                    strokeWidth: 2,
-                    fillColor: Color.fromARGB(80, 83, 134, 237),
-                  )
-                },
+                }),
               ),
-            ),
-            Container(
-              margin: EdgeInsets.only(bottom: 70),
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color.fromARGB(255, 237, 86, 86),
-                  padding:
-                      EdgeInsets.only(right: 15, left: 15, top: 10, bottom: 10),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+              Listener(
+                onPointerDown: (e) {
+                  cancelRecenterCamera();
+                },
+                child: GoogleMap(
+                  onMapCreated: _onMapCreated,
+                  compassEnabled: false,
+                  myLocationButtonEnabled: false,
+                  zoomControlsEnabled: false,
+                  myLocationEnabled: false,
+                  mapToolbarEnabled: false,
+                  mapType: MapType.normal,
+                  initialCameraPosition: CameraPosition(
+                    target: currentLocation == null
+                        ? _center
+                        : LatLng(
+                            currentLocation!.lat,
+                            currentLocation!.long,
+                          ),
+                    zoom: 16,
                   ),
+                  markers: {
+                    Marker(
+                      markerId: const MarkerId("currentLocation"),
+                      icon: currentLocationIcon,
+                      position: currentLocation == null
+                          ? _center
+                          : LatLng(
+                              currentLocation!.lat,
+                              currentLocation!.long,
+                            ),
+                      anchor: Offset(0.5, 0.5),
+                      rotation: currentLocation == null
+                          ? 0
+                          : currentLocation!.heading,
+                    ),
+                  },
+                  circles: {
+                    Circle(
+                      circleId: CircleId("hintCircle"),
+                      center: hintCenter != null
+                          ? LatLng(hintCenter!.lat, hintCenter!.long)
+                          : _center,
+                      radius: () {
+                        double radiusValue = hintRadius ?? defaultHintRadius;
+
+                        // Safety check to prevent crashes
+                        if (radiusValue.isNaN ||
+                            radiusValue.isInfinite ||
+                            radiusValue <= 0) {
+                          return widget.awardingRadius.clamp(
+                            10.0,
+                            defaultHintRadius,
+                          );
+                        }
+                        return radiusValue.clamp(
+                          widget.awardingRadius,
+                          defaultHintRadius,
+                        );
+                      }(),
+                      strokeColor: Color.fromARGB(80, 30, 41, 143),
+                      strokeWidth: 2,
+                      fillColor: Color.fromARGB(80, 83, 134, 237),
+                    ),
+                  },
                 ),
-                child: Text(
-                  "I've Arrived!",
-                  style: TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 21,
-                    fontWeight: FontWeight.w400,
-                    color: Color(0xFFFFFFFF),
+              ),
+              Container(
+                margin: EdgeInsets.only(bottom: 70),
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color.fromARGB(255, 237, 86, 86),
+                    padding: EdgeInsets.only(
+                      right: 15,
+                      left: 15,
+                      top: 10,
+                      bottom: 10,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
-                ),
-                onPressed: () async {
-                  if (!isArrivedButtonEnabled) return;
+                  child: Text(
+                    "I've Arrived!",
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 21,
+                      fontWeight: FontWeight.w400,
+                      color: Color(0xFFFFFFFF),
+                    ),
+                  ),
+                  onPressed: () async {
+                    if (!isArrivedButtonEnabled) return;
 
-                  setState(() {
-                    isArrivedButtonEnabled = false;
-                  });
+                    setState(() {
+                      isArrivedButtonEnabled = false;
+                    });
 
-                  bool hasArrived = checkArrived();
-                  String? chalName;
-                  if (hasArrived) {
-                    if (tracker == null || challenge == null) {
-                      displayToast("An error occurred while getting challenge",
-                          Status.error);
-                    } else {
-                      chalName = await apiClient.serverApi
-                          ?.completedChallenge(CompletedChallengeDto());
+                    bool hasArrived = checkArrived();
+                    String? chalName;
+                    if (hasArrived) {
+                      if (tracker == null || challenge == null) {
+                        displayToast(
+                          "An error occurred while getting challenge",
+                          Status.error,
+                        );
+                      } else {
+                        chalName = await apiClient.serverApi
+                            ?.completedChallenge(CompletedChallengeDto());
+                      }
                     }
-                  }
-                  final chalId = widget.challengeId;
-                  showDialog(
-                    context: context,
-                    barrierDismissible: !hasArrived,
-                    builder: (context) {
-                      return Container(
-                        margin: EdgeInsetsDirectional.only(start: 10, end: 10),
-                        child: Dialog(
-                          elevation: 16,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: ArrivalDialog(
-                              hasArrived: hasArrived,
-                              challengeId: chalId,
-                              challengeName: chalName,
+                    final chalId = widget.challengeId;
+                    showDialog(
+                      context: context,
+                      barrierDismissible: !hasArrived,
+                      builder: (context) {
+                        return Container(
+                          margin: EdgeInsetsDirectional.only(
+                            start: 10,
+                            end: 10,
+                          ),
+                          child: Dialog(
+                            elevation: 16,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: ArrivalDialog(
+                                hasArrived: hasArrived,
+                                challengeId: chalId,
+                                challengeName: chalName,
+                              ),
                             ),
                           ),
-                        ),
-                      );
-                    },
-                  ).then((_) {
-                    // Re-enable the button after the dialog is closed
-                    setState(() {
-                      isArrivedButtonEnabled = true;
+                        );
+                      },
+                    ).then((_) {
+                      // Re-enable the button after the dialog is closed
+                      setState(() {
+                        isArrivedButtonEnabled = true;
+                      });
                     });
-                  });
-                },
+                  },
+                ),
               ),
-            ),
-            Positioned(
-              bottom: 0,
-              right: 10,
-              child: Column(
-                children: [
-                  _buildHintButton(
-                    onboarding,
-                    screenWidth,
-                    screenHeight,
-                  ),
-                  _buildRecenterButton(
-                    onboarding,
-                    screenWidth,
-                    screenHeight,
-                  ),
-                ],
+              Positioned(
+                bottom: 0,
+                right: 10,
+                child: Column(
+                  children: [
+                    _buildHintButton(onboarding, screenWidth, screenHeight),
+                    _buildRecenterButton(onboarding, screenWidth, screenHeight),
+                  ],
+                ),
               ),
-            ),
-            _buildImageToggle(
-              onboarding,
-              imageUrl,
-              screenWidth,
-              screenHeight,
-            ),
-          ],
-        );
-      }),
+              _buildImageToggle(
+                onboarding,
+                imageUrl,
+                screenWidth,
+                screenHeight,
+              ),
+            ],
+          );
+        },
+      ),
     );
     // });
   }

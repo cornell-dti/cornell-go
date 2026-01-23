@@ -324,17 +324,21 @@ export interface ShuffleQuizQuestionDto {
   currentQuestionId?: string;
 }
 
-export interface QuizAnswerOptionDto {
-  id: string;
+export interface QuizAnswerDto {
+  id?: string;
   answerText: string;
+  isCorrect?: boolean;
 }
 
 export interface QuizQuestionDto {
   id: string;
-  questionText: string;
-  answers: QuizAnswerOptionDto[];
-  pointValue: number;
-  challengeId: string;
+  challengeId?: string;
+  questionText?: string;
+  explanation?: string;
+  difficulty?: number;
+  pointValue?: number;
+  category?: string;
+  answers?: QuizAnswerDto[];
 }
 
 export interface SubmitQuizAnswerDto {
@@ -362,6 +366,11 @@ export interface QuizProgressDto {
 export interface QuizErrorDto {
   message: string;
   code: QuizErrorCodeDto;
+}
+
+export interface UpdateQuizQuestionDataDto {
+  question: QuizQuestionDto;
+  deleted: boolean;
 }
 
 export interface CloseAccountDto {}
