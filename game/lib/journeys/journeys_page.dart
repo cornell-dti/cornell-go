@@ -271,7 +271,8 @@ class _JourneysPageState extends State<JourneysPage> {
                                 challenge.location?.name ?? "";
                             final challengeName = challenge.name ?? "";
 
-                            bool eventMatchesFiltersResult = eventMatchesFilters(
+                            bool eventMatchesFiltersResult =
+                                eventMatchesFilters(
                               event: event,
                               difficulty: widget.myDifficulty,
                               locations: widget.myLocations,
