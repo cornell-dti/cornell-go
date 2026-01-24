@@ -1916,7 +1916,7 @@ class _GameplayMapState extends State<GameplayMap>
                                     const SizedBox(height: 4),
                                     numHintsLeft <= 0
                                         ? Text(
-                                            "Hints refresh on Monday or Buy One",
+                                            "Time to use those bear instincts!",
                                             style: TextStyle(
                                               color: Colors.black,
                                               fontSize: 14,
@@ -1969,7 +1969,9 @@ class _GameplayMapState extends State<GameplayMap>
                         ),
                         Row(
                           mainAxisSize: MainAxisSize.min,
-                          mainAxisAlignment: MainAxisAlignment.start,
+                          mainAxisAlignment: numHintsLeft <= 0
+                              ? MainAxisAlignment.center
+                              : MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             SizedBox(
@@ -1999,7 +2001,7 @@ class _GameplayMapState extends State<GameplayMap>
                                   ),
                                 ),
                                 child: Text(
-                                  "Nevermind",
+                                  numHintsLeft <= 0 ? "Close" : "Nevermind",
                                   style: TextStyle(
                                     fontFamily: 'Poppins',
                                     fontSize: 14,
@@ -2011,75 +2013,36 @@ class _GameplayMapState extends State<GameplayMap>
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 15),
-                            SizedBox(
-                              width: 118,
-                              height: 40,
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                  if (numHintsLeft > 0) {
+                            if (numHintsLeft > 0) const SizedBox(width: 15),
+                            if (numHintsLeft > 0)
+                              SizedBox(
+                                width: 118,
+                                height: 40,
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
                                     _startHintAnimationFlowWithAnimations();
-                                  } else {
-                                    // TODO: Implement buy hint functionality
-                                  }
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: numHintsLeft <= 0
-                                      ? const Color(0xFFED5656)
-                                      : const Color(0xFFEC5555),
-                                  elevation: 0,
-                                  padding: const EdgeInsets.all(10),
-                                  minimumSize: const Size.fromHeight(40),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFFEC5555),
+                                    elevation: 0,
+                                    padding: const EdgeInsets.all(10),
+                                    minimumSize: const Size.fromHeight(40),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                  child: const Text(
+                                    "Use one Hint",
+                                    style: TextStyle(
+                                      fontFamily: 'Poppins',
+                                      fontSize: 14,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                 ),
-                                child: numHintsLeft <= 0
-                                    ? Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          const Text(
-                                            "Buy",
-                                            style: TextStyle(
-                                              fontFamily: 'Poppins',
-                                              fontSize: 14,
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 4),
-                                          SvgPicture.asset(
-                                            'assets/icons/bearcoins.svg',
-                                            width: 16,
-                                            height: 16,
-                                            fit: BoxFit.contain,
-                                          ),
-                                          const SizedBox(width: 4),
-                                          const Text(
-                                            "20",
-                                            style: TextStyle(
-                                              fontFamily: 'Poppins',
-                                              fontSize: 14,
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        ],
-                                      )
-                                    : const Text(
-                                        "Use one Hint",
-                                        style: TextStyle(
-                                          fontFamily: 'Poppins',
-                                          fontSize: 14,
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
                               ),
-                            ),
                           ],
                         ),
                       ],
@@ -2239,15 +2202,22 @@ class _HintBearAnimationWidgetState extends State<_HintBearAnimationWidget> {
             AnimatedBuilder(
               animation: widget.speechBubbleFadeAnimation,
               builder: (context, child) {
+                // Wider box for longer message to prevent text cramping
                 final messageBoxWidth = _currentMessage == "Goodluck!"
                     ? screenWidth * 0.3
-                    : screenWidth * 0.4;
+                    : screenWidth * 0.5;
                 final messageLeft = _currentMessage == "Goodluck!"
                     ? screenWidth * 0.28
-                    : screenWidth * 0.38;
+                    : screenWidth * 0.42;
                 final messageBottom = screenHeight * 0.265;
                 final arrowWidth = screenWidth * 0.1;
                 final arrowHeight = screenHeight * 0.04;
+
+                // Dynamic sizing for speech bubble
+                final bubbleBorderRadius = screenWidth * 0.02;
+                final bubbleHorizontalPadding = screenWidth * 0.04;
+                final bubbleVerticalPadding = screenHeight * 0.012;
+                final bubbleFontSize = screenWidth * 0.036;
 
                 return Positioned(
                   left: messageLeft - (messageBoxWidth / 2),
@@ -2258,26 +2228,29 @@ class _HintBearAnimationWidgetState extends State<_HintBearAnimationWidget> {
                       color: Colors.transparent,
                       elevation: 8,
                       shadowColor: Colors.black.withOpacity(0.5),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(bubbleBorderRadius),
                       child: Stack(
                         clipBehavior: Clip.none,
                         children: [
                           // Bubble
                           Container(
                             width: messageBoxWidth,
-                            constraints: const BoxConstraints(maxWidth: 300),
+                            constraints:
+                                BoxConstraints(maxWidth: screenWidth * 0.75),
                             decoration: BoxDecoration(
                               color: Colors.white,
-                              borderRadius: BorderRadius.circular(8),
+                              borderRadius:
+                                  BorderRadius.circular(bubbleBorderRadius),
                             ),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 8),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: bubbleHorizontalPadding,
+                                vertical: bubbleVerticalPadding),
                             child: Text(
                               _currentMessage,
                               textAlign: TextAlign.center,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontFamily: 'Poppins',
-                                fontSize: 14,
+                                fontSize: bubbleFontSize,
                                 fontWeight: FontWeight.w600,
                                 color: Colors.red,
                                 height: 1.5,
