@@ -390,19 +390,54 @@ class _ProfilePageState extends State<ProfilePage> {
                             ? "Journeys"
                             : "Challenge";
 
-                        // Calculate totalPoints.
-                        var totalPoints = 0;
+                        // Calculate both adjusted and original total points
+                        var totalAdjustedPoints = 0;
+                        var totalOriginalPoints = 0;
                         var locationImage;
-                        for (var challengeId in event.challenges ?? []) {
-                          var challenge =
-                              challengeModel.getChallengeById(challengeId);
-                          locationImage = challenge?.imageUrl;
-                          if (locationImage == null ||
-                              locationImage.length == 0)
-                            locationImage =
-                                "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png";
-                          if (challenge != null) {
-                            totalPoints += challenge.points ?? 0;
+                        // Get tracker for this event to access prevChallenges
+                        var eventTracker =
+                            trackerModel.trackerByEventId(event.id);
+                        if (eventTracker != null) {
+                          for (var prevChallenge
+                              in eventTracker.prevChallenges) {
+                            var challenge = challengeModel
+                                .getChallengeById(prevChallenge.challengeId);
+                            if (locationImage == null) {
+                              locationImage = challenge?.imageUrl;
+                              if (locationImage == null ||
+                                  locationImage.length == 0)
+                                locationImage =
+                                    "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png";
+                            }
+                            if (challenge != null) {
+                              // Calculate adjusted points: first apply extension deduction, then hint adjustment
+                              int basePoints = challenge.points ?? 0;
+                              totalOriginalPoints +=
+                                  basePoints; // Sum original points
+
+                              // If challenge was failed (timer expired), award 0 points
+                              if (prevChallenge.failed == true) {
+                                // Failed challenges earn 0 points
+                                totalAdjustedPoints += 0;
+                              } else {
+                                int extensionsUsed = 0;
+                                try {
+                                  extensionsUsed =
+                                      prevChallenge.extensionsUsed ?? 0;
+                                } catch (e) {
+                                  // Field not initialized, use default of 0
+                                  extensionsUsed = 0;
+                                }
+                                int extensionAdjustedPoints =
+                                    calculateExtensionAdjustedPoints(
+                                        basePoints, extensionsUsed);
+                                int finalAdjustedPoints =
+                                    calculateHintAdjustedPoints(
+                                        extensionAdjustedPoints,
+                                        prevChallenge.hintsUsed);
+                                totalAdjustedPoints += finalAdjustedPoints;
+                              }
+                            }
                           }
                         }
 
@@ -414,7 +449,8 @@ class _ProfilePageState extends State<ProfilePage> {
                             formattedDate,
                             friendlyDifficulty[event.difficulty]!,
                             hintsUsed,
-                            totalPoints);
+                            totalAdjustedPoints,
+                            totalOriginalPoints);
                       },
                       physics: NeverScrollableScrollPhysics(),
                       padding: EdgeInsets.only(top: 0),

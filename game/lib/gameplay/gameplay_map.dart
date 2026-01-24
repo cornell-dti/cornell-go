@@ -11,6 +11,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:async';
 import 'dart:math';
 import 'package:game/gameplay/challenge_completed.dart';
+import 'package:game/gameplay/challenge_failed.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'dart:ui' as ui;
 import 'package:flutter_compass/flutter_compass.dart';
@@ -24,6 +25,7 @@ import 'package:game/model/group_model.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/challenge_model.dart';
 import 'package:game/model/onboarding_model.dart';
+import 'package:game/model/timer_model.dart';
 import 'package:game/widgets/bear_mascot_message.dart';
 import 'package:showcaseview/showcaseview.dart';
 
@@ -74,6 +76,10 @@ class _GameplayMapState extends State<GameplayMap>
     with TickerProviderStateMixin {
   final METERS_TO_DEGREES = 111139;
 
+  /// Extension duration in seconds (5 minutes).
+  /// IMPORTANT: Must stay in sync with EXTENSION_LENGTH_MS in server/src/timer/timer.service.ts (in milliseconds).
+  static const int EXTENSION_TIME_SECONDS = 300;
+
   late Completer<GoogleMapController> mapCompleter = Completer();
   late StreamSubscription<Position> positionStream;
   StreamSubscription<CompassEvent>? _compassSubscription;
@@ -88,6 +94,28 @@ class _GameplayMapState extends State<GameplayMap>
   // User's current location will fall back to _center when current location
   // cannot be found
   GeoPoint? currentLocation;
+
+  // Timer
+  String timeLeft = "--:--"; // Time left that is displayed to the user
+  double currentTime = 0.0;
+  int totalTime = 0;
+  bool hasTimer = false;
+  Timer? _timerUpdateTimer; // Periodic timer to update display every second
+  bool _periodicTimerStarted = false;
+  int _waitCount = 0; // Counts how long we've been waiting for backend
+
+  /// Maximum time (in seconds) to wait for backend to respond when starting a timer.
+  /// After this timeout, the timer UI will show an error and reset.
+  static const int _maxBackendWaitTimeSeconds = 10;
+
+  // Stream subscriptions for timer events
+  StreamSubscription<TimerCompletedDto>? _timerCompletedSubscription;
+  StreamSubscription<TimerExtendedDto>? _timerExtendedSubscription;
+  StreamSubscription<TimerWarningDto>? _timerWarningSubscription;
+  StreamSubscription<TimerStartedDto>? _timerStartedSubscription;
+
+  bool _showWarningColors = false; // Show warning colors when 5 seconds left
+  bool _hasStartedFlashing = false; // Track if flashing animation has started
 
   int totalHints = 3;
   int numHintsLeft = 10;
@@ -148,6 +176,65 @@ class _GameplayMapState extends State<GameplayMap>
   var pictureIcon = SvgPicture.asset("assets/icons/mapexpand.svg");
   // Onboarding: overlay entry for bear mascot messages during onboarding steps 7-10
   OverlayEntry? _bearOverlayEntry;
+
+  // Timer: overlay entry for Time's Up message when timer expires
+  OverlayEntry? _timerModalOverlay;
+  bool _timerModalShowing = false; // Flag to prevent multiple overlays
+
+  // Flag to track when "Congratulations" dialog is showing after challenge completion
+  bool _arrivedDialogShowing = false;
+  OverlayEntry?
+      _timerWarningOverlay; // Current warning overlay entry for Niki warning the user of how much time is left
+
+  // Timer: animation for extension button countdown
+  AnimationController? _extensionAnimationController;
+  Animation<double>? _extensionAnimation;
+
+  /// Time window (in seconds) for the user to decide whether to extend the timer
+  /// after the "Time's Up" modal appears. The extension button shows a countdown
+  /// animation during this period; after it expires, the button becomes disabled.
+  static const int _extensionChoiceWindowSeconds = 10;
+
+  void _removeTimerWarning() {
+    _timerWarningOverlay?.remove();
+    _timerWarningOverlay = null;
+  }
+
+  void _displayTimerWarning(String timeLeft) {
+    _removeTimerWarning();
+
+    _timerWarningOverlay = OverlayEntry(
+      builder: (context) => BearMascotMessage(
+        message: '$timeLeft left!',
+        showBear: true,
+        bearAsset: 'popup',
+        bearLeftPercent: -0.095,
+        bearBottomPercent: 0.2,
+        messageLeftPercent: 0.55,
+        messageBottomPercent: 0.42,
+        messageBoxWidthPercent: 0.45,
+        textStyle: const TextStyle(
+          fontFamily: 'Poppins',
+          fontSize: 16,
+          fontWeight: FontWeight.w800,
+          color: Color(0xFFED5656),
+          height: 1.5,
+          decoration: TextDecoration.none,
+        ),
+      ),
+    );
+    Overlay.of(context).insert(_timerWarningOverlay!);
+
+    // Auto-dismiss after 1 second
+    Timer(Duration(seconds: 1), () {
+      if (mounted) {
+        _removeTimerWarning();
+        // Clear warning after 1 second in TimerModel
+        final timerModel = Provider.of<TimerModel>(context, listen: false);
+        timerModel.clearWarning();
+      }
+    });
+  }
 
   // Switch between the two sizes
   void _toggle() => setState(() {
@@ -280,6 +367,91 @@ class _GameplayMapState extends State<GameplayMap>
       ),
     );
     Overlay.of(context).insert(_bearOverlayEntry!);
+  }
+
+  /**
+   * Starts periodic updates to refresh timer display every second)
+   * Waits for backend to respond (isActive becomes true) before displaying
+   * Times out after _maxBackendWaitTimeSeconds if backend doesn't respond
+   */
+  void _startTimerUpdates() {
+    if (_periodicTimerStarted) return; // Timer already started
+    _periodicTimerStarted = true;
+    _waitCount = 0; // Reset wait counter
+
+    _timerUpdateTimer?.cancel(); // Cancel any existing timer
+
+    _timerUpdateTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+      final timerModel = Provider.of<TimerModel>(context, listen: false);
+
+      // Wait for backend to respond - timer not active yet
+      if (!timerModel.isTimerForChallenge(widget.challengeId)) {
+        _waitCount++;
+        if (_waitCount > _maxBackendWaitTimeSeconds) {
+          // If backend didn't respond in time, cancel timer and don't show it
+          timer.cancel();
+          _periodicTimerStarted = false;
+          setState(() {
+            hasTimer = false;
+            timeLeft = "--:--";
+            currentTime = 0.0;
+          });
+          print(
+              "Timer start timeout: Backend didn't respond within $_maxBackendWaitTimeSeconds seconds. isActive=${timerModel.isActive}, currentChallengeId=${timerModel.currentChallengeId}");
+          displayToast(
+              "Timer failed to start. Please try again.", Status.error);
+          return;
+        }
+        // Wait for backend to respond
+        return;
+      }
+
+      // Backend responded, reset wait counter and start displaying
+      _waitCount = 0;
+
+      final timeRemaining = timerModel.getTimeRemaining();
+
+      if (timeRemaining == null || timeRemaining <= 0) {
+        timer.cancel();
+        _periodicTimerStarted = false;
+        setState(() {
+          hasTimer = false;
+          timeLeft = "00:00";
+          currentTime = 0.0;
+        });
+        // Tell backend timer expired; backend sends TimerCompletedDto via stream, which will trigger _handleTimerExpiration() and make Time's Up modal appear
+        timerModel.completeTimer(widget.challengeId);
+        return;
+      }
+
+      final minutes = (timeRemaining / 60).floor();
+      final seconds = timeRemaining % 60;
+      final minutesStr = minutes.toString().padLeft(2, '0');
+      final secondsStr = seconds.toString().padLeft(2, '0');
+
+      // Start flashing when 5 seconds left: flash twice then stay on
+      if (timeRemaining <= 5 && !_hasStartedFlashing) {
+        _hasStartedFlashing = true;
+        setState(() => _showWarningColors = true);
+        Future.delayed(Duration(milliseconds: 300), () {
+          if (mounted) setState(() => _showWarningColors = false);
+        });
+        Future.delayed(Duration(milliseconds: 600), () {
+          if (mounted) setState(() => _showWarningColors = true);
+        });
+        Future.delayed(Duration(milliseconds: 900), () {
+          if (mounted) setState(() => _showWarningColors = false);
+        });
+        Future.delayed(Duration(milliseconds: 1200), () {
+          if (mounted) setState(() => _showWarningColors = true);
+        });
+      }
+
+      setState(() {
+        timeLeft = "$minutesStr:$secondsStr";
+        currentTime = timeRemaining.toDouble();
+      });
+    });
   }
 
   @override
@@ -416,16 +588,125 @@ class _GameplayMapState extends State<GameplayMap>
     ShowcaseView.register(
       scope: "gameplay_map",
     );
+
+    // Timer: Set up listeners first (before sending requests)
+    _setupTimerStartedListener(); // Listen for timer started from backend
+    _setupTimerExpirationListener(); // Listen for timer expiration from backend
+    _setupTimerExtensionListener(); // Listen for timer extension from backend
+    _setupTimerWarningListener(); // Listen for timer warning from backend
+    // Initialize timer state (this sends request to backend)
+    _initializeTimer();
+  }
+
+  /**
+   * Initialize timer state for the current challenge / reset timer state
+   * Only sets hasTimer = true if challenge actually has a timerLength > 0
+   */
+  void _initializeTimer() {
+    setState(() {
+      hasTimer = false;
+      timeLeft = "--:--";
+      currentTime = 0.0;
+      totalTime = 0;
+      _periodicTimerStarted = false;
+      _waitCount = 0;
+      _showWarningColors = false;
+      _hasStartedFlashing = false;
+    });
+
+    // Cancel any existing timer
+    _timerUpdateTimer?.cancel();
+
+    // Check if this challenge has a timer
+    final challengeModel = Provider.of<ChallengeModel>(context, listen: false);
+    final challenge = challengeModel.getChallengeById(widget.challengeId);
+    final timerModel = Provider.of<TimerModel>(context, listen: false);
+    final onboarding = Provider.of<OnboardingModel>(context, listen: false);
+
+    if (challenge?.timerLength != null && challenge!.timerLength! > 0) {
+      setState(() {
+        hasTimer = true;
+        totalTime = challenge.timerLength!;
+      });
+
+      // DON'T start timer if user is still in onboarding (step 5 is the gameplay intro overlay)
+      // Timer will start naturally when user navigates to challenge after completing onboarding
+      if (!onboarding.step5GameplayIntroComplete) {
+        print(
+            "Timer not started for challenge ${widget.challengeId} - onboarding not complete");
+        return;
+      }
+
+      // Request backend to start timer (sends StartChallengeTimerDto)
+      timerModel.startTimer(widget.challengeId);
+
+      // Start periodic timer, which won't display until backend responds
+      _startTimerUpdates();
+    } else {
+      print(
+          "No timer for challenge ${widget.challengeId} (timerLength=${challenge?.timerLength})");
+    }
+  }
+
+  /**
+   * Listens for timer started (TimerStartedDto) from backend
+   * Calculates totalTime as: originalTimerLength + (extensionsUsed * EXTENSION_TIME_SECONDS)
+   * This ensures progress = remainingTime / totalAllocatedTime
+   */
+  void _setupTimerStartedListener() {
+    final client = Provider.of<ApiClient>(context, listen: false);
+
+    // cancel any existing subscription
+    _timerStartedSubscription?.cancel();
+
+    _timerStartedSubscription =
+        client.clientApi.timerStartedStream.listen((event) {
+      if (event.challengeId == widget.challengeId && mounted) {
+        final timerModel = Provider.of<TimerModel>(context, listen: false);
+        final timeRemaining = timerModel.getTimeRemaining();
+        final challengeModel =
+            Provider.of<ChallengeModel>(context, listen: false);
+        final challenge = challengeModel.getChallengeById(widget.challengeId);
+
+        if (challenge?.timerLength != null &&
+            timeRemaining != null &&
+            timeRemaining > 0) {
+          setState(() {
+            // If timer has been extended, show progress relative to EXTENSION_TIME_SECONDS (5 min)
+            // This ensures the circle shows correct progress when coming back after logout
+            // Otherwise use original timer length
+            totalTime = event.extensionsUsed > 0
+                ? EXTENSION_TIME_SECONDS
+                : challenge!.timerLength!;
+            currentTime = timeRemaining.toDouble();
+          });
+        }
+      }
+    });
   }
 
   @override
   void didUpdateWidget(GameplayMap oldWidget) {
-    // If challenge changed, reset hint state
+    // If challenge changed, reset hint state and timer state
     if (oldWidget.challengeId != widget.challengeId) {
+      // Save whether modal/dialog was showing before removing it
+      // If showing, user is navigating away (to failed/completed page)
+      final wasTimerModalShowing = _timerModalShowing;
+      final wasArrivedDialogShowing = _arrivedDialogShowing;
+
       startingHintCenter = null;
       hintCenter = null;
       hintRadius = null;
       setStartingHintCircle();
+
+      // Remove timer modal if showing
+      _removeTimerModal();
+
+      // DON'T start timer for new challenge if any modal/dialog was showing
+      // (user is about to navigate away to completion/failed page)
+      if (!wasTimerModalShowing && !wasArrivedDialogShowing) {
+        _initializeTimer();
+      }
     }
 
     super.didUpdateWidget(oldWidget);
@@ -434,10 +715,21 @@ class _GameplayMapState extends State<GameplayMap>
   @override
   void dispose() {
     _removeBearOverlay();
+    _removeTimerModal();
+    _removeTimerWarning();
     _compassSubscription?.cancel();
     _removeHintBearOverlay();
     positionStream.cancel();
     _disposeController();
+    _timerUpdateTimer?.cancel(); // Cancel periodic timer updates
+    _periodicTimerStarted = false;
+    _waitCount = 0; //reset wait counter
+    _timerCompletedSubscription?.cancel(); //cancel timer completion listener
+    _timerExtendedSubscription?.cancel(); //cancel timer extension listener
+    _timerWarningSubscription?.cancel(); //cancel timer warning listener
+    _timerStartedSubscription?.cancel(); //cancel timer started listener
+    _extensionAnimationController
+        ?.dispose(); //dispose extension animation controller
     _circleShrinkController.dispose();
     _zoomStage1Controller.dispose();
     _zoomStage2Controller.dispose();
@@ -1376,6 +1668,17 @@ class _GameplayMapState extends State<GameplayMap>
         }
         var challenge = challengeModel.getChallengeById(widget.challengeId);
 
+        //re-initialize timer if challenge data loads after initState
+        if (challenge != null && !hasTimer && totalTime == 0) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted &&
+                challenge.timerLength != null &&
+                challenge.timerLength! > 0) {
+              _initializeTimer();
+            }
+          });
+        }
+
         if (challenge == null) {
           displayToast("Error getting challenge", Status.error);
         }
@@ -1530,6 +1833,78 @@ class _GameplayMapState extends State<GameplayMap>
                 },
               ),
             ),
+            // Only show timer if challenge has a timer
+            if (hasTimer)
+              Positioned(
+                top: MediaQuery.of(context).size.height *
+                    0.02, // Adjust top position
+                // left: MediaQuery.of(context).size.width * 0.5, // Adjust left position
+                child: Container(
+                  margin: EdgeInsets.all(4), // 4px margin on all sides
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      //timer container
+                      Container(
+                        width: MediaQuery.of(context).size.width * 0.20,
+                        height: MediaQuery.of(context).size.height * 0.04,
+                        decoration: BoxDecoration(
+                          color: _showWarningColors
+                              ? Color.fromARGB(204, 0, 0, 0)
+                              : (currentTime < 300
+                                  ? Color.fromARGB(
+                                      255, 237, 86, 86) // red when < 5 min left
+                                  : Color.fromARGB(
+                                      255, 64, 64, 61)), // grey > 5 min left
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Color.fromARGB(
+                                  64, 0, 0, 0), // #000000 with 25% opacity
+                              blurRadius: 4,
+                              offset: Offset(0, 4), // Position (0, 4)
+                            ),
+                          ],
+                        ),
+                      ),
+                      // Timer icon and countdown centered
+                      Row(
+                        mainAxisAlignment:
+                            MainAxisAlignment.center, // Center the row contents
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Timer icon (circular progress indicator)
+                          Container(
+                            margin: EdgeInsets.only(
+                                right: 8), // 8px margin between icon and text
+                            child: CustomPaint(
+                              size: Size(20, 20), // Outer circle: 20px x 20px
+                              painter: CircleSliceTimer(
+                                  progress: totalTime > 0
+                                      ? currentTime / totalTime
+                                      : 0.0,
+                                  iconColor: _showWarningColors
+                                      ? Color(0xFFFF8080) // #FF8080
+                                      : Colors.white),
+                            ),
+                          ),
+                          // Countdown text
+                          Text(
+                            timeLeft,
+                            style: TextStyle(
+                                fontSize: 14.0,
+                                fontWeight: FontWeight.bold,
+                                color: _showWarningColors
+                                    ? Color(0xFFFF8080)
+                                    : Colors.white,
+                                decoration: TextDecoration.none),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             Container(
               margin: EdgeInsets.only(bottom: 70),
               child: ElevatedButton(
@@ -1567,8 +1942,17 @@ class _GameplayMapState extends State<GameplayMap>
                       chalName = await apiClient.serverApi
                           ?.completedChallenge(CompletedChallengeDto());
                     }
+                    // Stop timer when challenge is successfully completed
+                    // This prevents "Time's Up" modal from appearing while congratulations dialog is showing
+                    _timerUpdateTimer?.cancel();
+                    _periodicTimerStarted = false;
+                    setState(() {
+                      hasTimer = false;
+                    });
                   }
                   final chalId = widget.challengeId;
+                  // Track that dialog is showing (prevents timer from starting for next challenge)
+                  _arrivedDialogShowing = true;
                   showDialog(
                     context: context,
                     barrierDismissible: !hasArrived,
@@ -1586,9 +1970,10 @@ class _GameplayMapState extends State<GameplayMap>
                       );
                     },
                   ).then((_) {
-                    // Re-enable the button after the dialog is closed
+                    // Re-enable the button and clear dialog flag after the dialog is closed
                     setState(() {
                       isArrivedButtonEnabled = true;
+                      _arrivedDialogShowing = false;
                     });
                   });
                 },
@@ -1632,6 +2017,440 @@ class _GameplayMapState extends State<GameplayMap>
       }),
     );
     // });
+  }
+
+  /** Formats time remaining in seconds to fit warning message (e.g., "5 minutes", "1 minute", "30 seconds") */
+  String _formatTimeRemaining(int seconds) {
+    if (seconds >= 60) {
+      // round to nearest minute to ensure "5 minutes" doesn't show up as "4 minutes" due to delay
+      final minutes = ((seconds + 30) / 60).floor();
+      return minutes == 1 ? "1 minute" : "$minutes minutes";
+    } else {
+      return "$seconds seconds";
+    }
+  }
+
+  /** Listens for timer warning (TimerWarningDto) from backend and displays bear popup
+   * - shows a popup animation of Niki warning the user of how much time is left 
+   * - auto-dismisses after 1 second
+   */
+  void _setupTimerWarningListener() {
+    final client = Provider.of<ApiClient>(context, listen: false);
+
+    _timerWarningSubscription?.cancel();
+
+    _timerWarningSubscription =
+        client.clientApi.timerWarningStream.listen((event) {
+      if (event.challengeId == widget.challengeId && mounted) {
+        final timeLeft = _formatTimeRemaining(event.milestone);
+        _displayTimerWarning(timeLeft);
+      }
+    });
+  }
+
+  /**
+   * Listens for timer expiration (TimerCompletedDto) from backend and then calls _handleTimerExpiration
+   */
+  void _setupTimerExpirationListener() {
+    final client = Provider.of<ApiClient>(context, listen: false);
+
+    // cancel any existing subscriptions
+    _timerCompletedSubscription?.cancel();
+
+    _timerCompletedSubscription =
+        client.clientApi.timerCompletedStream.listen((event) {
+      if (event.challengeId == widget.challengeId &&
+          mounted &&
+          !_timerModalShowing) {
+        _timerModalShowing = true;
+
+        _handleTimerExpiration();
+      } else {}
+    });
+  }
+
+  /**
+   * Listens for timer extension (TimerExtendedDto) from backend and updates timer display
+   * Adds EXTENSION_TIME_SECONDS to totalTime so progress shows remaining / total allocated time
+   */
+  void _setupTimerExtensionListener() {
+    final client = Provider.of<ApiClient>(context, listen: false);
+
+    // cancel any existing subscriptions
+    _timerExtendedSubscription?.cancel();
+
+    _timerExtendedSubscription =
+        client.clientApi.timerExtendedStream.listen((event) {
+      if (event.challengeId == widget.challengeId && mounted) {
+        // update timer display when timer is extended
+        final timerModel = Provider.of<TimerModel>(context, listen: false);
+        final timeRemaining = timerModel.getTimeRemaining();
+
+        setState(() {
+          hasTimer = true;
+          // Set totalTime to EXTENSION_TIME_SECONDS (5 min) so progress circle
+          // represents time remaining out of the extension time
+          if (timeRemaining != null) {
+            currentTime = timeRemaining.toDouble();
+            totalTime = EXTENSION_TIME_SECONDS;
+          }
+          // reset warning colors when timer is extended
+          _showWarningColors = false;
+          _hasStartedFlashing = false;
+        });
+        // restart timer updates if they were stopped
+        if (!_periodicTimerStarted) {
+          _startTimerUpdates();
+        }
+      }
+    });
+  }
+
+  /**
+   * Handles timer expiration in frontend - shows "Time's Up" modal 
+   * Note: challenge is NOT completed
+   */
+  void _handleTimerExpiration() {
+    if (!mounted || _timerModalShowing != true) {
+      return;
+    }
+
+    _timerUpdateTimer?.cancel();
+    _periodicTimerStarted = false;
+
+    // Start animation for extension choice countdown
+    _extensionAnimationController?.dispose();
+    _extensionAnimationController = AnimationController(
+      vsync: this,
+      duration: Duration(seconds: _extensionChoiceWindowSeconds),
+    );
+    _extensionAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
+      CurvedAnimation(
+        parent: _extensionAnimationController!,
+        curve: Curves.linear,
+      ),
+    );
+
+    // Listen to animation updates to rebuild overlay
+    _extensionAnimationController!.addListener(() {
+      if (mounted && _timerModalShowing && _timerModalOverlay != null) {
+        _timerModalOverlay!.markNeedsBuild();
+      }
+    });
+
+    // Start the animation
+    _extensionAnimationController!.forward();
+
+    // Add Time's Up overlay
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_timerModalShowing) return;
+
+      _timerModalOverlay = OverlayEntry(
+        opaque: false,
+        builder: (overlayContext) => Stack(
+          children: [
+            // Dimmed game map as background for modal overlay
+            GestureDetector(
+              onTap: () {},
+              child: Container(
+                color: Colors.black.withOpacity(0.3),
+              ),
+            ),
+            Center(
+              child: _buildTimesUpModal(),
+            ),
+          ],
+        ),
+      );
+
+      Overlay.of(context).insert(_timerModalOverlay!);
+    });
+  }
+
+  void _removeTimerModal() {
+    if (_timerModalOverlay != null) {
+      try {
+        _timerModalOverlay?.remove();
+        _timerModalOverlay?.dispose();
+      } catch (e) {
+        debugPrint("Error removing timer modal overlay: $e");
+      }
+      _timerModalOverlay = null;
+    }
+    _extensionAnimationController?.dispose();
+    _extensionAnimationController = null;
+    _extensionAnimation = null;
+    _timerModalShowing = false;
+  }
+
+  /**
+   * Builds the "Time's Up" modal dialog with Results and Extension buttons
+   */
+  Widget _buildTimesUpModal() {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    return Center(
+      child: Material(
+        type: MaterialType.transparency,
+        child: Container(
+          constraints: BoxConstraints(
+            maxWidth: screenWidth * 0.85,
+          ),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(9),
+          ),
+          padding: EdgeInsets.only(
+            top: screenHeight * 0.019, //~16px
+            bottom: screenHeight * 0.028, //~24px
+            left: screenWidth * 0.041, //~16px
+            right: screenWidth * 0.041, //~16px
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // SVG image
+              SvgPicture.asset(
+                'assets/images/niki_head_sweat.svg',
+                alignment: Alignment.center,
+              ),
+              // Title
+              Container(
+                margin: EdgeInsets.only(bottom: screenHeight * 0.005), //~5px
+                child: Text(
+                  "Time's Up!",
+                  style: TextStyle(
+                    fontSize: screenWidth * 0.061, //~24px
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+              // Message
+              Container(
+                margin: EdgeInsets.only(bottom: screenHeight * 0.019), //~16px
+                child: Text(
+                  "Want more time? Earn 5 more minutes of exploring for ${(widget.points * 0.25).floor()} points!",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: screenWidth * 0.036, //~14px
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Results button (width 86px, height 40px)
+                  SizedBox(
+                    width: screenWidth * 0.210, // ~82px
+                    height: screenHeight * 0.047, // ~40px on 852px screen
+                    child: ElevatedButton(
+                      onPressed: () {
+                        final timerModel =
+                            Provider.of<TimerModel>(context, listen: false);
+                        final client =
+                            Provider.of<ApiClient>(context, listen: false);
+
+                        // Listen for challengeFailed event from backend, then navigate
+                        late StreamSubscription<ChallengeFailedDto>
+                            subscription;
+                        subscription = client.clientApi.challengeFailedStream
+                            .listen((event) {
+                          if (event.challengeId == widget.challengeId) {
+                            subscription.cancel();
+
+                            // Remove overlay before navigating
+                            if (_timerModalOverlay != null) {
+                              _timerModalOverlay?.remove();
+                              _timerModalOverlay?.dispose();
+                              _timerModalOverlay = null;
+                            }
+                            _timerModalShowing = false;
+
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ChallengeFailedPage(
+                                  challengeId: widget.challengeId,
+                                ),
+                              ),
+                            );
+                          }
+                        });
+
+                        // Tell backend to immediately fail the challenge (skip grace period)
+                        timerModel.completeTimer(widget.challengeId);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        side:
+                            BorderSide(color: Color.fromARGB(255, 237, 86, 86)),
+                        padding: EdgeInsets.zero,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                              screenWidth * 0.025), //~10px
+                        ),
+                      ),
+                      child: Text(
+                        "Results",
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: screenWidth * 0.036, //~14px
+                          fontWeight: FontWeight.w500,
+                          color: Color.fromARGB(255, 237, 86, 86),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: screenWidth * 0.033), //~13px
+                  // Extension button (width 200px, height 40px) with sliding color indicator
+                  SizedBox(
+                    width: screenWidth * 0.478, // ~187px
+                    height: screenHeight * 0.047, // ~40px
+                    child: Stack(
+                      children: [
+                        // Base container with faded color (full size, always visible)
+                        Positioned.fill(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Color(0xFFF08988), // Faded color
+                              borderRadius: BorderRadius.circular(
+                                  screenWidth * 0.025), //~10px
+                            ),
+                          ),
+                        ),
+                        // Overlay with normal red color that shrinks from right to left
+                        if (_extensionAnimationController?.status !=
+                            AnimationStatus.completed)
+                          Positioned.fill(
+                            child: IgnorePointer(
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(
+                                    screenWidth * 0.025), //~10px
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: FractionallySizedBox(
+                                    widthFactor:
+                                        _extensionAnimation?.value ?? 0.0,
+                                    child: Container(
+                                      color: Color.fromARGB(
+                                          255, 237, 86, 86), // Normal red
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        Positioned.fill(
+                          child: ElevatedButton(
+                            onPressed: _extensionAnimationController?.status ==
+                                    AnimationStatus.completed
+                                ? () {
+                                    displayToast(
+                                        "Sorry, time has run out to choose the extension. Please click Results.",
+                                        Status.error);
+                                  }
+                                : () async {
+                                    final success = await _extendTimer();
+                                    if (success) {
+                                      _removeTimerModal(); // Close modal if timer extended successfully; otherwise leave open for user to return home/retry extending timer
+                                    }
+                                  },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                              shadowColor: Colors.transparent,
+                              elevation: 0,
+                              padding: EdgeInsets.only(
+                                left: screenWidth * 0.010, //~4px
+                                right: screenWidth * 0.020, //~8px
+                                top: screenHeight * 0.011, //~9px
+                                bottom: screenHeight * 0.011, //~9px
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(
+                                    screenWidth * 0.025), //~10px
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text("+ 5 Min for ",
+                                    style: TextStyle(
+                                        fontFamily: 'Poppins',
+                                        fontSize: screenWidth * 0.033, //~13px
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white)),
+                                SvgPicture.asset('assets/icons/bearcoins.svg',
+                                    width: screenWidth * 0.041, //~16px
+                                    height: screenWidth * 0.041),
+                                Flexible(
+                                  child: Text(
+                                      " ${(widget.points * 0.25).floor()} Pt",
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                          fontFamily: 'Poppins',
+                                          fontSize: screenWidth * 0.033, //~13px
+                                          color: Color(0xFFFFC737))),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /**
+   * Extends the timer - requests extensions from backend
+   * Returns true if extension succeeds (timer is extended by 5 minutes), false if it fails
+   */
+  Future<bool> _extendTimer() async {
+    final timerModel = Provider.of<TimerModel>(context, listen: false);
+
+    // Get current end time and extend timer
+    final currentEndTime = timerModel.endTime;
+    if (currentEndTime == null) {
+      displayToast("Unable to extend timer", Status.error);
+      return false;
+    }
+
+    // Extend timer by 5 minutes (300 seconds)
+    final newEndTime = currentEndTime.add(Duration(seconds: 300));
+    final errorMessage =
+        await timerModel.extendTimer(widget.challengeId, newEndTime);
+
+    if (errorMessage != null) {
+      // Check if it's specifically an insufficient coins error
+      if (errorMessage.toLowerCase().contains('insufficient coins') ||
+          errorMessage.toLowerCase().contains('cannot extend timer')) {
+        displayToast(
+            "Unable to extend timer: Insufficient coins", Status.error);
+      } else {
+        // Other timer-related errors
+        displayToast("Unable to extend timer: $errorMessage", Status.error);
+      }
+      return false;
+    }
+
+    // Success - timerExtended event will update the timer automatically via stream
+    // The stream listener (_setupTimerExtensionListener) handles resetting totalTime and currentTime
+    setState(() {
+      hasTimer = true;
+    });
+    return true;
   }
 
   /** Returns whether the user is at the challenge location */
@@ -2279,5 +3098,62 @@ class _HintBearAnimationWidgetState extends State<_HintBearAnimationWidget> {
         ),
       ),
     );
+  }
+}
+
+/**
+ * CircleSliceTimer creates the circular icon timer for a challenge.
+ * The timer starts out as a fully white circle, and slices of the timer are cut out as time progresses in the challenge.
+ * */
+class CircleSliceTimer extends CustomPainter {
+  final double progress;
+  final Color iconColor;
+
+  CircleSliceTimer({required this.progress, this.iconColor = Colors.white});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+
+    // Outer circle of timer icon
+    Paint outerCirclePaint = Paint()
+      ..color = iconColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.38;
+
+    canvas.drawCircle(center, size.width / 2, outerCirclePaint);
+
+    final innerRadius = 7.0;
+
+    // Draw white background circle first (full circle - remaining time)
+    Paint whiteCirclePaint = Paint()
+      ..color = iconColor
+      ..style = PaintingStyle.fill;
+
+    canvas.drawCircle(center, innerRadius, whiteCirclePaint);
+
+    // Draw gray arc on top showing elapsed time (grows clockwise from top)
+    // Elapsed progress = 1.0 - progress (how much time has passed)
+    double elapsedProgress = 1.0 - progress;
+    if (elapsedProgress > 0) {
+      Paint grayArcPaint = Paint()
+        ..color = Color.fromARGB(255, 64, 64, 61)
+        ..style = PaintingStyle.fill;
+
+      double sweepAngle = 2 * pi * elapsedProgress;
+
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: innerRadius),
+        -pi / 2,
+        sweepAngle,
+        true,
+        grayArcPaint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) {
+    return true;
   }
 }

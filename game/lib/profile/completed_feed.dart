@@ -92,21 +92,50 @@ class CompletedFeedWidget extends StatelessWidget {
 
                 var pictureList = <String>[];
                 var locationList = [];
-                var totalPoints = 0;
+                var totalAdjustedPoints = 0;
+                var totalOriginalPoints = 0;
 
-                for (var challengeId in event.challenges ?? []) {
-                  var challenge = challengeModel.getChallengeById(challengeId);
-                  var imageUrl = challenge?.imageUrl;
-                  if (imageUrl == null || imageUrl.length == 0) {
-                    imageUrl =
-                        "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png";
-                  }
+                // Get tracker for this event to access prevChallenges
+                var eventTracker = trackerModel.trackerByEventId(event.id);
+                if (eventTracker != null) {
+                  // Calculate both adjusted and original total points
+                  for (var prevChallenge in eventTracker.prevChallenges) {
+                    var challenge = challengeModel
+                        .getChallengeById(prevChallenge.challengeId);
+                    var imageUrl = challenge?.imageUrl;
+                    if (imageUrl == null || imageUrl.length == 0) {
+                      imageUrl =
+                          "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png";
+                    }
 
-                  if (challenge != null) {
-                    pictureList.add(imageUrl);
-                    locationList.add(friendlyLocation[challenge.location ??
-                        ChallengeLocationDto.ANY]); // wrong ANY was being used
-                    totalPoints += challenge.points ?? 0;
+                    if (challenge != null) {
+                      pictureList.add(imageUrl);
+                      locationList.add(friendlyLocation[challenge.location ??
+                          ChallengeLocationDto
+                              .ANY]); // wrong ANY was being used
+                      // Calculate adjusted points: first apply extension deduction, then hint adjustment
+                      int basePoints = challenge.points ?? 0;
+                      totalOriginalPoints += basePoints; // Sum original points
+
+                      // If challenge was failed (timer expired), award 0 points
+                      if (prevChallenge.failed == true) {
+                        // Failed challenges earn 0 points
+                        totalAdjustedPoints += 0;
+                      } else {
+                        int extensionsUsed = 0;
+                        try {
+                          extensionsUsed = prevChallenge.extensionsUsed ?? 0;
+                        } catch (e) {
+                          extensionsUsed = 0;
+                        }
+                        int extensionAdjustedPoints =
+                            calculateExtensionAdjustedPoints(
+                                basePoints, extensionsUsed);
+                        int finalAdjustedPoints = calculateHintAdjustedPoints(
+                            extensionAdjustedPoints, prevChallenge.hintsUsed);
+                        totalAdjustedPoints += finalAdjustedPoints;
+                      }
+                    }
                   }
                 }
 
@@ -118,7 +147,8 @@ class CompletedFeedWidget extends StatelessWidget {
                   location:
                       locationList.isNotEmpty ? locationList[0] : "Cornell",
                   difficulty: friendlyDifficulty[event.difficulty]!,
-                  points: totalPoints,
+                  adjustedPoints: totalAdjustedPoints,
+                  originalPoints: totalOriginalPoints,
                 );
               },
               itemCount: itemCount);

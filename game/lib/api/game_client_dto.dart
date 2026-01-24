@@ -444,6 +444,9 @@ class ChallengeDto {
     if (linkedEventId != null) {
       fields['linkedEventId'] = linkedEventId;
     }
+    if (timerLength != null) {
+      fields['timerLength'] = timerLength;
+    }
     return fields;
   }
 
@@ -467,6 +470,8 @@ class ChallengeDto {
         : null;
     linkedEventId =
         fields.containsKey('linkedEventId') ? (fields["linkedEventId"]) : null;
+    timerLength =
+        fields.containsKey('timerLength') ? (fields["timerLength"]) : null;
   }
 
   void partialUpdate(ChallengeDto other) {
@@ -484,6 +489,7 @@ class ChallengeDto {
         other.closeRadiusF == null ? closeRadiusF : other.closeRadiusF;
     linkedEventId =
         other.linkedEventId == null ? linkedEventId : other.linkedEventId;
+    timerLength = other.timerLength == null ? timerLength : other.timerLength;
   }
 
   ChallengeDto({
@@ -498,6 +504,7 @@ class ChallengeDto {
     this.awardingRadiusF,
     this.closeRadiusF,
     this.linkedEventId,
+    this.timerLength,
   });
 
   late String id;
@@ -511,6 +518,7 @@ class ChallengeDto {
   late double? awardingRadiusF;
   late double? closeRadiusF;
   late String? linkedEventId;
+  late int? timerLength;
 }
 
 class RequestChallengeDataDto {
@@ -1023,31 +1031,48 @@ class PrevChallengeDto {
     Map<String, dynamic> fields = {};
     fields['challengeId'] = challengeId;
     fields['hintsUsed'] = hintsUsed;
+    if (extensionsUsed != null) {
+      fields['extensionsUsed'] = extensionsUsed;
+    }
     fields['dateCompleted'] = dateCompleted;
+    if (failed != null) {
+      fields['failed'] = failed;
+    }
     return fields;
   }
 
   PrevChallengeDto.fromJson(Map<String, dynamic> fields) {
     challengeId = fields["challengeId"];
     hintsUsed = fields["hintsUsed"];
+    extensionsUsed = fields.containsKey('extensionsUsed')
+        ? (fields["extensionsUsed"])
+        : null;
     dateCompleted = fields["dateCompleted"];
+    failed = fields.containsKey('failed') ? (fields["failed"]) : null;
   }
 
   void partialUpdate(PrevChallengeDto other) {
     challengeId = other.challengeId;
     hintsUsed = other.hintsUsed;
+    extensionsUsed =
+        other.extensionsUsed == null ? extensionsUsed : other.extensionsUsed;
     dateCompleted = other.dateCompleted;
+    failed = other.failed == null ? failed : other.failed;
   }
 
   PrevChallengeDto({
     required this.challengeId,
     required this.hintsUsed,
+    this.extensionsUsed,
     required this.dateCompleted,
+    this.failed,
   });
 
   late String challengeId;
   late int hintsUsed;
+  late int? extensionsUsed;
   late String dateCompleted;
+  late bool? failed;
 }
 
 class EventTrackerDto {
@@ -1529,6 +1554,220 @@ class UpdateOrganizationDataDto {
 
   late OrganizationDto organization;
   late bool deleted;
+}
+
+class TimerStartedDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['timerId'] = timerId;
+    fields['endTime'] = endTime;
+    fields['challengeId'] = challengeId;
+    fields['extensionsUsed'] = extensionsUsed;
+    return fields;
+  }
+
+  TimerStartedDto.fromJson(Map<String, dynamic> fields) {
+    timerId = fields["timerId"];
+    endTime = fields["endTime"];
+    challengeId = fields["challengeId"];
+    extensionsUsed = fields["extensionsUsed"];
+  }
+
+  void partialUpdate(TimerStartedDto other) {
+    timerId = other.timerId;
+    endTime = other.endTime;
+    challengeId = other.challengeId;
+    extensionsUsed = other.extensionsUsed;
+  }
+
+  TimerStartedDto({
+    required this.timerId,
+    required this.endTime,
+    required this.challengeId,
+    required this.extensionsUsed,
+  });
+
+  late String timerId;
+  late String endTime;
+  late String challengeId;
+  late int extensionsUsed;
+}
+
+class TimerExtendedDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['timerId'] = timerId;
+    fields['challengeId'] = challengeId;
+    fields['newEndTime'] = newEndTime;
+    fields['extensionsUsed'] = extensionsUsed;
+    return fields;
+  }
+
+  TimerExtendedDto.fromJson(Map<String, dynamic> fields) {
+    timerId = fields["timerId"];
+    challengeId = fields["challengeId"];
+    newEndTime = fields["newEndTime"];
+    extensionsUsed = fields["extensionsUsed"];
+  }
+
+  void partialUpdate(TimerExtendedDto other) {
+    timerId = other.timerId;
+    challengeId = other.challengeId;
+    newEndTime = other.newEndTime;
+    extensionsUsed = other.extensionsUsed;
+  }
+
+  TimerExtendedDto({
+    required this.timerId,
+    required this.challengeId,
+    required this.newEndTime,
+    required this.extensionsUsed,
+  });
+
+  late String timerId;
+  late String challengeId;
+  late String newEndTime;
+  late int extensionsUsed;
+}
+
+class TimerCompletedDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['timerId'] = timerId;
+    fields['challengeId'] = challengeId;
+    fields['challengeCompleted'] = challengeCompleted;
+    return fields;
+  }
+
+  TimerCompletedDto.fromJson(Map<String, dynamic> fields) {
+    timerId = fields["timerId"];
+    challengeId = fields["challengeId"];
+    challengeCompleted = fields["challengeCompleted"];
+  }
+
+  void partialUpdate(TimerCompletedDto other) {
+    timerId = other.timerId;
+    challengeId = other.challengeId;
+    challengeCompleted = other.challengeCompleted;
+  }
+
+  TimerCompletedDto({
+    required this.timerId,
+    required this.challengeId,
+    required this.challengeCompleted,
+  });
+
+  late String timerId;
+  late String challengeId;
+  late bool challengeCompleted;
+}
+
+class ExtendTimerDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['challengeId'] = challengeId;
+    fields['endTime'] = endTime;
+    return fields;
+  }
+
+  ExtendTimerDto.fromJson(Map<String, dynamic> fields) {
+    challengeId = fields["challengeId"];
+    endTime = fields["endTime"];
+  }
+
+  void partialUpdate(ExtendTimerDto other) {
+    challengeId = other.challengeId;
+    endTime = other.endTime;
+  }
+
+  ExtendTimerDto({
+    required this.challengeId,
+    required this.endTime,
+  });
+
+  late String challengeId;
+  late String endTime;
+}
+
+class StartChallengeTimerDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['challengeId'] = challengeId;
+    return fields;
+  }
+
+  StartChallengeTimerDto.fromJson(Map<String, dynamic> fields) {
+    challengeId = fields["challengeId"];
+  }
+
+  void partialUpdate(StartChallengeTimerDto other) {
+    challengeId = other.challengeId;
+  }
+
+  StartChallengeTimerDto({
+    required this.challengeId,
+  });
+
+  late String challengeId;
+}
+
+class TimerWarningDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['challengeId'] = challengeId;
+    fields['milestone'] = milestone;
+    fields['timeRemaining'] = timeRemaining;
+    return fields;
+  }
+
+  TimerWarningDto.fromJson(Map<String, dynamic> fields) {
+    challengeId = fields["challengeId"];
+    milestone = fields["milestone"];
+    timeRemaining = fields["timeRemaining"];
+  }
+
+  void partialUpdate(TimerWarningDto other) {
+    challengeId = other.challengeId;
+    milestone = other.milestone;
+    timeRemaining = other.timeRemaining;
+  }
+
+  TimerWarningDto({
+    required this.challengeId,
+    required this.milestone,
+    required this.timeRemaining,
+  });
+
+  late String challengeId;
+  late int milestone;
+  late int timeRemaining;
+}
+
+class ChallengeFailedDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['challengeId'] = challengeId;
+    fields['userId'] = userId;
+    return fields;
+  }
+
+  ChallengeFailedDto.fromJson(Map<String, dynamic> fields) {
+    challengeId = fields["challengeId"];
+    userId = fields["userId"];
+  }
+
+  void partialUpdate(ChallengeFailedDto other) {
+    challengeId = other.challengeId;
+    userId = other.userId;
+  }
+
+  ChallengeFailedDto({
+    required this.challengeId,
+    required this.userId,
+  });
+
+  late String challengeId;
+  late String userId;
 }
 
 class CloseAccountDto {

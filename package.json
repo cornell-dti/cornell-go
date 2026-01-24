@@ -12,10 +12,12 @@
     "setup": "node ./scripts/setup.js",
     "updateapi": "node ./scripts/updateapi.js",
     "formatall": "node ./scripts/formatall.js",
-    "compilescripts": "tsc --project scripts"
+    "compilescripts": "tsc --project scripts",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "husky": "^9.1.7",
     "prettier": "^3.6.2"
   },
   "dependencies": {

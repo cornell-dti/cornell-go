@@ -5,6 +5,7 @@ import 'package:game/api/game_client_dto.dart';
 import 'package:game/model/user_model.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/tracker_model.dart';
+import 'package:game/model/challenge_model.dart';
 
 /**
  * `OnboardingModel` - Manages onboarding state across the app using ChangeNotifier pattern.
@@ -163,14 +164,15 @@ class OnboardingModel extends ChangeNotifier {
 
   /**
    * Check if onboarding prerequisites are met
-   * Returns true if user has at least one uncompleted challenge AND one uncompleted journey
+   * Returns true if user has at least one uncompleted challenge (any timer status)
+   * AND one uncompleted timer-free journey
    */
-  bool canStartOnboarding(
-      UserModel userModel, EventModel eventModel, TrackerModel trackerModel) {
+  bool canStartOnboarding(UserModel userModel, EventModel eventModel,
+      TrackerModel trackerModel, ChallengeModel challengeModel) {
     final allowedEventIds = userModel.getAvailableEventIds();
 
     bool hasUncompletedChallenge = false;
-    bool hasUncompletedJourney = false;
+    bool hasTimerFreeJourney = false;
 
     for (final eventId in allowedEventIds) {
       final event = eventModel.getEventById(eventId);
@@ -181,24 +183,33 @@ class OnboardingModel extends ChangeNotifier {
       final locationCount = event.challenges?.length ?? 0;
       final isComplete = (numberCompleted == locationCount);
 
-      if (!isComplete) {
-        // Single challenge event
-        if (locationCount == 1) {
-          hasUncompletedChallenge = true;
+      if (isComplete) continue;
+
+      if (locationCount == 1) {
+        // Single challenge - timer status doesn't matter
+        hasUncompletedChallenge = true;
+      } else if (locationCount > 1) {
+        // Journey - check if any challenge has a timer
+        bool journeyHasTimer = false;
+        for (var challengeId in event.challenges ?? []) {
+          var challenge = challengeModel.getChallengeById(challengeId);
+          if (challenge?.timerLength != null && challenge!.timerLength! > 0) {
+            journeyHasTimer = true;
+            break;
+          }
         }
-        // Journey event (multiple challenges)
-        else if (locationCount > 1) {
-          hasUncompletedJourney = true;
+        if (!journeyHasTimer) {
+          hasTimerFreeJourney = true;
         }
       }
 
       // Early exit if both conditions met
-      if (hasUncompletedChallenge && hasUncompletedJourney) {
+      if (hasUncompletedChallenge && hasTimerFreeJourney) {
         return true;
       }
     }
 
-    return false;
+    return hasUncompletedChallenge && hasTimerFreeJourney;
   }
 
   /**

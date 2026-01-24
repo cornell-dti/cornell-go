@@ -9,6 +9,7 @@ import 'package:game/api/game_client_dto.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/tracker_model.dart';
+import 'package:game/model/timer_model.dart';
 import 'package:game/model/group_model.dart';
 import 'package:game/model/challenge_model.dart';
 import 'package:game/utils/utility_functions.dart';
@@ -118,26 +119,16 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer5<ChallengeModel, EventModel, TrackerModel, ApiClient,
-            GroupModel>(
-        builder: (context, challengeModel, eventModel, trackerModel, apiClient,
-            groupModel, _) {
+    return Consumer6<ChallengeModel, EventModel, TrackerModel, TimerModel,
+            ApiClient, GroupModel>(
+        builder: (context, challengeModel, eventModel, trackerModel, timerModel,
+            apiClient, groupModel, _) {
       var eventId = groupModel.curEventId;
       var event = eventModel.getEventById(eventId ?? "");
       var tracker = trackerModel.trackerByEventId(eventId ?? "");
       if (tracker == null || tracker.prevChallenges.length == 0) {
         return CircularIndicator();
       }
-      // if (tracker == null) {
-      //   return Text("tracker is null");
-      // }
-      // if (tracker.prevChallenges.length == 0) {
-      //   return Text("tracker prevchallenges has 0 length");
-      // }
-      // if (tracker.prevChallenges.last.challengeId != widget.challengeId) {
-      //   return Text(
-      //       "tracker last completed challenge does not match passed in challenge id");
-      // }
 
       // if this event is a journey
       if ((event?.challenges?.length ?? 0) > 1)
@@ -154,6 +145,11 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
         );
       }
 
+      // get extensions used from TimerModel (check if timer was for this challenge)
+      int extensionsUsed = (timerModel.currentChallengeId == challenge.id)
+          ? timerModel.extensionsUsed
+          : 0;
+
       // build list of completed challenge text fields to display later
       var total_pts = 0;
       List<Widget> completedChallenges = [];
@@ -161,8 +157,18 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
         var completedChal =
             challengeModel.getChallengeById(prevChal.challengeId);
         if (completedChal == null) continue;
-        var pts = calculateHintAdjustedPoints(
-            completedChal.points ?? 0, prevChal.hintsUsed);
+        int basePoints = completedChal.points ?? 0;
+
+        // Calculate points: 0 if failed, otherwise apply extension and hint adjustments
+        int pts;
+        if (prevChal.failed == true) {
+          pts = 0;
+        } else {
+          int extensionAdjustedPoints = calculateExtensionAdjustedPoints(
+              basePoints, prevChal.extensionsUsed ?? 0);
+          pts = calculateHintAdjustedPoints(
+              extensionAdjustedPoints, prevChal.hintsUsed);
+        }
         total_pts += pts;
 
         completedChallenges.add(Container(
@@ -183,7 +189,9 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                 ),
                 Spacer(),
                 Text(
-                  "+ " + pts.toString() + " points",
+                  prevChal.failed == true
+                      ? "0 points"
+                      : "+ " + pts.toString() + " points",
                   style: TextStyle(color: Colors.white, fontSize: 16.0),
                 ),
               ],
@@ -206,6 +214,7 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                 right: 20),
             height: MediaQuery.of(context).size.height * 0.53,
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Container(
                   padding: EdgeInsets.only(bottom: 12),
@@ -271,13 +280,55 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                           Spacer(),
                           Text(
                             "+ " +
-                                (challenge.points ?? 0).toString() +
+                                () {
+                                  int basePoints = challenge.points ?? 0;
+                                  int extensionAdjustedPoints =
+                                      calculateExtensionAdjustedPoints(
+                                          basePoints, extensionsUsed);
+                                  return extensionAdjustedPoints.toString();
+                                }() +
                                 " points",
                             style:
                                 TextStyle(color: Colors.white, fontSize: 16.0),
                           ),
                         ],
                       )),
+                  if (extensionsUsed > 0)
+                    Container(
+                        margin:
+                            EdgeInsets.only(left: 30, bottom: 10, right: 30),
+                        child: Row(
+                          children: [
+                            SvgPicture.asset(
+                              'assets/icons/timer_icon_purple.svg',
+                              fit: BoxFit.cover,
+                            ),
+                            Text(
+                              "   +${extensionsUsed * 5} Minutes",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16.0,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Spacer(),
+                            Text(
+                              () {
+                                int basePoints = challenge.points ?? 0;
+                                int extensionAdjustedPoints =
+                                    calculateExtensionAdjustedPoints(
+                                        basePoints, extensionsUsed);
+                                int penalty =
+                                    basePoints - extensionAdjustedPoints;
+                                return "- $penalty points";
+                              }(),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16.0,
+                              ),
+                            ),
+                          ],
+                        )),
                   if (tracker.prevChallenges.last.hintsUsed > 0)
                     Container(
                         margin:
@@ -324,9 +375,18 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                   journeyPage
                       ? "Total Points: " + total_pts.toString()
                       : "Points Earned: " +
-                          calculateHintAdjustedPoints(challenge.points ?? 0,
-                                  tracker.prevChallenges.last.hintsUsed)
-                              .toString(),
+                          () {
+                            int basePoints = challenge.points ?? 0;
+                            // First apply extension deduction, then hint adjustment
+                            int extensionAdjustedPoints =
+                                calculateExtensionAdjustedPoints(
+                                    basePoints, extensionsUsed);
+                            int finalAdjustedPoints =
+                                calculateHintAdjustedPoints(
+                                    extensionAdjustedPoints,
+                                    tracker.prevChallenges.last.hintsUsed);
+                            return finalAdjustedPoints.toString();
+                          }(),
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 25.0,

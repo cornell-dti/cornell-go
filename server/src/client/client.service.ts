@@ -25,6 +25,13 @@ import {
   AchievementTrackerDto,
   UpdateAchievementDataDto,
 } from '../achievement/achievement.dto';
+import {
+  TimerStartedDto,
+  TimerExtendedDto,
+  TimerCompletedDto,
+  TimerWarningDto,
+  ChallengeFailedDto,
+} from '../timer/timer.dto';
 import { ExtractSubjectType } from '@casl/ability';
 
 export type ClientApiDef = {
@@ -40,6 +47,11 @@ export type ClientApiDef = {
   updateGroupData: UpdateGroupDataDto;
   updateOrganizationData: UpdateOrganizationDataDto;
   updateLeaderPosition: UpdateLeaderPositionDto;
+  timerStarted: TimerStartedDto;
+  timerExtended: TimerExtendedDto;
+  timerCompleted: TimerCompletedDto;
+  timerWarning: TimerWarningDto;
+  challengeFailed: ChallengeFailedDto;
 };
 
 @Injectable()

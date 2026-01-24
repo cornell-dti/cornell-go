@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/tracker_model.dart';
+import 'package:game/model/timer_model.dart';
 import 'package:game/model/group_model.dart';
 import 'package:game/api/geopoint.dart';
 import 'package:game/navigation_page/bottom_navbar.dart';
@@ -106,6 +107,7 @@ class _GameplayPageState extends State<GameplayPage> {
     OnboardingModel onboarding,
     ChallengeDto challenge,
     int hintsUsed,
+    int extensionsUsed,
     GeoPoint? currentLocation,
     GeoPoint? targetLocation,
     double sectionSeperation,
@@ -182,12 +184,16 @@ class _GameplayPageState extends State<GameplayPage> {
                   child: LayoutBuilder(
                     builder: (context, constraints) {
                       int basePoints = challenge.points ?? 0;
-                      int adjustedPoints =
-                          calculateHintAdjustedPoints(basePoints, hintsUsed);
+                      // First apply extension deduction, then hint adjustment
+                      int extensionAdjustedPoints =
+                          calculateExtensionAdjustedPoints(
+                              basePoints, extensionsUsed);
+                      int finalAdjustedPoints = calculateHintAdjustedPoints(
+                          extensionAdjustedPoints, hintsUsed);
 
                       String text = ' ' +
-                          (hintsUsed > 0
-                              ? adjustedPoints.toString() +
+                          ((extensionsUsed > 0 || hintsUsed > 0)
+                              ? finalAdjustedPoints.toString() +
                                   '/' +
                                   basePoints.toString()
                               : basePoints.toString()) +
@@ -268,10 +274,10 @@ class _GameplayPageState extends State<GameplayPage> {
     return Stack(
       children: [
         // LAYER 1: Main gameplay UI
-        Consumer5<ChallengeModel, EventModel, TrackerModel, ApiClient,
-                GroupModel>(
+        Consumer6<ChallengeModel, EventModel, TrackerModel, TimerModel,
+                ApiClient, GroupModel>(
             builder: (context, challengeModel, eventModel, trackerModel,
-                apiClient, groupModel, _) {
+                timerModel, apiClient, groupModel, _) {
           var eventId = groupModel.curEventId;
           // print(eventId);
           var event = eventModel.getEventById(eventId ?? "");
@@ -296,6 +302,11 @@ class _GameplayPageState extends State<GameplayPage> {
           }
           double awardingRadius = challenge.awardingRadiusF ?? 0;
           int hintsUsed = tracker.hintsUsed;
+
+          // Get extensions used from TimerModel (only if timer is for current challenge)
+          int extensionsUsed = timerModel.isTimerForChallenge(challenge.id)
+              ? timerModel.extensionsUsed
+              : 0;
 
           double sectionSeperation = MediaQuery.of(context).size.width * 0.05;
 
@@ -390,6 +401,7 @@ class _GameplayPageState extends State<GameplayPage> {
                                 onboarding,
                                 challenge,
                                 hintsUsed,
+                                extensionsUsed,
                                 currentLocation,
                                 targetLocation,
                                 sectionSeperation,

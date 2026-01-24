@@ -11,6 +11,7 @@ import 'package:game/model/onboarding_model.dart';
 import 'package:game/model/user_model.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/tracker_model.dart';
+import 'package:game/model/challenge_model.dart';
 import 'package:game/navigation_page/bottom_navbar.dart';
 
 final SUPPORT_URL =
@@ -120,9 +121,12 @@ class SettingsPage extends StatelessWidget {
                             final trackerModel = Provider.of<TrackerModel>(
                                 context,
                                 listen: false);
+                            final challengeModel = Provider.of<ChallengeModel>(
+                                context,
+                                listen: false);
 
-                            if (!onboarding.canStartOnboarding(
-                                userModel, eventModel, trackerModel)) {
+                            if (!onboarding.canStartOnboarding(userModel,
+                                eventModel, trackerModel, challengeModel)) {
                               displayToast(
                                   "Tutorial Unavailable", Status.error);
                               return;

@@ -269,6 +269,21 @@ int calculateHintAdjustedPoints(int basePoints, int hintsUsed) {
   ].reduce((a, b) => a > b ? a : b);
 }
 
+/**
+ * Calculate extension-adjusted points (25% deduction per extension)
+ * Each extension costs 25% of the original challenge points
+ * 
+ * @param originalPoints - Original challenge points
+ * @param extensionsUsed - Number of timer extensions used
+ * @returns Points awarded after timer extensions
+ */
+int calculateExtensionAdjustedPoints(int originalPoints, int extensionsUsed) {
+  if (extensionsUsed == 0) return originalPoints;
+  const double EXTENSION_COST = 0.25; // 25% per extension
+  final deduction = (originalPoints * EXTENSION_COST * extensionsUsed).floor();
+  return (originalPoints - deduction).clamp(0, originalPoints);
+}
+
 /// Matches an event based on difficulty, location, category, and search text
 bool eventMatchesFilters({
   required EventDto event,
