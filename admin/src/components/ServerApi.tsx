@@ -121,6 +121,20 @@ export class ServerApi {
     >;
   }
 
+  startChallengeTimer(data: dto.StartChallengeTimerDto) {
+    return this.send('startChallengeTimer', data) as Promise<
+      string | undefined
+    >;
+  }
+
+  extendTimer(data: dto.ExtendTimerDto) {
+    return this.send('extendTimer', data) as Promise<string | undefined>;
+  }
+
+  completeTimer(data: dto.TimerCompletedDto) {
+    return this.send('completeTimer', data) as Promise<boolean | undefined>;
+  }
+
   requestQuizQuestion(data: dto.RequestQuizQuestionDto) {
     return this.send('requestQuizQuestion', data) as Promise<
       boolean | undefined
@@ -265,6 +279,31 @@ export class ServerApi {
   ) {
     this.socket.removeAllListeners('updateLeaderPosition');
     this.socket.on('updateLeaderPosition', data => callback(data));
+  }
+
+  onTimerStarted(callback: (data: dto.TimerStartedDto) => void) {
+    this.socket.removeAllListeners('timerStarted');
+    this.socket.on('timerStarted', data => callback(data));
+  }
+
+  onTimerExtended(callback: (data: dto.TimerExtendedDto) => void) {
+    this.socket.removeAllListeners('timerExtended');
+    this.socket.on('timerExtended', data => callback(data));
+  }
+
+  onTimerCompleted(callback: (data: dto.TimerCompletedDto) => void) {
+    this.socket.removeAllListeners('timerCompleted');
+    this.socket.on('timerCompleted', data => callback(data));
+  }
+
+  onTimerWarning(callback: (data: dto.TimerWarningDto) => void) {
+    this.socket.removeAllListeners('timerWarning');
+    this.socket.on('timerWarning', data => callback(data));
+  }
+
+  onChallengeFailed(callback: (data: dto.ChallengeFailedDto) => void) {
+    this.socket.removeAllListeners('challengeFailed');
+    this.socket.on('challengeFailed', data => callback(data));
   }
 
   onUpdateQuizQuestionData(

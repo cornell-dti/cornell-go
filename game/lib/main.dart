@@ -11,6 +11,7 @@ import 'package:game/loading_page/loading_page.dart';
 import 'package:game/model/achievement_model.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:game/model/onboarding_model.dart';
+import 'package:game/model/timer_model.dart';
 import 'package:game/model/quiz_model.dart';
 
 // imports for google maps
@@ -131,6 +132,10 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (_) => ChallengeModel(client),
+          lazy: false,
+        ),
+        ChangeNotifierProvider(
+          create: (_) => TimerModel(client),
           lazy: false,
         ),
         ChangeNotifierProvider(create: (_) => QuizModel(client), lazy: false),

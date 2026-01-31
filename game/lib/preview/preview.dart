@@ -3,6 +3,7 @@ import 'package:game/api/game_api.dart';
 import 'package:game/gameplay/gameplay_page.dart';
 import 'package:provider/provider.dart';
 import 'package:game/api/game_client_dto.dart';
+import 'package:game/utils/utility_functions.dart';
 
 import 'package:geolocator/geolocator.dart';
 import 'package:game/api/geopoint.dart';
@@ -546,7 +547,24 @@ class _PreviewState extends State<Preview> {
                           ),
                         ),
                       ),
-                      onPressed: () {
+                      onPressed: () async {
+                        // Pre-check location before joining
+                        // Only show "Checking location..." if it takes > 1 second
+                        Timer? loadingTimer = Timer(Duration(seconds: 1), () {
+                          displayToast("Checking location...", Status.info);
+                        });
+                        try {
+                          await GeoPoint.current();
+                          loadingTimer.cancel();
+                        } catch (e) {
+                          loadingTimer.cancel();
+                          displayToast(
+                            "Can't join challenge - location not enabled",
+                            Status.error,
+                          );
+                          return;
+                        }
+
                         Provider.of<ApiClient>(
                           context,
                           listen: false,

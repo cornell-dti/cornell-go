@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/api/game_client_dto.dart';
+import 'package:game/api/geopoint.dart';
 import 'package:game/journeys/journey_cell.dart';
 import 'package:game/journeys/filter_form.dart';
 import 'package:game/model/event_model.dart';
@@ -13,6 +15,7 @@ import 'package:game/model/user_model.dart';
 import 'package:game/model/onboarding_model.dart';
 import 'package:game/widgets/bear_mascot_message.dart';
 import 'package:game/gameplay/gameplay_page.dart';
+import 'package:game/navigation_page/bottom_navbar.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:provider/provider.dart';
 import 'package:showcaseview/showcaseview.dart';
@@ -91,6 +94,7 @@ class _JourneysPageState extends State<JourneysPage> {
   List<JourneyCellDto> eventData = [];
   // Onboarding: overlay entry for bear mascot message prompting user to tap first journey
   OverlayEntry? _bearOverlayEntry;
+  bool _hasTriggeredStep4 = false; // Prevent multiple showcase triggers
 
   @override
   void initState() {
@@ -138,8 +142,35 @@ class _JourneysPageState extends State<JourneysPage> {
         bearBottomPercent: bearBottomPercent,
         messageLeftPercent: messageLeftPercent,
         messageBottomPercent: messageBottomPercent,
-        onTap: () {
+        onTap: () async {
           print("Tapped anywhere on step 4 - navigating to gameplay");
+
+          // Pre-check location before joining
+          // Only show "Checking location..." if it takes > 1 second
+          Timer? loadingTimer = Timer(Duration(seconds: 1), () {
+            displayToast("Checking location...", Status.info);
+          });
+          try {
+            await GeoPoint.current();
+            loadingTimer.cancel();
+          } catch (e) {
+            loadingTimer.cancel();
+            displayToast(
+              "Can't join challenge - location not enabled",
+              Status.error,
+            );
+            // Stop onboarding and go home
+            _removeBearOverlay();
+            ShowcaseView.getNamed("journeys_page").dismiss();
+            Provider.of<OnboardingModel>(context, listen: false)
+                .skipOnboarding();
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (context) => BottomNavBar()),
+              (route) => false,
+            );
+            return;
+          }
+
           _removeBearOverlay();
           ShowcaseView.getNamed("journeys_page").dismiss();
           Provider.of<OnboardingModel>(
@@ -252,6 +283,25 @@ class _JourneysPageState extends State<JourneysPage> {
 
                             if (challenge == null) continue;
 
+                            // Onboarding: Skip journeys with timed challenges during onboarding (only after journeys explanation)
+                            final onboarding = Provider.of<OnboardingModel>(
+                                context,
+                                listen: false);
+                            if (onboarding.step3JourneysExplanationComplete &&
+                                !onboarding.step4FirstJourneyComplete) {
+                              bool eventHasTimer = false;
+                              for (var challengeId in event.challenges ?? []) {
+                                var chal = challengeModel
+                                    .getChallengeById(challengeId);
+                                if (chal?.timerLength != null &&
+                                    chal!.timerLength! > 0) {
+                                  eventHasTimer = true;
+                                  break;
+                                }
+                              }
+                              if (eventHasTimer) continue;
+                            }
+
                             for (var challengeId in event.challenges ?? []) {
                               var challenge = challengeModel.getChallengeById(
                                 challengeId,
@@ -322,7 +372,9 @@ class _JourneysPageState extends State<JourneysPage> {
                           );
                           if (onboarding.step3JourneysExplanationComplete &&
                               !onboarding.step4FirstJourneyComplete &&
-                              eventData.isNotEmpty) {
+                              eventData.isNotEmpty &&
+                              !_hasTriggeredStep4) {
+                            _hasTriggeredStep4 = true; // Prevent re-triggering on rebuild
                             WidgetsBinding.instance.addPostFrameCallback((_) {
                               if (mounted) {
                                 ShowcaseView.getNamed(

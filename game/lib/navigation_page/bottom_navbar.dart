@@ -9,6 +9,7 @@ import 'package:game/model/onboarding_model.dart';
 import 'package:game/model/user_model.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/tracker_model.dart';
+import 'package:game/model/challenge_model.dart';
 import 'package:game/widgets/bear_mascot_message.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:showcaseview/showcaseview.dart';
@@ -279,6 +280,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
     final userModel = Provider.of<UserModel>(context);
     final eventModel = Provider.of<EventModel>(context);
     final trackerModel = Provider.of<TrackerModel>(context);
+    final challengeModel = Provider.of<ChallengeModel>(context);
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
@@ -415,7 +417,8 @@ class _BottomNavBarState extends State<BottomNavBar> {
         // Wait for backend response before showing onboarding
         if (!onboarding.isLoadingFromBackend &&
             !onboarding.step0WelcomeComplete &&
-            onboarding.canStartOnboarding(userModel, eventModel, trackerModel))
+            onboarding.canStartOnboarding(
+                userModel, eventModel, trackerModel, challengeModel))
           GestureDetector(
             onTap: () {
               print('👆 Step 0: Dismissing welcome overlay');

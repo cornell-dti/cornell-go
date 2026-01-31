@@ -122,6 +122,15 @@ class GameServerApi {
   Future<String?> updateOrganizationData(UpdateOrganizationDataDto dto) async =>
       await _invokeWithRefresh("updateOrganizationData", dto.toJson());
 
+  Future<String?> startChallengeTimer(StartChallengeTimerDto dto) async =>
+      await _invokeWithRefresh("startChallengeTimer", dto.toJson());
+
+  Future<String?> extendTimer(ExtendTimerDto dto) async =>
+      await _invokeWithRefresh("extendTimer", dto.toJson());
+
+  Future<bool?> completeTimer(TimerCompletedDto dto) async =>
+      await _invokeWithRefresh("completeTimer", dto.toJson());
+
   Future<bool?> requestQuizQuestion(RequestQuizQuestionDto dto) async =>
       await _invokeWithRefresh("requestQuizQuestion", dto.toJson());
 

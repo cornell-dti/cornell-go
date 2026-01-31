@@ -82,6 +82,7 @@ class _ChallengesPageState extends State<ChallengesPage> {
   GeoPoint? currentUserLocation;
   // Onboarding: overlay entry for bear mascot message explaining challenges
   OverlayEntry? _bearOverlayEntry;
+  bool _hasTriggeredStep1 = false; // Prevent multiple showcase triggers
 
   _ChallengesPageState(
     String? difficulty,
@@ -317,7 +318,9 @@ class _ChallengesPageState extends State<ChallengesPage> {
                         // Onboarding: Step 1 - Show showcase for first challenge card after welcome overlay
                         if (onboarding.step0WelcomeComplete &&
                             !onboarding.step1ChallengesComplete &&
-                            eventData.isNotEmpty) {
+                            eventData.isNotEmpty &&
+                            !_hasTriggeredStep1) {
+                          _hasTriggeredStep1 = true; // Prevent re-triggering on rebuild
                           WidgetsBinding.instance.addPostFrameCallback((_) {
                             if (mounted) {
                               ShowcaseView.getNamed(

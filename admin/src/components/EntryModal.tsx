@@ -33,6 +33,15 @@ export type DateEntryForm = {
   date: Date;
 };
 
+export type CheckboxNumberEntryForm = {
+  name: string;
+  checked: boolean;
+  value: number;
+  min: number;
+  max: number;
+  numberLabel: string;
+};
+
 export type AnswersEntryForm = {
   name: string;
   answers: Array<{ text: string; isCorrect: boolean }>;
@@ -54,6 +63,7 @@ export type EntryForm =
   | NumberEntryForm
   | MapEntryForm
   | DateEntryForm
+  | CheckboxNumberEntryForm
   | AnswersEntryForm
   | OptionWithCustomEntryForm;
 
@@ -165,6 +175,49 @@ function NumberEntryFormBox(props: { form: NumberEntryForm }) {
         }}
       />
     </EntryBox>
+  );
+}
+
+function CheckboxNumberEntryFormBox(props: { form: CheckboxNumberEntryForm }) {
+  const [checked, setChecked] = useState(props.form.checked);
+  const [val, setVal] = useState('' + props.form.value);
+
+  useEffect(() => {
+    setChecked(props.form.checked);
+    setVal('' + props.form.value);
+  }, [props.form]);
+
+  return (
+    <>
+      <EntryBox>
+        <label>
+          <input
+            type="checkbox"
+            checked={checked}
+            onChange={e => {
+              setChecked(e.target.checked);
+              props.form.checked = e.target.checked;
+            }}
+          />
+          {' ' + props.form.name}
+        </label>
+      </EntryBox>
+      {checked && (
+        <EntryBox>
+          {props.form.numberLabel + ': '}
+          <EntryTextBox
+            type="number"
+            value={val}
+            min={props.form.min}
+            max={props.form.max}
+            onChange={e => {
+              setVal(e.target.value);
+              props.form.value = +e.target.value;
+            }}
+          />
+        </EntryBox>
+      )}
+    </>
   );
 }
 
@@ -460,6 +513,8 @@ export function EntryModal(props: {
           return <OptionEntryFormBox form={form} key={form.name} />;
         } else if ('characterLimit' in form) {
           return <FreeEntryFormBox form={form} key={form.name} />;
+        } else if ('checked' in form) {
+          return <CheckboxNumberEntryFormBox form={form} key={form.name} />;
         } else if ('min' in form) {
           return <NumberEntryFormBox form={form} key={form.name} />;
         } else if ('date' in form) {

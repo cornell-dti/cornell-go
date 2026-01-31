@@ -110,6 +110,7 @@ class GeoPoint {
         // Ideally we would use best accuracy, but it doesn't work for some reason
         // desiredAccuracy: LocationAccuracy.best
         desiredAccuracy: LocationAccuracy.medium,
+        timeLimit: Duration(seconds: 3), // Give GPS time to get a fix
       );
       print("Got location: ${pos.latitude}, ${pos.longitude}");
 

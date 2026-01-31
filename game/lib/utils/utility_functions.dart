@@ -3,7 +3,6 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/api/game_client_dto.dart';
 import 'package:game/splash_page/splash_page.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'dart:io' show Platform; //at the top
 
@@ -197,12 +196,11 @@ Color RGBComplement(Color col) {
 Text LatoText(String text, double fs, Color color, FontWeight fw) {
   return Text(
     text,
-    style: GoogleFonts.lato(
-      textStyle: TextStyle(
-        color: color,
-        fontWeight: FontWeight.bold,
-        fontSize: fs,
-      ),
+    style: TextStyle(
+      fontFamily: 'Lato',
+      color: color,
+      fontWeight: fw,
+      fontSize: fs,
     ),
   );
 }
@@ -273,6 +271,21 @@ int calculateHintAdjustedPoints(int basePoints, int hintsUsed) {
     minAllowed,
     [rounded, basePoints].reduce((a, b) => a < b ? a : b),
   ].reduce((a, b) => a > b ? a : b);
+}
+
+/**
+ * Calculate extension-adjusted points (25% deduction per extension)
+ * Each extension costs 25% of the original challenge points
+ * 
+ * @param originalPoints - Original challenge points
+ * @param extensionsUsed - Number of timer extensions used
+ * @returns Points awarded after timer extensions
+ */
+int calculateExtensionAdjustedPoints(int originalPoints, int extensionsUsed) {
+  if (extensionsUsed == 0) return originalPoints;
+  const double EXTENSION_COST = 0.25; // 25% per extension
+  final deduction = (originalPoints * EXTENSION_COST * extensionsUsed).floor();
+  return (originalPoints - deduction).clamp(0, originalPoints);
 }
 
 /// Matches an event based on difficulty, location, category, and search text

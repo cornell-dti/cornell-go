@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/tracker_model.dart';
+import 'package:game/model/timer_model.dart';
 import 'package:game/model/group_model.dart';
 import 'package:game/api/geopoint.dart';
 import 'package:game/navigation_page/bottom_navbar.dart';
@@ -39,6 +40,13 @@ class _GameplayPageState extends State<GameplayPage> {
 
   late StreamSubscription<Position> positionStream;
   OverlayEntry? _bearOverlayEntry;
+
+  // Cached challenge data to prevent showing next challenge while completion dialog is open
+  ChallengeDto? _cachedChallenge;
+  GeoPoint? _cachedTargetLocation;
+  int _cachedHintsUsed = 0;
+  int _cachedExtensionsUsed = 0;
+  bool _hasTriggeredStep6 = false; // Prevent multiple showcase triggers
 
   @override
   void initState() {
@@ -109,6 +117,7 @@ class _GameplayPageState extends State<GameplayPage> {
     OnboardingModel onboarding,
     ChallengeDto challenge,
     int hintsUsed,
+    int extensionsUsed,
     GeoPoint? currentLocation,
     GeoPoint? targetLocation,
     double sectionSeperation,
@@ -193,14 +202,16 @@ class _GameplayPageState extends State<GameplayPage> {
                   child: LayoutBuilder(
                     builder: (context, constraints) {
                       int basePoints = challenge.points ?? 0;
-                      int adjustedPoints = calculateHintAdjustedPoints(
-                        basePoints,
-                        hintsUsed,
-                      );
+                      // First apply extension deduction, then hint adjustment
+                      int extensionAdjustedPoints =
+                          calculateExtensionAdjustedPoints(
+                              basePoints, extensionsUsed);
+                      int finalAdjustedPoints = calculateHintAdjustedPoints(
+                          extensionAdjustedPoints, hintsUsed);
 
                       String text = ' ' +
-                          (hintsUsed > 0
-                              ? adjustedPoints.toString() +
+                          ((extensionsUsed > 0 || hintsUsed > 0)
+                              ? finalAdjustedPoints.toString() +
                                   '/' +
                                   basePoints.toString()
                               : basePoints.toString()) +
@@ -282,17 +293,10 @@ class _GameplayPageState extends State<GameplayPage> {
     return Stack(
       children: [
         // LAYER 1: Main gameplay UI
-        Consumer5<ChallengeModel, EventModel, TrackerModel, ApiClient,
-            GroupModel>(
-          builder: (
-            context,
-            challengeModel,
-            eventModel,
-            trackerModel,
-            apiClient,
-            groupModel,
-            _,
-          ) {
+        Consumer6<ChallengeModel, EventModel, TrackerModel, TimerModel,
+            ApiClient, GroupModel>(
+          builder: (context, challengeModel, eventModel, trackerModel,
+              timerModel, apiClient, groupModel, _) {
             var eventId = groupModel.curEventId;
             // print(eventId);
             var event = eventModel.getEventById(eventId ?? "");
@@ -316,11 +320,44 @@ class _GameplayPageState extends State<GameplayPage> {
             double awardingRadius = challenge.awardingRadiusF ?? 0;
             int hintsUsed = tracker.hintsUsed;
 
+            // Get extensions used from TimerModel (only if timer is for current challenge)
+            int extensionsUsed = timerModel.isTimerForChallenge(challenge.id)
+                ? timerModel.extensionsUsed
+                : 0;
+
+            // Check if completion dialog is showing - if so, use cached data
+            // to prevent showing next challenge while popup is visible
+            ChallengeDto displayChallenge;
+            GeoPoint? displayTargetLocation;
+            int displayHintsUsed;
+            int displayExtensionsUsed;
+
+            if (GameplayMap.isCompletionDialogShowing && _cachedChallenge != null) {
+              // Use cached data while dialog is showing
+              displayChallenge = _cachedChallenge!;
+              displayTargetLocation = _cachedTargetLocation;
+              displayHintsUsed = _cachedHintsUsed;
+              displayExtensionsUsed = _cachedExtensionsUsed;
+            } else {
+              // Normal case - use current data and cache it
+              displayChallenge = challenge;
+              displayTargetLocation = targetLocation;
+              displayHintsUsed = hintsUsed;
+              displayExtensionsUsed = extensionsUsed;
+              // Cache the data for when dialog shows
+              _cachedChallenge = challenge;
+              _cachedTargetLocation = targetLocation;
+              _cachedHintsUsed = hintsUsed;
+              _cachedExtensionsUsed = extensionsUsed;
+            }
+
             double sectionSeperation = MediaQuery.of(context).size.width * 0.05;
 
             // Start showcase when step 5 completes
             if (onboarding.step5GameplayIntroComplete &&
-                !onboarding.step6InfoRowComplete) {
+                !onboarding.step6InfoRowComplete &&
+                !_hasTriggeredStep6) {
+              _hasTriggeredStep6 = true; // Prevent re-triggering on rebuild
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 if (mounted) {
                   ShowcaseView.getNamed(
@@ -409,7 +446,7 @@ class _GameplayPageState extends State<GameplayPage> {
                             margin: EdgeInsets.only(top: 16.45, bottom: 11),
                             alignment: Alignment.centerLeft,
                             child: Text(
-                              challenge.description ?? "NO DESCRIPTION",
+                              displayChallenge.description ?? "NO DESCRIPTION",
                               textAlign: TextAlign.left,
                               style: TextStyle(
                                 fontSize: 16,
@@ -419,10 +456,11 @@ class _GameplayPageState extends State<GameplayPage> {
                           ),
                           _buildInfoRow(
                             onboarding,
-                            challenge,
-                            hintsUsed,
+                            displayChallenge,
+                            displayHintsUsed,
+                            displayExtensionsUsed,
                             currentLocation,
-                            targetLocation,
+                            displayTargetLocation,
                             sectionSeperation,
                             screenWidth,
                             screenHeight,
@@ -435,11 +473,12 @@ class _GameplayPageState extends State<GameplayPage> {
                     child: Padding(
                       padding: EdgeInsets.only(top: 10),
                       child: GameplayMap(
-                        challengeId: challenge.id,
-                        targetLocation: (targetLocation ?? _center),
-                        awardingRadius: awardingRadius,
-                        points: challenge.points ?? 0,
-                        startingHintsUsed: hintsUsed,
+                        key: ValueKey(displayChallenge.id),
+                        challengeId: displayChallenge.id,
+                        targetLocation: (displayTargetLocation ?? _center),
+                        awardingRadius: displayChallenge.awardingRadiusF ?? 0,
+                        points: displayChallenge.points ?? 0,
+                        startingHintsUsed: displayHintsUsed,
                       ),
                     ),
                   ),

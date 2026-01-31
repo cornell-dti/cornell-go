@@ -13,15 +13,15 @@ import 'package:velocity_x/velocity_x.dart';
 
  */
 Widget completedCell(
-  BuildContext context,
-  String name,
-  String picture,
-  String type,
-  String date,
-  String difficulty,
-  int totalHintsUsed,
-  int points,
-) {
+    BuildContext context,
+    String name,
+    String picture,
+    String type,
+    String date,
+    String difficulty,
+    int totalHintsUsed,
+    int adjustedPoints,
+    int originalPoints) {
   return Container(
     width: MediaQuery.sizeOf(context).width * 0.85,
     height: MediaQuery.sizeOf(context).height * 0.11,
@@ -89,24 +89,18 @@ Widget completedCell(
                           width: 20,
                         ),
                         Text(
-                          ' ' +
-                              calculateHintAdjustedPoints(
-                                points,
-                                totalHintsUsed,
-                              ).toString() +
-                              "/" +
-                              points.toString() +
-                              " PTS",
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
-                            color: Color(0xFFC17E19),
-                          ),
-                        ),
-                      ],
+                            ' ' +
+                                adjustedPoints.toString() +
+                                "/" +
+                                originalPoints.toString() +
+                                " PTS",
+                            style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                                color: Color(0xFFC17E19)))
+                      ]),
                     ),
                   ),
-                ),
               ],
             ),
           ),

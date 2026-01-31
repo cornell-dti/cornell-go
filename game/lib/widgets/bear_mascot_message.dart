@@ -6,6 +6,7 @@ import 'package:flutter_svg/flutter_svg.dart';
  *
  * @remarks
  * Used in the onboarding flow to show the bear mascot with explanatory messages.
+ * Also used in the timer flow to show the bear mascot with warning messages of how much time is left.
  * Responsive design that adapts to different screen sizes.
  * Uses simple percentage-based positioning from edges of the screen.
  * Full-screen tappable area captures taps anywhere on the widget.
@@ -18,6 +19,8 @@ import 'package:flutter_svg/flutter_svg.dart';
  * @param messageLeftPercent - Message position from left edge (0.5 = centered)
  * @param messageBottomPercent - Message position from bottom edge (0.0 = bottom, 1.0 = top)
  * @param onTap - Optional callback when user taps anywhere on the widget
+ * @param textStyle - Optional custom text style for the message (default: gray, regular weight)
+ * @param messageBoxWidthPercent - Optional custom width for message box as percentage of screen width (default: 0.677)
  */
 class BearMascotMessage extends StatelessWidget {
   final String message;
@@ -28,6 +31,8 @@ class BearMascotMessage extends StatelessWidget {
   final double messageLeftPercent;
   final double messageBottomPercent; // 0.0 = bottom edge, 1.0 = top edge
   final VoidCallback? onTap; // Optional tap callback for the entire widget
+  final TextStyle? textStyle; // Optional custom text style
+  final double? messageBoxWidthPercent; // Optional custom message box width
 
   const BearMascotMessage({
     Key? key,
@@ -39,6 +44,8 @@ class BearMascotMessage extends StatelessWidget {
     this.messageLeftPercent = 0.5,
     this.messageBottomPercent = 0.4,
     this.onTap,
+    this.textStyle,
+    this.messageBoxWidthPercent,
   }) : super(key: key);
 
   @override
@@ -47,7 +54,7 @@ class BearMascotMessage extends StatelessWidget {
     final screenHeight = MediaQuery.of(context).size.height;
 
     // Responsive sizing based on Figma design (393x852)
-    final messageBoxWidth = screenWidth * 0.677;
+    final messageBoxWidth = screenWidth * (messageBoxWidthPercent ?? 0.677);
     final bearWidth =
         bearAsset == 'popup' ? screenWidth * 0.509 : screenWidth * 0.437;
     final bearHeight =
@@ -106,14 +113,15 @@ class BearMascotMessage extends StatelessWidget {
                     ),
                     child: Text(
                       message,
-                      style: const TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 14,
-                        fontWeight: FontWeight.w400,
-                        color: Color(0xFF6E6E6E),
-                        height: 1.5,
-                        decoration: TextDecoration.none,
-                      ),
+                      style: textStyle ??
+                          const TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 14,
+                            fontWeight: FontWeight.w400,
+                            color: Color(0xFF6E6E6E),
+                            height: 1.5,
+                            decoration: TextDecoration.none,
+                          ),
                     ),
                   ),
                   // Speech bubble tail pointing down-left toward bear
