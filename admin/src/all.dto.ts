@@ -56,6 +56,13 @@ export enum EventDifficultyDto {
   Hard = 'Hard',
 }
 
+export enum QuizErrorCodeDto {
+  NO_QUESTIONS = 'NO_QUESTIONS',
+  ALREADY_ANSWERED = 'ALREADY_ANSWERED',
+  INVALID_QUESTION = 'INVALID_QUESTION',
+  INVALID_ANSWER = 'INVALID_ANSWER',
+}
+
 export enum SetAuthToOAuthProviderDto {
   apple = 'apple',
   google = 'google',
@@ -349,6 +356,64 @@ export interface TimerWarningDto {
 export interface ChallengeFailedDto {
   challengeId: string;
   userId: string;
+}
+
+export interface RequestQuizQuestionDto {
+  challengeId: string;
+}
+
+export interface ShuffleQuizQuestionDto {
+  challengeId: string;
+  currentQuestionId?: string;
+}
+
+export interface QuizAnswerDto {
+  id?: string;
+  answerText: string;
+  isCorrect?: boolean;
+}
+
+export interface QuizQuestionDto {
+  id: string;
+  challengeId?: string;
+  questionText?: string;
+  explanation?: string;
+  difficulty?: number;
+  pointValue?: number;
+  category?: string;
+  answers?: QuizAnswerDto[];
+}
+
+export interface SubmitQuizAnswerDto {
+  questionId: string;
+  selectedAnswerId: string;
+}
+
+export interface QuizResultDto {
+  isCorrect: boolean;
+  pointsEarned: number;
+  explanation?: string;
+  correctAnswerText: string;
+  newTotalScore: number;
+}
+
+export interface QuizProgressDto {
+  challengeId: string;
+  totalQuestions: number;
+  answeredQuestions: number;
+  remainingQuestions: number;
+  isComplete: boolean;
+  totalPointsEarned: number;
+}
+
+export interface QuizErrorDto {
+  message: string;
+  code: QuizErrorCodeDto;
+}
+
+export interface UpdateQuizQuestionDataDto {
+  question: QuizQuestionDto;
+  deleted: boolean;
 }
 
 export interface CloseAccountDto {}

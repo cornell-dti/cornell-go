@@ -36,8 +36,9 @@ class ChallengeModel extends ChangeNotifier {
   ChallengeDto? getChallengeById(String id) {
     final chal = _challengesById[id];
     if (chal == null) {
-      _client.serverApi
-          ?.requestChallengeData(RequestChallengeDataDto(challenges: [id]));
+      _client.serverApi?.requestChallengeData(
+        RequestChallengeDataDto(challenges: [id]),
+      );
     }
     return chal;
   }

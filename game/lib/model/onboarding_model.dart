@@ -154,8 +154,9 @@ class OnboardingModel extends ChangeNotifier {
 
     // Save completion to backend database permanently
     try {
-      final result =
-          await _client.serverApi?.completeOnboarding(CompleteOnboardingDto());
+      final result = await _client.serverApi?.completeOnboarding(
+        CompleteOnboardingDto(),
+      );
       print('✅ Backend: Onboarding completion saved to database');
     } catch (e) {
       print('Failed to save onboarding completion: $e');
@@ -240,6 +241,15 @@ class OnboardingModel extends ChangeNotifier {
     } catch (e) {
       print('Failed to reset onboarding: $e');
     }
+  }
+
+  /**
+   * Skip onboarding (e.g., when location unavailable)
+   * Marks all steps complete locally but does NOT save to backend
+   * so user will see onboarding again next session
+   */
+  void skipOnboarding() {
+    _markAllStepsComplete();
   }
 
   /**

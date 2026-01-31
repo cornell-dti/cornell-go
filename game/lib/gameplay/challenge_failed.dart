@@ -228,15 +228,19 @@ class _ChallengeFailedState extends State<ChallengeFailedPage>
                   'assets/icons/locationCompleted.svg',
                   fit: BoxFit.cover,
                 ),
-                Text(
-                  "   " + (completedChal.name ?? ""),
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16.0,
-                    fontWeight: FontWeight.bold,
+                SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    completedChal.name ?? "",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                Spacer(),
+                SizedBox(width: 8),
                 Text(
                   prevChal.failed == true
                       ? "0 points"
@@ -348,19 +352,22 @@ class _ChallengeFailedState extends State<ChallengeFailedPage>
                     ),
                   ),
                 ),
-                Container(
-                  padding: EdgeInsets.only(bottom: 15),
-                  child: Text(
-                    "You were unable to find " +
-                        (challenge.name ?? "this challenge") +
-                        ".",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.w500,
+                // Only show description when not on completed journey page
+                if (!(journeyPage && journeyCompleted))
+                  Container(
+                    padding: EdgeInsets.only(bottom: 15),
+                    child: Text(
+                      "You were unable to find " +
+                          (challenge.name ?? "this challenge") +
+                          ".",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
-                ),
                 if (journeyPage)
                   Container(
                       padding: EdgeInsets.only(left: 30, bottom: 10),

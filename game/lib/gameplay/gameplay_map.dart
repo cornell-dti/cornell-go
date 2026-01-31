@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:game/navigation_page/bottom_navbar.dart';
@@ -28,6 +26,8 @@ import 'package:game/model/onboarding_model.dart';
 import 'package:game/model/timer_model.dart';
 import 'package:game/widgets/bear_mascot_message.dart';
 import 'package:showcaseview/showcaseview.dart';
+import 'package:game/quiz/quiz_page.dart';
+import 'package:game/gameplay/arrival_dialog.dart';
 
 /*
 
@@ -59,14 +59,22 @@ class GameplayMap extends StatefulWidget {
   final int points;
   final int startingHintsUsed;
 
-  const GameplayMap(
-      {Key? key,
-      required this.challengeId,
-      required this.targetLocation,
-      required this.awardingRadius,
-      required this.points,
-      required this.startingHintsUsed})
-      : super(key: key);
+  /// Static flag to indicate completion dialog is showing.
+  /// Used by GameplayPage to freeze its display during challenge completion.
+  static bool isCompletionDialogShowing = false;
+
+  /// Static flag to prevent double-clicking extension button.
+  /// Must be static because widget can be recreated during the process.
+  static bool isExtendingTimer = false;
+
+  const GameplayMap({
+    Key? key,
+    required this.challengeId,
+    required this.targetLocation,
+    required this.awardingRadius,
+    required this.points,
+    required this.startingHintsUsed,
+  }) : super(key: key);
 
   @override
   State<GameplayMap> createState() => _GameplayMapState();
@@ -107,6 +115,16 @@ class _GameplayMapState extends State<GameplayMap>
   /// Maximum time (in seconds) to wait for backend to respond when starting a timer.
   /// After this timeout, the timer UI will show an error and reset.
   static const int _maxBackendWaitTimeSeconds = 10;
+
+  // Location stream monitoring
+  Timer? _locationTimeoutTimer;
+  bool _locationWarningShown = false;
+  int _consecutiveLocationFailures = 0;
+  bool _locationWarningToastShown = false;
+
+  // Location retry configuration
+  static const int _maxConsecutiveFailures = 3;
+  static const int _locationTimeoutSeconds = 5;
 
   // Stream subscriptions for timer events
   StreamSubscription<TimerCompletedDto>? _timerCompletedSubscription;
@@ -180,9 +198,13 @@ class _GameplayMapState extends State<GameplayMap>
   // Timer: overlay entry for Time's Up message when timer expires
   OverlayEntry? _timerModalOverlay;
   bool _timerModalShowing = false; // Flag to prevent multiple overlays
+  bool _isProcessingResults =
+      false; // Flag to prevent double-clicking results button
 
   // Flag to track when "Congratulations" dialog is showing after challenge completion
   bool _arrivedDialogShowing = false;
+  // Cached challenge ID to prevent showing next challenge while dialog is open
+  String? _displayedChallengeId;
   OverlayEntry?
       _timerWarningOverlay; // Current warning overlay entry for Niki warning the user of how much time is left
 
@@ -311,7 +333,10 @@ class _GameplayMapState extends State<GameplayMap>
           print("Tapped anywhere on step 7 - expanding image");
           _removeBearOverlay();
           ShowcaseView.getNamed("gameplay_map").dismiss();
-          Provider.of<OnboardingModel>(context, listen: false).completeStep7();
+          Provider.of<OnboardingModel>(
+            context,
+            listen: false,
+          ).completeStep7();
           _toggle();
         },
       ),
@@ -335,7 +360,10 @@ class _GameplayMapState extends State<GameplayMap>
           print("Tapped anywhere on step 9");
           _removeBearOverlay();
           ShowcaseView.getNamed("gameplay_map").dismiss();
-          Provider.of<OnboardingModel>(context, listen: false).completeStep9();
+          Provider.of<OnboardingModel>(
+            context,
+            listen: false,
+          ).completeStep9();
         },
       ),
     );
@@ -358,7 +386,10 @@ class _GameplayMapState extends State<GameplayMap>
           print("Tapped anywhere on step 10");
           _removeBearOverlay();
           ShowcaseView.getNamed("gameplay_map").dismiss();
-          Provider.of<OnboardingModel>(context, listen: false).completeStep10();
+          Provider.of<OnboardingModel>(
+            context,
+            listen: false,
+          ).completeStep10();
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => BottomNavBar()),
@@ -457,6 +488,7 @@ class _GameplayMapState extends State<GameplayMap>
   @override
   void initState() {
     super.initState();
+    _displayedChallengeId = widget.challengeId;
     setCustomMarkerIcon();
     streamStarted = startPositionStream();
     setStartingHintCircle();
@@ -585,9 +617,7 @@ class _GameplayMapState extends State<GameplayMap>
     } catch (e) {
       // Not registered yet, that's fine
     }
-    ShowcaseView.register(
-      scope: "gameplay_map",
-    );
+    ShowcaseView.register(scope: "gameplay_map");
 
     // Timer: Set up listeners first (before sending requests)
     _setupTimerStartedListener(); // Listen for timer started from backend
@@ -637,11 +667,21 @@ class _GameplayMapState extends State<GameplayMap>
         return;
       }
 
-      // Request backend to start timer (sends StartChallengeTimerDto)
-      timerModel.startTimer(widget.challengeId);
-
-      // Start periodic timer, which won't display until backend responds
-      _startTimerUpdates();
+      // Don't start timer if this route isn't visible (e.g., quiz is on top)
+      // Use post-frame callback since ModalRoute.of(context) can't be called during initState
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final route = ModalRoute.of(context);
+        if (route != null && !route.isCurrent) {
+          print(
+              "Timer not started for challenge ${widget.challengeId} - route not current");
+          return;
+        }
+        // Request backend to start timer (sends StartChallengeTimerDto)
+        timerModel.startTimer(widget.challengeId);
+        // Start periodic timer updates
+        _startTimerUpdates();
+      });
     } else {
       print(
           "No timer for challenge ${widget.challengeId} (timerLength=${challenge?.timerLength})");
@@ -694,19 +734,24 @@ class _GameplayMapState extends State<GameplayMap>
       final wasTimerModalShowing = _timerModalShowing;
       final wasArrivedDialogShowing = _arrivedDialogShowing;
 
-      startingHintCenter = null;
-      hintCenter = null;
-      hintRadius = null;
-      setStartingHintCircle();
+      // Only update displayed challenge if no dialog is showing
+      // This prevents the next challenge from being revealed while
+      // the completion popup is still visible
+      if (!wasArrivedDialogShowing && !wasTimerModalShowing) {
+        _displayedChallengeId = widget.challengeId;
 
-      // Remove timer modal if showing
-      _removeTimerModal();
+        startingHintCenter = null;
+        hintCenter = null;
+        hintRadius = null;
+        setStartingHintCircle();
 
-      // DON'T start timer for new challenge if any modal/dialog was showing
-      // (user is about to navigate away to completion/failed page)
-      if (!wasTimerModalShowing && !wasArrivedDialogShowing) {
+        // Remove timer modal if showing
+        _removeTimerModal();
+
         _initializeTimer();
       }
+      // If dialog is showing, keep displaying the old challenge
+      // The navigation will happen when user clicks the button in the dialog
     }
 
     super.didUpdateWidget(oldWidget);
@@ -721,6 +766,9 @@ class _GameplayMapState extends State<GameplayMap>
     _removeHintBearOverlay();
     positionStream.cancel();
     _disposeController();
+    _locationTimeoutTimer?.cancel(); // Cancel location timeout timer
+    _consecutiveLocationFailures = 0;
+    _locationWarningToastShown = false;
     _timerUpdateTimer?.cancel(); // Cancel periodic timer updates
     _periodicTimerStarted = false;
     _waitCount = 0; //reset wait counter
@@ -739,6 +787,15 @@ class _GameplayMapState extends State<GameplayMap>
     _bearFadeController.dispose();
     _bearSlideOutController.dispose();
     super.dispose();
+  }
+
+  /// Returns true if any dialog/popup is showing (skip location checks to avoid disruption)
+  bool _isDialogOrPopupShowing() {
+    return _arrivedDialogShowing ||
+        _timerModalShowing ||
+        GameplayMap.isCompletionDialogShowing ||
+        isHintDialogOpen ||
+        isHintAnimationInProgress;
   }
 
   Future<void> _disposeController() async {
@@ -819,31 +876,131 @@ class _GameplayMapState extends State<GameplayMap>
         ),
       );
 
-      positionStream = Geolocator.getPositionStream(
-              locationSettings: GeoPoint.getLocationSettings())
-          .listen((Position? newPos) {
-        if (!mounted) {
+      // Start periodic check - verify we can still get location every 10 seconds
+      _locationWarningShown = false;
+      _consecutiveLocationFailures = 0;
+      _locationWarningToastShown = false;
+      _locationTimeoutTimer?.cancel();
+      _locationTimeoutTimer =
+          Timer.periodic(Duration(seconds: 10), (timer) async {
+        if (!mounted || _locationWarningShown) {
+          timer.cancel();
           return;
         }
-        // prints user coordinates - useful for debugging
-        // print(newPos == null
-        //     ? 'Unknown'
-        //     : '${newPos.latitude.toString()}, ${newPos.longitude.toString()}');
 
-        // putting the animate camera logic in here seems to not work
-        // could be useful to debug later?
-        currentLocation = newPos == null
-            ? GeoPoint(_center.latitude, _center.longitude, 0)
-            : GeoPoint(newPos.latitude, newPos.longitude, newPos.heading);
-        setState(() {});
+        // Skip check if any dialog/popup is showing to avoid disruption
+        if (_isDialogOrPopupShowing()) {
+          return;
+        }
+
+        // Try to actually get a position - this will fail if GPS isn't working
+        try {
+          await Geolocator.getCurrentPosition(
+            desiredAccuracy: LocationAccuracy.low,
+            timeLimit: Duration(seconds: _locationTimeoutSeconds),
+          );
+          // Success - reset failure counter
+          _consecutiveLocationFailures = 0;
+          _locationWarningToastShown = false;
+        } catch (e) {
+          // Failed to get position - increment failure counter
+          _consecutiveLocationFailures++;
+
+          // Show warning toast after 2 failures (but don't navigate away yet)
+          if (_consecutiveLocationFailures == 2 &&
+              !_locationWarningToastShown) {
+            _locationWarningToastShown = true;
+            displayToast("Location signal weak. Retrying...", Status.info);
+          }
+
+          // Only kick out after max consecutive failures
+          if (_consecutiveLocationFailures >= _maxConsecutiveFailures) {
+            if (mounted &&
+                !_locationWarningShown &&
+                !_isDialogOrPopupShowing()) {
+              _locationWarningShown = true;
+              timer.cancel();
+              displayToast(
+                "Location unavailable. Returning to home.",
+                Status.error,
+              );
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (context) => BottomNavBar()),
+                (route) => false,
+              );
+            }
+          }
+        }
       });
+
+      positionStream = Geolocator.getPositionStream(
+        locationSettings: GeoPoint.getLocationSettings(),
+      ).listen(
+        (Position? newPos) {
+          if (!mounted) {
+            return;
+          }
+
+          currentLocation = newPos == null
+              ? GeoPoint(_center.latitude, _center.longitude, 0)
+              : GeoPoint(newPos.latitude, newPos.longitude, newPos.heading);
+
+          // Stream success - reset failure counter
+          _consecutiveLocationFailures = 0;
+          _locationWarningToastShown = false;
+
+          setState(() {});
+        },
+        onError: (error) {
+          // Location stream error - don't immediately navigate away
+          // Skip error handling if dialog is showing
+          if (_isDialogOrPopupShowing()) {
+            return;
+          }
+
+          _consecutiveLocationFailures++;
+
+          // Show warning on first failure
+          if (_consecutiveLocationFailures == 1 &&
+              !_locationWarningToastShown) {
+            _locationWarningToastShown = true;
+            displayToast(
+                "Location signal interrupted. Reconnecting...", Status.info);
+          }
+
+          // Only take action after multiple failures
+          if (_consecutiveLocationFailures >= _maxConsecutiveFailures) {
+            if (mounted &&
+                !_locationWarningShown &&
+                !_isDialogOrPopupShowing()) {
+              _locationWarningShown = true;
+              displayToast(
+                "Location lost. Returning to home.",
+                Status.error,
+              );
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (context) => BottomNavBar()),
+                (route) => false,
+              );
+            }
+          }
+        },
+      );
 
       positionStream.onData((newPos) {
         if (!mounted) {
           return;
         }
-        currentLocation =
-            GeoPoint(newPos.latitude, newPos.longitude, newPos.heading);
+
+        currentLocation = GeoPoint(
+          newPos.latitude,
+          newPos.longitude,
+          newPos.heading,
+        );
+
+        // Reset failure counter on successful location update
+        _consecutiveLocationFailures = 0;
+        _locationWarningToastShown = false;
 
         // upon new user location data, moves map camera to be centered around
         // new position and sets zoom.
@@ -860,23 +1017,10 @@ class _GameplayMapState extends State<GameplayMap>
 
       return true;
     } catch (e) {
-      print('Failed to get location: $e');
-
-      displayToast("Not able to receive location. Please check permissions.",
-          Status.error);
-
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        Future.delayed(Duration(seconds: 1), () {
-          if (mounted) {
-            // if the page state is still active, navigate to bottom navbar
-            Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(builder: (context) => BottomNavBar()),
-              (route) => false,
-            );
-          }
-        });
-      });
-
+      // Location was pre-checked in preview.dart before joining,
+      // so this is likely a transient error. Log it but don't alarm the user.
+      // The periodic check and stream error handlers will catch real issues.
+      print('Failed to get initial location in gameplay_map: $e');
       return false;
     }
   }
@@ -912,8 +1056,11 @@ class _GameplayMapState extends State<GameplayMap>
       if (!mounted) {
         return;
       }
-      currentLocation =
-          GeoPoint(newPos.latitude, newPos.longitude, newPos.heading);
+      currentLocation = GeoPoint(
+        newPos.latitude,
+        newPos.longitude,
+        newPos.heading,
+      );
 
       googleMapController.animateCamera(
         CameraUpdate.newCameraPosition(
@@ -936,18 +1083,26 @@ class _GameplayMapState extends State<GameplayMap>
       if (!mounted) {
         return;
       }
-      currentLocation =
-          GeoPoint(newPos.latitude, newPos.longitude, newPos.heading);
+      currentLocation = GeoPoint(
+        newPos.latitude,
+        newPos.longitude,
+        newPos.heading,
+      );
       setState(() {});
     });
   }
 
   Future<Uint8List> getBytesFromAsset(String path, int width) async {
     ByteData data = await rootBundle.load(path);
-    ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(),
-        targetWidth: width, targetHeight: width);
+    ui.Codec codec = await ui.instantiateImageCodec(
+      data.buffer.asUint8List(),
+      targetWidth: width,
+      targetHeight: width,
+    );
     ui.FrameInfo fi = await codec.getNextFrame();
-    return (await fi.image.toByteData(format: ui.ImageByteFormat.png))!
+    return (await fi.image.toByteData(
+      format: ui.ImageByteFormat.png,
+    ))!
         .buffer
         .asUint8List();
   }
@@ -958,8 +1113,10 @@ class _GameplayMapState extends State<GameplayMap>
    */
   BitmapDescriptor currentLocationIcon = BitmapDescriptor.defaultMarker;
   void setCustomMarkerIcon() async {
-    Uint8List newMarker =
-        await getBytesFromAsset('assets/icons/userlocation.png', 200);
+    Uint8List newMarker = await getBytesFromAsset(
+      'assets/icons/userlocation.png',
+      200,
+    );
     currentLocationIcon = BitmapDescriptor.fromBytes(newMarker);
     setState(() {});
   }
@@ -1439,8 +1596,9 @@ class _GameplayMapState extends State<GameplayMap>
           // (optional) immediately kick off Step 9
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
-              ShowcaseView.getNamed("gameplay_map")
-                  .startShowCase([onboarding.step9RecenterButtonKey]);
+              ShowcaseView.getNamed(
+                "gameplay_map",
+              ).startShowCase([onboarding.step9RecenterButtonKey]);
               _showRecenterBearOverlay();
             }
           });
@@ -1486,7 +1644,7 @@ class _GameplayMapState extends State<GameplayMap>
                   ),
                 ),
               ),
-            )
+            ),
           ],
         ),
       ),
@@ -1519,9 +1677,13 @@ class _GameplayMapState extends State<GameplayMap>
     double screenHeight,
   ) {
     // 1. Build base SVG icon
-    Widget svgIcon = SvgPicture.asset("assets/icons/maprecenter.svg",
-        colorFilter: ColorFilter.mode(
-            Color.fromARGB(255, 131, 90, 124), BlendMode.srcIn));
+    Widget svgIcon = SvgPicture.asset(
+      "assets/icons/maprecenter.svg",
+      colorFilter: ColorFilter.mode(
+        Color.fromARGB(255, 131, 90, 124),
+        BlendMode.srcIn,
+      ),
+    );
 
     // 2. Step 9: Wrap just the SVG with showcase
     if (onboarding.step8ExpandedImageComplete &&
@@ -1550,10 +1712,7 @@ class _GameplayMapState extends State<GameplayMap>
     );
 
     // 4. Add padding outside everything
-    return Padding(
-      padding: EdgeInsets.only(bottom: 150.0),
-      child: button,
-    );
+    return Padding(padding: EdgeInsets.only(bottom: 150.0), child: button);
   }
 
   // Build hint button with optional onboarding showcase
@@ -1598,10 +1757,7 @@ class _GameplayMapState extends State<GameplayMap>
               shape: BoxShape.circle,
               color: Colors.white,
               boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.3),
-                  blurRadius: 5,
-                ),
+                BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 5),
               ],
             ),
             child: Text(
@@ -1631,10 +1787,7 @@ class _GameplayMapState extends State<GameplayMap>
     }
 
     // 3. Add padding outside showcase
-    return Container(
-      padding: EdgeInsets.only(bottom: 15.0),
-      child: hintButton,
-    );
+    return Container(padding: EdgeInsets.only(bottom: 15.0), child: hintButton);
   }
 
   @override
@@ -1651,25 +1804,37 @@ class _GameplayMapState extends State<GameplayMap>
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        colorSchemeSeed: Colors.green[700],
-      ),
+      theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.green[700]),
       home: Consumer5<EventModel, GroupModel, TrackerModel, ChallengeModel,
-              ApiClient>(
-          builder: (context, eventModel, groupModel, trackerModel,
-              challengeModel, apiClient, child) {
-        EventTrackerDto? tracker =
-            trackerModel.trackerByEventId(groupModel.curEventId ?? "");
+          ApiClient>(builder: (
+        context,
+        eventModel,
+        groupModel,
+        trackerModel,
+        challengeModel,
+        apiClient,
+        child,
+      ) {
+        // Use displayed challenge ID to prevent showing next challenge while dialog is open
+        final effectiveChallengeId =
+            _displayedChallengeId ?? widget.challengeId;
+
+        EventTrackerDto? tracker = trackerModel.trackerByEventId(
+          groupModel.curEventId ?? "",
+        );
         if (tracker == null) {
           displayToast("Error getting event tracker", Status.error);
-        } else if ((tracker.curChallengeId ?? '') == widget.challengeId) {
+        } else if ((tracker.curChallengeId ?? '') == effectiveChallengeId) {
           numHintsLeft = totalHints - tracker.hintsUsed;
         }
-        var challenge = challengeModel.getChallengeById(widget.challengeId);
+        var challenge = challengeModel.getChallengeById(effectiveChallengeId);
 
         //re-initialize timer if challenge data loads after initState
-        if (challenge != null && !hasTimer && totalTime == 0) {
+        // Only re-initialize if no dialog is showing (to prevent starting timer for next challenge)
+        if (challenge != null &&
+            !hasTimer &&
+            totalTime == 0 &&
+            !_arrivedDialogShowing) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted &&
                 challenge.timerLength != null &&
@@ -1694,8 +1859,9 @@ class _GameplayMapState extends State<GameplayMap>
             !onboarding.step7ImageToggleComplete) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
-              ShowcaseView.getNamed("gameplay_map")
-                  .startShowCase([onboarding.step7ImageToggleKey]);
+              ShowcaseView.getNamed(
+                "gameplay_map",
+              ).startShowCase([onboarding.step7ImageToggleKey]);
               // Show bear overlay on top of showcase
               _showImageToggleBearOverlay();
             }
@@ -1708,8 +1874,9 @@ class _GameplayMapState extends State<GameplayMap>
             !onboarding.step8ExpandedImageComplete) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
-              ShowcaseView.getNamed("gameplay_map")
-                  .startShowCase([onboarding.step8ExpandedImageKey]);
+              ShowcaseView.getNamed(
+                "gameplay_map",
+              ).startShowCase([onboarding.step8ExpandedImageKey]);
               // No bear overlay for step 8 - just transparent full-screen tap
             }
           });
@@ -1720,8 +1887,9 @@ class _GameplayMapState extends State<GameplayMap>
             !onboarding.step9RecenterButtonComplete) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
-              ShowcaseView.getNamed("gameplay_map")
-                  .startShowCase([onboarding.step9RecenterButtonKey]);
+              ShowcaseView.getNamed(
+                "gameplay_map",
+              ).startShowCase([onboarding.step9RecenterButtonKey]);
               // Show bear overlay on top of showcase
               _showRecenterBearOverlay();
             }
@@ -1733,8 +1901,9 @@ class _GameplayMapState extends State<GameplayMap>
             !onboarding.step10HintButtonComplete) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
-              ShowcaseView.getNamed("gameplay_map")
-                  .startShowCase([onboarding.step10HintButtonKey]);
+              ShowcaseView.getNamed(
+                "gameplay_map",
+              ).startShowCase([onboarding.step10HintButtonKey]);
               // Show bear overlay on top of showcase
               _showHintBearOverlay();
             }
@@ -1745,23 +1914,25 @@ class _GameplayMapState extends State<GameplayMap>
           alignment: Alignment.bottomCenter,
           children: [
             StreamBuilder(
-                stream: client.clientApi.disconnectedStream,
-                builder: ((context, snapshot) {
-                  // Redirect to login if server api is null
-                  if (client.serverApi == null) {
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      // Clear entire navigation stack and push to login screen
-                      Navigator.of(context).pushAndRemoveUntil(
-                        MaterialPageRoute(
-                            builder: (context) => SplashPageWidget()),
-                        (route) => false,
-                      );
-                      displayToast("Signed out", Status.success);
-                    });
-                  }
+              stream: client.clientApi.disconnectedStream,
+              builder: ((context, snapshot) {
+                // Redirect to login if server api is null
+                if (client.serverApi == null) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    // Clear entire navigation stack and push to login screen
+                    Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(
+                        builder: (context) => SplashPageWidget(),
+                      ),
+                      (route) => false,
+                    );
+                    displayToast("Signed out", Status.success);
+                  });
+                }
 
-                  return Container();
-                })),
+                return Container();
+              }),
+            ),
             Listener(
               onPointerDown: (e) {
                 cancelRecenterCamera();
@@ -1781,7 +1952,10 @@ class _GameplayMapState extends State<GameplayMap>
                 initialCameraPosition: CameraPosition(
                   target: currentLocation == null
                       ? _center
-                      : LatLng(currentLocation!.lat, currentLocation!.long),
+                      : LatLng(
+                          currentLocation!.lat,
+                          currentLocation!.long,
+                        ),
                   zoom: 16,
                 ),
                 markers: {
@@ -1790,7 +1964,10 @@ class _GameplayMapState extends State<GameplayMap>
                     icon: currentLocationIcon,
                     position: currentLocation == null
                         ? _center
-                        : LatLng(currentLocation!.lat, currentLocation!.long),
+                        : LatLng(
+                            currentLocation!.lat,
+                            currentLocation!.long,
+                          ),
                     anchor: Offset(0.5, 0.5),
                     rotation: _compassHeading,
                   ),
@@ -1820,16 +1997,20 @@ class _GameplayMapState extends State<GameplayMap>
                       if (radiusValue.isNaN ||
                           radiusValue.isInfinite ||
                           radiusValue <= 0) {
-                        return widget.awardingRadius
-                            .clamp(10.0, defaultHintRadius);
+                        return widget.awardingRadius.clamp(
+                          10.0,
+                          defaultHintRadius,
+                        );
                       }
                       return radiusValue.clamp(
-                          widget.awardingRadius, defaultHintRadius);
+                        widget.awardingRadius,
+                        defaultHintRadius,
+                      );
                     }(),
                     strokeColor: Color.fromARGB(80, 30, 41, 143),
                     strokeWidth: 2,
                     fillColor: Color.fromARGB(80, 83, 134, 237),
-                  )
+                  ),
                 },
               ),
             ),
@@ -1910,8 +2091,12 @@ class _GameplayMapState extends State<GameplayMap>
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color.fromARGB(255, 237, 86, 86),
-                  padding:
-                      EdgeInsets.only(right: 15, left: 15, top: 10, bottom: 10),
+                  padding: EdgeInsets.only(
+                    right: 15,
+                    left: 15,
+                    top: 10,
+                    bottom: 10,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
@@ -1934,11 +2119,22 @@ class _GameplayMapState extends State<GameplayMap>
 
                   bool hasArrived = checkArrived();
                   String? chalName;
+
+                  // Capture challenge ID BEFORE calling completedChallenge
+                  // because the backend will update tracker to next challenge
+                  final chalId = widget.challengeId;
+
                   if (hasArrived) {
                     if (tracker == null || challenge == null) {
                       displayToast("An error occurred while getting challenge",
                           Status.error);
                     } else {
+                      // Set flags BEFORE calling completedChallenge so that
+                      // didUpdateWidget knows not to update _displayedChallengeId
+                      // when the backend sends the tracker update
+                      _arrivedDialogShowing = true;
+                      GameplayMap.isCompletionDialogShowing = true;
+
                       chalName = await apiClient.serverApi
                           ?.completedChallenge(CompletedChallengeDto());
                     }
@@ -1950,8 +2146,8 @@ class _GameplayMapState extends State<GameplayMap>
                       hasTimer = false;
                     });
                   }
-                  final chalId = widget.challengeId;
-                  // Track that dialog is showing (prevents timer from starting for next challenge)
+
+                  // Also set for non-arrived case (dialog still shows)
                   _arrivedDialogShowing = true;
                   showDialog(
                     context: context,
@@ -1963,14 +2159,18 @@ class _GameplayMapState extends State<GameplayMap>
                           elevation: 16,
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(10),
-                            child: displayDialog(
-                                context, hasArrived, chalId, chalName),
+                            child: ArrivalDialog(
+                              hasArrived: hasArrived,
+                              challengeId: chalId,
+                              challengeName: chalName,
+                            ),
                           ),
                         ),
                       );
                     },
                   ).then((_) {
-                    // Re-enable the button and clear dialog flag after the dialog is closed
+                    // Re-enable the button and clear dialog flags after the dialog is closed
+                    GameplayMap.isCompletionDialogShowing = false;
                     setState(() {
                       isArrivedButtonEnabled = true;
                       _arrivedDialogShowing = false;
@@ -2041,7 +2241,9 @@ class _GameplayMapState extends State<GameplayMap>
 
     _timerWarningSubscription =
         client.clientApi.timerWarningStream.listen((event) {
-      if (event.challengeId == widget.challengeId && mounted) {
+      // Use displayed challenge ID to handle case where widget may have changed
+      final effectiveChallengeId = _displayedChallengeId ?? widget.challengeId;
+      if (event.challengeId == effectiveChallengeId && mounted) {
         final timeLeft = _formatTimeRemaining(event.milestone);
         _displayTimerWarning(timeLeft);
       }
@@ -2059,10 +2261,14 @@ class _GameplayMapState extends State<GameplayMap>
 
     _timerCompletedSubscription =
         client.clientApi.timerCompletedStream.listen((event) {
-      if (event.challengeId == widget.challengeId &&
+      // Use displayed challenge ID to handle case where widget may have changed
+      final effectiveChallengeId = _displayedChallengeId ?? widget.challengeId;
+      if (event.challengeId == effectiveChallengeId &&
           mounted &&
           !_timerModalShowing) {
         _timerModalShowing = true;
+        // Also set static flag so GameplayPage freezes its display
+        GameplayMap.isCompletionDialogShowing = true;
 
         _handleTimerExpiration();
       } else {}
@@ -2081,7 +2287,9 @@ class _GameplayMapState extends State<GameplayMap>
 
     _timerExtendedSubscription =
         client.clientApi.timerExtendedStream.listen((event) {
-      if (event.challengeId == widget.challengeId && mounted) {
+      // Use displayed challenge ID to handle case where widget may have changed
+      final effectiveChallengeId = _displayedChallengeId ?? widget.challengeId;
+      if (event.challengeId == effectiveChallengeId && mounted) {
         // update timer display when timer is extended
         final timerModel = Provider.of<TimerModel>(context, listen: false);
         final timeRemaining = timerModel.getTimeRemaining();
@@ -2181,6 +2389,11 @@ class _GameplayMapState extends State<GameplayMap>
     _extensionAnimationController = null;
     _extensionAnimation = null;
     _timerModalShowing = false;
+    // Reset button flags when modal closes
+    GameplayMap.isExtendingTimer = false;
+    _isProcessingResults = false;
+    // Clear static flag so GameplayPage can update again
+    GameplayMap.isCompletionDialogShowing = false;
   }
 
   /**
@@ -2249,42 +2462,73 @@ class _GameplayMapState extends State<GameplayMap>
                     width: screenWidth * 0.210, // ~82px
                     height: screenHeight * 0.047, // ~40px on 852px screen
                     child: ElevatedButton(
-                      onPressed: () {
-                        final timerModel =
-                            Provider.of<TimerModel>(context, listen: false);
-                        final client =
-                            Provider.of<ApiClient>(context, listen: false);
+                      onPressed: _isProcessingResults
+                          ? null // Disable while processing
+                          : () {
+                              // Prevent double-clicks
+                              if (_isProcessingResults) return;
+                              _isProcessingResults = true;
 
-                        // Listen for challengeFailed event from backend, then navigate
-                        late StreamSubscription<ChallengeFailedDto>
-                            subscription;
-                        subscription = client.clientApi.challengeFailedStream
-                            .listen((event) {
-                          if (event.challengeId == widget.challengeId) {
-                            subscription.cancel();
+                              // Capture challenge ID at button press time
+                              final capturedChallengeId =
+                                  _displayedChallengeId ?? widget.challengeId;
 
-                            // Remove overlay before navigating
-                            if (_timerModalOverlay != null) {
-                              _timerModalOverlay?.remove();
-                              _timerModalOverlay?.dispose();
-                              _timerModalOverlay = null;
-                            }
-                            _timerModalShowing = false;
+                              final timerModel = Provider.of<TimerModel>(
+                                  context,
+                                  listen: false);
+                              final client = Provider.of<ApiClient>(context,
+                                  listen: false);
+                              final groupModel = Provider.of<GroupModel>(
+                                  context,
+                                  listen: false);
 
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ChallengeFailedPage(
-                                  challengeId: widget.challengeId,
-                                ),
-                              ),
-                            );
-                          }
-                        });
+                              Timer? timeoutTimer;
+                              StreamSubscription? trackerSubscription;
 
-                        // Tell backend to immediately fail the challenge (skip grace period)
-                        timerModel.completeTimer(widget.challengeId);
-                      },
+                              void cleanup() {
+                                timeoutTimer?.cancel();
+                                trackerSubscription?.cancel();
+                              }
+
+                              void navigateToResults() {
+                                cleanup();
+                                _removeTimerModal();
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ChallengeFailedPage(
+                                      challengeId: capturedChallengeId,
+                                    ),
+                                  ),
+                                );
+                              }
+
+                              // Timeout after 2 seconds - navigate anyway
+                              timeoutTimer = Timer(Duration(seconds: 2), () {
+                                navigateToResults();
+                              });
+
+                              // Wait for tracker update that includes our failed challenge
+                              final eventId = groupModel.curEventId;
+                              trackerSubscription = client
+                                  .clientApi.updateEventTrackerDataStream
+                                  .listen((tracker) {
+                                if (tracker.eventId == eventId) {
+                                  // Check if our challenge is now in prevChallenges
+                                  final hasFailedChallenge =
+                                      tracker.prevChallenges.any(
+                                    (prev) =>
+                                        prev.challengeId == capturedChallengeId,
+                                  );
+                                  if (hasFailedChallenge) {
+                                    navigateToResults();
+                                  }
+                                }
+                              });
+
+                              // Tell backend to fail the challenge
+                              timerModel.completeTimer(capturedChallengeId);
+                            },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
                         side:
@@ -2355,9 +2599,10 @@ class _GameplayMapState extends State<GameplayMap>
                                         Status.error);
                                   }
                                 : () async {
+                                    // Guard is inside _extendTimer() - it will return false if already running
                                     final success = await _extendTimer();
                                     if (success) {
-                                      _removeTimerModal(); // Close modal if timer extended successfully; otherwise leave open for user to return home/retry extending timer
+                                      _removeTimerModal();
                                     }
                                   },
                             style: ElevatedButton.styleFrom(
@@ -2418,6 +2663,20 @@ class _GameplayMapState extends State<GameplayMap>
    * Returns true if extension succeeds (timer is extended by 5 minutes), false if it fails
    */
   Future<bool> _extendTimer() async {
+    // Guard: if already extending, don't run again
+    // Once clicked, button stays disabled until modal closes
+    print(
+        '_extendTimer called, GameplayMap.isExtendingTimer = $GameplayMap.isExtendingTimer');
+    if (GameplayMap.isExtendingTimer) {
+      print('_extendTimer: BLOCKED - already extending');
+      return false;
+    }
+    GameplayMap.isExtendingTimer = true;
+    print('_extendTimer: PROCEEDING - set flag to true');
+
+    // Use displayed challenge ID to handle case where widget.challengeId may have changed
+    final challengeId = _displayedChallengeId ?? widget.challengeId;
+
     final timerModel = Provider.of<TimerModel>(context, listen: false);
 
     // Get current end time and extend timer
@@ -2429,8 +2688,7 @@ class _GameplayMapState extends State<GameplayMap>
 
     // Extend timer by 5 minutes (300 seconds)
     final newEndTime = currentEndTime.add(Duration(seconds: 300));
-    final errorMessage =
-        await timerModel.extendTimer(widget.challengeId, newEndTime);
+    final errorMessage = await timerModel.extendTimer(challengeId, newEndTime);
 
     if (errorMessage != null) {
       // Check if it's specifically an insufficient coins error
@@ -2451,6 +2709,8 @@ class _GameplayMapState extends State<GameplayMap>
       hasTimer = true;
     });
     return true;
+    // Note: GameplayMap.isExtendingTimer is NOT reset here - it stays true until modal closes
+    // This prevents any possibility of multiple extensions from rapid clicks
   }
 
   /** Returns whether the user is at the challenge location */

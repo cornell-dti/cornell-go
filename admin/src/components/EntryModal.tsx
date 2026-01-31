@@ -42,13 +42,30 @@ export type CheckboxNumberEntryForm = {
   numberLabel: string;
 };
 
+export type AnswersEntryForm = {
+  name: string;
+  answers: Array<{ text: string; isCorrect: boolean }>;
+  minAnswers: number;
+  maxAnswers: number;
+};
+
+export type OptionWithCustomEntryForm = {
+  name: string;
+  value: number;
+  options: string[];
+  customValue: string;
+  customOptionLabel: string;
+};
+
 export type EntryForm =
   | OptionEntryForm
   | FreeEntryForm
   | NumberEntryForm
   | MapEntryForm
   | DateEntryForm
-  | CheckboxNumberEntryForm;
+  | CheckboxNumberEntryForm
+  | AnswersEntryForm
+  | OptionWithCustomEntryForm;
 
 const EntryBox = styled.div`
   margin-bottom: 12px;
@@ -308,6 +325,167 @@ function MapEntryFormBox(props: { form: MapEntryForm }) {
   );
 }
 
+// Styled components for AnswersEntryForm
+const AnswerRow = styled.div`
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  gap: 8px;
+`;
+
+const AnswerInput = styled.input`
+  flex: 1;
+  font-size: 16px;
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+`;
+
+const CorrectRadio = styled.input`
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+`;
+
+const AnswerButton = styled.button`
+  padding: 4px 12px;
+  cursor: pointer;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #f5f5f5;
+  &:hover {
+    background: #e0e0e0;
+  }
+`;
+
+const AnswersContainer = styled.div`
+  margin-bottom: 16px;
+`;
+
+function AnswersEntryFormBox(props: { form: AnswersEntryForm }) {
+  const [answers, setAnswers] = useState(props.form.answers);
+
+  useEffect(() => {
+    setAnswers([...props.form.answers]);
+  }, [props.form]);
+
+  const updateAnswerText = (index: number, text: string) => {
+    const newAnswers = [...answers];
+    newAnswers[index].text = text;
+    setAnswers(newAnswers);
+    props.form.answers = newAnswers;
+  };
+
+  const toggleCorrect = (index: number) => {
+    const newAnswers = answers.map((a, i) => ({
+      ...a,
+      isCorrect: i === index,
+    }));
+    setAnswers(newAnswers);
+    props.form.answers = newAnswers;
+  };
+
+  const addAnswer = () => {
+    if (answers.length < props.form.maxAnswers) {
+      const newAnswers = [...answers, { text: '', isCorrect: false }];
+      setAnswers(newAnswers);
+      props.form.answers = newAnswers;
+    }
+  };
+
+  const removeAnswer = (index: number) => {
+    if (answers.length > props.form.minAnswers) {
+      const newAnswers = answers.filter((_, i) => i !== index);
+      if (!newAnswers.some(a => a.isCorrect) && newAnswers.length > 0) {
+        newAnswers[0].isCorrect = true;
+      }
+      setAnswers(newAnswers);
+      props.form.answers = newAnswers;
+    }
+  };
+
+  return (
+    <AnswersContainer>
+      <div style={{ marginBottom: 8 }}>{props.form.name}:</div>
+      {answers.map((answer, index) => (
+        <AnswerRow key={index}>
+          <CorrectRadio
+            type="radio"
+            name="correctAnswer"
+            checked={answer.isCorrect}
+            onChange={() => toggleCorrect(index)}
+            title="Mark as correct"
+          />
+          <AnswerInput
+            value={answer.text}
+            placeholder={`Answer ${index + 1}`}
+            onChange={e => updateAnswerText(index, e.target.value)}
+          />
+          {answers.length > props.form.minAnswers && (
+            <AnswerButton onClick={() => removeAnswer(index)}>-</AnswerButton>
+          )}
+        </AnswerRow>
+      ))}
+      {answers.length < props.form.maxAnswers && (
+        <AnswerButton onClick={addAnswer}>+ Add Answer</AnswerButton>
+      )}
+    </AnswersContainer>
+  );
+}
+
+function OptionWithCustomEntryFormBox(props: {
+  form: OptionWithCustomEntryForm;
+}) {
+  const [selectedIndex, setSelectedIndex] = useState(props.form.value);
+  const [customText, setCustomText] = useState(props.form.customValue);
+
+  const isCustomSelected = selectedIndex === props.form.options.length;
+
+  useEffect(() => {
+    setSelectedIndex(props.form.value);
+    setCustomText(props.form.customValue);
+  }, [props.form]);
+
+  return (
+    <>
+      <EntryBox>
+        <label htmlFor={props.form.name}>{props.form.name + ':'}</label>
+        <EntrySelect
+          name={props.form.name}
+          value={
+            isCustomSelected
+              ? props.form.customOptionLabel
+              : props.form.options[selectedIndex]
+          }
+          onChange={e => {
+            const idx = e.target.selectedIndex;
+            setSelectedIndex(idx);
+            props.form.value = idx;
+          }}
+        >
+          {props.form.options.map(opt => (
+            <option key={opt}>{opt}</option>
+          ))}
+          <option>{props.form.customOptionLabel}</option>
+        </EntrySelect>
+      </EntryBox>
+      {isCustomSelected && (
+        <EntryBox>
+          <span>Custom value:</span>
+          <EntryTextBox
+            value={customText}
+            placeholder="Enter custom category"
+            onChange={e => {
+              setCustomText(e.target.value);
+              props.form.customValue = e.target.value;
+            }}
+          />
+        </EntryBox>
+      )}
+    </>
+  );
+}
+
 export function EntryModal(props: {
   title: string;
   form: EntryForm[];
@@ -327,7 +505,11 @@ export function EntryModal(props: {
       }}
     >
       {props.form.map(form => {
-        if ('options' in form) {
+        if ('answers' in form) {
+          return <AnswersEntryFormBox form={form} key={form.name} />;
+        } else if ('customOptionLabel' in form) {
+          return <OptionWithCustomEntryFormBox form={form} key={form.name} />;
+        } else if ('options' in form) {
           return <OptionEntryFormBox form={form} key={form.name} />;
         } else if ('characterLimit' in form) {
           return <FreeEntryFormBox form={form} key={form.name} />;

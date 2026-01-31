@@ -13,8 +13,10 @@ class GroupModel extends ChangeNotifier {
       if (!(event.group is String)) {
         group = event.group;
         curEventId = event.group.curEventId;
-        members.removeWhere((element) =>
-            event.group.members?.any((mem) => mem.id == element.id) ?? false);
+        members.removeWhere(
+          (element) =>
+              event.group.members?.any((mem) => mem.id == element.id) ?? false,
+        );
         members.clear();
         members.sort((mem1, mem2) => mem1.points - mem2.points);
         notifyListeners();

@@ -23,8 +23,9 @@ class UserModel extends ChangeNotifier {
     client.clientApi.connectedStream.listen((event) {
       userData = null;
       client.serverApi?.requestUserData(RequestUserDataDto());
-      client.serverApi
-          ?.requestOrganizationData(RequestOrganizationDataDto(admin: false));
+      client.serverApi?.requestOrganizationData(
+        RequestOrganizationDataDto(admin: false),
+      );
     });
 
     client.clientApi.disconnectedStream.listen((event) {
@@ -72,15 +73,24 @@ class UserModel extends ChangeNotifier {
     return achIds.toList();
   }
 
-  void updateUserData(String id, String? username, String? college,
-      String? major, String? year) {
-    _client.serverApi?.updateUserData(UpdateUserDataDto(
+  void updateUserData(
+    String id,
+    String? username,
+    String? college,
+    String? major,
+    String? year,
+  ) {
+    _client.serverApi?.updateUserData(
+      UpdateUserDataDto(
         user: UserDto(
-            id: id,
-            username: username,
-            college: college,
-            major: major,
-            year: year),
-        deleted: false));
+          id: id,
+          username: username,
+          college: college,
+          major: major,
+          year: year,
+        ),
+        deleted: false,
+      ),
+    );
   }
 }

@@ -14,6 +14,7 @@ import {
   UserDto,
   OrganizationDto,
   AchievementDto,
+  QuizQuestionDto,
 } from '../all.dto';
 
 import { ServerApi } from './ServerApi';
@@ -27,6 +28,7 @@ const defaultData = {
   organizations: new Map<string, OrganizationDto>(),
   users: new Map<string, UserDto>(),
   groups: new Map<string, GroupDto>(),
+  quizQuestions: new Map<string, QuizQuestionDto>(),
   selectedEvent: '' as string,
   selectedOrg: '' as string,
   errors: new Map<string, UpdateErrorDto>(),
@@ -80,6 +82,17 @@ const defaultData = {
   async deleteGroup(id: string): Promise<boolean | undefined> {
     return undefined;
   },
+  async updateQuizQuestion(
+    question: QuizQuestionDto,
+  ): Promise<string | undefined> {
+    return undefined;
+  },
+  async deleteQuizQuestion(id: string): Promise<string | undefined> {
+    return undefined;
+  },
+  async requestQuizQuestions(challengeId: string): Promise<number | undefined> {
+    return undefined;
+  },
 };
 
 export const ServerDataContext = createContext(defaultData);
@@ -97,21 +110,27 @@ export function ServerDataProvider(props: { children: ReactNode }) {
   const methods = useMemo(
     () => ({
       selectEvent(id: string) {
-        setServerData({ ...serverData, selectedEvent: id });
-        sock.requestChallengeData({
-          challenges: serverData.events.get(id)?.challenges ?? [],
+        setServerData(prev => {
+          sock.requestChallengeData({
+            challenges: prev.events.get(id)?.challenges ?? [],
+          });
+          return { ...prev, selectedEvent: id };
         });
       },
       selectOrg(id: string) {
-        setServerData({ ...serverData, selectedOrg: id, selectedEvent: '' });
-        sock.requestEventData({
-          events: serverData.organizations.get(id)?.events ?? [],
+        setServerData(prev => {
+          sock.requestEventData({
+            events: prev.organizations.get(id)?.events ?? [],
+          });
+          return { ...prev, selectedOrg: id, selectedEvent: '' };
         });
       },
       selectOrganization(id: string) {
-        setServerData({ ...serverData, selectedOrg: id, selectedEvent: '' });
-        sock.requestEventData({
-          events: serverData.organizations.get(id)?.events ?? [],
+        setServerData(prev => {
+          sock.requestEventData({
+            events: prev.organizations.get(id)?.events ?? [],
+          });
+          return { ...prev, selectedOrg: id, selectedEvent: '' };
         });
       },
       updateChallenge(challenge: ChallengeDto) {
@@ -136,8 +155,11 @@ export function ServerDataProvider(props: { children: ReactNode }) {
         });
       },
       deleteError(id: string) {
-        serverData.errors.delete(id);
-        setTimeout(() => setServerData({ ...serverData }), 0);
+        setServerData(prev => {
+          const newErrors = new Map(prev.errors);
+          newErrors.delete(id);
+          return { ...prev, errors: newErrors };
+        });
       },
       updateUser(user: UserDto) {
         return sock.updateUserData({ user, deleted: false });
@@ -169,8 +191,17 @@ export function ServerDataProvider(props: { children: ReactNode }) {
           deleted: true,
         });
       },
+      updateQuizQuestion(question: QuizQuestionDto) {
+        return sock.updateQuizQuestionData({ question, deleted: false });
+      },
+      deleteQuizQuestion(id: string) {
+        return sock.updateQuizQuestionData({ question: { id }, deleted: true });
+      },
+      requestQuizQuestions(challengeId: string) {
+        return sock.requestQuizQuestions({ challengeId });
+      },
     }),
-    [serverData, setServerData, sock],
+    [sock],
   );
 
   useEffect(() => {
@@ -182,116 +213,146 @@ export function ServerDataProvider(props: { children: ReactNode }) {
   /** Update defaultData object when ServerApi websocket receives a response */
   useEffect(() => {
     sock.onUpdateAchievementData(data => {
-      if (data.deleted) {
-        serverData.achievements.delete(data.achievement.id);
-      } else {
-        serverData.achievements.set(
-          (data.achievement as AchievementDto).id,
-          data.achievement as AchievementDto,
-        );
-      }
-
-      setTimeout(() => setServerData({ ...serverData }), 0);
+      setServerData(prev => {
+        const newAchievements = new Map(prev.achievements);
+        if (data.deleted) {
+          newAchievements.delete(data.achievement.id);
+        } else {
+          newAchievements.set(
+            (data.achievement as AchievementDto).id,
+            data.achievement as AchievementDto,
+          );
+        }
+        return { ...prev, achievements: newAchievements };
+      });
     });
     sock.onUpdateEventData(data => {
-      if (data.deleted) {
-        serverData.events.delete(data.event.id);
-        if (data.event.id === serverData.selectedEvent) {
-          serverData.selectedEvent = '';
+      setServerData(prev => {
+        const newEvents = new Map(prev.events);
+        let newSelectedEvent = prev.selectedEvent;
+        if (data.deleted) {
+          newEvents.delete(data.event.id);
+          if (data.event.id === prev.selectedEvent) {
+            newSelectedEvent = '';
+          }
+        } else {
+          const oldChallenges =
+            prev.events.get((data.event as EventDto).id)?.challenges ?? [];
+
+          sock.requestChallengeData({
+            challenges:
+              (data.event as EventDto).challenges?.filter(
+                (chal: string) => !oldChallenges.includes(chal),
+              ) ?? [],
+          });
+
+          newEvents.set(
+            (data.event as EventDto).id,
+            data.event as EventDto,
+          );
         }
-      } else {
-        const oldChallenges =
-          serverData.events.get((data.event as EventDto).id)?.challenges ?? [];
-
-        sock.requestChallengeData({
-          challenges:
-            (data.event as EventDto).challenges?.filter(
-              (chal: string) => !(chal in oldChallenges),
-            ) ?? [],
-        });
-
-        serverData.events.set(
-          (data.event as EventDto).id,
-          data.event as EventDto,
-        );
-      }
-
-      setTimeout(() => setServerData({ ...serverData }), 0);
+        return { ...prev, events: newEvents, selectedEvent: newSelectedEvent };
+      });
     });
     sock.onUpdateChallengeData(data => {
-      if (data.deleted) {
-        serverData.challenges.delete(data.challenge.id);
-      } else {
-        serverData.challenges.set(
-          (data.challenge as ChallengeDto).id,
-          data.challenge as ChallengeDto,
-        );
-      }
-
-      setTimeout(() => setServerData({ ...serverData }), 0);
+      setServerData(prev => {
+        const newChallenges = new Map(prev.challenges);
+        if (data.deleted) {
+          newChallenges.delete(data.challenge.id);
+        } else {
+          newChallenges.set(
+            (data.challenge as ChallengeDto).id,
+            data.challenge as ChallengeDto,
+          );
+        }
+        return { ...prev, challenges: newChallenges };
+      });
     });
     sock.onUpdateUserData(data => {
-      if (data.deleted) {
-        serverData.users.delete((data.user as UserDto).id);
-      } else {
-        serverData.users.set((data.user as UserDto).id, data.user as UserDto);
-      }
-
-      setTimeout(() => setServerData({ ...serverData }), 0);
+      setServerData(prev => {
+        const newUsers = new Map(prev.users);
+        if (data.deleted) {
+          newUsers.delete((data.user as UserDto).id);
+        } else {
+          newUsers.set((data.user as UserDto).id, data.user as UserDto);
+        }
+        return { ...prev, users: newUsers };
+      });
     });
     sock.onUpdateGroupData(data => {
-      if (data.deleted) {
-        serverData.groups.delete((data.group as GroupDto).id);
-      } else {
-        serverData.groups.set(
-          (data.group as GroupDto).id,
-          data.group as GroupDto,
-        );
-      }
-
-      setTimeout(() => setServerData({ ...serverData }), 0);
+      setServerData(prev => {
+        const newGroups = new Map(prev.groups);
+        if (data.deleted) {
+          newGroups.delete((data.group as GroupDto).id);
+        } else {
+          newGroups.set(
+            (data.group as GroupDto).id,
+            data.group as GroupDto,
+          );
+        }
+        return { ...prev, groups: newGroups };
+      });
     });
     sock.onUpdateOrganizationData(data => {
-      if (data.deleted) {
-        serverData.organizations.delete(data.organization.id);
-      } else {
-        const oldEvents =
-          serverData.organizations.get(
-            (data.organization as OrganizationDto).id,
-          )?.events ?? [];
+      setServerData(prev => {
+        const newOrganizations = new Map(prev.organizations);
+        if (data.deleted) {
+          newOrganizations.delete(data.organization.id);
+        } else {
+          const oldEvents =
+            prev.organizations.get(
+              (data.organization as OrganizationDto).id,
+            )?.events ?? [];
 
-        const oldAchievements =
-          serverData.organizations.get(
-            (data.organization as OrganizationDto).id,
-          )?.achivements ?? [];
+          const oldAchievements =
+            prev.organizations.get(
+              (data.organization as OrganizationDto).id,
+            )?.achivements ?? [];
 
-        sock.requestEventData({
-          events: (data.organization as OrganizationDto).events?.filter(
-            (ev: string) => !(ev in oldEvents),
-          ),
-        });
-
-        if (data.organization.achivements) {
-          sock.requestAchievementData({
-            achievements: data.organization.achivements?.filter(
-              achId => !(achId in oldAchievements),
+          sock.requestEventData({
+            events: (data.organization as OrganizationDto).events?.filter(
+              (ev: string) => !oldEvents.includes(ev),
             ),
           });
+
+          if (data.organization.achivements) {
+            sock.requestAchievementData({
+              achievements: data.organization.achivements?.filter(
+                achId => !oldAchievements.includes(achId),
+              ),
+            });
+          }
+
+          newOrganizations.set(
+            (data.organization as OrganizationDto).id,
+            data.organization as OrganizationDto,
+          );
         }
-
-        serverData.organizations.set(
-          (data.organization as OrganizationDto).id,
-          data.organization as OrganizationDto,
-        );
-      }
-
-      setTimeout(() => setServerData({ ...serverData }), 0);
+        return { ...prev, organizations: newOrganizations };
+      });
     });
     sock.onUpdateErrorData(data => {
-      serverData.errors.set('Error', data);
-      setTimeout(() => setServerData({ ...serverData }), 0);
+      setServerData(prev => {
+        const newErrors = new Map(prev.errors);
+        newErrors.set('Error', data);
+        return { ...prev, errors: newErrors };
+      });
     });
-  }, [sock, serverData, setServerData]);
+    sock.onUpdateQuizQuestionData(data => {
+      setServerData(prev => {
+        const newQuizQuestions = new Map(prev.quizQuestions);
+        if (data.deleted) {
+          newQuizQuestions.delete(data.question.id);
+        } else {
+          newQuizQuestions.set(
+            (data.question as QuizQuestionDto).id,
+            data.question as QuizQuestionDto,
+          );
+        }
+        return { ...prev, quizQuestions: newQuizQuestions };
+      });
+    });
+  }, [sock]);
 
   if (!connection.connection) return <>{props.children}</>;
 

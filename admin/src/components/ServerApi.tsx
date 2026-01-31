@@ -135,6 +135,38 @@ export class ServerApi {
     return this.send('completeTimer', data) as Promise<boolean | undefined>;
   }
 
+  requestQuizQuestion(data: dto.RequestQuizQuestionDto) {
+    return this.send('requestQuizQuestion', data) as Promise<
+      boolean | undefined
+    >;
+  }
+
+  shuffleQuizQuestion(data: dto.ShuffleQuizQuestionDto) {
+    return this.send('shuffleQuizQuestion', data) as Promise<
+      boolean | undefined
+    >;
+  }
+
+  submitQuizAnswer(data: dto.SubmitQuizAnswerDto) {
+    return this.send('submitQuizAnswer', data) as Promise<boolean | undefined>;
+  }
+
+  getQuizProgress(data: dto.RequestQuizQuestionDto) {
+    return this.send('getQuizProgress', data) as Promise<boolean | undefined>;
+  }
+
+  requestQuizQuestions(data: dto.RequestQuizQuestionDto) {
+    return this.send('requestQuizQuestions', data) as Promise<
+      number | undefined
+    >;
+  }
+
+  updateQuizQuestionData(data: dto.UpdateQuizQuestionDataDto) {
+    return this.send('updateQuizQuestionData', data) as Promise<
+      string | undefined
+    >;
+  }
+
   requestAllUserData(data: dto.RequestAllUserDataDto) {
     return this.send('requestAllUserData', data) as Promise<number | undefined>;
   }
@@ -272,5 +304,32 @@ export class ServerApi {
   onChallengeFailed(callback: (data: dto.ChallengeFailedDto) => void) {
     this.socket.removeAllListeners('challengeFailed');
     this.socket.on('challengeFailed', data => callback(data));
+  }
+
+  onUpdateQuizQuestionData(
+    callback: (data: dto.UpdateQuizQuestionDataDto) => void,
+  ) {
+    this.socket.removeAllListeners('updateQuizQuestionData');
+    this.socket.on('updateQuizQuestionData', data => callback(data));
+  }
+
+  onQuizQuestion(callback: (data: dto.QuizQuestionDto) => void) {
+    this.socket.removeAllListeners('quizQuestion');
+    this.socket.on('quizQuestion', data => callback(data));
+  }
+
+  onQuizResult(callback: (data: dto.QuizResultDto) => void) {
+    this.socket.removeAllListeners('quizResult');
+    this.socket.on('quizResult', data => callback(data));
+  }
+
+  onQuizError(callback: (data: dto.QuizErrorDto) => void) {
+    this.socket.removeAllListeners('quizError');
+    this.socket.on('quizError', data => callback(data));
+  }
+
+  onQuizProgress(callback: (data: dto.QuizProgressDto) => void) {
+    this.socket.removeAllListeners('quizProgress');
+    this.socket.on('quizProgress', data => callback(data));
   }
 }

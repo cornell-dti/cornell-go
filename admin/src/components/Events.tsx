@@ -356,9 +356,12 @@ export function Events() {
               setDeleteModalOpen(true);
             }}
             onEdit={() => {
-              setCurrentId(ev.id);
-              setForm(toForm(ev));
-              setEditModalOpen(true);
+              const freshEvent = serverData.events.get(ev.id);
+              if (freshEvent) {
+                setCurrentId(ev.id);
+                setForm(toForm(freshEvent));
+                setEditModalOpen(true);
+              }
             }}
             onCopy={() => {
               const orgs = Array.from(serverData.organizations.values());

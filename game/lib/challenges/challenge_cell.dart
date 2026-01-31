@@ -36,33 +36,34 @@ class ChallengeCell extends StatefulWidget {
   final double? distanceFromChallenge;
 
   const ChallengeCell(
-      this.location,
-      this.challengeName,
-      this.challengeLat,
-      this.challengeLong,
-      this.imgUrl,
-      this.isCompleted,
-      this.description,
-      this.difficulty,
-      this.points,
-      this.eventId,
-      this.distanceFromChallenge,
-      {Key? key})
-      : super(key: key);
+    this.location,
+    this.challengeName,
+    this.challengeLat,
+    this.challengeLong,
+    this.imgUrl,
+    this.isCompleted,
+    this.description,
+    this.difficulty,
+    this.points,
+    this.eventId,
+    this.distanceFromChallenge, {
+    Key? key,
+  }) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _ChallengeCellState(
-      location,
-      challengeName,
-      challengeLat,
-      challengeLong,
-      imgUrl,
-      isCompleted,
-      description,
-      difficulty,
-      points,
-      eventId,
-      distanceFromChallenge);
+        location,
+        challengeName,
+        challengeLat,
+        challengeLong,
+        imgUrl,
+        isCompleted,
+        description,
+        difficulty,
+        points,
+        eventId,
+        distanceFromChallenge,
+      );
 }
 
 class _ChallengeCellState extends State<ChallengeCell> {
@@ -81,19 +82,20 @@ class _ChallengeCellState extends State<ChallengeCell> {
   final double? distanceFromChallenge;
 
   _ChallengeCellState(
-      this.location,
-      this.challengeName,
-      this.challengeLat,
-      this.challengeLong,
-      this.imgUrl,
-      this.isCompleted,
-      this.description,
-      this.difficulty,
-      this.points,
-      this.eventId,
-      // newly added field
-      // this.totalDistance
-      this.distanceFromChallenge);
+    this.location,
+    this.challengeName,
+    this.challengeLat,
+    this.challengeLong,
+    this.imgUrl,
+    this.isCompleted,
+    this.description,
+    this.difficulty,
+    this.points,
+    this.eventId,
+    // newly added field
+    // this.totalDistance
+    this.distanceFromChallenge,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -103,22 +105,24 @@ class _ChallengeCellState extends State<ChallengeCell> {
     return GestureDetector(
       onTap: () async {
         await showModalBottomSheet(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(10.0)),
-            ),
-            context: context,
-            isScrollControlled: true,
-            builder: (context) => Preview(
-                challengeName,
-                challengeLat,
-                challengeLong,
-                description,
-                imgUrl,
-                difficulty,
-                points,
-                PreviewType.CHALLENGE,
-                location,
-                eventId));
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(10.0)),
+          ),
+          context: context,
+          isScrollControlled: true,
+          builder: (context) => Preview(
+            challengeName,
+            challengeLat,
+            challengeLong,
+            description,
+            imgUrl,
+            difficulty,
+            points,
+            PreviewType.CHALLENGE,
+            location,
+            eventId,
+          ),
+        );
       },
       child: Container(
         decoration: BoxDecoration(
@@ -143,10 +147,12 @@ class _ChallengeCellState extends State<ChallengeCell> {
                 padding: const EdgeInsets.only(right: 14),
                 child: ClipRRect(
                   borderRadius: BorderRadius.all(Radius.circular(4.6)),
-                  child: Image.network(imgUrl,
-                      width: deviceHeight * 0.1,
-                      height: deviceHeight * 0.1,
-                      fit: BoxFit.cover),
+                  child: Image.network(
+                    imgUrl,
+                    width: deviceHeight * 0.1,
+                    height: deviceHeight * 0.1,
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
               Expanded(
@@ -161,9 +167,11 @@ class _ChallengeCellState extends State<ChallengeCell> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          Icon(Icons.location_on,
-                              size: MediaQuery.sizeOf(context).height * 0.025,
-                              color: Color.fromARGB(255, 131, 90, 124)),
+                          Icon(
+                            Icons.location_on,
+                            size: MediaQuery.sizeOf(context).height * 0.025,
+                            color: Color.fromARGB(255, 131, 90, 124),
+                          ),
                           Expanded(
                             child: Text(
                               location,
@@ -178,9 +186,11 @@ class _ChallengeCellState extends State<ChallengeCell> {
                           ),
                           //match formatting of previous distance display and text above (text shown adjacent to this icon)
                           if (distanceFromChallenge != null) ...[
-                            Icon(Icons.directions_walk,
-                                size: MediaQuery.sizeOf(context).height * 0.02,
-                                color: Color.fromARGB(255, 110, 110, 110)),
+                            Icon(
+                              Icons.directions_walk,
+                              size: MediaQuery.sizeOf(context).height * 0.02,
+                              color: Color.fromARGB(255, 110, 110, 110),
+                            ),
                             Text(
                               ' ' +
                                   (distanceFromChallenge! / 1609.34)
@@ -232,25 +242,27 @@ class _ChallengeCellState extends State<ChallengeCell> {
                           ),
                         ),
                         SizedBox(width: deviceWidth * 0.02),
-                        Row(children: [
-                          SvgPicture.asset(
-                            "assets/icons/bearcoins.svg",
-                            width: deviceWidth * 0.06,
-                          ),
-                          Text(
-                            ' ' + points.toString() + " PTS",
-                            style: TextStyle(
-                              fontSize: deviceHeight * 0.018,
-                              fontWeight: FontWeight.w500,
-                              color: Color(0xFFC17E19),
+                        Row(
+                          children: [
+                            SvgPicture.asset(
+                              "assets/icons/bearcoins.svg",
+                              width: deviceWidth * 0.06,
                             ),
-                          ),
-                        ]),
+                            Text(
+                              ' ' + points.toString() + " PTS",
+                              style: TextStyle(
+                                fontSize: deviceHeight * 0.018,
+                                fontWeight: FontWeight.w500,
+                                color: Color(0xFFC17E19),
+                              ),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   ],
                 ),
-              )
+              ),
             ],
           ),
         ),

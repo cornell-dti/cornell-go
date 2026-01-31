@@ -15,6 +15,7 @@ import { OrganizationModule } from './organization/organization.module';
 import { AchievementModule } from './achievement/achievement.module';
 import { CaslModule } from './casl/casl.module';
 import { TimerModule } from './timer/timer.module';
+import { QuizModule } from './quiz/quiz.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { TimerModule } from './timer/timer.module';
     OrganizationModule,
     CaslModule,
     TimerModule,
+    QuizModule,
   ],
   controllers: [],
   providers: [],

@@ -25,9 +25,7 @@ import '../utils/utility_functions.dart';
  * - At least one field has been changed from its original value 
  */
 class EditProfileWidget extends StatefulWidget {
-  EditProfileWidget({
-    Key? key,
-  }) : super(key: key);
+  EditProfileWidget({Key? key}) : super(key: key);
 
   @override
   _EditProfileState createState() => _EditProfileState();
@@ -89,13 +87,20 @@ class _EditProfileState extends State<EditProfileWidget> {
     height: 0,
   );
   var fieldDecoration = InputDecoration(
-    contentPadding:
-        EdgeInsets.only(left: 20.0, right: 20.0, top: 10, bottom: 10),
+    contentPadding: EdgeInsets.only(
+      left: 20.0,
+      right: 20.0,
+      top: 10,
+      bottom: 10,
+    ),
     labelStyle: TextStyle(
-        color: Color.fromARGB(51, 0, 0, 0), fontWeight: FontWeight.w400),
+      color: Color.fromARGB(51, 0, 0, 0),
+      fontWeight: FontWeight.w400,
+    ),
     enabledBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: Color.fromARGB(51, 0, 0, 0), width: 1.5),
-        borderRadius: BorderRadius.all(Radius.circular(10.0))),
+      borderSide: BorderSide(color: Color.fromARGB(51, 0, 0, 0), width: 1.5),
+      borderRadius: BorderRadius.all(Radius.circular(10.0)),
+    ),
     focusedBorder: OutlineInputBorder(
       borderRadius: BorderRadius.all(Radius.circular(10.0)),
       borderSide: BorderSide(
@@ -134,7 +139,7 @@ class _EditProfileState extends State<EditProfileWidget> {
     "Cornell Tech",
     "Law School",
     "Veterinary Medicine",
-    "Weill Cornell Medicine"
+    "Weill Cornell Medicine",
   ];
 
   /// Majors mapped to their respective colleges
@@ -166,13 +171,13 @@ class _EditProfileState extends State<EditProfileWidget> {
       "Landscape Architecture",
       "Nutritional Sciences",
       "Plant Sciences",
-      "Viticulture & Enology"
+      "Viticulture & Enology",
     ],
     "Architecture, Art and Planning": [
       "Architecture",
       "Fine Arts",
       "History of Architecture",
-      "Urban and Regional Studies"
+      "Urban and Regional Studies",
     ],
     "Business": ["Applied Economics and Management", "Hotel Administration"],
     "Engineering": [
@@ -189,7 +194,7 @@ class _EditProfileState extends State<EditProfileWidget> {
       "Information Science, Systems, and Technology",
       "Materials Science and Engineering",
       "Mechanical Engineering",
-      "Operations Research and Engineering"
+      "Operations Research and Engineering",
     ],
     "Arts and Sciences": [
       "Africana Studies",
@@ -234,7 +239,7 @@ class _EditProfileState extends State<EditProfileWidget> {
       "Sociology",
       "Spanish",
       "Statistical Science",
-      "Undecided"
+      "Undecided",
     ],
     "Human Ecology": [
       "Design and Environmental Analysis",
@@ -244,7 +249,7 @@ class _EditProfileState extends State<EditProfileWidget> {
       "Human Biology, Health, and Society",
       "Human Development",
       "Nutritional Sciences",
-      "Undecided"
+      "Undecided",
     ],
     "Industrial and Labor Relations (ILR)": [],
     "Public Policy": ["Health Care Policy", "Public Policy"],
@@ -253,12 +258,12 @@ class _EditProfileState extends State<EditProfileWidget> {
       "Computer Science",
       "Information Science",
       "Information Science, Systems, and Technology",
-      "Statistical Science"
+      "Statistical Science",
     ],
     "Cornell Tech": [],
     "Law School": [],
     "Veterinary Medicine": [],
-    "Weill Cornell Medicine": []
+    "Weill Cornell Medicine": [],
   };
 
   /// Available graduation years for student selection
@@ -274,7 +279,7 @@ class _EditProfileState extends State<EditProfileWidget> {
     "2028",
     "2029",
     "2030",
-    "Alumni"
+    "Alumni",
   ];
 
   @override
@@ -287,98 +292,99 @@ class _EditProfileState extends State<EditProfileWidget> {
     );
 
     return Scaffold(
-        backgroundColor: Color.fromARGB(255, 255, 248, 241),
-        appBar: AppBar(
-            toolbarHeight: 70,
-            backgroundColor: Color.fromARGB(255, 237, 86, 86),
-            // Set widget before appBar title
-            leading: IconButton(
-              icon: const Icon(Icons.navigate_before),
-              color: Colors.white,
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-            title: Padding(
-              padding: EdgeInsets.only(
-                  top: MediaQuery.of(context).size.height * 0.01),
-              child: Text(
-                'Edit Profile',
-                style: headerStyle,
-              ),
-            ),
-            actions: [],
-            centerTitle: true),
-        body: Center(
-            child: Consumer<UserModel>(builder: (context, userModel, child) {
-          if (userModel.userData == null) {
-            return CircularIndicator();
-          }
-
-          String? currUsername = userModel.userData?.username;
-          String? currYear = userModel.userData?.year;
-          String? currCollege = userModel.userData?.college;
-          String? currMajor = userModel.userData?.major;
-
-          // Initialize fields only if they haven't been already
-          if (newUsername == null) {
-            newUsername = currUsername ?? '';
-          }
-
-          if (newYear == null) {
-            newYear = currYear;
-            if (newYear != null && newYear!.isEmpty) {
-              newYear = null;
+      backgroundColor: Color.fromARGB(255, 255, 248, 241),
+      appBar: AppBar(
+        toolbarHeight: 70,
+        backgroundColor: Color.fromARGB(255, 237, 86, 86),
+        // Set widget before appBar title
+        leading: IconButton(
+          icon: const Icon(Icons.navigate_before),
+          color: Colors.white,
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        title: Padding(
+          padding: EdgeInsets.only(
+            top: MediaQuery.of(context).size.height * 0.01,
+          ),
+          child: Text('Edit Profile', style: headerStyle),
+        ),
+        actions: [],
+        centerTitle: true,
+      ),
+      body: Center(
+        child: Consumer<UserModel>(
+          builder: (context, userModel, child) {
+            if (userModel.userData == null) {
+              return CircularIndicator();
             }
-          }
 
-          if (newCollege == null) {
-            newCollege = currCollege;
-            if (newCollege != null && newCollege!.isEmpty) {
-              newCollege = null;
-            }
-          }
+            String? currUsername = userModel.userData?.username;
+            String? currYear = userModel.userData?.year;
+            String? currCollege = userModel.userData?.college;
+            String? currMajor = userModel.userData?.major;
 
-          if (newMajor == null) {
-            newMajor = currMajor;
-            if (newMajor != null && newMajor!.isEmpty) {
-              newMajor = null;
+            // Initialize fields only if they haven't been already
+            if (newUsername == null) {
+              newUsername = currUsername ?? '';
             }
-          }
 
-          // Determines if any profile fields have been changed from their original values.
-          bool fieldsChanged() {
-            if (newUsername == null ||
-                newCollege == null ||
-                newYear == null ||
-                newMajor == null) {
-              return false;
+            if (newYear == null) {
+              newYear = currYear;
+              if (newYear != null && newYear!.isEmpty) {
+                newYear = null;
+              }
             }
-            if (newUsername!.isEmpty) {
-              return false;
-            }
-            // return true if any of the fields are different
-            return (newUsername != currUsername ||
-                newYear != currYear ||
-                newMajor != currMajor ||
-                newCollege != currCollege);
-          }
 
-          return LayoutBuilder(
+            if (newCollege == null) {
+              newCollege = currCollege;
+              if (newCollege != null && newCollege!.isEmpty) {
+                newCollege = null;
+              }
+            }
+
+            if (newMajor == null) {
+              newMajor = currMajor;
+              if (newMajor != null && newMajor!.isEmpty) {
+                newMajor = null;
+              }
+            }
+
+            // Determines if any profile fields have been changed from their original values.
+            bool fieldsChanged() {
+              if (newUsername == null ||
+                  newCollege == null ||
+                  newYear == null ||
+                  newMajor == null) {
+                return false;
+              }
+              if (newUsername!.isEmpty) {
+                return false;
+              }
+              // return true if any of the fields are different
+              return (newUsername != currUsername ||
+                  newYear != currYear ||
+                  newMajor != currMajor ||
+                  newCollege != currCollege);
+            }
+
+            return LayoutBuilder(
               builder: (BuildContext context, BoxConstraints constraints) {
-            return SizedBox(
-                width: constraints.maxWidth * 0.85,
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.only(top: 30),
-                        child: SvgPicture.asset(
+                return SizedBox(
+                  width: constraints.maxWidth * 0.85,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.only(top: 30),
+                          child: SvgPicture.asset(
                             "assets/images/yellow_bear_prof.svg",
                             height: 115,
-                            width: 115),
-                      ),
-                      Container(
+                            width: 115,
+                          ),
+                        ),
+                        Container(
                           padding: EdgeInsets.only(top: 30),
                           width: double.infinity,
                           child: Column(
@@ -393,10 +399,11 @@ class _EditProfileState extends State<EditProfileWidget> {
                                   newUsername = value;
                                   updateButtonKey.value++;
                                 },
-                              )
+                              ),
                             ],
-                          )),
-                      Container(
+                          ),
+                        ),
+                        Container(
                           padding: EdgeInsets.only(top: 15),
                           width: double.infinity,
                           child: Column(
@@ -404,15 +411,19 @@ class _EditProfileState extends State<EditProfileWidget> {
                             children: [
                               Text('College', style: headingStyle),
                               SizedBox(height: 5),
-                              DropdownWidget(newCollege, _colleges,
-                                  notifyParent: (val) {
-                                newCollege = val;
-                                majorDropdownKey.value++;
-                                updateButtonKey.value++;
-                              })
+                              DropdownWidget(
+                                newCollege,
+                                _colleges,
+                                notifyParent: (val) {
+                                  newCollege = val;
+                                  majorDropdownKey.value++;
+                                  updateButtonKey.value++;
+                                },
+                              ),
                             ],
-                          )),
-                      Container(
+                          ),
+                        ),
+                        Container(
                           padding: EdgeInsets.only(top: 15),
                           width: double.infinity,
                           child: Column(
@@ -422,28 +433,35 @@ class _EditProfileState extends State<EditProfileWidget> {
                               SizedBox(height: 5),
                               // Changing key forces a rebuild of child widget
                               ValueListenableBuilder<double>(
-                                  valueListenable: majorDropdownKey,
-                                  builder: (BuildContext context,
-                                      double keyValue, Widget? child) {
-                                    return DropdownWidget(
-                                        // assigning UniqueKey will rebuild widget upon state change
-                                        key: ValueKey(keyValue),
-                                        (_majors[newCollege] == null ||
-                                                !_majors[newCollege]!
-                                                    .contains(newMajor))
-                                            ? null
-                                            : newMajor,
-                                        newCollege == null
-                                            ? null
-                                            : _majors[newCollege],
-                                        notifyParent: (val) {
+                                valueListenable: majorDropdownKey,
+                                builder: (
+                                  BuildContext context,
+                                  double keyValue,
+                                  Widget? child,
+                                ) {
+                                  return DropdownWidget(
+                                    // assigning UniqueKey will rebuild widget upon state change
+                                    key: ValueKey(keyValue),
+                                    (_majors[newCollege] == null ||
+                                            !_majors[newCollege]!.contains(
+                                              newMajor,
+                                            ))
+                                        ? null
+                                        : newMajor,
+                                    newCollege == null
+                                        ? null
+                                        : _majors[newCollege],
+                                    notifyParent: (val) {
                                       newMajor = val;
                                       updateButtonKey.value++;
-                                    });
-                                  })
+                                    },
+                                  );
+                                },
+                              ),
                             ],
-                          )),
-                      Container(
+                          ),
+                        ),
+                        Container(
                           padding: EdgeInsets.only(top: 15),
                           width: double.infinity,
                           child: Column(
@@ -451,62 +469,75 @@ class _EditProfileState extends State<EditProfileWidget> {
                             children: [
                               Text('Graduation Year', style: headingStyle),
                               SizedBox(height: 5),
-                              DropdownWidget(newYear, _years,
-                                  notifyParent: (val) {
-                                newYear = val;
-                                updateButtonKey.value++;
-                              })
+                              DropdownWidget(
+                                newYear,
+                                _years,
+                                notifyParent: (val) {
+                                  newYear = val;
+                                  updateButtonKey.value++;
+                                },
+                              ),
                             ],
-                          )),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 30, bottom: 60),
-                        child: ValueListenableBuilder<double>(
-                          valueListenable: updateButtonKey,
-                          builder: (BuildContext context, double keyValue,
-                              Widget? child) {
-                            return Container(
-                              width: double.infinity,
-                              child: TextButton(
-                                key: ValueKey(keyValue),
-                                onPressed: !fieldsChanged()
-                                    ? null
-                                    : () {
-                                        if (newUsername == null ||
-                                            newUsername!.trim().length < 3) {
-                                          displayToast(
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 30, bottom: 60),
+                          child: ValueListenableBuilder<double>(
+                            valueListenable: updateButtonKey,
+                            builder: (
+                              BuildContext context,
+                              double keyValue,
+                              Widget? child,
+                            ) {
+                              return Container(
+                                width: double.infinity,
+                                child: TextButton(
+                                  key: ValueKey(keyValue),
+                                  onPressed: !fieldsChanged()
+                                      ? null
+                                      : () {
+                                          if (newUsername == null ||
+                                              newUsername!.trim().length < 3) {
+                                            displayToast(
                                               "Username must be 3 or more characters",
-                                              Status.error);
-                                          return;
-                                        }
-                                        userModel.updateUserData(
+                                              Status.error,
+                                            );
+                                            return;
+                                          }
+                                          userModel.updateUserData(
                                             userModel.userData?.id ?? "",
                                             newUsername,
                                             newCollege,
                                             newMajor,
-                                            newYear);
-                                        setState(() {});
-                                      },
-                                style: TextButton.styleFrom(
-                                  backgroundColor: Color(0xFFE95755),
-                                  disabledBackgroundColor: Color(0xFFB9B9B9),
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 16),
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8)),
+                                            newYear,
+                                          );
+                                          setState(() {});
+                                        },
+                                  style: TextButton.styleFrom(
+                                    backgroundColor: Color(0xFFE95755),
+                                    disabledBackgroundColor: Color(0xFFB9B9B9),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 16,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                  child: Text('Update', style: buttonStyle),
                                 ),
-                                child: Text(
-                                  'Update',
-                                  style: buttonStyle,
-                                ),
-                              ),
-                            );
-                          },
+                              );
+                            },
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ));
-          });
-        })));
+                );
+              },
+            );
+          },
+        ),
+      ),
+    );
   }
 }

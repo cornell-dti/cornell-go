@@ -87,13 +87,13 @@ const BLOCK_SVG = (
 const styles = {
   select: { margin: '0 20px' },
   buttonsCellContainer: {
-    padding: "0 20px",
-    width: "100%",
-    height: "100%",
-    display: "flex",
-    justifyContent: "flex-end",
-    alignItems: "center",
-    gap: "3px",
+    padding: '0 20px',
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    gap: '3px',
   },
   editButton: {
     background: '#f3f3f3',
@@ -203,7 +203,7 @@ function getColumns(setRowsData: any, serverData: any) {
           <button
             title="Block/Unblock"
             style={styles.cancelButton}
-            onClick={async (e) => {
+            onClick={async e => {
               e.stopPropagation();
 
               // Toggle isBanned status
@@ -212,14 +212,14 @@ function getColumns(setRowsData: any, serverData: any) {
               data.isBanned = newStatus;
 
               setRowsData((prevRows: any[]) =>
-                prevRows.map((row) =>
-                  row.id === data.id ? { ...row, isBanned: newStatus } : row
-                )
+                prevRows.map(row =>
+                  row.id === data.id ? { ...row, isBanned: newStatus } : row,
+                ),
               );
               alert(
                 `User ${data.username} has been ${
-                  newStatus ? "blocked" : "unblocked"
-                }.`
+                  newStatus ? 'blocked' : 'unblocked'
+                }.`,
               );
             }}
           >
@@ -228,14 +228,14 @@ function getColumns(setRowsData: any, serverData: any) {
           <button
             title="Delete"
             style={styles.cancelButton}
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation();
 
               if (
-                window.confirm("Are you sure you want to delete this user?")
+                window.confirm('Are you sure you want to delete this user?')
               ) {
                 setRowsData((prevRows: any[]) =>
-                  prevRows.filter((row) => row.id !== data.id)
+                  prevRows.filter(row => row.id !== data.id),
                 );
                 serverData.users.delete(data.id);
                 serverData.deleteUser(data.id);

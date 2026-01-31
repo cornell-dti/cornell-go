@@ -41,6 +41,13 @@ class _GameplayPageState extends State<GameplayPage> {
   late StreamSubscription<Position> positionStream;
   OverlayEntry? _bearOverlayEntry;
 
+  // Cached challenge data to prevent showing next challenge while completion dialog is open
+  ChallengeDto? _cachedChallenge;
+  GeoPoint? _cachedTargetLocation;
+  int _cachedHintsUsed = 0;
+  int _cachedExtensionsUsed = 0;
+  bool _hasTriggeredStep6 = false; // Prevent multiple showcase triggers
+
   @override
   void initState() {
     super.initState();
@@ -89,7 +96,10 @@ class _GameplayPageState extends State<GameplayPage> {
           print("Tapped anywhere on step 6");
           _removeBearOverlay();
           ShowcaseView.getNamed("gameplay_page").dismiss();
-          Provider.of<OnboardingModel>(context, listen: false).completeStep6();
+          Provider.of<OnboardingModel>(
+            context,
+            listen: false,
+          ).completeStep6();
         },
       ),
     );
@@ -131,13 +141,17 @@ class _GameplayPageState extends State<GameplayPage> {
                           ' ' + (abbrevLocation[challenge.location] ?? "");
                       return FittedBox(
                         fit: BoxFit.scaleDown,
-                        child: Text(text,
-                            style: TextStyle(
-                                fontSize: 14, color: Color(0xFF835A7C))),
+                        child: Text(
+                          text,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Color(0xFF835A7C),
+                          ),
+                        ),
                       );
                     },
                   ),
-                )
+                ),
               ],
             ),
           ),
@@ -161,14 +175,18 @@ class _GameplayPageState extends State<GameplayPage> {
                           ' Mi Away';
                       return FittedBox(
                         fit: BoxFit.scaleDown,
-                        child: Text(text,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                                fontSize: 14, color: Color(0xFF58B171))),
+                        child: Text(
+                          text,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Color(0xFF58B171),
+                          ),
+                        ),
                       );
                     },
                   ),
-                )
+                ),
               ],
             ),
           ),
@@ -200,15 +218,18 @@ class _GameplayPageState extends State<GameplayPage> {
                           " PTS";
                       return FittedBox(
                         fit: BoxFit.scaleDown,
-                        child: Text(text,
-                            style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                color: Color(0xFFC17E19))),
+                        child: Text(
+                          text,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: Color(0xFFC17E19),
+                          ),
+                        ),
                       );
                     },
                   ),
-                )
+                ),
               ],
             ),
           ),
@@ -239,19 +260,17 @@ class _GameplayPageState extends State<GameplayPage> {
    * Sets the camera to center on user's location by default
    */
   void startPositionStream() async {
-    GeoPoint.current().then(
-      (location) {
-        if (mounted) {
-          setState(() {
-            currentLocation = location;
-          });
-        }
-      },
-    );
+    GeoPoint.current().then((location) {
+      if (mounted) {
+        setState(() {
+          currentLocation = location;
+        });
+      }
+    });
 
     positionStream = Geolocator.getPositionStream(
-            locationSettings: GeoPoint.getLocationSettings())
-        .listen((Position? newPos) {
+      locationSettings: GeoPoint.getLocationSettings(),
+    ).listen((Position? newPos) {
       // prints user coordinates - useful for debugging
       // print(newPos == null
       //     ? 'Unknown'
@@ -275,155 +294,200 @@ class _GameplayPageState extends State<GameplayPage> {
       children: [
         // LAYER 1: Main gameplay UI
         Consumer6<ChallengeModel, EventModel, TrackerModel, TimerModel,
-                ApiClient, GroupModel>(
-            builder: (context, challengeModel, eventModel, trackerModel,
-                timerModel, apiClient, groupModel, _) {
-          var eventId = groupModel.curEventId;
-          // print(eventId);
-          var event = eventModel.getEventById(eventId ?? "");
-          var tracker = trackerModel.trackerByEventId(eventId ?? "");
-          if (tracker == null) {
-            return CircularIndicator();
-          }
+            ApiClient, GroupModel>(
+          builder: (context, challengeModel, eventModel, trackerModel,
+              timerModel, apiClient, groupModel, _) {
+            var eventId = groupModel.curEventId;
+            // print(eventId);
+            var event = eventModel.getEventById(eventId ?? "");
+            var tracker = trackerModel.trackerByEventId(eventId ?? "");
+            if (tracker == null) {
+              return CircularIndicator();
+            }
 
-          var challenge = challengeModel.getChallengeById(
-              tracker.curChallengeId ??
-                  tracker.prevChallenges.last.challengeId);
-
-          if (challenge == null) {
-            return Scaffold(
-              body: Text("No challenge data"),
+            var challenge = challengeModel.getChallengeById(
+              tracker.curChallengeId ?? tracker.prevChallenges.last.challengeId,
             );
-          }
 
-          GeoPoint? targetLocation;
-          if (challenge.latF != null && challenge.longF != null) {
-            targetLocation = GeoPoint(challenge.latF!, challenge.longF!, 0);
-          }
-          double awardingRadius = challenge.awardingRadiusF ?? 0;
-          int hintsUsed = tracker.hintsUsed;
+            if (challenge == null) {
+              return Scaffold(body: Text("No challenge data"));
+            }
 
-          // Get extensions used from TimerModel (only if timer is for current challenge)
-          int extensionsUsed = timerModel.isTimerForChallenge(challenge.id)
-              ? timerModel.extensionsUsed
-              : 0;
+            GeoPoint? targetLocation;
+            if (challenge.latF != null && challenge.longF != null) {
+              targetLocation = GeoPoint(challenge.latF!, challenge.longF!, 0);
+            }
+            double awardingRadius = challenge.awardingRadiusF ?? 0;
+            int hintsUsed = tracker.hintsUsed;
 
-          double sectionSeperation = MediaQuery.of(context).size.width * 0.05;
+            // Get extensions used from TimerModel (only if timer is for current challenge)
+            int extensionsUsed = timerModel.isTimerForChallenge(challenge.id)
+                ? timerModel.extensionsUsed
+                : 0;
 
-          // Start showcase when step 5 completes
-          if (onboarding.step5GameplayIntroComplete &&
-              !onboarding.step6InfoRowComplete) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (mounted) {
-                ShowcaseView.getNamed("gameplay_page")
-                    .startShowCase([onboarding.step6InfoRowKey]);
-                // Show bear overlay on top of showcase
-                _showBearOverlay();
-              }
-            });
-          }
+            // Check if completion dialog is showing - if so, use cached data
+            // to prevent showing next challenge while popup is visible
+            ChallengeDto displayChallenge;
+            GeoPoint? displayTargetLocation;
+            int displayHintsUsed;
+            int displayExtensionsUsed;
 
-          return Scaffold(
-            body: Column(
-              children: [
-                SafeArea(
+            if (GameplayMap.isCompletionDialogShowing &&
+                _cachedChallenge != null) {
+              // Use cached data while dialog is showing
+              displayChallenge = _cachedChallenge!;
+              displayTargetLocation = _cachedTargetLocation;
+              displayHintsUsed = _cachedHintsUsed;
+              displayExtensionsUsed = _cachedExtensionsUsed;
+            } else {
+              // Normal case - use current data and cache it
+              displayChallenge = challenge;
+              displayTargetLocation = targetLocation;
+              displayHintsUsed = hintsUsed;
+              displayExtensionsUsed = extensionsUsed;
+              // Cache the data for when dialog shows
+              _cachedChallenge = challenge;
+              _cachedTargetLocation = targetLocation;
+              _cachedHintsUsed = hintsUsed;
+              _cachedExtensionsUsed = extensionsUsed;
+            }
+
+            double sectionSeperation = MediaQuery.of(context).size.width * 0.05;
+
+            // Start showcase when step 5 completes
+            if (onboarding.step5GameplayIntroComplete &&
+                !onboarding.step6InfoRowComplete &&
+                !_hasTriggeredStep6) {
+              _hasTriggeredStep6 = true; // Prevent re-triggering on rebuild
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) {
+                  ShowcaseView.getNamed(
+                    "gameplay_page",
+                  ).startShowCase([onboarding.step6InfoRowKey]);
+                  // Show bear overlay on top of showcase
+                  _showBearOverlay();
+                }
+              });
+            }
+
+            return Scaffold(
+              body: Column(
+                children: [
+                  SafeArea(
                     bottom: false,
                     child: Container(
-                        padding:
-                            EdgeInsets.only(left: 39, right: 39, bottom: 10),
-                        child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.center,
+                      padding: EdgeInsets.only(left: 39, right: 39, bottom: 10),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                              TextButton(
+                                style: TextButton.styleFrom(
+                                  padding: EdgeInsets.zero,
+                                  minimumSize: Size(50, 30),
+                                  tapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                  alignment: Alignment.centerLeft,
+                                  foregroundColor: Colors.grey,
+                                ),
+                                onPressed: () {
+                                  // Left button action
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => BottomNavBar(),
+                                    ),
+                                  );
+                                },
+                                child: Row(
                                   children: [
-                                    TextButton(
-                                        style: TextButton.styleFrom(
-                                            padding: EdgeInsets.zero,
-                                            minimumSize: Size(50, 30),
-                                            tapTargetSize: MaterialTapTargetSize
-                                                .shrinkWrap,
-                                            alignment: Alignment.centerLeft,
-                                            foregroundColor: Colors.grey),
-                                        onPressed: () {
-                                          // Left button action
-                                          Navigator.pushReplacement(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (context) =>
-                                                    BottomNavBar()),
-                                          );
-                                        },
-                                        child: Row(children: [
-                                          SvgPicture.asset(
-                                              "assets/icons/backcarrot.svg"),
-                                          Text(
-                                              '  Leave ' +
-                                                  (event!.challenges!.length > 1
-                                                      ? "Journey"
-                                                      : "Challenge"),
-                                              style: TextStyle(
-                                                  fontSize: 14,
-                                                  color: Color(0xFF835A7C)))
-                                        ])),
-                                    Container(
-                                      decoration: const BoxDecoration(
-                                        color: Color(0xFFF1F1F1),
-                                        borderRadius: BorderRadius.all(
-                                          Radius.circular(15.0),
-                                        ),
-                                      ),
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 4.0, horizontal: 8.0),
-                                      child: Text(
-                                          (event.challenges!.length > 1
+                                    SvgPicture.asset(
+                                      "assets/icons/backcarrot.svg",
+                                    ),
+                                    Text(
+                                      '  Leave ' +
+                                          (event!.challenges!.length > 1
                                               ? "Journey"
                                               : "Challenge"),
-                                          style: TextStyle(
-                                              fontSize: 14,
-                                              color: Color(0xFFA4A4A4))),
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Color(0xFF835A7C),
+                                      ),
                                     ),
-                                  ]),
-                              Container(
-                                margin: EdgeInsets.only(top: 16.45, bottom: 11),
-                                alignment: Alignment.centerLeft,
-                                child: Text(
-                                  challenge.description ?? "NO DESCRIPTION",
-                                  textAlign: TextAlign.left,
-                                  style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold),
+                                  ],
                                 ),
                               ),
-                              _buildInfoRow(
-                                onboarding,
-                                challenge,
-                                hintsUsed,
-                                extensionsUsed,
-                                currentLocation,
-                                targetLocation,
-                                sectionSeperation,
-                                screenWidth,
-                                screenHeight,
-                              )
-                            ]))),
-                Expanded(
-                  child: Padding(
+                              Container(
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFFF1F1F1),
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(15.0),
+                                  ),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 4.0,
+                                  horizontal: 8.0,
+                                ),
+                                child: Text(
+                                  (event.challenges!.length > 1
+                                      ? "Journey"
+                                      : "Challenge"),
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Color(0xFFA4A4A4),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          Container(
+                            margin: EdgeInsets.only(top: 16.45, bottom: 11),
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              displayChallenge.description ?? "NO DESCRIPTION",
+                              textAlign: TextAlign.left,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          _buildInfoRow(
+                            onboarding,
+                            displayChallenge,
+                            displayHintsUsed,
+                            displayExtensionsUsed,
+                            currentLocation,
+                            displayTargetLocation,
+                            sectionSeperation,
+                            screenWidth,
+                            screenHeight,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Padding(
                       padding: EdgeInsets.only(top: 10),
                       child: GameplayMap(
-                        challengeId: challenge.id,
-                        targetLocation: (targetLocation ?? _center),
-                        awardingRadius: awardingRadius,
-                        points: challenge.points ?? 0,
-                        startingHintsUsed: hintsUsed,
-                      )),
-                ),
-              ],
-            ),
-          );
-        }),
+                        key: ValueKey(displayChallenge.id),
+                        challengeId: displayChallenge.id,
+                        targetLocation: (displayTargetLocation ?? _center),
+                        awardingRadius: displayChallenge.awardingRadiusF ?? 0,
+                        points: displayChallenge.points ?? 0,
+                        startingHintsUsed: displayHintsUsed,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
 
         // LAYER 2: Step 5 - Gameplay map intro overlay (full-screen dimmed)
         if (onboarding.step4FirstJourneyComplete &&

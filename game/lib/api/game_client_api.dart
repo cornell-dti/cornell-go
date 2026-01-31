@@ -93,6 +93,29 @@ class GameClientApi {
   Stream<ChallengeFailedDto> get challengeFailedStream =>
       _challengeFailedController.stream;
 
+  final _updateQuizQuestionDataController =
+      StreamController<UpdateQuizQuestionDataDto>.broadcast(sync: true);
+  Stream<UpdateQuizQuestionDataDto> get updateQuizQuestionDataStream =>
+      _updateQuizQuestionDataController.stream;
+
+  final _quizQuestionController =
+      StreamController<QuizQuestionDto>.broadcast(sync: true);
+  Stream<QuizQuestionDto> get quizQuestionStream =>
+      _quizQuestionController.stream;
+
+  final _quizResultController =
+      StreamController<QuizResultDto>.broadcast(sync: true);
+  Stream<QuizResultDto> get quizResultStream => _quizResultController.stream;
+
+  final _quizErrorController =
+      StreamController<QuizErrorDto>.broadcast(sync: true);
+  Stream<QuizErrorDto> get quizErrorStream => _quizErrorController.stream;
+
+  final _quizProgressController =
+      StreamController<QuizProgressDto>.broadcast(sync: true);
+  Stream<QuizProgressDto> get quizProgressStream =>
+      _quizProgressController.stream;
+
   final _reconnectedController = StreamController<bool>.broadcast(sync: true);
   Stream<bool> get reconnectedStream => _reconnectedController.stream;
 
@@ -190,6 +213,23 @@ class GameClientApi {
         "challengeFailed",
         (data) =>
             _challengeFailedController.add(ChallengeFailedDto.fromJson(data)));
+
+    sock.on(
+        "updateQuizQuestionData",
+        (data) => _updateQuizQuestionDataController
+            .add(UpdateQuizQuestionDataDto.fromJson(data)));
+
+    sock.on("quizQuestion",
+        (data) => _quizQuestionController.add(QuizQuestionDto.fromJson(data)));
+
+    sock.on("quizResult",
+        (data) => _quizResultController.add(QuizResultDto.fromJson(data)));
+
+    sock.on("quizError",
+        (data) => _quizErrorController.add(QuizErrorDto.fromJson(data)));
+
+    sock.on("quizProgress",
+        (data) => _quizProgressController.add(QuizProgressDto.fromJson(data)));
 
     _connectedController.add(true);
   }

@@ -56,6 +56,13 @@ enum EventDifficultyDto {
   Hard,
 }
 
+enum QuizErrorCodeDto {
+  NO_QUESTIONS,
+  ALREADY_ANSWERED,
+  INVALID_QUESTION,
+  INVALID_ANSWER,
+}
+
 enum SetAuthToOAuthProviderDto {
   apple,
   google,
@@ -1768,6 +1775,353 @@ class ChallengeFailedDto {
 
   late String challengeId;
   late String userId;
+}
+
+class RequestQuizQuestionDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['challengeId'] = challengeId;
+    return fields;
+  }
+
+  RequestQuizQuestionDto.fromJson(Map<String, dynamic> fields) {
+    challengeId = fields["challengeId"];
+  }
+
+  void partialUpdate(RequestQuizQuestionDto other) {
+    challengeId = other.challengeId;
+  }
+
+  RequestQuizQuestionDto({
+    required this.challengeId,
+  });
+
+  late String challengeId;
+}
+
+class ShuffleQuizQuestionDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['challengeId'] = challengeId;
+    if (currentQuestionId != null) {
+      fields['currentQuestionId'] = currentQuestionId;
+    }
+    return fields;
+  }
+
+  ShuffleQuizQuestionDto.fromJson(Map<String, dynamic> fields) {
+    challengeId = fields["challengeId"];
+    currentQuestionId = fields.containsKey('currentQuestionId')
+        ? (fields["currentQuestionId"])
+        : null;
+  }
+
+  void partialUpdate(ShuffleQuizQuestionDto other) {
+    challengeId = other.challengeId;
+    currentQuestionId = other.currentQuestionId == null
+        ? currentQuestionId
+        : other.currentQuestionId;
+  }
+
+  ShuffleQuizQuestionDto({
+    required this.challengeId,
+    this.currentQuestionId,
+  });
+
+  late String challengeId;
+  late String? currentQuestionId;
+}
+
+class QuizAnswerDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    if (id != null) {
+      fields['id'] = id;
+    }
+    fields['answerText'] = answerText;
+    if (isCorrect != null) {
+      fields['isCorrect'] = isCorrect;
+    }
+    return fields;
+  }
+
+  QuizAnswerDto.fromJson(Map<String, dynamic> fields) {
+    id = fields.containsKey('id') ? (fields["id"]) : null;
+    answerText = fields["answerText"];
+    isCorrect = fields.containsKey('isCorrect') ? (fields["isCorrect"]) : null;
+  }
+
+  void partialUpdate(QuizAnswerDto other) {
+    id = other.id == null ? id : other.id;
+    answerText = other.answerText;
+    isCorrect = other.isCorrect == null ? isCorrect : other.isCorrect;
+  }
+
+  QuizAnswerDto({
+    this.id,
+    required this.answerText,
+    this.isCorrect,
+  });
+
+  late String? id;
+  late String answerText;
+  late bool? isCorrect;
+}
+
+class QuizQuestionDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['id'] = id;
+    if (challengeId != null) {
+      fields['challengeId'] = challengeId;
+    }
+    if (questionText != null) {
+      fields['questionText'] = questionText;
+    }
+    if (explanation != null) {
+      fields['explanation'] = explanation;
+    }
+    if (difficulty != null) {
+      fields['difficulty'] = difficulty;
+    }
+    if (pointValue != null) {
+      fields['pointValue'] = pointValue;
+    }
+    if (category != null) {
+      fields['category'] = category;
+    }
+    if (answers != null) {
+      fields['answers'] = answers!
+          .map<Map<String, dynamic>>((dynamic val) => val!.toJson())
+          .toList();
+    }
+    return fields;
+  }
+
+  QuizQuestionDto.fromJson(Map<String, dynamic> fields) {
+    id = fields["id"];
+    challengeId =
+        fields.containsKey('challengeId') ? (fields["challengeId"]) : null;
+    questionText =
+        fields.containsKey('questionText') ? (fields["questionText"]) : null;
+    explanation =
+        fields.containsKey('explanation') ? (fields["explanation"]) : null;
+    difficulty =
+        fields.containsKey('difficulty') ? (fields["difficulty"]) : null;
+    pointValue =
+        fields.containsKey('pointValue') ? (fields["pointValue"]) : null;
+    category = fields.containsKey('category') ? (fields["category"]) : null;
+    answers = fields.containsKey('answers')
+        ? (fields["answers"]
+            .map<QuizAnswerDto>((dynamic val) => QuizAnswerDto.fromJson(val))
+            .toList())
+        : null;
+  }
+
+  void partialUpdate(QuizQuestionDto other) {
+    id = other.id;
+    challengeId = other.challengeId == null ? challengeId : other.challengeId;
+    questionText =
+        other.questionText == null ? questionText : other.questionText;
+    explanation = other.explanation == null ? explanation : other.explanation;
+    difficulty = other.difficulty == null ? difficulty : other.difficulty;
+    pointValue = other.pointValue == null ? pointValue : other.pointValue;
+    category = other.category == null ? category : other.category;
+    answers = other.answers == null ? answers : other.answers;
+  }
+
+  QuizQuestionDto({
+    required this.id,
+    this.challengeId,
+    this.questionText,
+    this.explanation,
+    this.difficulty,
+    this.pointValue,
+    this.category,
+    this.answers,
+  });
+
+  late String id;
+  late String? challengeId;
+  late String? questionText;
+  late String? explanation;
+  late int? difficulty;
+  late int? pointValue;
+  late String? category;
+  late List<QuizAnswerDto>? answers;
+}
+
+class SubmitQuizAnswerDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['questionId'] = questionId;
+    fields['selectedAnswerId'] = selectedAnswerId;
+    return fields;
+  }
+
+  SubmitQuizAnswerDto.fromJson(Map<String, dynamic> fields) {
+    questionId = fields["questionId"];
+    selectedAnswerId = fields["selectedAnswerId"];
+  }
+
+  void partialUpdate(SubmitQuizAnswerDto other) {
+    questionId = other.questionId;
+    selectedAnswerId = other.selectedAnswerId;
+  }
+
+  SubmitQuizAnswerDto({
+    required this.questionId,
+    required this.selectedAnswerId,
+  });
+
+  late String questionId;
+  late String selectedAnswerId;
+}
+
+class QuizResultDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['isCorrect'] = isCorrect;
+    fields['pointsEarned'] = pointsEarned;
+    if (explanation != null) {
+      fields['explanation'] = explanation;
+    }
+    fields['correctAnswerText'] = correctAnswerText;
+    fields['newTotalScore'] = newTotalScore;
+    return fields;
+  }
+
+  QuizResultDto.fromJson(Map<String, dynamic> fields) {
+    isCorrect = fields["isCorrect"];
+    pointsEarned = fields["pointsEarned"];
+    explanation =
+        fields.containsKey('explanation') ? (fields["explanation"]) : null;
+    correctAnswerText = fields["correctAnswerText"];
+    newTotalScore = fields["newTotalScore"];
+  }
+
+  void partialUpdate(QuizResultDto other) {
+    isCorrect = other.isCorrect;
+    pointsEarned = other.pointsEarned;
+    explanation = other.explanation == null ? explanation : other.explanation;
+    correctAnswerText = other.correctAnswerText;
+    newTotalScore = other.newTotalScore;
+  }
+
+  QuizResultDto({
+    required this.isCorrect,
+    required this.pointsEarned,
+    this.explanation,
+    required this.correctAnswerText,
+    required this.newTotalScore,
+  });
+
+  late bool isCorrect;
+  late int pointsEarned;
+  late String? explanation;
+  late String correctAnswerText;
+  late int newTotalScore;
+}
+
+class QuizProgressDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['challengeId'] = challengeId;
+    fields['totalQuestions'] = totalQuestions;
+    fields['answeredQuestions'] = answeredQuestions;
+    fields['remainingQuestions'] = remainingQuestions;
+    fields['isComplete'] = isComplete;
+    fields['totalPointsEarned'] = totalPointsEarned;
+    return fields;
+  }
+
+  QuizProgressDto.fromJson(Map<String, dynamic> fields) {
+    challengeId = fields["challengeId"];
+    totalQuestions = fields["totalQuestions"];
+    answeredQuestions = fields["answeredQuestions"];
+    remainingQuestions = fields["remainingQuestions"];
+    isComplete = fields["isComplete"];
+    totalPointsEarned = fields["totalPointsEarned"];
+  }
+
+  void partialUpdate(QuizProgressDto other) {
+    challengeId = other.challengeId;
+    totalQuestions = other.totalQuestions;
+    answeredQuestions = other.answeredQuestions;
+    remainingQuestions = other.remainingQuestions;
+    isComplete = other.isComplete;
+    totalPointsEarned = other.totalPointsEarned;
+  }
+
+  QuizProgressDto({
+    required this.challengeId,
+    required this.totalQuestions,
+    required this.answeredQuestions,
+    required this.remainingQuestions,
+    required this.isComplete,
+    required this.totalPointsEarned,
+  });
+
+  late String challengeId;
+  late int totalQuestions;
+  late int answeredQuestions;
+  late int remainingQuestions;
+  late bool isComplete;
+  late int totalPointsEarned;
+}
+
+class QuizErrorDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['message'] = message;
+    fields['code'] = code!.name;
+    return fields;
+  }
+
+  QuizErrorDto.fromJson(Map<String, dynamic> fields) {
+    message = fields["message"];
+    code = QuizErrorCodeDto.values.byName(fields['code']);
+  }
+
+  void partialUpdate(QuizErrorDto other) {
+    message = other.message;
+    code = other.code;
+  }
+
+  QuizErrorDto({
+    required this.message,
+    required this.code,
+  });
+
+  late String message;
+  late QuizErrorCodeDto code;
+}
+
+class UpdateQuizQuestionDataDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['question'] = question!.toJson();
+    fields['deleted'] = deleted;
+    return fields;
+  }
+
+  UpdateQuizQuestionDataDto.fromJson(Map<String, dynamic> fields) {
+    question = QuizQuestionDto.fromJson(fields['question']);
+    deleted = fields["deleted"];
+  }
+
+  void partialUpdate(UpdateQuizQuestionDataDto other) {
+    question = other.question;
+    deleted = other.deleted;
+  }
+
+  UpdateQuizQuestionDataDto({
+    required this.question,
+    required this.deleted,
+  });
+
+  late QuizQuestionDto question;
+  late bool deleted;
 }
 
 class CloseAccountDto {

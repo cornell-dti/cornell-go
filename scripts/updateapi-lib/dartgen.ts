@@ -289,7 +289,7 @@ export function getDartServerApiFile(apiDefs: ApiDefs) {
       // Set up timeout - only complete if not already completed
       Future.delayed(Duration(seconds: 5)).then((value) {
         if (!completer.isCompleted) {
-          completer.complete(null);
+          completionFunc(null);
         }
       });
 

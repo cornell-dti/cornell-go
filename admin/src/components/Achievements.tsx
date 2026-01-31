@@ -317,9 +317,12 @@ export function Achievements() {
               setDeleteModalOpen(true);
             }}
             onEdit={() => {
-              setCurrentId(ach.id);
-              setForm(toForm(ach));
-              setEditModalOpen(true);
+              const freshAchievement = serverData.achievements.get(ach.id);
+              if (freshAchievement) {
+                setCurrentId(ach.id);
+                setForm(toForm(freshAchievement));
+                setEditModalOpen(true);
+              }
             }}
             onCopy={() => {
               const orgs = Array.from(serverData.organizations.values());

@@ -45,12 +45,7 @@ class GameServerApi {
       completer.complete(arg);
     };
 
-    // Set up timeout - only complete if not already completed
-    Future.delayed(Duration(seconds: 5)).then((value) {
-      if (!completer.isCompleted) {
-        completer.complete(null);
-      }
-    });
+    Future.delayed(Duration(seconds: 5)).then((value) => completionFunc(null));
 
     _refreshEv = ev;
     _refreshDat = data;
@@ -135,6 +130,24 @@ class GameServerApi {
 
   Future<bool?> completeTimer(TimerCompletedDto dto) async =>
       await _invokeWithRefresh("completeTimer", dto.toJson());
+
+  Future<bool?> requestQuizQuestion(RequestQuizQuestionDto dto) async =>
+      await _invokeWithRefresh("requestQuizQuestion", dto.toJson());
+
+  Future<bool?> shuffleQuizQuestion(ShuffleQuizQuestionDto dto) async =>
+      await _invokeWithRefresh("shuffleQuizQuestion", dto.toJson());
+
+  Future<bool?> submitQuizAnswer(SubmitQuizAnswerDto dto) async =>
+      await _invokeWithRefresh("submitQuizAnswer", dto.toJson());
+
+  Future<bool?> getQuizProgress(RequestQuizQuestionDto dto) async =>
+      await _invokeWithRefresh("getQuizProgress", dto.toJson());
+
+  Future<int?> requestQuizQuestions(RequestQuizQuestionDto dto) async =>
+      await _invokeWithRefresh("requestQuizQuestions", dto.toJson());
+
+  Future<String?> updateQuizQuestionData(UpdateQuizQuestionDataDto dto) async =>
+      await _invokeWithRefresh("updateQuizQuestionData", dto.toJson());
 
   Future<int?> requestAllUserData(RequestAllUserDataDto dto) async =>
       await _invokeWithRefresh("requestAllUserData", dto.toJson());

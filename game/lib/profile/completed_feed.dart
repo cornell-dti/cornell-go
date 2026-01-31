@@ -37,23 +37,25 @@ class CompletedFeedWidget extends StatelessWidget {
             ),
           ),
           title: Padding(
-            padding:
-                EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.01),
-            child: Text(
-              'Completed',
-              style: headerStyle,
+            padding: EdgeInsets.only(
+              top: MediaQuery.of(context).size.height * 0.01,
             ),
+            child: Text('Completed', style: headerStyle),
           ),
           centerTitle: true, // Still useful for horizontal centering
           actions: [],
         ),
         body: Consumer4<UserModel, EventModel, TrackerModel, ChallengeModel>(
-            builder: (context, userModel, eventModel, trackerModel,
-                challengeModel, child) {
+            builder: (
+          context,
+          userModel,
+          eventModel,
+          trackerModel,
+          challengeModel,
+          child,
+        ) {
           if (userModel.userData == null) {
-            return Center(
-              child: CircularProgressIndicator(),
-            );
+            return Center(child: CircularProgressIndicator());
           }
 
           List<Tuple2<DateTime, EventDto>> completedEvents = [];
@@ -73,8 +75,9 @@ class CompletedFeedWidget extends StatelessWidget {
               // prevChallenges.last will throw StateError if prevChallenges
               // is empty, meaning the challenge was not completed properly
               var completedDate = tracker.prevChallenges.last.dateCompleted;
-              DateTime date =
-                  DateFormat("E, d MMM y HH:mm:ss").parse(completedDate);
+              DateTime date = DateFormat(
+                "E, d MMM y HH:mm:ss",
+              ).parse(completedDate);
               completedEvents.add(Tuple2<DateTime, EventDto>(date, event));
             } catch (e) {
               displayToast("Error with completing challenge", Status.error);

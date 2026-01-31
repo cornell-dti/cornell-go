@@ -3,7 +3,6 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/api/game_client_dto.dart';
 import 'package:game/splash_page/splash_page.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'dart:io' show Platform; //at the top
 
@@ -15,11 +14,7 @@ Future<void> showAlert(String message, context) async {
       return AlertDialog(
         title: const Text('Alert'),
         content: SingleChildScrollView(
-          child: ListBody(
-            children: <Widget>[
-              Text(message),
-            ],
-          ),
+          child: ListBody(children: <Widget>[Text(message)]),
         ),
         actions: <Widget>[
           TextButton(
@@ -37,7 +32,11 @@ Future<void> showAlert(String message, context) async {
 TextEditingController _textFieldController = TextEditingController();
 
 Future<void> displayTextInputDialog(
-    BuildContext context, String text, String hintText, dynamic onOk) async {
+  BuildContext context,
+  String text,
+  String hintText,
+  dynamic onOk,
+) async {
   _textFieldController.clear();
 
   return showDialog(
@@ -83,7 +82,10 @@ Future<String?> getId() async {
 }
 
 Future<void> showLeaveConfirmationAlert(
-    String message, context, ApiClient client) async {
+  String message,
+  context,
+  ApiClient client,
+) async {
   return showDialog<void>(
     context: context,
     barrierDismissible: false, // user must tap button!
@@ -91,11 +93,7 @@ Future<void> showLeaveConfirmationAlert(
       return AlertDialog(
         title: const Text('Leave Group'),
         content: SingleChildScrollView(
-          child: ListBody(
-            children: <Widget>[
-              Text(message),
-            ],
-          ),
+          child: ListBody(children: <Widget>[Text(message)]),
         ),
         actions: <Widget>[
           TextButton(
@@ -125,7 +123,8 @@ Future<void> showDeletionConfirmationAlert(context, ApiClient client) async {
       return AlertDialog(
         title: const Text('Delete Account'),
         content: const Text(
-            'Are you sure you want to delete your account? This action cannot be undone.'),
+          'Are you sure you want to delete your account? This action cannot be undone.',
+        ),
         actions: <Widget>[
           TextButton(
             child: const Text('YES'),
@@ -195,10 +194,15 @@ Color RGBComplement(Color col) {
 }
 
 Text LatoText(String text, double fs, Color color, FontWeight fw) {
-  return Text(text,
-      style: GoogleFonts.lato(
-          textStyle: TextStyle(
-              color: color, fontWeight: FontWeight.bold, fontSize: fs)));
+  return Text(
+    text,
+    style: TextStyle(
+      fontFamily: 'Lato',
+      color: color,
+      fontWeight: fw,
+      fontSize: fs,
+    ),
+  );
 }
 
 final Map<EventDifficultyDto, String> friendlyDifficulty = {
@@ -265,7 +269,7 @@ int calculateHintAdjustedPoints(int basePoints, int hintsUsed) {
   int minAllowed = (basePoints / 2).floor();
   return [
     minAllowed,
-    [rounded, basePoints].reduce((a, b) => a < b ? a : b)
+    [rounded, basePoints].reduce((a, b) => a < b ? a : b),
   ].reduce((a, b) => a > b ? a : b);
 }
 

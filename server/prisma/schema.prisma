@@ -107,7 +107,8 @@ model User {
   sessionLogEntries      SessionLogEntry[]
   achievementTrackers    AchievementTracker[]
   challengeTimers        ChallengeTimer[]
-  hasCompletedOnboarding Boolean
+  UserQuizAnswer         UserQuizAnswer[]
+  hasCompletedOnboarding Boolean              @default(false)
 }
 
 model Group {
@@ -143,6 +144,7 @@ model Challenge {
   timerLength    Int?
   completions    PrevChallenge[]
   activeTrackers EventTracker[]
+  QuizQuestion   QuizQuestion[]
 }
 
 model EventBase {
@@ -293,4 +295,54 @@ model ChallengeTimer {
   challengeId           String
 
   @@unique([userId, challengeId]) //one timer per user per challenge
+}
+
+model QuizQuestion {
+  id          String    @id @default(cuid())
+  challengeId String
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+
+  questionText String
+  explanation  String?
+  difficulty   Int     @default(1)
+  pointValue   Int     @default(10)
+  category     String  @default("HISTORICAL")
+
+  answers     QuizAnswer[]
+  userAnswers UserQuizAnswer[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("QuizQuestion")
+}
+
+model QuizAnswer {
+  id         String       @id @default(cuid())
+  questionId String
+  question   QuizQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  answerText String
+  isCorrect  Boolean @default(false)
+
+  userSelections UserQuizAnswer[]
+
+  @@map("QuizAnswer")
+}
+
+model UserQuizAnswer {
+  id               String       @id @default(cuid())
+  userId           String
+  user             User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  questionId       String
+  question         QuizQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  selectedAnswerId String?
+  selectedAnswer   QuizAnswer?  @relation(fields: [selectedAnswerId], references: [id], onDelete: SetNull)
+
+  isCorrect    Boolean
+  pointsEarned Int
+  answeredAt   DateTime @default(now())
+
+  @@unique([userId, questionId]) // Enforce one attempt per question
+  @@map("UserQuizAnswer")
 }

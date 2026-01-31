@@ -36,11 +36,7 @@ class _VisitedPlacesWidgetState extends State<VisitedPlacesWidget> {
                     padding: const EdgeInsets.all(8.0),
                     child: Row(
                       children: [
-                        Icon(
-                          Icons.search,
-                          size: 25,
-                          color: Colors.white,
-                        ),
+                        Icon(Icons.search, size: 25, color: Colors.white),
                         Expanded(
                           child: TextField(
                             cursorColor: Colors.white,
@@ -50,12 +46,14 @@ class _VisitedPlacesWidgetState extends State<VisitedPlacesWidget> {
                               ),
                               border: UnderlineInputBorder(),
                               hintText: 'search...',
-                              hintStyle:
-                                  TextStyle(fontSize: 20, color: Colors.white),
+                              hintStyle: TextStyle(
+                                fontSize: 20,
+                                color: Colors.white,
+                              ),
                               fillColor: Colors.white,
                             ),
                           ),
-                        )
+                        ),
                       ],
                     ),
                   ),
@@ -65,17 +63,37 @@ class _VisitedPlacesWidgetState extends State<VisitedPlacesWidget> {
                     shrinkWrap: true,
                     scrollDirection: Axis.vertical,
                     children: [
-                      visitedPlacesCell(context, "Sage Chapel", "4/19/2021", 5,
-                          "assets/images/38582.jpg"),
-                      visitedPlacesCell(context, "Sage Chapel", "4/19/2021", 5,
-                          "assets/images/38582.jpg"),
-                      visitedPlacesCell(context, "Sage Chapel", "4/19/2021", 5,
-                          "assets/images/38582.jpg"),
-                      visitedPlacesCell(context, "Sage Chapel", "4/19/2021", 5,
-                          "assets/images/38582.jpg"),
+                      visitedPlacesCell(
+                        context,
+                        "Sage Chapel",
+                        "4/19/2021",
+                        5,
+                        "assets/images/38582.jpg",
+                      ),
+                      visitedPlacesCell(
+                        context,
+                        "Sage Chapel",
+                        "4/19/2021",
+                        5,
+                        "assets/images/38582.jpg",
+                      ),
+                      visitedPlacesCell(
+                        context,
+                        "Sage Chapel",
+                        "4/19/2021",
+                        5,
+                        "assets/images/38582.jpg",
+                      ),
+                      visitedPlacesCell(
+                        context,
+                        "Sage Chapel",
+                        "4/19/2021",
+                        5,
+                        "assets/images/38582.jpg",
+                      ),
                     ],
                   ),
-                )
+                ),
               ],
             ),
           ),
