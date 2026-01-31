@@ -82,25 +82,24 @@ Widget completedCell(
                   padding: const EdgeInsets.only(top: 5.0),
                   child: Container(
                     width: 200,
-                    child: Row(
-                      children: [
-                        SvgPicture.asset(
-                          "assets/icons/bearcoins.svg",
-                          width: 20,
-                        ),
-                        Text(
-                            ' ' +
-                                adjustedPoints.toString() +
-                                "/" +
-                                originalPoints.toString() +
-                                " PTS",
-                            style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
-                                color: Color(0xFFC17E19)))
-                      ]),
-                    ),
+                    child: Row(children: [
+                      SvgPicture.asset(
+                        "assets/icons/bearcoins.svg",
+                        width: 20,
+                      ),
+                      Text(
+                          ' ' +
+                              adjustedPoints.toString() +
+                              "/" +
+                              originalPoints.toString() +
+                              " PTS",
+                          style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xFFC17E19)))
+                    ]),
                   ),
+                ),
               ],
             ),
           ),

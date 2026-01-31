@@ -256,12 +256,13 @@ class _CompletedChallengeFullState extends State<CompletedChallengeFull> {
                                   ),
                                 ),
                                 SizedBox(width: 8),
-                                Row(children: [
-                                  SvgPicture.asset(
-                                    "assets/icons/bearcoins.svg",
-                                    width: 25,
-                                  ),
-                                  Text(
+                                Row(
+                                  children: [
+                                    SvgPicture.asset(
+                                      "assets/icons/bearcoins.svg",
+                                      width: 25,
+                                    ),
+                                    Text(
                                       ' ' +
                                           widget.adjustedPoints.toString() +
                                           "/" +

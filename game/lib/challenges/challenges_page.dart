@@ -320,7 +320,8 @@ class _ChallengesPageState extends State<ChallengesPage> {
                             !onboarding.step1ChallengesComplete &&
                             eventData.isNotEmpty &&
                             !_hasTriggeredStep1) {
-                          _hasTriggeredStep1 = true; // Prevent re-triggering on rebuild
+                          _hasTriggeredStep1 =
+                              true; // Prevent re-triggering on rebuild
                           WidgetsBinding.instance.addPostFrameCallback((_) {
                             if (mounted) {
                               ShowcaseView.getNamed(

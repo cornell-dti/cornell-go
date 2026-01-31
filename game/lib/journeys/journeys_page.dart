@@ -374,7 +374,8 @@ class _JourneysPageState extends State<JourneysPage> {
                               !onboarding.step4FirstJourneyComplete &&
                               eventData.isNotEmpty &&
                               !_hasTriggeredStep4) {
-                            _hasTriggeredStep4 = true; // Prevent re-triggering on rebuild
+                            _hasTriggeredStep4 =
+                                true; // Prevent re-triggering on rebuild
                             WidgetsBinding.instance.addPostFrameCallback((_) {
                               if (mounted) {
                                 ShowcaseView.getNamed(

@@ -421,7 +421,9 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                           Spacer(),
                           Text(
                             // TIMER: Shows extension-adjusted points
-                            "+ " + extensionAdjustedPoints.toString() + " points",
+                            "+ " +
+                                extensionAdjustedPoints.toString() +
+                                " points",
                             style:
                                 TextStyle(color: Colors.white, fontSize: 16.0),
                           ),
@@ -482,8 +484,8 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                             Spacer(),
                             Text(
                               () {
-                                int penalty =
-                                    extensionAdjustedPoints - finalAdjustedPoints;
+                                int penalty = extensionAdjustedPoints -
+                                    finalAdjustedPoints;
                                 return "- $penalty points";
                               }(),
                               style: TextStyle(
@@ -525,40 +527,39 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                 ] else ...[
                   // TIMER: Journey page view - show completed challenges list
                   Expanded(
-                      child: ListView(
-                          padding: EdgeInsets.zero,
+                      child: ListView(padding: EdgeInsets.zero, children: [
+                    ...completedChallenges,
+                    // QUIZ: Show quiz bonus for journey if any (inside scroll view)
+                    if (displayQuizPoints > 0)
+                      Container(
+                        margin:
+                            EdgeInsets.only(left: 30, bottom: 10, right: 30),
+                        child: Row(
                           children: [
-                            ...completedChallenges,
-                            // QUIZ: Show quiz bonus for journey if any (inside scroll view)
-                            if (displayQuizPoints > 0)
-                              Container(
-                                margin: EdgeInsets.only(left: 30, bottom: 10, right: 30),
-                                child: Row(
-                                  children: [
-                                    SvgPicture.asset(
-                                      'assets/icons/quiz.svg',
-                                      fit: BoxFit.cover,
-                                    ),
-                                    Text(
-                                      "   Quiz Bonus",
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 16.0,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    Spacer(),
-                                    Text(
-                                      "+ $displayQuizPoints points",
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 16.0,
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                            SvgPicture.asset(
+                              'assets/icons/quiz.svg',
+                              fit: BoxFit.cover,
+                            ),
+                            Text(
+                              "   Quiz Bonus",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16.0,
+                                fontWeight: FontWeight.bold,
                               ),
-                          ])),
+                            ),
+                            Spacer(),
+                            Text(
+                              "+ $displayQuizPoints points",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16.0,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ])),
                 ],
                 SizedBox(height: 10),
                 // MERGED: Total points display
@@ -632,7 +633,8 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                                             bottom: 10),
                                         shape: RoundedRectangleBorder(
                                           side: BorderSide(color: Colors.white),
-                                          borderRadius: BorderRadius.circular(10),
+                                          borderRadius:
+                                              BorderRadius.circular(10),
                                         ),
                                       ),
                                       onPressed: () =>
@@ -702,9 +704,7 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                           child: Row(mainAxisSize: MainAxisSize.min, children: [
                             Text(
                               // TIMER: Shows "Journey Progress" for journeys, "Return Home" for single challenges
-                              isJourney
-                                  ? "Journey Progress "
-                                  : "Return Home ",
+                              isJourney ? "Journey Progress " : "Return Home ",
                               style: TextStyle(
                                   fontFamily: 'Poppins',
                                   fontSize: 21,

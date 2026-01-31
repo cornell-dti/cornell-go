@@ -332,7 +332,8 @@ class _GameplayPageState extends State<GameplayPage> {
             int displayHintsUsed;
             int displayExtensionsUsed;
 
-            if (GameplayMap.isCompletionDialogShowing && _cachedChallenge != null) {
+            if (GameplayMap.isCompletionDialogShowing &&
+                _cachedChallenge != null) {
               // Use cached data while dialog is showing
               displayChallenge = _cachedChallenge!;
               displayTargetLocation = _cachedTargetLocation;
