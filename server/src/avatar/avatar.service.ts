@@ -94,12 +94,14 @@ export class AvatarService {
                 where: { id: dto.itemId },
             });
 
+            // Lock the user row to prevent concurrent purchases from racing
+            const [user] = await tx.$queryRaw<{ score: number }[]>`
+                SELECT score FROM "User" WHERE id = ${userId} FOR UPDATE
+            `;
+            const balance = user?.score ?? 0;
+
             if (!item) {
-                const user = await tx.user.findUnique({
-                    where: { id: userId },
-                    select: { score: true },
-                });
-                return { success: false, newBalance: user?.score ?? 0, itemId: dto.itemId };
+                return { success: false, newBalance: balance, itemId: dto.itemId };
             }
 
             // Already owned?
@@ -109,19 +111,8 @@ export class AvatarService {
                 })) > 0;
 
             if (alreadyOwned) {
-                const user = await tx.user.findUnique({
-                    where: { id: userId },
-                    select: { score: true },
-                });
-                return { success: true, newBalance: user?.score ?? 0, itemId: item.id };
+                return { success: true, newBalance: balance, itemId: item.id };
             }
-
-            // Get user balance inside transaction
-            const user = await tx.user.findUnique({
-                where: { id: userId },
-                select: { score: true },
-            });
-            const balance = user?.score ?? 0;
 
             if (balance < item.cost) {
                 return { success: false, newBalance: balance, itemId: item.id };
