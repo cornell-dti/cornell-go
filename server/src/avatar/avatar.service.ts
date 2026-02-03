@@ -89,40 +89,57 @@ export class AvatarService {
         userId: string,
         dto: PurchaseBearItemDto,
     ): Promise<PurchaseResultDto> {
-        const item = await this.prisma.bearItem.findUnique({
-            where: { id: dto.itemId },
-        });
-        if (!item) {
-            return { success: false, newBalance: await this.getUserBalance(userId), itemId: dto.itemId };
-        }
+        return await this.prisma.$transaction(async (tx) => {
+            const item = await tx.bearItem.findUnique({
+                where: { id: dto.itemId },
+            });
 
-        // Already owned?
-        const alreadyOwned =
-            (await this.prisma.userBearInventory.count({
-                where: { userId, bearItemId: item.id },
-            })) > 0;
-        if (alreadyOwned) {
-            return { success: true, newBalance: await this.getUserBalance(userId), itemId: item.id };
-        }
+            if (!item) {
+                const user = await tx.user.findUnique({
+                    where: { id: userId },
+                    select: { score: true },
+                });
+                return { success: false, newBalance: user?.score ?? 0, itemId: dto.itemId };
+            }
 
-        const balance = await this.getUserBalance(userId);
-        if (balance < item.cost) {
-            return { success: false, newBalance: balance, itemId: item.id };
-        }
+            // Already owned?
+            const alreadyOwned =
+                (await tx.userBearInventory.count({
+                    where: { userId, bearItemId: item.id },
+                })) > 0;
 
-        // Deduct cost from user's score (temporary currency) and add to inventory
-        await this.prisma.$transaction([
-            this.prisma.user.update({
+            if (alreadyOwned) {
+                const user = await tx.user.findUnique({
+                    where: { id: userId },
+                    select: { score: true },
+                });
+                return { success: true, newBalance: user?.score ?? 0, itemId: item.id };
+            }
+
+            // Get user balance inside transaction
+            const user = await tx.user.findUnique({
+                where: { id: userId },
+                select: { score: true },
+            });
+            const balance = user?.score ?? 0;
+
+            if (balance < item.cost) {
+                return { success: false, newBalance: balance, itemId: item.id };
+            }
+
+            // Deduct cost from user's score (temporary currency) and add to inventory
+            await tx.user.update({
                 where: { id: userId },
                 data: { score: { decrement: item.cost } },
-            }),
-            this.prisma.userBearInventory.create({
-                data: { userId, bearItemId: item.id },
-            }),
-        ]);
+            });
 
-        const newBalance = balance - item.cost;
-        return { success: true, newBalance, itemId: item.id };
+            await tx.userBearInventory.create({
+                data: { userId, bearItemId: item.id },
+            });
+
+            const newBalance = balance - item.cost;
+            return { success: true, newBalance, itemId: item.id };
+        });
     }
 
     async equipItem(userId: string, dto: EquipBearItemDto): Promise<UserBearLoadoutDto> {

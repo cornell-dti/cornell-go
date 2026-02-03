@@ -50,6 +50,7 @@ export interface RequestBearItemsDto {
     slot?: BearSlotDto;
 }
 
+// Empty DTOS for documentation and frontend api generation
 export interface RequestUserInventoryDto { }
 
 export interface RequestUserBearLoadoutDto { }
