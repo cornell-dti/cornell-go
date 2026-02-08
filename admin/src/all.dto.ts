@@ -22,6 +22,13 @@ export enum LoginEnrollmentTypeDto {
   GUEST = 'GUEST',
 }
 
+export enum BearSlotDto {
+  EYES = 'EYES',
+  MOUTH = 'MOUTH',
+  COLOR = 'COLOR',
+  ACCESSORY = 'ACCESSORY',
+}
+
 export enum ChallengeLocationDto {
   ENG_QUAD = 'ENG_QUAD',
   ARTS_QUAD = 'ARTS_QUAD',
@@ -131,6 +138,59 @@ export interface LoginDto {
 export interface RefreshTokenDto {
   refreshToken: string;
 }
+
+export interface BearItemDto {
+  id: string;
+  name: string;
+  slot: BearSlotDto;
+  cost: number;
+  assetKey: string;
+  mimeType: string;
+  zIndex?: number;
+}
+
+export interface PurchaseBearItemDto {
+  itemId: string;
+}
+
+export interface EquipBearItemDto {
+  slot: BearSlotDto;
+  itemId?: string;
+}
+
+export interface PurchaseResultDto {
+  success: boolean;
+  newBalance: number;
+  itemId: string;
+}
+
+export interface UserBearLoadoutDto {
+  userId: string;
+}
+
+export interface UserInventoryDto {
+  userId: string;
+  items: BearItemDto[];
+  balance: number;
+}
+
+export interface RequestBearItemsDto {
+  slot?: BearSlotDto;
+}
+
+export interface RequestUserInventoryDto {}
+
+export interface RequestUserBearLoadoutDto {}
+
+export interface UpdateBearItemsDataDto {
+  items: BearItemDto[];
+}
+
+export interface UpdateUserInventoryDataDto {}
+
+export interface UpdateUserBearLoadoutDataDto {}
+
+export interface UpdatePurchaseResultDto {}
 
 export interface CompletedChallengeDto {}
 

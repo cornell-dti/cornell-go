@@ -22,6 +22,13 @@ enum LoginEnrollmentTypeDto {
   GUEST,
 }
 
+enum BearSlotDto {
+  EYES,
+  MOUTH,
+  COLOR,
+  ACCESSORY,
+}
+
 enum ChallengeLocationDto {
   ENG_QUAD,
   ARTS_QUAD,
@@ -402,6 +409,318 @@ class RefreshTokenDto {
   });
 
   late String refreshToken;
+}
+
+class BearItemDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['id'] = id;
+    fields['name'] = name;
+    fields['slot'] = slot!.name;
+    fields['cost'] = cost;
+    fields['assetKey'] = assetKey;
+    fields['mimeType'] = mimeType;
+    if (zIndex != null) {
+      fields['zIndex'] = zIndex;
+    }
+    return fields;
+  }
+
+  BearItemDto.fromJson(Map<String, dynamic> fields) {
+    id = fields["id"];
+    name = fields["name"];
+    slot = BearSlotDto.values.byName(fields['slot']);
+    cost = fields["cost"];
+    assetKey = fields["assetKey"];
+    mimeType = fields["mimeType"];
+    zIndex = fields.containsKey('zIndex') ? (fields["zIndex"]) : null;
+  }
+
+  void partialUpdate(BearItemDto other) {
+    id = other.id;
+    name = other.name;
+    slot = other.slot;
+    cost = other.cost;
+    assetKey = other.assetKey;
+    mimeType = other.mimeType;
+    zIndex = other.zIndex == null ? zIndex : other.zIndex;
+  }
+
+  BearItemDto({
+    required this.id,
+    required this.name,
+    required this.slot,
+    required this.cost,
+    required this.assetKey,
+    required this.mimeType,
+    this.zIndex,
+  });
+
+  late String id;
+  late String name;
+  late BearSlotDto slot;
+  late int cost;
+  late String assetKey;
+  late String mimeType;
+  late int? zIndex;
+}
+
+class PurchaseBearItemDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['itemId'] = itemId;
+    return fields;
+  }
+
+  PurchaseBearItemDto.fromJson(Map<String, dynamic> fields) {
+    itemId = fields["itemId"];
+  }
+
+  void partialUpdate(PurchaseBearItemDto other) {
+    itemId = other.itemId;
+  }
+
+  PurchaseBearItemDto({
+    required this.itemId,
+  });
+
+  late String itemId;
+}
+
+class EquipBearItemDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['slot'] = slot!.name;
+    if (itemId != null) {
+      fields['itemId'] = itemId;
+    }
+    return fields;
+  }
+
+  EquipBearItemDto.fromJson(Map<String, dynamic> fields) {
+    slot = BearSlotDto.values.byName(fields['slot']);
+    itemId = fields.containsKey('itemId') ? (fields["itemId"]) : null;
+  }
+
+  void partialUpdate(EquipBearItemDto other) {
+    slot = other.slot;
+    itemId = other.itemId == null ? itemId : other.itemId;
+  }
+
+  EquipBearItemDto({
+    required this.slot,
+    this.itemId,
+  });
+
+  late BearSlotDto slot;
+  late String? itemId;
+}
+
+class PurchaseResultDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['success'] = success;
+    fields['newBalance'] = newBalance;
+    fields['itemId'] = itemId;
+    return fields;
+  }
+
+  PurchaseResultDto.fromJson(Map<String, dynamic> fields) {
+    success = fields["success"];
+    newBalance = fields["newBalance"];
+    itemId = fields["itemId"];
+  }
+
+  void partialUpdate(PurchaseResultDto other) {
+    success = other.success;
+    newBalance = other.newBalance;
+    itemId = other.itemId;
+  }
+
+  PurchaseResultDto({
+    required this.success,
+    required this.newBalance,
+    required this.itemId,
+  });
+
+  late bool success;
+  late int newBalance;
+  late String itemId;
+}
+
+class UserBearLoadoutDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['userId'] = userId;
+    return fields;
+  }
+
+  UserBearLoadoutDto.fromJson(Map<String, dynamic> fields) {
+    userId = fields["userId"];
+  }
+
+  void partialUpdate(UserBearLoadoutDto other) {
+    userId = other.userId;
+  }
+
+  UserBearLoadoutDto({
+    required this.userId,
+  });
+
+  late String userId;
+}
+
+class UserInventoryDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['userId'] = userId;
+    fields['items'] = items!
+        .map<Map<String, dynamic>>((dynamic val) => val!.toJson())
+        .toList();
+    fields['balance'] = balance;
+    return fields;
+  }
+
+  UserInventoryDto.fromJson(Map<String, dynamic> fields) {
+    userId = fields["userId"];
+    items = fields["items"]
+        .map<BearItemDto>((dynamic val) => BearItemDto.fromJson(val))
+        .toList();
+    balance = fields["balance"];
+  }
+
+  void partialUpdate(UserInventoryDto other) {
+    userId = other.userId;
+    items = other.items;
+    balance = other.balance;
+  }
+
+  UserInventoryDto({
+    required this.userId,
+    required this.items,
+    required this.balance,
+  });
+
+  late String userId;
+  late List<BearItemDto> items;
+  late int balance;
+}
+
+class RequestBearItemsDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    if (slot != null) {
+      fields['slot'] = slot!.name;
+    }
+    return fields;
+  }
+
+  RequestBearItemsDto.fromJson(Map<String, dynamic> fields) {
+    slot = fields.containsKey('slot')
+        ? (BearSlotDto.values.byName(fields['slot']))
+        : null;
+  }
+
+  void partialUpdate(RequestBearItemsDto other) {
+    slot = other.slot == null ? slot : other.slot;
+  }
+
+  RequestBearItemsDto({
+    this.slot,
+  });
+
+  late BearSlotDto? slot;
+}
+
+class RequestUserInventoryDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    return fields;
+  }
+
+  RequestUserInventoryDto.fromJson(Map<String, dynamic> fields) {}
+
+  void partialUpdate(RequestUserInventoryDto other) {}
+
+  RequestUserInventoryDto();
+}
+
+class RequestUserBearLoadoutDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    return fields;
+  }
+
+  RequestUserBearLoadoutDto.fromJson(Map<String, dynamic> fields) {}
+
+  void partialUpdate(RequestUserBearLoadoutDto other) {}
+
+  RequestUserBearLoadoutDto();
+}
+
+class UpdateBearItemsDataDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['items'] = items!
+        .map<Map<String, dynamic>>((dynamic val) => val!.toJson())
+        .toList();
+    return fields;
+  }
+
+  UpdateBearItemsDataDto.fromJson(Map<String, dynamic> fields) {
+    items = fields["items"]
+        .map<BearItemDto>((dynamic val) => BearItemDto.fromJson(val))
+        .toList();
+  }
+
+  void partialUpdate(UpdateBearItemsDataDto other) {
+    items = other.items;
+  }
+
+  UpdateBearItemsDataDto({
+    required this.items,
+  });
+
+  late List<BearItemDto> items;
+}
+
+class UpdateUserInventoryDataDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    return fields;
+  }
+
+  UpdateUserInventoryDataDto.fromJson(Map<String, dynamic> fields) {}
+
+  void partialUpdate(UpdateUserInventoryDataDto other) {}
+
+  UpdateUserInventoryDataDto();
+}
+
+class UpdateUserBearLoadoutDataDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    return fields;
+  }
+
+  UpdateUserBearLoadoutDataDto.fromJson(Map<String, dynamic> fields) {}
+
+  void partialUpdate(UpdateUserBearLoadoutDataDto other) {}
+
+  UpdateUserBearLoadoutDataDto();
+}
+
+class UpdatePurchaseResultDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    return fields;
+  }
+
+  UpdatePurchaseResultDto.fromJson(Map<String, dynamic> fields) {}
+
+  void partialUpdate(UpdatePurchaseResultDto other) {}
+
+  UpdatePurchaseResultDto();
 }
 
 class CompletedChallengeDto {
