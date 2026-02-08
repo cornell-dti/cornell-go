@@ -31,6 +31,30 @@ export class ServerApi {
     >;
   }
 
+  requestBearItems(data: dto.RequestBearItemsDto) {
+    return this.send('requestBearItems', data) as Promise<number | undefined>;
+  }
+
+  requestUserInventory(data: dto.RequestUserInventoryDto) {
+    return this.send('requestUserInventory', data) as Promise<
+      number | undefined
+    >;
+  }
+
+  requestUserBearLoadout(data: dto.RequestUserBearLoadoutDto) {
+    return this.send('requestUserBearLoadout', data) as Promise<
+      number | undefined
+    >;
+  }
+
+  purchaseBearItem(data: dto.PurchaseBearItemDto) {
+    return this.send('purchaseBearItem', data) as Promise<boolean | undefined>;
+  }
+
+  equipBearItem(data: dto.EquipBearItemDto) {
+    return this.send('equipBearItem', data) as Promise<boolean | undefined>;
+  }
+
   requestChallengeData(data: dto.RequestChallengeDataDto) {
     return this.send('requestChallengeData', data) as Promise<
       number | undefined
@@ -233,5 +257,31 @@ export class ServerApi {
   ) {
     this.socket.removeAllListeners('updateLeaderPosition');
     this.socket.on('updateLeaderPosition', data => callback(data));
+  }
+
+  onUpdateBearItemsData(callback: (data: dto.UpdateBearItemsDataDto) => void) {
+    this.socket.removeAllListeners('updateBearItemsData');
+    this.socket.on('updateBearItemsData', data => callback(data));
+  }
+
+  onUpdateUserInventoryData(
+    callback: (data: dto.UpdateUserInventoryDataDto) => void,
+  ) {
+    this.socket.removeAllListeners('updateUserInventoryData');
+    this.socket.on('updateUserInventoryData', data => callback(data));
+  }
+
+  onUpdateUserBearLoadoutData(
+    callback: (data: dto.UpdateUserBearLoadoutDataDto) => void,
+  ) {
+    this.socket.removeAllListeners('updateUserBearLoadoutData');
+    this.socket.on('updateUserBearLoadoutData', data => callback(data));
+  }
+
+  onUpdatePurchaseResult(
+    callback: (data: dto.UpdatePurchaseResultDto) => void,
+  ) {
+    this.socket.removeAllListeners('updatePurchaseResult');
+    this.socket.on('updatePurchaseResult', data => callback(data));
   }
 }

@@ -45,18 +45,14 @@ class GameServerApi {
       completer.complete(arg);
     };
 
-    Future.delayed(Duration(seconds: 5)).then((value) {
-      if (!completer.isCompleted) {
-        completer.complete(null);
-      }
-    });
+    Future.delayed(Duration(seconds: 5))
+        .then((value) => completer.complete(null));
 
     _refreshEv = ev;
     _refreshDat = data;
     _refreshResolver = completionFunc;
 
-    // Note: Uncomment if you want to log all events (gets pretty spammy)
-    // print(ev);
+    print(ev);
     _socket.emitWithAck(ev, data, ack: completionFunc);
 
     return completer.future;
@@ -71,6 +67,21 @@ class GameServerApi {
 
   Future<String?> updateAchievementData(UpdateAchievementDataDto dto) async =>
       await _invokeWithRefresh("updateAchievementData", dto.toJson());
+
+  Future<int?> requestBearItems(RequestBearItemsDto dto) async =>
+      await _invokeWithRefresh("requestBearItems", dto.toJson());
+
+  Future<int?> requestUserInventory(RequestUserInventoryDto dto) async =>
+      await _invokeWithRefresh("requestUserInventory", dto.toJson());
+
+  Future<int?> requestUserBearLoadout(RequestUserBearLoadoutDto dto) async =>
+      await _invokeWithRefresh("requestUserBearLoadout", dto.toJson());
+
+  Future<bool?> purchaseBearItem(PurchaseBearItemDto dto) async =>
+      await _invokeWithRefresh("purchaseBearItem", dto.toJson());
+
+  Future<bool?> equipBearItem(EquipBearItemDto dto) async =>
+      await _invokeWithRefresh("equipBearItem", dto.toJson());
 
   Future<int?> requestChallengeData(RequestChallengeDataDto dto) async =>
       await _invokeWithRefresh("requestChallengeData", dto.toJson());
