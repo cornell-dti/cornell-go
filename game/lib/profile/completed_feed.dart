@@ -37,23 +37,25 @@ class CompletedFeedWidget extends StatelessWidget {
             ),
           ),
           title: Padding(
-            padding:
-                EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.01),
-            child: Text(
-              'Completed',
-              style: headerStyle,
+            padding: EdgeInsets.only(
+              top: MediaQuery.of(context).size.height * 0.01,
             ),
+            child: Text('Completed', style: headerStyle),
           ),
           centerTitle: true, // Still useful for horizontal centering
           actions: [],
         ),
         body: Consumer4<UserModel, EventModel, TrackerModel, ChallengeModel>(
-            builder: (context, userModel, eventModel, trackerModel,
-                challengeModel, child) {
+            builder: (
+          context,
+          userModel,
+          eventModel,
+          trackerModel,
+          challengeModel,
+          child,
+        ) {
           if (userModel.userData == null) {
-            return Center(
-              child: CircularProgressIndicator(),
-            );
+            return Center(child: CircularProgressIndicator());
           }
 
           List<Tuple2<DateTime, EventDto>> completedEvents = [];
@@ -73,8 +75,9 @@ class CompletedFeedWidget extends StatelessWidget {
               // prevChallenges.last will throw StateError if prevChallenges
               // is empty, meaning the challenge was not completed properly
               var completedDate = tracker.prevChallenges.last.dateCompleted;
-              DateTime date =
-                  DateFormat("E, d MMM y HH:mm:ss").parse(completedDate);
+              DateTime date = DateFormat(
+                "E, d MMM y HH:mm:ss",
+              ).parse(completedDate);
               completedEvents.add(Tuple2<DateTime, EventDto>(date, event));
             } catch (e) {
               displayToast("Error with completing challenge", Status.error);
@@ -92,21 +95,50 @@ class CompletedFeedWidget extends StatelessWidget {
 
                 var pictureList = <String>[];
                 var locationList = [];
-                var totalPoints = 0;
+                var totalAdjustedPoints = 0;
+                var totalOriginalPoints = 0;
 
-                for (var challengeId in event.challenges ?? []) {
-                  var challenge = challengeModel.getChallengeById(challengeId);
-                  var imageUrl = challenge?.imageUrl;
-                  if (imageUrl == null || imageUrl.length == 0) {
-                    imageUrl =
-                        "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png";
-                  }
+                // Get tracker for this event to access prevChallenges
+                var eventTracker = trackerModel.trackerByEventId(event.id);
+                if (eventTracker != null) {
+                  // Calculate both adjusted and original total points
+                  for (var prevChallenge in eventTracker.prevChallenges) {
+                    var challenge = challengeModel
+                        .getChallengeById(prevChallenge.challengeId);
+                    var imageUrl = challenge?.imageUrl;
+                    if (imageUrl == null || imageUrl.length == 0) {
+                      imageUrl =
+                          "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png";
+                    }
 
-                  if (challenge != null) {
-                    pictureList.add(imageUrl);
-                    locationList.add(friendlyLocation[challenge.location ??
-                        ChallengeLocationDto.ANY]); // wrong ANY was being used
-                    totalPoints += challenge.points ?? 0;
+                    if (challenge != null) {
+                      pictureList.add(imageUrl);
+                      locationList.add(friendlyLocation[challenge.location ??
+                          ChallengeLocationDto
+                              .ANY]); // wrong ANY was being used
+                      // Calculate adjusted points: first apply extension deduction, then hint adjustment
+                      int basePoints = challenge.points ?? 0;
+                      totalOriginalPoints += basePoints; // Sum original points
+
+                      // If challenge was failed (timer expired), award 0 points
+                      if (prevChallenge.failed == true) {
+                        // Failed challenges earn 0 points
+                        totalAdjustedPoints += 0;
+                      } else {
+                        int extensionsUsed = 0;
+                        try {
+                          extensionsUsed = prevChallenge.extensionsUsed ?? 0;
+                        } catch (e) {
+                          extensionsUsed = 0;
+                        }
+                        int extensionAdjustedPoints =
+                            calculateExtensionAdjustedPoints(
+                                basePoints, extensionsUsed);
+                        int finalAdjustedPoints = calculateHintAdjustedPoints(
+                            extensionAdjustedPoints, prevChallenge.hintsUsed);
+                        totalAdjustedPoints += finalAdjustedPoints;
+                      }
+                    }
                   }
                 }
 
@@ -118,7 +150,8 @@ class CompletedFeedWidget extends StatelessWidget {
                   location:
                       locationList.isNotEmpty ? locationList[0] : "Cornell",
                   difficulty: friendlyDifficulty[event.difficulty]!,
-                  points: totalPoints,
+                  adjustedPoints: totalAdjustedPoints,
+                  originalPoints: totalOriginalPoints,
                 );
               },
               itemCount: itemCount);

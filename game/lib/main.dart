@@ -13,6 +13,8 @@ import 'package:game/loading_page/loading_page.dart';
 import 'package:game/model/achievement_model.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:game/model/onboarding_model.dart';
+import 'package:game/model/timer_model.dart';
+import 'package:game/model/quiz_model.dart';
 
 // imports for google maps
 import 'dart:io' show Platform;
@@ -87,10 +89,7 @@ void main() async {
 
   runApp(
     USE_DEVICE_PREVIEW
-        ? DevicePreview(
-            enabled: !kReleaseMode,
-            builder: (context) => MyApp(),
-          )
+        ? DevicePreview(enabled: !kReleaseMode, builder: (context) => MyApp())
         : MyApp(),
   );
 }
@@ -132,7 +131,9 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider.value(value: client),
         ChangeNotifierProvider(create: (_) => UserModel(client), lazy: false),
         ChangeNotifierProvider(
-            create: (_) => OnboardingModel(client), lazy: false),
+          create: (_) => OnboardingModel(client),
+          lazy: false,
+        ),
         ChangeNotifierProvider(create: (_) => GroupModel(client), lazy: false),
         ChangeNotifierProvider(create: (_) => EventModel(client), lazy: false),
         ChangeNotifierProvider(
@@ -147,6 +148,11 @@ class MyApp extends StatelessWidget {
           create: (_) => ChallengeModel(client),
           lazy: false,
         ),
+        ChangeNotifierProvider(
+          create: (_) => TimerModel(client),
+          lazy: false,
+        ),
+        ChangeNotifierProvider(create: (_) => QuizModel(client), lazy: false),
       ],
       child: GameWidget(
         child: MaterialApp(

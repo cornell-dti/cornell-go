@@ -15,8 +15,7 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-
-version: 1.2.0+10
+version: 1.2.1+2
 
 environment:
   sdk: ">=3.0.0 <4.0.0"
@@ -68,6 +67,7 @@ dependencies:
   win32: ^5.6.1
   device_preview: ^1.2.0
   showcaseview: ^5.0.1
+  flutter_compass: ^0.8.0
 
 dev_dependencies:
   flutter_test:
@@ -102,6 +102,7 @@ flutter:
     - assets/videos/
     - assets/audios/
     - assets/lottie_animations/
+    - assets/fonts/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
@@ -120,6 +121,11 @@ flutter:
         - asset: assets/fonts/Poppins-Regular.ttf
         - asset: assets/fonts/Poppins-Medium.ttf
           weight: 500
+    - family: Lato
+      fonts:
+        - asset: assets/fonts/Lato-Regular.ttf
+        - asset: assets/fonts/Lato-Bold.ttf
+          weight: 700
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages

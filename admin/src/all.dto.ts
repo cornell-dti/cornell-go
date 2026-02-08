@@ -56,6 +56,13 @@ export enum EventDifficultyDto {
   Hard = 'Hard',
 }
 
+export enum QuizErrorCodeDto {
+  NO_QUESTIONS = 'NO_QUESTIONS',
+  ALREADY_ANSWERED = 'ALREADY_ANSWERED',
+  INVALID_QUESTION = 'INVALID_QUESTION',
+  INVALID_ANSWER = 'INVALID_ANSWER',
+}
+
 export enum SetAuthToOAuthProviderDto {
   apple = 'apple',
   google = 'google',
@@ -139,6 +146,7 @@ export interface ChallengeDto {
   awardingRadiusF?: number;
   closeRadiusF?: number;
   linkedEventId?: string;
+  timerLength?: number;
 }
 
 export interface RequestChallengeDataDto {
@@ -226,7 +234,9 @@ export interface EventDto {
 export interface PrevChallengeDto {
   challengeId: string;
   hintsUsed: number;
+  extensionsUsed?: number;
   dateCompleted: string;
+  failed?: boolean;
 }
 
 export interface EventTrackerDto {
@@ -305,6 +315,104 @@ export interface RequestOrganizationDataDto {
 
 export interface UpdateOrganizationDataDto {
   organization: OrganizationDto;
+  deleted: boolean;
+}
+
+export interface TimerStartedDto {
+  timerId: string;
+  endTime: string;
+  challengeId: string;
+  extensionsUsed: number;
+}
+
+export interface TimerExtendedDto {
+  timerId: string;
+  challengeId: string;
+  newEndTime: string;
+  extensionsUsed: number;
+}
+
+export interface TimerCompletedDto {
+  timerId: string;
+  challengeId: string;
+  challengeCompleted: boolean;
+}
+
+export interface ExtendTimerDto {
+  challengeId: string;
+  endTime: string;
+}
+
+export interface StartChallengeTimerDto {
+  challengeId: string;
+}
+
+export interface TimerWarningDto {
+  challengeId: string;
+  milestone: number;
+  timeRemaining: number;
+}
+
+export interface ChallengeFailedDto {
+  challengeId: string;
+  userId: string;
+}
+
+export interface RequestQuizQuestionDto {
+  challengeId: string;
+}
+
+export interface ShuffleQuizQuestionDto {
+  challengeId: string;
+  currentQuestionId?: string;
+}
+
+export interface QuizAnswerDto {
+  id?: string;
+  answerText: string;
+  isCorrect?: boolean;
+}
+
+export interface QuizQuestionDto {
+  id: string;
+  challengeId?: string;
+  questionText?: string;
+  explanation?: string;
+  difficulty?: number;
+  pointValue?: number;
+  category?: string;
+  answers?: QuizAnswerDto[];
+}
+
+export interface SubmitQuizAnswerDto {
+  questionId: string;
+  selectedAnswerId: string;
+}
+
+export interface QuizResultDto {
+  isCorrect: boolean;
+  pointsEarned: number;
+  explanation?: string;
+  correctAnswerText: string;
+  newTotalScore: number;
+}
+
+export interface QuizProgressDto {
+  challengeId: string;
+  totalQuestions: number;
+  answeredQuestions: number;
+  remainingQuestions: number;
+  isComplete: boolean;
+  totalPointsEarned: number;
+}
+
+export interface QuizErrorDto {
+  message: string;
+  code: QuizErrorCodeDto;
+}
+
+export interface UpdateQuizQuestionDataDto {
+  question: QuizQuestionDto;
   deleted: boolean;
 }
 

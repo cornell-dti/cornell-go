@@ -68,6 +68,54 @@ class GameClientApi {
   Stream<UpdateLeaderPositionDto> get updateLeaderPositionStream =>
       _updateLeaderPositionController.stream;
 
+  final _timerStartedController =
+      StreamController<TimerStartedDto>.broadcast(sync: true);
+  Stream<TimerStartedDto> get timerStartedStream =>
+      _timerStartedController.stream;
+
+  final _timerExtendedController =
+      StreamController<TimerExtendedDto>.broadcast(sync: true);
+  Stream<TimerExtendedDto> get timerExtendedStream =>
+      _timerExtendedController.stream;
+
+  final _timerCompletedController =
+      StreamController<TimerCompletedDto>.broadcast(sync: true);
+  Stream<TimerCompletedDto> get timerCompletedStream =>
+      _timerCompletedController.stream;
+
+  final _timerWarningController =
+      StreamController<TimerWarningDto>.broadcast(sync: true);
+  Stream<TimerWarningDto> get timerWarningStream =>
+      _timerWarningController.stream;
+
+  final _challengeFailedController =
+      StreamController<ChallengeFailedDto>.broadcast(sync: true);
+  Stream<ChallengeFailedDto> get challengeFailedStream =>
+      _challengeFailedController.stream;
+
+  final _updateQuizQuestionDataController =
+      StreamController<UpdateQuizQuestionDataDto>.broadcast(sync: true);
+  Stream<UpdateQuizQuestionDataDto> get updateQuizQuestionDataStream =>
+      _updateQuizQuestionDataController.stream;
+
+  final _quizQuestionController =
+      StreamController<QuizQuestionDto>.broadcast(sync: true);
+  Stream<QuizQuestionDto> get quizQuestionStream =>
+      _quizQuestionController.stream;
+
+  final _quizResultController =
+      StreamController<QuizResultDto>.broadcast(sync: true);
+  Stream<QuizResultDto> get quizResultStream => _quizResultController.stream;
+
+  final _quizErrorController =
+      StreamController<QuizErrorDto>.broadcast(sync: true);
+  Stream<QuizErrorDto> get quizErrorStream => _quizErrorController.stream;
+
+  final _quizProgressController =
+      StreamController<QuizProgressDto>.broadcast(sync: true);
+  Stream<QuizProgressDto> get quizProgressStream =>
+      _quizProgressController.stream;
+
   final _reconnectedController = StreamController<bool>.broadcast(sync: true);
   Stream<bool> get reconnectedStream => _reconnectedController.stream;
 
@@ -144,6 +192,44 @@ class GameClientApi {
         "updateLeaderPosition",
         (data) => _updateLeaderPositionController
             .add(UpdateLeaderPositionDto.fromJson(data)));
+
+    sock.on("timerStarted",
+        (data) => _timerStartedController.add(TimerStartedDto.fromJson(data)));
+
+    sock.on(
+        "timerExtended",
+        (data) =>
+            _timerExtendedController.add(TimerExtendedDto.fromJson(data)));
+
+    sock.on(
+        "timerCompleted",
+        (data) =>
+            _timerCompletedController.add(TimerCompletedDto.fromJson(data)));
+
+    sock.on("timerWarning",
+        (data) => _timerWarningController.add(TimerWarningDto.fromJson(data)));
+
+    sock.on(
+        "challengeFailed",
+        (data) =>
+            _challengeFailedController.add(ChallengeFailedDto.fromJson(data)));
+
+    sock.on(
+        "updateQuizQuestionData",
+        (data) => _updateQuizQuestionDataController
+            .add(UpdateQuizQuestionDataDto.fromJson(data)));
+
+    sock.on("quizQuestion",
+        (data) => _quizQuestionController.add(QuizQuestionDto.fromJson(data)));
+
+    sock.on("quizResult",
+        (data) => _quizResultController.add(QuizResultDto.fromJson(data)));
+
+    sock.on("quizError",
+        (data) => _quizErrorController.add(QuizErrorDto.fromJson(data)));
+
+    sock.on("quizProgress",
+        (data) => _quizProgressController.add(QuizProgressDto.fromJson(data)));
 
     _connectedController.add(true);
   }

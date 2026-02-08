@@ -25,6 +25,20 @@ import {
   AchievementTrackerDto,
   UpdateAchievementDataDto,
 } from '../achievement/achievement.dto';
+import {
+  TimerStartedDto,
+  TimerExtendedDto,
+  TimerCompletedDto,
+  TimerWarningDto,
+  ChallengeFailedDto,
+} from '../timer/timer.dto';
+import {
+  UpdateQuizQuestionDataDto,
+  QuizQuestionDto,
+  QuizResultDto,
+  QuizErrorDto,
+  QuizProgressDto,
+} from '../quiz/quiz.dto';
 import { ExtractSubjectType } from '@casl/ability';
 
 export type ClientApiDef = {
@@ -40,6 +54,16 @@ export type ClientApiDef = {
   updateGroupData: UpdateGroupDataDto;
   updateOrganizationData: UpdateOrganizationDataDto;
   updateLeaderPosition: UpdateLeaderPositionDto;
+  timerStarted: TimerStartedDto;
+  timerExtended: TimerExtendedDto;
+  timerCompleted: TimerCompletedDto;
+  timerWarning: TimerWarningDto;
+  challengeFailed: ChallengeFailedDto;
+  updateQuizQuestionData: UpdateQuizQuestionDataDto;
+  quizQuestion: QuizQuestionDto;
+  quizResult: QuizResultDto;
+  quizError: QuizErrorDto;
+  quizProgress: QuizProgressDto;
 };
 
 @Injectable()

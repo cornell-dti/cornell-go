@@ -8,7 +8,9 @@ Widget navBtn(scaffoldKey, context) {
       padding: const EdgeInsets.only(left: 8.0),
       child: Container(
         margin: EdgeInsets.only(
-            top: MediaQuery.of(context).size.height / 8, left: 25),
+          top: MediaQuery.of(context).size.height / 8,
+          left: 25,
+        ),
         child: FloatingActionButton(
           heroTag: "nav_menu_btn",
           onPressed: () {

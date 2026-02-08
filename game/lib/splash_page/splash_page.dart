@@ -1,10 +1,13 @@
-/* This file is the login page for the app. It is called splash because of an old design choice that we didn't change. It allows the user to sign in with their Cornell email through google sign in, Apple sign in (iOS only), or unrestricted Google sign in (Android only). When the user tries to log in, we verify the user with their information, the important ones being authentication and location. */
+/* This file is the login page for the app. It is called splash because of an old design choice that we didn't change
+. It allows the user to sign in with their Cornell email through google sign in, Apple sign in (iOS only), or unrestricted Google sign in (Android only). 
+When the user tries to log in, we verify the user with their information, the important ones being authentication and location. */
 
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 import 'package:game/api/game_api.dart';
+import 'package:game/api/game_client_dto.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:game/register_page/register_page.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -16,16 +19,19 @@ class SplashPageWidget extends StatelessWidget {
 
   // Shared button style for all authentication buttons
   ButtonStyle get _authButtonStyle => ButtonStyle(
-      backgroundColor: MaterialStatePropertyAll<Color>(Colors.white),
-      fixedSize: MaterialStatePropertyAll<Size>(Size(250, 50)),
-      shape: MaterialStatePropertyAll<OutlinedBorder>(
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0))));
+        backgroundColor: MaterialStatePropertyAll<Color>(Colors.white),
+        fixedSize: MaterialStatePropertyAll<Size>(Size(250, 50)),
+        shape: MaterialStatePropertyAll<OutlinedBorder>(
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+        ),
+      );
 
   // Shared text style for button labels
   TextStyle get _authButtonTextStyle => TextStyle(
-      color: Color.fromARGB(255, 93, 100, 112),
-      fontSize: 20,
-      fontWeight: FontWeight.w500);
+        color: Color.fromARGB(255, 93, 100, 112),
+        fontSize: 20,
+        fontWeight: FontWeight.w500,
+      );
 
   // Builds Cornell login button with Google Sign-In
   Widget _buildCornellLoginButton(ApiClient client) {
@@ -37,16 +43,19 @@ class SplashPageWidget extends StatelessWidget {
             final GoogleSignInAccount? account = await apiClient.signinGoogle();
 
             if (account == null) {
-              displayToast("An error occured while signing you into Google!",
-                  Status.error);
+              displayToast(
+                "An error occured while signing you into Google!",
+                Status.error,
+              );
               return;
             }
 
             if (!account.email.contains("@cornell.edu")) {
               await apiClient.disconnect();
               displayToast(
-                  "Only Cornell-affiliated users may use Google Sign-in!",
-                  Status.error);
+                "Only Cornell-affiliated users may use Google Sign-in!",
+                Status.error,
+              );
               return;
             }
 
@@ -54,11 +63,14 @@ class SplashPageWidget extends StatelessWidget {
             final idToken = auth.idToken;
 
             bool userExists = await apiClient.checkUserExists(
-                AuthProviderType.google, idToken ?? "");
+              AuthProviderType.google,
+              idToken ?? "",
+            );
             if (userExists) {
               // User exists, proceed with the login process
-              final gRelogResult =
-                  await client.connectGoogleNoRegister(account);
+              final gRelogResult = await client.connectGoogleNoRegister(
+                account,
+              );
 
               if (gRelogResult != null) {
                 return;
@@ -67,8 +79,10 @@ class SplashPageWidget extends StatelessWidget {
               // User does not exist, navigate to registration page
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (context) =>
-                      RegisterPageWidget(googleUser: account, idToken: idToken),
+                  builder: (context) => RegisterPageWidget(
+                    googleUser: account,
+                    idToken: idToken,
+                  ),
                 ),
               );
             }
@@ -91,20 +105,25 @@ class SplashPageWidget extends StatelessWidget {
               final credential = await apiClient.signinApple();
 
               if (credential == null) {
-                displayToast("An error occurred while signing you into Apple!",
-                    Status.error);
+                displayToast(
+                  "An error occurred while signing you into Apple!",
+                  Status.error,
+                );
                 return;
               }
 
               // Check if Apple user exists (similar to Google Sign-In flow)
               final idToken = credential.identityToken;
               bool userExists = await apiClient.checkUserExists(
-                  AuthProviderType.apple, idToken ?? "");
+                AuthProviderType.apple,
+                idToken ?? "",
+              );
 
               if (userExists) {
                 // User exists, proceed with the login process
-                final appleRelogResult =
-                    await client.connectAppleNoRegister(credential);
+                final appleRelogResult = await client.connectAppleNoRegister(
+                  credential,
+                );
 
                 if (appleRelogResult != null) {
                   return;
@@ -114,13 +133,17 @@ class SplashPageWidget extends StatelessWidget {
                 Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (context) => RegisterPageWidget(
-                        appleUser: credential, idToken: idToken),
+                      appleUser: credential,
+                      idToken: idToken,
+                    ),
                   ),
                 );
               }
             } catch (e) {
               displayToast(
-                  "An error occurred during Apple Sign-in!", Status.error);
+                "An error occurred during Apple Sign-in!",
+                Status.error,
+              );
             }
           },
           child: Text("Apple Login", style: _authButtonTextStyle),
@@ -129,49 +152,27 @@ class SplashPageWidget extends StatelessWidget {
     );
   }
 
-  // Builds unrestricted Google Sign-In button for Android users
-  // No domain restriction - allows any Google account for Play Store review compliance
-  Widget _buildGoogleLoginButton(ApiClient client) {
-    return Consumer<ApiClient>(
-      builder: (context, apiClient, child) {
-        return TextButton(
-          style: _authButtonStyle,
-          onPressed: () async {
-            final GoogleSignInAccount? account = await apiClient.signinGoogle();
-
-            if (account == null) {
-              displayToast("An error occurred while signing you into Google!",
-                  Status.error);
-              return;
-            }
-
-            // No domain restriction - allows any Google account
-            final auth = await account.authentication;
-            final idToken = auth.idToken;
-
-            bool userExists = await apiClient.checkUserExists(
-                AuthProviderType.google, idToken ?? "");
-            if (userExists) {
-              // User exists, proceed with the login process
-              final gRelogResult =
-                  await client.connectGoogleNoRegister(account);
-
-              if (gRelogResult != null) {
-                return;
-              }
-            } else {
-              // User does not exist, navigate to registration page
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) =>
-                      RegisterPageWidget(googleUser: account, idToken: idToken),
-                ),
-              );
-            }
-          },
-          child: Text("Google Login", style: _authButtonTextStyle),
+  // Builds guest login button for Android users
+  // Maintains the original guest access functionality for non-iOS platforms
+  Widget _buildGuestButton(ApiClient client) {
+    return TextButton(
+      style: _authButtonStyle,
+      onPressed: () async {
+        // Connect as device guest user (original functionality)
+        final connectionResult = await client.connectDevice(
+          "",
+          LoginEnrollmentTypeDto.GUEST,
+          "",
+          "",
+          "",
+          [],
         );
+
+        if (connectionResult == null) {
+          displayToast("An error occurred while signing you up!", Status.error);
+        }
       },
+      child: Text("Continue as Guest", style: _authButtonTextStyle),
     );
   }
 
@@ -194,48 +195,49 @@ class SplashPageWidget extends StatelessWidget {
             ),
           ),
           Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                StreamBuilder(
-                    // CENTRALIZED NAVIGATION: Handles all auth flows (login, registration, reconnect)
-                    stream: client.clientApi.connectedStream,
-                    builder: (context, snapshot) {
-                      if (client.serverApi != null) {
-                        print("ServerApi != null");
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          // Navigate to main app from splash page
-                          Navigator.pushAndRemoveUntil(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => BottomNavBar()),
-                              (route) => false);
-                          displayToast("Signed in!", Status.success);
-                        });
-                      }
-                      return Container();
-                    }),
-                _buildCornellLoginButton(client),
-                SizedBox(height: 16),
-                Row(children: <Widget>[
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              StreamBuilder(
+                // CENTRALIZED NAVIGATION: Handles all auth flows (login, registration, reconnect)
+                stream: client.clientApi.connectedStream,
+                builder: (context, snapshot) {
+                  if (client.serverApi != null) {
+                    print("ServerApi != null");
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      // Navigate to main app from splash page
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (context) => BottomNavBar()),
+                        (route) => false,
+                      );
+                      displayToast("Signed in!", Status.success);
+                    });
+                  }
+                  return Container();
+                },
+              ),
+              _buildCornellLoginButton(client),
+              SizedBox(height: 16),
+              Row(
+                children: <Widget>[
                   SizedBox(width: 69),
-                  Expanded(
-                      child: Divider(
-                    color: Colors.white,
-                  )),
+                  Expanded(child: Divider(color: Colors.white)),
                   SizedBox(width: 8),
                   LatoText("OR", 14.0, Colors.white, FontWeight.w600),
                   SizedBox(width: 8),
                   Expanded(child: Divider(color: Colors.white)),
                   SizedBox(width: 69),
-                ]),
-                SizedBox(height: 16),
-                // Platform-specific authentication: Apple Sign-In for iOS, unrestricted Google Sign-In for Android
-                Platform.isIOS
-                    ? _buildAppleSignInButton(client)
-                    : _buildGoogleLoginButton(client),
-                SizedBox(height: 80),
-              ]),
+                ],
+              ),
+              SizedBox(height: 16),
+              // Platform-specific authentication: Apple Sign-In for iOS, Guest access for Android
+              Platform.isIOS
+                  ? _buildAppleSignInButton(client)
+                  : _buildGuestButton(client),
+              SizedBox(height: 80),
+            ],
+          ),
         ],
       ),
     );

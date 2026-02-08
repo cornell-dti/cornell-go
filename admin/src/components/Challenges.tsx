@@ -1,7 +1,11 @@
-import { useContext, useState } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { compareTwoStrings } from 'string-similarity';
 import styled, { css } from 'styled-components';
-import { ChallengeDto, ChallengeLocationDto } from '../all.dto';
+import {
+  ChallengeDto,
+  ChallengeLocationDto,
+  QuizQuestionDto,
+} from '../all.dto';
 import { moveDown, moveUp } from '../ordering';
 import { AlertModal } from './AlertModal';
 import { DeleteModal } from './DeleteModal';
@@ -12,6 +16,9 @@ import {
   OptionEntryForm,
   MapEntryForm,
   NumberEntryForm,
+  CheckboxNumberEntryForm,
+  AnswersEntryForm,
+  OptionWithCustomEntryForm,
 } from './EntryModal';
 import { HButton } from './HButton';
 import {
@@ -51,6 +58,191 @@ const locationOptions: ChallengeLocationDto[] = [
   ChallengeLocationDto.ANY,
 ];
 
+// Category options for quiz questions
+const categoryOptions = [
+  'HISTORICAL',
+  'SCIENCE',
+  'CULTURE',
+  'PHYSICAL',
+  'FOOD',
+  'NATURE',
+];
+
+// Styled components for quiz section
+const QuizSection = styled.div`
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #eee;
+`;
+
+const QuizHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  padding: 4px 0;
+  &:hover {
+    background: #f9f9f9;
+  }
+`;
+
+const QuizQuestionItem = styled.div`
+  background: #f5f5f5;
+  border-radius: 4px;
+  padding: 8px;
+  margin: 8px 0;
+`;
+
+// Quiz form helpers
+function makeQuizForm(): EntryForm[] {
+  return [
+    { name: 'Question', characterLimit: 2048, value: '' },
+    { name: 'Explanation (optional)', characterLimit: 2048, value: '' },
+    {
+      name: 'Category',
+      options: categoryOptions,
+      value: 0,
+      customValue: '',
+      customOptionLabel: 'Custom...',
+    },
+    { name: 'Difficulty', min: 1, max: 5, value: 1 },
+    { name: 'Point Value', min: 1, max: 100, value: 10 },
+    {
+      name: 'Answers (select correct answer)',
+      answers: [
+        { text: '', isCorrect: true },
+        { text: '', isCorrect: false },
+      ],
+      minAnswers: 2,
+      maxAnswers: 4,
+    },
+  ];
+}
+
+function toQuizForm(question: QuizQuestionDto): EntryForm[] {
+  const categoryIndex = categoryOptions.indexOf(
+    question.category ?? 'HISTORICAL',
+  );
+  const isCustomCategory = categoryIndex === -1;
+
+  return [
+    {
+      name: 'Question',
+      characterLimit: 2048,
+      value: question.questionText ?? '',
+    },
+    {
+      name: 'Explanation (optional)',
+      characterLimit: 2048,
+      value: question.explanation ?? '',
+    },
+    {
+      name: 'Category',
+      options: categoryOptions,
+      value: isCustomCategory ? categoryOptions.length : categoryIndex,
+      customValue: isCustomCategory ? (question.category ?? '') : '',
+      customOptionLabel: 'Custom...',
+    },
+    { name: 'Difficulty', min: 1, max: 5, value: question.difficulty ?? 1 },
+    { name: 'Point Value', min: 1, max: 100, value: question.pointValue ?? 10 },
+    {
+      name: 'Answers (select correct answer)',
+      answers: question.answers?.map(a => ({
+        text: a.answerText,
+        isCorrect: a.isCorrect ?? false,
+      })) ?? [
+        { text: '', isCorrect: true },
+        { text: '', isCorrect: false },
+      ],
+      minAnswers: 2,
+      maxAnswers: 4,
+    },
+  ];
+}
+
+function fromQuizForm(
+  form: EntryForm[],
+  challengeId: string,
+  id: string,
+): QuizQuestionDto {
+  const categoryForm = form[2] as OptionWithCustomEntryForm;
+  const isCustom = categoryForm.value === categoryOptions.length;
+
+  return {
+    id,
+    challengeId,
+    questionText: (form[0] as FreeEntryForm).value,
+    explanation: (form[1] as FreeEntryForm).value || undefined,
+    category: isCustom
+      ? categoryForm.customValue.trim() || 'GENERAL'
+      : categoryOptions[categoryForm.value],
+    difficulty: (form[3] as NumberEntryForm).value,
+    pointValue: (form[4] as NumberEntryForm).value,
+    answers: (form[5] as AnswersEntryForm).answers.map(a => ({
+      answerText: a.text,
+      isCorrect: a.isCorrect,
+    })),
+  };
+}
+
+// QuizQuestionSection component
+function QuizQuestionSection(props: {
+  challengeId: string;
+  onCreateQuiz: () => void;
+  onEditQuiz: (question: QuizQuestionDto) => void;
+  onDeleteQuiz: (questionId: string) => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const serverData = useContext(ServerDataContext);
+
+  // Filter questions for this challenge
+  const questions = Array.from(serverData.quizQuestions.values()).filter(
+    q => q.challengeId === props.challengeId,
+  );
+
+  useEffect(() => {
+    if (expanded) {
+      serverData.requestQuizQuestions(props.challengeId);
+    }
+  }, [expanded, props.challengeId]);
+
+  return (
+    <QuizSection>
+      <QuizHeader onClick={() => setExpanded(!expanded)}>
+        <span>
+          <b>Quiz Questions</b> ({questions.length})
+        </span>
+        <span>{expanded ? '▼' : '▶'}</span>
+      </QuizHeader>
+
+      {expanded && (
+        <>
+          {questions.map(q => (
+            <QuizQuestionItem key={q.id}>
+              <div>
+                <b>Q:</b> {q.questionText}
+              </div>
+              <div>
+                <small>
+                  Category: {q.category} | Difficulty: {q.difficulty} | Points:{' '}
+                  {q.pointValue}
+                </small>
+              </div>
+              <div style={{ marginTop: 4 }}>
+                <HButton onClick={() => props.onEditQuiz(q)}>EDIT</HButton>
+                <HButton onClick={() => props.onDeleteQuiz(q.id)} float="right">
+                  DELETE
+                </HButton>
+              </div>
+            </QuizQuestionItem>
+          ))}
+          <HButton onClick={props.onCreateQuiz}>+ ADD QUESTION</HButton>
+        </>
+      )}
+    </QuizSection>
+  );
+}
+
 function ChallengeCard(props: {
   challenge: ChallengeDto;
   onUp: () => void;
@@ -58,6 +250,9 @@ function ChallengeCard(props: {
   onDelete: () => void;
   onEdit: () => void;
   onCopy: () => void;
+  onCreateQuiz: () => void;
+  onEditQuiz: (question: QuizQuestionDto) => void;
+  onDeleteQuiz: (questionId: string) => void;
 }) {
   return (
     <ListCardBox>
@@ -72,7 +267,13 @@ function ChallengeCard(props: {
         <b>{props.challenge.longF}</b> <br />
         Awarding Distance: <b>{props.challenge.awardingRadiusF} meters</b>{' '}
         <br />
-        Close Distance: <b>{props.challenge.closeRadiusF} meters</b>
+        Close Distance: <b>{props.challenge.closeRadiusF} meters</b> <br />
+        Timer:{' '}
+        <b>
+          {props.challenge.timerLength
+            ? `${Math.floor(props.challenge.timerLength / 60)}m ${props.challenge.timerLength % 60}s`
+            : 'None'}
+        </b>
       </ListCardBody>
       <ListCardButtons>
         <HButton onClick={props.onUp}>UP</HButton>
@@ -87,6 +288,12 @@ function ChallengeCard(props: {
           COPY
         </HButton>
       </ListCardButtons>
+      <QuizQuestionSection
+        challengeId={props.challenge.id}
+        onCreateQuiz={props.onCreateQuiz}
+        onEditQuiz={props.onEditQuiz}
+        onDeleteQuiz={props.onDeleteQuiz}
+      />
     </ListCardBox>
   );
 }
@@ -105,6 +312,14 @@ function makeForm(): EntryForm[] {
     { name: 'Image URL', characterLimit: 2048, value: '' },
     { name: 'Awarding Distance (meters)', min: 1, max: 1000, value: 1 },
     { name: 'Close Distance (meters)', min: 1, max: 1000, value: 1 },
+    {
+      name: 'Enable Timer',
+      checked: false,
+      value: 300,
+      min: 60,
+      max: 3600,
+      numberLabel: 'Timer Length (seconds)',
+    },
   ];
 }
 
@@ -154,6 +369,14 @@ function toForm(challenge: ChallengeDto) {
       max: 1000,
       value: challenge.closeRadiusF ?? 0,
     },
+    {
+      name: 'Enable Timer',
+      checked: (challenge.timerLength ?? 0) > 0,
+      value: challenge.timerLength ?? 300,
+      min: 60,
+      max: 3600,
+      numberLabel: 'Timer Length (seconds)',
+    },
   ];
 }
 
@@ -162,6 +385,7 @@ function fromForm(
   eventId: string,
   id: string,
 ): ChallengeDto {
+  const timerForm = form[8] as CheckboxNumberEntryForm;
   return {
     id,
     name: (form[2] as FreeEntryForm).value,
@@ -174,6 +398,7 @@ function fromForm(
     awardingRadiusF: (form[6] as NumberEntryForm).value,
     closeRadiusF: (form[7] as NumberEntryForm).value,
     linkedEventId: eventId,
+    timerLength: timerForm.checked ? timerForm.value : undefined,
   };
 }
 
@@ -203,8 +428,25 @@ export function Challenges() {
     evIds: [] as string[],
   }));
 
+  // Quiz state
+  const [createQuizModalOpen, setCreateQuizModalOpen] = useState(false);
+  const [editQuizModalOpen, setEditQuizModalOpen] = useState(false);
+  const [deleteQuizModalOpen, setDeleteQuizModalOpen] = useState(false);
+  const [quizForm, setQuizForm] = useState<EntryForm[]>(() => makeQuizForm());
+  const [currentQuizId, setCurrentQuizId] = useState('');
+  const [currentChallengeId, setCurrentChallengeId] = useState('');
+
   const serverData = useContext(ServerDataContext);
   const selectedEvent = serverData.events.get(serverData.selectedEvent);
+
+  // Fetch quiz questions for all challenges when event is selected
+  useEffect(() => {
+    if (selectedEvent?.challenges) {
+      for (const challengeId of selectedEvent.challenges) {
+        serverData.requestQuizQuestions(challengeId);
+      }
+    }
+  }, [serverData.selectedEvent, selectedEvent?.challenges?.length]);
 
   return (
     <>
@@ -271,6 +513,44 @@ export function Challenges() {
         }}
         form={copyForm.form}
       />
+
+      {/* Quiz Modals */}
+      <EntryModal
+        title="Create Quiz Question"
+        isOpen={createQuizModalOpen}
+        entryButtonText="CREATE"
+        onEntry={() => {
+          serverData.updateQuizQuestion(
+            fromQuizForm(quizForm, currentChallengeId, ''),
+          );
+          setCreateQuizModalOpen(false);
+        }}
+        onCancel={() => setCreateQuizModalOpen(false)}
+        form={quizForm}
+      />
+      <EntryModal
+        title="Edit Quiz Question"
+        isOpen={editQuizModalOpen}
+        entryButtonText="SAVE"
+        onEntry={() => {
+          serverData.updateQuizQuestion(
+            fromQuizForm(quizForm, currentChallengeId, currentQuizId),
+          );
+          setEditQuizModalOpen(false);
+        }}
+        onCancel={() => setEditQuizModalOpen(false)}
+        form={quizForm}
+      />
+      <DeleteModal
+        objectName="this quiz question"
+        isOpen={deleteQuizModalOpen}
+        onClose={() => setDeleteQuizModalOpen(false)}
+        onDelete={() => {
+          serverData.deleteQuizQuestion(currentQuizId);
+          setDeleteQuizModalOpen(false);
+        }}
+      />
+
       <SearchBar
         onCreate={() => {
           setForm(makeForm());
@@ -326,9 +606,12 @@ export function Challenges() {
               serverData.updateEvent(selectedEvent);
             }}
             onEdit={() => {
-              setCurrentId(chal.id);
-              setForm(toForm(chal));
-              setEditModalOpen(true);
+              const freshChallenge = serverData.challenges.get(chal.id);
+              if (freshChallenge) {
+                setCurrentId(chal.id);
+                setForm(toForm(freshChallenge));
+                setEditModalOpen(true);
+              }
             }}
             onDelete={() => {
               setCurrentId(chal.id);
@@ -346,6 +629,24 @@ export function Challenges() {
                 evIds: evs.map(ev => ev.id),
               });
               setCopyModalOpen(true);
+            }}
+            onCreateQuiz={() => {
+              setCurrentChallengeId(chal.id);
+              setQuizForm(makeQuizForm());
+              setCreateQuizModalOpen(true);
+            }}
+            onEditQuiz={question => {
+              const freshQuestion = serverData.quizQuestions.get(question.id);
+              if (freshQuestion) {
+                setCurrentChallengeId(chal.id);
+                setCurrentQuizId(question.id);
+                setQuizForm(toQuizForm(freshQuestion));
+                setEditQuizModalOpen(true);
+              }
+            }}
+            onDeleteQuiz={questionId => {
+              setCurrentQuizId(questionId);
+              setDeleteQuizModalOpen(true);
             }}
           />
         ))}

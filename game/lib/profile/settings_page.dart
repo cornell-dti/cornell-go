@@ -11,10 +11,12 @@ import 'package:game/model/onboarding_model.dart';
 import 'package:game/model/user_model.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/tracker_model.dart';
+import 'package:game/model/challenge_model.dart';
 import 'package:game/navigation_page/bottom_navbar.dart';
 
-final SUPPORT_URL =
-    Uri.parse("https://sites.google.com/cornell.edu/cornellgosupport");
+final SUPPORT_URL = Uri.parse(
+  "https://sites.google.com/cornell.edu/cornellgosupport",
+);
 
 class SettingsPage extends StatelessWidget {
   final bool isGuest;
@@ -30,182 +32,37 @@ class SettingsPage extends StatelessWidget {
     );
 
     return Scaffold(
-        backgroundColor: Color.fromARGB(255, 255, 248, 241),
-        appBar: AppBar(
-          backgroundColor: Color.fromARGB(255, 237, 86, 86),
-          toolbarHeight: MediaQuery.of(context).size.height * 0.08,
-          leading: Align(
-            alignment: Alignment.center,
-            child: IconButton(
-              icon: Icon(Icons.navigate_before),
-              color: Colors.white,
-              onPressed: () => Navigator.pop(context),
-            ),
+      backgroundColor: Color.fromARGB(255, 255, 248, 241),
+      appBar: AppBar(
+        backgroundColor: Color.fromARGB(255, 237, 86, 86),
+        toolbarHeight: MediaQuery.of(context).size.height * 0.08,
+        leading: Align(
+          alignment: Alignment.center,
+          child: IconButton(
+            icon: Icon(Icons.navigate_before),
+            color: Colors.white,
+            onPressed: () => Navigator.pop(context),
           ),
-          title: Padding(
-            padding:
-                EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.01),
-            child: Text(
-              'Settings',
-              style: headerStyle,
-            ),
-          ),
-          centerTitle: true, // Still useful for horizontal centering
-          actions: [],
         ),
-        body: Center(child: LayoutBuilder(
+        title: Padding(
+          padding: EdgeInsets.only(
+            top: MediaQuery.of(context).size.height * 0.01,
+          ),
+          child: Text('Settings', style: headerStyle),
+        ),
+        centerTitle: true, // Still useful for horizontal centering
+        actions: [],
+      ),
+      body: Center(
+        child: LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
             return SizedBox(
               width: constraints.maxWidth * 0.9,
               child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    SizedBox(height: 20),
-                    if (!isGuest)
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.only(
-                            topRight: Radius.circular(10),
-                            topLeft: Radius.circular(10),
-                          ),
-                        ),
-                        child: TextButton(
-                          onPressed: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => EditProfileWidget()));
-                          },
-                          style: TextButton.styleFrom(
-                              padding: EdgeInsets.only(left: 20.0),
-                              alignment: Alignment.centerLeft,
-                              fixedSize: Size(constraints.maxWidth, 60)),
-                          child: Row(
-                            children: [
-                              Padding(
-                                padding: EdgeInsets.only(right: 20.0),
-                                child: SvgPicture.asset(
-                                  'assets/icons/head.svg',
-                                ),
-                              ),
-                              Text(
-                                'Edit Profile',
-                                textAlign: TextAlign.left,
-                                style: TextStyle(
-                                    fontFamily: 'Poppins',
-                                    fontSize: 16,
-                                    color: Colors.black),
-                              )
-                            ],
-                          ),
-                        ),
-                      ),
-                    if (!isGuest) Divider(height: 1),
-                    if (!isGuest)
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                        ),
-                        child: TextButton(
-                          onPressed: () async {
-                            // Check if prerequisites are met before restarting tutorial
-                            final onboarding = Provider.of<OnboardingModel>(
-                                context,
-                                listen: false);
-                            final userModel =
-                                Provider.of<UserModel>(context, listen: false);
-                            final eventModel =
-                                Provider.of<EventModel>(context, listen: false);
-                            final trackerModel = Provider.of<TrackerModel>(
-                                context,
-                                listen: false);
-
-                            if (!onboarding.canStartOnboarding(
-                                userModel, eventModel, trackerModel)) {
-                              displayToast(
-                                  "Tutorial Unavailable", Status.error);
-                              return;
-                            }
-
-                            // Reset onboarding state and navigate to home
-                            await onboarding.reset();
-
-                            // Navigate back to home page where onboarding will auto-start
-                            if (context.mounted) {
-                              Navigator.of(context).pushAndRemoveUntil(
-                                MaterialPageRoute(
-                                    builder: (context) => BottomNavBar()),
-                                (route) => false,
-                              );
-                              displayToast(
-                                  "Tutorial restarted", Status.success);
-                            }
-                          },
-                          style: TextButton.styleFrom(
-                              padding: EdgeInsets.only(left: 20.0),
-                              alignment: Alignment.centerLeft,
-                              fixedSize: Size(constraints.maxWidth, 60)),
-                          child: Row(
-                            children: [
-                              Padding(
-                                padding: EdgeInsets.only(right: 20.0),
-                                child: SvgPicture.asset(
-                                  'assets/icons/reset.svg',
-                                  width: 14,
-                                  height: 14,
-                                ),
-                              ),
-                              Text(
-                                'Restart Tutorial',
-                                textAlign: TextAlign.left,
-                                style: TextStyle(
-                                    fontFamily: 'Poppins',
-                                    fontSize: 16,
-                                    color: Colors.black),
-                              )
-                            ],
-                          ),
-                        ),
-                      ),
-                    if (!isGuest) Divider(height: 1),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.only(
-                          bottomLeft: Radius.circular(10),
-                          bottomRight: Radius.circular(10),
-                        ),
-                      ),
-                      child: TextButton(
-                        onPressed: () {
-                          launchUrl(SUPPORT_URL);
-                        },
-                        style: TextButton.styleFrom(
-                            padding: EdgeInsets.only(left: 20.0),
-                            alignment: Alignment.centerLeft,
-                            fixedSize: Size(constraints.maxWidth, 60)),
-                        child: Row(
-                          children: [
-                            Padding(
-                              padding: EdgeInsets.only(right: 20.0),
-                              child: SvgPicture.asset(
-                                'assets/icons/feedback.svg',
-                              ),
-                            ),
-                            Text(
-                              'Support',
-                              textAlign: TextAlign.left,
-                              style: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 16,
-                                  color: Colors.black),
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 20),
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(height: 20),
+                  if (!isGuest)
                     Container(
                       decoration: BoxDecoration(
                         color: Colors.white,
@@ -216,124 +73,299 @@ class SettingsPage extends StatelessWidget {
                       ),
                       child: TextButton(
                         onPressed: () {
-                          displayTextInputDialog(
-                              context, "Join Organization", "Access Code",
-                              (text) {
-                            client.serverApi?.joinOrganization(
-                                JoinOrganizationDto(
-                                    accessCode: text.toLowerCase()));
-                          });
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => EditProfileWidget(),
+                            ),
+                          );
                         },
                         style: TextButton.styleFrom(
-                            padding: EdgeInsets.only(left: 20.0),
-                            alignment: Alignment.centerLeft,
-                            fixedSize: Size(constraints.maxWidth, 60)),
+                          padding: EdgeInsets.only(left: 20.0),
+                          alignment: Alignment.centerLeft,
+                          fixedSize: Size(constraints.maxWidth, 60),
+                        ),
                         child: Row(
                           children: [
                             Padding(
                               padding: EdgeInsets.only(right: 20.0),
-                              child: SvgPicture.asset(
-                                'assets/icons/orgs.svg',
-                                width: 14,
-                                height: 14,
-                              ),
+                              child: SvgPicture.asset('assets/icons/head.svg'),
                             ),
                             Text(
-                              'Join Organization',
+                              'Edit Profile',
                               textAlign: TextAlign.left,
                               style: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 16,
-                                  color: Colors.black),
-                            )
+                                fontFamily: 'Poppins',
+                                fontSize: 16,
+                                color: Colors.black,
+                              ),
+                            ),
                           ],
                         ),
                       ),
                     ),
-                    Divider(height: 1),
+                  if (!isGuest) Divider(height: 1),
+                  if (!isGuest)
                     Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.only(
-                          bottomRight: Radius.circular(10),
-                          bottomLeft: Radius.circular(10),
-                        ),
-                      ),
+                      decoration: BoxDecoration(color: Colors.white),
                       child: TextButton(
                         onPressed: () async {
-                          await client.disconnect();
-                        },
-                        style: TextButton.styleFrom(
-                            padding: EdgeInsets.only(left: 20.0),
-                            alignment: Alignment.centerLeft,
-                            fixedSize: Size(constraints.maxWidth, 60)),
-                        child: Row(
-                          children: [
-                            Padding(
-                              padding: EdgeInsets.only(right: 20.0),
-                              child: SvgPicture.asset(
-                                'assets/icons/logout.svg',
+                          // Check if prerequisites are met before restarting tutorial
+                          final onboarding = Provider.of<OnboardingModel>(
+                            context,
+                            listen: false,
+                          );
+                          final userModel = Provider.of<UserModel>(
+                            context,
+                            listen: false,
+                          );
+                          final eventModel = Provider.of<EventModel>(
+                            context,
+                            listen: false,
+                          );
+                          final trackerModel = Provider.of<TrackerModel>(
+                            context,
+                            listen: false,
+                          );
+                          final challengeModel = Provider.of<ChallengeModel>(
+                            context,
+                            listen: false,
+                          );
+
+                          if (!onboarding.canStartOnboarding(
+                            userModel,
+                            eventModel,
+                            trackerModel,
+                            challengeModel,
+                          )) {
+                            displayToast("Tutorial Unavailable", Status.error);
+                            return;
+                          }
+
+                          // Reset onboarding state and navigate to home
+                          await onboarding.reset();
+
+                          // Navigate back to home page where onboarding will auto-start
+                          if (context.mounted) {
+                            Navigator.of(context).pushAndRemoveUntil(
+                              MaterialPageRoute(
+                                builder: (context) => BottomNavBar(),
                               ),
-                            ),
-                            Text(
-                              'Logout',
-                              textAlign: TextAlign.left,
-                              style: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 16,
-                                  color: Colors.black),
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 10),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.only(
-                          topRight: Radius.circular(10),
-                          topLeft: Radius.circular(10),
-                        ),
-                      ),
-                      child: TextButton(
-                        onPressed: () {
-                          showDeletionConfirmationAlert(context, client);
+                              (route) => false,
+                            );
+                            displayToast("Tutorial restarted", Status.success);
+                          }
                         },
                         style: TextButton.styleFrom(
-                            padding: EdgeInsets.only(left: 20.0),
-                            alignment: Alignment.centerLeft,
-                            fixedSize: Size(constraints.maxWidth, 60)),
+                          padding: EdgeInsets.only(left: 20.0),
+                          alignment: Alignment.centerLeft,
+                          fixedSize: Size(constraints.maxWidth, 60),
+                        ),
                         child: Row(
                           children: [
                             Padding(
                               padding: EdgeInsets.only(right: 20.0),
                               child: SvgPicture.asset(
-                                'assets/icons/delete.svg',
+                                'assets/icons/reset.svg',
                                 width: 14,
                                 height: 14,
                               ),
                             ),
                             Text(
-                              'Delete Account',
+                              'Restart Tutorial',
                               textAlign: TextAlign.left,
                               style: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 16,
-                                  color: Colors.red),
-                            )
+                                fontFamily: 'Poppins',
+                                fontSize: 16,
+                                color: Colors.black,
+                              ),
+                            ),
                           ],
                         ),
                       ),
                     ),
-                    Spacer(),
-                    Padding(
-                        padding: EdgeInsets.only(bottom: 120),
-                        child: Image(
-                            image: AssetImage('assets/images/go-logo.png'))),
-                  ]),
+                  if (!isGuest) Divider(height: 1),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.only(
+                        bottomLeft: Radius.circular(10),
+                        bottomRight: Radius.circular(10),
+                      ),
+                    ),
+                    child: TextButton(
+                      onPressed: () {
+                        launchUrl(SUPPORT_URL);
+                      },
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.only(left: 20.0),
+                        alignment: Alignment.centerLeft,
+                        fixedSize: Size(constraints.maxWidth, 60),
+                      ),
+                      child: Row(
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.only(right: 20.0),
+                            child: SvgPicture.asset(
+                              'assets/icons/feedback.svg',
+                            ),
+                          ),
+                          Text(
+                            'Support',
+                            textAlign: TextAlign.left,
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 16,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.only(
+                        topRight: Radius.circular(10),
+                        topLeft: Radius.circular(10),
+                      ),
+                    ),
+                    child: TextButton(
+                      onPressed: () {
+                        displayTextInputDialog(
+                          context,
+                          "Join Organization",
+                          "Access Code",
+                          (text) {
+                            client.serverApi?.joinOrganization(
+                              JoinOrganizationDto(
+                                accessCode: text.toLowerCase(),
+                              ),
+                            );
+                          },
+                        );
+                      },
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.only(left: 20.0),
+                        alignment: Alignment.centerLeft,
+                        fixedSize: Size(constraints.maxWidth, 60),
+                      ),
+                      child: Row(
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.only(right: 20.0),
+                            child: SvgPicture.asset(
+                              'assets/icons/orgs.svg',
+                              width: 14,
+                              height: 14,
+                            ),
+                          ),
+                          Text(
+                            'Join Organization',
+                            textAlign: TextAlign.left,
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 16,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Divider(height: 1),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.only(
+                        bottomRight: Radius.circular(10),
+                        bottomLeft: Radius.circular(10),
+                      ),
+                    ),
+                    child: TextButton(
+                      onPressed: () async {
+                        await client.disconnect();
+                      },
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.only(left: 20.0),
+                        alignment: Alignment.centerLeft,
+                        fixedSize: Size(constraints.maxWidth, 60),
+                      ),
+                      child: Row(
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.only(right: 20.0),
+                            child: SvgPicture.asset('assets/icons/logout.svg'),
+                          ),
+                          Text(
+                            'Logout',
+                            textAlign: TextAlign.left,
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 16,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.only(
+                        topRight: Radius.circular(10),
+                        topLeft: Radius.circular(10),
+                      ),
+                    ),
+                    child: TextButton(
+                      onPressed: () {
+                        showDeletionConfirmationAlert(context, client);
+                      },
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.only(left: 20.0),
+                        alignment: Alignment.centerLeft,
+                        fixedSize: Size(constraints.maxWidth, 60),
+                      ),
+                      child: Row(
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.only(right: 20.0),
+                            child: SvgPicture.asset(
+                              'assets/icons/delete.svg',
+                              width: 14,
+                              height: 14,
+                            ),
+                          ),
+                          Text(
+                            'Delete Account',
+                            textAlign: TextAlign.left,
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 16,
+                              color: Colors.red,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Spacer(),
+                  Padding(
+                    padding: EdgeInsets.only(bottom: 120),
+                    child: Image(
+                      image: AssetImage('assets/images/go-logo.png'),
+                    ),
+                  ),
+                ],
+              ),
             );
           },
-        )));
+        ),
+      ),
+    );
   }
 }

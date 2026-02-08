@@ -107,6 +107,8 @@ model User {
   participatedIn         PrevChallenge[]      @relation("prevChallengeParticipant")
   sessionLogEntries      SessionLogEntry[]
   achievementTrackers    AchievementTracker[]
+  challengeTimers        ChallengeTimer[]
+  UserQuizAnswer         UserQuizAnswer[]
   hasCompletedOnboarding Boolean
 }
 
@@ -140,8 +142,10 @@ model Challenge {
   longitude      Float
   awardingRadius Float
   closeRadius    Float
+  timerLength    Int?
   completions    PrevChallenge[]
   activeTrackers EventTracker[]
+  QuizQuestion   QuizQuestion[]
 }
 
 model EventBase {
@@ -195,17 +199,19 @@ model EventTracker {
 }
 
 model PrevChallenge {
-  id           Int          @id @default(autoincrement())
-  subject      String       @default("PrevChallenge")
-  user         User         @relation("owner", fields: [userId], references: [id], onDelete: Cascade)
-  userId       String
-  participants User[]       @relation("prevChallengeParticipant")
-  challenge    Challenge    @relation(fields: [challengeId], references: [id], onDelete: Cascade)
-  challengeId  String
-  tracker      EventTracker @relation(fields: [trackerId], references: [id], onDelete: Cascade)
-  trackerId    String
-  hintsUsed    Int
-  timestamp    DateTime     @default(now())
+  id             Int          @id @default(autoincrement())
+  subject        String       @default("PrevChallenge")
+  user           User         @relation("owner", fields: [userId], references: [id], onDelete: Cascade)
+  userId         String
+  participants   User[]       @relation("prevChallengeParticipant")
+  challenge      Challenge    @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  challengeId    String
+  tracker        EventTracker @relation(fields: [trackerId], references: [id], onDelete: Cascade)
+  trackerId      String
+  hintsUsed      Int
+  extensionsUsed Int          @default(0)
+  timestamp      DateTime     @default(now())
+  failed         Boolean      @default(false) // True if challenge was failed due to timer expiration
 }
 
 model Organization {
@@ -260,4 +266,84 @@ model AchievementTracker {
   dateComplete  DateTime?
   achievementId String
   userId        String
+}
+
+enum ChallengeTimerStatus {
+  ACTIVE
+  GRACE_PERIOD // Timer expired but waiting for potential extension (prevents race condition)
+  COMPLETED
+  EXPIRED
+  PAUSED
+  CANCELLED
+}
+
+model ChallengeTimer {
+  id                    String               @id @default(uuid())
+  subject               String               @default("ChallengeTimer")
+  timerLength           Int                  @default(600) //in seconds
+  startTime             DateTime             @default(now())
+  endTime               DateTime?
+  currentStatus         ChallengeTimerStatus @default(ACTIVE)
+  extensionsUsed        Int                  @default(0) //number of extensions used for this timer
+  originalBasePoints    Int //original points challenge would give (if no extensions used)
+  // warnings
+  warningMilestones     Int[]                @default([]) //milestones to send warnings for
+  warningMilestonesSent Int[]                @default([]) //which milestones have been sent
+  lastWarningSent       DateTime? //when last warning was sent
+  // relationships 
+  user                  User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId                String
+  challengeId           String
+
+  @@unique([userId, challengeId]) //one timer per user per challenge
+}
+
+model QuizQuestion {
+  id          String    @id @default(cuid())
+  challengeId String
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+
+  questionText String
+  explanation  String?
+  difficulty   Int     @default(1)
+  pointValue   Int     @default(10)
+  category     String  @default("HISTORICAL")
+
+  answers     QuizAnswer[]
+  userAnswers UserQuizAnswer[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("QuizQuestion")
+}
+
+model QuizAnswer {
+  id         String       @id @default(cuid())
+  questionId String
+  question   QuizQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  answerText String
+  isCorrect  Boolean @default(false)
+
+  userSelections UserQuizAnswer[]
+
+  @@map("QuizAnswer")
+}
+
+model UserQuizAnswer {
+  id               String       @id @default(cuid())
+  userId           String
+  user             User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  questionId       String
+  question         QuizQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  selectedAnswerId String?
+  selectedAnswer   QuizAnswer?  @relation(fields: [selectedAnswerId], references: [id], onDelete: SetNull)
+
+  isCorrect    Boolean
+  pointsEarned Int
+  answeredAt   DateTime @default(now())
+
+  @@unique([userId, questionId]) // Enforce one attempt per question
+  @@map("UserQuizAnswer")
 }

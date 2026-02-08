@@ -278,7 +278,7 @@ function getDartServerApiFile(apiDefs) {
       };
 
       Future.delayed(Duration(seconds: 5))
-          .then((value) => completer.complete(null));
+          .then((value) => completionFunc(null));
 
       _refreshEv = ev;
       _refreshDat = data;

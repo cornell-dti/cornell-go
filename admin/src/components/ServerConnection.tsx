@@ -63,16 +63,27 @@ export function ServerConnectionProvider(props: { children: ReactNode }) {
           const socket = io(serverUrl, {
             auth: { token: loginResponse.accessToken },
             autoConnect: false,
+            reconnection: true,
+            reconnectionAttempts: Infinity,
+            reconnectionDelay: 1000,
+            reconnectionDelayMax: 5000,
           });
 
           socket.on('connect', () => {
             setConnection(socket);
           });
 
-          socket.on('connect_error', () => {});
+          socket.on('connect_error', (err) => {
+            console.error('Socket connection error:', err);
+          });
 
-          socket.on('disconnect', () => {
-            this.disconnect();
+          socket.on('disconnect', (reason) => {
+            console.log('Socket disconnected:', reason);
+            // Only permanently close if server kicked us
+            if (reason === 'io server disconnect') {
+              this.disconnect();
+            }
+            // For other reasons (transport close, ping timeout), socket.io will auto-reconnect
           });
 
           socket.connect();

@@ -17,9 +17,10 @@ Widget podiumCell(context, String name, bool isUser) {
   );
 
   return Container(
-      width: 78,
-      height: 88.824,
-      child: Column(children: [
+    width: 78,
+    height: 88.824,
+    child: Column(
+      children: [
         Container(
           width: 49.128,
           height: 49.128,
@@ -27,7 +28,10 @@ Widget podiumCell(context, String name, bool isUser) {
             color: constructColorFromUserName(name),
             borderRadius: BorderRadius.circular(49.128),
             border: isUser
-                ? Border.all(color: Color.fromRGBO(255, 170, 91, 1), width: 2.5)
+                ? Border.all(
+                    color: Color.fromRGBO(255, 170, 91, 1),
+                    width: 2.5,
+                  )
                 : null,
           ),
         ),
@@ -41,6 +45,8 @@ Widget podiumCell(context, String name, bool isUser) {
             // Allowing wrapping of the names in the podium
             overflow: TextOverflow.ellipsis,
           ),
-        )
-      ]));
+        ),
+      ],
+    ),
+  );
 }

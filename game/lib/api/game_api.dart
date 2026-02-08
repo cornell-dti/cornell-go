@@ -64,11 +64,7 @@ enum AuthProviderType { google, apple }
 
 class ApiClient extends ChangeNotifier {
   final FlutterSecureStorage _storage;
-  final _googleSignIn = GoogleSignIn(
-    scopes: [
-      'email',
-    ],
-  );
+  final _googleSignIn = GoogleSignIn(scopes: ['email']);
 
   // The ApiClient manages the socket and authentication state while the ClientApi manages the streams that components listen to
   final String _apiUrl;
@@ -106,12 +102,13 @@ class ApiClient extends ChangeNotifier {
 
     IO.cache.clear();
     final socket = IO.io(
-        _apiUrl,
-        IO.OptionBuilder()
-            .setTransports(["websocket"])
-            .disableAutoConnect()
-            .setAuth({'token': _accessToken})
-            .build());
+      _apiUrl,
+      IO.OptionBuilder()
+          .setTransports(["websocket"])
+          .disableAutoConnect()
+          .setAuth({'token': _accessToken})
+          .build(),
+    );
 
     socket.onDisconnect((data) {
       print("Server Disconnected!");
@@ -172,8 +169,10 @@ class ApiClient extends ChangeNotifier {
 
   Future<bool> _refreshAccess(bool relog) async {
     if (_refreshToken != null) {
-      final refreshResponse =
-          await http.post(_refreshUrl, body: {'refreshToken': _refreshToken});
+      final refreshResponse = await http.post(
+        _refreshUrl,
+        body: {'refreshToken': _refreshToken},
+      );
       if (refreshResponse.statusCode == 201 && refreshResponse.body != "") {
         final responseBody = jsonDecode(refreshResponse.body);
         _accessToken = responseBody["accessToken"];
@@ -207,74 +206,120 @@ class ApiClient extends ChangeNotifier {
   }
 
   Future<http.Response?> connectDevice(
-      String year,
-      LoginEnrollmentTypeDto enrollmentType,
-      String username,
-      String college,
-      String major,
-      List<String> interests) async {
+    String year,
+    LoginEnrollmentTypeDto enrollmentType,
+    String username,
+    String college,
+    String major,
+    List<String> interests,
+  ) async {
     final String? id = await getId();
-    return connect(id!, _deviceLoginUrl, year, enrollmentType, username,
-        college, major, interests,
-        noRegister: false);
+    return connect(
+      id!,
+      _deviceLoginUrl,
+      year,
+      enrollmentType,
+      username,
+      college,
+      major,
+      interests,
+      noRegister: false,
+    );
   }
 
   Future<http.Response?> connectGoogle(
-      GoogleSignInAccount gAccount,
-      String year,
-      LoginEnrollmentTypeDto enrollmentType,
-      String username,
-      String college,
-      String major,
-      List<String> interests) async {
+    GoogleSignInAccount gAccount,
+    String year,
+    LoginEnrollmentTypeDto enrollmentType,
+    String username,
+    String college,
+    String major,
+    List<String> interests,
+  ) async {
     final auth = await gAccount.authentication;
-    return connect(auth.idToken ?? "", _googleLoginUrl, year, enrollmentType,
-        username, college, major, interests,
-        noRegister: false);
+    return connect(
+      auth.idToken ?? "",
+      _googleLoginUrl,
+      year,
+      enrollmentType,
+      username,
+      college,
+      major,
+      interests,
+      noRegister: false,
+    );
   }
 
   Future<http.Response?> connectGoogleNoRegister(
-      GoogleSignInAccount gAccount) async {
+    GoogleSignInAccount gAccount,
+  ) async {
     final auth = await gAccount.authentication;
-    return connect(auth.idToken ?? "", _googleLoginUrl, "",
-        LoginEnrollmentTypeDto.GUEST, "", "", "", [],
-        noRegister: true);
+    return connect(
+      auth.idToken ?? "",
+      _googleLoginUrl,
+      "",
+      LoginEnrollmentTypeDto.GUEST,
+      "",
+      "",
+      "",
+      [],
+      noRegister: true,
+    );
   }
 
   // Connects to server using Apple Sign-In credentials with full registration
   // Uses Apple identity token and user-provided registration details
   Future<http.Response?> connectApple(
-      AuthorizationCredentialAppleID credential,
-      String year,
-      LoginEnrollmentTypeDto enrollmentType,
-      String username,
-      String college,
-      String major,
-      List<String> interests) async {
-    return connect(credential.identityToken ?? "", _appleLoginUrl, year,
-        enrollmentType, username, college, major, interests,
-        noRegister: false);
+    AuthorizationCredentialAppleID credential,
+    String year,
+    LoginEnrollmentTypeDto enrollmentType,
+    String username,
+    String college,
+    String major,
+    List<String> interests,
+  ) async {
+    return connect(
+      credential.identityToken ?? "",
+      _appleLoginUrl,
+      year,
+      enrollmentType,
+      username,
+      college,
+      major,
+      interests,
+      noRegister: false,
+    );
   }
 
   // Connects to server using Apple Sign-In credentials without registration
   // Used for existing users who just want to sign in
   Future<http.Response?> connectAppleNoRegister(
-      AuthorizationCredentialAppleID credential) async {
-    return connect(credential.identityToken ?? "", _appleLoginUrl, "",
-        LoginEnrollmentTypeDto.GUEST, "", "", "", [],
-        noRegister: true);
+    AuthorizationCredentialAppleID credential,
+  ) async {
+    return connect(
+      credential.identityToken ?? "",
+      _appleLoginUrl,
+      "",
+      LoginEnrollmentTypeDto.GUEST,
+      "",
+      "",
+      "",
+      [],
+      noRegister: true,
+    );
   }
 
   Future<http.Response?> connect(
-      String idToken,
-      Uri url,
-      String year,
-      LoginEnrollmentTypeDto enrollmentType,
-      String username,
-      String college,
-      String major,
-      List<String> interests,
-      {bool noRegister = false}) async {
+    String idToken,
+    Uri url,
+    String year,
+    LoginEnrollmentTypeDto enrollmentType,
+    String username,
+    String college,
+    String major,
+    List<String> interests, {
+    bool noRegister = false,
+  }) async {
     // Location at registration is optional
     double? lat;
     double? long;
@@ -290,23 +335,26 @@ class ApiClient extends ChangeNotifier {
     }
 
     final loginDto = LoginDto(
-        idToken: idToken,
-        latF: lat,
-        enrollmentType: enrollmentType,
-        year: year,
-        username: username,
-        college: college,
-        major: major,
-        interests: interests.join(","),
-        longF: long,
-        aud: Platform.isIOS ? LoginAudDto.ios : LoginAudDto.android,
-        noRegister: noRegister);
+      idToken: idToken,
+      latF: lat,
+      enrollmentType: enrollmentType,
+      year: year,
+      username: username,
+      college: college,
+      major: major,
+      interests: interests.join(","),
+      longF: long,
+      aud: Platform.isIOS ? LoginAudDto.ios : LoginAudDto.android,
+      noRegister: noRegister,
+    );
 
-    final loginResponse = await http.post(url,
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(loginDto.toJson()));
+    final loginResponse = await http.post(
+      url,
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(loginDto.toJson()),
+    );
 
     if (loginResponse.statusCode == 201 && loginResponse.body != "") {
       final responseBody = jsonDecode(loginResponse.body);
@@ -390,7 +438,9 @@ class ApiClient extends ChangeNotifier {
 
   // Generic method to check if a user exists for any auth provider
   Future<bool> checkUserExists(
-      AuthProviderType authType, String idToken) async {
+    AuthProviderType authType,
+    String idToken,
+  ) async {
     try {
       final Uri baseUrl;
       final String providerName;
@@ -417,7 +467,8 @@ class ApiClient extends ChangeNotifier {
         return responseData['exists'];
       }
       print(
-          'Failed to check $providerName user. Status code: ${response.statusCode}');
+        'Failed to check $providerName user. Status code: ${response.statusCode}',
+      );
       return false;
     } catch (e) {
       print('Error occurred while checking $authType user: $e');

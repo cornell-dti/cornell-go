@@ -8,13 +8,13 @@ class FilterForm extends StatefulWidget {
   String? myDifficulty;
   List<String>? myLocations;
   List<String>? myCategories;
-  FilterForm(
-      {Key? key,
-      required this.onSubmit,
-      String? difficulty,
-      List<String>? locations,
-      List<String>? categories})
-      : super(key: key) {
+  FilterForm({
+    Key? key,
+    required this.onSubmit,
+    String? difficulty,
+    List<String>? locations,
+    List<String>? categories,
+  }) : super(key: key) {
     myDifficulty = difficulty;
     myLocations = locations;
     myCategories = categories;
@@ -35,7 +35,10 @@ class _FilterFormState extends State<FilterForm> {
   int filterCount = 0;
 
   _FilterFormState(
-      String? difficulty, List<String>? locations, List<String>? categories) {
+    String? difficulty,
+    List<String>? locations,
+    List<String>? categories,
+  ) {
     selectedDifficulty = difficulty ?? '';
     selectedLocations = locations ?? [];
     selectedCategories = categories ?? [];
@@ -181,9 +184,9 @@ class _FilterFormState extends State<FilterForm> {
           ),
           // SizedBox(height: 20.0),
           Expanded(
-              child: ListView(
-                  padding: EdgeInsets.symmetric(horizontal: 20.0),
-                  children: [
+            child: ListView(
+              padding: EdgeInsets.symmetric(horizontal: 20.0),
+              children: [
                 ListTile(
                   title: Text(
                     'Category',
@@ -317,7 +320,9 @@ class _FilterFormState extends State<FilterForm> {
                     );
                   }).toList(),
                 ),
-              ])),
+              ],
+            ),
+          ),
           SizedBox(height: 20.0),
           Container(
             width: 600,

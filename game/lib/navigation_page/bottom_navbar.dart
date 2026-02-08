@@ -9,6 +9,7 @@ import 'package:game/model/onboarding_model.dart';
 import 'package:game/model/user_model.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/tracker_model.dart';
+import 'package:game/model/challenge_model.dart';
 import 'package:game/widgets/bear_mascot_message.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:showcaseview/showcaseview.dart';
@@ -58,8 +59,10 @@ class _BottomNavBarState extends State<BottomNavBar> {
   bool _hasTriggeredStep11 = false; // Prevent multiple showcase triggers
   bool _hasTriggeredStep12 = false; // Prevent multiple showcase triggers
   OverlayEntry? _bearOverlayEntry;
-  static const TextStyle optionStyle =
-      TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
+  static const TextStyle optionStyle = TextStyle(
+    fontSize: 30,
+    fontWeight: FontWeight.bold,
+  );
   static List<Widget> _widgetOptions = <Widget>[
     SearchFilterBar(),
     GlobalLeaderboardWidget(),
@@ -102,7 +105,10 @@ class _BottomNavBarState extends State<BottomNavBar> {
           print("Tapped anywhere on step 11");
           _removeBearOverlay();
           ShowcaseView.getNamed("bottom_navbar_profile").dismiss();
-          Provider.of<OnboardingModel>(context, listen: false).completeStep11();
+          Provider.of<OnboardingModel>(
+            context,
+            listen: false,
+          ).completeStep11();
         },
       ),
     );
@@ -127,7 +133,10 @@ class _BottomNavBarState extends State<BottomNavBar> {
           print("Tapped anywhere on step 12");
           _removeBearOverlay();
           ShowcaseView.getNamed("bottom_navbar_leaderboard").dismiss();
-          Provider.of<OnboardingModel>(context, listen: false).completeStep12();
+          Provider.of<OnboardingModel>(
+            context,
+            listen: false,
+          ).completeStep12();
         },
       ),
     );
@@ -165,12 +174,15 @@ class _BottomNavBarState extends State<BottomNavBar> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SvgPicture.asset("assets/icons/profilehead.svg",
-                colorFilter:
-                    ColorFilter.mode(Colors.black, BlendMode.srcIn)), // Active
+            SvgPicture.asset(
+              "assets/icons/profilehead.svg",
+              colorFilter: ColorFilter.mode(Colors.black, BlendMode.srcIn),
+            ), // Active
             SizedBox(height: 2),
-            Text('Profile',
-                style: TextStyle(fontSize: 12, color: Colors.black)), // Active
+            Text(
+              'Profile',
+              style: TextStyle(fontSize: 12, color: Colors.black),
+            ), // Active
           ],
         ),
       );
@@ -183,13 +195,17 @@ class _BottomNavBarState extends State<BottomNavBar> {
     }
 
     // Normal tab when not in onboarding
-    final profileIcon = SvgPicture.asset("assets/icons/profilehead.svg",
-        colorFilter: ColorFilter.mode(Colors.grey, BlendMode.srcIn));
+    final profileIcon = SvgPicture.asset(
+      "assets/icons/profilehead.svg",
+      colorFilter: ColorFilter.mode(Colors.grey, BlendMode.srcIn),
+    );
 
     return BottomNavigationBarItem(
       icon: profileIcon,
-      activeIcon: SvgPicture.asset("assets/icons/profilehead.svg",
-          colorFilter: ColorFilter.mode(Colors.black, BlendMode.srcIn)),
+      activeIcon: SvgPicture.asset(
+        "assets/icons/profilehead.svg",
+        colorFilter: ColorFilter.mode(Colors.black, BlendMode.srcIn),
+      ),
       label: 'Profile',
     );
   }
@@ -217,12 +233,15 @@ class _BottomNavBarState extends State<BottomNavBar> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SvgPicture.asset("assets/icons/leaderboard.svg",
-                colorFilter:
-                    ColorFilter.mode(Colors.black, BlendMode.srcIn)), // Active
+            SvgPicture.asset(
+              "assets/icons/leaderboard.svg",
+              colorFilter: ColorFilter.mode(Colors.black, BlendMode.srcIn),
+            ), // Active
             SizedBox(height: 2),
-            Text('Leaderboard',
-                style: TextStyle(fontSize: 12, color: Colors.black)), // Active
+            Text(
+              'Leaderboard',
+              style: TextStyle(fontSize: 12, color: Colors.black),
+            ), // Active
           ],
         ),
       );
@@ -235,13 +254,17 @@ class _BottomNavBarState extends State<BottomNavBar> {
     }
 
     // Normal tab when not in onboarding
-    final leaderboardIcon = SvgPicture.asset("assets/icons/leaderboard.svg",
-        colorFilter: ColorFilter.mode(Colors.grey, BlendMode.srcIn));
+    final leaderboardIcon = SvgPicture.asset(
+      "assets/icons/leaderboard.svg",
+      colorFilter: ColorFilter.mode(Colors.grey, BlendMode.srcIn),
+    );
 
     return BottomNavigationBarItem(
       icon: leaderboardIcon,
-      activeIcon: SvgPicture.asset("assets/icons/leaderboard.svg",
-          colorFilter: ColorFilter.mode(Colors.black, BlendMode.srcIn)),
+      activeIcon: SvgPicture.asset(
+        "assets/icons/leaderboard.svg",
+        colorFilter: ColorFilter.mode(Colors.black, BlendMode.srcIn),
+      ),
       label: 'Leaderboard',
     );
   }
@@ -252,10 +275,12 @@ class _BottomNavBarState extends State<BottomNavBar> {
   Widget build(BuildContext context) {
     final client = Provider.of<ApiClient>(context);
     final onboarding = Provider.of<OnboardingModel>(
-        context); // listen: true (default) so we rebuild on step completion
+      context,
+    ); // listen: true (default) so we rebuild on step completion
     final userModel = Provider.of<UserModel>(context);
     final eventModel = Provider.of<EventModel>(context);
     final trackerModel = Provider.of<TrackerModel>(context);
+    final challengeModel = Provider.of<ChallengeModel>(context);
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
@@ -273,8 +298,10 @@ class _BottomNavBarState extends State<BottomNavBar> {
           ShowcaseView.register(
             scope: "bottom_navbar_profile",
             onFinish: () {
-              Provider.of<OnboardingModel>(context, listen: false)
-                  .completeStep11();
+              Provider.of<OnboardingModel>(
+                context,
+                listen: false,
+              ).completeStep11();
             },
           );
           // Switch to Profile tab
@@ -282,8 +309,9 @@ class _BottomNavBarState extends State<BottomNavBar> {
             _selectedIndex = 2;
           });
           // Start showcase to highlight Profile icon
-          ShowcaseView.getNamed("bottom_navbar_profile")
-              .startShowCase([onboarding.step11ProfileTabKey]);
+          ShowcaseView.getNamed(
+            "bottom_navbar_profile",
+          ).startShowCase([onboarding.step11ProfileTabKey]);
           // Show bear overlay on top of showcase
           _showProfileBearOverlay();
         }
@@ -304,8 +332,10 @@ class _BottomNavBarState extends State<BottomNavBar> {
           ShowcaseView.register(
             scope: "bottom_navbar_leaderboard",
             onFinish: () {
-              Provider.of<OnboardingModel>(context, listen: false)
-                  .completeStep12();
+              Provider.of<OnboardingModel>(
+                context,
+                listen: false,
+              ).completeStep12();
             },
           );
           // Switch to Leaderboard tab
@@ -313,8 +343,9 @@ class _BottomNavBarState extends State<BottomNavBar> {
             _selectedIndex = 1;
           });
           // Start showcase to highlight Leaderboard icon
-          ShowcaseView.getNamed("bottom_navbar_leaderboard")
-              .startShowCase([onboarding.step12LeaderboardTabKey]);
+          ShowcaseView.getNamed(
+            "bottom_navbar_leaderboard",
+          ).startShowCase([onboarding.step12LeaderboardTabKey]);
           // Show bear overlay on top of showcase
           _showLeaderboardBearOverlay();
         }
@@ -338,58 +369,56 @@ class _BottomNavBarState extends State<BottomNavBar> {
       children: [
         // LAYER 1: Main app UI (Scaffold with content + bottom navbar)
         Scaffold(
-            body: Center(
-              child: StreamBuilder(
-                  stream: client.clientApi.disconnectedStream,
-                  builder: (context, snapshot) {
-                    // Redirect to login if server api is null
-                    if (client.serverApi == null) {
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        // Clear entire navigation stack and push to login screen
-                        Navigator.of(context).pushAndRemoveUntil(
-                          MaterialPageRoute(
-                              builder: (context) => SplashPageWidget()),
-                          (route) => false,
-                        );
-                        displayToast("Signed out", Status.success);
-                      });
-                    }
-                    // Returning the main content page above the navbar [Home, Leaderboard, Profile]
-                    return _widgetOptions.elementAt(_selectedIndex);
-                  }),
+          body: Center(
+            child: StreamBuilder(
+              stream: client.clientApi.disconnectedStream,
+              builder: (context, snapshot) {
+                // Redirect to login if server api is null
+                if (client.serverApi == null) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    // Clear entire navigation stack and push to login screen
+                    Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(
+                        builder: (context) => SplashPageWidget(),
+                      ),
+                      (route) => false,
+                    );
+                    displayToast("Signed out", Status.success);
+                  });
+                }
+                // Returning the main content page above the navbar [Home, Leaderboard, Profile]
+                return _widgetOptions.elementAt(_selectedIndex);
+              },
             ),
-            bottomNavigationBar: BottomNavigationBar(
-              items: [
-                BottomNavigationBarItem(
-                  icon: SvgPicture.asset("assets/icons/home.svg",
-                      colorFilter:
-                          ColorFilter.mode(Colors.grey, BlendMode.srcIn)),
-                  activeIcon: SvgPicture.asset("assets/icons/home.svg",
-                      colorFilter:
-                          ColorFilter.mode(Colors.black, BlendMode.srcIn)),
-                  label: 'Home',
+          ),
+          bottomNavigationBar: BottomNavigationBar(
+            items: [
+              BottomNavigationBarItem(
+                icon: SvgPicture.asset(
+                  "assets/icons/home.svg",
+                  colorFilter: ColorFilter.mode(Colors.grey, BlendMode.srcIn),
                 ),
-                _buildLeaderboardTab(
-                  onboarding,
-                  screenWidth,
-                  screenHeight,
+                activeIcon: SvgPicture.asset(
+                  "assets/icons/home.svg",
+                  colorFilter: ColorFilter.mode(Colors.black, BlendMode.srcIn),
                 ),
-                _buildProfileTab(
-                  onboarding,
-                  screenWidth,
-                  screenHeight,
-                ),
-              ],
-              currentIndex: _selectedIndex,
-              selectedItemColor: Colors.black,
-              onTap: _onItemTapped,
-            )),
+                label: 'Home',
+              ),
+              _buildLeaderboardTab(onboarding, screenWidth, screenHeight),
+              _buildProfileTab(onboarding, screenWidth, screenHeight),
+            ],
+            currentIndex: _selectedIndex,
+            selectedItemColor: Colors.black,
+            onTap: _onItemTapped,
+          ),
+        ),
 
         // LAYER 2: Step 0 - Welcome onboarding overlay (manual, no ShowcaseView)
         // Wait for backend response before showing onboarding
         if (!onboarding.isLoadingFromBackend &&
             !onboarding.step0WelcomeComplete &&
-            onboarding.canStartOnboarding(userModel, eventModel, trackerModel))
+            onboarding.canStartOnboarding(
+                userModel, eventModel, trackerModel, challengeModel))
           GestureDetector(
             onTap: () {
               print('👆 Step 0: Dismissing welcome overlay');

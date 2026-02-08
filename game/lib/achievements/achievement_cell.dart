@@ -9,9 +9,12 @@ class AchievementCell extends StatefulWidget {
   final int totalTasks;
 
   const AchievementCell(
-      this.description, this.thumbnail, this.tasksFinished, this.totalTasks,
-      {Key? key})
-      : super(key: key);
+    this.description,
+    this.thumbnail,
+    this.tasksFinished,
+    this.totalTasks, {
+    Key? key,
+  }) : super(key: key);
 
   @override
   State<StatefulWidget> createState() =>
@@ -27,10 +30,13 @@ class _AchievementCellState extends State<AchievementCell> {
   // final int totalDistance;
 
   _AchievementCellState(
-      this.description, this.thumbnail, this.tasksFinished, this.totalTasks
-      // newly added field
-      // this.totalDistance
-      );
+    this.description,
+    this.thumbnail,
+    this.tasksFinished,
+    this.totalTasks,
+    // newly added field
+    // this.totalDistance
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +80,7 @@ class _AchievementCellState extends State<AchievementCell> {
                     LoadingBar(this.tasksFinished, this.totalTasks),
                   ],
                 ),
-              )
+              ),
             ],
           ),
         ),
