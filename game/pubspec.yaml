@@ -28,7 +28,7 @@ dependencies:
   sliding_up_panel: ^2.0.0+1
   velocity_x:
   flutter_blurhash:
-  cached_network_image: ^3.1.0
+  cached_network_image: ^3.4.1
   google_fonts: 6.1.0
   url_launcher:
   confetti: ^0.7.0
