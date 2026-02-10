@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -87,11 +88,13 @@ class _CompletedChallengeFullState extends State<CompletedChallengeFull> {
                   builder: (BuildContext context) {
                     return ClipRRect(
                       borderRadius: BorderRadius.circular(8),
-                      child: Image.network(
-                        picture,
+                      child: CachedNetworkImage(
+                        imageUrl: picture,
+                        placeholder: (context, url) => CircularProgressIndicator(),
+                        errorWidget: (context, url, error) => Icon(Icons.error),
                         fit: BoxFit.cover,
-                        width: 390,
-                        height: 20,
+                        // width: 390,
+                        // height: 20,
                       ),
                     );
                   },

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/gameplay/gameplay_page.dart';
@@ -274,11 +275,13 @@ class _PreviewState extends State<Preview> {
             child: Column(
               children: [
                 //Image
-                Image.network(
-                  imgUrl,
-                  height: MediaQuery.of(context).size.height * 0.25,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
+                CachedNetworkImage(
+                  imageUrl: imgUrl,
+                  placeholder: (context, url) => CircularProgressIndicator(),
+                  errorWidget: (context, url, error) => Icon(Icons.error),
+                  // height: MediaQuery.of(context).size.height * 0.25,
+                  // width: double.infinity,
+                  // fit: BoxFit.cover,
                 ),
                 SizedBox(height: 20),
 

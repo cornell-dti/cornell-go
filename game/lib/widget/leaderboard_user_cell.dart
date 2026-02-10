@@ -52,11 +52,13 @@ Widget leaderBoardUserCell(
             ),
             CircleAvatar(
               child: ClipOval(
-                child: Image.network(
-                  'https://www.w3schools.com/howto/img_avatar.png',
+                child: CachedNetworkImage(
+                  imageUrl: 'https://www.w3schools.com/howto/img_avatar.png',
+                  placeholder: (context, url) => CircularProgressIndicator(),
+                  errorWidget: (context, url, error) => Icon(Icons.error),
                   fit: BoxFit.cover,
-                  width: 90,
-                  height: 90,
+                  // width: 90,
+                  // height: 90,
                 ),
               ),
             ),

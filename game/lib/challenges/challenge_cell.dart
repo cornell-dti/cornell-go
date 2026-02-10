@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:game/preview/preview.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -147,10 +148,12 @@ class _ChallengeCellState extends State<ChallengeCell> {
                 padding: const EdgeInsets.only(right: 14),
                 child: ClipRRect(
                   borderRadius: BorderRadius.all(Radius.circular(4.6)),
-                  child: Image.network(
-                    imgUrl,
-                    width: deviceHeight * 0.1,
-                    height: deviceHeight * 0.1,
+                  child: CachedNetworkImage(
+                    imageUrl: imgUrl,
+                    placeholder: (context, url) => CircularProgressIndicator(),
+                    errorWidget: (context, url, error) => Icon(Icons.error),
+                    // width: deviceHeight * 0.1,
+                    // height: deviceHeight * 0.1,
                     fit: BoxFit.cover,
                   ),
                 ),

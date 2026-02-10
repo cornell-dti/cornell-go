@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:game/navigation_page/bottom_navbar.dart';
@@ -1569,11 +1570,13 @@ class _GameplayMapState extends State<GameplayMap>
       alignment: pictureAlign,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(10),
-        child: Image.network(
-          imageUrl,
+        child: CachedNetworkImage(
+          imageUrl: imageUrl,
           fit: BoxFit.cover,
-          width: pictureWidth,
-          height: pictureHeight,
+          placeholder: (context, url) => CircularProgressIndicator(),
+          errorWidget: (context, url, error) => Icon(Icons.error),
+          // width: pictureWidth,
+          // height: pictureHeight,
         ),
       ),
     );
