@@ -164,8 +164,15 @@ export interface PurchaseResultDto {
   itemId: string;
 }
 
+export interface EquippedSlotDto {
+  slot: BearSlotDto;
+  itemId?: string;
+  zIndex?: number;
+}
+
 export interface UserBearLoadoutDto {
   userId: string;
+  equipped: EquippedSlotDto[];
 }
 
 export interface UserInventoryDto {
@@ -186,11 +193,22 @@ export interface UpdateBearItemsDataDto {
   items: BearItemDto[];
 }
 
-export interface UpdateUserInventoryDataDto {}
+export interface UpdateUserInventoryDataDto {
+  userId: string;
+  items: BearItemDto[];
+  balance: number;
+}
 
-export interface UpdateUserBearLoadoutDataDto {}
+export interface UpdateUserBearLoadoutDataDto {
+  userId: string;
+  equipped: EquippedSlotDto[];
+}
 
-export interface UpdatePurchaseResultDto {}
+export interface UpdatePurchaseResultDto {
+  success: boolean;
+  newBalance: number;
+  itemId: string;
+}
 
 export interface CompletedChallengeDto {}
 
@@ -520,6 +538,7 @@ export interface UserDto {
   major?: string;
   interests?: string[];
   score?: number;
+  coins?: number;
   isBanned?: boolean;
   groupId?: string;
   authType?: UserAuthTypeDto;

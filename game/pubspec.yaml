@@ -96,6 +96,11 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
+    - assets/buildabear/
+    - assets/buildabear/color/
+    - assets/buildabear/eyes/
+    - assets/buildabear/mouth/
+    - assets/buildabear/accessories/
     - assets/videos/
     - assets/audios/
     - assets/lottie_animations/

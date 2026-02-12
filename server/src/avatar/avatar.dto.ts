@@ -30,13 +30,15 @@ export interface PurchaseResultDto {
     itemId: string;
 }
 
+export interface EquippedSlotDto {
+    slot: BearSlotDto;
+    itemId?: string;
+    zIndex?: number;
+}
+
 export interface UserBearLoadoutDto {
     userId: string;
-    equipped: Array<{
-        slot: BearSlotDto;
-        itemId?: string;
-        zIndex?: number | null;
-    }>;
+    equipped: EquippedSlotDto[];
 }
 
 export interface UserInventoryDto {
@@ -59,10 +61,21 @@ export interface UpdateBearItemsDataDto {
     items: BearItemDto[];
 }
 
-export interface UpdateUserInventoryDataDto extends UserInventoryDto { }
+export interface UpdateUserInventoryDataDto {
+    userId: string;
+    items: BearItemDto[];
+    balance: number;
+}
 
-export interface UpdateUserBearLoadoutDataDto extends UserBearLoadoutDto { }
+export interface UpdateUserBearLoadoutDataDto {
+    userId: string;
+    equipped: EquippedSlotDto[];
+}
 
-export interface UpdatePurchaseResultDto extends PurchaseResultDto { }
+export interface UpdatePurchaseResultDto {
+    success: boolean;
+    newBalance: number;
+    itemId: string;
+}
 
 

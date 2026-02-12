@@ -36,7 +36,7 @@ export class UserService {
     private clientService: ClientService,
     private abilityFactory: CaslAbilityFactory,
     private achievementService: AchievementService,
-  ) {}
+  ) { }
 
   /** Find a user by their authentication token */
   async byAuth(authType: AuthType, authToken: string) {
@@ -116,6 +116,20 @@ export class UserService {
     }
 
     await this.achievementService.createAchievementTrackers(user);
+
+    // Seed default bear items into inventory & equipped loadout
+    const defaultBearItems = await this.prisma.bearItem.findMany({
+      where: { isDefault: true },
+    });
+
+    for (const item of defaultBearItems) {
+      await this.prisma.userBearInventory.create({
+        data: { userId: user.id, bearItemId: item.id },
+      });
+      await this.prisma.userBearEquipped.create({
+        data: { userId: user.id, bearItemId: item.id, slot: item.slot },
+      });
+    }
 
     return user;
   }
@@ -212,14 +226,14 @@ export class UserService {
   async updateUser(ability: AppAbility, user: UserDto): Promise<User> {
     const username = user.username
       ? new CensorSensor()
-          .cleanProfanityIsh(
-            user.username
-              ?.substring(0, 128)
-              ?.replaceAll(/[^_A-Za-z0-9]/g, ' ')
-              ?.replaceAll('_', ' '),
-          )
-          .replaceAll('*', '_')
-          .replaceAll(' ', '_')
+        .cleanProfanityIsh(
+          user.username
+            ?.substring(0, 128)
+            ?.replaceAll(/[^_A-Za-z0-9]/g, ' ')
+            ?.replaceAll('_', ' '),
+        )
+        .replaceAll('*', '_')
+        .replaceAll(' ', '_')
       : undefined;
 
     const userObj = await this.prisma.user.findFirstOrThrow({
@@ -283,6 +297,7 @@ export class UserService {
       major: joinedUser.major,
       year: joinedUser.year,
       score: joinedUser.score,
+      coins: joinedUser.coins,
       groupId: joinedUser.group.friendlyId,
       hasCompletedOnboarding: joinedUser.hasCompletedOnboarding,
       isBanned: joinedUser.isBanned,
