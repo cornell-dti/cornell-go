@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:game/achievements/achievements_page.dart';
+import 'package:game/api/game_api.dart';
 import 'package:game/api/game_client_dto.dart';
 import 'package:game/model/achievement_model.dart';
 import 'package:game/model/challenge_model.dart';
@@ -9,6 +12,8 @@ import 'package:game/model/tracker_model.dart';
 import 'package:game/model/user_model.dart';
 import 'package:game/achievements/achievement_cell.dart';
 import 'package:game/profile/completed_cell.dart';
+import 'package:game/profile/build_a_bear/bear_preview.dart';
+import 'package:game/profile/build_a_bear/build_a_bear_page.dart';
 import 'package:game/profile/settings_page.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:intl/intl.dart' hide TextDirection;
@@ -60,6 +65,95 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  /// Bear items loaded from the backend, filtered by slot.
+  List<BearItemDto> _colorItems = [];
+  List<BearItemDto> _eyeItems = [];
+  List<BearItemDto> _mouthItems = [];
+  List<BearItemDto> _accessoryItems = [];
+
+  /// Currently equipped item IDs keyed by slot.
+  Map<BearSlotDto, String?> _equippedBySlot = {};
+
+  StreamSubscription<UpdateBearItemsDataDto>? _bearItemsSub;
+  StreamSubscription<UpdateUserBearLoadoutDataDto>? _loadoutSub;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _requestBearData();
+    });
+  }
+
+  @override
+  void dispose() {
+    _bearItemsSub?.cancel();
+    _loadoutSub?.cancel();
+    super.dispose();
+  }
+
+  void _requestBearData() {
+    final apiClient = context.read<ApiClient>();
+    final server = apiClient.serverApi;
+    if (server == null) return;
+
+    _bearItemsSub ??=
+        apiClient.clientApi.updateBearItemsDataStream.listen((update) {
+      setState(() {
+        _colorItems = update.items
+            .where((i) => i.slot == BearSlotDto.COLOR)
+            .toList();
+        _eyeItems = update.items
+            .where((i) => i.slot == BearSlotDto.EYES)
+            .toList();
+        _mouthItems = update.items
+            .where((i) => i.slot == BearSlotDto.MOUTH)
+            .toList();
+        _accessoryItems = update.items
+            .where((i) => i.slot == BearSlotDto.ACCESSORY)
+            .toList();
+      });
+    });
+
+    _loadoutSub ??=
+        apiClient.clientApi.updateUserBearLoadoutDataStream.listen((loadout) {
+      setState(() {
+        _equippedBySlot = {
+          for (final e in loadout.equipped) e.slot: e.itemId,
+        };
+      });
+    });
+
+    server.requestBearItems(RequestBearItemsDto());
+    server.requestUserBearLoadout(RequestUserBearLoadoutDto());
+  }
+
+  /// Look up the equipped [BearItemDto] for a given [slot].
+  BearItemDto? _equippedItemForSlot(BearSlotDto slot) {
+    final itemId = _equippedBySlot[slot];
+    if (itemId == null) return null;
+    final List<BearItemDto> items;
+    switch (slot) {
+      case BearSlotDto.COLOR:
+        items = _colorItems;
+        break;
+      case BearSlotDto.EYES:
+        items = _eyeItems;
+        break;
+      case BearSlotDto.MOUTH:
+        items = _mouthItems;
+        break;
+      case BearSlotDto.ACCESSORY:
+        items = _accessoryItems;
+        break;
+    }
+    try {
+      return items.firstWhere((i) => i.id == itemId);
+    } catch (_) {
+      return null;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // Get screen dimensions for responsive sizing
@@ -69,9 +163,9 @@ class _ProfilePageState extends State<ProfilePage> {
 
     // Calculate responsive sizes
     final headerHeight = screenHeight * 0.30;
-    final bearWidth = screenWidth * 0.35; // 35% of screen width
-    final bearHeight =
-        screenWidth * 0.35 * (593 / 429); // Maintain bear's aspect ratio
+    // Bear: size by header so it fits the green area; aspect 429w : 593h
+    final bearHeight = headerHeight * 0.9;
+    final bearWidth = bearHeight * (429 / 593);
     final iconSize = screenWidth * 0.075; // 7.5% of screen width
     final badgeWidth = screenWidth * 0.2; // 20% of screen width
     final badgeHeight = screenHeight * 0.03; // 3% of screen height
@@ -205,37 +299,57 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                         ),
                       ),
-                      // Settings icon positioned on the right
+                      // Clothes hanger and settings icons positioned on the right
                       Positioned(
-                        right: screenWidth *
-                            0.05, // will shift this to the right when hanger icon is introduced
+                        right: screenWidth * 0.05,
                         top: MediaQuery.of(context)
                             .padding
                             .top, // for status bar
-                        child: IconButton(
-                          icon: Icon(Icons.settings,
-                              size: iconSize, color: Colors.black),
-                          onPressed: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: SvgPicture.asset(
+                                'assets/icons/clotheshanger.svg',
+                                width: iconSize,
+                                height: iconSize,
+                              ),
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
                                     builder: (context) =>
-                                        SettingsPage(isGuest)));
-                          },
+                                        const BuildABearPage(),
+                                  ),
+                                );
+                              },
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.settings,
+                                  size: iconSize, color: Colors.black),
+                              onPressed: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            SettingsPage(isGuest)));
+                              },
+                            ),
+                          ],
                         ),
                       ),
-                      // Centered bear.png image
-                      Center(
-                        child: Container(
-                          padding: EdgeInsets.only(
-                              top: MediaQuery.of(context).padding.top - 10),
-                          child: Container(
-                            width: bearWidth,
-                            height: bearHeight,
-                            child: Image.asset(
-                              'assets/icons/bear.png',
-                              fit: BoxFit.cover,
-                            ),
+                      // Bear: anchored at bottom-center of header, sized to header
+                      Positioned(
+                        left: 0,
+                        right: 0,
+                        bottom:
+                            -headerHeight * 0.04, // Slight overlap with content
+                        height: bearHeight,
+                        child: Center(
+                          child: BearPreview(
+                            bearWidth: bearWidth,
+                            bearHeight: bearHeight,
+                            itemForSlot: _equippedItemForSlot,
                           ),
                         ),
                       ),

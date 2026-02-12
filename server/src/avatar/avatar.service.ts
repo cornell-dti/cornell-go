@@ -38,12 +38,11 @@ export class AvatarService {
     }
 
     private async getUserBalance(userId: string): Promise<number> {
-        // NOTE: Using User.score as currency until a dedicated "coins" field exists
         const user = await this.prisma.user.findUnique({
             where: { id: userId },
-            select: { score: true },
+            select: { coins: true },
         });
-        return user?.score ?? 0;
+        return user?.coins ?? 0;
     }
 
     async getInventory(userId: string): Promise<UserInventoryDto> {
@@ -80,7 +79,7 @@ export class AvatarService {
             equipped: equipped.map(e => ({
                 slot: this.toDtoSlot(e.slot),
                 itemId: e.bearItemId ?? undefined,
-                zIndex: e.bearItem?.zIndex ?? null,
+                zIndex: e.bearItem?.zIndex ?? undefined,
             })),
         };
     }
@@ -95,10 +94,10 @@ export class AvatarService {
             });
 
             // Lock the user row to prevent concurrent purchases from racing
-            const [user] = await tx.$queryRaw<{ score: number }[]>`
-                SELECT score FROM "User" WHERE id = ${userId} FOR UPDATE
+            const [user] = await tx.$queryRaw<{ coins: number }[]>`
+                SELECT coins FROM "User" WHERE id = ${userId} FOR UPDATE
             `;
-            const balance = user?.score ?? 0;
+            const balance = user?.coins ?? 0;
 
             if (!item) {
                 return { success: false, newBalance: balance, itemId: dto.itemId };
@@ -118,10 +117,10 @@ export class AvatarService {
                 return { success: false, newBalance: balance, itemId: item.id };
             }
 
-            // Deduct cost from user's score (temporary currency) and add to inventory
+            // Deduct cost from user's coins and add to inventory
             await tx.user.update({
                 where: { id: userId },
-                data: { score: { decrement: item.cost } },
+                data: { coins: { decrement: item.cost } },
             });
 
             await tx.userBearInventory.create({

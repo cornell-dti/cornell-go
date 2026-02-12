@@ -93,6 +93,7 @@ model User {
   administrator       Boolean
   enrollmentType      EnrollmentType
   score               Int
+  coins               Int                  @default(0)
   isBanned            Boolean              @default(false)
   group               Group                @relation("member", fields: [groupId], references: [id])
   groupId             String

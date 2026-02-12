@@ -30,10 +30,13 @@ async function main() {
   await prisma.prevChallenge.deleteMany();
   await prisma.eventTracker.deleteMany();
   await prisma.challenge.deleteMany();
+  await prisma.userBearEquipped.deleteMany();
+  await prisma.userBearInventory.deleteMany();
   await prisma.user.deleteMany(); // Users before groups (User has groupId FK)
   await prisma.group.deleteMany();
   await prisma.eventBase.deleteMany();
   await prisma.organization.deleteMany();
+  await prisma.bearItem.deleteMany();
 
   // Create Organizations
   console.log('🏛️  Creating organizations...');
@@ -69,9 +72,9 @@ async function main() {
       name: 'Cornell Campus Classics',
       description:
         "Explore the most iconic spots on Cornell's beautiful campus.",
-      longDescription: 
+      longDescription:
         'Join us for the Cornell Campus Classics tour, where you will visit the most iconic and picturesque locations on campus. Start at the Engineering Quad, marvel at the architecture of Uris Library, and take in the serene beauty of Libe Slope. Along the way, learn fascinating facts about Cornell history and traditions. Do not forget to snap some photos at these must-see spots!',
-        timeLimitation: 'PERPETUAL',
+      timeLimitation: 'PERPETUAL',
       indexable: true,
       endTime: new Date('2030-12-31'),
       latitude: 42.4534,
@@ -92,7 +95,7 @@ async function main() {
         'Discover the best eats around Cornell and Ithaca!',
       longDescription:
         'Embark on the Ithaca Foodie Adventure and savor the diverse culinary delights that Cornell and the surrounding Ithaca area have to offer. Start your journey at one of Cornell\'s renowned dining halls, where you can sample a variety of dishes made with fresh, local ingredients. Then, venture into downtown Ithaca to explore charming cafes, food trucks, and restaurants that showcase the region\'s vibrant food scene. Whether you\'re craving farm-to-table fare or international cuisine, this adventure promises a feast for your taste buds!',
-        timeLimitation: 'PERPETUAL',
+      timeLimitation: 'PERPETUAL',
       indexable: true,
       endTime: new Date('2030-12-31'),
       latitude: 42.4534,
@@ -113,7 +116,7 @@ async function main() {
         'Ithaca is Gorges! Explore the stunning natural beauty surrounding Cornell, from waterfalls to hiking trails.',
       longDescription:
         'Experience the breathtaking natural beauty of Ithaca with the Gorges Nature Trail tour. Known for its stunning waterfalls, lush forests, and scenic hiking trails, Ithaca offers a perfect escape into nature. Begin your adventure at one of the many gorges near Cornell University, where you can take in the sights and sounds of cascading water and vibrant wildlife. As you hike through the trails, enjoy panoramic views of the surrounding landscape and discover hidden gems along the way. Whether you are an avid hiker or simply looking to unwind in nature, this tour is sure to leave you refreshed and inspired.',
-        timeLimitation: 'PERPETUAL',
+      timeLimitation: 'PERPETUAL',
       indexable: true,
       endTime: new Date('2030-12-31'),
       latitude: 42.4534,
@@ -146,6 +149,7 @@ async function main() {
         administrator: false,
         enrollmentType: 'UNDERGRADUATE',
         score: 285,
+        coins: 100,
         hasCompletedOnboarding: false,
         group: {
           create: {
@@ -172,6 +176,7 @@ async function main() {
         administrator: false,
         enrollmentType: 'UNDERGRADUATE',
         score: 420,
+        coins: 150,
         hasCompletedOnboarding: false,
         group: {
           create: {
@@ -198,6 +203,7 @@ async function main() {
         administrator: false,
         enrollmentType: 'UNDERGRADUATE',
         score: 155,
+        coins: 50,
         hasCompletedOnboarding: false,
         group: {
           create: {
@@ -224,6 +230,7 @@ async function main() {
         administrator: false,
         enrollmentType: 'UNDERGRADUATE',
         score: 340,
+        coins: 125,
         hasCompletedOnboarding: false,
         group: {
           create: {
@@ -250,6 +257,7 @@ async function main() {
         administrator: false,
         enrollmentType: 'UNDERGRADUATE',
         score: 90,
+        coins: 25,
         hasCompletedOnboarding: false,
         group: {
           create: {
@@ -276,6 +284,7 @@ async function main() {
         administrator: false,
         enrollmentType: 'UNDERGRADUATE',
         score: 215,
+        coins: 75,
         hasCompletedOnboarding: false,
         group: {
           create: {
@@ -302,6 +311,7 @@ async function main() {
         administrator: false,
         enrollmentType: 'UNDERGRADUATE',
         score: 175,
+        coins: 60,
         hasCompletedOnboarding: false,
         group: {
           create: {
@@ -329,6 +339,7 @@ async function main() {
         administrator: false,
         enrollmentType: 'GRADUATE',
         score: 260,
+        coins: 90,
         hasCompletedOnboarding: false,
         group: {
           create: {
@@ -356,6 +367,7 @@ async function main() {
         administrator: false,
         enrollmentType: 'ALUMNI',
         score: 50,
+        coins: 15,
         hasCompletedOnboarding: false,
         group: {
           create: {
@@ -383,6 +395,7 @@ async function main() {
         administrator: true,
         enrollmentType: 'UNDERGRADUATE',
         score: 385,
+        coins: 200,
         hasCompletedOnboarding: false,
         group: {
           create: {
@@ -705,6 +718,316 @@ async function main() {
     });
   }
 
+  // Create BearItems for build-a-bear (COLOR slot)
+  console.log('🐻 Creating bear color items...');
+  await prisma.bearItem.createMany({
+    data: [
+      {
+        name: 'Red Bear',
+        slot: 'COLOR',
+        cost: 0,
+        assetKey: 'buildabear/color/redbear',
+        mimeType: 'image/png',
+        isDefault: true,
+      },
+      {
+        name: 'Black Bear',
+        slot: 'COLOR',
+        cost: 25,
+        assetKey: 'buildabear/color/blackbear',
+        mimeType: 'image/png',
+      },
+      {
+        name: 'Brown Bear',
+        slot: 'COLOR',
+        cost: 25,
+        assetKey: 'buildabear/color/brownbear',
+        mimeType: 'image/png',
+      },
+      {
+        name: 'Grizzly Bear',
+        slot: 'COLOR',
+        cost: 25,
+        assetKey: 'buildabear/color/grizzlybear',
+        mimeType: 'image/png',
+      },
+      {
+        name: 'Inverse Panda',
+        slot: 'COLOR',
+        cost: 25,
+        assetKey: 'buildabear/color/inversepanda',
+        mimeType: 'image/png',
+      },
+      {
+        name: 'Panda Bear',
+        slot: 'COLOR',
+        cost: 25,
+        assetKey: 'buildabear/color/pandabear',
+        mimeType: 'image/png',
+      },
+      {
+        name: 'Polar Bear',
+        slot: 'COLOR',
+        cost: 25,
+        assetKey: 'buildabear/color/polarbear',
+        mimeType: 'image/png',
+      },
+      {
+        name: 'Shiba Bear',
+        slot: 'COLOR',
+        cost: 25,
+        assetKey: 'buildabear/color/shibabear',
+        mimeType: 'image/png',
+      },
+      {
+        name: 'Sun Bear',
+        slot: 'COLOR',
+        cost: 25,
+        assetKey: 'buildabear/color/sunbear',
+        mimeType: 'image/png',
+      },
+    ],
+  });
+
+  // Create BearItems for build-a-bear (EYES slot)
+  console.log('👀 Creating bear eyes items...');
+  await prisma.bearItem.createMany({
+    data: [
+      {
+        name: 'Default Eyes',
+        slot: 'EYES',
+        cost: 0,
+        assetKey: 'buildabear/eyes/eyes',
+        mimeType: 'image/png',
+        isDefault: true,
+      },
+      {
+        name: 'Content',
+        slot: 'EYES',
+        cost: 25,
+        assetKey: 'buildabear/eyes/content',
+        mimeType: 'image/png',
+      },
+      {
+        name: 'Blush',
+        slot: 'EYES',
+        cost: 25,
+        assetKey: 'buildabear/eyes/blush',
+        mimeType: 'image/png',
+      },
+      {
+        name: 'Cry',
+        slot: 'EYES',
+        cost: 25,
+        assetKey: 'buildabear/eyes/cry',
+        mimeType: 'image/png',
+      },
+      {
+        name: 'Embarrassed',
+        slot: 'EYES',
+        cost: 25,
+        assetKey: 'buildabear/eyes/embarrassed',
+        mimeType: 'image/png',
+      },
+      {
+        name: 'Evil',
+        slot: 'EYES',
+        cost: 25,
+        assetKey: 'buildabear/eyes/evil',
+        mimeType: 'image/png',
+      },
+      {
+        name: 'Eyebrows',
+        slot: 'EYES',
+        cost: 25,
+        assetKey: 'buildabear/eyes/eyebrows',
+        mimeType: 'image/png',
+      },
+      {
+        name: 'XX Eyes',
+        slot: 'EYES',
+        cost: 25,
+        assetKey: 'buildabear/eyes/xx',
+        mimeType: 'image/png',
+      },
+      {
+        name: 'Angled Eyes',
+        slot: 'EYES',
+        cost: 25,
+        assetKey: 'buildabear/eyes/><',
+        mimeType: 'image/png',
+      },
+    ],
+  });
+
+  // Create BearItems for build-a-bear (MOUTH slot)
+  console.log('👄 Creating bear mouth items...');
+  await prisma.bearItem.createMany({
+    data: [
+      {
+        name: 'Default Mouth',
+        slot: 'MOUTH',
+        cost: 0,
+        assetKey: 'buildabear/mouth/mouth',
+        mimeType: 'image/png',
+        isDefault: true,
+      },
+      {
+        name: 'Cheeks',
+        slot: 'MOUTH',
+        cost: 25,
+        assetKey: 'buildabear/mouth/cheeks',
+        mimeType: 'image/png',
+      },
+      {
+        name: 'Frown',
+        slot: 'MOUTH',
+        cost: 25,
+        assetKey: 'buildabear/mouth/frown',
+        mimeType: 'image/png',
+      },
+      {
+        name: 'Grin',
+        slot: 'MOUTH',
+        cost: 25,
+        assetKey: 'buildabear/mouth/grin',
+        mimeType: 'image/png',
+      },
+      {
+        name: 'Nervous',
+        slot: 'MOUTH',
+        cost: 25,
+        assetKey: 'buildabear/mouth/nervous',
+        mimeType: 'image/png',
+      },
+      {
+        name: 'Serious',
+        slot: 'MOUTH',
+        cost: 25,
+        assetKey: 'buildabear/mouth/serious',
+        mimeType: 'image/png',
+      },
+      {
+        name: 'Smirk',
+        slot: 'MOUTH',
+        cost: 25,
+        assetKey: 'buildabear/mouth/smirk',
+        mimeType: 'image/png',
+      },
+      {
+        name: 'Tongue',
+        slot: 'MOUTH',
+        cost: 25,
+        assetKey: 'buildabear/mouth/tongue',
+        mimeType: 'image/png',
+      },
+      {
+        name: 'UwU',
+        slot: 'MOUTH',
+        cost: 25,
+        assetKey: 'buildabear/mouth/uwu',
+        mimeType: 'image/png',
+      },
+    ],
+  });
+
+  // Create BearItems for build-a-bear (ACCESSORY slot)
+  console.log('🎀 Creating bear accessory items...');
+  await prisma.bearItem.createMany({
+    data: [
+      {
+        name: 'Bow',
+        slot: 'ACCESSORY',
+        cost: 25,
+        assetKey: 'buildabear/accessories/bow',
+        mimeType: 'image/png',
+      },
+      {
+        name: 'Bowtie',
+        slot: 'ACCESSORY',
+        cost: 25,
+        assetKey: 'buildabear/accessories/bowtie',
+        mimeType: 'image/png',
+      },
+      {
+        name: 'Flower',
+        slot: 'ACCESSORY',
+        cost: 25,
+        assetKey: 'buildabear/accessories/flower',
+        mimeType: 'image/png',
+      },
+      {
+        name: 'Glasses',
+        slot: 'ACCESSORY',
+        cost: 25,
+        assetKey: 'buildabear/accessories/glasses',
+        mimeType: 'image/png',
+      },
+      {
+        name: 'Goatee',
+        slot: 'ACCESSORY',
+        cost: 25,
+        assetKey: 'buildabear/accessories/goatee',
+        mimeType: 'image/png',
+      },
+      {
+        name: 'Necktie',
+        slot: 'ACCESSORY',
+        cost: 25,
+        assetKey: 'buildabear/accessories/necktie',
+        mimeType: 'image/png',
+      },
+      {
+        name: 'Purse',
+        slot: 'ACCESSORY',
+        cost: 25,
+        assetKey: 'buildabear/accessories/purse',
+        mimeType: 'image/png',
+      },
+      {
+        name: 'Scarf',
+        slot: 'ACCESSORY',
+        cost: 25,
+        assetKey: 'buildabear/accessories/scarf',
+        mimeType: 'image/png',
+      },
+      {
+        name: 'Top Hat',
+        slot: 'ACCESSORY',
+        cost: 25,
+        assetKey: 'buildabear/accessories/tophat',
+        mimeType: 'image/png',
+      },
+    ],
+  });
+
+  // Seed default bear items into each user's inventory and equipped loadout
+  console.log('🐻 Seeding default bear inventory & equipped for users...');
+  const defaultBearItems = await prisma.bearItem.findMany({
+    where: { isDefault: true },
+  });
+
+  for (const user of users) {
+    for (const item of defaultBearItems) {
+      // Add to inventory
+      await prisma.userBearInventory.create({
+        data: {
+          userId: user.id,
+          bearItemId: item.id,
+        },
+      });
+
+      // Equip the default item for its slot
+      await prisma.userBearEquipped.create({
+        data: {
+          userId: user.id,
+          bearItemId: item.id,
+          slot: item.slot,
+        },
+      });
+    }
+  }
+
   console.log('✅ Database seeded successfully!');
   console.log(`   📊 Created ${users.length} users`);
   console.log(`   🏛️  Created 3 organizations`);
@@ -712,6 +1035,11 @@ async function main() {
   console.log(`   🎮 Created 12 challenges`);
   console.log(`   🏆 Created 4 achievements`);
   console.log(`   👫 Created ${users.length} groups`);
+  console.log(`   🐻 Created 9 bear color items`);
+  console.log(`   👀 Created 9 bear eyes items`);
+  console.log(`   👄 Created 9 bear mouth items`);
+  console.log(`   🎀 Created 9 bear accessory items`);
+  console.log(`   🧸 Seeded ${defaultBearItems.length} default items x ${users.length} users = ${defaultBearItems.length * users.length} inventory + equipped entries`);
 }
 
 main()
