@@ -474,13 +474,25 @@ class _BuildABearPageState extends State<BuildABearPage> {
     return null;
   }
 
-  /// Shows a confirmation dialog for purchasing the given [item].
-  void _showPurchaseDialog(BearItemDto item) {
+  /// Shared confirmation dialog used by purchase, equip, and unequip flows.
+  ///
+  /// [preview] is the widget shown at the top of the dialog (e.g. item image
+  /// or an icon). [message] is the prompt text. [actionLabel] and
+  /// [actionColor] style the confirm button. [onConfirm] is called when the
+  /// user taps confirm and receives the dialog's [BuildContext] so it can
+  /// close the dialog after the async operation completes.
+  void _showConfirmationDialog({
+    required Widget preview,
+    required String message,
+    required String actionLabel,
+    required Color actionColor,
+    required Future<void> Function(BuildContext dialogContext) onConfirm,
+  }) {
     showDialog(
       context: context,
       barrierDismissible: true,
       builder: (dialogContext) {
-        bool isPurchasing = false;
+        bool isLoading = false;
         return StatefulBuilder(
           builder: (_, setDialogState) {
             return Dialog(
@@ -494,7 +506,6 @@ class _BuildABearPageState extends State<BuildABearPage> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Item preview
                     Container(
                       width: 120,
                       height: 120,
@@ -507,14 +518,11 @@ class _BuildABearPageState extends State<BuildABearPage> {
                         ),
                       ),
                       padding: const EdgeInsets.all(16),
-                      child: Image.asset(
-                        'assets/${item.assetKey}.png',
-                        fit: BoxFit.contain,
-                      ),
+                      child: preview,
                     ),
                     const SizedBox(height: 20),
                     Text(
-                      'Would you like to purchase this item for ${item.cost} coins?',
+                      message,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                         fontFamily: 'Poppins',
@@ -526,12 +534,11 @@ class _BuildABearPageState extends State<BuildABearPage> {
                     const SizedBox(height: 24),
                     Row(
                       children: [
-                        // Cancel button
                         Expanded(
                           child: SizedBox(
                             height: 46,
                             child: OutlinedButton(
-                              onPressed: isPurchasing
+                              onPressed: isLoading
                                   ? null
                                   : () => Navigator.pop(dialogContext),
                               style: OutlinedButton.styleFrom(
@@ -556,30 +563,28 @@ class _BuildABearPageState extends State<BuildABearPage> {
                           ),
                         ),
                         const SizedBox(width: 12),
-                        // Purchase button
                         Expanded(
                           child: SizedBox(
                             height: 46,
                             child: ElevatedButton(
-                              onPressed: isPurchasing
+                              onPressed: isLoading
                                   ? null
                                   : () async {
                                       setDialogState(
-                                          () => isPurchasing = true);
-                                      await _handlePurchase(
-                                          item, dialogContext);
+                                          () => isLoading = true);
+                                      await onConfirm(dialogContext);
                                     },
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFFC85C5C),
+                                backgroundColor: actionColor,
                                 foregroundColor: Colors.white,
                                 disabledBackgroundColor:
-                                    const Color(0xFFC85C5C).withOpacity(0.6),
+                                    actionColor.withOpacity(0.6),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(23),
                                 ),
                                 elevation: 0,
                               ),
-                              child: isPurchasing
+                              child: isLoading
                                   ? const SizedBox(
                                       width: 20,
                                       height: 20,
@@ -588,9 +593,9 @@ class _BuildABearPageState extends State<BuildABearPage> {
                                         color: Colors.white,
                                       ),
                                     )
-                                  : const Text(
-                                      'Purchase',
-                                      style: TextStyle(
+                                  : Text(
+                                      actionLabel,
+                                      style: const TextStyle(
                                         fontFamily: 'Poppins',
                                         fontSize: 14,
                                         fontWeight: FontWeight.w600,
@@ -608,6 +613,21 @@ class _BuildABearPageState extends State<BuildABearPage> {
           },
         );
       },
+    );
+  }
+
+  /// Shows a confirmation dialog for purchasing the given [item].
+  void _showPurchaseDialog(BearItemDto item) {
+    _showConfirmationDialog(
+      preview: Image.asset(
+        'assets/${item.assetKey}.png',
+        fit: BoxFit.contain,
+      ),
+      message:
+          'Would you like to purchase this item for ${item.cost} coins?',
+      actionLabel: 'Purchase',
+      actionColor: const Color(0xFFC85C5C),
+      onConfirm: (dialogContext) => _handlePurchase(item, dialogContext),
     );
   }
 
@@ -670,138 +690,15 @@ class _BuildABearPageState extends State<BuildABearPage> {
 
   /// Shows a confirmation dialog for equipping an already-owned [item].
   void _showEquipDialog(BearItemDto item) {
-    showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (dialogContext) {
-        bool isEquipping = false;
-        return StatefulBuilder(
-          builder: (_, setDialogState) {
-            return Dialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-              backgroundColor: const Color(0xFFFFF5EA),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 28, vertical: 32),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Item preview
-                    Container(
-                      width: 120,
-                      height: 120,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: const Color(0xFF8B4513),
-                          width: 2,
-                        ),
-                      ),
-                      padding: const EdgeInsets.all(16),
-                      child: Image.asset(
-                        'assets/${item.assetKey}.png',
-                        fit: BoxFit.contain,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    const Text(
-                      'Would you like to equip this item?',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    Row(
-                      children: [
-                        // Cancel button
-                        Expanded(
-                          child: SizedBox(
-                            height: 46,
-                            child: OutlinedButton(
-                              onPressed: isEquipping
-                                  ? null
-                                  : () => Navigator.pop(dialogContext),
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: const Color(0xFF8B4513),
-                                side: const BorderSide(
-                                  color: Color(0xFF8B4513),
-                                  width: 1.5,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(23),
-                                ),
-                              ),
-                              child: const Text(
-                                'Cancel',
-                                style: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        // Equip button
-                        Expanded(
-                          child: SizedBox(
-                            height: 46,
-                            child: ElevatedButton(
-                              onPressed: isEquipping
-                                  ? null
-                                  : () async {
-                                      setDialogState(
-                                          () => isEquipping = true);
-                                      await _handleEquip(
-                                          item, dialogContext);
-                                    },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF8B4513),
-                                foregroundColor: Colors.white,
-                                disabledBackgroundColor:
-                                    const Color(0xFF8B4513).withOpacity(0.6),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(23),
-                                ),
-                                elevation: 0,
-                              ),
-                              child: isEquipping
-                                  ? const SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: Colors.white,
-                                      ),
-                                    )
-                                  : const Text(
-                                      'Equip',
-                                      style: TextStyle(
-                                        fontFamily: 'Poppins',
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-      },
+    _showConfirmationDialog(
+      preview: Image.asset(
+        'assets/${item.assetKey}.png',
+        fit: BoxFit.contain,
+      ),
+      message: 'Would you like to equip this item?',
+      actionLabel: 'Equip',
+      actionColor: const Color(0xFF8B4513),
+      onConfirm: (dialogContext) => _handleEquip(item, dialogContext),
     );
   }
 
@@ -832,138 +729,16 @@ class _BuildABearPageState extends State<BuildABearPage> {
 
   /// Shows a confirmation dialog for unequipping the current accessory.
   void _showUnequipDialog() {
-    showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (dialogContext) {
-        bool isUnequipping = false;
-        return StatefulBuilder(
-          builder: (_, setDialogState) {
-            return Dialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-              backgroundColor: const Color(0xFFFFF5EA),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 28, vertical: 32),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Icon to represent removing
-                    Container(
-                      width: 120,
-                      height: 120,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: const Color(0xFF8B4513),
-                          width: 2,
-                        ),
-                      ),
-                      padding: const EdgeInsets.all(16),
-                      child: const Icon(
-                        Icons.remove_circle_outline,
-                        size: 64,
-                        color: Color(0xFF8B4513),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    const Text(
-                      'Would you like to remove the current accessory?',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    Row(
-                      children: [
-                        // Cancel button
-                        Expanded(
-                          child: SizedBox(
-                            height: 46,
-                            child: OutlinedButton(
-                              onPressed: isUnequipping
-                                  ? null
-                                  : () => Navigator.pop(dialogContext),
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: const Color(0xFF8B4513),
-                                side: const BorderSide(
-                                  color: Color(0xFF8B4513),
-                                  width: 1.5,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(23),
-                                ),
-                              ),
-                              child: const Text(
-                                'Cancel',
-                                style: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        // Unequip button
-                        Expanded(
-                          child: SizedBox(
-                            height: 46,
-                            child: ElevatedButton(
-                              onPressed: isUnequipping
-                                  ? null
-                                  : () async {
-                                      setDialogState(
-                                          () => isUnequipping = true);
-                                      await _handleUnequip(dialogContext);
-                                    },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF8B4513),
-                                foregroundColor: Colors.white,
-                                disabledBackgroundColor:
-                                    const Color(0xFF8B4513).withOpacity(0.6),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(23),
-                                ),
-                                elevation: 0,
-                              ),
-                              child: isUnequipping
-                                  ? const SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: Colors.white,
-                                      ),
-                                    )
-                                  : const Text(
-                                      'Unequip',
-                                      style: TextStyle(
-                                        fontFamily: 'Poppins',
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-      },
+    _showConfirmationDialog(
+      preview: const Icon(
+        Icons.remove_circle_outline,
+        size: 64,
+        color: Color(0xFF8B4513),
+      ),
+      message: 'Would you like to remove the current accessory?',
+      actionLabel: 'Unequip',
+      actionColor: const Color(0xFF8B4513),
+      onConfirm: (dialogContext) => _handleUnequip(dialogContext),
     );
   }
 
@@ -1176,3 +951,4 @@ class _BuildABearPageState extends State<BuildABearPage> {
     );
   }
 }
+
