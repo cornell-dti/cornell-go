@@ -71,15 +71,8 @@ class _ProfilePageState extends State<ProfilePage> {
       body: Container(
         child: Consumer5<UserModel, EventModel, TrackerModel, ChallengeModel,
             AchievementModel>(
-          builder: (
-            context,
-            userModel,
-            eventModel,
-            trackerModel,
-            challengeModel,
-            achModel,
-            child,
-          ) {
+          builder: (context, userModel, eventModel, trackerModel,
+              challengeModel, achModel, child) {
             if (userModel.userData == null) {
               return Center(child: CircularProgressIndicator());
             }
@@ -408,13 +401,15 @@ class _ProfilePageState extends State<ProfilePage> {
                           var totalOriginalPoints = 0;
                           var locationImage;
                           // Get tracker for this event to access prevChallenges
-                          var eventTracker =
-                              trackerModel.trackerByEventId(event.id);
+                          var eventTracker = trackerModel.trackerByEventId(
+                            event.id,
+                          );
                           if (eventTracker != null) {
                             for (var prevChallenge
                                 in eventTracker.prevChallenges) {
-                              var challenge = challengeModel
-                                  .getChallengeById(prevChallenge.challengeId);
+                              var challenge = challengeModel.getChallengeById(
+                                prevChallenge.challengeId,
+                              );
                               if (locationImage == null) {
                                 locationImage = challenge?.imageUrl;
                                 if (locationImage == null ||
@@ -443,11 +438,14 @@ class _ProfilePageState extends State<ProfilePage> {
                                   }
                                   int extensionAdjustedPoints =
                                       calculateExtensionAdjustedPoints(
-                                          basePoints, extensionsUsed);
+                                    basePoints,
+                                    extensionsUsed,
+                                  );
                                   int finalAdjustedPoints =
                                       calculateHintAdjustedPoints(
-                                          extensionAdjustedPoints,
-                                          prevChallenge.hintsUsed);
+                                    extensionAdjustedPoints,
+                                    prevChallenge.hintsUsed,
+                                  );
                                   totalAdjustedPoints += finalAdjustedPoints;
                                 }
                               }

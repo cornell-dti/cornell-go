@@ -94,6 +94,7 @@ function EventCard(props: {
           Category: <b>{categoryType}</b> <br />
           Publicly Visible: <b>{affirmOfBool(!!props.event.indexable)}</b>{' '}
           <br />
+          Featured: <b>{affirmOfBool(!!props.event.featured)}</b> <br />
         </ListCardBody>
         <ListCardButtons>
           <HButton onClick={props.onDelete}>DELETE</HButton>
@@ -131,6 +132,7 @@ function makeForm() {
       value: 0,
     },
     { name: 'Publicly Visible', options: ['No', 'Yes'], value: 0 },
+    { name: 'Featured', options: ['No', 'Yes'], value: 0 },
     { name: 'Available Until', date: new Date('2050') },
   ] as EntryForm[];
 }
@@ -152,7 +154,8 @@ function fromForm(form: EntryForm[], id: string): EventDto {
     ] as EventCategoryDto,
 
     indexable: (form[6] as OptionEntryForm).value === 1,
-    endTime: (form[7] as DateEntryForm).date.toUTCString(),
+    featured: (form[7] as OptionEntryForm).value === 1,
+    endTime: (form[8] as DateEntryForm).date.toUTCString(),
     challenges: [],
     difficulty:
       (form[5] as OptionEntryForm).value === 0
@@ -200,6 +203,11 @@ function toForm(event: EventDto) {
       name: 'Publicly Visible',
       options: ['No', 'Yes'],
       value: event.indexable ? 1 : 0,
+    },
+    {
+      name: 'Featured',
+      options: ['No', 'Yes'],
+      value: event.featured ? 1 : 0,
     },
     { name: 'Available Until', date: event.endTime && new Date(event.endTime) },
   ] as EntryForm[];

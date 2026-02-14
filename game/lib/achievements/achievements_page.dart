@@ -80,9 +80,7 @@ class _AchievementsPageState extends State<AchievementsPage> {
     );
 
     return Container(
-      decoration: BoxDecoration(
-        color: Color(0xFFED5656),
-      ),
+      decoration: BoxDecoration(color: Color(0xFFED5656)),
       child: SafeArea(
         bottom: false,
         child: Scaffold(
@@ -133,7 +131,9 @@ class _AchievementsPageState extends State<AchievementsPage> {
                         );
 
                         return ListView.separated(
-                          padding: const EdgeInsets.symmetric(horizontal: 3),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 3,
+                          ),
                           itemCount: achList.length,
                           itemBuilder: (context, index) {
                             // Check if the achievement is completed
