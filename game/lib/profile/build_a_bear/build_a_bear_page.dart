@@ -7,7 +7,10 @@ import 'package:provider/provider.dart';
 import 'dart:async';
 
 /// Build-a-Bear page for avatar customization.
-/// Displays the color tab with a 3x3 grid of bear color options.
+///
+/// Displays a live bear preview on top and a tabbed item grid (Eyes, Mouth,
+/// Color, Accessories) on the bottom. Items are loaded via WebSocket and can
+/// be previewed, purchased, equipped, or unequipped.
 class BuildABearPage extends StatefulWidget {
   const BuildABearPage({Key? key}) : super(key: key);
 
@@ -30,6 +33,7 @@ class _BuildABearPageState extends State<BuildABearPage> {
   /// All items indexed by ID for O(1) lookups.
   Map<String, BearItemDto> _itemById = {};
 
+  /// Whether the initial bear-item fetch is still in progress.
   bool _isLoading = true;
 
   /// Currently equipped item IDs keyed by slot.
@@ -45,8 +49,13 @@ class _BuildABearPageState extends State<BuildABearPage> {
   /// IDs of items the user owns (from inventory).
   Set<String> _ownedItemIds = {};
 
+  /// Subscription to the bear-items catalog stream (all available items).
   StreamSubscription<UpdateBearItemsDataDto>? _bearItemsSub;
+
+  /// Subscription to the user's equipped-loadout stream.
   StreamSubscription<UpdateUserBearLoadoutDataDto>? _loadoutSub;
+
+  /// Subscription to the user's inventory stream (owned items).
   StreamSubscription<UpdateUserInventoryDataDto>? _inventorySub;
 
   @override
@@ -66,6 +75,8 @@ class _BuildABearPageState extends State<BuildABearPage> {
     super.dispose();
   }
 
+  /// Subscribes to bear-item, loadout, and inventory streams, then requests
+  /// the initial data from the server. Called once from [initState].
   void _requestBearItems() {
     final apiClient = context.read<ApiClient>();
     final server = apiClient.serverApi;
@@ -124,6 +135,9 @@ class _BuildABearPageState extends State<BuildABearPage> {
     server.requestUserInventory(RequestUserInventoryDto());
   }
 
+  /// Builds the page layout: a top section with the bear preview over a
+  /// background image, and a bottom section with the tab bar and item grid.
+  /// A floating action button appears when a non-equipped item is selected.
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
@@ -598,7 +612,10 @@ class _BuildABearPageState extends State<BuildABearPage> {
     );
   }
 
-  /// Shows a confirmation dialog for purchasing the given [item].
+  /// Shows a confirmation dialog for purchasing [item].
+  ///
+  /// On confirm, delegates to [_handlePurchase] which sends the purchase
+  /// request, auto-equips on success, and refreshes the coin balance.
   void _showPurchaseDialog(BearItemDto item) {
     _showConfirmationDialog(
       preview: Image.asset(
@@ -613,7 +630,9 @@ class _BuildABearPageState extends State<BuildABearPage> {
     );
   }
 
-  /// Executes the purchase, equips the item on success, and closes the dialog.
+  /// Executes the purchase request for [item], auto-equips on success,
+  /// refreshes the coin balance, and closes the [dialogContext] dialog.
+  /// Shows a snackbar on insufficient funds.
   Future<void> _handlePurchase(
       BearItemDto item, BuildContext dialogContext) async {
     final apiClient = context.read<ApiClient>();
@@ -671,6 +690,9 @@ class _BuildABearPageState extends State<BuildABearPage> {
   }
 
   /// Shows a confirmation dialog for equipping an already-owned [item].
+  ///
+  /// On confirm, delegates to [_handleEquip] which sends the equip request
+  /// and lets the loadout listener update the UI.
   void _showEquipDialog(BearItemDto item) {
     _showConfirmationDialog(
       preview: Image.asset(
@@ -684,7 +706,8 @@ class _BuildABearPageState extends State<BuildABearPage> {
     );
   }
 
-  /// Sends the equip request and closes the dialog.
+  /// Sends the equip request for [item] and closes the [dialogContext] dialog.
+  /// The loadout stream listener handles UI updates.
   Future<void> _handleEquip(
       BearItemDto item, BuildContext dialogContext) async {
     final apiClient = context.read<ApiClient>();
@@ -710,6 +733,9 @@ class _BuildABearPageState extends State<BuildABearPage> {
   }
 
   /// Shows a confirmation dialog for unequipping the current accessory.
+  ///
+  /// On confirm, delegates to [_handleUnequip] which sends an equip request
+  /// with no item ID to clear the accessory slot.
   void _showUnequipDialog() {
     _showConfirmationDialog(
       preview: const Icon(
@@ -724,7 +750,9 @@ class _BuildABearPageState extends State<BuildABearPage> {
     );
   }
 
-  /// Sends the unequip request for accessories and closes the dialog.
+  /// Sends an equip request with no item ID to clear the accessory slot,
+  /// then closes the [dialogContext] dialog. The loadout stream listener
+  /// handles UI updates.
   Future<void> _handleUnequip(BuildContext dialogContext) async {
     final apiClient = context.read<ApiClient>();
     final server = apiClient.serverApi;
@@ -804,6 +832,10 @@ class _BuildABearPageState extends State<BuildABearPage> {
 
   static const Color _navSelectedColor = Color(0xFF8C473C);
 
+  /// Builds a single tab button in the category nav bar.
+  ///
+  /// [label] is the display text and [tab] is the enum value it activates.
+  /// Tapping resets the selection and displayed preview back to equipped items.
   Widget _buildNavTab(String label, _BuildABearTab tab) {
     final isSelected = _selectedTab == tab;
     return GestureDetector(
@@ -838,6 +870,11 @@ class _BuildABearPageState extends State<BuildABearPage> {
     );
   }
 
+  /// Builds a single grid cell displaying [item]'s thumbnail and status label.
+  ///
+  /// [cellSize] controls the thumbnail dimensions. The cell is highlighted
+  /// when it is the actively selected item or, if nothing is selected, when
+  /// it is the currently equipped item for its slot.
   Widget _buildItemCell({
     required BearItemDto item,
     required double cellSize,
