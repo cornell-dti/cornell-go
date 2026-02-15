@@ -26,6 +26,10 @@ class _BuildABearPageState extends State<BuildABearPage> {
   List<BearItemDto> _eyeItems = [];
   List<BearItemDto> _mouthItems = [];
   List<BearItemDto> _accessoryItems = [];
+
+  /// All items indexed by ID for O(1) lookups.
+  Map<String, BearItemDto> _itemById = {};
+
   bool _isLoading = true;
 
   /// Currently equipped item IDs keyed by slot.
@@ -74,22 +78,18 @@ class _BuildABearPageState extends State<BuildABearPage> {
     _bearItemsSub ??=
         apiClient.clientApi.updateBearItemsDataStream.listen((update) {
       setState(() {
-        _colorItems = update.items
-            .where((i) => i.slot == BearSlotDto.COLOR)
-            .toList(growable: true)
-          ..sort((a, b) => a.cost.compareTo(b.cost));
-        _eyeItems = update.items
-            .where((i) => i.slot == BearSlotDto.EYES)
-            .toList(growable: true)
-          ..sort((a, b) => a.cost.compareTo(b.cost));
-        _mouthItems = update.items
-            .where((i) => i.slot == BearSlotDto.MOUTH)
-            .toList(growable: true)
-          ..sort((a, b) => a.cost.compareTo(b.cost));
-        _accessoryItems = update.items
-            .where((i) => i.slot == BearSlotDto.ACCESSORY)
-            .toList(growable: true)
-          ..sort((a, b) => a.cost.compareTo(b.cost));
+        final grouped = <BearSlotDto, List<BearItemDto>>{};
+        for (final item in update.items) {
+          (grouped[item.slot] ??= []).add(item);
+        }
+        for (final list in grouped.values) {
+          list.sort((a, b) => a.cost.compareTo(b.cost));
+        }
+        _colorItems = grouped[BearSlotDto.COLOR] ?? [];
+        _eyeItems = grouped[BearSlotDto.EYES] ?? [];
+        _mouthItems = grouped[BearSlotDto.MOUTH] ?? [];
+        _accessoryItems = grouped[BearSlotDto.ACCESSORY] ?? [];
+        _itemById = {for (final item in update.items) item.id: item};
         _isLoading = false;
       });
     });
@@ -445,33 +445,15 @@ class _BuildABearPageState extends State<BuildABearPage> {
   /// Check if the currently selected item is the equipped one for its slot.
   bool _isSelectedItemEquipped() {
     if (_selectedItemId == null) return true;
-    final allItems = [
-      ..._colorItems,
-      ..._eyeItems,
-      ..._mouthItems,
-      ..._accessoryItems,
-    ];
-    for (final item in allItems) {
-      if (item.id == _selectedItemId) {
-        return _equippedBySlot[item.slot] == item.id;
-      }
-    }
-    return true;
+    final item = _itemById[_selectedItemId];
+    if (item == null) return true;
+    return _equippedBySlot[item.slot] == item.id;
   }
 
   /// Returns the currently selected [BearItemDto], or null.
   BearItemDto? _getSelectedItem() {
     if (_selectedItemId == null) return null;
-    final allItems = [
-      ..._colorItems,
-      ..._eyeItems,
-      ..._mouthItems,
-      ..._accessoryItems,
-    ];
-    for (final item in allItems) {
-      if (item.id == _selectedItemId) return item;
-    }
-    return null;
+    return _itemById[_selectedItemId];
   }
 
   /// Shared confirmation dialog used by purchase, equip, and unequip flows.
