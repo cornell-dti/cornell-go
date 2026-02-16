@@ -29,6 +29,7 @@ dependencies:
   velocity_x:
   flutter_blurhash:
   cached_network_image: ^3.4.1
+  shimmer: ^3.0.0
   google_fonts: 6.1.0
   url_launcher:
   confetti: ^0.7.0

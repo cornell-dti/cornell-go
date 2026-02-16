@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:shimmer/shimmer.dart';
 
 /**
  * Widget that represents each completed challenge 
@@ -91,7 +92,14 @@ class _CompletedChallengeFullState extends State<CompletedChallengeFull> {
                       child: CachedNetworkImage(
                         imageUrl: picture,
                         placeholder: (context, url) =>
-                            CircularProgressIndicator(),
+                            Shimmer.fromColors(
+                              baseColor: Colors.grey[300]!,
+                              highlightColor: Colors.grey[100]!,
+                              child: Container(
+                                width: 390,
+                                height: 20,
+                              ),
+                            ),
                         errorWidget: (context, url, error) => Container(
                           width: 390,
                           height: 20,

@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:game/preview/preview.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:shimmer/shimmer.dart';
 
 /**
  * `ChallengeCell` Widget - Individual challenge display component.
@@ -149,10 +150,22 @@ class _ChallengeCellState extends State<ChallengeCell> {
                 child: ClipRRect(
                   borderRadius: BorderRadius.all(Radius.circular(4.6)),
                   child: CachedNetworkImage(
-                    imageUrl: 'https://invalid-domain-xyz-12345.com/image.png', 
+                    // imageUrl: 'https://invalid-domain-xyz-12345.com/image.png', 
+                    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/3/3f/Fronalpstock_big.jpg',
                     //testing error with invalid url
-                    // imageUrl: imgUrl,wh
-                    placeholder: (context, url) => CircularProgressIndicator(),
+                    // imageUrl: imgUrl,
+                    placeholder: (context, url) => Shimmer.fromColors(
+                      baseColor: Colors.grey[300]!,
+                      highlightColor: Colors.grey[100]!,
+                      child: Container(
+                        width: deviceHeight * 0.1,
+                        height: deviceHeight * 0.1,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(4.6),
+                        ),
+                      ),
+                    ),
                     errorWidget: (context, url, error) => Container(
                       width: deviceHeight * 0.1,
                       height: deviceHeight * 0.1,

@@ -14,6 +14,7 @@ import 'package:game/gameplay/challenge_failed.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'dart:ui' as ui;
 import 'package:flutter_compass/flutter_compass.dart';
+import 'package:shimmer/shimmer.dart';
 
 // for backend connection
 import 'package:provider/provider.dart';
@@ -1573,7 +1574,18 @@ class _GameplayMapState extends State<GameplayMap>
         child: CachedNetworkImage(
           imageUrl: imageUrl,
           fit: BoxFit.cover,
-          placeholder: (context, url) => CircularProgressIndicator(),
+          placeholder: (context, url) => Shimmer.fromColors(
+            baseColor: Colors.grey[300]!,
+            highlightColor: Colors.grey[100]!,
+            child: Container(
+              width: pictureWidth,
+              height: pictureHeight,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(4.6),
+              ),
+            ),
+          ),
           errorWidget: (context, url, error) => Container(
             width: pictureWidth,
             height: pictureHeight,

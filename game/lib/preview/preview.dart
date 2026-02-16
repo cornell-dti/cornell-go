@@ -10,6 +10,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:game/api/geopoint.dart';
 import 'dart:async';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:shimmer/shimmer.dart';
 
 import 'dart:math';
 
@@ -277,7 +278,18 @@ class _PreviewState extends State<Preview> {
                 //Image
                 CachedNetworkImage(
                   imageUrl: imgUrl,
-                  placeholder: (context, url) => CircularProgressIndicator(),
+                  placeholder: (context, url) => Shimmer.fromColors(
+                    baseColor: Colors.grey[300]!,
+                    highlightColor: Colors.grey[100]!,
+                    child: Container(
+                      height: MediaQuery.of(context).size.height * 0.25,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(4.6),
+                      ),
+                    ),
+                  ),
                   errorWidget: (context, url, error) => Container(
                     height: MediaQuery.of(context).size.height * 0.25,
                     width: double.infinity,

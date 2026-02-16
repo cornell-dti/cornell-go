@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
 
 final defaultStyle = TextStyle(
   fontWeight: FontWeight.normal,
@@ -55,7 +56,14 @@ Widget leaderBoardUserCell(
               child: ClipOval(
                 child: CachedNetworkImage(
                   imageUrl: 'https://www.w3schools.com/howto/img_avatar.png',
-                  placeholder: (context, url) => CircularProgressIndicator(),
+                  placeholder: (context, url) => Shimmer.fromColors(
+                    baseColor: Colors.grey[300]!,
+                    highlightColor: Colors.grey[100]!,
+                    child: Container(
+                      width: 90,
+                      height: 90,
+                    ),
+                  ),
                   errorWidget: (context, url, error) => Container(
                     width: 90,
                     height: 90,
