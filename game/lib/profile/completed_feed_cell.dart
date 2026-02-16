@@ -93,8 +93,8 @@ class _CompletedChallengeFullState extends State<CompletedChallengeFull> {
                         placeholder: (context, url) => CircularProgressIndicator(),
                         errorWidget: (context, url, error) => Icon(Icons.error),
                         fit: BoxFit.cover,
-                        // width: 390,
-                        // height: 20,
+                        width: 390,
+                        height: 20,
                       ),
                     );
                   },

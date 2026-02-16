@@ -279,9 +279,9 @@ class _PreviewState extends State<Preview> {
                   imageUrl: imgUrl,
                   placeholder: (context, url) => CircularProgressIndicator(),
                   errorWidget: (context, url, error) => Icon(Icons.error),
-                  // height: MediaQuery.of(context).size.height * 0.25,
-                  // width: double.infinity,
-                  // fit: BoxFit.cover,
+                  height: MediaQuery.of(context).size.height * 0.25,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
                 ),
                 SizedBox(height: 20),
 

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 final defaultStyle = TextStyle(
@@ -57,8 +58,8 @@ Widget leaderBoardUserCell(
                   placeholder: (context, url) => CircularProgressIndicator(),
                   errorWidget: (context, url, error) => Icon(Icons.error),
                   fit: BoxFit.cover,
-                  // width: 90,
-                  // height: 90,
+                  width: 90,
+                  height: 90,
                 ),
               ),
             ),
