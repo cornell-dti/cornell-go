@@ -56,7 +56,15 @@ Widget leaderBoardUserCell(
                 child: CachedNetworkImage(
                   imageUrl: 'https://www.w3schools.com/howto/img_avatar.png',
                   placeholder: (context, url) => CircularProgressIndicator(),
-                  errorWidget: (context, url, error) => Icon(Icons.error),
+                  errorWidget: (context, url, error) => Container(
+                    width: 90,
+                    height: 90,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade200,
+                      borderRadius: BorderRadius.circular(4.6),
+                    ),
+                    child: Icon(Icons.error),
+                  ),
                   fit: BoxFit.cover,
                   width: 90,
                   height: 90,

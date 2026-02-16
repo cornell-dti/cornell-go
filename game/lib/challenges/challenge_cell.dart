@@ -149,11 +149,21 @@ class _ChallengeCellState extends State<ChallengeCell> {
                 child: ClipRRect(
                   borderRadius: BorderRadius.all(Radius.circular(4.6)),
                   child: CachedNetworkImage(
-                    imageUrl: imgUrl,
+                    imageUrl: 'https://invalid-domain-xyz-12345.com/image.png', 
+                    //testing error with invalid url
+                    // imageUrl: imgUrl,wh
                     placeholder: (context, url) => CircularProgressIndicator(),
-                    errorWidget: (context, url, error) => Icon(Icons.error),
-                    // width: deviceHeight * 0.1,
-                    // height: deviceHeight * 0.1,
+                    errorWidget: (context, url, error) => Container(
+                      width: deviceHeight * 0.1,
+                      height: deviceHeight * 0.1,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade200,
+                        borderRadius: BorderRadius.circular(4.6),
+                      ),
+                      child: Icon(Icons.error),
+                    ),
+                    width: deviceHeight * 0.1,
+                    height: deviceHeight * 0.1,
                     fit: BoxFit.cover,
                   ),
                 ),

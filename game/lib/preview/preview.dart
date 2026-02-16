@@ -278,7 +278,15 @@ class _PreviewState extends State<Preview> {
                 CachedNetworkImage(
                   imageUrl: imgUrl,
                   placeholder: (context, url) => CircularProgressIndicator(),
-                  errorWidget: (context, url, error) => Icon(Icons.error),
+                  errorWidget: (context, url, error) => Container(
+                    height: MediaQuery.of(context).size.height * 0.25,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade200,
+                      borderRadius: BorderRadius.circular(4.6),
+                    ),
+                    child: Icon(Icons.error),
+                  ),
                   height: MediaQuery.of(context).size.height * 0.25,
                   width: double.infinity,
                   fit: BoxFit.cover,

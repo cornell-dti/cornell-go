@@ -1574,9 +1574,17 @@ class _GameplayMapState extends State<GameplayMap>
           imageUrl: imageUrl,
           fit: BoxFit.cover,
           placeholder: (context, url) => CircularProgressIndicator(),
-          errorWidget: (context, url, error) => Icon(Icons.error),
-          // width: pictureWidth,
-          // height: pictureHeight,
+          errorWidget: (context, url, error) => Container(
+            width: pictureWidth,
+            height: pictureHeight,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade200,
+              borderRadius: BorderRadius.circular(4.6),
+            ),
+            child: Icon(Icons.error),
+          ),
+          width: pictureWidth,
+          height: pictureHeight,
         ),
       ),
     );
