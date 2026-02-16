@@ -12,6 +12,12 @@ import 'package:shimmer/shimmer.dart';
  * It displays key information about a challenge and handles tap interactions
  * to show more details.
  * 
+ * Image loading uses CachedNetworkImage, with a shimmer placeholder for 
+ * when the image is loading and an error icon with a gray background if 
+ * the image cannot be loaded. The gray background of the error matches the
+ * original size of the image.
+
+ * 
  * @param props - Contains:
  *   - `location`: Challenge location
  *   - `challengeName`: Name of the challenge
@@ -150,8 +156,9 @@ class _ChallengeCellState extends State<ChallengeCell> {
                 child: ClipRRect(
                   borderRadius: BorderRadius.all(Radius.circular(4.6)),
                   child: CachedNetworkImage(
-                    // imageUrl: 'https://invalid-domain-xyz-12345.com/image.png', 
-                    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/3/3f/Fronalpstock_big.jpg',
+                    // imageUrl: 'https://invalid-domain-xyz-12345.com/image.png',
+                    imageUrl:
+                        'https://upload.wikimedia.org/wikipedia/commons/3/3f/Fronalpstock_big.jpg',
                     //testing error with invalid url
                     // imageUrl: imgUrl,
                     placeholder: (context, url) => Shimmer.fromColors(
