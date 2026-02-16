@@ -157,13 +157,8 @@ class _ChallengeCellState extends State<ChallengeCell> {
                 child: ClipRRect(
                   borderRadius: BorderRadius.all(Radius.circular(4.6)),
                   child: CachedNetworkImage(
-                    // key: ValueKey(imgUrl),
-                    key: ValueKey(
-                        'https://invalid-domain-xyz-12345.com/image.png'),
-                    imageUrl: 'https://invalid-domain-xyz-12345.com/image.png',
-                    // imageUrl:'https://upload.wikimedia.org/wikipedia/commons/3/3f/Fronalpstock_big.jpg',
-                    //testing error with invalid url
-                    // imageUrl: imgUrl,
+                    key: ValueKey(imgUrl),
+                    imageUrl: imgUrl,
                     placeholder: (context, url) => Shimmer.fromColors(
                       baseColor: Colors.grey[300]!,
                       highlightColor: Colors.grey[100]!,

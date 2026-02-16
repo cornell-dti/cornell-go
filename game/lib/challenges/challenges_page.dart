@@ -340,7 +340,7 @@ class _ChallengesPageState extends State<ChallengesPage> {
                           itemCount: eventData.length,
                           itemBuilder: (context, index) {
                             final challengeCell = ChallengeCell(
-                              key: UniqueKey(),
+                              key: ValueKey(eventData[index].eventId),
                               eventData[index].location,
                               eventData[index].name,
                               eventData[index].lat,
