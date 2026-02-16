@@ -1572,6 +1572,7 @@ class _GameplayMapState extends State<GameplayMap>
       child: ClipRRect(
         borderRadius: BorderRadius.circular(10),
         child: CachedNetworkImage(
+          key: ValueKey(imageUrl),
           imageUrl: imageUrl,
           fit: BoxFit.cover,
           placeholder: (context, url) => Shimmer.fromColors(

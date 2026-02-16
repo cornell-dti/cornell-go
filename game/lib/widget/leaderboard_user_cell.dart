@@ -55,6 +55,7 @@ Widget leaderBoardUserCell(
             CircleAvatar(
               child: ClipOval(
                 child: CachedNetworkImage(
+                  key: ValueKey('leaderboard-$position-$name'), // need a key that's unique per item (imageUrl is the same for everyone)
                   imageUrl: 'https://www.w3schools.com/howto/img_avatar.png',
                   placeholder: (context, url) => Shimmer.fromColors(
                     baseColor: Colors.grey[300]!,

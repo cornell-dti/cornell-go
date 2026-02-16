@@ -15,8 +15,9 @@ import 'package:shimmer/shimmer.dart';
  * Image loading uses CachedNetworkImage, with a shimmer placeholder for 
  * when the image is loading and an error icon with a gray background if 
  * the image cannot be loaded. The gray background of the error matches the
- * original size of the image.
-
+ * original size of the image. A ValueKey based on imgUrl (the link to the image) 
+ * is used so when the list rebuilds, the same image widget is preserved and there
+ * is no flickering of the loading state.
  * 
  * @param props - Contains:
  *   - `location`: Challenge location
@@ -156,9 +157,11 @@ class _ChallengeCellState extends State<ChallengeCell> {
                 child: ClipRRect(
                   borderRadius: BorderRadius.all(Radius.circular(4.6)),
                   child: CachedNetworkImage(
-                    // imageUrl: 'https://invalid-domain-xyz-12345.com/image.png',
-                    imageUrl:
-                        'https://upload.wikimedia.org/wikipedia/commons/3/3f/Fronalpstock_big.jpg',
+                    // key: ValueKey(imgUrl),
+                    key: ValueKey(
+                        'https://invalid-domain-xyz-12345.com/image.png'),
+                    imageUrl: 'https://invalid-domain-xyz-12345.com/image.png',
+                    // imageUrl:'https://upload.wikimedia.org/wikipedia/commons/3/3f/Fronalpstock_big.jpg',
                     //testing error with invalid url
                     // imageUrl: imgUrl,
                     placeholder: (context, url) => Shimmer.fromColors(

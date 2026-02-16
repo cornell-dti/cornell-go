@@ -277,6 +277,7 @@ class _PreviewState extends State<Preview> {
               children: [
                 //Image
                 CachedNetworkImage(
+                  key: ValueKey(imgUrl),
                   imageUrl: imgUrl,
                   placeholder: (context, url) => Shimmer.fromColors(
                     baseColor: Colors.grey[300]!,

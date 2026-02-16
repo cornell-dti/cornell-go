@@ -90,6 +90,7 @@ class _CompletedChallengeFullState extends State<CompletedChallengeFull> {
                     return ClipRRect(
                       borderRadius: BorderRadius.circular(8),
                       child: CachedNetworkImage(
+                        key: ValueKey(picture),
                         imageUrl: picture,
                         placeholder: (context, url) =>
                             Shimmer.fromColors(
