@@ -11,6 +11,7 @@ import {
   EventBase,
   EventTracker,
   Challenge,
+  OrganizationSpecialUsage,
 } from '@prisma/client';
 import { SessionLogService } from '../session-log/session-log.service';
 import { EventService } from '../event/event.service';
@@ -224,6 +225,108 @@ describe('ChallengeModule E2E', () => {
         where: { id: chalID },
       });
       expect(chal.imageUrl).toEqual('update test');
+    });
+  });
+
+  describe('Dynamic challenge selection', () => {
+    let journeyEvent: EventBase;
+    let chal1: Challenge;
+    let chal2: Challenge;
+    let groupService: GroupService;
+
+    beforeAll(async () => {
+      const orgService = moduleRef.get<OrganizationService>(OrganizationService);
+      groupService = moduleRef.get<GroupService>(GroupService);
+      const defaultOrg = await orgService.getDefaultOrganization(
+        OrganizationSpecialUsage.DEVICE_LOGIN,
+      );
+      const orgId = defaultOrg.id;
+      journeyEvent = await organizationService.makeDefaultEvent(orgId, 'Dynamic Journey');
+      chal1 = (await prisma.challenge.findMany({
+        where: { linkedEventId: journeyEvent.id },
+        orderBy: { eventIndex: 'asc' },
+      }))[0];
+      chal2 = await organizationService.makeDefaultChallenge(journeyEvent.id);
+      await groupService.setCurrentEvent(user, journeyEvent.id);
+    });
+
+    it('should return available challenges via getAvailableChallenges', async () => {
+      const available =
+        await challengeService.getAvailableChallenges(user);
+      expect(available).toHaveLength(2);
+      expect(available.map(c => c.id)).toContain(chal1.id);
+      expect(available.map(c => c.id)).toContain(chal2.id);
+    });
+
+    it('should set current challenge via setCurrentChallenge', async () => {
+      const trackerBefore = await eventService.getCurrentEventTrackerForUser(user);
+      expect(trackerBefore.curChallengeId).toBeTruthy();
+
+      const result = await challengeService.setCurrentChallenge(
+        user,
+        chal2.id,
+      );
+      expect(result).not.toBeNull();
+      expect(result!.curChallengeId).toEqual(chal2.id);
+      expect(result!.hintsUsed).toEqual(0);
+
+      const trackerAfter = await eventService.getCurrentEventTrackerForUser(user);
+      expect(trackerAfter.curChallengeId).toEqual(chal2.id);
+    });
+
+    it('should reject setCurrentChallenge for completed challenge', async () => {
+      await challengeService.completeChallenge(user);
+      const trackerAfterComplete =
+        await eventService.getCurrentEventTrackerForUser(user);
+      const completedId = chal2.id;
+
+      const result = await challengeService.setCurrentChallenge(
+        user,
+        completedId,
+      );
+      expect(result).toBeNull();
+    });
+
+    it('should reject setCurrentChallenge for challenge from other event', async () => {
+      const orgService = moduleRef.get<OrganizationService>(OrganizationService);
+      const defaultOrg = await orgService.getDefaultOrganization(
+        OrganizationSpecialUsage.DEVICE_LOGIN,
+      );
+      const otherEvent = await organizationService.makeDefaultEvent(
+        defaultOrg.id,
+        'Other Event',
+      );
+      const otherChal =
+        await organizationService.makeDefaultChallenge(otherEvent.id);
+
+      const result = await challengeService.setCurrentChallenge(
+        user,
+        otherChal.id,
+      );
+      expect(result).toBeNull();
+    });
+
+    it('getAvailableChallenges excludes completed challenges', async () => {
+      const available =
+        await challengeService.getAvailableChallenges(user);
+      expect(available.map(c => c.id)).not.toContain(chal2.id);
+      expect(available.map(c => c.id)).toContain(chal1.id);
+    });
+
+    it('timer starts when selecting timed challenge', async () => {
+      const timedChal = await organizationService.makeDefaultChallenge(
+        journeyEvent.id,
+      );
+      await challengeService.upsertChallengeFromDto(fullAbility, {
+        ...(await challengeService.dtoForChallenge(timedChal)),
+        timerLength: 300,
+      });
+      const result = await challengeService.setCurrentChallenge(
+        user,
+        timedChal.id,
+      );
+      expect(result).not.toBeNull();
+      expect(result!.curChallengeId).toEqual(timedChal.id);
     });
   });
 

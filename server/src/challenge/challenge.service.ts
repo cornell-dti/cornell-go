@@ -135,6 +135,98 @@ export class ChallengeService {
     return nextChal;
   }
 
+  /**
+   * Get all available (uncompleted) challenges in the user's current journey.
+   * Returns challenges sorted by eventIndex for consistent ordering.
+   */
+  async getAvailableChallenges(user: User): Promise<Challenge[]> {
+    const evTracker =
+      await this.eventService.getCurrentEventTrackerForUser(user);
+
+    return await this.prisma.challenge.findMany({
+      where: {
+        linkedEventId: evTracker.eventId,
+        completions: { none: { userId: user.id } },
+      },
+      orderBy: {
+        eventIndex: 'asc',
+      },
+    });
+  }
+
+  /**
+   * Set the current challenge for the user in their active journey.
+   * Validates: challenge must be uncompleted and belong to the current event.
+   * Starts timer if the selected challenge has one.
+   * Returns the updated EventTracker or null if validation fails.
+   */
+  async setCurrentChallenge(user: User, challengeId: string): Promise<EventTracker | null> {
+    const evTracker =
+      await this.eventService.getCurrentEventTrackerForUser(user);
+
+    const challenge = await this.prisma.challenge.findFirst({
+      where: {
+        id: challengeId,
+        linkedEventId: evTracker.eventId,
+      },
+    });
+
+    if (!challenge) {
+      return null; // Challenge not found or belongs to different event
+    }
+
+    const isCompleted =
+      (await this.prisma.prevChallenge.count({
+        where: {
+          userId: user.id,
+          challengeId: challengeId,
+          trackerId: evTracker.id,
+        },
+      })) > 0;
+
+    if (isCompleted) {
+      return null; // Cannot select already completed challenge
+    }
+
+    // Cancel any active timer for the previous challenge when switching
+    if (evTracker.curChallengeId && evTracker.curChallengeId !== challengeId) {
+      const prevTimer = await this.prisma.challengeTimer.findFirst({
+        where: {
+          userId: user.id,
+          challengeId: evTracker.curChallengeId,
+          currentStatus: ChallengeTimerStatus.ACTIVE,
+        },
+      });
+      if (prevTimer) {
+        await this.prisma.challengeTimer.update({
+          where: { id: prevTimer.id },
+          data: { currentStatus: ChallengeTimerStatus.CANCELLED },
+        });
+      }
+    }
+
+    const newEvTracker = await this.prisma.eventTracker.update({
+      where: { id: evTracker.id },
+      data: {
+        curChallengeId: challengeId,
+        hintsUsed: 0,
+      },
+    });
+
+    if (challenge.timerLength) {
+      await this.clientService.sendEvent(
+        [`user/${user.id}`],
+        'startTimerForChallenge',
+        {
+          challengeId: challenge.id,
+          timerLength: challenge.timerLength,
+        },
+      );
+    }
+
+    return newEvTracker;
+  }
+
   /** Progress user through challenges, ensuring challengeId is current */
   // async completeChallenge(user: User, challengeId: string, ability: AppAbility) {
   async completeChallenge(user: User) {

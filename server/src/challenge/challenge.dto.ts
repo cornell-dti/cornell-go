@@ -49,3 +49,8 @@ export interface RequestEventTrackerDataDto {
 export interface SetCurrentChallengeDto {
   challengeId: string;
 }
+
+/** DTO for response to requestAvailableChallenges - list of available challenge DTOs */
+export interface AvailableChallengesResponseDto {
+  challenges: ChallengeDto[];
+}
