@@ -50,6 +50,9 @@ export interface SetCurrentChallengeDto {
   challengeId: string;
 }
 
+/** DTO for requestAvailableChallenges */
+export interface RequestAvailableChallengesDto {}
+
 /** DTO for response to requestAvailableChallenges - list of available challenge DTOs */
 export interface AvailableChallengesResponseDto {
   challenges: ChallengeDto[];

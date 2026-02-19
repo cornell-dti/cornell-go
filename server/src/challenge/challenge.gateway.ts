@@ -12,6 +12,7 @@ import { ChallengeService } from './challenge.service';
 import {
   AvailableChallengesResponseDto,
   CompletedChallengeDto,
+  RequestAvailableChallengesDto,
   RequestChallengeDataDto,
   SetCurrentChallengeDto,
   UpdateChallengeDataDto,
@@ -44,7 +45,10 @@ export class ChallengeGateway {
    * @param data array of challenges to return
    */
   @SubscribeMessage('requestAvailableChallenges')
-  async requestAvailableChallenges(@CallingUser() user: User) {
+  async requestAvailableChallenges(
+    @CallingUser() user: User,
+    @MessageBody() data: RequestAvailableChallengesDto,
+  ) {
     const challenges =
       await this.challengeService.getAvailableChallenges(user);
     const dtos = await Promise.all(

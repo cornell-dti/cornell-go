@@ -73,11 +73,11 @@ export function ServerConnectionProvider(props: { children: ReactNode }) {
             setConnection(socket);
           });
 
-          socket.on('connect_error', (err) => {
+          socket.on('connect_error', err => {
             console.error('Socket connection error:', err);
           });
 
-          socket.on('disconnect', (reason) => {
+          socket.on('disconnect', reason => {
             console.log('Socket disconnected:', reason);
             // Only permanently close if server kicked us
             if (reason === 'io server disconnect') {

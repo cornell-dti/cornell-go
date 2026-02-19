@@ -246,10 +246,7 @@ export function ServerDataProvider(props: { children: ReactNode }) {
               ) ?? [],
           });
 
-          newEvents.set(
-            (data.event as EventDto).id,
-            data.event as EventDto,
-          );
+          newEvents.set((data.event as EventDto).id, data.event as EventDto);
         }
         return { ...prev, events: newEvents, selectedEvent: newSelectedEvent };
       });
@@ -285,10 +282,7 @@ export function ServerDataProvider(props: { children: ReactNode }) {
         if (data.deleted) {
           newGroups.delete((data.group as GroupDto).id);
         } else {
-          newGroups.set(
-            (data.group as GroupDto).id,
-            data.group as GroupDto,
-          );
+          newGroups.set((data.group as GroupDto).id, data.group as GroupDto);
         }
         return { ...prev, groups: newGroups };
       });
@@ -300,14 +294,12 @@ export function ServerDataProvider(props: { children: ReactNode }) {
           newOrganizations.delete(data.organization.id);
         } else {
           const oldEvents =
-            prev.organizations.get(
-              (data.organization as OrganizationDto).id,
-            )?.events ?? [];
+            prev.organizations.get((data.organization as OrganizationDto).id)
+              ?.events ?? [];
 
           const oldAchievements =
-            prev.organizations.get(
-              (data.organization as OrganizationDto).id,
-            )?.achivements ?? [];
+            prev.organizations.get((data.organization as OrganizationDto).id)
+              ?.achivements ?? [];
 
           sock.requestEventData({
             events: (data.organization as OrganizationDto).events?.filter(

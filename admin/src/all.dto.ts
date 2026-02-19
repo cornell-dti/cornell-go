@@ -166,6 +166,12 @@ export interface SetCurrentChallengeDto {
   challengeId: string;
 }
 
+export interface RequestAvailableChallengesDto {}
+
+export interface AvailableChallengesResponseDto {
+  challenges: ChallengeDto[];
+}
+
 export interface UpdateErrorDto {
   id: string;
   message: string;
@@ -318,46 +324,6 @@ export interface UpdateOrganizationDataDto {
   deleted: boolean;
 }
 
-export interface TimerStartedDto {
-  timerId: string;
-  endTime: string;
-  challengeId: string;
-  extensionsUsed: number;
-}
-
-export interface TimerExtendedDto {
-  timerId: string;
-  challengeId: string;
-  newEndTime: string;
-  extensionsUsed: number;
-}
-
-export interface TimerCompletedDto {
-  timerId: string;
-  challengeId: string;
-  challengeCompleted: boolean;
-}
-
-export interface ExtendTimerDto {
-  challengeId: string;
-  endTime: string;
-}
-
-export interface StartChallengeTimerDto {
-  challengeId: string;
-}
-
-export interface TimerWarningDto {
-  challengeId: string;
-  milestone: number;
-  timeRemaining: number;
-}
-
-export interface ChallengeFailedDto {
-  challengeId: string;
-  userId: string;
-}
-
 export interface RequestQuizQuestionDto {
   challengeId: string;
 }
@@ -414,6 +380,46 @@ export interface QuizErrorDto {
 export interface UpdateQuizQuestionDataDto {
   question: QuizQuestionDto;
   deleted: boolean;
+}
+
+export interface TimerStartedDto {
+  timerId: string;
+  endTime: string;
+  challengeId: string;
+  extensionsUsed: number;
+}
+
+export interface TimerExtendedDto {
+  timerId: string;
+  challengeId: string;
+  newEndTime: string;
+  extensionsUsed: number;
+}
+
+export interface TimerCompletedDto {
+  timerId: string;
+  challengeId: string;
+  challengeCompleted: boolean;
+}
+
+export interface ExtendTimerDto {
+  challengeId: string;
+  endTime: string;
+}
+
+export interface StartChallengeTimerDto {
+  challengeId: string;
+}
+
+export interface TimerWarningDto {
+  challengeId: string;
+  milestone: number;
+  timeRemaining: number;
+}
+
+export interface ChallengeFailedDto {
+  challengeId: string;
+  userId: string;
 }
 
 export interface CloseAccountDto {}
