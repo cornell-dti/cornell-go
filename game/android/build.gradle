@@ -8,35 +8,8 @@
 //     }
 // }
 
-// Stub extractDebugAnnotations so it creates expected output without running broken lint (uast) code
-gradle.beforeProject { proj ->
-    proj.afterEvaluate {
-        def t = proj.tasks.findByName('extractDebugAnnotations')
-        if (t != null) {
-            t.actions.clear()
-            t.doLast {
-                def outFile = new File(proj.buildDir, "intermediates/annotations_typedef_file/debug/extractDebugAnnotations/typedefs.txt")
-                outFile.parentFile.mkdirs()
-                outFile.text = ""
-            }
-        }
-    }
-}
-gradle.taskGraph.whenReady { graph ->
-    graph.allTasks.findAll { it.name == 'extractDebugAnnotations' }.each { t ->
-        t.actions.clear()
-        t.doLast {
-            def outFile = new File(t.project.buildDir, "intermediates/annotations_typedef_file/debug/extractDebugAnnotations/typedefs.txt")
-            outFile.parentFile.mkdirs()
-            outFile.text = ""
-        }
-    }
-}
-
 allprojects {
     repositories {
-        // Local repo with valid uast-31.7.3 POM/JAR to work around broken Google Maven artifact
-        maven { url = uri("${rootProject.projectDir}/uast-fix") }
         google()
         mavenCentral()
     }
@@ -59,13 +32,16 @@ subprojects {
 subprojects { subproject ->
     subproject.buildDir = "${rootProject.buildDir}/${subproject.name}"
     subproject.evaluationDependsOn(':app')
+}
 
-    // Workaround: disable extractDebugAnnotations to avoid resolving broken uast POM from Google Maven
+subprojects { project ->
     def disableExtract = {
-        subproject.tasks.findByName('extractDebugAnnotations')?.enabled = false
+        project.tasks.matching { it.name.contains('extractDebugAnnotations') }.configureEach {
+            enabled = false
+        }
     }
     try {
-        subproject.afterEvaluate(disableExtract)
+        project.afterEvaluate(disableExtract)
     } catch (Exception ignored) {
         disableExtract()
     }
