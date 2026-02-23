@@ -39,13 +39,16 @@ const bool USE_DEVICE_PREVIEW = false;
 final storage = FlutterSecureStorage();
 late final String API_URL;
 late final ApiClient client;
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   // Initialize Flutter bindings first - required for ALL plugins
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Firebase
-  await Firebase.initializeApp();
+  // Initialize Firebase (guard against double-init on iOS)
+  if (Firebase.apps.isEmpty) {
+    await Firebase.initializeApp();
+  }
   print('Firebase initialized');
 
   // Load environment variables from .env file
@@ -71,6 +74,7 @@ void main() async {
       // Send FCM token to server when available or refreshed
       client.updateFcmToken(token);
     },
+    navigatorKey: navigatorKey,
   );
 
   // Init Google Maps platform
@@ -153,6 +157,7 @@ class MyApp extends StatelessWidget {
       ],
       child: GameWidget(
         child: MaterialApp(
+          navigatorKey: navigatorKey,
           useInheritedMediaQuery: USE_DEVICE_PREVIEW,
           locale: USE_DEVICE_PREVIEW ? DevicePreview.locale(context) : null,
           builder: USE_DEVICE_PREVIEW ? DevicePreview.appBuilder : null,
@@ -168,6 +173,9 @@ class MyApp extends StatelessWidget {
             primarySwatch: ColorPalette.BigRed,
             useMaterial3: false,
           ),
+          routes: {
+            '/home': (context) => BottomNavBar(),
+          },
           home: LoadingPageWidget(client.tryRelog()),
         ),
       ),

@@ -1,15 +1,21 @@
 import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 /// Background message handler - must be a top-level function
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   print('Handling background message: ${message.messageId}');
-  print('Message data: ${message.data}');
-  if (message.notification != null) {
-    print('Message notification: ${message.notification?.title}');
-  }
 }
+
+/// Android notification channel for CornellGO
+const AndroidNotificationChannel _androidChannel = AndroidNotificationChannel(
+  'cornellgo_notifications',
+  'CornellGO Notifications',
+  description: 'Notifications from CornellGO',
+  importance: Importance.high,
+);
 
 /// NotificationService handles Firebase Cloud Messaging (FCM) setup and token management.
 ///
@@ -17,28 +23,39 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 /// - Requesting notification permissions from the user
 /// - Retrieving and managing FCM tokens
 /// - Setting up foreground and background message handlers
-/// - Listening for token refresh events
+/// - Showing Android foreground notifications via flutter_local_notifications
+/// - Navigating to home on notification tap
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
   factory NotificationService() => _instance;
   NotificationService._internal();
 
   final FirebaseMessaging _messaging = FirebaseMessaging.instance;
+  final FlutterLocalNotificationsPlugin _localNotifications =
+      FlutterLocalNotificationsPlugin();
   String? _fcmToken;
   Function(String)? _onTokenRefresh;
+  GlobalKey<NavigatorState>? _navigatorKey;
 
   /// Get the current FCM token
   String? get fcmToken => _fcmToken;
 
   /// Initialize the notification service
   ///
-  /// This should be called after Firebase.initializeApp() in main.dart
   /// [onTokenRefresh] callback is called whenever the FCM token changes
-  Future<void> initialize({Function(String)? onTokenRefresh}) async {
+  /// [navigatorKey] is used to navigate when a notification is tapped
+  Future<void> initialize({
+    Function(String)? onTokenRefresh,
+    GlobalKey<NavigatorState>? navigatorKey,
+  }) async {
     _onTokenRefresh = onTokenRefresh;
+    _navigatorKey = navigatorKey;
 
     // Set up background message handler
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+    // Initialize local notifications for Android foreground display
+    await _initLocalNotifications();
 
     // Request permissions
     await _requestPermissions();
@@ -64,6 +81,31 @@ class NotificationService {
     if (initialMessage != null) {
       _handleMessageOpenedApp(initialMessage);
     }
+  }
+
+  /// Initialize flutter_local_notifications for Android foreground display
+  Future<void> _initLocalNotifications() async {
+    const androidSettings =
+        AndroidInitializationSettings('@mipmap/launcher_icon');
+    const iosSettings = DarwinInitializationSettings();
+    const initSettings = InitializationSettings(
+      android: androidSettings,
+      iOS: iosSettings,
+    );
+
+    await _localNotifications.initialize(
+      initSettings,
+      onDidReceiveNotificationResponse: (details) {
+        // User tapped on a local notification — navigate to home
+        _navigateToHome();
+      },
+    );
+
+    // Create the Android notification channel
+    await _localNotifications
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(_androidChannel);
   }
 
   /// Request notification permissions from the user
@@ -101,8 +143,6 @@ class NotificationService {
         final apnsToken = await _messaging.getAPNSToken();
         if (apnsToken == null) {
           print('APNs token not available yet');
-          // APNs token might not be immediately available on iOS
-          // The token refresh listener will catch it later
         }
       }
 
@@ -125,52 +165,53 @@ class NotificationService {
     print('Received foreground message: ${message.messageId}');
 
     if (message.notification != null) {
-      print('Notification title: ${message.notification?.title}');
-      print('Notification body: ${message.notification?.body}');
-
-      // For foreground notifications, you might want to show a local notification
-      // or display an in-app banner. Firebase Messaging doesn't automatically
-      // show notifications when the app is in the foreground.
       _showForegroundNotification(message);
-    }
-
-    if (message.data.isNotEmpty) {
-      print('Message data: ${message.data}');
-      // Handle data payload
     }
   }
 
   /// Handle notification tap when app was in background
   void _handleMessageOpenedApp(RemoteMessage message) {
     print('Notification opened app: ${message.messageId}');
-    print('Message data: ${message.data}');
-
-    // Handle navigation based on notification data
-    // For example: navigate to a specific event or challenge
-    if (message.data.containsKey('eventId')) {
-      // Navigate to event
-      print('Should navigate to event: ${message.data['eventId']}');
-    }
+    _navigateToHome();
   }
 
   /// Show a notification when app is in foreground
-  ///
-  /// On iOS, foreground notifications are shown automatically if
-  /// presentation options are set. On Android, we need to handle this manually.
   void _showForegroundNotification(RemoteMessage message) async {
-    // For iOS, set foreground presentation options
     if (Platform.isIOS) {
+      // iOS shows foreground notifications natively with these options
       await _messaging.setForegroundNotificationPresentationOptions(
         alert: true,
         badge: true,
         sound: true,
       );
-    }
+    } else if (Platform.isAndroid) {
+      // Android requires manual display via flutter_local_notifications
+      final notification = message.notification;
+      if (notification == null) return;
 
-    // For Android, you might want to use flutter_local_notifications
-    // to show a notification manually when in foreground.
-    // For now, we'll just log it since the notification will be shown
-    // automatically on iOS and this is primarily for manual admin notifications.
+      await _localNotifications.show(
+        notification.hashCode,
+        notification.title,
+        notification.body,
+        NotificationDetails(
+          android: AndroidNotificationDetails(
+            _androidChannel.id,
+            _androidChannel.name,
+            channelDescription: _androidChannel.description,
+            importance: Importance.high,
+            priority: Priority.high,
+            icon: '@mipmap/launcher_icon',
+          ),
+        ),
+      );
+    }
+  }
+
+  /// Navigate to the home page
+  void _navigateToHome() {
+    final navigator = _navigatorKey?.currentState;
+    if (navigator == null) return;
+    navigator.pushNamedAndRemoveUntil('/home', (route) => false);
   }
 
   /// Manually refresh the FCM token
