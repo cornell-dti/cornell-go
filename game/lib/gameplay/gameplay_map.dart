@@ -195,6 +195,12 @@ class _GameplayMapState extends State<GameplayMap>
   // Onboarding: overlay entry for bear mascot messages during onboarding steps 7-10
   OverlayEntry? _bearOverlayEntry;
 
+  // Onboarding: guard flags to prevent re-triggering showcase/overlay on every rebuild
+  bool _hasTriggeredStep7 = false;
+  bool _hasTriggeredStep8 = false;
+  bool _hasTriggeredStep9 = false;
+  bool _hasTriggeredStep10 = false;
+
   // Timer: overlay entry for Time's Up message when timer expires
   OverlayEntry? _timerModalOverlay;
   bool _timerModalShowing = false; // Flag to prevent multiple overlays
@@ -1829,13 +1835,14 @@ class _GameplayMapState extends State<GameplayMap>
 
           // Onboarding: Step 7 - Show showcase for image toggle button after info row explanation
           if (onboarding.step6InfoRowComplete &&
-              !onboarding.step7ImageToggleComplete) {
+              !onboarding.step7ImageToggleComplete &&
+              !_hasTriggeredStep7) {
+            _hasTriggeredStep7 = true;
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (mounted) {
                 ShowcaseView.getNamed(
                   "gameplay_map",
                 ).startShowCase([onboarding.step7ImageToggleKey]);
-                // Show bear overlay on top of showcase
                 _showImageToggleBearOverlay();
               }
             });
@@ -1844,26 +1851,28 @@ class _GameplayMapState extends State<GameplayMap>
           // Onboarding: Step 8 - Show showcase for expanded image view
           if (isExpanded &&
               onboarding.step7ImageToggleComplete &&
-              !onboarding.step8ExpandedImageComplete) {
+              !onboarding.step8ExpandedImageComplete &&
+              !_hasTriggeredStep8) {
+            _hasTriggeredStep8 = true;
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (mounted) {
                 ShowcaseView.getNamed(
                   "gameplay_map",
                 ).startShowCase([onboarding.step8ExpandedImageKey]);
-                // No bear overlay for step 8 - just transparent full-screen tap
               }
             });
           }
 
           // Onboarding: Step 9 - Show showcase for recenter button
           if (onboarding.step8ExpandedImageComplete &&
-              !onboarding.step9RecenterButtonComplete) {
+              !onboarding.step9RecenterButtonComplete &&
+              !_hasTriggeredStep9) {
+            _hasTriggeredStep9 = true;
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (mounted) {
                 ShowcaseView.getNamed(
                   "gameplay_map",
                 ).startShowCase([onboarding.step9RecenterButtonKey]);
-                // Show bear overlay on top of showcase
                 _showRecenterBearOverlay();
               }
             });
@@ -1871,13 +1880,14 @@ class _GameplayMapState extends State<GameplayMap>
 
           // Onboarding: Step 10 - Final gameplay step showcases hint button, then navigates home
           if (onboarding.step9RecenterButtonComplete &&
-              !onboarding.step10HintButtonComplete) {
+              !onboarding.step10HintButtonComplete &&
+              !_hasTriggeredStep10) {
+            _hasTriggeredStep10 = true;
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (mounted) {
                 ShowcaseView.getNamed(
                   "gameplay_map",
                 ).startShowCase([onboarding.step10HintButtonKey]);
-                // Show bear overlay on top of showcase
                 _showHintBearOverlay();
               }
             });
