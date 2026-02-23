@@ -79,10 +79,8 @@ class SplashPageWidget extends StatelessWidget {
               // User does not exist, navigate to registration page
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (context) => RegisterPageWidget(
-                    googleUser: account,
-                    idToken: idToken,
-                  ),
+                  builder: (context) =>
+                      RegisterPageWidget(googleUser: account, idToken: idToken),
                 ),
               );
             }

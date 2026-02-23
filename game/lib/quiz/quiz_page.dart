@@ -104,9 +104,8 @@ class _QuizScreenState extends State<_QuizScreen> {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => ChallengeCompletedPage(
-                      challengeId: widget.challengeId,
-                    ),
+                    builder: (context) =>
+                        ChallengeCompletedPage(challengeId: widget.challengeId),
                   ),
                 );
               }
@@ -245,8 +244,9 @@ class _QuizScreenState extends State<_QuizScreen> {
       );
       final groupModel = Provider.of<GroupModel>(context, listen: false);
 
-      final challenge =
-          challengeModel.getChallengeById(question.challengeId ?? "");
+      final challenge = challengeModel.getChallengeById(
+        question.challengeId ?? "",
+      );
       final eventId = challenge?.linkedEventId ?? groupModel.curEventId;
       final event = eventModel.getEventById(eventId ?? "");
       category = event?.category;

@@ -28,10 +28,7 @@ Widget podiumCell(context, String name, bool isUser) {
             color: constructColorFromUserName(name),
             borderRadius: BorderRadius.circular(49.128),
             border: isUser
-                ? Border.all(
-                    color: Color.fromRGBO(255, 170, 91, 1),
-                    width: 2.5,
-                  )
+                ? Border.all(color: Color.fromRGBO(255, 170, 91, 1), width: 2.5)
                 : null,
           ),
         ),

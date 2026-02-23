@@ -515,12 +515,16 @@ class _EditProfileState extends State<EditProfileWidget> {
                                         },
                                   style: TextButton.styleFrom(
                                     backgroundColor: Color(0xFFE95755),
-                                    disabledBackgroundColor: Color(0xFFB9B9B9),
+                                    disabledBackgroundColor: Color(
+                                      0xFFB9B9B9,
+                                    ),
                                     padding: const EdgeInsets.symmetric(
                                       vertical: 16,
                                     ),
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
+                                      borderRadius: BorderRadius.circular(
+                                        8,
+                                      ),
                                     ),
                                   ),
                                   child: Text('Update', style: buttonStyle),
