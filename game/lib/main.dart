@@ -134,10 +134,7 @@ class MyApp extends StatelessWidget {
           create: (_) => ChallengeModel(client),
           lazy: false,
         ),
-        ChangeNotifierProvider(
-          create: (_) => TimerModel(client),
-          lazy: false,
-        ),
+        ChangeNotifierProvider(create: (_) => TimerModel(client), lazy: false),
         ChangeNotifierProvider(create: (_) => QuizModel(client), lazy: false),
       ],
       child: GameWidget(

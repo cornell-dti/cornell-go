@@ -65,7 +65,8 @@ class GeoPoint {
         final cacheAge = DateTime.now().difference(_lastLocationAt!);
         if (cacheAge <= _cacheMaxAge) {
           print(
-              "Using in-memory cached location (age ${cacheAge.inSeconds}s): ${_lastLocation!.lat}, ${_lastLocation!.long}");
+            "Using in-memory cached location (age ${cacheAge.inSeconds}s): ${_lastLocation!.lat}, ${_lastLocation!.long}",
+          );
           return _lastLocation!;
         }
       }
@@ -90,8 +91,14 @@ class GeoPoint {
           Geolocator.getCurrentPosition(
             desiredAccuracy: LocationAccuracy.medium,
           ).then((pos) {
-            print("Got updated location: ${pos.latitude}, ${pos.longitude}");
-            _lastLocation = GeoPoint(pos.latitude, pos.longitude, pos.heading);
+            print(
+              "Got updated location: ${pos.latitude}, ${pos.longitude}",
+            );
+            _lastLocation = GeoPoint(
+              pos.latitude,
+              pos.longitude,
+              pos.heading,
+            );
             _lastLocationAt = DateTime.now();
           }).catchError((e) {
             print("Error getting current position: $e");

@@ -24,36 +24,30 @@ class CompletedFeedWidget extends StatelessWidget {
     );
 
     return Scaffold(
-        backgroundColor: Color.fromARGB(255, 255, 248, 241),
-        appBar: AppBar(
-          backgroundColor: Color.fromARGB(255, 237, 86, 86),
-          toolbarHeight: MediaQuery.of(context).size.height * 0.08,
-          leading: Align(
-            alignment: Alignment.center,
-            child: IconButton(
-              icon: Icon(Icons.navigate_before),
-              color: Colors.white,
-              onPressed: () => Navigator.pop(context),
-            ),
+      backgroundColor: Color.fromARGB(255, 255, 248, 241),
+      appBar: AppBar(
+        backgroundColor: Color.fromARGB(255, 237, 86, 86),
+        toolbarHeight: MediaQuery.of(context).size.height * 0.08,
+        leading: Align(
+          alignment: Alignment.center,
+          child: IconButton(
+            icon: Icon(Icons.navigate_before),
+            color: Colors.white,
+            onPressed: () => Navigator.pop(context),
           ),
-          title: Padding(
-            padding: EdgeInsets.only(
-              top: MediaQuery.of(context).size.height * 0.01,
-            ),
-            child: Text('Completed', style: headerStyle),
-          ),
-          centerTitle: true, // Still useful for horizontal centering
-          actions: [],
         ),
-        body: Consumer4<UserModel, EventModel, TrackerModel, ChallengeModel>(
-            builder: (
-          context,
-          userModel,
-          eventModel,
-          trackerModel,
-          challengeModel,
-          child,
-        ) {
+        title: Padding(
+          padding: EdgeInsets.only(
+            top: MediaQuery.of(context).size.height * 0.01,
+          ),
+          child: Text('Completed', style: headerStyle),
+        ),
+        centerTitle: true, // Still useful for horizontal centering
+        actions: [],
+      ),
+      body: Consumer4<UserModel, EventModel, TrackerModel, ChallengeModel>(
+        builder: (context, userModel, eventModel, trackerModel, challengeModel,
+            child) {
           if (userModel.userData == null) {
             return Center(child: CircularProgressIndicator());
           }
@@ -87,74 +81,82 @@ class CompletedFeedWidget extends StatelessWidget {
           completedEvents.sort((a, b) => b.item1.compareTo(a.item1));
           final itemCount = completedEvents.length;
           return ListView.builder(
-              itemBuilder: (context, index) {
-                var event = completedEvents[index].item2;
-                var date = completedEvents[index].item1;
-                var type =
-                    event.challenges!.length > 1 ? "Journeys" : "Challenge";
+            itemBuilder: (context, index) {
+              var event = completedEvents[index].item2;
+              var date = completedEvents[index].item1;
+              var type =
+                  event.challenges!.length > 1 ? "Journeys" : "Challenge";
 
-                var pictureList = <String>[];
-                var locationList = [];
-                var totalAdjustedPoints = 0;
-                var totalOriginalPoints = 0;
+              var pictureList = <String>[];
+              var locationList = [];
+              var totalAdjustedPoints = 0;
+              var totalOriginalPoints = 0;
 
-                // Get tracker for this event to access prevChallenges
-                var eventTracker = trackerModel.trackerByEventId(event.id);
-                if (eventTracker != null) {
-                  // Calculate both adjusted and original total points
-                  for (var prevChallenge in eventTracker.prevChallenges) {
-                    var challenge = challengeModel
-                        .getChallengeById(prevChallenge.challengeId);
-                    var imageUrl = challenge?.imageUrl;
-                    if (imageUrl == null || imageUrl.length == 0) {
-                      imageUrl =
-                          "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png";
-                    }
+              // Get tracker for this event to access prevChallenges
+              var eventTracker = trackerModel.trackerByEventId(event.id);
+              if (eventTracker != null) {
+                // Calculate both adjusted and original total points
+                for (var prevChallenge in eventTracker.prevChallenges) {
+                  var challenge = challengeModel.getChallengeById(
+                    prevChallenge.challengeId,
+                  );
+                  var imageUrl = challenge?.imageUrl;
+                  if (imageUrl == null || imageUrl.length == 0) {
+                    imageUrl =
+                        "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png";
+                  }
 
-                    if (challenge != null) {
-                      pictureList.add(imageUrl);
-                      locationList.add(friendlyLocation[challenge.location ??
-                          ChallengeLocationDto
-                              .ANY]); // wrong ANY was being used
-                      // Calculate adjusted points: first apply extension deduction, then hint adjustment
-                      int basePoints = challenge.points ?? 0;
-                      totalOriginalPoints += basePoints; // Sum original points
+                  if (challenge != null) {
+                    pictureList.add(imageUrl);
+                    locationList.add(
+                      friendlyLocation[
+                          challenge.location ?? ChallengeLocationDto.ANY],
+                    ); // wrong ANY was being used
+                    // Calculate adjusted points: first apply extension deduction, then hint adjustment
+                    int basePoints = challenge.points ?? 0;
+                    totalOriginalPoints += basePoints; // Sum original points
 
-                      // If challenge was failed (timer expired), award 0 points
-                      if (prevChallenge.failed == true) {
-                        // Failed challenges earn 0 points
-                        totalAdjustedPoints += 0;
-                      } else {
-                        int extensionsUsed = 0;
-                        try {
-                          extensionsUsed = prevChallenge.extensionsUsed ?? 0;
-                        } catch (e) {
-                          extensionsUsed = 0;
-                        }
-                        int extensionAdjustedPoints =
-                            calculateExtensionAdjustedPoints(
-                                basePoints, extensionsUsed);
-                        int finalAdjustedPoints = calculateHintAdjustedPoints(
-                            extensionAdjustedPoints, prevChallenge.hintsUsed);
-                        totalAdjustedPoints += finalAdjustedPoints;
+                    // If challenge was failed (timer expired), award 0 points
+                    if (prevChallenge.failed == true) {
+                      // Failed challenges earn 0 points
+                      totalAdjustedPoints += 0;
+                    } else {
+                      int extensionsUsed = 0;
+                      try {
+                        extensionsUsed = prevChallenge.extensionsUsed ?? 0;
+                      } catch (e) {
+                        extensionsUsed = 0;
                       }
+                      int extensionAdjustedPoints =
+                          calculateExtensionAdjustedPoints(
+                        basePoints,
+                        extensionsUsed,
+                      );
+                      int finalAdjustedPoints = calculateHintAdjustedPoints(
+                        extensionAdjustedPoints,
+                        prevChallenge.hintsUsed,
+                      );
+                      totalAdjustedPoints += finalAdjustedPoints;
                     }
                   }
                 }
+              }
 
-                return CompletedChallengeFull(
-                  name: event.name!,
-                  pictures: pictureList,
-                  type: type,
-                  date: DateFormat("MMMM d, y").format(date),
-                  location:
-                      locationList.isNotEmpty ? locationList[0] : "Cornell",
-                  difficulty: friendlyDifficulty[event.difficulty]!,
-                  adjustedPoints: totalAdjustedPoints,
-                  originalPoints: totalOriginalPoints,
-                );
-              },
-              itemCount: itemCount);
-        }));
+              return CompletedChallengeFull(
+                name: event.name!,
+                pictures: pictureList,
+                type: type,
+                date: DateFormat("MMMM d, y").format(date),
+                location: locationList.isNotEmpty ? locationList[0] : "Cornell",
+                difficulty: friendlyDifficulty[event.difficulty]!,
+                adjustedPoints: totalAdjustedPoints,
+                originalPoints: totalOriginalPoints,
+              );
+            },
+            itemCount: itemCount,
+          );
+        },
+      ),
+    );
   }
 }

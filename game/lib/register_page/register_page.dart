@@ -84,12 +84,7 @@ class _RegisterPageWidgetState extends State<RegisterPageWidget> {
                                 width: 2.0,
                                 color: name == _selectedOption
                                     ? Color.fromARGB(255, 255, 170, 91)
-                                    : Color.fromARGB(
-                                        255,
-                                        217,
-                                        217,
-                                        217,
-                                      ),
+                                    : Color.fromARGB(255, 217, 217, 217),
                               ),
                               borderRadius: BorderRadius.circular(10.0),
                             ),
@@ -98,9 +93,7 @@ class _RegisterPageWidgetState extends State<RegisterPageWidget> {
                               ? MaterialStatePropertyAll<Color>(
                                   Color.fromARGB(102, 255, 170, 91),
                                 )
-                              : MaterialStatePropertyAll<Color>(
-                                  Colors.white,
-                                ),
+                              : MaterialStatePropertyAll<Color>(Colors.white),
                         ),
                         onPressed: () => {
                           setState(() {

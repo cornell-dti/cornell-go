@@ -87,10 +87,7 @@ Widget leaderBoardCell(
               ),
             ),
             // Points - fixed width to prevent overflow
-            Text(
-              points.toString() + " pts",
-              style: pointStyle,
-            ),
+            Text(points.toString() + " pts", style: pointStyle),
           ],
         ),
       ),

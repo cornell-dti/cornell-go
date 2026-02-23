@@ -92,10 +92,7 @@ class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
           print("Tapped anywhere on step 2");
           _removeBearOverlay();
           ShowcaseView.getNamed("home_navbar").dismiss();
-          Provider.of<OnboardingModel>(
-            context,
-            listen: false,
-          ).completeStep2();
+          Provider.of<OnboardingModel>(context, listen: false).completeStep2();
           // Onboarding: Switch to Journeys tab (index 1) to trigger step 3 explanation overlay
           _tabController.animateTo(1);
         },

@@ -11,10 +11,7 @@ Widget navTab(context, icon, label, next) {
     title: Text(label, style: listTextStyle),
     onTap: () => {
       Navigator.pop(context),
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => next),
-      ),
+      Navigator.push(context, MaterialPageRoute(builder: (context) => next)),
     },
   );
 }
