@@ -270,251 +270,195 @@ class _PreviewState extends State<Preview> {
           height: MediaQuery.of(context).size.height * 0.75,
           width: MediaQuery.of(context).size.width,
           color: Colors.white,
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                //Image
-                Image.network(
-                  imgUrl,
-                  height: MediaQuery.of(context).size.height * 0.25,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                ),
-                SizedBox(height: 20),
+          child: SafeArea(
+            top: false,
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  //Image
+                  Image.network(
+                    imgUrl,
+                    height: MediaQuery.of(context).size.height * 0.25,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
+                  SizedBox(height: 20),
 
-                // Row with starting location and distance
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20.0,
-                    vertical: 5,
-                  ),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.location_on,
-                          size: 24,
-                          color: Preview.purpleColor,
-                        ),
-                        Text(
-                          location,
-                          style: TextStyle(
-                            fontSize: 20,
-                            color: Preview.purpleColor,
-                          ),
-                        ),
-                        SizedBox(width: 10),
-                        Icon(
-                          Icons.directions_walk,
-                          size: 24,
-                          color: Preview.greyColor,
-                        ),
-                        Text(
-                          ' ' +
-                              (currentLocation != null &&
-                                      challengeLat != null &&
-                                      challengeLong != null
-                                  ? (currentLocation!.distanceTo(
-                                            GeoPoint(
-                                              challengeLat!,
-                                              challengeLong!,
-                                              0,
-                                            ),
-                                          ) /
-                                          1609.34)
-                                      .toStringAsFixed(1)
-                                  : "?.?") +
-                              " mi",
-                          style: TextStyle(
-                            fontSize: 20,
-                            color: Preview.greyColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(
-                    left: 25.0,
-                    right: 25.0,
-                    bottom: 5,
-                  ),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      challengeName,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 25,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ),
-                ),
-                Container(
-                  height: MediaQuery.of(context).size.height * 0.12,
-                  child: Padding(
+                  // Row with starting location and distance
+                  Padding(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 25.0,
-                      vertical: 8.0,
+                      horizontal: 20.0,
+                      vertical: 5,
                     ),
                     child: Align(
-                      alignment: Alignment.topLeft,
-                      child: SingleChildScrollView(
-                        child: Text(
-                          description,
-                          style: TextStyle(
-                            // fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                            fontFamily: 'Poppins',
+                      alignment: Alignment.centerLeft,
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.location_on,
+                            size: 24,
+                            color: Preview.purpleColor,
+                          ),
+                          Text(
+                            location,
+                            style: TextStyle(
+                              fontSize: 20,
+                              color: Preview.purpleColor,
+                            ),
+                          ),
+                          SizedBox(width: 10),
+                          Icon(
+                            Icons.directions_walk,
+                            size: 24,
                             color: Preview.greyColor,
+                          ),
+                          Text(
+                            ' ' +
+                                (currentLocation != null &&
+                                        challengeLat != null &&
+                                        challengeLong != null
+                                    ? (currentLocation!.distanceTo(
+                                              GeoPoint(
+                                                challengeLat!,
+                                                challengeLong!,
+                                                0,
+                                              ),
+                                            ) /
+                                            1609.34)
+                                        .toStringAsFixed(1)
+                                    : "?.?") +
+                                " mi",
+                            style: TextStyle(
+                              fontSize: 20,
+                              color: Preview.greyColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      left: 25.0,
+                      right: 25.0,
+                      bottom: 5,
+                    ),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        challengeName,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 25,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    height: MediaQuery.of(context).size.height * 0.12,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 25.0,
+                        vertical: 8.0,
+                      ),
+                      child: Align(
+                        alignment: Alignment.topLeft,
+                        child: SingleChildScrollView(
+                          child: Text(
+                            description,
+                            style: TextStyle(
+                              // fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              fontFamily: 'Poppins',
+                              color: Preview.greyColor,
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(
-                    left: 25,
-                    right: 25,
-                    bottom: 15,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: SizedBox(
-                          child: Align(
-                            alignment: Alignment.centerRight,
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                    top: 10.0,
-                                    right: 5,
-                                  ),
-                                  child: Container(
-                                    height: 36,
-                                    alignment: Alignment.centerLeft,
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      left: 25,
+                      right: 25,
+                      bottom: 15,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: SizedBox(
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                      top: 10.0,
+                                      right: 5,
+                                    ),
                                     child: Container(
-                                      decoration: BoxDecoration(
-                                        color: Color.fromARGB(
-                                          255,
-                                          249,
-                                          237,
-                                          218,
-                                        ),
-                                        borderRadius: BorderRadius.circular(16),
-                                      ),
-                                      child: Padding(
-                                        padding: const EdgeInsets.only(
-                                          left: 8,
-                                          right: 8,
-                                        ),
-                                        child: Align(
-                                          alignment: Alignment.center,
-                                          child: Text(
-                                            difficulty[0].toUpperCase() +
-                                                difficulty.substring(1),
-                                            style: TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w400,
-                                              color: Colors.black,
-                                            ),
+                                      height: 36,
+                                      alignment: Alignment.centerLeft,
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          color: Color.fromARGB(
+                                            255,
+                                            249,
+                                            237,
+                                            218,
                                           ),
+                                          borderRadius:
+                                              BorderRadius.circular(16),
                                         ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                    left: 4,
-                                    top: 10.0,
-                                  ),
-                                  child: Container(
-                                    height: 36,
-                                    alignment: Alignment.centerLeft,
-                                    child: Row(
-                                      children: [
-                                        SvgPicture.asset(
-                                          "assets/icons/bearcoins.svg",
-                                          width: 40,
-                                          height: 40,
-                                        ),
-                                        Padding(
+                                        child: Padding(
                                           padding: const EdgeInsets.only(
-                                            left: 4,
+                                            left: 8,
+                                            right: 8,
                                           ),
-                                          child: Text(
-                                            points.toString() + " PTS",
-                                            style: TextStyle(
-                                              fontSize: 20,
-                                              fontWeight: FontWeight.w500,
-                                              color: Color(0xFFC17E19),
+                                          child: Align(
+                                            alignment: Alignment.center,
+                                            child: Text(
+                                              difficulty[0].toUpperCase() +
+                                                  difficulty.substring(1),
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w400,
+                                                color: Colors.black,
+                                              ),
                                             ),
                                           ),
                                         ),
-                                      ],
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                (type == PreviewType.JOURNEY)
-                    ? Column(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 25,
-                              vertical: 5,
-                            ),
-                            child: LoadingBar(numberCompleted, locationCount),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(
-                              left: 25,
-                              right: 25,
-                              bottom: 15,
-                              top: 3,
-                            ),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: SizedBox(
-                                    child: Align(
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                      left: 4,
+                                      top: 10.0,
+                                    ),
+                                    child: Container(
+                                      height: 36,
                                       alignment: Alignment.centerLeft,
                                       child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
                                         children: [
-                                          Spacer(),
                                           SvgPicture.asset(
-                                            "assets/icons/pin.svg",
+                                            "assets/icons/bearcoins.svg",
+                                            width: 40,
+                                            height: 40,
                                           ),
-                                          Text(
-                                            " " +
-                                                numberCompleted.toString() +
-                                                "/" +
-                                                locationCount.toString(),
-                                            style: TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w600,
-                                              color: Color.fromARGB(
-                                                255,
-                                                110,
-                                                110,
-                                                110,
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                              left: 4,
+                                            ),
+                                            child: Text(
+                                              points.toString() + " PTS",
+                                              style: TextStyle(
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.w500,
+                                                color: Color(0xFFC17E19),
                                               ),
                                             ),
                                           ),
@@ -522,78 +466,139 @@ class _PreviewState extends State<Preview> {
                                       ),
                                     ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
-                        ],
-                      )
-                    : SizedBox(height: 30),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 25),
-                  child: SizedBox(
-                    height: 50,
-                    width: MediaQuery.sizeOf(context).width * 0.9,
-                    child: TextButton(
-                      style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all(
-                          backgroundRed,
                         ),
-                        shape:
-                            MaterialStateProperty.all<RoundedRectangleBorder>(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0),
-                            side: BorderSide(color: backgroundRed),
+                      ],
+                    ),
+                  ),
+                  (type == PreviewType.JOURNEY)
+                      ? Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 25,
+                                vertical: 5,
+                              ),
+                              child: LoadingBar(numberCompleted, locationCount),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                left: 25,
+                                right: 25,
+                                bottom: 15,
+                                top: 3,
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: SizedBox(
+                                      child: Align(
+                                        alignment: Alignment.centerLeft,
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Spacer(),
+                                            SvgPicture.asset(
+                                              "assets/icons/pin.svg",
+                                            ),
+                                            Text(
+                                              " " +
+                                                  numberCompleted.toString() +
+                                                  "/" +
+                                                  locationCount.toString(),
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w600,
+                                                color: Color.fromARGB(
+                                                  255,
+                                                  110,
+                                                  110,
+                                                  110,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        )
+                      : SizedBox(height: 30),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 25),
+                    child: SizedBox(
+                      height: 50,
+                      width: MediaQuery.sizeOf(context).width * 0.9,
+                      child: TextButton(
+                        style: ButtonStyle(
+                          backgroundColor: MaterialStateProperty.all(
+                            backgroundRed,
+                          ),
+                          shape:
+                              MaterialStateProperty.all<RoundedRectangleBorder>(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10.0),
+                              side: BorderSide(color: backgroundRed),
+                            ),
                           ),
                         ),
-                      ),
-                      onPressed: () async {
-                        // Pre-check location before joining
-                        // Only show "Checking location..." if it takes > 1 second
-                        Timer? loadingTimer = Timer(Duration(seconds: 1), () {
-                          displayToast("Checking location...", Status.info);
-                        });
-                        try {
-                          await GeoPoint.current();
-                          loadingTimer.cancel();
-                        } catch (e) {
-                          loadingTimer.cancel();
-                          displayToast(
-                            "Can't join challenge - location not enabled",
-                            Status.error,
-                          );
-                          return;
-                        }
-
-                        Provider.of<ApiClient>(
-                          context,
-                          listen: false,
-                        ).serverApi?.setCurrentEvent(
-                              SetCurrentEventDto(eventId: eventId),
+                        onPressed: () async {
+                          // Pre-check location before joining
+                          // Only show "Checking location..." if it takes > 1 second
+                          Timer? loadingTimer = Timer(Duration(seconds: 1), () {
+                            displayToast("Checking location...", Status.info);
+                          });
+                          try {
+                            await GeoPoint.current();
+                            loadingTimer.cancel();
+                          } catch (e) {
+                            loadingTimer.cancel();
+                            displayToast(
+                              "Can't join challenge - location not enabled",
+                              Status.error,
                             );
-                        Navigator.pop(context);
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => GameplayPage(),
+                            return;
+                          }
+
+                          Provider.of<ApiClient>(
+                            context,
+                            listen: false,
+                          ).serverApi?.setCurrentEvent(
+                                SetCurrentEventDto(eventId: eventId),
+                              );
+                          Navigator.pop(context);
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => GameplayPage(),
+                            ),
+                          );
+                        },
+                        child: Text(
+                          (numberCompleted == 0)
+                              ? "Let's Go!"
+                              : "Continue exploring",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20,
+                            fontFamily: "Poppins",
+                            color: Colors.white,
                           ),
-                        );
-                      },
-                      child: Text(
-                        (numberCompleted == 0)
-                            ? "Let's Go!"
-                            : "Continue exploring",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20,
-                          fontFamily: "Poppins",
-                          color: Colors.white,
                         ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                  SizedBox(height: 8),
+                ],
+              ),
             ),
           ),
         ),
