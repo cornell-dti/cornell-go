@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:game/api/game_api.dart';
+import 'package:game/constants/constants.dart';
 import 'package:game/api/game_client_dto.dart';
 import 'package:game/splash_page/splash_page.dart';
 import 'package:device_info_plus/device_info_plus.dart';
@@ -328,6 +329,6 @@ bool eventMatchesFilters({
 /// Returns a valid image URL or a default placeholder if the input is null or empty
 String getValidImageUrl(String? imageUrl) {
   return (imageUrl == null || imageUrl.isEmpty)
-      ? "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png"
+      ? AppStrings.missingImageUrl
       : imageUrl;
 }

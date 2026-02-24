@@ -11,6 +11,7 @@ import 'dart:async';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'dart:math';
+import 'package:game/constants/constants.dart';
 
 class LoadingBar extends StatelessWidget {
   final int totalTasks;
@@ -33,7 +34,7 @@ class LoadingBar extends StatelessWidget {
                 alignment: Alignment.centerLeft,
                 child: Container(
                   decoration: new BoxDecoration(
-                    color: Color.fromARGB(255, 241, 241, 241),
+                    color: AppColors.lightGray,
                     shape: BoxShape.rectangle,
                     borderRadius: BorderRadius.all(Radius.circular(16.0)),
                   ),
@@ -46,7 +47,7 @@ class LoadingBar extends StatelessWidget {
                 alignment: Alignment.centerLeft,
                 child: Container(
                   decoration: new BoxDecoration(
-                    color: Color.fromARGB(197, 237, 86, 86),
+                    color: AppColors.primaryRed.withAlpha(197),
                     shape: BoxShape.rectangle,
                     borderRadius: BorderRadius.all(Radius.circular(16.0)),
                   ),
@@ -63,7 +64,7 @@ class LoadingBar extends StatelessWidget {
                 margin: EdgeInsets.only(left: 8, top: 3),
                 alignment: Alignment.centerLeft,
                 decoration: new BoxDecoration(
-                  color: Color(0x99F3C6C6),
+                  color: AppColors.lightRedBackground.withAlpha(153),
                   shape: BoxShape.rectangle,
                   borderRadius: BorderRadius.all(Radius.circular(5.0)),
                 ),
@@ -99,9 +100,9 @@ class Preview extends StatefulWidget {
   // final int
   //     totalDistance;
 
-  static Color backgroundColor = Color.fromARGB(255, 217, 214, 213);
-  static Color purpleColor = Color.fromARGB(255, 131, 90, 124);
-  static Color greyColor = Color.fromARGB(255, 110, 110, 110);
+  static Color backgroundColor = AppColors.warmLightGray;
+  static Color purpleColor = AppColors.purple;
+  static Color greyColor = AppColors.grayText;
 
   //Temporary image for now. Will have to change later
   final String imgPath = "assets/images/38582.jpg";
@@ -158,7 +159,7 @@ class _PreviewState extends State<Preview> {
   //     totalDistance;
   final String location;
 
-  static Color backgroundRed = Color.fromARGB(255, 237, 86, 86);
+  static Color backgroundRed = AppColors.primaryRed;
 
   //fields unique to journeys
   final int locationCount;
@@ -404,12 +405,7 @@ class _PreviewState extends State<Preview> {
                                       alignment: Alignment.centerLeft,
                                       child: Container(
                                         decoration: BoxDecoration(
-                                          color: Color.fromARGB(
-                                            255,
-                                            249,
-                                            237,
-                                            218,
-                                          ),
+                                          color: AppColors.cream,
                                           borderRadius:
                                               BorderRadius.circular(16),
                                         ),
@@ -458,7 +454,7 @@ class _PreviewState extends State<Preview> {
                                               style: TextStyle(
                                                 fontSize: 20,
                                                 fontWeight: FontWeight.w500,
-                                                color: Color(0xFFC17E19),
+                                                color: AppColors.gold,
                                               ),
                                             ),
                                           ),
@@ -513,12 +509,7 @@ class _PreviewState extends State<Preview> {
                                               style: TextStyle(
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.w600,
-                                                color: Color.fromARGB(
-                                                  255,
-                                                  110,
-                                                  110,
-                                                  110,
-                                                ),
+                                                color: AppColors.grayText,
                                               ),
                                             ),
                                           ],

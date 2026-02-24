@@ -33,7 +33,7 @@ import 'package:game/navigation_page/bottom_navbar.dart';
 import 'package:game/splash_page/splash_page.dart';
 import 'package:game/widget/game_widget.dart';
 import 'package:provider/provider.dart';
-import 'package:game/color_palette.dart';
+import 'package:game/constants/constants.dart';
 
 const bool USE_DEVICE_PREVIEW = false;
 final storage = FlutterSecureStorage();
@@ -170,7 +170,7 @@ class MyApp extends StatelessWidget {
           supportedLocales: const [Locale('en', '')],
           theme: ThemeData(
             fontFamily: 'Poppins',
-            primarySwatch: ColorPalette.BigRed,
+            primarySwatch: AppColors.primaryRedSwatch,
             useMaterial3: false,
           ),
           routes: {

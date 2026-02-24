@@ -28,6 +28,7 @@ import 'package:game/widgets/bear_mascot_message.dart';
 import 'package:showcaseview/showcaseview.dart';
 import 'package:game/quiz/quiz_page.dart';
 import 'package:game/gameplay/arrival_dialog.dart';
+import 'package:game/constants/constants.dart';
 
 /*
 
@@ -86,7 +87,8 @@ class _GameplayMapState extends State<GameplayMap>
 
   /// Extension duration in seconds (5 minutes).
   /// IMPORTANT: Must stay in sync with EXTENSION_LENGTH_MS in server/src/timer/timer.service.ts (in milliseconds).
-  static const int EXTENSION_TIME_SECONDS = 300;
+  static const int EXTENSION_TIME_SECONDS =
+      300; // See AppDurations.extensionTimeSeconds
 
   late Completer<GoogleMapController> mapCompleter = Completer();
   late StreamSubscription<Position> positionStream;
@@ -245,7 +247,7 @@ class _GameplayMapState extends State<GameplayMap>
           fontFamily: 'Poppins',
           fontSize: 16,
           fontWeight: FontWeight.w800,
-          color: Color(0xFFED5656),
+          color: AppColors.primaryRed,
           height: 1.5,
           decoration: TextDecoration.none,
         ),
@@ -1663,7 +1665,7 @@ class _GameplayMapState extends State<GameplayMap>
     Widget svgIcon = SvgPicture.asset(
       "assets/icons/maprecenter.svg",
       colorFilter: ColorFilter.mode(
-        Color.fromARGB(255, 131, 90, 124),
+        AppColors.purple,
         BlendMode.srcIn,
       ),
     );
@@ -1690,7 +1692,7 @@ class _GameplayMapState extends State<GameplayMap>
       heroTag: "recenter_button",
       onPressed: recenterCamera,
       label: svgIcon,
-      backgroundColor: Color.fromARGB(255, 255, 255, 255),
+      backgroundColor: Colors.white,
       shape: CircleBorder(),
     );
 
@@ -1708,15 +1710,11 @@ class _GameplayMapState extends State<GameplayMap>
         isHintButtonIlluminated ||
         isHintAnimationInProgress;
     final Color iconColor = shouldHighlight
-        ? const Color(0xFFFFAA5B)
-        : (numHintsLeft == 0
-            ? const Color.fromARGB(255, 217, 217, 217)
-            : const Color.fromARGB(255, 131, 90, 124));
+        ? AppColors.orange
+        : (numHintsLeft == 0 ? AppColors.inputGray : AppColors.purple);
     final Color hintCountColor = shouldHighlight
-        ? const Color(0xFFFFAA5B)
-        : (numHintsLeft == 0
-            ? const Color.fromARGB(255, 217, 217, 217)
-            : const Color.fromARGB(255, 131, 90, 124));
+        ? AppColors.orange
+        : (numHintsLeft == 0 ? AppColors.inputGray : AppColors.purple);
 
     // 1. Build complete hint button with counter badge (without padding)
     Widget hintButton = Stack(
@@ -1729,7 +1727,7 @@ class _GameplayMapState extends State<GameplayMap>
             "assets/icons/maphint.svg",
             colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
           ),
-          backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+          backgroundColor: Colors.white,
           shape: const CircleBorder(),
         ),
         // num hints left counter
@@ -1829,8 +1827,7 @@ class _GameplayMapState extends State<GameplayMap>
 
           var imageUrl = challenge?.imageUrl;
           if (imageUrl == null || imageUrl.length == 0) {
-            imageUrl =
-                "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png";
+            imageUrl = AppStrings.missingImageUrl;
           }
 
           // Onboarding: Step 7 - Show showcase for image toggle button after info row explanation
@@ -1984,9 +1981,9 @@ class _GameplayMapState extends State<GameplayMap>
                           defaultHintRadius,
                         );
                       }(),
-                      strokeColor: Color.fromARGB(80, 30, 41, 143),
+                      strokeColor: AppColors.geofenceStroke,
                       strokeWidth: 2,
-                      fillColor: Color.fromARGB(80, 83, 134, 237),
+                      fillColor: AppColors.geofenceFill,
                     ),
                   },
                 ),
@@ -2008,29 +2005,17 @@ class _GameplayMapState extends State<GameplayMap>
                           height: MediaQuery.of(context).size.height * 0.04,
                           decoration: BoxDecoration(
                             color: _showWarningColors
-                                ? Color.fromARGB(204, 0, 0, 0)
+                                ? AppColors.black80
                                 : (currentTime < 300
-                                    ? Color.fromARGB(
-                                        255,
-                                        237,
-                                        86,
-                                        86,
-                                      ) // red when < 5 min left
-                                    : Color.fromARGB(
-                                        255,
-                                        64,
-                                        64,
-                                        61,
-                                      )), // grey > 5 min left
+                                    ? AppColors
+                                        .primaryRed // red when < 5 min left
+                                    : AppColors
+                                        .darkOliveGray), // grey > 5 min left
                             borderRadius: BorderRadius.circular(20),
                             boxShadow: [
                               BoxShadow(
-                                color: Color.fromARGB(
-                                  64,
-                                  0,
-                                  0,
-                                  0,
-                                ), // #000000 with 25% opacity
+                                color: AppColors
+                                    .black25, // #000000 with 25% opacity
                                 blurRadius: 4,
                                 offset: Offset(0, 4), // Position (0, 4)
                               ),
@@ -2055,7 +2040,7 @@ class _GameplayMapState extends State<GameplayMap>
                                       ? currentTime / totalTime
                                       : 0.0,
                                   iconColor: _showWarningColors
-                                      ? Color(0xFFFF8080) // #FF8080
+                                      ? AppColors.lightRed // #FF8080
                                       : Colors.white,
                                 ),
                               ),
@@ -2067,7 +2052,7 @@ class _GameplayMapState extends State<GameplayMap>
                                 fontSize: 14.0,
                                 fontWeight: FontWeight.bold,
                                 color: _showWarningColors
-                                    ? Color(0xFFFF8080)
+                                    ? AppColors.lightRed
                                     : Colors.white,
                                 decoration: TextDecoration.none,
                               ),
@@ -2082,7 +2067,7 @@ class _GameplayMapState extends State<GameplayMap>
                 margin: EdgeInsets.only(bottom: 70),
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color.fromARGB(255, 237, 86, 86),
+                    backgroundColor: AppColors.primaryRed,
                     padding: EdgeInsets.only(
                       right: 15,
                       left: 15,
@@ -2099,7 +2084,7 @@ class _GameplayMapState extends State<GameplayMap>
                       fontFamily: 'Poppins',
                       fontSize: 21,
                       fontWeight: FontWeight.w400,
-                      color: Color(0xFFFFFFFF),
+                      color: Colors.white,
                     ),
                   ),
                   onPressed: () async {
@@ -2187,7 +2172,7 @@ class _GameplayMapState extends State<GameplayMap>
                   child: AbsorbPointer(
                     absorbing: true,
                     child: Container(
-                      color: const Color.fromARGB(128, 217, 217, 217),
+                      color: AppColors.inputGrayHalf,
                     ),
                   ),
                 ),
@@ -2523,7 +2508,7 @@ class _GameplayMapState extends State<GameplayMap>
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
                         side: BorderSide(
-                          color: Color.fromARGB(255, 237, 86, 86),
+                          color: AppColors.primaryRed,
                         ),
                         padding: EdgeInsets.zero,
                         shape: RoundedRectangleBorder(
@@ -2538,7 +2523,7 @@ class _GameplayMapState extends State<GameplayMap>
                           fontFamily: 'Poppins',
                           fontSize: screenWidth * 0.036, //~14px
                           fontWeight: FontWeight.w500,
-                          color: Color.fromARGB(255, 237, 86, 86),
+                          color: AppColors.primaryRed,
                         ),
                       ),
                     ),
@@ -2554,7 +2539,7 @@ class _GameplayMapState extends State<GameplayMap>
                         Positioned.fill(
                           child: Container(
                             decoration: BoxDecoration(
-                              color: Color(0xFFF08988), // Faded color
+                              color: AppColors.fadedRed, // Faded color
                               borderRadius: BorderRadius.circular(
                                 screenWidth * 0.025,
                               ), //~10px
@@ -2576,12 +2561,7 @@ class _GameplayMapState extends State<GameplayMap>
                                     widthFactor:
                                         _extensionAnimation?.value ?? 0.0,
                                     child: Container(
-                                      color: Color.fromARGB(
-                                        255,
-                                        237,
-                                        86,
-                                        86,
-                                      ), // Normal red
+                                      color: AppColors.primaryRed, // Normal red
                                     ),
                                   ),
                                 ),
@@ -2646,7 +2626,7 @@ class _GameplayMapState extends State<GameplayMap>
                                     style: TextStyle(
                                       fontFamily: 'Poppins',
                                       fontSize: screenWidth * 0.033, //~13px
-                                      color: Color(0xFFFFC737),
+                                      color: AppColors.yellow,
                                     ),
                                   ),
                                 ),
@@ -2798,7 +2778,7 @@ class _GameplayMapState extends State<GameplayMap>
                         ),
                       ),
                       backgroundColor: MaterialStateProperty.all<Color>(
-                        Color.fromARGB(255, 237, 86, 86),
+                        AppColors.primaryRed,
                       ),
                     ),
                     child: Text(
@@ -2858,12 +2838,8 @@ class _GameplayMapState extends State<GameplayMap>
                         ),
                         side: MaterialStateProperty.all<BorderSide>(
                           BorderSide(
-                            color: Color.fromARGB(
-                              255,
-                              237,
-                              86,
-                              86,
-                            ), // Specify the border color
+                            color: AppColors
+                                .primaryRed, // Specify the border color
                             width: 2.0, // Specify the border width
                           ),
                         ),
@@ -2877,7 +2853,7 @@ class _GameplayMapState extends State<GameplayMap>
                           fontSize: MediaQuery.devicePixelRatioOf(context) < 3
                               ? 12
                               : 14,
-                          color: Color.fromARGB(255, 237, 86, 86),
+                          color: AppColors.primaryRed,
                         ),
                       ),
                     ),
@@ -2900,7 +2876,7 @@ class _GameplayMapState extends State<GameplayMap>
                             ),
                           ),
                           backgroundColor: MaterialStateProperty.all<Color>(
-                            Color.fromARGB(255, 237, 86, 86),
+                            AppColors.primaryRed,
                           ),
                         ),
                         child: Text(
@@ -3119,8 +3095,8 @@ class _GameplayMapState extends State<GameplayMap>
                                   side: BorderSide(
                                     width: 1.5,
                                     color: numHintsLeft <= 0
-                                        ? const Color(0xFFED5656)
-                                        : const Color(0xFFEC5555),
+                                        ? AppColors.primaryRed
+                                        : AppColors.activeRed,
                                   ),
                                 ),
                               ),
@@ -3130,8 +3106,8 @@ class _GameplayMapState extends State<GameplayMap>
                                   fontFamily: 'Poppins',
                                   fontSize: 14,
                                   color: numHintsLeft <= 0
-                                      ? const Color(0xFFED5656)
-                                      : const Color(0xFFEC5555),
+                                      ? AppColors.primaryRed
+                                      : AppColors.activeRed,
                                   fontWeight: FontWeight.w400,
                                 ),
                               ),
@@ -3148,7 +3124,7 @@ class _GameplayMapState extends State<GameplayMap>
                                   _startHintAnimationFlowWithAnimations();
                                 },
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFFEC5555),
+                                  backgroundColor: AppColors.activeRed,
                                   elevation: 0,
                                   padding: const EdgeInsets.all(10),
                                   minimumSize: const Size.fromHeight(40),
@@ -3446,7 +3422,7 @@ class CircleSliceTimer extends CustomPainter {
     double elapsedProgress = 1.0 - progress;
     if (elapsedProgress > 0) {
       Paint grayArcPaint = Paint()
-        ..color = Color.fromARGB(255, 64, 64, 61)
+        ..color = AppColors.darkOliveGray
         ..style = PaintingStyle.fill;
 
       double sweepAngle = 2 * pi * elapsedProgress;

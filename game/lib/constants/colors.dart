@@ -1,0 +1,90 @@
+import 'package:flutter/material.dart';
+
+class AppColors {
+  AppColors._();
+
+  // Brand Reds
+  static const Color primaryRed = Color(0xFFED5656);
+  static const Color carnelian = Color(0xFFB31B1B);
+  static const Color accentRed = Color(0xFFE95755);
+  static const Color activeRed = Color(0xFFEC5555);
+  static const Color lightRed = Color(0xFFFF8080);
+
+  // MaterialColor for ThemeData
+  static const MaterialColor primaryRedSwatch = MaterialColor(
+    0xFFED5656,
+    <int, Color>{
+      50: primaryRed,
+      100: primaryRed,
+      200: primaryRed,
+      300: primaryRed,
+      400: primaryRed,
+      500: primaryRed,
+      600: primaryRed,
+      700: primaryRed,
+      800: primaryRed,
+      900: primaryRed,
+    },
+  );
+
+  // Secondary
+  static const Color purple = Color(0xFF835A7C);
+  static const Color gold = Color(0xFFC17E19);
+  static const Color yellow = Color(0xFFFFC737);
+  static const Color orange = Color(0xFFFFAA5B);
+  static const Color green = Color(0xFF58B171);
+  static const Color greenDark = Color(0xFF31B346);
+
+  // Backgrounds
+  static const Color warmWhite = Color(0xFFFFF8F1);
+  static const Color cream = Color(0xFFF9EDDA);
+  static const Color quizBackground = Color(0xFFF9F5F1);
+  static const Color pageGrayBackground = Color(0xFFDBE2E7);
+  static const Color skyBlue = Color(0xFFB3EBF6);
+
+  // Grays & Text
+  static const Color darkText = Color(0xFF1E1E1E);
+  static const Color mediumText = Color(0xFF474747);
+  static const Color grayText = Color(0xFF6E6E6E);
+  static const Color mediumGray = Color(0xFFA4A4A4);
+  static const Color lightGray = Color(0xFFF1F1F1);
+  static const Color lightGrayBorder = Color(0xFFE5E5E5);
+
+  // Special
+  static const Color leaderboardGoldBorder = Color(0xFFFBDDAF);
+  static const Color fadedRed = Color(0xFFF08988);
+  static const Color lightRedBackground = Color(0xFFF3C6C6);
+  static const Color dangerRed = Color(0xFFDC3545);
+  static const Color brown = Color(0xFF6E4A28);
+
+  // Black overlays (sorted by opacity)
+  static const Color black10 = Color(0x19000000);
+  static const Color black20 = Color(0x33000000);
+  static const Color black25 = Color(0x40000000);
+  static const Color black30 = Color(0x4D000000);
+  static const Color black80 = Color(0xCC000000);
+
+  // Extended grays
+  static const Color silverGray = Color(0xFFC6C6C6);
+  static const Color disabledGray = Color(0xFFBABABA);
+  static const Color inputGray = Color(0xFFD9D9D9);
+  static const Color inputGrayHalf = Color(0x80D9D9D9);
+  static const Color chipDisabledGray = Color(0x64D2D2D2);
+  static const Color borderGray = Color(0xFFE4E4E4);
+  static const Color warmLightGray = Color(0xFFD9D6D5);
+  static const Color darkOliveGray = Color(0xFF40403D);
+  static const Color slateGray = Color(0xFF5D6470);
+  static const Color darkCharcoal = Color(0xFF2B2F32);
+
+  // Podium
+  static const Color podiumGold = Color(0xFFEAB111);
+  static const Color podiumSilver = Color(0xFFABADAD);
+  static const Color podiumBronze = Color(0xFFDB782A);
+
+  // Orange variant
+  static const Color orangeLight = Color(0x26FFAA5B);
+
+  // Geofence
+  static const Color geofenceStroke = Color(0x501E298F);
+  static const Color geofenceFill = Color(0x505386ED);
+}

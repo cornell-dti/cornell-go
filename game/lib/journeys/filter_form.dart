@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:game/api/game_client_dto.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:sticky_headers/sticky_headers.dart';
+import 'package:game/constants/constants.dart';
 
 class FilterForm extends StatefulWidget {
   final void Function(List<String>, List<String>, String) onSubmit;
@@ -156,7 +157,7 @@ class _FilterFormState extends State<FilterForm> {
           children: [
             Container(
               padding: EdgeInsets.symmetric(vertical: 12.0),
-              color: Color.fromARGB(255, 237, 86, 86),
+              color: AppColors.primaryRed,
               child: Stack(
                 children: [
                   Row(
@@ -213,8 +214,8 @@ class _FilterFormState extends State<FilterForm> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor:
                               selectedCategories.contains(category.name)
-                                  ? Color.fromARGB(255, 249, 237, 218)
-                                  : Color.fromARGB(100, 210, 210, 210),
+                                  ? AppColors.cream
+                                  : AppColors.chipDisabledGray,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20.0),
                           ),
@@ -258,8 +259,8 @@ class _FilterFormState extends State<FilterForm> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor:
                               selectedLocations.contains(location.name)
-                                  ? Color.fromARGB(255, 249, 237, 218)
-                                  : Color.fromARGB(100, 210, 210, 210),
+                                  ? AppColors.cream
+                                  : AppColors.chipDisabledGray,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20.0),
                           ),
@@ -303,8 +304,8 @@ class _FilterFormState extends State<FilterForm> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor:
                               selectedDifficulty.contains(diff.name)
-                                  ? Color.fromARGB(255, 249, 237, 218)
-                                  : Color.fromARGB(100, 210, 210, 210),
+                                  ? AppColors.cream
+                                  : AppColors.chipDisabledGray,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20.0),
                           ),
@@ -334,7 +335,7 @@ class _FilterFormState extends State<FilterForm> {
                   side: BorderSide(
                     width: 1,
                     strokeAlign: BorderSide.strokeAlignCenter,
-                    color: Color(0xFFE5E5E5),
+                    color: AppColors.lightGrayBorder,
                   ),
                 ),
               ),
@@ -356,8 +357,8 @@ class _FilterFormState extends State<FilterForm> {
                     },
                     child: Text('Clear'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Color.fromARGB(255, 255, 255, 255),
-                      foregroundColor: Color.fromARGB(255, 0, 0, 0),
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.black,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10.0),
                       ),
@@ -369,7 +370,7 @@ class _FilterFormState extends State<FilterForm> {
                         onPressed: filterCount > 0 ? filterChallenges : null,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: filterCount > 0
-                              ? const Color(0xFFEC5555) // Active color
+                              ? AppColors.activeRed // Active color
                               : Colors.grey, // Disabled color
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(

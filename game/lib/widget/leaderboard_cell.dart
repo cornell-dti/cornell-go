@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:game/constants/constants.dart';
 import 'package:game/utils/utility_functions.dart';
 
 /**
@@ -17,14 +18,14 @@ Widget leaderBoardCell(
 ) {
   //Creating the styles to use for the position, name, and points
   var posStyle = TextStyle(
-    color: Color(0xFF474747),
+    color: AppColors.mediumText,
     fontSize: 20,
     fontFamily: 'Poppins',
     fontWeight: FontWeight.w500,
     height: 0,
   );
   var nameStyle = TextStyle(
-    color: Color(0xFF474747),
+    color: AppColors.mediumText,
     fontSize: 14,
     fontFamily: 'Poppins',
     fontWeight: FontWeight.w500,
@@ -42,10 +43,10 @@ Widget leaderBoardCell(
   return Container(
     decoration: ShapeDecoration(
       // Leaderboard cell is highlighted if it is the user
-      color: (isUser) ? Color(0xFFFFF8F1) : Colors.white,
+      color: (isUser) ? AppColors.warmWhite : Colors.white,
       shape: RoundedRectangleBorder(
         side: (isUser)
-            ? BorderSide(width: 2, color: Color(0xFFFBDDAF))
+            ? BorderSide(width: 2, color: AppColors.leaderboardGoldBorder)
             : BorderSide.none,
         borderRadius: BorderRadius.circular(10),
       ),

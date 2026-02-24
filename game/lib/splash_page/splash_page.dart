@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 import 'package:game/api/game_api.dart';
+import 'package:game/constants/constants.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:game/register_page/register_page.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -27,7 +28,7 @@ class SplashPageWidget extends StatelessWidget {
 
   // Shared text style for button labels
   TextStyle get _authButtonTextStyle => TextStyle(
-        color: Color.fromARGB(255, 93, 100, 112),
+        color: AppColors.slateGray,
         fontSize: 20,
         fontWeight: FontWeight.w500,
       );
