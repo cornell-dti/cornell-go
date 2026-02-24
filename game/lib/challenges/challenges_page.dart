@@ -15,6 +15,7 @@ import 'package:game/widgets/bear_mascot_message.dart';
 import 'package:provider/provider.dart';
 import 'package:showcaseview/showcaseview.dart';
 import 'package:velocity_x/velocity_x.dart';
+import 'package:game/constants/constants.dart';
 import 'challenge_cell.dart';
 
 class ChallengeCellDto {
@@ -183,7 +184,7 @@ class _ChallengesPageState extends State<ChallengesPage> {
     final onboarding = Provider.of<OnboardingModel>(context, listen: true);
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(color: Color.fromARGB(255, 255, 248, 241)),
+        decoration: BoxDecoration(color: AppColors.warmWhite),
         child: Padding(
           padding: EdgeInsets.all(16),
           child: Stack(

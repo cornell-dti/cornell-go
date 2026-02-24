@@ -28,6 +28,7 @@ import 'package:game/widgets/bear_mascot_message.dart';
 import 'package:showcaseview/showcaseview.dart';
 import 'package:game/quiz/quiz_page.dart';
 import 'package:game/gameplay/arrival_dialog.dart';
+import 'package:game/constants/constants.dart';
 
 /*
 
@@ -86,7 +87,8 @@ class _GameplayMapState extends State<GameplayMap>
 
   /// Extension duration in seconds (5 minutes).
   /// IMPORTANT: Must stay in sync with EXTENSION_LENGTH_MS in server/src/timer/timer.service.ts (in milliseconds).
-  static const int EXTENSION_TIME_SECONDS = 300;
+  static const int EXTENSION_TIME_SECONDS =
+      300; // See AppDurations.extensionTimeSeconds
 
   late Completer<GoogleMapController> mapCompleter = Completer();
   late StreamSubscription<Position> positionStream;
@@ -195,6 +197,12 @@ class _GameplayMapState extends State<GameplayMap>
   // Onboarding: overlay entry for bear mascot messages during onboarding steps 7-10
   OverlayEntry? _bearOverlayEntry;
 
+  // Onboarding: guard flags to prevent re-triggering showcase/overlay on every rebuild
+  bool _hasTriggeredStep7 = false;
+  bool _hasTriggeredStep8 = false;
+  bool _hasTriggeredStep9 = false;
+  bool _hasTriggeredStep10 = false;
+
   // Timer: overlay entry for Time's Up message when timer expires
   OverlayEntry? _timerModalOverlay;
   bool _timerModalShowing = false; // Flag to prevent multiple overlays
@@ -239,7 +247,7 @@ class _GameplayMapState extends State<GameplayMap>
           fontFamily: 'Poppins',
           fontSize: 16,
           fontWeight: FontWeight.w800,
-          color: Color(0xFFED5656),
+          color: AppColors.primaryRed,
           height: 1.5,
           decoration: TextDecoration.none,
         ),
@@ -1657,7 +1665,7 @@ class _GameplayMapState extends State<GameplayMap>
     Widget svgIcon = SvgPicture.asset(
       "assets/icons/maprecenter.svg",
       colorFilter: ColorFilter.mode(
-        Color.fromARGB(255, 131, 90, 124),
+        AppColors.purple,
         BlendMode.srcIn,
       ),
     );
@@ -1702,15 +1710,15 @@ class _GameplayMapState extends State<GameplayMap>
         isHintButtonIlluminated ||
         isHintAnimationInProgress;
     final Color iconColor = shouldHighlight
-        ? const Color(0xFFFFAA5B)
+        ? AppColors.orange
         : (numHintsLeft == 0
             ? const Color.fromARGB(255, 217, 217, 217)
-            : const Color.fromARGB(255, 131, 90, 124));
+            : AppColors.purple);
     final Color hintCountColor = shouldHighlight
-        ? const Color(0xFFFFAA5B)
+        ? AppColors.orange
         : (numHintsLeft == 0
             ? const Color.fromARGB(255, 217, 217, 217)
-            : const Color.fromARGB(255, 131, 90, 124));
+            : AppColors.purple);
 
     // 1. Build complete hint button with counter badge (without padding)
     Widget hintButton = Stack(
@@ -1823,19 +1831,19 @@ class _GameplayMapState extends State<GameplayMap>
 
           var imageUrl = challenge?.imageUrl;
           if (imageUrl == null || imageUrl.length == 0) {
-            imageUrl =
-                "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png";
+            imageUrl = AppStrings.missingImageUrl;
           }
 
           // Onboarding: Step 7 - Show showcase for image toggle button after info row explanation
           if (onboarding.step6InfoRowComplete &&
-              !onboarding.step7ImageToggleComplete) {
+              !onboarding.step7ImageToggleComplete &&
+              !_hasTriggeredStep7) {
+            _hasTriggeredStep7 = true;
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (mounted) {
                 ShowcaseView.getNamed(
                   "gameplay_map",
                 ).startShowCase([onboarding.step7ImageToggleKey]);
-                // Show bear overlay on top of showcase
                 _showImageToggleBearOverlay();
               }
             });
@@ -1844,26 +1852,28 @@ class _GameplayMapState extends State<GameplayMap>
           // Onboarding: Step 8 - Show showcase for expanded image view
           if (isExpanded &&
               onboarding.step7ImageToggleComplete &&
-              !onboarding.step8ExpandedImageComplete) {
+              !onboarding.step8ExpandedImageComplete &&
+              !_hasTriggeredStep8) {
+            _hasTriggeredStep8 = true;
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (mounted) {
                 ShowcaseView.getNamed(
                   "gameplay_map",
                 ).startShowCase([onboarding.step8ExpandedImageKey]);
-                // No bear overlay for step 8 - just transparent full-screen tap
               }
             });
           }
 
           // Onboarding: Step 9 - Show showcase for recenter button
           if (onboarding.step8ExpandedImageComplete &&
-              !onboarding.step9RecenterButtonComplete) {
+              !onboarding.step9RecenterButtonComplete &&
+              !_hasTriggeredStep9) {
+            _hasTriggeredStep9 = true;
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (mounted) {
                 ShowcaseView.getNamed(
                   "gameplay_map",
                 ).startShowCase([onboarding.step9RecenterButtonKey]);
-                // Show bear overlay on top of showcase
                 _showRecenterBearOverlay();
               }
             });
@@ -1871,13 +1881,14 @@ class _GameplayMapState extends State<GameplayMap>
 
           // Onboarding: Step 10 - Final gameplay step showcases hint button, then navigates home
           if (onboarding.step9RecenterButtonComplete &&
-              !onboarding.step10HintButtonComplete) {
+              !onboarding.step10HintButtonComplete &&
+              !_hasTriggeredStep10) {
+            _hasTriggeredStep10 = true;
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (mounted) {
                 ShowcaseView.getNamed(
                   "gameplay_map",
                 ).startShowCase([onboarding.step10HintButtonKey]);
-                // Show bear overlay on top of showcase
                 _showHintBearOverlay();
               }
             });
@@ -2045,7 +2056,7 @@ class _GameplayMapState extends State<GameplayMap>
                                       ? currentTime / totalTime
                                       : 0.0,
                                   iconColor: _showWarningColors
-                                      ? Color(0xFFFF8080) // #FF8080
+                                      ? AppColors.lightRed // #FF8080
                                       : Colors.white,
                                 ),
                               ),
@@ -2057,7 +2068,7 @@ class _GameplayMapState extends State<GameplayMap>
                                 fontSize: 14.0,
                                 fontWeight: FontWeight.bold,
                                 color: _showWarningColors
-                                    ? Color(0xFFFF8080)
+                                    ? AppColors.lightRed
                                     : Colors.white,
                                 decoration: TextDecoration.none,
                               ),
@@ -2072,7 +2083,7 @@ class _GameplayMapState extends State<GameplayMap>
                 margin: EdgeInsets.only(bottom: 70),
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color.fromARGB(255, 237, 86, 86),
+                    backgroundColor: AppColors.primaryRed,
                     padding: EdgeInsets.only(
                       right: 15,
                       left: 15,
@@ -2089,7 +2100,7 @@ class _GameplayMapState extends State<GameplayMap>
                       fontFamily: 'Poppins',
                       fontSize: 21,
                       fontWeight: FontWeight.w400,
-                      color: Color(0xFFFFFFFF),
+                      color: Colors.white,
                     ),
                   ),
                   onPressed: () async {
@@ -2513,7 +2524,7 @@ class _GameplayMapState extends State<GameplayMap>
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
                         side: BorderSide(
-                          color: Color.fromARGB(255, 237, 86, 86),
+                          color: AppColors.primaryRed,
                         ),
                         padding: EdgeInsets.zero,
                         shape: RoundedRectangleBorder(
@@ -2528,7 +2539,7 @@ class _GameplayMapState extends State<GameplayMap>
                           fontFamily: 'Poppins',
                           fontSize: screenWidth * 0.036, //~14px
                           fontWeight: FontWeight.w500,
-                          color: Color.fromARGB(255, 237, 86, 86),
+                          color: AppColors.primaryRed,
                         ),
                       ),
                     ),
@@ -2544,7 +2555,7 @@ class _GameplayMapState extends State<GameplayMap>
                         Positioned.fill(
                           child: Container(
                             decoration: BoxDecoration(
-                              color: Color(0xFFF08988), // Faded color
+                              color: AppColors.fadedRed, // Faded color
                               borderRadius: BorderRadius.circular(
                                 screenWidth * 0.025,
                               ), //~10px
@@ -2636,7 +2647,7 @@ class _GameplayMapState extends State<GameplayMap>
                                     style: TextStyle(
                                       fontFamily: 'Poppins',
                                       fontSize: screenWidth * 0.033, //~13px
-                                      color: Color(0xFFFFC737),
+                                      color: AppColors.yellow,
                                     ),
                                   ),
                                 ),
@@ -2788,7 +2799,7 @@ class _GameplayMapState extends State<GameplayMap>
                         ),
                       ),
                       backgroundColor: MaterialStateProperty.all<Color>(
-                        Color.fromARGB(255, 237, 86, 86),
+                        AppColors.primaryRed,
                       ),
                     ),
                     child: Text(
@@ -2867,7 +2878,7 @@ class _GameplayMapState extends State<GameplayMap>
                           fontSize: MediaQuery.devicePixelRatioOf(context) < 3
                               ? 12
                               : 14,
-                          color: Color.fromARGB(255, 237, 86, 86),
+                          color: AppColors.primaryRed,
                         ),
                       ),
                     ),
@@ -2890,7 +2901,7 @@ class _GameplayMapState extends State<GameplayMap>
                             ),
                           ),
                           backgroundColor: MaterialStateProperty.all<Color>(
-                            Color.fromARGB(255, 237, 86, 86),
+                            AppColors.primaryRed,
                           ),
                         ),
                         child: Text(
@@ -3109,8 +3120,8 @@ class _GameplayMapState extends State<GameplayMap>
                                   side: BorderSide(
                                     width: 1.5,
                                     color: numHintsLeft <= 0
-                                        ? const Color(0xFFED5656)
-                                        : const Color(0xFFEC5555),
+                                        ? AppColors.primaryRed
+                                        : AppColors.activeRed,
                                   ),
                                 ),
                               ),
@@ -3120,8 +3131,8 @@ class _GameplayMapState extends State<GameplayMap>
                                   fontFamily: 'Poppins',
                                   fontSize: 14,
                                   color: numHintsLeft <= 0
-                                      ? const Color(0xFFED5656)
-                                      : const Color(0xFFEC5555),
+                                      ? AppColors.primaryRed
+                                      : AppColors.activeRed,
                                   fontWeight: FontWeight.w400,
                                 ),
                               ),
@@ -3138,7 +3149,7 @@ class _GameplayMapState extends State<GameplayMap>
                                   _startHintAnimationFlowWithAnimations();
                                 },
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFFEC5555),
+                                  backgroundColor: AppColors.activeRed,
                                   elevation: 0,
                                   padding: const EdgeInsets.all(10),
                                   minimumSize: const Size.fromHeight(40),

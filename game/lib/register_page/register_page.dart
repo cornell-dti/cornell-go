@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:game/constants/constants.dart';
 import 'package:game/api/game_client_dto.dart';
 import 'package:game/details_page/details_page.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -83,7 +84,7 @@ class _RegisterPageWidgetState extends State<RegisterPageWidget> {
                               side: BorderSide(
                                 width: 2.0,
                                 color: name == _selectedOption
-                                    ? Color.fromARGB(255, 255, 170, 91)
+                                    ? AppColors.orange
                                     : Color.fromARGB(255, 217, 217, 217),
                               ),
                               borderRadius: BorderRadius.circular(10.0),
@@ -91,7 +92,7 @@ class _RegisterPageWidgetState extends State<RegisterPageWidget> {
                           ),
                           backgroundColor: name == _selectedOption
                               ? MaterialStatePropertyAll<Color>(
-                                  Color.fromARGB(102, 255, 170, 91),
+                                  AppColors.orange.withAlpha(102),
                                 )
                               : MaterialStatePropertyAll<Color>(Colors.white),
                         ),
@@ -129,8 +130,8 @@ class _RegisterPageWidgetState extends State<RegisterPageWidget> {
                     ),
                     backgroundColor: MaterialStatePropertyAll<Color>(
                       _selectedOption.isNotEmpty
-                          ? Color.fromARGB(255, 233, 87, 85)
-                          : Color.fromARGB(153, 233, 87, 85),
+                          ? AppColors.accentRed
+                          : AppColors.accentRed.withAlpha(153),
                     ),
                   ),
                   child: Container(

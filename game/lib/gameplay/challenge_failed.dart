@@ -1,3 +1,4 @@
+import 'package:game/constants/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:game/gameplay/gameplay_page.dart';
 import 'package:game/navigation_page/bottom_navbar.dart';
@@ -42,7 +43,7 @@ class LoadingBar extends StatelessWidget {
                     alignment: Alignment.centerLeft,
                     child: Container(
                       decoration: new BoxDecoration(
-                        color: Color.fromARGB(255, 241, 241, 241),
+                        color: AppColors.lightGray,
                         shape: BoxShape.rectangle,
                         borderRadius: BorderRadius.all(Radius.circular(16.0)),
                       ),
@@ -55,7 +56,7 @@ class LoadingBar extends StatelessWidget {
                     alignment: Alignment.centerLeft,
                     child: Container(
                       decoration: new BoxDecoration(
-                        color: Color.fromARGB(197, 237, 86, 86),
+                        color: AppColors.primaryRed.withAlpha(197),
                         shape: BoxShape.rectangle,
                         borderRadius: BorderRadius.all(Radius.circular(16.0)),
                       ),
@@ -72,7 +73,7 @@ class LoadingBar extends StatelessWidget {
                     margin: EdgeInsets.only(left: 8, top: 3),
                     alignment: Alignment.centerLeft,
                     decoration: new BoxDecoration(
-                      color: Color(0x99F3C6C6),
+                      color: AppColors.lightRedBackground.withAlpha(153),
                       shape: BoxShape.rectangle,
                       borderRadius: BorderRadius.all(Radius.circular(5.0)),
                     ),
@@ -457,12 +458,7 @@ class _ChallengeFailedState extends State<ChallengeFailedPage>
                             child: journeyCompleted
                                 ? ElevatedButton(
                                     style: ElevatedButton.styleFrom(
-                                      backgroundColor: Color.fromARGB(
-                                        255,
-                                        237,
-                                        86,
-                                        86,
-                                      ),
+                                      backgroundColor: AppColors.primaryRed,
                                       padding: EdgeInsets.only(
                                         right: 15,
                                         left: 15,
@@ -554,12 +550,7 @@ class _ChallengeFailedState extends State<ChallengeFailedPage>
                                       Spacer(),
                                       ElevatedButton(
                                         style: ElevatedButton.styleFrom(
-                                          backgroundColor: Color.fromARGB(
-                                            255,
-                                            237,
-                                            86,
-                                            86,
-                                          ),
+                                          backgroundColor: AppColors.primaryRed,
                                           padding: EdgeInsets.only(
                                             right: 15,
                                             left: 15,
@@ -609,12 +600,7 @@ class _ChallengeFailedState extends State<ChallengeFailedPage>
                             ),
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Color.fromARGB(
-                                  255,
-                                  237,
-                                  86,
-                                  86,
-                                ),
+                                backgroundColor: AppColors.primaryRed,
                                 padding: EdgeInsets.only(
                                   right: 15,
                                   left: 15,

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io' show Platform;
 import 'package:geolocator/geolocator.dart';
+import 'package:game/constants/constants.dart';
 
 class GeoPoint {
   static bool didMakeRequest = false;
@@ -147,7 +148,7 @@ class GeoPoint {
         accuracy: LocationAccuracy.high,
         distanceFilter: 100,
         forceLocationManager: true,
-        intervalDuration: const Duration(seconds: 10),
+        intervalDuration: AppDurations.locationInterval,
         //(Optional) Set foreground notification config to keep the app alive
         //when going to the background
         foregroundNotificationConfig: const ForegroundNotificationConfig(

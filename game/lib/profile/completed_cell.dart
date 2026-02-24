@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:velocity_x/velocity_x.dart';
+import 'package:game/constants/constants.dart';
 
 /**
  * Widget that represents each individual completed journey or challenge
@@ -98,7 +99,7 @@ Widget completedCell(
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
-                            color: Color(0xFFC17E19),
+                            color: AppColors.gold,
                           ),
                         ),
                       ],
