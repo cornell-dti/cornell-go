@@ -54,4 +54,37 @@ class AppColors {
   static const Color leaderboardGoldBorder = Color(0xFFFBDDAF);
   static const Color fadedRed = Color(0xFFF08988);
   static const Color lightRedBackground = Color(0xFFF3C6C6);
+  static const Color dangerRed = Color(0xFFDC3545);
+  static const Color brown = Color(0xFF6E4A28);
+
+  // Black overlays (sorted by opacity)
+  static const Color black10 = Color(0x19000000);
+  static const Color black20 = Color(0x33000000);
+  static const Color black25 = Color(0x40000000);
+  static const Color black30 = Color(0x4D000000);
+  static const Color black80 = Color(0xCC000000);
+
+  // Extended grays
+  static const Color silverGray = Color(0xFFC6C6C6);
+  static const Color disabledGray = Color(0xFFBABABA);
+  static const Color inputGray = Color(0xFFD9D9D9);
+  static const Color inputGrayHalf = Color(0x80D9D9D9);
+  static const Color chipDisabledGray = Color(0x64D2D2D2);
+  static const Color borderGray = Color(0xFFE4E4E4);
+  static const Color warmLightGray = Color(0xFFD9D6D5);
+  static const Color darkOliveGray = Color(0xFF40403D);
+  static const Color slateGray = Color(0xFF5D6470);
+  static const Color darkCharcoal = Color(0xFF2B2F32);
+
+  // Podium
+  static const Color podiumGold = Color(0xFFEAB111);
+  static const Color podiumSilver = Color(0xFFABADAD);
+  static const Color podiumBronze = Color(0xFFDB782A);
+
+  // Orange variant
+  static const Color orangeLight = Color(0x26FFAA5B);
+
+  // Geofence
+  static const Color geofenceStroke = Color(0x501E298F);
+  static const Color geofenceFill = Color(0x505386ED);
 }

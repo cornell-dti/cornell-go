@@ -72,6 +72,13 @@ class GeoPoint {
         }
       }
 
+      // FASTEST PATH: Check our in-memory cache first (instant)
+      if (_lastLocation != null) {
+        print(
+            "Using in-memory cached location: ${_lastLocation!.lat}, ${_lastLocation!.long}");
+        return _lastLocation!;
+      }
+
       // FAST PATH: Try to get last known position first (milliseconds)
       try {
         Position? lastPosition = await Geolocator.getLastKnownPosition();

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:game/constants/constants.dart';
 import 'package:game/widget/back_btn.dart';
 import 'package:game/widget/visited_places_cell.dart';
 
@@ -23,7 +24,7 @@ class _VisitedPlacesWidgetState extends State<VisitedPlacesWidget> {
     return Scaffold(
       key: scaffoldKey,
       floatingActionButton: backBtn(scaffoldKey, context, "Previouly visited"),
-      backgroundColor: Color.fromARGB(255, 43, 47, 50),
+      backgroundColor: AppColors.darkCharcoal,
       body: Padding(
         padding: const EdgeInsets.only(top: 150),
         child: Container(

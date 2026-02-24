@@ -1692,7 +1692,7 @@ class _GameplayMapState extends State<GameplayMap>
       heroTag: "recenter_button",
       onPressed: recenterCamera,
       label: svgIcon,
-      backgroundColor: Color.fromARGB(255, 255, 255, 255),
+      backgroundColor: Colors.white,
       shape: CircleBorder(),
     );
 
@@ -1711,14 +1711,10 @@ class _GameplayMapState extends State<GameplayMap>
         isHintAnimationInProgress;
     final Color iconColor = shouldHighlight
         ? AppColors.orange
-        : (numHintsLeft == 0
-            ? const Color.fromARGB(255, 217, 217, 217)
-            : AppColors.purple);
+        : (numHintsLeft == 0 ? AppColors.inputGray : AppColors.purple);
     final Color hintCountColor = shouldHighlight
         ? AppColors.orange
-        : (numHintsLeft == 0
-            ? const Color.fromARGB(255, 217, 217, 217)
-            : AppColors.purple);
+        : (numHintsLeft == 0 ? AppColors.inputGray : AppColors.purple);
 
     // 1. Build complete hint button with counter badge (without padding)
     Widget hintButton = Stack(
@@ -1731,7 +1727,7 @@ class _GameplayMapState extends State<GameplayMap>
             "assets/icons/maphint.svg",
             colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
           ),
-          backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+          backgroundColor: Colors.white,
           shape: const CircleBorder(),
         ),
         // num hints left counter
@@ -1985,9 +1981,9 @@ class _GameplayMapState extends State<GameplayMap>
                           defaultHintRadius,
                         );
                       }(),
-                      strokeColor: Color.fromARGB(80, 30, 41, 143),
+                      strokeColor: AppColors.geofenceStroke,
                       strokeWidth: 2,
-                      fillColor: Color.fromARGB(80, 83, 134, 237),
+                      fillColor: AppColors.geofenceFill,
                     ),
                   },
                 ),
@@ -2009,29 +2005,17 @@ class _GameplayMapState extends State<GameplayMap>
                           height: MediaQuery.of(context).size.height * 0.04,
                           decoration: BoxDecoration(
                             color: _showWarningColors
-                                ? Color.fromARGB(204, 0, 0, 0)
+                                ? AppColors.black80
                                 : (currentTime < 300
-                                    ? Color.fromARGB(
-                                        255,
-                                        237,
-                                        86,
-                                        86,
-                                      ) // red when < 5 min left
-                                    : Color.fromARGB(
-                                        255,
-                                        64,
-                                        64,
-                                        61,
-                                      )), // grey > 5 min left
+                                    ? AppColors
+                                        .primaryRed // red when < 5 min left
+                                    : AppColors
+                                        .darkOliveGray), // grey > 5 min left
                             borderRadius: BorderRadius.circular(20),
                             boxShadow: [
                               BoxShadow(
-                                color: Color.fromARGB(
-                                  64,
-                                  0,
-                                  0,
-                                  0,
-                                ), // #000000 with 25% opacity
+                                color: AppColors
+                                    .black25, // #000000 with 25% opacity
                                 blurRadius: 4,
                                 offset: Offset(0, 4), // Position (0, 4)
                               ),
@@ -2188,7 +2172,7 @@ class _GameplayMapState extends State<GameplayMap>
                   child: AbsorbPointer(
                     absorbing: true,
                     child: Container(
-                      color: const Color.fromARGB(128, 217, 217, 217),
+                      color: AppColors.inputGrayHalf,
                     ),
                   ),
                 ),
@@ -2577,12 +2561,7 @@ class _GameplayMapState extends State<GameplayMap>
                                     widthFactor:
                                         _extensionAnimation?.value ?? 0.0,
                                     child: Container(
-                                      color: Color.fromARGB(
-                                        255,
-                                        237,
-                                        86,
-                                        86,
-                                      ), // Normal red
+                                      color: AppColors.primaryRed, // Normal red
                                     ),
                                   ),
                                 ),
@@ -2859,12 +2838,8 @@ class _GameplayMapState extends State<GameplayMap>
                         ),
                         side: MaterialStateProperty.all<BorderSide>(
                           BorderSide(
-                            color: Color.fromARGB(
-                              255,
-                              237,
-                              86,
-                              86,
-                            ), // Specify the border color
+                            color: AppColors
+                                .primaryRed, // Specify the border color
                             width: 2.0, // Specify the border width
                           ),
                         ),
@@ -3447,7 +3422,7 @@ class CircleSliceTimer extends CustomPainter {
     double elapsedProgress = 1.0 - progress;
     if (elapsedProgress > 0) {
       Paint grayArcPaint = Paint()
-        ..color = Color.fromARGB(255, 64, 64, 61)
+        ..color = AppColors.darkOliveGray
         ..style = PaintingStyle.fill;
 
       double sweepAngle = 2 * pi * elapsedProgress;

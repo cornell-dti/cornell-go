@@ -32,7 +32,7 @@ Widget completedCell(
       borderRadius: BorderRadius.circular(10.0),
       boxShadow: [
         BoxShadow(
-          color: Color.fromRGBO(0, 0, 0, 0.25),
+          color: AppColors.black25,
           offset: Offset(0, 4),
           blurRadius: 4,
         ),

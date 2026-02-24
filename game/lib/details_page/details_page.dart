@@ -261,13 +261,13 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
                             bottom: 10,
                           ),
                           labelStyle: TextStyle(
-                            color: Color.fromARGB(51, 0, 0, 0),
+                            color: AppColors.black20,
                             fontWeight: FontWeight.w400,
                           ),
                           labelText: 'e.g. CornellianLover123',
                           enabledBorder: OutlineInputBorder(
                             borderSide: BorderSide(
-                              color: Color.fromARGB(51, 0, 0, 0),
+                              color: AppColors.black20,
                               width: 1.5,
                             ),
                             borderRadius: BorderRadius.all(
