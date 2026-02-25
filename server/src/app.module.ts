@@ -16,6 +16,7 @@ import { AchievementModule } from './achievement/achievement.module';
 import { CaslModule } from './casl/casl.module';
 import { TimerModule } from './timer/timer.module';
 import { QuizModule } from './quiz/quiz.module';
+import { ClubSubmissionModule } from './club-submission/club-submission.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { QuizModule } from './quiz/quiz.module';
     CaslModule,
     TimerModule,
     QuizModule,
+    ClubSubmissionModule,
   ],
   controllers: [],
   providers: [],
