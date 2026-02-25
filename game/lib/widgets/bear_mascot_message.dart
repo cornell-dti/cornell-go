@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:game/constants/constants.dart';
 
 /**
  * `BearMascotMessage` Widget - Displays the bear mascot with a message bubble.
@@ -118,7 +119,7 @@ class BearMascotMessage extends StatelessWidget {
                             fontFamily: 'Poppins',
                             fontSize: 14,
                             fontWeight: FontWeight.w400,
-                            color: Color(0xFF6E6E6E),
+                            color: AppColors.grayText,
                             height: 1.5,
                             decoration: TextDecoration.none,
                           ),

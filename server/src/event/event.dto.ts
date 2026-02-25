@@ -96,6 +96,7 @@ export interface EventDto {
   indexable?: boolean;
   longitudeF?: number;
   latitudeF?: number;
+  featured?: boolean;
 }
 
 /** DTO for PrevChallenge as used in EventTrackerDto */

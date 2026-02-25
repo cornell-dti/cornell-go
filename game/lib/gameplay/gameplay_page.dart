@@ -20,6 +20,7 @@ import 'package:showcaseview/showcaseview.dart';
 
 import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:async';
+import 'package:game/constants/constants.dart';
 
 class GameplayPage extends StatefulWidget {
   const GameplayPage({Key? key}) : super(key: key);
@@ -96,10 +97,7 @@ class _GameplayPageState extends State<GameplayPage> {
           print("Tapped anywhere on step 6");
           _removeBearOverlay();
           ShowcaseView.getNamed("gameplay_page").dismiss();
-          Provider.of<OnboardingModel>(
-            context,
-            listen: false,
-          ).completeStep6();
+          Provider.of<OnboardingModel>(context, listen: false).completeStep6();
         },
       ),
     );
@@ -145,7 +143,7 @@ class _GameplayPageState extends State<GameplayPage> {
                           text,
                           style: TextStyle(
                             fontSize: 14,
-                            color: Color(0xFF835A7C),
+                            color: AppColors.purple,
                           ),
                         ),
                       );
@@ -180,7 +178,7 @@ class _GameplayPageState extends State<GameplayPage> {
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 14,
-                            color: Color(0xFF58B171),
+                            color: AppColors.green,
                           ),
                         ),
                       );
@@ -205,9 +203,13 @@ class _GameplayPageState extends State<GameplayPage> {
                       // First apply extension deduction, then hint adjustment
                       int extensionAdjustedPoints =
                           calculateExtensionAdjustedPoints(
-                              basePoints, extensionsUsed);
+                        basePoints,
+                        extensionsUsed,
+                      );
                       int finalAdjustedPoints = calculateHintAdjustedPoints(
-                          extensionAdjustedPoints, hintsUsed);
+                        extensionAdjustedPoints,
+                        hintsUsed,
+                      );
 
                       String text = ' ' +
                           ((extensionsUsed > 0 || hintsUsed > 0)
@@ -223,7 +225,7 @@ class _GameplayPageState extends State<GameplayPage> {
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
-                            color: Color(0xFFC17E19),
+                            color: AppColors.gold,
                           ),
                         ),
                       );
@@ -295,8 +297,16 @@ class _GameplayPageState extends State<GameplayPage> {
         // LAYER 1: Main gameplay UI
         Consumer6<ChallengeModel, EventModel, TrackerModel, TimerModel,
             ApiClient, GroupModel>(
-          builder: (context, challengeModel, eventModel, trackerModel,
-              timerModel, apiClient, groupModel, _) {
+          builder: (
+            context,
+            challengeModel,
+            eventModel,
+            trackerModel,
+            timerModel,
+            apiClient,
+            groupModel,
+            _,
+          ) {
             var eventId = groupModel.curEventId;
             // print(eventId);
             var event = eventModel.getEventById(eventId ?? "");
@@ -315,7 +325,11 @@ class _GameplayPageState extends State<GameplayPage> {
 
             GeoPoint? targetLocation;
             if (challenge.latF != null && challenge.longF != null) {
-              targetLocation = GeoPoint(challenge.latF!, challenge.longF!, 0);
+              targetLocation = GeoPoint(
+                challenge.latF!,
+                challenge.longF!,
+                0,
+              );
             }
             double awardingRadius = challenge.awardingRadiusF ?? 0;
             int hintsUsed = tracker.hintsUsed;
@@ -376,7 +390,11 @@ class _GameplayPageState extends State<GameplayPage> {
                   SafeArea(
                     bottom: false,
                     child: Container(
-                      padding: EdgeInsets.only(left: 39, right: 39, bottom: 10),
+                      padding: EdgeInsets.only(
+                        left: 39,
+                        right: 39,
+                        bottom: 10,
+                      ),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.center,
@@ -414,7 +432,7 @@ class _GameplayPageState extends State<GameplayPage> {
                                               : "Challenge"),
                                       style: TextStyle(
                                         fontSize: 14,
-                                        color: Color(0xFF835A7C),
+                                        color: AppColors.purple,
                                       ),
                                     ),
                                   ],
@@ -422,7 +440,7 @@ class _GameplayPageState extends State<GameplayPage> {
                               ),
                               Container(
                                 decoration: const BoxDecoration(
-                                  color: Color(0xFFF1F1F1),
+                                  color: AppColors.lightGray,
                                   borderRadius: BorderRadius.all(
                                     Radius.circular(15.0),
                                   ),
@@ -437,7 +455,7 @@ class _GameplayPageState extends State<GameplayPage> {
                                       : "Challenge"),
                                   style: TextStyle(
                                     fontSize: 14,
-                                    color: Color(0xFFA4A4A4),
+                                    color: AppColors.mediumGray,
                                   ),
                                 ),
                               ),

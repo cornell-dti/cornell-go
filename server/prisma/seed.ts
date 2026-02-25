@@ -91,10 +91,9 @@ async function main() {
     data: {
       requiredMembers: 1,
       name: 'Ithaca Foodie Adventure',
-      description:
-        'Discover the best eats around Cornell and Ithaca!',
+      description: 'Discover the best eats around Cornell and Ithaca!',
       longDescription:
-        'Embark on the Ithaca Foodie Adventure and savor the diverse culinary delights that Cornell and the surrounding Ithaca area have to offer. Start your journey at one of Cornell\'s renowned dining halls, where you can sample a variety of dishes made with fresh, local ingredients. Then, venture into downtown Ithaca to explore charming cafes, food trucks, and restaurants that showcase the region\'s vibrant food scene. Whether you\'re craving farm-to-table fare or international cuisine, this adventure promises a feast for your taste buds!',
+        "Embark on the Ithaca Foodie Adventure and savor the diverse culinary delights that Cornell and the surrounding Ithaca area have to offer. Start your journey at one of Cornell's renowned dining halls, where you can sample a variety of dishes made with fresh, local ingredients. Then, venture into downtown Ithaca to explore charming cafes, food trucks, and restaurants that showcase the region's vibrant food scene. Whether you're craving farm-to-table fare or international cuisine, this adventure promises a feast for your taste buds!",
       timeLimitation: 'PERPETUAL',
       indexable: true,
       endTime: new Date('2030-12-31'),
@@ -137,7 +136,7 @@ async function main() {
       description:
         'Watch the sunset from Libe Slope, one of the most beautiful views on campus.',
       longDescription:
-        'Experience the magic of a Cornell sunset from Libe Slope. This iconic location offers one of the most breathtaking views on campus, especially during golden hour. Whether you\'re studying, relaxing, or just taking in the scenery, Libe Slope is a must-visit spot that captures the essence of Cornell\'s natural beauty.',
+        "Experience the magic of a Cornell sunset from Libe Slope. This iconic location offers one of the most breathtaking views on campus, especially during golden hour. Whether you're studying, relaxing, or just taking in the scenery, Libe Slope is a must-visit spot that captures the essence of Cornell's natural beauty.",
       timeLimitation: 'PERPETUAL',
       indexable: true,
       endTime: new Date('2030-12-31'),
@@ -145,6 +144,88 @@ async function main() {
       longitude: -76.484807,
       difficulty: 'EASY',
       category: 'NATURE',
+      usedIn: {
+        connect: [{ id: cornellOrg.id }],
+      },
+    },
+  });
+
+  const suspensionBridgeEvent = await prisma.eventBase.create({
+    data: {
+      requiredMembers: 1,
+      name: 'Suspension Bridge Walk',
+      description:
+        'Cross the iconic Cornell suspension bridge and take in the gorge views.',
+      longDescription:
+        'The Cornell suspension bridge is one of the most thrilling spots on campus. Spanning the Fall Creek gorge, it offers breathtaking views of the rushing water and rocky walls below. Whether you are crossing to class or simply soaking in the scenery, walking across this bridge is a quintessential Cornell experience.',
+      timeLimitation: 'PERPETUAL',
+      indexable: true,
+      endTime: new Date('2030-12-31'),
+      latitude: 42.452,
+      longitude: -76.4873,
+      difficulty: 'EASY',
+      category: 'NATURE',
+      usedIn: {
+        connect: [{ id: cornellOrg.id }],
+      },
+    },
+  });
+
+  const cornellDairyEvent = await prisma.eventBase.create({
+    data: {
+      requiredMembers: 1,
+      name: 'Cornell Dairy Bar Tasting',
+      description: 'Sample the famous Cornell ice cream made fresh on campus.',
+      longDescription:
+        "Head to Stocking Hall on the Ag Quad and treat yourself to some of the best ice cream you will ever taste. Made on campus from milk produced by Cornell's own dairy herd, Cornell Dairy ice cream is a beloved tradition. Try classic flavors like Big Red Bear Tracks or seasonal specials.",
+      timeLimitation: 'PERPETUAL',
+      indexable: true,
+      endTime: new Date('2030-12-31'),
+      latitude: 42.4486,
+      longitude: -76.4787,
+      difficulty: 'EASY',
+      category: 'FOOD',
+      usedIn: {
+        connect: [{ id: cornellOrg.id }],
+      },
+    },
+  });
+
+  const bellTowerEvent = await prisma.eventBase.create({
+    data: {
+      requiredMembers: 1,
+      name: 'McGraw Tower Chimes Concert',
+      description: 'Listen to the Cornell Chimes ring out from McGraw Tower.',
+      longDescription:
+        "The Cornell Chimes have been a campus tradition since 1868. Played by student chimesmasters, the 21 bells of McGraw Tower ring out three times daily, filling the campus with music. Stand nearby during a concert and experience one of Cornell's oldest and most cherished traditions.",
+      timeLimitation: 'PERPETUAL',
+      indexable: true,
+      endTime: new Date('2030-12-31'),
+      latitude: 42.4474,
+      longitude: -76.4849,
+      difficulty: 'EASY',
+      category: 'HISTORICAL',
+      usedIn: {
+        connect: [{ id: cornellOrg.id }],
+      },
+    },
+  });
+
+  const dragonDayEvent = await prisma.eventBase.create({
+    data: {
+      requiredMembers: 1,
+      name: 'Dragon Day Monument',
+      description:
+        'Visit the site of the legendary Dragon Day celebration on the Arts Quad.',
+      longDescription:
+        "Dragon Day is one of Cornell's most unique traditions. Every spring, architecture students build an enormous dragon and parade it across campus to the Arts Quad. Visit the spot where decades of dragons have met their fiery end and learn about this beloved tradition that dates back to 1901.",
+      timeLimitation: 'PERPETUAL',
+      indexable: true,
+      endTime: new Date('2030-12-31'),
+      latitude: 42.4509,
+      longitude: -76.4836,
+      difficulty: 'NORMAL',
+      category: 'HISTORICAL',
       usedIn: {
         connect: [{ id: cornellOrg.id }],
       },
@@ -632,7 +713,7 @@ async function main() {
       name: 'Libe Slope',
       location: 'CENTRAL_CAMPUS',
       description:
-        'Visit Libe Slope and enjoy one of the most iconic views on Cornell\'s campus, especially beautiful at sunset.',
+        "Visit Libe Slope and enjoy one of the most iconic views on Cornell's campus, especially beautiful at sunset.",
       points: 85,
       imageUrl:
         'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800',
@@ -640,6 +721,78 @@ async function main() {
       longitude: -76.484807,
       awardingRadius: 60,
       closeRadius: 120,
+    },
+  });
+
+  const suspensionBridgeChallenge = await prisma.challenge.create({
+    data: {
+      linkedEventId: suspensionBridgeEvent.id,
+      eventIndex: 0,
+      name: 'Suspension Bridge',
+      location: 'NORTH_CAMPUS',
+      description:
+        'Walk across the suspension bridge over Fall Creek gorge and take in the stunning views of the waterfall below.',
+      points: 75,
+      imageUrl:
+        'https://images.unsplash.com/photo-1545893835-abaa50cbe628?w=800',
+      latitude: 42.452,
+      longitude: -76.4873,
+      awardingRadius: 50,
+      closeRadius: 100,
+    },
+  });
+
+  const cornellDairyChallenge = await prisma.challenge.create({
+    data: {
+      linkedEventId: cornellDairyEvent.id,
+      eventIndex: 0,
+      name: 'Stocking Hall Dairy Bar',
+      location: 'AG_QUAD',
+      description:
+        'Visit the Cornell Dairy Bar at Stocking Hall and try the famous campus-made ice cream.',
+      points: 60,
+      imageUrl:
+        'https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=800',
+      latitude: 42.4486,
+      longitude: -76.4787,
+      awardingRadius: 40,
+      closeRadius: 80,
+    },
+  });
+
+  const bellTowerChallenge = await prisma.challenge.create({
+    data: {
+      linkedEventId: bellTowerEvent.id,
+      eventIndex: 0,
+      name: 'McGraw Tower',
+      location: 'CENTRAL_CAMPUS',
+      description:
+        'Stand near McGraw Tower during a chimes concert and enjoy the music echoing across campus.',
+      points: 80,
+      imageUrl:
+        'https://images.unsplash.com/photo-1548625149-fc4a29cf7092?w=800',
+      latitude: 42.4474,
+      longitude: -76.4849,
+      awardingRadius: 50,
+      closeRadius: 100,
+    },
+  });
+
+  const dragonDayChallenge = await prisma.challenge.create({
+    data: {
+      linkedEventId: dragonDayEvent.id,
+      eventIndex: 0,
+      name: 'Arts Quad Dragon Day Site',
+      location: 'ARTS_QUAD',
+      description:
+        'Visit the Arts Quad where the Dragon Day parade culminates each spring.',
+      points: 70,
+      imageUrl:
+        'https://images.unsplash.com/photo-1562774053-701939374585?w=800',
+      latitude: 42.4509,
+      longitude: -76.4836,
+      awardingRadius: 45,
+      closeRadius: 90,
     },
   });
 
@@ -653,7 +806,7 @@ async function main() {
 
   // Quiz questions for Campus Tour Event challenges
   const campusTourChallenges = allChallenges.filter(
-    (c) => c.linkedEventId === campusTourEvent.id,
+    c => c.linkedEventId === campusTourEvent.id,
   );
 
   // Quiz for McGraw Tower Clock - Multiple questions for shuffling
@@ -661,7 +814,8 @@ async function main() {
     await prisma.quizQuestion.create({
       data: {
         challengeId: campusTourChallenges[0].id,
-        questionText: 'What is the item the statue is holding in his right hand?',
+        questionText:
+          'What is the item the statue is holding in his right hand?',
         pointValue: 10,
         difficulty: 1,
         category: 'HISTORICAL',
@@ -682,7 +836,8 @@ async function main() {
         pointValue: 10,
         difficulty: 1,
         category: 'HISTORICAL',
-        explanation: 'McGraw Tower houses the Cornell Chimes, which consist of 21 bells.',
+        explanation:
+          'McGraw Tower houses the Cornell Chimes, which consist of 21 bells.',
         answers: {
           create: [
             { answerText: '18', isCorrect: false },
@@ -717,16 +872,24 @@ async function main() {
     await prisma.quizQuestion.create({
       data: {
         challengeId: campusTourChallenges[1].id,
-        questionText: 'What was one of Andrew Dickson White\'s key contributions to Cornell University?',
+        questionText:
+          "What was one of Andrew Dickson White's key contributions to Cornell University?",
         pointValue: 10,
         difficulty: 1,
         category: 'HISTORICAL',
-        explanation: 'Andrew Dickson White co-founded Cornell University with Ezra Cornell in 1865.',
+        explanation:
+          'Andrew Dickson White co-founded Cornell University with Ezra Cornell in 1865.',
         answers: {
           create: [
-            { answerText: 'Created Cornell\'s medical school.', isCorrect: false },
+            {
+              answerText: "Created Cornell's medical school.",
+              isCorrect: false,
+            },
             { answerText: 'Co-founded the university.', isCorrect: true },
-            { answerText: 'Designed first graduate programs.', isCorrect: false },
+            {
+              answerText: 'Designed first graduate programs.',
+              isCorrect: false,
+            },
             { answerText: 'Funded the library.', isCorrect: false },
           ],
         },
@@ -752,7 +915,8 @@ async function main() {
     await prisma.quizQuestion.create({
       data: {
         challengeId: campusTourChallenges[1].id,
-        questionText: 'What architectural style is the A.D. White Reading Room known for?',
+        questionText:
+          'What architectural style is the A.D. White Reading Room known for?',
         pointValue: 10,
         difficulty: 1,
         category: 'HISTORICAL',
@@ -773,7 +937,8 @@ async function main() {
     await prisma.quizQuestion.create({
       data: {
         challengeId: campusTourChallenges[2].id,
-        questionText: 'Which college is primarily located in the Engineering Quad?',
+        questionText:
+          'Which college is primarily located in the Engineering Quad?',
         pointValue: 10,
         difficulty: 1,
         category: 'HISTORICAL',
@@ -781,7 +946,10 @@ async function main() {
           create: [
             { answerText: 'College of Arts & Sciences', isCorrect: false },
             { answerText: 'College of Engineering', isCorrect: true },
-            { answerText: 'College of Agriculture and Life Sciences', isCorrect: false },
+            {
+              answerText: 'College of Agriculture and Life Sciences',
+              isCorrect: false,
+            },
             { answerText: 'School of Hotel Administration', isCorrect: false },
           ],
         },
@@ -790,7 +958,8 @@ async function main() {
     await prisma.quizQuestion.create({
       data: {
         challengeId: campusTourChallenges[2].id,
-        questionText: 'What is the name of the main building in the Engineering Quad?',
+        questionText:
+          'What is the name of the main building in the Engineering Quad?',
         pointValue: 10,
         difficulty: 1,
         category: 'HISTORICAL',
@@ -807,7 +976,8 @@ async function main() {
     await prisma.quizQuestion.create({
       data: {
         challengeId: campusTourChallenges[2].id,
-        questionText: 'Which famous Cornell engineering program is based in the Engineering Quad?',
+        questionText:
+          'Which famous Cornell engineering program is based in the Engineering Quad?',
         pointValue: 10,
         difficulty: 1,
         category: 'HISTORICAL',
@@ -835,7 +1005,8 @@ async function main() {
         pointValue: 10,
         difficulty: 1,
         category: 'HISTORICAL',
-        explanation: 'Cornell University was founded in 1865 by Ezra Cornell and Andrew Dickson White.',
+        explanation:
+          'Cornell University was founded in 1865 by Ezra Cornell and Andrew Dickson White.',
         answers: {
           create: [
             { answerText: '1865', isCorrect: true },
@@ -849,11 +1020,13 @@ async function main() {
     await prisma.quizQuestion.create({
       data: {
         challengeId: campusTourChallenges[4].id,
-        questionText: 'What was Ezra Cornell\'s primary business before founding the university?',
+        questionText:
+          "What was Ezra Cornell's primary business before founding the university?",
         pointValue: 10,
         difficulty: 1,
         category: 'HISTORICAL',
-        explanation: 'Ezra Cornell made his fortune in the telegraph industry, particularly with Western Union.',
+        explanation:
+          'Ezra Cornell made his fortune in the telegraph industry, particularly with Western Union.',
         answers: {
           create: [
             { answerText: 'Telegraph industry', isCorrect: true },
@@ -867,7 +1040,7 @@ async function main() {
     await prisma.quizQuestion.create({
       data: {
         challengeId: campusTourChallenges[4].id,
-        questionText: 'Which animal is Cornell\'s unofficial mascot?',
+        questionText: "Which animal is Cornell's unofficial mascot?",
         pointValue: 10,
         difficulty: 1,
         category: 'HISTORICAL',
@@ -885,7 +1058,7 @@ async function main() {
 
   // Quiz questions for Foodie Event challenges
   const foodieChallenges = allChallenges.filter(
-    (c) => c.linkedEventId === foodieEvent.id,
+    c => c.linkedEventId === foodieEvent.id,
   );
 
   // Quiz for Okenshields Dining Hall - Multiple questions
@@ -893,7 +1066,7 @@ async function main() {
     await prisma.quizQuestion.create({
       data: {
         challengeId: foodieChallenges[0].id,
-        questionText: 'What is the name of Cornell\'s largest dining hall?',
+        questionText: "What is the name of Cornell's largest dining hall?",
         pointValue: 10,
         difficulty: 1,
         category: 'FOOD',
@@ -948,7 +1121,8 @@ async function main() {
     await prisma.quizQuestion.create({
       data: {
         challengeId: foodieChallenges[1].id,
-        questionText: 'What is the popular abbreviation for Collegetown Bagels?',
+        questionText:
+          'What is the popular abbreviation for Collegetown Bagels?',
         pointValue: 10,
         difficulty: 1,
         category: 'FOOD',
@@ -1010,13 +1184,17 @@ async function main() {
         pointValue: 10,
         difficulty: 1,
         category: 'FOOD',
-        explanation: 'Cornell ice cream is made fresh on campus using milk from Cornell\'s own dairy cows.',
+        explanation:
+          "Cornell ice cream is made fresh on campus using milk from Cornell's own dairy cows.",
         answers: {
           create: [
-            { answerText: 'It\'s made on campus with Cornell dairy milk', isCorrect: true },
-            { answerText: 'It\'s imported from Italy', isCorrect: false },
-            { answerText: 'It\'s vegan', isCorrect: false },
-            { answerText: 'It\'s only available in summer', isCorrect: false },
+            {
+              answerText: "It's made on campus with Cornell dairy milk",
+              isCorrect: true,
+            },
+            { answerText: "It's imported from Italy", isCorrect: false },
+            { answerText: "It's vegan", isCorrect: false },
+            { answerText: "It's only available in summer", isCorrect: false },
           ],
         },
       },
@@ -1059,7 +1237,7 @@ async function main() {
 
   // Quiz questions for Nature Event challenges
   const natureChallenges = allChallenges.filter(
-    (c) => c.linkedEventId === natureEvent.id,
+    c => c.linkedEventId === natureEvent.id,
   );
 
   // Quiz for Fall Creek Gorge Trail - Multiple questions
@@ -1067,7 +1245,7 @@ async function main() {
     await prisma.quizQuestion.create({
       data: {
         challengeId: natureChallenges[0].id,
-        questionText: 'What is Ithaca\'s famous slogan?',
+        questionText: "What is Ithaca's famous slogan?",
         pointValue: 10,
         difficulty: 1,
         category: 'NATURE',
@@ -1088,7 +1266,8 @@ async function main() {
         pointValue: 10,
         difficulty: 1,
         category: 'NATURE',
-        explanation: 'Ithaca and the surrounding Finger Lakes region are home to over 150 waterfalls.',
+        explanation:
+          'Ithaca and the surrounding Finger Lakes region are home to over 150 waterfalls.',
         answers: {
           create: [
             { answerText: 'Over 150', isCorrect: true },
@@ -1126,11 +1305,12 @@ async function main() {
     await prisma.quizQuestion.create({
       data: {
         challengeId: natureChallenges[2].id,
-        questionText: 'What is the name of Cornell\'s botanical gardens?',
+        questionText: "What is the name of Cornell's botanical gardens?",
         pointValue: 10,
         difficulty: 1,
         category: 'NATURE',
-        explanation: 'The Cornell Botanic Gardens (formerly Cornell Plantations) features beautiful trails and gardens.',
+        explanation:
+          'The Cornell Botanic Gardens (formerly Cornell Plantations) features beautiful trails and gardens.',
         answers: {
           create: [
             { answerText: 'Cornell Botanic Gardens', isCorrect: true },
@@ -1148,7 +1328,8 @@ async function main() {
         pointValue: 10,
         difficulty: 1,
         category: 'NATURE',
-        explanation: 'Trillium is a genus of flowering plants native to North America, known for their three-petaled flowers.',
+        explanation:
+          'Trillium is a genus of flowering plants native to North America, known for their three-petaled flowers.',
         answers: {
           create: [
             { answerText: 'A type of wildflower', isCorrect: true },
@@ -1168,7 +1349,10 @@ async function main() {
         category: 'NATURE',
         answers: {
           create: [
-            { answerText: 'Native wildflowers and woodland plants', isCorrect: true },
+            {
+              answerText: 'Native wildflowers and woodland plants',
+              isCorrect: true,
+            },
             { answerText: 'Only trees', isCorrect: false },
             { answerText: 'Only water features', isCorrect: false },
             { answerText: 'Only sculptures', isCorrect: false },
@@ -1188,7 +1372,10 @@ async function main() {
       category: 'NATURE',
       answers: {
         create: [
-          { answerText: 'Stunning sunset views and campus scenery', isCorrect: true },
+          {
+            answerText: 'Stunning sunset views and campus scenery',
+            isCorrect: true,
+          },
           { answerText: 'Being the highest point on campus', isCorrect: false },
           { answerText: 'Hosting sports events', isCorrect: false },
           { answerText: 'Having the best study spots', isCorrect: false },
@@ -1203,11 +1390,12 @@ async function main() {
       pointValue: 10,
       difficulty: 1,
       category: 'NATURE',
-      explanation: '"Libe" is short for "Library" - referring to Uris Library nearby.',
+      explanation:
+        '"Libe" is short for "Library" - referring to Uris Library nearby.',
       answers: {
         create: [
           { answerText: 'Library (shortened)', isCorrect: true },
-          { answerText: 'A person\'s name', isCorrect: false },
+          { answerText: "A person's name", isCorrect: false },
           { answerText: 'A type of plant', isCorrect: false },
           { answerText: 'A building name', isCorrect: false },
         ],
@@ -1227,6 +1415,227 @@ async function main() {
           { answerText: 'Early morning', isCorrect: false },
           { answerText: 'Midday', isCorrect: false },
           { answerText: 'Late night', isCorrect: false },
+        ],
+      },
+    },
+  });
+
+  // Quiz questions for Suspension Bridge standalone challenge
+  await prisma.quizQuestion.create({
+    data: {
+      challengeId: suspensionBridgeChallenge.id,
+      questionText: 'What gorge does the Cornell suspension bridge cross?',
+      pointValue: 10,
+      difficulty: 1,
+      category: 'NATURE',
+      answers: {
+        create: [
+          { answerText: 'Fall Creek', isCorrect: true },
+          { answerText: 'Cascadilla Creek', isCorrect: false },
+          { answerText: 'Six Mile Creek', isCorrect: false },
+          { answerText: 'Taughannock Creek', isCorrect: false },
+        ],
+      },
+    },
+  });
+  await prisma.quizQuestion.create({
+    data: {
+      challengeId: suspensionBridgeChallenge.id,
+      questionText: 'What type of bridge is the Cornell suspension bridge?',
+      pointValue: 10,
+      difficulty: 1,
+      category: 'NATURE',
+      answers: {
+        create: [
+          { answerText: 'A pedestrian suspension bridge', isCorrect: true },
+          { answerText: 'A vehicle bridge', isCorrect: false },
+          { answerText: 'A covered bridge', isCorrect: false },
+          { answerText: 'A drawbridge', isCorrect: false },
+        ],
+      },
+    },
+  });
+  await prisma.quizQuestion.create({
+    data: {
+      challengeId: suspensionBridgeChallenge.id,
+      questionText: 'What can you see from the suspension bridge?',
+      pointValue: 10,
+      difficulty: 1,
+      category: 'NATURE',
+      answers: {
+        create: [
+          { answerText: 'A waterfall and gorge walls', isCorrect: true },
+          { answerText: 'Cayuga Lake', isCorrect: false },
+          { answerText: 'The Cornell clock tower', isCorrect: false },
+          { answerText: 'Downtown Ithaca', isCorrect: false },
+        ],
+      },
+    },
+  });
+
+  // Quiz questions for Cornell Dairy Bar standalone challenge
+  await prisma.quizQuestion.create({
+    data: {
+      challengeId: cornellDairyChallenge.id,
+      questionText: 'Where does the milk for Cornell ice cream come from?',
+      pointValue: 10,
+      difficulty: 1,
+      category: 'FOOD',
+      answers: {
+        create: [
+          { answerText: "Cornell's own dairy herd on campus", isCorrect: true },
+          { answerText: 'A local Ithaca dairy farm', isCorrect: false },
+          { answerText: 'Imported from Vermont', isCorrect: false },
+          { answerText: 'A commercial supplier', isCorrect: false },
+        ],
+      },
+    },
+  });
+  await prisma.quizQuestion.create({
+    data: {
+      challengeId: cornellDairyChallenge.id,
+      questionText: 'In which building is the Cornell Dairy Bar located?',
+      pointValue: 10,
+      difficulty: 1,
+      category: 'FOOD',
+      answers: {
+        create: [
+          { answerText: 'Stocking Hall', isCorrect: true },
+          { answerText: 'Warren Hall', isCorrect: false },
+          { answerText: 'Mann Library', isCorrect: false },
+          { answerText: 'Bailey Hall', isCorrect: false },
+        ],
+      },
+    },
+  });
+  await prisma.quizQuestion.create({
+    data: {
+      challengeId: cornellDairyChallenge.id,
+      questionText: 'Which college at Cornell runs the Dairy Bar?',
+      pointValue: 10,
+      difficulty: 1,
+      category: 'FOOD',
+      explanation:
+        'The College of Agriculture and Life Sciences (CALS) operates the dairy program.',
+      answers: {
+        create: [
+          {
+            answerText: 'College of Agriculture and Life Sciences',
+            isCorrect: true,
+          },
+          { answerText: 'College of Engineering', isCorrect: false },
+          { answerText: 'School of Hotel Administration', isCorrect: false },
+          { answerText: 'College of Arts & Sciences', isCorrect: false },
+        ],
+      },
+    },
+  });
+
+  // Quiz questions for McGraw Tower Chimes standalone challenge
+  await prisma.quizQuestion.create({
+    data: {
+      challengeId: bellTowerChallenge.id,
+      questionText: 'How many bells make up the Cornell Chimes?',
+      pointValue: 10,
+      difficulty: 1,
+      category: 'HISTORICAL',
+      answers: {
+        create: [
+          { answerText: '21', isCorrect: true },
+          { answerText: '12', isCorrect: false },
+          { answerText: '30', isCorrect: false },
+          { answerText: '15', isCorrect: false },
+        ],
+      },
+    },
+  });
+  await prisma.quizQuestion.create({
+    data: {
+      challengeId: bellTowerChallenge.id,
+      questionText: 'When did the Cornell Chimes tradition begin?',
+      pointValue: 10,
+      difficulty: 1,
+      category: 'HISTORICAL',
+      explanation:
+        'The Cornell Chimes tradition dates back to 1868, just three years after the university was founded.',
+      answers: {
+        create: [
+          { answerText: '1868', isCorrect: true },
+          { answerText: '1900', isCorrect: false },
+          { answerText: '1865', isCorrect: false },
+          { answerText: '1920', isCorrect: false },
+        ],
+      },
+    },
+  });
+  await prisma.quizQuestion.create({
+    data: {
+      challengeId: bellTowerChallenge.id,
+      questionText: 'Who plays the Cornell Chimes?',
+      pointValue: 10,
+      difficulty: 1,
+      category: 'HISTORICAL',
+      answers: {
+        create: [
+          { answerText: 'Student chimesmasters', isCorrect: true },
+          { answerText: 'Professional musicians', isCorrect: false },
+          { answerText: 'An automated system', isCorrect: false },
+          { answerText: 'Faculty members', isCorrect: false },
+        ],
+      },
+    },
+  });
+
+  // Quiz questions for Dragon Day standalone challenge
+  await prisma.quizQuestion.create({
+    data: {
+      challengeId: dragonDayChallenge.id,
+      questionText: 'Which students build the Dragon Day dragon?',
+      pointValue: 10,
+      difficulty: 1,
+      category: 'HISTORICAL',
+      answers: {
+        create: [
+          { answerText: 'Architecture students', isCorrect: true },
+          { answerText: 'Engineering students', isCorrect: false },
+          { answerText: 'Art students', isCorrect: false },
+          { answerText: 'All freshmen', isCorrect: false },
+        ],
+      },
+    },
+  });
+  await prisma.quizQuestion.create({
+    data: {
+      challengeId: dragonDayChallenge.id,
+      questionText: 'When did the Dragon Day tradition begin?',
+      pointValue: 10,
+      difficulty: 1,
+      category: 'HISTORICAL',
+      explanation:
+        "Dragon Day dates back to 1901, making it one of Cornell's oldest traditions.",
+      answers: {
+        create: [
+          { answerText: '1901', isCorrect: true },
+          { answerText: '1950', isCorrect: false },
+          { answerText: '1865', isCorrect: false },
+          { answerText: '1975', isCorrect: false },
+        ],
+      },
+    },
+  });
+  await prisma.quizQuestion.create({
+    data: {
+      challengeId: dragonDayChallenge.id,
+      questionText: 'What happens to the dragon at the end of the parade?',
+      pointValue: 10,
+      difficulty: 1,
+      category: 'HISTORICAL',
+      answers: {
+        create: [
+          { answerText: 'It is traditionally set on fire', isCorrect: true },
+          { answerText: 'It is displayed in a museum', isCorrect: false },
+          { answerText: 'It is thrown into a gorge', isCorrect: false },
+          { answerText: 'It is donated to the city', isCorrect: false },
         ],
       },
     },
@@ -1343,8 +1752,8 @@ async function main() {
   console.log('✅ Database seeded successfully!');
   console.log(`   📊 Created ${users.length} users`);
   console.log(`   🏛️  Created 3 organizations`);
-  console.log(`   🎯 Created 4 events (3 journeys + 1 standalone challenge)`);
-  console.log(`   🎮 Created 13 challenges (12 in journeys + 1 standalone)`);
+  console.log(`   🎯 Created 8 events (3 journeys + 5 standalone challenges)`);
+  console.log(`   🎮 Created 17 challenges (12 in journeys + 5 standalone)`);
   console.log(`   📝 Created ${quizQuestionCount} quiz questions`);
   console.log(`   🏆 Created 4 achievements`);
   console.log(`   👫 Created ${users.length} groups`);

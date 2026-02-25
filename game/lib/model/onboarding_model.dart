@@ -168,8 +168,12 @@ class OnboardingModel extends ChangeNotifier {
    * Returns true if user has at least one uncompleted challenge (any timer status)
    * AND one uncompleted timer-free journey
    */
-  bool canStartOnboarding(UserModel userModel, EventModel eventModel,
-      TrackerModel trackerModel, ChallengeModel challengeModel) {
+  bool canStartOnboarding(
+    UserModel userModel,
+    EventModel eventModel,
+    TrackerModel trackerModel,
+    ChallengeModel challengeModel,
+  ) {
     final allowedEventIds = userModel.getAvailableEventIds();
 
     bool hasUncompletedChallenge = false;

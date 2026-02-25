@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:game/constants/constants.dart';
 import 'package:game/utils/utility_functions.dart';
 
 /**
@@ -9,7 +10,7 @@ import 'package:game/utils/utility_functions.dart';
  */
 Widget podiumCell(context, String name, bool isUser) {
   var nameStyle = TextStyle(
-    color: Color(0xFF1E1E1E),
+    color: AppColors.darkText,
     fontSize: 14,
     fontFamily: 'Poppins',
     fontWeight: FontWeight.w500,
@@ -28,10 +29,7 @@ Widget podiumCell(context, String name, bool isUser) {
             color: constructColorFromUserName(name),
             borderRadius: BorderRadius.circular(49.128),
             border: isUser
-                ? Border.all(
-                    color: Color.fromRGBO(255, 170, 91, 1),
-                    width: 2.5,
-                  )
+                ? Border.all(color: Color.fromRGBO(255, 170, 91, 1), width: 2.5)
                 : null,
           ),
         ),
