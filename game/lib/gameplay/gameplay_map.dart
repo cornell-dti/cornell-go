@@ -907,11 +907,12 @@ class _GameplayMapState extends State<GameplayMap>
             timeLimit: Duration(seconds: _locationTimeoutSeconds),
           );
           if (mounted && currentLocation != null) {
-            final newLocation = GeoPoint(position.latitude, position.longitude, position.heading);
+            final newLocation = GeoPoint(
+                position.latitude, position.longitude, position.heading);
             final locationChanged = _previousLocation == null ||
                 _previousLocation!.lat != newLocation.lat ||
                 _previousLocation!.long != newLocation.long;
-            
+
             if (locationChanged) {
               setState(() {
                 currentLocation = newLocation;
@@ -924,7 +925,7 @@ class _GameplayMapState extends State<GameplayMap>
               });
             }
           }
-          
+
           // Success - reset failure counter
           _consecutiveLocationFailures = 0;
           _locationWarningToastShown = false;
@@ -982,7 +983,7 @@ class _GameplayMapState extends State<GameplayMap>
             _locationWarningToastShown = false;
 
             _checkRadiusStatusInSetState();
-            
+
             if (locationChanged) {
               _previousLocation = newLocation;
             }
@@ -1047,7 +1048,7 @@ class _GameplayMapState extends State<GameplayMap>
           _locationWarningToastShown = false;
 
           _checkRadiusStatusInSetState();
-          
+
           if (locationChanged) {
             _previousLocation = newLocation;
           }
@@ -2067,9 +2068,9 @@ class _GameplayMapState extends State<GameplayMap>
                         widget.targetLocation.long,
                       ),
                       radius: widget.awardingRadius,
-                      strokeColor: Color.fromARGB(200, 76, 175, 80), 
+                      strokeColor: Color.fromARGB(200, 76, 175, 80),
                       strokeWidth: 3,
-                      fillColor: Color.fromARGB(50, 76, 175, 80), 
+                      fillColor: Color.fromARGB(50, 76, 175, 80),
                     ),
                   if (_isWithinCloseRadius)
                     Circle(
@@ -2079,7 +2080,7 @@ class _GameplayMapState extends State<GameplayMap>
                         widget.targetLocation.long,
                       ),
                       radius: widget.closeRadius,
-                      strokeColor: Color.fromARGB(200, 255, 152, 0), 
+                      strokeColor: Color.fromARGB(200, 255, 152, 0),
                       strokeWidth: 3,
                       fillColor: Color.fromARGB(50, 255, 152, 0),
                     ),
@@ -2805,12 +2806,12 @@ class _GameplayMapState extends State<GameplayMap>
       _isWithinCloseRadius = false;
       return;
     }
-    
+
     final distance = currentLocation!.distanceTo(widget.targetLocation);
-    
+
     _isWithinAwardingRadius = distance <= widget.awardingRadius;
-    _isWithinCloseRadius = distance <= widget.closeRadius && 
-                          distance > widget.awardingRadius;
+    _isWithinCloseRadius =
+        distance <= widget.closeRadius && distance > widget.awardingRadius;
   }
 
   /**
@@ -2822,19 +2823,19 @@ class _GameplayMapState extends State<GameplayMap>
     if (currentLocation == null) {
       return;
     }
-    
+
     final distance = currentLocation!.distanceTo(widget.targetLocation);
     final wasWithinAwarding = _isWithinAwardingRadius;
     final wasWithinClose = _isWithinCloseRadius;
-    
+
     final newWithinAwarding = distance <= widget.awardingRadius;
-    final newWithinClose = distance <= widget.closeRadius && 
-                          distance > widget.awardingRadius;
-    
+    final newWithinClose =
+        distance <= widget.closeRadius && distance > widget.awardingRadius;
+
     _isWithinAwardingRadius = newWithinAwarding;
     _isWithinCloseRadius = newWithinClose;
-    
-    if (wasWithinAwarding != newWithinAwarding || 
+
+    if (wasWithinAwarding != newWithinAwarding ||
         wasWithinClose != newWithinClose) {
       setState(() {});
     }
