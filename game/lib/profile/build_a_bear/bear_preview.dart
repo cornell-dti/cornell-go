@@ -30,7 +30,7 @@ class BearPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final eyesOffsetY = -bearHeight * 0.19;
-    final mouthOffsetY = -bearHeight * 0.135;
+    final mouthOffsetY = -bearHeight * 0.07;
 
     return SizedBox(
       width: bearWidth,
@@ -77,17 +77,11 @@ class BearPreview extends StatelessWidget {
     final eyesItem = itemForSlot(BearSlotDto.EYES);
     if (eyesItem == null) return const SizedBox.shrink();
 
-    final isBlush = eyesItem.assetKey == 'buildabear/eyes/blush';
-    final isEmbarrassed = eyesItem.assetKey == 'buildabear/eyes/embarrassed';
-    final eyeScale = (isBlush || isEmbarrassed) ? 0.35 : 0.24;
-    final eyesXOffset = isEmbarrassed ? bearWidth * 0.04 : 0.0;
-    final eyesYOffset = isEmbarrassed
-        ? defaultOffsetY - bearHeight * 0.02
-        : defaultOffsetY;
+    const eyeScale = 0.35;
 
     return Center(
       child: Transform.translate(
-        offset: Offset(eyesXOffset, eyesYOffset),
+        offset: Offset(0.0, defaultOffsetY),
         child: SizedBox(
           width: bearWidth * eyeScale,
           height: bearHeight * eyeScale,
@@ -108,27 +102,11 @@ class BearPreview extends StatelessWidget {
     final mouthItem = itemForSlot(BearSlotDto.MOUTH);
     if (mouthItem == null) return const SizedBox.shrink();
 
-    final isCheeks = mouthItem.assetKey == 'buildabear/mouth/cheeks';
-    final isGrin = mouthItem.assetKey == 'buildabear/mouth/grin';
-    final isSmirk = mouthItem.assetKey == 'buildabear/mouth/smirk';
-    final isNervous = mouthItem.assetKey == 'buildabear/mouth/nervous';
-    final isTongue = mouthItem.assetKey == 'buildabear/mouth/tongue';
-    final isSerious = mouthItem.assetKey == 'buildabear/mouth/serious';
-    final isUwu = mouthItem.assetKey == 'buildabear/mouth/uwu';
-
-    final mouthScale = (isCheeks || isGrin || isSmirk)
-        ? 0.16
-        : (isNervous || isSerious || isUwu ? 0.12 : 0.1);
-    final mouthXOffset = isGrin
-        ? -bearWidth * 0.01
-        : (isSmirk ? bearWidth * 0.01 : 0.0);
-    final mouthYOffset = (isNervous || isTongue)
-        ? defaultOffsetY + bearHeight * 0.02
-        : (isGrin ? defaultOffsetY + bearHeight * 0.01 : defaultOffsetY);
+    const mouthScale = 0.25;
 
     return Center(
       child: Transform.translate(
-        offset: Offset(mouthXOffset, mouthYOffset),
+        offset: Offset(0.0, defaultOffsetY),
         child: SizedBox(
           width: bearWidth * mouthScale,
           height: bearHeight * mouthScale,
