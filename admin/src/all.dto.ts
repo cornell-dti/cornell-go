@@ -166,6 +166,12 @@ export interface SetCurrentChallengeDto {
   challengeId: string;
 }
 
+export interface RequestAvailableChallengesDto {}
+
+export interface AvailableChallengesResponseDto {
+  challenges: ChallengeDto[];
+}
+
 export interface UpdateErrorDto {
   id: string;
   message: string;

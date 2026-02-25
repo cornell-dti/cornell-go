@@ -10,7 +10,9 @@ import { CallingUser } from '../auth/calling-user.decorator';
 import { ClientService } from '../client/client.service';
 import { ChallengeService } from './challenge.service';
 import {
+  AvailableChallengesResponseDto,
   CompletedChallengeDto,
+  RequestAvailableChallengesDto,
   RequestChallengeDataDto,
   SetCurrentChallengeDto,
   UpdateChallengeDataDto,
@@ -42,6 +44,43 @@ export class ChallengeGateway {
    * @param user the calling user
    * @param data array of challenges to return
    */
+  @SubscribeMessage('requestAvailableChallenges')
+  async requestAvailableChallenges(
+    @CallingUser() user: User,
+    @MessageBody() data: RequestAvailableChallengesDto,
+  ) {
+    const challenges =
+      await this.challengeService.getAvailableChallenges(user);
+    const dtos = await Promise.all(
+      challenges.map(ch => this.challengeService.dtoForChallenge(ch)),
+    );
+    const response: AvailableChallengesResponseDto = { challenges: dtos };
+    return response;
+  }
+
+  @SubscribeMessage('setCurrentChallenge')
+  async setCurrentChallenge(
+    @CallingUser() user: User,
+    @MessageBody() data: SetCurrentChallengeDto,
+  ) {
+    const tracker = await this.challengeService.setCurrentChallenge(
+      user,
+      data.challengeId,
+    );
+    if (tracker != null) {
+      const group = await this.groupService.getGroupForUser(user);
+      await this.groupService.emitUpdateGroupData(group, false);
+      await this.eventService.emitUpdateEventTracker(tracker, user);
+      return { success: true };
+    } else {
+      await this.clientService.emitErrorData(
+        user,
+        'Cannot set current challenge: challenge not found, already completed, or from different event',
+      );
+      return { success: false };
+    }
+  }
+
   @SubscribeMessage('requestChallengeData')
   async requestChallengeData(
     @UserAbility() ability: AppAbility,
