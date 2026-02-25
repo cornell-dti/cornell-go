@@ -1,6 +1,8 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:game/constants/constants.dart';
 
 /**
@@ -88,8 +90,27 @@ class _CompletedChallengeFullState extends State<CompletedChallengeFull> {
                   builder: (BuildContext context) {
                     return ClipRRect(
                       borderRadius: BorderRadius.circular(8),
-                      child: Image.network(
-                        picture,
+                      child: CachedNetworkImage(
+                        key: ValueKey(picture),
+                        imageUrl: picture,
+                        placeholder: (context, url) =>
+                            Shimmer.fromColors(
+                              baseColor: Colors.grey[300]!,
+                              highlightColor: Colors.grey[100]!,
+                              child: Container(
+                                width: 390,
+                                height: 20,
+                              ),
+                            ),
+                        errorWidget: (context, url, error) => Container(
+                          width: 390,
+                          height: 20,
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade200,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(Icons.error),
+                        ),
                         fit: BoxFit.cover,
                         width: 390,
                         height: 20,

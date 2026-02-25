@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:game/navigation_page/bottom_navbar.dart';
@@ -13,6 +14,7 @@ import 'package:game/gameplay/challenge_failed.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'dart:ui' as ui;
 import 'package:flutter_compass/flutter_compass.dart';
+import 'package:shimmer/shimmer.dart';
 
 // for backend connection
 import 'package:provider/provider.dart';
@@ -1554,9 +1556,31 @@ class _GameplayMapState extends State<GameplayMap>
       alignment: pictureAlign,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(10),
-        child: Image.network(
-          imageUrl,
+        child: CachedNetworkImage(
+          key: ValueKey(imageUrl),
+          imageUrl: imageUrl,
           fit: BoxFit.cover,
+          placeholder: (context, url) => Shimmer.fromColors(
+            baseColor: Colors.grey[300]!,
+            highlightColor: Colors.grey[100]!,
+            child: Container(
+              width: pictureWidth,
+              height: pictureHeight,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(4.6),
+              ),
+            ),
+          ),
+          errorWidget: (context, url, error) => Container(
+            width: pictureWidth,
+            height: pictureHeight,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade200,
+              borderRadius: BorderRadius.circular(4.6),
+            ),
+            child: Icon(Icons.error),
+          ),
           width: pictureWidth,
           height: pictureHeight,
         ),

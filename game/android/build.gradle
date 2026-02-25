@@ -29,9 +29,22 @@ subprojects {
     }
 }
 
-subprojects {
-    project.buildDir = "${rootProject.buildDir}/${project.name}"
-    project.evaluationDependsOn(':app')
+subprojects { subproject ->
+    subproject.buildDir = "${rootProject.buildDir}/${subproject.name}"
+    subproject.evaluationDependsOn(':app')
+}
+
+subprojects { project ->
+    def disableExtract = {
+        project.tasks.matching { it.name.contains('extractDebugAnnotations') }.configureEach {
+            enabled = false
+        }
+    }
+    try {
+        project.afterEvaluate(disableExtract)
+    } catch (Exception ignored) {
+        disableExtract()
+    }
 }
 
 tasks.register("clean", Delete) {

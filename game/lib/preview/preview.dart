@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/gameplay/gameplay_page.dart';
@@ -9,6 +10,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:game/api/geopoint.dart';
 import 'dart:async';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:shimmer/shimmer.dart';
 
 import 'dart:math';
 import 'package:game/constants/constants.dart';
@@ -275,8 +277,30 @@ class _PreviewState extends State<Preview> {
             child: Column(
               children: [
                 //Image
-                Image.network(
-                  imgUrl,
+                CachedNetworkImage(
+                  key: ValueKey(imgUrl),
+                  imageUrl: imgUrl,
+                  placeholder: (context, url) => Shimmer.fromColors(
+                    baseColor: Colors.grey[300]!,
+                    highlightColor: Colors.grey[100]!,
+                    child: Container(
+                      height: MediaQuery.of(context).size.height * 0.25,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(4.6),
+                      ),
+                    ),
+                  ),
+                  errorWidget: (context, url, error) => Container(
+                    height: MediaQuery.of(context).size.height * 0.25,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade200,
+                      borderRadius: BorderRadius.circular(4.6),
+                    ),
+                    child: Icon(Icons.error),
+                  ),
                   height: MediaQuery.of(context).size.height * 0.25,
                   width: double.infinity,
                   fit: BoxFit.cover,

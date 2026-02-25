@@ -1,6 +1,8 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:game/preview/preview.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:game/constants/constants.dart';
 
 /**
@@ -10,6 +12,13 @@ import 'package:game/constants/constants.dart';
  * This widget represents a single challenge card in the challenges list.
  * It displays key information about a challenge and handles tap interactions
  * to show more details.
+ * 
+ * Image loading uses CachedNetworkImage, with a shimmer placeholder for 
+ * when the image is loading and an error icon with a gray background if 
+ * the image cannot be loaded. The gray background of the error matches the
+ * original size of the image. A ValueKey based on imgUrl (the link to the image) 
+ * is used so when the list rebuilds, the same image widget is preserved and there
+ * is no flickering of the loading state.
  * 
  * @param props - Contains:
  *   - `location`: Challenge location
@@ -149,8 +158,30 @@ class _ChallengeCellState extends State<ChallengeCell> {
                 padding: const EdgeInsets.only(right: 14),
                 child: ClipRRect(
                   borderRadius: BorderRadius.all(Radius.circular(4.6)),
-                  child: Image.network(
-                    imgUrl,
+                  child: CachedNetworkImage(
+                    key: ValueKey(imgUrl),
+                    imageUrl: imgUrl,
+                    placeholder: (context, url) => Shimmer.fromColors(
+                      baseColor: Colors.grey[300]!,
+                      highlightColor: Colors.grey[100]!,
+                      child: Container(
+                        width: deviceHeight * 0.1,
+                        height: deviceHeight * 0.1,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(4.6),
+                        ),
+                      ),
+                    ),
+                    errorWidget: (context, url, error) => Container(
+                      width: deviceHeight * 0.1,
+                      height: deviceHeight * 0.1,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade200,
+                        borderRadius: BorderRadius.circular(4.6),
+                      ),
+                      child: Icon(Icons.error),
+                    ),
                     width: deviceHeight * 0.1,
                     height: deviceHeight * 0.1,
                     fit: BoxFit.cover,
