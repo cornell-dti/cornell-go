@@ -109,6 +109,8 @@ model User {
   challengeTimers        ChallengeTimer[]
   UserQuizAnswer         UserQuizAnswer[]
   hasCompletedOnboarding Boolean              @default(false)
+  eventAttendances       EventAttendance[]
+  eventRSVPs             EventRSVP[]
 }
 
 model Group {
@@ -215,17 +217,18 @@ model PrevChallenge {
 }
 
 model Organization {
-  id           String                   @id @default(uuid())
-  createdAt    DateTime                 @default(now())
-  updatedAt    DateTime                 @updatedAt()
-  subject      String                   @default("Organization")
-  name         String
-  accessCode   String
-  members      User[]                   @relation("orgToUser")
-  managers     User[]                   @relation("orgManager")
-  events       EventBase[]              @relation("eventOrgs")
-  specialUsage OrganizationSpecialUsage
-  achievements Achievement[]
+  id                    String                   @id @default(uuid())
+  createdAt             DateTime                 @default(now())
+  updatedAt             DateTime                 @updatedAt()
+  subject               String                   @default("Organization")
+  name                  String
+  accessCode            String
+  members               User[]                   @relation("orgToUser")
+  managers              User[]                   @relation("orgManager")
+  events                EventBase[]              @relation("eventOrgs")
+  specialUsage          OrganizationSpecialUsage
+  achievements          Achievement[]
+  submittedCampusEvents CampusEvent[]
 }
 
 model SessionLogEntry {
@@ -346,4 +349,119 @@ model UserQuizAnswer {
 
   @@unique([userId, questionId]) // Enforce one attempt per question
   @@map("UserQuizAnswer")
+}
+
+// ---- Events ----
+
+enum CampusEventCategory {
+  SOCIAL
+  CULTURAL
+  ATHLETIC
+  WELLNESS
+  ACADEMIC
+  ARTS
+  CAREER
+  COMMUNITY
+  OTHER
+}
+
+enum EventSource {
+  API_EVENTS
+  ADMIN_CREATED
+  COMMUNITY_SUBMITTED
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  ARCHIVED
+}
+
+enum CheckInMethod {
+  LOCATION
+  QR_CODE
+  EITHER
+}
+
+model CampusEvent {
+  id String @id @default(uuid())
+
+  // Core info
+  title       String
+  description String
+  imageUrl    String?
+
+  // Date & time
+  startTime DateTime
+  endTime   DateTime
+  allDay    Boolean  @default(false)
+
+  // Location
+  locationName  String
+  address       String?
+  latitude      Float
+  longitude     Float
+  checkInRadius Float   @default(100)
+
+  // Categorization
+  categories CampusEventCategory[]
+  tags       String[]
+
+  // Source & approval
+  source          EventSource
+  externalId      String?        @unique
+  externalUrl     String?
+  approvalStatus  ApprovalStatus
+  rejectionReason String?
+
+  // Organizer
+  organizerName  String?
+  organizerEmail String?
+  organizerId    String?
+  organizer      Organization? @relation(fields: [organizerId], references: [id])
+
+  // Engagement
+  checkInMethod       CheckInMethod @default(EITHER)
+  qrCode              String?       @unique
+  pointsForAttendance Int           @default(10)
+  featured            Boolean       @default(false)
+  registrationUrl     String?
+
+  // Tracking
+  attendances EventAttendance[]
+  rsvps       EventRSVP[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([startTime])
+  @@index([approvalStatus])
+  @@index([source])
+}
+
+model EventAttendance {
+  id            String      @id @default(uuid())
+  userId        String
+  user          User        @relation(fields: [userId], references: [id])
+  campusEventId String
+  campusEvent   CampusEvent @relation(fields: [campusEventId], references: [id])
+
+  checkedInAt   DateTime      @default(now())
+  checkInMethod CheckInMethod
+  pointsAwarded Int
+
+  @@unique([userId, campusEventId])
+}
+
+model EventRSVP {
+  id            String      @id @default(uuid())
+  userId        String
+  user          User        @relation(fields: [userId], references: [id])
+  campusEventId String
+  campusEvent   CampusEvent @relation(fields: [campusEventId], references: [id])
+
+  rsvpAt DateTime @default(now())
+
+  @@unique([userId, campusEventId])
 }
