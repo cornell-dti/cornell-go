@@ -57,6 +57,7 @@ class GameplayMap extends StatefulWidget {
   final String challengeId;
   final GeoPoint targetLocation;
   final double awardingRadius;
+  final double closeRadius;
   final int points;
   final int startingHintsUsed;
 
@@ -73,6 +74,7 @@ class GameplayMap extends StatefulWidget {
     required this.challengeId,
     required this.targetLocation,
     required this.awardingRadius,
+    required this.closeRadius,
     required this.points,
     required this.startingHintsUsed,
   }) : super(key: key);
@@ -144,6 +146,9 @@ class _GameplayMapState extends State<GameplayMap>
   double defaultHintRadius = 200.0;
   double? hintRadius;
   double _compassHeading = 0.0;
+  bool _isWithinAwardingRadius = false;
+  bool _isWithinCloseRadius = false;
+  GeoPoint? _previousLocation;
 
   // Add this to your state variables (After isExapnded)
   bool isArrivedButtonEnabled = true;
@@ -851,6 +856,8 @@ class _GameplayMapState extends State<GameplayMap>
       }
       setState(() {
         currentLocation = location;
+        _checkRadiusStatusInSetState();
+        _previousLocation = location;
       });
 
       // Immediately center the camera on the user's location
@@ -883,10 +890,30 @@ class _GameplayMapState extends State<GameplayMap>
 
         // Try to actually get a position - this will fail if GPS isn't working
         try {
-          await Geolocator.getCurrentPosition(
+          final position = await Geolocator.getCurrentPosition(
             desiredAccuracy: LocationAccuracy.low,
             timeLimit: Duration(seconds: _locationTimeoutSeconds),
           );
+          if (mounted && currentLocation != null) {
+            final newLocation = GeoPoint(
+                position.latitude, position.longitude, position.heading);
+            final locationChanged = _previousLocation == null ||
+                _previousLocation!.lat != newLocation.lat ||
+                _previousLocation!.long != newLocation.long;
+
+            if (locationChanged) {
+              setState(() {
+                currentLocation = newLocation;
+                _checkRadiusStatusInSetState();
+                _previousLocation = newLocation;
+              });
+            } else {
+              setState(() {
+                _checkRadiusStatusInSetState();
+              });
+            }
+          }
+
           // Success - reset failure counter
           _consecutiveLocationFailures = 0;
           _locationWarningToastShown = false;
@@ -929,15 +956,26 @@ class _GameplayMapState extends State<GameplayMap>
             return;
           }
 
-          currentLocation = newPos == null
+          final newLocation = newPos == null
               ? GeoPoint(_center.latitude, _center.longitude, 0)
               : GeoPoint(newPos.latitude, newPos.longitude, newPos.heading);
 
-          // Stream success - reset failure counter
-          _consecutiveLocationFailures = 0;
-          _locationWarningToastShown = false;
+          final locationChanged = _previousLocation == null ||
+              _previousLocation!.lat != newLocation.lat ||
+              _previousLocation!.long != newLocation.long;
 
-          setState(() {});
+          setState(() {
+            currentLocation = newLocation;
+
+            _consecutiveLocationFailures = 0;
+            _locationWarningToastShown = false;
+
+            _checkRadiusStatusInSetState();
+
+            if (locationChanged) {
+              _previousLocation = newLocation;
+            }
+          });
         },
         onError: (error) {
           // Location stream error - don't immediately navigate away
@@ -982,15 +1020,29 @@ class _GameplayMapState extends State<GameplayMap>
           return;
         }
 
-        currentLocation = GeoPoint(
+        // Create new location from position
+        final newLocation = GeoPoint(
           newPos.latitude,
           newPos.longitude,
           newPos.heading,
         );
 
-        // Reset failure counter on successful location update
-        _consecutiveLocationFailures = 0;
-        _locationWarningToastShown = false;
+        final locationChanged = _previousLocation == null ||
+            _previousLocation!.lat != newLocation.lat ||
+            _previousLocation!.long != newLocation.long;
+
+        setState(() {
+          currentLocation = newLocation;
+
+          _consecutiveLocationFailures = 0;
+          _locationWarningToastShown = false;
+
+          _checkRadiusStatusInSetState();
+
+          if (locationChanged) {
+            _previousLocation = newLocation;
+          }
+        });
 
         // upon new user location data, moves map camera to be centered around
         // new position and sets zoom.
@@ -1002,7 +1054,6 @@ class _GameplayMapState extends State<GameplayMap>
             ),
           ),
         );
-        setState(() {});
       });
 
       return true;
@@ -1939,6 +1990,9 @@ class _GameplayMapState extends State<GameplayMap>
                         : LatLng(currentLocation!.lat, currentLocation!.long),
                     zoom: 16,
                   ),
+                },
+                circles: {
+                  if (!_isWithinAwardingRadius && !_isWithinCloseRadius)
                   markers: {
                     Marker(
                       markerId: const MarkerId("currentLocation"),
@@ -1957,13 +2011,11 @@ class _GameplayMapState extends State<GameplayMap>
                           ? LatLng(hintCenter!.lat, hintCenter!.long)
                           : _center,
                       radius: () {
-                        // Use animated radius if animation is in progress
                         double radiusValue;
                         if (isHintAnimationInProgress &&
                             _oldHintRadius != null &&
                             _newHintRadius != null &&
                             _circleShrinkAnimation.value < 1.0) {
-                          // Interpolate between old and new radius during animation
                           radiusValue = _oldHintRadius! +
                               (_newHintRadius! - _oldHintRadius!) *
                                   _circleShrinkAnimation.value;
@@ -1971,7 +2023,6 @@ class _GameplayMapState extends State<GameplayMap>
                           radiusValue = hintRadius ?? defaultHintRadius;
                         }
 
-                        // Safety check to prevent crashes
                         if (radiusValue.isNaN ||
                             radiusValue.isInfinite ||
                             radiusValue <= 0) {
@@ -1989,8 +2040,31 @@ class _GameplayMapState extends State<GameplayMap>
                       strokeWidth: 2,
                       fillColor: Color.fromARGB(80, 83, 134, 237),
                     ),
-                  },
-                ),
+                  if (_isWithinAwardingRadius)
+                    Circle(
+                      circleId: CircleId("awardingRadiusCircle"),
+                      center: LatLng(
+                        widget.targetLocation.lat,
+                        widget.targetLocation.long,
+                      ),
+                      radius: widget.awardingRadius,
+                      strokeColor: Color.fromARGB(200, 76, 175, 80),
+                      strokeWidth: 3,
+                      fillColor: Color.fromARGB(50, 76, 175, 80),
+                    ),
+                  if (_isWithinCloseRadius)
+                    Circle(
+                      circleId: CircleId("closeRadiusCircle"),
+                      center: LatLng(
+                        widget.targetLocation.lat,
+                        widget.targetLocation.long,
+                      ),
+                      radius: widget.closeRadius,
+                      strokeColor: Color.fromARGB(200, 255, 152, 0),
+                      strokeWidth: 3,
+                      fillColor: Color.fromARGB(50, 255, 152, 0),
+                    ),
+                },
               ),
               // Only show timer if challenge has a timer
               if (hasTimer)
@@ -2734,12 +2808,54 @@ class _GameplayMapState extends State<GameplayMap>
         widget.awardingRadius;
   }
 
-  Container displayDialog(
-    BuildContext context,
-    hasArrived,
-    String challengeId,
-    String? challengeName,
-  ) {
+  /**
+   * Checks if the user is within awarding or close radius and updates state variables.
+   * This version is called from within setState() to avoid nested setState calls.
+   * Updates the radius status flags which control which circle color is displayed.
+   */
+  void _checkRadiusStatusInSetState() {
+    if (currentLocation == null) {
+      _isWithinAwardingRadius = false;
+      _isWithinCloseRadius = false;
+      return;
+    }
+
+    final distance = currentLocation!.distanceTo(widget.targetLocation);
+
+    _isWithinAwardingRadius = distance <= widget.awardingRadius;
+    _isWithinCloseRadius =
+        distance <= widget.closeRadius && distance > widget.awardingRadius;
+  }
+
+  /**
+   * Checks if the user is within awarding or close radius and updates state.
+   * This is called when position updates to show/hide radius circles.
+   * Always updates state to ensure live radius color changes.
+   */
+  void _checkRadiusStatus() {
+    if (currentLocation == null) {
+      return;
+    }
+
+    final distance = currentLocation!.distanceTo(widget.targetLocation);
+    final wasWithinAwarding = _isWithinAwardingRadius;
+    final wasWithinClose = _isWithinCloseRadius;
+
+    final newWithinAwarding = distance <= widget.awardingRadius;
+    final newWithinClose =
+        distance <= widget.closeRadius && distance > widget.awardingRadius;
+
+    _isWithinAwardingRadius = newWithinAwarding;
+    _isWithinCloseRadius = newWithinClose;
+
+    if (wasWithinAwarding != newWithinAwarding ||
+        wasWithinClose != newWithinClose) {
+      setState(() {});
+    }
+  }
+
+  Container displayDialog(BuildContext context, hasArrived, String challengeId,
+      String? challengeName) {
     final name = challengeName ?? "";
     return hasArrived
         ? Container(

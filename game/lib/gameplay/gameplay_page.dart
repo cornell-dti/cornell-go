@@ -496,6 +496,7 @@ class _GameplayPageState extends State<GameplayPage> {
                         challengeId: displayChallenge.id,
                         targetLocation: (displayTargetLocation ?? _center),
                         awardingRadius: displayChallenge.awardingRadiusF ?? 0,
+                        closeRadius: displayChallenge.closeRadiusF ?? 0,
                         points: displayChallenge.points ?? 0,
                         startingHintsUsed: displayHintsUsed,
                       ),

@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Modal } from './Modal';
 import styled from 'styled-components';
-import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet';
+import { GoogleMap, LoadScript, Marker, Circle } from '@react-google-maps/api';
 
 export type OptionEntryForm = {
   name: string;
@@ -26,6 +26,8 @@ export type MapEntryForm = {
   name: string;
   latitude: number;
   longitude: number;
+  awardingRadiusF?: number;
+  closeRadiusF?: number;
 };
 
 export type DateEntryForm = {
@@ -226,49 +228,59 @@ const MapBox = styled.div`
   height: 300px;
   margin-bottom: 32px;
   overflow: hidden;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 `;
 
-function DraggableMarker(props: {
-  center: [number, number];
-  onLocationChange: (lat: number, long: number) => void;
-}) {
-  const [position, setPosition] = useState(props.center);
-  const markerRef = useRef<any>(null);
-  const eventHandlers = useMemo(
-    () => ({
-      dragend() {
-        const marker = markerRef.current;
-        if (marker != null) {
-          const { lat, lng } = marker.getLatLng();
-          props.onLocationChange(lat, lng);
-          setPosition(marker.getLatLng());
-        }
-      },
-    }),
-    [],
-  );
+const mapContainerStyle = {
+  width: '100%',
+  height: '300px',
+};
 
-  return (
-    <Marker
-      draggable={true}
-      eventHandlers={eventHandlers}
-      position={position}
-      ref={markerRef}
-    >
-      <Popup minWidth={90}>
-        <span>Drag the pin to move the location</span>
-      </Popup>
-    </Marker>
-  );
-}
-
-function MapEntryFormBox(props: { form: MapEntryForm }) {
+function MapEntryFormBox(props: { form: MapEntryForm; allForms?: EntryForm[] }) {
   const [lat, setLat] = useState(props.form.latitude);
   const [lng, setLng] = useState(props.form.longitude);
+  const [map, setMap] = useState<google.maps.Map | null>(null);
+  const [markerPosition, setMarkerPosition] = useState<google.maps.LatLngLiteral>({
+    lat: props.form.latitude,
+    lng: props.form.longitude,
+  });
+  const [awardingRadius, setAwardingRadius] = useState(props.form.awardingRadiusF ?? 0);
+  const [closeRadius, setCloseRadius] = useState(props.form.closeRadiusF ?? 0);
+
+  useEffect(() => {
+    if (props.allForms) {
+      const awardingForm = props.allForms.find(
+        f => 'name' in f && f.name === 'Awarding Distance (meters)'
+      ) as NumberEntryForm | undefined;
+      const closeForm = props.allForms.find(
+        f => 'name' in f && f.name === 'Close Distance (meters)'
+      ) as NumberEntryForm | undefined;
+
+      if (awardingForm) {
+        const newValue = awardingForm.value;
+        if (newValue !== awardingRadius) {
+          setAwardingRadius(newValue);
+          props.form.awardingRadiusF = newValue;
+        }
+      }
+      if (closeForm) {
+        const newValue = closeForm.value;
+        if (newValue !== closeRadius) {
+          setCloseRadius(newValue);
+          props.form.closeRadiusF = newValue;
+        }
+      }
+    }
+  });
 
   useEffect(() => {
     setLat(props.form.latitude);
     setLng(props.form.longitude);
+    setMarkerPosition({
+      lat: props.form.latitude,
+      lng: props.form.longitude,
+    });
   }, [props.form.latitude, props.form.longitude]);
 
   const handleLatChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -276,6 +288,7 @@ function MapEntryFormBox(props: { form: MapEntryForm }) {
     if (!isNaN(newLat)) {
       setLat(newLat);
       props.form.latitude = newLat;
+      setMarkerPosition({ lat: newLat, lng });
     }
   };
 
@@ -284,34 +297,73 @@ function MapEntryFormBox(props: { form: MapEntryForm }) {
     if (!isNaN(newLng)) {
       setLng(newLng);
       props.form.longitude = newLng;
+      setMarkerPosition({ lat, lng: newLng });
     }
   };
+
+  const onMarkerDragEnd = (e: google.maps.MapMouseEvent) => {
+    if (e.latLng) {
+      const newLat = e.latLng.lat();
+      const newLng = e.latLng.lng();
+      setLat(newLat);
+      setLng(newLng);
+      props.form.latitude = newLat;
+      props.form.longitude = newLng;
+      setMarkerPosition({ lat: newLat, lng: newLng });
+    }
+  };
+
+  const apiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY || '';
 
   return (
     <>
       <MapBox>
-        <MapContainer
-          center={[lat, lng]}
-          zoom={20}
-          style={{
-            width: '100%',
-            height: 300,
-          }}
-        >
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-          <DraggableMarker
-            center={[lat, lng]}
-            onLocationChange={(newLat, newLng) => {
-              setLat(newLat);
-              setLng(newLng);
-              props.form.latitude = newLat;
-              props.form.longitude = newLng;
+        <LoadScript googleMapsApiKey={apiKey}>
+          <GoogleMap
+            mapContainerStyle={mapContainerStyle}
+            center={markerPosition}
+            zoom={20}
+            onLoad={setMap}
+            options={{
+              disableDefaultUI: false,
+              zoomControl: true,
+              streetViewControl: false,
             }}
-          />
-        </MapContainer>
+          >
+            <Marker
+              position={markerPosition}
+              draggable={true}
+              onDragEnd={onMarkerDragEnd}
+              title="Drag the pin to move the location"
+            />
+            {awardingRadius > 0 && (
+              <Circle
+                center={markerPosition}
+                radius={awardingRadius}
+                options={{
+                  fillColor: '#4CAF50',
+                  fillOpacity: 0.2,
+                  strokeColor: '#4CAF50',
+                  strokeOpacity: 0.8,
+                  strokeWeight: 2,
+                }}
+              />
+            )}
+            {closeRadius > 0 && (
+              <Circle
+                center={markerPosition}
+                radius={closeRadius}
+                options={{
+                  fillColor: '#FF9800',
+                  fillOpacity: 0.2,
+                  strokeColor: '#FF9800',
+                  strokeOpacity: 0.8,
+                  strokeWeight: 2,
+                }}
+              />
+            )}
+          </GoogleMap>
+        </LoadScript>
       </MapBox>
       <EntryBox>
         <span>Latitude:</span>
@@ -520,7 +572,7 @@ export function EntryModal(props: {
         } else if ('date' in form) {
           return <DateEntryFormBox form={form} key={form.name} />;
         } else {
-          return <MapEntryFormBox form={form} key={form.name} />;
+          return <MapEntryFormBox form={form} allForms={props.form} key={form.name} />;
         }
       })}
     </Modal>
