@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:game/constants/constants.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/api/game_client_dto.dart';
@@ -15,7 +16,7 @@ import 'package:game/model/challenge_model.dart';
 import 'package:game/navigation_page/bottom_navbar.dart';
 
 final SUPPORT_URL = Uri.parse(
-  "https://sites.google.com/cornell.edu/cornellgosupport",
+  AppStrings.supportUrl,
 );
 
 class SettingsPage extends StatelessWidget {
@@ -25,16 +26,16 @@ class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var headerStyle = TextStyle(
-      color: Color(0xFFFFF8F1),
+      color: AppColors.warmWhite,
       fontSize: 20,
       fontFamily: 'Poppins',
       fontWeight: FontWeight.w600,
     );
 
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 255, 248, 241),
+      backgroundColor: AppColors.warmWhite,
       appBar: AppBar(
-        backgroundColor: Color.fromARGB(255, 237, 86, 86),
+        backgroundColor: AppColors.primaryRed,
         toolbarHeight: MediaQuery.of(context).size.height * 0.08,
         leading: Align(
           alignment: Alignment.center,

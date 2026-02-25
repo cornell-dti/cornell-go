@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:game/constants/constants.dart';
 
 /**
  * Widget that represents each completed challenge 
@@ -148,7 +149,7 @@ class _CompletedChallengeFullState extends State<CompletedChallengeFull> {
                         Text(
                           widget.location,
                           style: TextStyle(
-                            color: Color(0xFF835A7C),
+                            color: AppColors.purple,
                             fontSize: 16,
                             fontFamily: 'Poppins',
                             fontWeight: FontWeight.w400,
@@ -259,7 +260,7 @@ class _CompletedChallengeFullState extends State<CompletedChallengeFull> {
                                     vertical: 4,
                                   ),
                                   decoration: ShapeDecoration(
-                                    color: Color(0xFFF9EDDA),
+                                    color: AppColors.cream,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(20),
                                     ),
@@ -292,7 +293,7 @@ class _CompletedChallengeFullState extends State<CompletedChallengeFull> {
                                       style: TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.w500,
-                                        color: Color(0xFFC17E19),
+                                        color: AppColors.gold,
                                       ),
                                     ),
                                   ],

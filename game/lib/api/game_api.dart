@@ -12,6 +12,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:http/http.dart' as http;
 import 'package:game/api/geopoint.dart';
+import 'package:game/constants/constants.dart';
 
 enum AuthProviderType { google, apple }
 
@@ -87,10 +88,10 @@ class ApiClient extends ChangeNotifier {
   ApiClient(FlutterSecureStorage storage, String apiUrl)
       : _storage = storage,
         _apiUrl = apiUrl,
-        _googleLoginUrl = Uri.parse(apiUrl).resolve("google"),
-        _appleLoginUrl = Uri.parse(apiUrl).resolve("apple"),
-        _deviceLoginUrl = Uri.parse(apiUrl).resolve("device-login"),
-        _refreshUrl = Uri.parse(apiUrl).resolve("refresh-access"),
+        _googleLoginUrl = Uri.parse(apiUrl).resolve(ApiConfig.googleAuthPath),
+        _appleLoginUrl = Uri.parse(apiUrl).resolve(ApiConfig.appleAuthPath),
+        _deviceLoginUrl = Uri.parse(apiUrl).resolve(ApiConfig.deviceLoginPath),
+        _refreshUrl = Uri.parse(apiUrl).resolve(ApiConfig.refreshAccessPath),
         _clientApi = GameClientApi();
 
   void _createSocket(bool refreshing) async {
@@ -180,12 +181,13 @@ class ApiClient extends ChangeNotifier {
 
   Future<void> _saveToken() async {
     if (_refreshToken != null) {
-      await _storage.write(key: "refresh_token", value: _refreshToken);
+      await _storage.write(
+          key: ApiConfig.refreshTokenKey, value: _refreshToken);
     }
   }
 
   Future<bool> tryRelog() async {
-    final token = await _storage.read(key: "refresh_token");
+    final token = await _storage.read(key: ApiConfig.refreshTokenKey);
     if (token != null) {
       _refreshToken = token;
       final access = await _refreshAccess(true);
@@ -398,7 +400,7 @@ class ApiClient extends ChangeNotifier {
   }
 
   Future<void> disconnect() async {
-    await _storage.delete(key: "refresh_token");
+    await _storage.delete(key: ApiConfig.refreshTokenKey);
     await _googleSignIn.signOut();
 
     _refreshToken = null;

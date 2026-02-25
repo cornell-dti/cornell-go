@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:velocity_x/velocity_x.dart';
+import 'package:game/constants/constants.dart';
 
 /**
  * Widget that represents each individual completed journey or challenge
@@ -13,15 +14,16 @@ import 'package:velocity_x/velocity_x.dart';
 
  */
 Widget completedCell(
-    BuildContext context,
-    String name,
-    String picture,
-    String type,
-    String date,
-    String difficulty,
-    int totalHintsUsed,
-    int adjustedPoints,
-    int originalPoints) {
+  BuildContext context,
+  String name,
+  String picture,
+  String type,
+  String date,
+  String difficulty,
+  int totalHintsUsed,
+  int adjustedPoints,
+  int originalPoints,
+) {
   return Container(
     width: MediaQuery.sizeOf(context).width * 0.85,
     height: MediaQuery.sizeOf(context).height * 0.11,
@@ -82,22 +84,26 @@ Widget completedCell(
                   padding: const EdgeInsets.only(top: 5.0),
                   child: Container(
                     width: 200,
-                    child: Row(children: [
-                      SvgPicture.asset(
-                        "assets/icons/bearcoins.svg",
-                        width: 20,
-                      ),
-                      Text(
+                    child: Row(
+                      children: [
+                        SvgPicture.asset(
+                          "assets/icons/bearcoins.svg",
+                          width: 20,
+                        ),
+                        Text(
                           ' ' +
                               adjustedPoints.toString() +
                               "/" +
                               originalPoints.toString() +
                               " PTS",
                           style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                              color: Color(0xFFC17E19)))
-                    ]),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.gold,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],

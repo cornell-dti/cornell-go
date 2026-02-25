@@ -13,6 +13,7 @@ import 'package:game/utils/utility_functions.dart';
 import 'package:game/model/tracker_model.dart';
 import 'package:provider/provider.dart';
 import 'package:velocity_x/velocity_x.dart';
+import 'package:game/constants/constants.dart';
 
 class AchievementCellDto {
   AchievementCellDto({
@@ -73,21 +74,19 @@ class _AchievementsPageState extends State<AchievementsPage> {
   @override
   Widget build(BuildContext context) {
     var headerStyle = TextStyle(
-      color: Color(0xFFFFF8F1),
+      color: AppColors.warmWhite,
       fontSize: 20,
       fontFamily: 'Poppins',
       fontWeight: FontWeight.w600,
     );
 
     return Container(
-      decoration: BoxDecoration(
-        color: Color(0xFFED5656),
-      ),
+      decoration: BoxDecoration(color: AppColors.primaryRed),
       child: SafeArea(
         bottom: false,
         child: Scaffold(
           appBar: AppBar(
-            backgroundColor: Color.fromARGB(255, 237, 86, 86),
+            backgroundColor: AppColors.primaryRed,
             toolbarHeight: MediaQuery.of(context).size.height * 0.08,
             leading: Align(
               alignment: Alignment.center,
@@ -110,7 +109,7 @@ class _AchievementsPageState extends State<AchievementsPage> {
             width: double.infinity,
             height: double.infinity,
             decoration: BoxDecoration(
-              color: Color.fromARGB(255, 255, 248, 241),
+              color: AppColors.warmWhite,
             ),
             child: Padding(
               padding: EdgeInsets.all(30),
@@ -133,7 +132,9 @@ class _AchievementsPageState extends State<AchievementsPage> {
                         );
 
                         return ListView.separated(
-                          padding: const EdgeInsets.symmetric(horizontal: 3),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 3,
+                          ),
                           itemCount: achList.length,
                           itemBuilder: (context, index) {
                             // Check if the achievement is completed

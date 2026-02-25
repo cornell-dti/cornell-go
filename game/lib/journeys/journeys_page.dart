@@ -20,6 +20,7 @@ import 'package:game/utils/utility_functions.dart';
 import 'package:provider/provider.dart';
 import 'package:showcaseview/showcaseview.dart';
 import 'package:velocity_x/velocity_x.dart';
+import 'package:game/constants/constants.dart';
 
 /** A Data Transfer Object that holds information about a challenge 
  * cell in the UI */
@@ -162,8 +163,10 @@ class _JourneysPageState extends State<JourneysPage> {
             // Stop onboarding and go home
             _removeBearOverlay();
             ShowcaseView.getNamed("journeys_page").dismiss();
-            Provider.of<OnboardingModel>(context, listen: false)
-                .skipOnboarding();
+            Provider.of<OnboardingModel>(
+              context,
+              listen: false,
+            ).skipOnboarding();
             Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(builder: (context) => BottomNavBar()),
               (route) => false,
@@ -173,10 +176,7 @@ class _JourneysPageState extends State<JourneysPage> {
 
           _removeBearOverlay();
           ShowcaseView.getNamed("journeys_page").dismiss();
-          Provider.of<OnboardingModel>(
-            context,
-            listen: false,
-          ).completeStep4();
+          Provider.of<OnboardingModel>(context, listen: false).completeStep4();
 
           // Onboarding: Navigate to gameplay page to continue onboarding flow
           apiClient.serverApi?.setCurrentEvent(
@@ -224,7 +224,7 @@ class _JourneysPageState extends State<JourneysPage> {
         width: double.infinity,
         height: double.infinity,
         decoration: BoxDecoration(
-          color: Color.fromARGB(255, 255, 248, 241), // Background color
+          color: AppColors.warmWhite, // Background color
         ),
         child: Center(
           child: Padding(
@@ -258,7 +258,9 @@ class _JourneysPageState extends State<JourneysPage> {
                               userModel.getAvailableEventIds();
 
                           final events = allowedEventIds
-                              .map((id) => myEventModel.getEventById(id))
+                              .map(
+                                (id) => myEventModel.getEventById(id),
+                              )
                               .filter((element) => element != null)
                               .map((e) => e!)
                               .toList();
@@ -285,8 +287,9 @@ class _JourneysPageState extends State<JourneysPage> {
 
                             // Onboarding: Skip journeys with timed challenges during onboarding (only after journeys explanation)
                             final onboarding = Provider.of<OnboardingModel>(
-                                context,
-                                listen: false);
+                              context,
+                              listen: false,
+                            );
                             if (onboarding.step3JourneysExplanationComplete &&
                                 !onboarding.step4FirstJourneyComplete) {
                               bool eventHasTimer = false;
@@ -303,9 +306,8 @@ class _JourneysPageState extends State<JourneysPage> {
                             }
 
                             for (var challengeId in event.challenges ?? []) {
-                              var challenge = challengeModel.getChallengeById(
-                                challengeId,
-                              );
+                              var challenge =
+                                  challengeModel.getChallengeById(challengeId);
                               if (challenge != null) {
                                 totalPoints += challenge.points ?? 0;
                               }
@@ -332,7 +334,9 @@ class _JourneysPageState extends State<JourneysPage> {
                               challengeName: challengeName,
                             );
 
-                            var imageUrl = getValidImageUrl(challenge.imageUrl);
+                            var imageUrl = getValidImageUrl(
+                              challenge.imageUrl,
+                            );
 
                             if (!complete &&
                                 !timeTillExpire.isNegative &&
@@ -376,7 +380,9 @@ class _JourneysPageState extends State<JourneysPage> {
                               !_hasTriggeredStep4) {
                             _hasTriggeredStep4 =
                                 true; // Prevent re-triggering on rebuild
-                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                            WidgetsBinding.instance.addPostFrameCallback((
+                              _,
+                            ) {
                               if (mounted) {
                                 ShowcaseView.getNamed(
                                   "journeys_page",
@@ -390,7 +396,9 @@ class _JourneysPageState extends State<JourneysPage> {
                           }
 
                           return ListView.separated(
-                            padding: const EdgeInsets.symmetric(horizontal: 3),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 3,
+                            ),
                             itemCount: eventData.length,
                             itemBuilder: (context, index) {
                               final journeyCell = JourneyCell(

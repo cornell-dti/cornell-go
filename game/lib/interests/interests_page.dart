@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:game/constants/constants.dart';
 import 'package:game/api/game_client_dto.dart';
 import 'package:game/challenges/challenges_page.dart';
 import 'package:game/main.dart';
@@ -106,7 +107,7 @@ class _InterestsPageWidgetState extends State<InterestsPageWidget> {
                         value: _checked[i],
                         controlAffinity: ListTileControlAffinity.leading,
                         tileColor: _checked[i]
-                            ? Color.fromARGB(77, 255, 170, 91)
+                            ? AppColors.orange.withAlpha(77)
                             : Colors.white,
                         fillColor: MaterialStateProperty.all<Color>(
                           _checked[i]
@@ -119,7 +120,7 @@ class _InterestsPageWidgetState extends State<InterestsPageWidget> {
                           side: BorderSide(
                             width: 2,
                             color: _checked[i]
-                                ? Color.fromARGB(255, 255, 170, 91)
+                                ? AppColors.orange
                                 : Color.fromARGB(255, 228, 228, 228),
                           ),
                         ),
@@ -190,7 +191,7 @@ class _InterestsPageWidgetState extends State<InterestsPageWidget> {
                         ),
                       ),
                       backgroundColor: MaterialStatePropertyAll<Color>(
-                        Color.fromARGB(255, 233, 87, 85),
+                        AppColors.accentRed,
                       ),
                     ),
                     child: Container(

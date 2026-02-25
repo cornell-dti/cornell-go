@@ -30,6 +30,7 @@ import 'package:game/widgets/bear_mascot_message.dart';
 import 'package:showcaseview/showcaseview.dart';
 import 'package:game/quiz/quiz_page.dart';
 import 'package:game/gameplay/arrival_dialog.dart';
+import 'package:game/constants/constants.dart';
 
 /*
 
@@ -88,7 +89,8 @@ class _GameplayMapState extends State<GameplayMap>
 
   /// Extension duration in seconds (5 minutes).
   /// IMPORTANT: Must stay in sync with EXTENSION_LENGTH_MS in server/src/timer/timer.service.ts (in milliseconds).
-  static const int EXTENSION_TIME_SECONDS = 300;
+  static const int EXTENSION_TIME_SECONDS =
+      300; // See AppDurations.extensionTimeSeconds
 
   late Completer<GoogleMapController> mapCompleter = Completer();
   late StreamSubscription<Position> positionStream;
@@ -197,6 +199,12 @@ class _GameplayMapState extends State<GameplayMap>
   // Onboarding: overlay entry for bear mascot messages during onboarding steps 7-10
   OverlayEntry? _bearOverlayEntry;
 
+  // Onboarding: guard flags to prevent re-triggering showcase/overlay on every rebuild
+  bool _hasTriggeredStep7 = false;
+  bool _hasTriggeredStep8 = false;
+  bool _hasTriggeredStep9 = false;
+  bool _hasTriggeredStep10 = false;
+
   // Timer: overlay entry for Time's Up message when timer expires
   OverlayEntry? _timerModalOverlay;
   bool _timerModalShowing = false; // Flag to prevent multiple overlays
@@ -241,7 +249,7 @@ class _GameplayMapState extends State<GameplayMap>
           fontFamily: 'Poppins',
           fontSize: 16,
           fontWeight: FontWeight.w800,
-          color: Color(0xFFED5656),
+          color: AppColors.primaryRed,
           height: 1.5,
           decoration: TextDecoration.none,
         ),
@@ -335,10 +343,7 @@ class _GameplayMapState extends State<GameplayMap>
           print("Tapped anywhere on step 7 - expanding image");
           _removeBearOverlay();
           ShowcaseView.getNamed("gameplay_map").dismiss();
-          Provider.of<OnboardingModel>(
-            context,
-            listen: false,
-          ).completeStep7();
+          Provider.of<OnboardingModel>(context, listen: false).completeStep7();
           _toggle();
         },
       ),
@@ -362,10 +367,7 @@ class _GameplayMapState extends State<GameplayMap>
           print("Tapped anywhere on step 9");
           _removeBearOverlay();
           ShowcaseView.getNamed("gameplay_map").dismiss();
-          Provider.of<OnboardingModel>(
-            context,
-            listen: false,
-          ).completeStep9();
+          Provider.of<OnboardingModel>(context, listen: false).completeStep9();
         },
       ),
     );
@@ -388,10 +390,7 @@ class _GameplayMapState extends State<GameplayMap>
           print("Tapped anywhere on step 10");
           _removeBearOverlay();
           ShowcaseView.getNamed("gameplay_map").dismiss();
-          Provider.of<OnboardingModel>(
-            context,
-            listen: false,
-          ).completeStep10();
+          Provider.of<OnboardingModel>(context, listen: false).completeStep10();
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => BottomNavBar()),
@@ -430,9 +429,12 @@ class _GameplayMapState extends State<GameplayMap>
             currentTime = 0.0;
           });
           print(
-              "Timer start timeout: Backend didn't respond within $_maxBackendWaitTimeSeconds seconds. isActive=${timerModel.isActive}, currentChallengeId=${timerModel.currentChallengeId}");
+            "Timer start timeout: Backend didn't respond within $_maxBackendWaitTimeSeconds seconds. isActive=${timerModel.isActive}, currentChallengeId=${timerModel.currentChallengeId}",
+          );
           displayToast(
-              "Timer failed to start. Please try again.", Status.error);
+            "Timer failed to start. Please try again.",
+            Status.error,
+          );
           return;
         }
         // Wait for backend to respond
@@ -548,40 +550,25 @@ class _GameplayMapState extends State<GameplayMap>
 
     // Create animation for circle shrinking
     _circleShrinkAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _circleShrinkController,
-        curve: Curves.easeInOut,
-      ),
+      CurvedAnimation(parent: _circleShrinkController, curve: Curves.easeInOut),
     );
 
     // Create zoom animations
     _zoomStage1Animation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _zoomStage1Controller,
-        curve: Curves.elasticOut,
-      ),
+      CurvedAnimation(parent: _zoomStage1Controller, curve: Curves.elasticOut),
     );
 
     _zoomStage2Animation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _zoomStage2Controller,
-        curve: Curves.elasticOut,
-      ),
+      CurvedAnimation(parent: _zoomStage2Controller, curve: Curves.elasticOut),
     );
 
     // Create bear hint animations
     _bearSlideInAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _bearSlideInController,
-        curve: Curves.easeOut,
-      ),
+      CurvedAnimation(parent: _bearSlideInController, curve: Curves.easeOut),
     );
 
     _bearRotateAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _bearRotateController,
-        curve: Curves.easeOut,
-      ),
+      CurvedAnimation(parent: _bearRotateController, curve: Curves.easeOut),
     );
 
     _speechBubbleFadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -592,17 +579,11 @@ class _GameplayMapState extends State<GameplayMap>
     );
 
     _bearFadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _bearFadeController,
-        curve: Curves.easeInOut,
-      ),
+      CurvedAnimation(parent: _bearFadeController, curve: Curves.easeInOut),
     );
 
     _bearSlideOutAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _bearSlideOutController,
-        curve: Curves.easeIn,
-      ),
+      CurvedAnimation(parent: _bearSlideOutController, curve: Curves.easeIn),
     );
 
     // Add listener to update UI during circle animation
@@ -665,7 +646,8 @@ class _GameplayMapState extends State<GameplayMap>
       // Timer will start naturally when user navigates to challenge after completing onboarding
       if (!onboarding.step5GameplayIntroComplete) {
         print(
-            "Timer not started for challenge ${widget.challengeId} - onboarding not complete");
+          "Timer not started for challenge ${widget.challengeId} - onboarding not complete",
+        );
         return;
       }
 
@@ -676,7 +658,8 @@ class _GameplayMapState extends State<GameplayMap>
         final route = ModalRoute.of(context);
         if (route != null && !route.isCurrent) {
           print(
-              "Timer not started for challenge ${widget.challengeId} - route not current");
+            "Timer not started for challenge ${widget.challengeId} - route not current",
+          );
           return;
         }
         // Request backend to start timer (sends StartChallengeTimerDto)
@@ -686,7 +669,8 @@ class _GameplayMapState extends State<GameplayMap>
       });
     } else {
       print(
-          "No timer for challenge ${widget.challengeId} (timerLength=${challenge?.timerLength})");
+        "No timer for challenge ${widget.challengeId} (timerLength=${challenge?.timerLength})",
+      );
     }
   }
 
@@ -701,13 +685,16 @@ class _GameplayMapState extends State<GameplayMap>
     // cancel any existing subscription
     _timerStartedSubscription?.cancel();
 
-    _timerStartedSubscription =
-        client.clientApi.timerStartedStream.listen((event) {
+    _timerStartedSubscription = client.clientApi.timerStartedStream.listen((
+      event,
+    ) {
       if (event.challengeId == widget.challengeId && mounted) {
         final timerModel = Provider.of<TimerModel>(context, listen: false);
         final timeRemaining = timerModel.getTimeRemaining();
-        final challengeModel =
-            Provider.of<ChallengeModel>(context, listen: false);
+        final challengeModel = Provider.of<ChallengeModel>(
+          context,
+          listen: false,
+        );
         final challenge = challengeModel.getChallengeById(widget.challengeId);
 
         if (challenge?.timerLength != null &&
@@ -883,8 +870,9 @@ class _GameplayMapState extends State<GameplayMap>
       _consecutiveLocationFailures = 0;
       _locationWarningToastShown = false;
       _locationTimeoutTimer?.cancel();
-      _locationTimeoutTimer =
-          Timer.periodic(Duration(seconds: 10), (timer) async {
+      _locationTimeoutTimer = Timer.periodic(Duration(seconds: 10), (
+        timer,
+      ) async {
         if (!mounted || _locationWarningShown) {
           timer.cancel();
           return;
@@ -967,7 +955,9 @@ class _GameplayMapState extends State<GameplayMap>
               !_locationWarningToastShown) {
             _locationWarningToastShown = true;
             displayToast(
-                "Location signal interrupted. Reconnecting...", Status.info);
+              "Location signal interrupted. Reconnecting...",
+              Status.info,
+            );
           }
 
           // Only take action after multiple failures
@@ -1134,8 +1124,11 @@ class _GameplayMapState extends State<GameplayMap>
    * @returns The maximum zoom level that keeps the circle in frame
    */
   double _calculateZoomForRadius(
-      double radiusMeters, double centerLat, double screenWidthPixels,
-      {double paddingFactor = 2.5}) {
+    double radiusMeters,
+    double centerLat,
+    double screenWidthPixels, {
+    double paddingFactor = 2.5,
+  }) {
     // Diameter of circle in meters (with generous padding to ensure it fits)
     // Use diameter * paddingFactor to ensure the entire circle fits with margin
     final double diameterWithPadding = radiusMeters * 2 * paddingFactor;
@@ -1177,10 +1170,7 @@ class _GameplayMapState extends State<GameplayMap>
       double newLong = hintCenter!.long -
           (startingHintCenter!.long - widget.targetLocation.long) * 0.33;
 
-      return {
-        'radius': newRadius,
-        'center': GeoPoint(newLat, newLong, 0),
-      };
+      return {'radius': newRadius, 'center': GeoPoint(newLat, newLong, 0)};
     }
     return null;
   }
@@ -1203,8 +1193,10 @@ class _GameplayMapState extends State<GameplayMap>
       displayToast("Could not get event", Status.error);
       return;
     } else {
-      Provider.of<TrackerModel>(context, listen: false)
-          .useEventTrackerHint(eventId);
+      Provider.of<TrackerModel>(
+        context,
+        listen: false,
+      ).useEventTrackerHint(eventId);
     }
 
     hintRadius = newValues['radius'] as double;
@@ -1227,10 +1219,7 @@ class _GameplayMapState extends State<GameplayMap>
       transitionDuration: const Duration(milliseconds: 300),
       transitionBuilder: (context, animation, secondaryAnimation, child) {
         return FadeTransition(
-          opacity: CurvedAnimation(
-            parent: animation,
-            curve: Curves.easeInOut,
-          ),
+          opacity: CurvedAnimation(parent: animation, curve: Curves.easeInOut),
           child: child,
         );
       },
@@ -1342,8 +1331,10 @@ class _GameplayMapState extends State<GameplayMap>
       return;
     }
 
-    Provider.of<TrackerModel>(context, listen: false)
-        .useEventTrackerHint(eventId);
+    Provider.of<TrackerModel>(
+      context,
+      listen: false,
+    ).useEventTrackerHint(eventId);
 
     _newHintRadius = newValues['radius'] as double;
     hintCenter = newValues['center'] as GeoPoint;
@@ -1374,8 +1365,11 @@ class _GameplayMapState extends State<GameplayMap>
               : _center);
 
       // Calculate intermediate target
-      final intermediateTarget =
-          _offsetTowards(startPosition, finalTarget, 0.7);
+      final intermediateTarget = _offsetTowards(
+        startPosition,
+        finalTarget,
+        0.7,
+      );
 
       // Get current zoom or use default
       final startZoom = _currentZoom ?? 16.0;
@@ -1387,8 +1381,11 @@ class _GameplayMapState extends State<GameplayMap>
       final circleRadius = _newHintRadius ?? hintRadius ?? defaultHintRadius;
       final double paddingFactor = circleRadius < 60 ? 4.0 : 2.5;
       final calculatedZoom = _calculateZoomForRadius(
-          circleRadius, finalTarget.latitude, screenSizePixels,
-          paddingFactor: paddingFactor);
+        circleRadius,
+        finalTarget.latitude,
+        screenSizePixels,
+        paddingFactor: paddingFactor,
+      );
 
       // Ensure the circle always fits on screen
       final targetZoom = min(calculatedZoom, 18.0).clamp(startZoom, 18.0);
@@ -1404,19 +1401,13 @@ class _GameplayMapState extends State<GameplayMap>
         // Fallback: if controllers aren't initialized, use simple animation
         await googleMapController.animateCamera(
           CameraUpdate.newCameraPosition(
-            CameraPosition(
-              target: intermediateTarget,
-              zoom: intermediateZoom,
-            ),
+            CameraPosition(target: intermediateTarget, zoom: intermediateZoom),
           ),
         );
         await Future.delayed(const Duration(milliseconds: 300));
         await googleMapController.animateCamera(
           CameraUpdate.newCameraPosition(
-            CameraPosition(
-              target: finalTarget,
-              zoom: 18.0,
-            ),
+            CameraPosition(target: finalTarget, zoom: 18.0),
           ),
         );
         return;
@@ -1436,10 +1427,7 @@ class _GameplayMapState extends State<GameplayMap>
 
         googleMapController.moveCamera(
           CameraUpdate.newCameraPosition(
-            CameraPosition(
-              target: currentPos,
-              zoom: currentZoom,
-            ),
+            CameraPosition(target: currentPos, zoom: currentZoom),
           ),
         );
       };
@@ -1477,10 +1465,7 @@ class _GameplayMapState extends State<GameplayMap>
 
         googleMapController.moveCamera(
           CameraUpdate.newCameraPosition(
-            CameraPosition(
-              target: currentPos,
-              zoom: currentZoom,
-            ),
+            CameraPosition(target: currentPos, zoom: currentZoom),
           ),
         );
       };
@@ -1704,7 +1689,7 @@ class _GameplayMapState extends State<GameplayMap>
     Widget svgIcon = SvgPicture.asset(
       "assets/icons/maprecenter.svg",
       colorFilter: ColorFilter.mode(
-        Color.fromARGB(255, 131, 90, 124),
+        AppColors.purple,
         BlendMode.srcIn,
       ),
     );
@@ -1749,15 +1734,15 @@ class _GameplayMapState extends State<GameplayMap>
         isHintButtonIlluminated ||
         isHintAnimationInProgress;
     final Color iconColor = shouldHighlight
-        ? const Color(0xFFFFAA5B)
+        ? AppColors.orange
         : (numHintsLeft == 0
             ? const Color.fromARGB(255, 217, 217, 217)
-            : const Color.fromARGB(255, 131, 90, 124));
+            : AppColors.purple);
     final Color hintCountColor = shouldHighlight
-        ? const Color(0xFFFFAA5B)
+        ? AppColors.orange
         : (numHintsLeft == 0
             ? const Color.fromARGB(255, 217, 217, 217)
-            : const Color.fromARGB(255, 131, 90, 124));
+            : AppColors.purple);
 
     // 1. Build complete hint button with counter badge (without padding)
     Widget hintButton = Stack(
@@ -1766,8 +1751,10 @@ class _GameplayMapState extends State<GameplayMap>
         FloatingActionButton.extended(
           heroTag: "hint_button",
           onPressed: _openHintDialog,
-          label: SvgPicture.asset("assets/icons/maphint.svg",
-              colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn)),
+          label: SvgPicture.asset(
+            "assets/icons/maphint.svg",
+            colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
+          ),
           backgroundColor: const Color.fromARGB(255, 255, 255, 255),
           shape: const CircleBorder(),
         ),
@@ -1830,415 +1817,419 @@ class _GameplayMapState extends State<GameplayMap>
       debugShowCheckedModeBanner: false,
       theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.green[700]),
       home: Consumer5<EventModel, GroupModel, TrackerModel, ChallengeModel,
-          ApiClient>(builder: (
-        context,
-        eventModel,
-        groupModel,
-        trackerModel,
-        challengeModel,
-        apiClient,
-        child,
-      ) {
-        // Use displayed challenge ID to prevent showing next challenge while dialog is open
-        final effectiveChallengeId =
-            _displayedChallengeId ?? widget.challengeId;
+          ApiClient>(
+        builder: (context, eventModel, groupModel, trackerModel, challengeModel,
+            apiClient, child) {
+          // Use displayed challenge ID to prevent showing next challenge while dialog is open
+          final effectiveChallengeId =
+              _displayedChallengeId ?? widget.challengeId;
 
-        EventTrackerDto? tracker = trackerModel.trackerByEventId(
-          groupModel.curEventId ?? "",
-        );
-        if (tracker == null) {
-          displayToast("Error getting event tracker", Status.error);
-        } else if ((tracker.curChallengeId ?? '') == effectiveChallengeId) {
-          numHintsLeft = totalHints - tracker.hintsUsed;
-        }
-        var challenge = challengeModel.getChallengeById(effectiveChallengeId);
+          EventTrackerDto? tracker = trackerModel.trackerByEventId(
+            groupModel.curEventId ?? "",
+          );
+          if (tracker == null) {
+            displayToast("Error getting event tracker", Status.error);
+          } else if ((tracker.curChallengeId ?? '') == effectiveChallengeId) {
+            numHintsLeft = totalHints - tracker.hintsUsed;
+          }
+          var challenge = challengeModel.getChallengeById(effectiveChallengeId);
 
-        //re-initialize timer if challenge data loads after initState
-        // Only re-initialize if no dialog is showing (to prevent starting timer for next challenge)
-        if (challenge != null &&
-            !hasTimer &&
-            totalTime == 0 &&
-            !_arrivedDialogShowing) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted &&
-                challenge.timerLength != null &&
-                challenge.timerLength! > 0) {
-              _initializeTimer();
-            }
-          });
-        }
+          //re-initialize timer if challenge data loads after initState
+          // Only re-initialize if no dialog is showing (to prevent starting timer for next challenge)
+          if (challenge != null &&
+              !hasTimer &&
+              totalTime == 0 &&
+              !_arrivedDialogShowing) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted &&
+                  challenge.timerLength != null &&
+                  challenge.timerLength! > 0) {
+                _initializeTimer();
+              }
+            });
+          }
 
-        if (challenge == null) {
-          displayToast("Error getting challenge", Status.error);
-        }
+          if (challenge == null) {
+            displayToast("Error getting challenge", Status.error);
+          }
 
-        var imageUrl = challenge?.imageUrl;
-        if (imageUrl == null || imageUrl.length == 0) {
-          imageUrl =
-              "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png";
-        }
+          var imageUrl = challenge?.imageUrl;
+          if (imageUrl == null || imageUrl.length == 0) {
+            imageUrl = AppStrings.missingImageUrl;
+          }
 
-        // Onboarding: Step 7 - Show showcase for image toggle button after info row explanation
-        if (onboarding.step6InfoRowComplete &&
-            !onboarding.step7ImageToggleComplete) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
-              ShowcaseView.getNamed(
-                "gameplay_map",
-              ).startShowCase([onboarding.step7ImageToggleKey]);
-              // Show bear overlay on top of showcase
-              _showImageToggleBearOverlay();
-            }
-          });
-        }
+          // Onboarding: Step 7 - Show showcase for image toggle button after info row explanation
+          if (onboarding.step6InfoRowComplete &&
+              !onboarding.step7ImageToggleComplete &&
+              !_hasTriggeredStep7) {
+            _hasTriggeredStep7 = true;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                ShowcaseView.getNamed(
+                  "gameplay_map",
+                ).startShowCase([onboarding.step7ImageToggleKey]);
+                _showImageToggleBearOverlay();
+              }
+            });
+          }
 
-        // Onboarding: Step 8 - Show showcase for expanded image view
-        if (isExpanded &&
-            onboarding.step7ImageToggleComplete &&
-            !onboarding.step8ExpandedImageComplete) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
-              ShowcaseView.getNamed(
-                "gameplay_map",
-              ).startShowCase([onboarding.step8ExpandedImageKey]);
-              // No bear overlay for step 8 - just transparent full-screen tap
-            }
-          });
-        }
+          // Onboarding: Step 8 - Show showcase for expanded image view
+          if (isExpanded &&
+              onboarding.step7ImageToggleComplete &&
+              !onboarding.step8ExpandedImageComplete &&
+              !_hasTriggeredStep8) {
+            _hasTriggeredStep8 = true;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                ShowcaseView.getNamed(
+                  "gameplay_map",
+                ).startShowCase([onboarding.step8ExpandedImageKey]);
+              }
+            });
+          }
 
-        // Onboarding: Step 9 - Show showcase for recenter button
-        if (onboarding.step8ExpandedImageComplete &&
-            !onboarding.step9RecenterButtonComplete) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
-              ShowcaseView.getNamed(
-                "gameplay_map",
-              ).startShowCase([onboarding.step9RecenterButtonKey]);
-              // Show bear overlay on top of showcase
-              _showRecenterBearOverlay();
-            }
-          });
-        }
+          // Onboarding: Step 9 - Show showcase for recenter button
+          if (onboarding.step8ExpandedImageComplete &&
+              !onboarding.step9RecenterButtonComplete &&
+              !_hasTriggeredStep9) {
+            _hasTriggeredStep9 = true;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                ShowcaseView.getNamed(
+                  "gameplay_map",
+                ).startShowCase([onboarding.step9RecenterButtonKey]);
+                _showRecenterBearOverlay();
+              }
+            });
+          }
 
-        // Onboarding: Step 10 - Final gameplay step showcases hint button, then navigates home
-        if (onboarding.step9RecenterButtonComplete &&
-            !onboarding.step10HintButtonComplete) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
-              ShowcaseView.getNamed(
-                "gameplay_map",
-              ).startShowCase([onboarding.step10HintButtonKey]);
-              // Show bear overlay on top of showcase
-              _showHintBearOverlay();
-            }
-          });
-        }
+          // Onboarding: Step 10 - Final gameplay step showcases hint button, then navigates home
+          if (onboarding.step9RecenterButtonComplete &&
+              !onboarding.step10HintButtonComplete &&
+              !_hasTriggeredStep10) {
+            _hasTriggeredStep10 = true;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                ShowcaseView.getNamed(
+                  "gameplay_map",
+                ).startShowCase([onboarding.step10HintButtonKey]);
+                _showHintBearOverlay();
+              }
+            });
+          }
 
-        return Stack(
-          alignment: Alignment.bottomCenter,
-          children: [
-            StreamBuilder(
-              stream: client.clientApi.disconnectedStream,
-              builder: ((context, snapshot) {
-                // Redirect to login if server api is null
-                if (client.serverApi == null) {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    // Clear entire navigation stack and push to login screen
-                    Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(
-                        builder: (context) => SplashPageWidget(),
-                      ),
-                      (route) => false,
-                    );
-                    displayToast("Signed out", Status.success);
-                  });
-                }
-
-                return Container();
-              }),
-            ),
-            Listener(
-              onPointerDown: (e) {
-                cancelRecenterCamera();
-              },
-              child: GoogleMap(
-                onMapCreated: _onMapCreated,
-                onCameraMove: (CameraPosition position) {
-                  _currentCameraPosition = position.target;
-                  _currentZoom = position.zoom;
-                },
-                compassEnabled: false,
-                myLocationButtonEnabled: false,
-                zoomControlsEnabled: false,
-                myLocationEnabled: false,
-                mapToolbarEnabled: false,
-                mapType: MapType.normal,
-                initialCameraPosition: CameraPosition(
-                  target: currentLocation == null
-                      ? _center
-                      : LatLng(
-                          currentLocation!.lat,
-                          currentLocation!.long,
+          return Stack(
+            alignment: Alignment.bottomCenter,
+            children: [
+              StreamBuilder(
+                stream: client.clientApi.disconnectedStream,
+                builder: ((context, snapshot) {
+                  // Redirect to login if server api is null
+                  if (client.serverApi == null) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      // Clear entire navigation stack and push to login screen
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(
+                          builder: (context) => SplashPageWidget(),
                         ),
-                  zoom: 16,
-                ),
-                markers: {
-                  Marker(
-                    markerId: const MarkerId("currentLocation"),
-                    icon: currentLocationIcon,
-                    position: currentLocation == null
-                        ? _center
-                        : LatLng(
-                            currentLocation!.lat,
-                            currentLocation!.long,
-                          ),
-                    anchor: Offset(0.5, 0.5),
-                    rotation: _compassHeading,
-                  ),
-                },
-                circles: {
-                  Circle(
-                    circleId: CircleId("hintCircle"),
-                    center: hintCenter != null
-                        ? LatLng(hintCenter!.lat, hintCenter!.long)
-                        : _center,
-                    radius: () {
-                      // Use animated radius if animation is in progress
-                      double radiusValue;
-                      if (isHintAnimationInProgress &&
-                          _oldHintRadius != null &&
-                          _newHintRadius != null &&
-                          _circleShrinkAnimation.value < 1.0) {
-                        // Interpolate between old and new radius during animation
-                        radiusValue = _oldHintRadius! +
-                            (_newHintRadius! - _oldHintRadius!) *
-                                _circleShrinkAnimation.value;
-                      } else {
-                        radiusValue = hintRadius ?? defaultHintRadius;
-                      }
+                        (route) => false,
+                      );
+                      displayToast("Signed out", Status.success);
+                    });
+                  }
 
-                      // Safety check to prevent crashes
-                      if (radiusValue.isNaN ||
-                          radiusValue.isInfinite ||
-                          radiusValue <= 0) {
-                        return widget.awardingRadius.clamp(
-                          10.0,
+                  return Container();
+                }),
+              ),
+              Listener(
+                onPointerDown: (e) {
+                  cancelRecenterCamera();
+                },
+                child: GoogleMap(
+                  onMapCreated: _onMapCreated,
+                  onCameraMove: (CameraPosition position) {
+                    _currentCameraPosition = position.target;
+                    _currentZoom = position.zoom;
+                  },
+                  compassEnabled: false,
+                  myLocationButtonEnabled: false,
+                  zoomControlsEnabled: false,
+                  myLocationEnabled: false,
+                  mapToolbarEnabled: false,
+                  mapType: MapType.normal,
+                  initialCameraPosition: CameraPosition(
+                    target: currentLocation == null
+                        ? _center
+                        : LatLng(currentLocation!.lat, currentLocation!.long),
+                    zoom: 16,
+                  ),
+                  markers: {
+                    Marker(
+                      markerId: const MarkerId("currentLocation"),
+                      icon: currentLocationIcon,
+                      position: currentLocation == null
+                          ? _center
+                          : LatLng(currentLocation!.lat, currentLocation!.long),
+                      anchor: Offset(0.5, 0.5),
+                      rotation: _compassHeading,
+                    ),
+                  },
+                  circles: {
+                    Circle(
+                      circleId: CircleId("hintCircle"),
+                      center: hintCenter != null
+                          ? LatLng(hintCenter!.lat, hintCenter!.long)
+                          : _center,
+                      radius: () {
+                        // Use animated radius if animation is in progress
+                        double radiusValue;
+                        if (isHintAnimationInProgress &&
+                            _oldHintRadius != null &&
+                            _newHintRadius != null &&
+                            _circleShrinkAnimation.value < 1.0) {
+                          // Interpolate between old and new radius during animation
+                          radiusValue = _oldHintRadius! +
+                              (_newHintRadius! - _oldHintRadius!) *
+                                  _circleShrinkAnimation.value;
+                        } else {
+                          radiusValue = hintRadius ?? defaultHintRadius;
+                        }
+
+                        // Safety check to prevent crashes
+                        if (radiusValue.isNaN ||
+                            radiusValue.isInfinite ||
+                            radiusValue <= 0) {
+                          return widget.awardingRadius.clamp(
+                            10.0,
+                            defaultHintRadius,
+                          );
+                        }
+                        return radiusValue.clamp(
+                          widget.awardingRadius,
                           defaultHintRadius,
                         );
-                      }
-                      return radiusValue.clamp(
-                        widget.awardingRadius,
-                        defaultHintRadius,
-                      );
-                    }(),
-                    strokeColor: Color.fromARGB(80, 30, 41, 143),
-                    strokeWidth: 2,
-                    fillColor: Color.fromARGB(80, 83, 134, 237),
-                  ),
-                },
+                      }(),
+                      strokeColor: Color.fromARGB(80, 30, 41, 143),
+                      strokeWidth: 2,
+                      fillColor: Color.fromARGB(80, 83, 134, 237),
+                    ),
+                  },
+                ),
               ),
-            ),
-            // Only show timer if challenge has a timer
-            if (hasTimer)
-              Positioned(
-                top: MediaQuery.of(context).size.height *
-                    0.02, // Adjust top position
-                // left: MediaQuery.of(context).size.width * 0.5, // Adjust left position
-                child: Container(
-                  margin: EdgeInsets.all(4), // 4px margin on all sides
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      //timer container
-                      Container(
-                        width: MediaQuery.of(context).size.width * 0.20,
-                        height: MediaQuery.of(context).size.height * 0.04,
-                        decoration: BoxDecoration(
-                          color: _showWarningColors
-                              ? Color.fromARGB(204, 0, 0, 0)
-                              : (currentTime < 300
-                                  ? Color.fromARGB(
-                                      255, 237, 86, 86) // red when < 5 min left
-                                  : Color.fromARGB(
-                                      255, 64, 64, 61)), // grey > 5 min left
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Color.fromARGB(
-                                  64, 0, 0, 0), // #000000 with 25% opacity
-                              blurRadius: 4,
-                              offset: Offset(0, 4), // Position (0, 4)
-                            ),
-                          ],
+              // Only show timer if challenge has a timer
+              if (hasTimer)
+                Positioned(
+                  top: MediaQuery.of(context).size.height *
+                      0.02, // Adjust top position
+                  // left: MediaQuery.of(context).size.width * 0.5, // Adjust left position
+                  child: Container(
+                    margin: EdgeInsets.all(4), // 4px margin on all sides
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        //timer container
+                        Container(
+                          width: MediaQuery.of(context).size.width * 0.20,
+                          height: MediaQuery.of(context).size.height * 0.04,
+                          decoration: BoxDecoration(
+                            color: _showWarningColors
+                                ? Color.fromARGB(204, 0, 0, 0)
+                                : (currentTime < 300
+                                    ? Color.fromARGB(
+                                        255,
+                                        237,
+                                        86,
+                                        86,
+                                      ) // red when < 5 min left
+                                    : Color.fromARGB(
+                                        255,
+                                        64,
+                                        64,
+                                        61,
+                                      )), // grey > 5 min left
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Color.fromARGB(
+                                  64,
+                                  0,
+                                  0,
+                                  0,
+                                ), // #000000 with 25% opacity
+                                blurRadius: 4,
+                                offset: Offset(0, 4), // Position (0, 4)
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      // Timer icon and countdown centered
-                      Row(
-                        mainAxisAlignment:
-                            MainAxisAlignment.center, // Center the row contents
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // Timer icon (circular progress indicator)
-                          Container(
-                            margin: EdgeInsets.only(
-                                right: 8), // 8px margin between icon and text
-                            child: CustomPaint(
-                              size: Size(20, 20), // Outer circle: 20px x 20px
-                              painter: CircleSliceTimer(
+                        // Timer icon and countdown centered
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment
+                              .center, // Center the row contents
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Timer icon (circular progress indicator)
+                            Container(
+                              margin: EdgeInsets.only(
+                                right: 8,
+                              ), // 8px margin between icon and text
+                              child: CustomPaint(
+                                size: Size(20, 20), // Outer circle: 20px x 20px
+                                painter: CircleSliceTimer(
                                   progress: totalTime > 0
                                       ? currentTime / totalTime
                                       : 0.0,
                                   iconColor: _showWarningColors
-                                      ? Color(0xFFFF8080) // #FF8080
-                                      : Colors.white),
+                                      ? AppColors.lightRed // #FF8080
+                                      : Colors.white,
+                                ),
+                              ),
                             ),
-                          ),
-                          // Countdown text
-                          Text(
-                            timeLeft,
-                            style: TextStyle(
+                            // Countdown text
+                            Text(
+                              timeLeft,
+                              style: TextStyle(
                                 fontSize: 14.0,
                                 fontWeight: FontWeight.bold,
                                 color: _showWarningColors
-                                    ? Color(0xFFFF8080)
+                                    ? AppColors.lightRed
                                     : Colors.white,
-                                decoration: TextDecoration.none),
-                          ),
-                        ],
-                      ),
-                    ],
+                                decoration: TextDecoration.none,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            Container(
-              margin: EdgeInsets.only(bottom: 70),
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color.fromARGB(255, 237, 86, 86),
-                  padding: EdgeInsets.only(
-                    right: 15,
-                    left: 15,
-                    top: 10,
-                    bottom: 10,
+              Container(
+                margin: EdgeInsets.only(bottom: 70),
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryRed,
+                    padding: EdgeInsets.only(
+                      right: 15,
+                      left: 15,
+                      top: 10,
+                      bottom: 10,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                  child: Text(
+                    "I've Arrived!",
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 21,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.white,
+                    ),
                   ),
-                ),
-                child: Text(
-                  "I've Arrived!",
-                  style: TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 21,
-                    fontWeight: FontWeight.w400,
-                    color: Color(0xFFFFFFFF),
-                  ),
-                ),
-                onPressed: () async {
-                  if (!isArrivedButtonEnabled) return;
+                  onPressed: () async {
+                    if (!isArrivedButtonEnabled) return;
 
-                  setState(() {
-                    isArrivedButtonEnabled = false;
-                  });
-
-                  bool hasArrived = checkArrived();
-                  String? chalName;
-
-                  // Capture challenge ID BEFORE calling completedChallenge
-                  // because the backend will update tracker to next challenge
-                  final chalId = widget.challengeId;
-
-                  if (hasArrived) {
-                    if (tracker == null || challenge == null) {
-                      displayToast("An error occurred while getting challenge",
-                          Status.error);
-                    } else {
-                      // Set flags BEFORE calling completedChallenge so that
-                      // didUpdateWidget knows not to update _displayedChallengeId
-                      // when the backend sends the tracker update
-                      _arrivedDialogShowing = true;
-                      GameplayMap.isCompletionDialogShowing = true;
-
-                      chalName = await apiClient.serverApi
-                          ?.completedChallenge(CompletedChallengeDto());
-                    }
-                    // Stop timer when challenge is successfully completed
-                    // This prevents "Time's Up" modal from appearing while congratulations dialog is showing
-                    _timerUpdateTimer?.cancel();
-                    _periodicTimerStarted = false;
                     setState(() {
-                      hasTimer = false;
+                      isArrivedButtonEnabled = false;
                     });
-                  }
 
-                  // Also set for non-arrived case (dialog still shows)
-                  _arrivedDialogShowing = true;
-                  showDialog(
-                    context: context,
-                    barrierDismissible: !hasArrived,
-                    builder: (context) {
-                      return Container(
-                        margin: EdgeInsetsDirectional.only(start: 10, end: 10),
-                        child: Dialog(
-                          elevation: 16,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: ArrivalDialog(
-                              hasArrived: hasArrived,
-                              challengeId: chalId,
-                              challengeName: chalName,
+                    bool hasArrived = checkArrived();
+                    String? chalName;
+
+                    // Capture challenge ID BEFORE calling completedChallenge
+                    // because the backend will update tracker to next challenge
+                    final chalId = widget.challengeId;
+
+                    if (hasArrived) {
+                      if (tracker == null || challenge == null) {
+                        displayToast(
+                          "An error occurred while getting challenge",
+                          Status.error,
+                        );
+                      } else {
+                        // Set flags BEFORE calling completedChallenge so that
+                        // didUpdateWidget knows not to update _displayedChallengeId
+                        // when the backend sends the tracker update
+                        _arrivedDialogShowing = true;
+                        GameplayMap.isCompletionDialogShowing = true;
+
+                        chalName = await apiClient.serverApi
+                            ?.completedChallenge(CompletedChallengeDto());
+                      }
+                      // Stop timer when challenge is successfully completed
+                      // This prevents "Time's Up" modal from appearing while congratulations dialog is showing
+                      _timerUpdateTimer?.cancel();
+                      _periodicTimerStarted = false;
+                      setState(() {
+                        hasTimer = false;
+                      });
+                    }
+
+                    // Also set for non-arrived case (dialog still shows)
+                    _arrivedDialogShowing = true;
+                    showDialog(
+                      context: context,
+                      barrierDismissible: !hasArrived,
+                      builder: (context) {
+                        return Container(
+                          margin: EdgeInsetsDirectional.only(
+                            start: 10,
+                            end: 10,
+                          ),
+                          child: Dialog(
+                            elevation: 16,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: ArrivalDialog(
+                                hasArrived: hasArrived,
+                                challengeId: chalId,
+                                challengeName: chalName,
+                              ),
                             ),
                           ),
-                        ),
-                      );
-                    },
-                  ).then((_) {
-                    // Re-enable the button and clear dialog flags after the dialog is closed
-                    GameplayMap.isCompletionDialogShowing = false;
-                    setState(() {
-                      isArrivedButtonEnabled = true;
-                      _arrivedDialogShowing = false;
+                        );
+                      },
+                    ).then((_) {
+                      // Re-enable the button and clear dialog flags after the dialog is closed
+                      GameplayMap.isCompletionDialogShowing = false;
+                      setState(() {
+                        isArrivedButtonEnabled = true;
+                        _arrivedDialogShowing = false;
+                      });
                     });
-                  });
-                },
-              ),
-            ),
-            _buildImageToggle(
-              onboarding,
-              imageUrl,
-              screenWidth,
-              screenHeight,
-            ),
-            if (isHintAnimationInProgress)
-              Positioned.fill(
-                child: AbsorbPointer(
-                  absorbing: true,
-                  child: Container(
-                    color: const Color.fromARGB(128, 217, 217, 217),
-                  ),
+                  },
                 ),
               ),
-            Positioned(
-              bottom: 0,
-              right: 10,
-              child: Column(
-                children: [
-                  _buildHintButton(
-                    onboarding,
-                    screenWidth,
-                    screenHeight,
-                  ),
-                  _buildRecenterButton(
-                    onboarding,
-                    screenWidth,
-                    screenHeight,
-                  ),
-                ],
+              _buildImageToggle(
+                onboarding,
+                imageUrl,
+                screenWidth,
+                screenHeight,
               ),
-            ),
-          ],
-        );
-      }),
+              if (isHintAnimationInProgress)
+                Positioned.fill(
+                  child: AbsorbPointer(
+                    absorbing: true,
+                    child: Container(
+                      color: const Color.fromARGB(128, 217, 217, 217),
+                    ),
+                  ),
+                ),
+              Positioned(
+                bottom: 0,
+                right: 10,
+                child: Column(
+                  children: [
+                    _buildHintButton(onboarding, screenWidth, screenHeight),
+                    _buildRecenterButton(onboarding, screenWidth, screenHeight),
+                  ],
+                ),
+              ),
+            ],
+          );
+        },
+      ),
     );
     // });
   }
@@ -2263,8 +2254,9 @@ class _GameplayMapState extends State<GameplayMap>
 
     _timerWarningSubscription?.cancel();
 
-    _timerWarningSubscription =
-        client.clientApi.timerWarningStream.listen((event) {
+    _timerWarningSubscription = client.clientApi.timerWarningStream.listen((
+      event,
+    ) {
       // Use displayed challenge ID to handle case where widget may have changed
       final effectiveChallengeId = _displayedChallengeId ?? widget.challengeId;
       if (event.challengeId == effectiveChallengeId && mounted) {
@@ -2283,8 +2275,9 @@ class _GameplayMapState extends State<GameplayMap>
     // cancel any existing subscriptions
     _timerCompletedSubscription?.cancel();
 
-    _timerCompletedSubscription =
-        client.clientApi.timerCompletedStream.listen((event) {
+    _timerCompletedSubscription = client.clientApi.timerCompletedStream.listen((
+      event,
+    ) {
       // Use displayed challenge ID to handle case where widget may have changed
       final effectiveChallengeId = _displayedChallengeId ?? widget.challengeId;
       if (event.challengeId == effectiveChallengeId &&
@@ -2309,8 +2302,9 @@ class _GameplayMapState extends State<GameplayMap>
     // cancel any existing subscriptions
     _timerExtendedSubscription?.cancel();
 
-    _timerExtendedSubscription =
-        client.clientApi.timerExtendedStream.listen((event) {
+    _timerExtendedSubscription = client.clientApi.timerExtendedStream.listen((
+      event,
+    ) {
       // Use displayed challenge ID to handle case where widget may have changed
       final effectiveChallengeId = _displayedChallengeId ?? widget.challengeId;
       if (event.challengeId == effectiveChallengeId && mounted) {
@@ -2384,13 +2378,9 @@ class _GameplayMapState extends State<GameplayMap>
             // Dimmed game map as background for modal overlay
             GestureDetector(
               onTap: () {},
-              child: Container(
-                color: Colors.black.withOpacity(0.3),
-              ),
+              child: Container(color: Colors.black.withOpacity(0.3)),
             ),
-            Center(
-              child: _buildTimesUpModal(),
-            ),
+            Center(child: _buildTimesUpModal()),
           ],
         ),
       );
@@ -2431,9 +2421,7 @@ class _GameplayMapState extends State<GameplayMap>
       child: Material(
         type: MaterialType.transparency,
         child: Container(
-          constraints: BoxConstraints(
-            maxWidth: screenWidth * 0.85,
-          ),
+          constraints: BoxConstraints(maxWidth: screenWidth * 0.85),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(9),
@@ -2498,13 +2486,17 @@ class _GameplayMapState extends State<GameplayMap>
                                   _displayedChallengeId ?? widget.challengeId;
 
                               final timerModel = Provider.of<TimerModel>(
-                                  context,
-                                  listen: false);
-                              final client = Provider.of<ApiClient>(context,
-                                  listen: false);
+                                context,
+                                listen: false,
+                              );
+                              final client = Provider.of<ApiClient>(
+                                context,
+                                listen: false,
+                              );
                               final groupModel = Provider.of<GroupModel>(
-                                  context,
-                                  listen: false);
+                                context,
+                                listen: false,
+                              );
 
                               Timer? timeoutTimer;
                               StreamSubscription? trackerSubscription;
@@ -2555,12 +2547,14 @@ class _GameplayMapState extends State<GameplayMap>
                             },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
-                        side:
-                            BorderSide(color: Color.fromARGB(255, 237, 86, 86)),
+                        side: BorderSide(
+                          color: AppColors.primaryRed,
+                        ),
                         padding: EdgeInsets.zero,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(
-                              screenWidth * 0.025), //~10px
+                            screenWidth * 0.025,
+                          ), //~10px
                         ),
                       ),
                       child: Text(
@@ -2569,7 +2563,7 @@ class _GameplayMapState extends State<GameplayMap>
                           fontFamily: 'Poppins',
                           fontSize: screenWidth * 0.036, //~14px
                           fontWeight: FontWeight.w500,
-                          color: Color.fromARGB(255, 237, 86, 86),
+                          color: AppColors.primaryRed,
                         ),
                       ),
                     ),
@@ -2585,9 +2579,10 @@ class _GameplayMapState extends State<GameplayMap>
                         Positioned.fill(
                           child: Container(
                             decoration: BoxDecoration(
-                              color: Color(0xFFF08988), // Faded color
+                              color: AppColors.fadedRed, // Faded color
                               borderRadius: BorderRadius.circular(
-                                  screenWidth * 0.025), //~10px
+                                screenWidth * 0.025,
+                              ), //~10px
                             ),
                           ),
                         ),
@@ -2598,7 +2593,8 @@ class _GameplayMapState extends State<GameplayMap>
                             child: IgnorePointer(
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(
-                                    screenWidth * 0.025), //~10px
+                                  screenWidth * 0.025,
+                                ), //~10px
                                 child: Align(
                                   alignment: Alignment.centerLeft,
                                   child: FractionallySizedBox(
@@ -2606,7 +2602,11 @@ class _GameplayMapState extends State<GameplayMap>
                                         _extensionAnimation?.value ?? 0.0,
                                     child: Container(
                                       color: Color.fromARGB(
-                                          255, 237, 86, 86), // Normal red
+                                        255,
+                                        237,
+                                        86,
+                                        86,
+                                      ), // Normal red
                                     ),
                                   ),
                                 ),
@@ -2619,8 +2619,9 @@ class _GameplayMapState extends State<GameplayMap>
                                     AnimationStatus.completed
                                 ? () {
                                     displayToast(
-                                        "Sorry, time has run out to choose the extension. Please click Results.",
-                                        Status.error);
+                                      "Sorry, time has run out to choose the extension. Please click Results.",
+                                      Status.error,
+                                    );
                                   }
                                 : () async {
                                     // Guard is inside _extendTimer() - it will return false if already running
@@ -2641,30 +2642,38 @@ class _GameplayMapState extends State<GameplayMap>
                               ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(
-                                    screenWidth * 0.025), //~10px
+                                  screenWidth * 0.025,
+                                ), //~10px
                               ),
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.start,
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Text("+ 5 Min for ",
-                                    style: TextStyle(
-                                        fontFamily: 'Poppins',
-                                        fontSize: screenWidth * 0.033, //~13px
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white)),
-                                SvgPicture.asset('assets/icons/bearcoins.svg',
-                                    width: screenWidth * 0.041, //~16px
-                                    height: screenWidth * 0.041),
+                                Text(
+                                  "+ 5 Min for ",
+                                  style: TextStyle(
+                                    fontFamily: 'Poppins',
+                                    fontSize: screenWidth * 0.033, //~13px
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                SvgPicture.asset(
+                                  'assets/icons/bearcoins.svg',
+                                  width: screenWidth * 0.041, //~16px
+                                  height: screenWidth * 0.041,
+                                ),
                                 Flexible(
                                   child: Text(
-                                      " ${(widget.points * 0.25).floor()} Pt",
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                          fontFamily: 'Poppins',
-                                          fontSize: screenWidth * 0.033, //~13px
-                                          color: Color(0xFFFFC737))),
+                                    " ${(widget.points * 0.25).floor()} Pt",
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontFamily: 'Poppins',
+                                      fontSize: screenWidth * 0.033, //~13px
+                                      color: AppColors.yellow,
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
@@ -2690,7 +2699,8 @@ class _GameplayMapState extends State<GameplayMap>
     // Guard: if already extending, don't run again
     // Once clicked, button stays disabled until modal closes
     print(
-        '_extendTimer called, GameplayMap.isExtendingTimer = $GameplayMap.isExtendingTimer');
+      '_extendTimer called, GameplayMap.isExtendingTimer = $GameplayMap.isExtendingTimer',
+    );
     if (GameplayMap.isExtendingTimer) {
       print('_extendTimer: BLOCKED - already extending');
       return false;
@@ -2719,7 +2729,9 @@ class _GameplayMapState extends State<GameplayMap>
       if (errorMessage.toLowerCase().contains('insufficient coins') ||
           errorMessage.toLowerCase().contains('cannot extend timer')) {
         displayToast(
-            "Unable to extend timer: Insufficient coins", Status.error);
+          "Unable to extend timer: Insufficient coins",
+          Status.error,
+        );
       } else {
         // Other timer-related errors
         displayToast("Unable to extend timer: $errorMessage", Status.error);
@@ -2746,8 +2758,12 @@ class _GameplayMapState extends State<GameplayMap>
         widget.awardingRadius;
   }
 
-  Container displayDialog(BuildContext context, hasArrived, String challengeId,
-      String? challengeName) {
+  Container displayDialog(
+    BuildContext context,
+    hasArrived,
+    String challengeId,
+    String? challengeName,
+  ) {
     final name = challengeName ?? "";
     return hasArrived
         ? Container(
@@ -2759,26 +2775,29 @@ class _GameplayMapState extends State<GameplayMap>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                    margin: EdgeInsets.only(top: 5),
-                    child: Text(
-                      "Congratulations!",
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    )),
+                  margin: EdgeInsets.only(top: 5),
+                  child: Text(
+                    "Congratulations!",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ),
                 Container(
-                    margin: EdgeInsets.only(bottom: 10),
-                    child: Text(
-                      "You've arrived at ${name}!",
-                      style:
-                          TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
-                    )),
+                  margin: EdgeInsets.only(bottom: 10),
+                  child: Text(
+                    "You've arrived at ${name}!",
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
+                  ),
+                ),
                 Container(
                   margin: EdgeInsets.only(bottom: 10),
                   width: MediaQuery.of(context).size.width,
                   decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(10.0))),
-                  child: SvgPicture.asset('assets/images/arrived.svg',
-                      fit: BoxFit.cover),
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                  ),
+                  child: SvgPicture.asset(
+                    'assets/images/arrived.svg',
+                    fit: BoxFit.cover,
+                  ),
                 ),
                 Center(
                   child: ElevatedButton(
@@ -2787,27 +2806,32 @@ class _GameplayMapState extends State<GameplayMap>
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => ChallengeCompletedPage(
-                                  challengeId: challengeId,
-                                )),
+                          builder: (context) =>
+                              ChallengeCompletedPage(challengeId: challengeId),
+                        ),
                       );
                     },
                     style: ButtonStyle(
                       padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
-                          EdgeInsets.only(left: 15, right: 15)),
+                        EdgeInsets.only(left: 15, right: 15),
+                      ),
                       shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                         RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(
-                              7.3), // Adjust the radius as needed
+                            7.3,
+                          ), // Adjust the radius as needed
                         ),
                       ),
                       backgroundColor: MaterialStateProperty.all<Color>(
-                          Color.fromARGB(255, 237, 86, 86)),
+                        AppColors.primaryRed,
+                      ),
                     ),
-                    child: Text("Point Breakdown",
-                        style: TextStyle(color: Colors.white)),
+                    child: Text(
+                      "Point Breakdown",
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
-                )
+                ),
               ],
             ),
           )
@@ -2819,58 +2843,72 @@ class _GameplayMapState extends State<GameplayMap>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                    margin: EdgeInsets.only(top: 5),
-                    child: Text(
-                      "Nearly There!",
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
-                    )),
+                  margin: EdgeInsets.only(top: 5),
+                  child: Text(
+                    "Nearly There!",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                  ),
+                ),
                 Container(
-                    margin: EdgeInsets.only(bottom: 10),
-                    child: Text(
-                        "You're close, but not there yet." +
-                            (numHintsLeft > 0
-                                ? " Use a hint if needed! Each hint reduces reward by ~15%. Using all 3 hints yields half the points."
-                                : ""),
-                        style: TextStyle(
-                            fontSize: 14, fontWeight: FontWeight.w400))),
-                Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                  ElevatedButton(
+                  margin: EdgeInsets.only(bottom: 10),
+                  child: Text(
+                    "You're close, but not there yet." +
+                        (numHintsLeft > 0
+                            ? " Use a hint if needed! Each hint reduces reward by ~15%. Using all 3 hints yields half the points."
+                            : ""),
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
                       onPressed: () => Navigator.pop(context, false),
                       style: ButtonStyle(
                         padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
-                            EdgeInsets.symmetric(
-                                horizontal:
-                                    (MediaQuery.devicePixelRatioOf(context) < 3
-                                        ? 10
-                                        : 15))),
+                          EdgeInsets.symmetric(
+                            horizontal:
+                                (MediaQuery.devicePixelRatioOf(context) < 3
+                                    ? 10
+                                    : 15),
+                          ),
+                        ),
                         shape:
                             MaterialStateProperty.all<RoundedRectangleBorder>(
                           RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(
-                                7.3), // Adjust the radius as needed
+                              7.3,
+                            ), // Adjust the radius as needed
                           ),
                         ),
                         side: MaterialStateProperty.all<BorderSide>(
                           BorderSide(
                             color: Color.fromARGB(
-                                255, 237, 86, 86), // Specify the border color
+                              255,
+                              237,
+                              86,
+                              86,
+                            ), // Specify the border color
                             width: 2.0, // Specify the border width
                           ),
                         ),
-                        backgroundColor:
-                            MaterialStateProperty.all<Color>(Colors.white),
+                        backgroundColor: MaterialStateProperty.all<Color>(
+                          Colors.white,
+                        ),
                       ),
-                      child: Text("Nevermind",
-                          style: TextStyle(
-                              fontSize:
-                                  MediaQuery.devicePixelRatioOf(context) < 3
-                                      ? 12
-                                      : 14,
-                              color: Color.fromARGB(255, 237, 86, 86)))),
-                  if (numHintsLeft > 0) Spacer(),
-                  if (numHintsLeft > 0)
-                    ElevatedButton(
+                      child: Text(
+                        "Nevermind",
+                        style: TextStyle(
+                          fontSize: MediaQuery.devicePixelRatioOf(context) < 3
+                              ? 12
+                              : 14,
+                          color: AppColors.primaryRed,
+                        ),
+                      ),
+                    ),
+                    if (numHintsLeft > 0) Spacer(),
+                    if (numHintsLeft > 0)
+                      ElevatedButton(
                         onPressed: () {
                           Navigator.pop(context, false);
                           _startHintAnimationFlow();
@@ -2878,7 +2916,8 @@ class _GameplayMapState extends State<GameplayMap>
                         style: ButtonStyle(
                           padding:
                               MaterialStateProperty.all<EdgeInsetsGeometry>(
-                                  EdgeInsets.only(left: 15, right: 15)),
+                            EdgeInsets.only(left: 15, right: 15),
+                          ),
                           shape:
                               MaterialStateProperty.all<RoundedRectangleBorder>(
                             RoundedRectangleBorder(
@@ -2886,16 +2925,21 @@ class _GameplayMapState extends State<GameplayMap>
                             ),
                           ),
                           backgroundColor: MaterialStateProperty.all<Color>(
-                              Color.fromARGB(255, 237, 86, 86)),
+                            AppColors.primaryRed,
+                          ),
                         ),
-                        child: Text("Use Hint (${numHintsLeft} Left)",
-                            style: TextStyle(
-                                fontSize:
-                                    MediaQuery.devicePixelRatioOf(context) < 3
-                                        ? 12
-                                        : 14,
-                                color: Colors.white))),
-                ])
+                        child: Text(
+                          "Use Hint (${numHintsLeft} Left)",
+                          style: TextStyle(
+                            fontSize: MediaQuery.devicePixelRatioOf(context) < 3
+                                ? 12
+                                : 14,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               ],
             ),
           );
@@ -2913,248 +2957,251 @@ class _GameplayMapState extends State<GameplayMap>
         ),
       ),
       child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: 302,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Container(
-                    width: double.infinity,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Container(
-                          width: double.infinity,
-                          height: 23,
-                          child: Wrap(
-                            alignment: WrapAlignment.end,
-                            runAlignment: WrapAlignment.start,
-                            spacing: 8,
-                            runSpacing: 0,
-                            children: [
-                              GestureDetector(
-                                onTap: () {
-                                  Navigator.of(context).pop();
-                                  setState(() {
-                                    isHintDialogOpen = false;
-                                    isHintButtonIlluminated = false;
-                                  });
-                                },
-                                child: Container(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 302,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  width: double.infinity,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: double.infinity,
+                        height: 23,
+                        child: Wrap(
+                          alignment: WrapAlignment.end,
+                          runAlignment: WrapAlignment.start,
+                          spacing: 8,
+                          runSpacing: 0,
+                          children: [
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.of(context).pop();
+                                setState(() {
+                                  isHintDialogOpen = false;
+                                  isHintButtonIlluminated = false;
+                                });
+                              },
+                              child: Container(
+                                width: 24,
+                                height: 24,
+                                clipBehavior: Clip.antiAlias,
+                                decoration: BoxDecoration(),
+                                child: SvgPicture.asset(
+                                  'assets/icons/cancel.svg',
                                   width: 24,
                                   height: 24,
-                                  clipBehavior: Clip.antiAlias,
-                                  decoration: BoxDecoration(),
-                                  child: SvgPicture.asset(
-                                    'assets/icons/cancel.svg',
-                                    width: 24,
-                                    height: 24,
-                                    fit: BoxFit.contain,
+                                  fit: BoxFit.contain,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 21),
+                      Container(
+                        width: 302,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                SvgPicture.asset(
+                                  numHintsLeft <= 0
+                                      ? 'assets/icons/sweating_bear.svg'
+                                      : 'assets/icons/hint_popup.svg',
+                                  width: numHintsLeft <= 0 ? 134 : 186.72,
+                                  height: numHintsLeft <= 0 ? 110 : null,
+                                  fit: BoxFit.contain,
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 21),
+                      Container(
+                        width: double.infinity,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Container(
+                              width: double.infinity,
+                              clipBehavior: Clip.antiAlias,
+                              decoration: BoxDecoration(),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    numHintsLeft <= 0
+                                        ? "You're out of Hints!"
+                                        : 'Want to use a Hint?',
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 24,
+                                      fontFamily: 'Poppins',
+                                      fontWeight: FontWeight.w700,
+                                      height: 1.30,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  numHintsLeft <= 0
+                                      ? Text(
+                                          "Time to use those bear instincts!",
+                                          style: TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 14,
+                                            fontFamily: 'Poppins',
+                                            fontWeight: FontWeight.w400,
+                                          ),
+                                        )
+                                      : Text.rich(
+                                          TextSpan(
+                                            children: [
+                                              TextSpan(
+                                                text: 'You have ',
+                                                style: TextStyle(
+                                                  color: Colors.black,
+                                                  fontSize: 14,
+                                                  fontFamily: 'Poppins',
+                                                  fontWeight: FontWeight.w400,
+                                                ),
+                                              ),
+                                              TextSpan(
+                                                text: numHintsLeft.toString(),
+                                                style: TextStyle(
+                                                  color: const Color(
+                                                    0xFFE95755,
+                                                  ),
+                                                  fontSize: 14,
+                                                  fontFamily: 'Poppins',
+                                                  fontWeight: FontWeight.w700,
+                                                ),
+                                              ),
+                                              TextSpan(
+                                                text: numHintsLeft == 1
+                                                    ? ' hint left for the week!'
+                                                    : ' hints left for the week!',
+                                                style: TextStyle(
+                                                  color: Colors.black,
+                                                  fontSize: 14,
+                                                  fontFamily: 'Poppins',
+                                                  fontWeight: FontWeight.w400,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                          ],
+                        ),
+                      ),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: numHintsLeft <= 0
+                            ? MainAxisAlignment.center
+                            : MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                            width: 118,
+                            height: 40,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                setState(() {
+                                  isHintDialogOpen = false;
+                                  isHintButtonIlluminated = false;
+                                });
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                elevation: 0,
+                                padding: const EdgeInsets.all(10),
+                                minimumSize: const Size.fromHeight(40),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  side: BorderSide(
+                                    width: 1.5,
+                                    color: numHintsLeft <= 0
+                                        ? AppColors.primaryRed
+                                        : AppColors.activeRed,
                                   ),
                                 ),
                               ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 21),
-                        Container(
-                          width: 302,
-                          child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    SvgPicture.asset(
-                                      numHintsLeft <= 0
-                                          ? 'assets/icons/sweating_bear.svg'
-                                          : 'assets/icons/hint_popup.svg',
-                                      width: numHintsLeft <= 0 ? 134 : 186.72,
-                                      height: numHintsLeft <= 0 ? 110 : null,
-                                      fit: BoxFit.contain,
-                                    ),
-                                  ],
-                                ),
-                              ]),
-                        ),
-                        const SizedBox(height: 21),
-                        Container(
-                          width: double.infinity,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Container(
-                                width: double.infinity,
-                                clipBehavior: Clip.antiAlias,
-                                decoration: BoxDecoration(),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      numHintsLeft <= 0
-                                          ? "You're out of Hints!"
-                                          : 'Want to use a Hint?',
-                                      style: TextStyle(
-                                        color: Colors.black,
-                                        fontSize: 24,
-                                        fontFamily: 'Poppins',
-                                        fontWeight: FontWeight.w700,
-                                        height: 1.30,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    numHintsLeft <= 0
-                                        ? Text(
-                                            "Time to use those bear instincts!",
-                                            style: TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 14,
-                                              fontFamily: 'Poppins',
-                                              fontWeight: FontWeight.w400,
-                                            ),
-                                          )
-                                        : Text.rich(
-                                            TextSpan(
-                                              children: [
-                                                TextSpan(
-                                                  text: 'You have ',
-                                                  style: TextStyle(
-                                                    color: Colors.black,
-                                                    fontSize: 14,
-                                                    fontFamily: 'Poppins',
-                                                    fontWeight: FontWeight.w400,
-                                                  ),
-                                                ),
-                                                TextSpan(
-                                                  text: numHintsLeft.toString(),
-                                                  style: TextStyle(
-                                                    color:
-                                                        const Color(0xFFE95755),
-                                                    fontSize: 14,
-                                                    fontFamily: 'Poppins',
-                                                    fontWeight: FontWeight.w700,
-                                                  ),
-                                                ),
-                                                TextSpan(
-                                                  text: numHintsLeft == 1
-                                                      ? ' hint left for the week!'
-                                                      : ' hints left for the week!',
-                                                  style: TextStyle(
-                                                    color: Colors.black,
-                                                    fontSize: 14,
-                                                    fontFamily: 'Poppins',
-                                                    fontWeight: FontWeight.w400,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                  ],
+                              child: Text(
+                                numHintsLeft <= 0 ? "Close" : "Nevermind",
+                                style: TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: 14,
+                                  color: numHintsLeft <= 0
+                                      ? AppColors.primaryRed
+                                      : AppColors.activeRed,
+                                  fontWeight: FontWeight.w400,
                                 ),
                               ),
-                              const SizedBox(height: 12),
-                            ],
+                            ),
                           ),
-                        ),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          mainAxisAlignment: numHintsLeft <= 0
-                              ? MainAxisAlignment.center
-                              : MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
+                          if (numHintsLeft > 0) const SizedBox(width: 15),
+                          if (numHintsLeft > 0)
                             SizedBox(
                               width: 118,
                               height: 40,
                               child: ElevatedButton(
                                 onPressed: () {
                                   Navigator.of(context).pop();
-                                  setState(() {
-                                    isHintDialogOpen = false;
-                                    isHintButtonIlluminated = false;
-                                  });
+                                  _startHintAnimationFlowWithAnimations();
                                 },
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.white,
+                                  backgroundColor: AppColors.activeRed,
                                   elevation: 0,
                                   padding: const EdgeInsets.all(10),
                                   minimumSize: const Size.fromHeight(40),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(8),
-                                    side: BorderSide(
-                                      width: 1.5,
-                                      color: numHintsLeft <= 0
-                                          ? const Color(0xFFED5656)
-                                          : const Color(0xFFEC5555),
-                                    ),
                                   ),
                                 ),
-                                child: Text(
-                                  numHintsLeft <= 0 ? "Close" : "Nevermind",
+                                child: const Text(
+                                  "Use one Hint",
                                   style: TextStyle(
                                     fontFamily: 'Poppins',
                                     fontSize: 14,
-                                    color: numHintsLeft <= 0
-                                        ? const Color(0xFFED5656)
-                                        : const Color(0xFFEC5555),
-                                    fontWeight: FontWeight.w400,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
                               ),
                             ),
-                            if (numHintsLeft > 0) const SizedBox(width: 15),
-                            if (numHintsLeft > 0)
-                              SizedBox(
-                                width: 118,
-                                height: 40,
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                    _startHintAnimationFlowWithAnimations();
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFFEC5555),
-                                    elevation: 0,
-                                    padding: const EdgeInsets.all(10),
-                                    minimumSize: const Size.fromHeight(40),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                  ),
-                                  child: const Text(
-                                    "Use one Hint",
-                                    style: TextStyle(
-                                      fontFamily: 'Poppins',
-                                      fontSize: 14,
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  )
-                ],
-              ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ]),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -3338,16 +3385,19 @@ class _HintBearAnimationWidgetState extends State<_HintBearAnimationWidget> {
                           // Bubble
                           Container(
                             width: messageBoxWidth,
-                            constraints:
-                                BoxConstraints(maxWidth: screenWidth * 0.75),
+                            constraints: BoxConstraints(
+                              maxWidth: screenWidth * 0.75,
+                            ),
                             decoration: BoxDecoration(
                               color: Colors.white,
-                              borderRadius:
-                                  BorderRadius.circular(bubbleBorderRadius),
+                              borderRadius: BorderRadius.circular(
+                                bubbleBorderRadius,
+                              ),
                             ),
                             padding: EdgeInsets.symmetric(
-                                horizontal: bubbleHorizontalPadding,
-                                vertical: bubbleVerticalPadding),
+                              horizontal: bubbleHorizontalPadding,
+                              vertical: bubbleVerticalPadding,
+                            ),
                             child: Text(
                               _currentMessage,
                               textAlign: TextAlign.center,
