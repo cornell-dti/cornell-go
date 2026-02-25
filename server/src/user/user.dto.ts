@@ -56,6 +56,7 @@ export interface UserDto {
   major?: string;
   interests?: string[];
   score?: number;
+  coins?: number;
   isBanned?: boolean;
   groupId?: string;
   authType?: UserAuthTypeDto;

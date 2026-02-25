@@ -77,38 +77,39 @@ enum OrganizationSpecialUsage {
 }
 
 model User {
-  id                     String               @id() @default(uuid())
-  createdAt              DateTime             @default(now())
-  updatedAt              DateTime             @updatedAt()
-  subject                String               @default("User")
-  authToken              String               @unique
-  authType               AuthType
-  username               String               @unique
-  year                   String
-  college                String
-  major                  String
-  interests              String[]
-  email                  String
-  hashedRefreshToken     String
-  administrator          Boolean
-  enrollmentType         EnrollmentType
-  score                  Int
-  isBanned               Boolean              @default(false)
-  group                  Group                @relation("member", fields: [groupId], references: [id])
-  groupId                String
-  hostOf                 Group?               @relation("host")
-  eventTrackers          EventTracker[]
-  favorites              EventBase[]
-  completedChallenges    PrevChallenge[]      @relation("owner")
-  memberOf               Organization[]       @relation("orgToUser")
-  managerOf              Organization[]       @relation("orgManager")
-  isRanked               Boolean              @default(true)
-  participatedIn         PrevChallenge[]      @relation("prevChallengeParticipant")
-  sessionLogEntries      SessionLogEntry[]
-  achievementTrackers    AchievementTracker[]
-  challengeTimers        ChallengeTimer[]
-  UserQuizAnswer         UserQuizAnswer[]
-  hasCompletedOnboarding Boolean              @default(false)
+  id                  String               @id() @default(uuid())
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt()
+  subject             String               @default("User")
+  authToken           String               @unique
+  authType            AuthType
+  username            String               @unique
+  year                String
+  college             String
+  major               String
+  interests           String[]
+  email               String
+  hashedRefreshToken  String
+  administrator       Boolean
+  enrollmentType      EnrollmentType
+  score               Int
+  coins               Int                  @default(0)
+  isBanned            Boolean              @default(false)
+  group               Group                @relation("member", fields: [groupId], references: [id])
+  groupId             String
+  hostOf              Group?               @relation("host")
+  eventTrackers       EventTracker[]
+  favorites           EventBase[]
+  completedChallenges PrevChallenge[]      @relation("owner")
+  memberOf            Organization[]       @relation("orgToUser")
+  managerOf           Organization[]       @relation("orgManager")
+  isRanked            Boolean              @default(true)
+  participatedIn      PrevChallenge[]      @relation("prevChallengeParticipant")
+  sessionLogEntries   SessionLogEntry[]
+  achievementTrackers AchievementTracker[]
+  bearInventories     UserBearInventory[]
+  bearEquipped        UserBearEquipped[]
+  hasCompletedOnboarding Boolean
 }
 
 model Group {
@@ -346,4 +347,57 @@ model UserQuizAnswer {
 
   @@unique([userId, questionId]) // Enforce one attempt per question
   @@map("UserQuizAnswer")
+}
+
+// BUILD-A-BEAR MODELS
+enum BearSlot {
+  EYES
+  MOUTH
+  COLOR
+  ACCESSORY
+}
+
+model BearItem {
+  id          String              @id @default(uuid())
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt()
+  name        String
+  slot        BearSlot
+  cost       Int
+
+  assetKey   String
+  mimeType   String?
+  zIndex     Int?
+
+  isDefault   Boolean             @default(false)
+  inventories UserBearInventory[]
+  equipped    UserBearEquipped[]
+}
+
+model UserBearInventory {
+  id           String   @id @default(uuid())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt()
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
+  bearItem     BearItem @relation(fields: [bearItemId], references: [id], onDelete: Cascade)
+  bearItemId   String
+  acquiredDate DateTime @default(now())
+
+  @@unique([userId, bearItemId])
+}
+
+model UserBearEquipped {
+  id         String   @id @default(uuid())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt()
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String
+  bearItem   BearItem @relation(fields: [bearItemId], references: [id], onDelete: Cascade)
+  bearItemId String
+  slot       BearSlot
+
+  @@unique([userId, slot])
 }
