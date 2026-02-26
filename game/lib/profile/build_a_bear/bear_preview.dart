@@ -77,7 +77,7 @@ class BearPreview extends StatelessWidget {
     final eyesItem = itemForSlot(BearSlotDto.EYES);
     if (eyesItem == null) return const SizedBox.shrink();
 
-    const eyeScale = 0.35;
+    const eyeScale = 0.4;
 
     return Center(
       child: Transform.translate(
