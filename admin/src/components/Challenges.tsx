@@ -151,9 +151,9 @@ function toQuizForm(question: QuizQuestionDto): EntryForm[] {
         text: a.answerText,
         isCorrect: a.isCorrect ?? false,
       })) ?? [
-        { text: '', isCorrect: true },
-        { text: '', isCorrect: false },
-      ],
+          { text: '', isCorrect: true },
+          { text: '', isCorrect: false },
+        ],
       minAnswers: 2,
       maxAnswers: 4,
     },
@@ -299,8 +299,16 @@ function ChallengeCard(props: {
 }
 
 function makeForm(): EntryForm[] {
+  const awardingRadius = 1;
+  const closeRadius = 1;
   return [
-    { name: 'Location', latitude: 42.447546, longitude: -76.484593 },
+    {
+      name: 'Location',
+      latitude: 42.447546,
+      longitude: -76.484593,
+      awardingRadiusF: awardingRadius,
+      closeRadiusF: closeRadius,
+    },
     {
       name: 'Location Description',
       options: locationOptions as string[],
@@ -310,8 +318,8 @@ function makeForm(): EntryForm[] {
     { name: 'Description', characterLimit: 2048, value: '' },
     { name: 'Points', min: 1, max: 1000, value: 50 },
     { name: 'Image URL', characterLimit: 2048, value: '' },
-    { name: 'Awarding Distance (meters)', min: 1, max: 1000, value: 1 },
-    { name: 'Close Distance (meters)', min: 1, max: 1000, value: 1 },
+    { name: 'Awarding Distance (meters)', min: 1, max: 1000, value: awardingRadius },
+    { name: 'Close Distance (meters)', min: 1, max: 1000, value: closeRadius },
     {
       name: 'Enable Timer',
       checked: false,
@@ -324,11 +332,15 @@ function makeForm(): EntryForm[] {
 }
 
 function toForm(challenge: ChallengeDto) {
+  const awardingRadius = challenge.awardingRadiusF ?? 0;
+  const closeRadius = challenge.closeRadiusF ?? 0;
   return [
     {
       name: 'Location',
       latitude: challenge.latF ?? 0,
       longitude: challenge.longF ?? 0,
+      awardingRadiusF: awardingRadius,
+      closeRadiusF: closeRadius,
     },
     {
       name: 'Location Description',
@@ -361,13 +373,13 @@ function toForm(challenge: ChallengeDto) {
       name: 'Awarding Distance (meters)',
       min: 1,
       max: 1000,
-      value: challenge.awardingRadiusF ?? 0,
+      value: awardingRadius,
     },
     {
       name: 'Close Distance (meters)',
       min: 1,
       max: 1000,
-      value: challenge.closeRadiusF ?? 0,
+      value: closeRadius,
     },
     {
       name: 'Enable Timer',
@@ -566,7 +578,7 @@ export function Challenges() {
         <CenterText>Select an event to view challenges</CenterText>
       ) : serverData.events.get(serverData.selectedEvent) ? (
         serverData.events.get(serverData.selectedEvent)?.challenges?.length ===
-          0 && <CenterText>No challenges in event</CenterText>
+        0 && <CenterText>No challenges in event</CenterText>
       ) : (
         <CenterText>Error getting challenges</CenterText>
       )}
@@ -577,9 +589,9 @@ export function Challenges() {
           query === ''
             ? 0
             : compareTwoStrings(b.name ?? '', query) -
-              compareTwoStrings(a.name ?? '', query) +
-              compareTwoStrings(b.description ?? '', query) -
-              compareTwoStrings(a.description ?? '', query),
+            compareTwoStrings(a.name ?? '', query) +
+            compareTwoStrings(b.description ?? '', query) -
+            compareTwoStrings(a.description ?? '', query),
         )
         .map((chal: ChallengeDto) => (
           <ChallengeCard
