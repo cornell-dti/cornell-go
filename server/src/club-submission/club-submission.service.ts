@@ -1,4 +1,7 @@
 import { Injectable } from '@nestjs/common';
+import { ApprovalStatus, EventSource } from '@prisma/client';
+import { PrismaService } from '../prisma/prisma.service';
+import { ClubSubmissionDto } from './club-submission.dto';
 /**
  * Build admin-facing service methods: 
  * get all pending events, 
@@ -12,12 +15,15 @@ export class ClubSubmissionService {
         private  prisma: PrismaService
     ){}
 
+    const DEFAULT_LAT = 42.4534; 
+    const DEFAULT_LONG = -76.4735;
+
     /**
      * Creates a CampusEvent from ClubSubmission Google Form data
      * sets approvalStatus to PENDING and EventSource to COMMUNITY_SUBMITTED
      */
     async createClubSubmission(dto: ClubSubmissionDto) {
-        const campusEvent: CampusEvent =  this.prisma.campusEvent.create({
+        return this.prisma.campusEvent.create({
             data: {
                 title: dto.eventTitle,
                 description: dto.description,
@@ -28,10 +34,10 @@ export class ClubSubmissionService {
 
                 locationName: dto.location,
                 address: dto.address ?? null,
-                latitude: dto.latitude ?? null, // TODO: create default lat/long
-                longitude: dto.longtitude ?? null,
+                latitude: dto.latitude ?? DEFAULT_LAT,
+                longitude: dto.longtitude ?? DEFAULT_LONG,
 
-                category: [dto.category],
+                categories: [dto.category],
                 tags: [],
 
                 organizerName: dto.clubName,
@@ -39,14 +45,37 @@ export class ClubSubmissionService {
                 registrationUrl: dto.registrationLink ?? null,
 
                 approvalStatus: ApprovalStatus.PENDING,
-                source: EventSource.COMMUNITY_SUBMITTED
+                source: EventSource.COMMUNITY_SUBMITTED,
+            },
+        });
+    }
 
+    async getPendingEvents() {
+        return this.prisma.campusEvent.findMany({
+            where: {approvalStatus: ApprovalStatus.PENDING}, 
+            orderBy: {createdAt: 'asc'} //orders in time created (oldest to newest)
+        });
+    }
+
+    // approve an event (sets status to approved)
+    async approveEvent(id: string) {
+        return this.prisma.campusEvent.update({
+            where: {id},
+            data: {
+                approvalStatus: ApprovalStatus.APPROVED,
+                rejectionReason: null
             }
-        }
+        });
+    }
 
-        )
-        console.log(`CampusEvent created`);
-    
-        return campusEvent
+    // reject with a reason (sets status to rejected)
+    async rejectEvent(id: string, reason: string){
+        return this.prisma.campusEvent.update({
+            where: {id},
+            data: {
+                approvalStatus: ApprovalStatus.REJECTED,
+                rejectionReason: reason
+            }
+        });
     }
 }
