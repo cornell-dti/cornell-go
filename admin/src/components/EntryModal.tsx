@@ -158,7 +158,10 @@ function DateEntryFormBox(props: { form: DateEntryForm }) {
   );
 }
 
-function NumberEntryFormBox(props: { form: NumberEntryForm }) {
+function NumberEntryFormBox(props: {
+  form: NumberEntryForm;
+  onChange?: (value: number) => void;
+}) {
   const [val, setVal] = useState('');
 
   useEffect(() => setVal('' + props.form.value), [props.form]);
@@ -172,8 +175,10 @@ function NumberEntryFormBox(props: { form: NumberEntryForm }) {
         min={props.form.min}
         max={props.form.max}
         onChange={e => {
+          const num = +e.target.value;
           setVal(e.target.value);
-          props.form.value = +e.target.value;
+          props.form.value = num;
+          props.onChange?.(num);
         }}
       />
     </EntryBox>
@@ -245,34 +250,16 @@ function MapEntryFormBox(props: { form: MapEntryForm; allForms?: EntryForm[] }) 
     lat: props.form.latitude,
     lng: props.form.longitude,
   });
-  const [awardingRadius, setAwardingRadius] = useState(props.form.awardingRadiusF ?? 0);
-  const [closeRadius, setCloseRadius] = useState(props.form.closeRadiusF ?? 0);
 
-  useEffect(() => {
-    if (props.allForms) {
-      const awardingForm = props.allForms.find(
-        f => 'name' in f && f.name === 'Awarding Distance (meters)'
-      ) as NumberEntryForm | undefined;
-      const closeForm = props.allForms.find(
-        f => 'name' in f && f.name === 'Close Distance (meters)'
-      ) as NumberEntryForm | undefined;
-
-      if (awardingForm) {
-        const newValue = awardingForm.value;
-        if (newValue !== awardingRadius) {
-          setAwardingRadius(newValue);
-          props.form.awardingRadiusF = newValue;
-        }
-      }
-      if (closeForm) {
-        const newValue = closeForm.value;
-        if (newValue !== closeRadius) {
-          setCloseRadius(newValue);
-          props.form.closeRadiusF = newValue;
-        }
-      }
-    }
-  });
+  // Derive radii from form so map updates when Awarding/Close Distance fields change
+  const awardingRadius =
+    (props.allForms?.find(
+      f => 'name' in f && f.name === 'Awarding Distance (meters)'
+    ) as NumberEntryForm | undefined)?.value ?? props.form.awardingRadiusF ?? 0;
+  const closeRadius =
+    (props.allForms?.find(
+      f => 'name' in f && f.name === 'Close Distance (meters)'
+    ) as NumberEntryForm | undefined)?.value ?? props.form.closeRadiusF ?? 0;
 
   useEffect(() => {
     setLat(props.form.latitude);
@@ -545,7 +532,18 @@ export function EntryModal(props: {
   entryButtonText: string;
   onEntry: () => void;
   onCancel: () => void;
+  /** When provided, radius number changes update parent state so the map re-renders. */
+  onRadiusChange?: (awardingRadius: number, closeRadius: number) => void;
 }) {
+  const getAwarding = () =>
+    (props.form.find(
+      f => 'name' in f && f.name === 'Awarding Distance (meters)'
+    ) as NumberEntryForm | undefined)?.value ?? 0;
+  const getClose = () =>
+    (props.form.find(
+      f => 'name' in f && f.name === 'Close Distance (meters)'
+    ) as NumberEntryForm | undefined)?.value ?? 0;
+
   return (
     <Modal
       title={props.title}
@@ -568,7 +566,24 @@ export function EntryModal(props: {
         } else if ('checked' in form) {
           return <CheckboxNumberEntryFormBox form={form} key={form.name} />;
         } else if ('min' in form) {
-          return <NumberEntryFormBox form={form} key={form.name} />;
+          const isAwarding = form.name === 'Awarding Distance (meters)';
+          const isClose = form.name === 'Close Distance (meters)';
+          const onRadiusChange = props.onRadiusChange;
+          return (
+            <NumberEntryFormBox
+              form={form}
+              key={form.name}
+              onChange={
+                (isAwarding || isClose) && onRadiusChange
+                  ? value =>
+                      onRadiusChange(
+                        isAwarding ? value : getAwarding(),
+                        isClose ? value : getClose()
+                      )
+                  : undefined
+              }
+            />
+          );
         } else if ('date' in form) {
           return <DateEntryFormBox form={form} key={form.name} />;
         } else {

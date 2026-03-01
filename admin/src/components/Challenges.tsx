@@ -13,9 +13,9 @@ import {
   EntryForm,
   EntryModal,
   FreeEntryForm,
+  NumberEntryForm,
   OptionEntryForm,
   MapEntryForm,
-  NumberEntryForm,
   CheckboxNumberEntryForm,
   AnswersEntryForm,
   OptionWithCustomEntryForm,
@@ -451,6 +451,21 @@ export function Challenges() {
   const serverData = useContext(ServerDataContext);
   const selectedEvent = serverData.events.get(serverData.selectedEvent);
 
+  const handleRadiusChange = (awardingRadius: number, closeRadius: number) => {
+    setForm(prev => {
+      const next = [...prev];
+      const mapForm = next[0] as MapEntryForm;
+      next[0] = {
+        ...mapForm,
+        awardingRadiusF: awardingRadius,
+        closeRadiusF: closeRadius,
+      };
+      next[6] = { ...(next[6] as NumberEntryForm), value: awardingRadius };
+      next[7] = { ...(next[7] as NumberEntryForm), value: closeRadius };
+      return next;
+    });
+  };
+
   // Fetch quiz questions for all challenges when event is selected
   useEffect(() => {
     if (selectedEvent?.challenges) {
@@ -481,6 +496,7 @@ export function Challenges() {
           setCreateModalOpen(false);
         }}
         form={form}
+        onRadiusChange={handleRadiusChange}
       />
       <EntryModal
         title="Edit Challenge"
@@ -496,6 +512,7 @@ export function Challenges() {
           setEditModalOpen(false);
         }}
         form={form}
+        onRadiusChange={handleRadiusChange}
       />
       <DeleteModal
         objectName={serverData.challenges.get(currentId)?.name ?? ''}
