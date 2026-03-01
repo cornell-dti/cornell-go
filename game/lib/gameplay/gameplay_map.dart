@@ -1939,49 +1939,49 @@ class _GameplayMapState extends State<GameplayMap>
                     zoom: 16,
                   ),
                   circles: {
-                  Circle(
-                    circleId: CircleId("hintCircle"),
-                    center: hintCenter != null
-                        ? LatLng(hintCenter!.lat, hintCenter!.long)
-                        : _center,
-                    radius: () {
-                      // Use animated radius if animation is in progress
-                      double radiusValue;
-                      if (isHintAnimationInProgress &&
-                          _oldHintRadius != null &&
-                          _newHintRadius != null &&
-                          _circleShrinkAnimation.value < 1.0) {
-                        // Interpolate between old and new radius during animation
-                        radiusValue = _oldHintRadius! +
-                            (_newHintRadius! - _oldHintRadius!) *
-                                _circleShrinkAnimation.value;
-                      } else {
-                        radiusValue = hintRadius ?? defaultHintRadius;
-                      }
+                    Circle(
+                      circleId: CircleId("hintCircle"),
+                      center: hintCenter != null
+                          ? LatLng(hintCenter!.lat, hintCenter!.long)
+                          : _center,
+                      radius: () {
+                        // Use animated radius if animation is in progress
+                        double radiusValue;
+                        if (isHintAnimationInProgress &&
+                            _oldHintRadius != null &&
+                            _newHintRadius != null &&
+                            _circleShrinkAnimation.value < 1.0) {
+                          // Interpolate between old and new radius during animation
+                          radiusValue = _oldHintRadius! +
+                              (_newHintRadius! - _oldHintRadius!) *
+                                  _circleShrinkAnimation.value;
+                        } else {
+                          radiusValue = hintRadius ?? defaultHintRadius;
+                        }
 
-                      // Safety check to prevent crashes
-                      if (radiusValue.isNaN ||
-                          radiusValue.isInfinite ||
-                          radiusValue <= 0) {
-                        return widget.awardingRadius.clamp(
-                          10.0,
+                        // Safety check to prevent crashes
+                        if (radiusValue.isNaN ||
+                            radiusValue.isInfinite ||
+                            radiusValue <= 0) {
+                          return widget.awardingRadius.clamp(
+                            10.0,
+                            defaultHintRadius,
+                          );
+                        }
+                        return radiusValue.clamp(
+                          widget.awardingRadius,
                           defaultHintRadius,
                         );
-                      }
-                      return radiusValue.clamp(
-                        widget.awardingRadius,
-                        defaultHintRadius,
-                      );
-                    }(),
-                    strokeColor: Color.fromARGB(80, 30, 41, 143),
-                    strokeWidth: 2,
-                    fillColor: Color.fromARGB(80, 83, 134, 237),
-                  ),
-                },
+                      }(),
+                      strokeColor: Color.fromARGB(80, 30, 41, 143),
+                      strokeWidth: 2,
+                      fillColor: Color.fromARGB(80, 83, 134, 237),
+                    ),
+                  },
+                ),
               ),
-            ),
-            // Only show timer if challenge has a timer
-            if (hasTimer)
+              // Only show timer if challenge has a timer
+              if (hasTimer)
                 Positioned(
                   top: MediaQuery.of(context).size.height *
                       0.02, // Adjust top position
