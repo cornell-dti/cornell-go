@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:game/constants/constants.dart';
 
 final defaultStyle = TextStyle(
   fontWeight: FontWeight.normal,
@@ -11,7 +12,6 @@ Widget leaderBoardUserCell(
   int total_positions,
   int points,
 ) {
-  Color Carnelian = Color(0xFFB31B1B);
   var posStyle = defaultStyle.copyWith(
     fontWeight: FontWeight.bold,
     color: Colors.white,
@@ -27,7 +27,7 @@ Widget leaderBoardUserCell(
       clipBehavior: Clip.none,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
-        color: Carnelian,
+        color: AppColors.carnelian,
         border: Border.all(color: Colors.grey),
       ),
       width: MediaQuery.of(context).size.width,

@@ -15,6 +15,7 @@ import 'package:game/widgets/bear_mascot_message.dart';
 import 'package:provider/provider.dart';
 import 'package:showcaseview/showcaseview.dart';
 import 'package:velocity_x/velocity_x.dart';
+import 'package:game/constants/constants.dart';
 import 'challenge_cell.dart';
 
 class ChallengeCellDto {
@@ -30,6 +31,7 @@ class ChallengeCellDto {
     required this.points,
     required this.eventId,
     this.distanceFromChallenge, // not required for challenge cell to be displayed
+    required this.featured,
   });
   late String location;
   late String name;
@@ -43,6 +45,7 @@ class ChallengeCellDto {
   late String eventId;
   late double?
       distanceFromChallenge; // Distance from user's current location (null if not calculable)
+  late bool featured;
 }
 
 class ChallengesPage extends StatefulWidget {
@@ -146,10 +149,7 @@ class _ChallengesPageState extends State<ChallengesPage> {
           print("Tapped anywhere on step 1");
           _removeBearOverlay();
           ShowcaseView.getNamed("challenges_page").dismiss();
-          Provider.of<OnboardingModel>(
-            context,
-            listen: false,
-          ).completeStep1();
+          Provider.of<OnboardingModel>(context, listen: false).completeStep1();
         },
       ),
     );
@@ -184,7 +184,7 @@ class _ChallengesPageState extends State<ChallengesPage> {
     final onboarding = Provider.of<OnboardingModel>(context, listen: true);
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(color: Color.fromARGB(255, 255, 248, 241)),
+        decoration: BoxDecoration(color: AppColors.warmWhite),
         child: Padding(
           padding: EdgeInsets.all(16),
           child: Stack(
@@ -223,7 +223,9 @@ class _ChallengesPageState extends State<ChallengesPage> {
                         eventData.clear();
 
                         for (EventDto event in events) {
-                          var tracker = trackerModel.trackerByEventId(event.id);
+                          var tracker = trackerModel.trackerByEventId(
+                            event.id,
+                          );
                           var numberCompleted =
                               tracker?.prevChallenges.length ?? 0;
                           var complete =
@@ -234,7 +236,9 @@ class _ChallengesPageState extends State<ChallengesPage> {
                             event.endTime ?? "",
                           );
 
-                          Duration timeTillExpire = endtime.difference(now);
+                          Duration timeTillExpire = endtime.difference(
+                            now,
+                          );
                           if (locationCount != 1) continue;
                           var challenge = challengeModel.getChallengeById(
                             event.challenges?[0] ?? "",
@@ -255,7 +259,9 @@ class _ChallengesPageState extends State<ChallengesPage> {
                             challengeLocation: challengeLocation,
                           );
 
-                          var imageUrl = getValidImageUrl(challenge.imageUrl);
+                          var imageUrl = getValidImageUrl(
+                            challenge.imageUrl,
+                          );
 
                           if (!complete &&
                               !timeTillExpire.isNegative &&
@@ -267,12 +273,16 @@ class _ChallengesPageState extends State<ChallengesPage> {
                                 challenge.longF != null) {
                               try {
                                 GeoPoint challengeGeoPoint = GeoPoint(
-                                    challenge.latF!, challenge.longF!, 0);
+                                  challenge.latF!,
+                                  challenge.longF!,
+                                  0,
+                                );
                                 distance = currentUserLocation!
                                     .distanceTo(challengeGeoPoint);
                               } catch (e) {
                                 print(
-                                    "Error calculating distance: $e"); // not fatal but it will log the error
+                                  "Error calculating distance: $e",
+                                ); // not fatal but it will log the error
                               }
                             }
 
@@ -291,6 +301,7 @@ class _ChallengesPageState extends State<ChallengesPage> {
                                 points: challenge.points ?? 0,
                                 eventId: event.id,
                                 distanceFromChallenge: distance,
+                                featured: event.featured ?? false,
                               ),
                             );
                           } else if (event.id == groupModel.curEventId) {
@@ -300,19 +311,19 @@ class _ChallengesPageState extends State<ChallengesPage> {
                           }
                         }
 
-                        // Sort by distance (null distances go to the end)
+                        // Sort featured first, then by distance within each group
                         eventData.sort((a, b) {
+                          if (a.featured && !b.featured) return -1;
+                          if (!a.featured && b.featured) return 1;
                           if (a.distanceFromChallenge == null &&
                               b.distanceFromChallenge == null) {
-                            return 0; // Both null, keep original order
+                            return 0;
                           }
-                          if (a.distanceFromChallenge == null)
-                            return 1; // a goes to end
-                          if (b.distanceFromChallenge == null)
-                            return -1; // b goes to end of list
+                          if (a.distanceFromChallenge == null) return 1;
+                          if (b.distanceFromChallenge == null) return -1;
                           return a.distanceFromChallenge!.compareTo(
                             b.distanceFromChallenge!,
-                          ); // Sort ascending
+                          );
                         });
 
                         // Onboarding: Step 1 - Show showcase for first challenge card after welcome overlay
@@ -322,7 +333,9 @@ class _ChallengesPageState extends State<ChallengesPage> {
                             !_hasTriggeredStep1) {
                           _hasTriggeredStep1 =
                               true; // Prevent re-triggering on rebuild
-                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                          WidgetsBinding.instance.addPostFrameCallback((
+                            _,
+                          ) {
                             if (mounted) {
                               ShowcaseView.getNamed(
                                 "challenges_page",
@@ -336,7 +349,9 @@ class _ChallengesPageState extends State<ChallengesPage> {
                         }
 
                         return ListView.separated(
-                          padding: const EdgeInsets.symmetric(horizontal: 3),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 3,
+                          ),
                           itemCount: eventData.length,
                           itemBuilder: (context, index) {
                             final challengeCell = ChallengeCell(
@@ -352,6 +367,7 @@ class _ChallengesPageState extends State<ChallengesPage> {
                               eventData[index].points,
                               eventData[index].eventId,
                               eventData[index].distanceFromChallenge,
+                              eventData[index].featured,
                             );
 
                             // Onboarding: Wrap first challenge card with showcase highlight

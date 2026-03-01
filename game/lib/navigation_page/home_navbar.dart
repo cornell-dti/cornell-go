@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:game/constants/constants.dart';
 import 'package:game/journeys/journeys_page.dart';
 import 'package:game/challenges/challenges_page.dart';
 import 'package:game/model/onboarding_model.dart';
@@ -92,10 +93,7 @@ class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
           print("Tapped anywhere on step 2");
           _removeBearOverlay();
           ShowcaseView.getNamed("home_navbar").dismiss();
-          Provider.of<OnboardingModel>(
-            context,
-            listen: false,
-          ).completeStep2();
+          Provider.of<OnboardingModel>(context, listen: false).completeStep2();
           // Onboarding: Switch to Journeys tab (index 1) to trigger step 3 explanation overlay
           _tabController.animateTo(1);
         },
@@ -174,7 +172,7 @@ class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
     }
 
     return Scaffold(
-      backgroundColor: Color(0xFFED5656),
+      backgroundColor: AppColors.primaryRed,
       resizeToAvoidBottomInset: false,
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(
@@ -183,7 +181,7 @@ class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
         child: AppBar(
           automaticallyImplyLeading: false,
           elevation: 0.0,
-          backgroundColor: Color(0xFFED5656),
+          backgroundColor: AppColors.primaryRed,
           titleTextStyle: TextStyle(
             fontSize: MediaQuery.sizeOf(context).height * 0.03,
             fontWeight: FontWeight.w500,
@@ -192,7 +190,7 @@ class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
             controller: _tabController,
             indicator: BoxDecoration(
               border: Border(
-                bottom: BorderSide(color: Color(0xFFFFAA5B), width: 2.0),
+                bottom: BorderSide(color: AppColors.orange, width: 2.0),
               ),
             ),
             overlayColor: MaterialStateProperty.resolveWith<Color?>(

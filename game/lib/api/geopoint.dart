@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io' show Platform;
 import 'package:geolocator/geolocator.dart';
+import 'package:game/constants/constants.dart';
 
 class GeoPoint {
   static bool didMakeRequest = false;
@@ -65,7 +66,8 @@ class GeoPoint {
         final cacheAge = DateTime.now().difference(_lastLocationAt!);
         if (cacheAge <= _cacheMaxAge) {
           print(
-              "Using in-memory cached location (age ${cacheAge.inSeconds}s): ${_lastLocation!.lat}, ${_lastLocation!.long}");
+            "Using in-memory cached location (age ${cacheAge.inSeconds}s): ${_lastLocation!.lat}, ${_lastLocation!.long}",
+          );
           return _lastLocation!;
         }
       }
@@ -90,8 +92,14 @@ class GeoPoint {
           Geolocator.getCurrentPosition(
             desiredAccuracy: LocationAccuracy.medium,
           ).then((pos) {
-            print("Got updated location: ${pos.latitude}, ${pos.longitude}");
-            _lastLocation = GeoPoint(pos.latitude, pos.longitude, pos.heading);
+            print(
+              "Got updated location: ${pos.latitude}, ${pos.longitude}",
+            );
+            _lastLocation = GeoPoint(
+              pos.latitude,
+              pos.longitude,
+              pos.heading,
+            );
             _lastLocationAt = DateTime.now();
           }).catchError((e) {
             print("Error getting current position: $e");
@@ -140,7 +148,7 @@ class GeoPoint {
         accuracy: LocationAccuracy.high,
         distanceFilter: 100,
         forceLocationManager: true,
-        intervalDuration: const Duration(seconds: 10),
+        intervalDuration: AppDurations.locationInterval,
         //(Optional) Set foreground notification config to keep the app alive
         //when going to the background
         foregroundNotificationConfig: const ForegroundNotificationConfig(

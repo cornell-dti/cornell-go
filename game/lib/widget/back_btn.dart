@@ -1,9 +1,9 @@
 import 'package:simple_animations/simple_animations.dart';
 import 'package:flutter/material.dart';
+import 'package:game/constants/constants.dart';
 
 Widget backBtn(scaffoldKey, context, text) {
   var toFit = MediaQuery.of(context).size.width - 35;
-  Color Carnelian = Color(0xFFB31B1B);
   return Align(
     alignment: Alignment.topLeft,
     child: Container(
@@ -26,7 +26,7 @@ Widget backBtn(scaffoldKey, context, text) {
                   width: value,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.all(Radius.circular(28)),
-                    color: Carnelian,
+                    color: AppColors.carnelian,
                   ),
                   child: Padding(
                     padding: const EdgeInsets.only(
@@ -56,7 +56,7 @@ Widget backBtn(scaffoldKey, context, text) {
               onPressed: () {
                 Navigator.pop(context);
               },
-              backgroundColor: Carnelian,
+              backgroundColor: AppColors.carnelian,
               child: const Icon(Icons.arrow_back),
             ),
           ),

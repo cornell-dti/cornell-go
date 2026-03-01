@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:game/constants/constants.dart';
 import 'package:game/api/game_client_dto.dart';
 import 'package:game/interests/interests_page.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -252,7 +253,7 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
                         onChanged: (newValue) => setState(() {
                           _name = newValue;
                         }),
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           contentPadding: EdgeInsets.only(
                             left: 20.0,
                             right: 20.0,
@@ -278,7 +279,7 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
                               Radius.circular(10.0),
                             ),
                             borderSide: BorderSide(
-                              color: Color.fromARGB(255, 255, 170, 91),
+                              color: AppColors.orange,
                               width: 1.5,
                             ),
                           ),
@@ -287,7 +288,7 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
                               Radius.circular(10.0),
                             ),
                             borderSide: BorderSide(
-                              color: Color.fromARGB(153, 233, 87, 85),
+                              color: AppColors.accentRed.withAlpha(153),
                               width: 1.5,
                             ),
                           ),
@@ -296,7 +297,7 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
                               Radius.circular(10.0),
                             ),
                             borderSide: BorderSide(
-                              color: Color.fromARGB(153, 233, 87, 85),
+                              color: AppColors.accentRed.withAlpha(153),
                               width: 1.5,
                             ),
                           ),
@@ -398,7 +399,7 @@ class _DetailsPageWidgetState extends State<DetailsPageWidget> {
                         ),
                       ),
                       backgroundColor: MaterialStatePropertyAll<Color>(
-                        Color.fromARGB(255, 233, 87, 85),
+                        AppColors.accentRed,
                       ),
                     ),
                     child: Container(

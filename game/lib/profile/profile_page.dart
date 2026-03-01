@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:game/constants/constants.dart';
 import 'package:game/achievements/achievements_page.dart';
 import 'package:game/api/game_client_dto.dart';
 import 'package:game/model/achievement_model.dart';
@@ -67,19 +68,12 @@ class _ProfilePageState extends State<ProfilePage> {
     final ovalHeight = ovalWidth * (352 / 800); // Maintain aspect ratio
 
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 255, 245, 234),
+      backgroundColor: Color(0xFFFFF5EA),
       body: Container(
         child: Consumer5<UserModel, EventModel, TrackerModel, ChallengeModel,
             AchievementModel>(
-          builder: (
-            context,
-            userModel,
-            eventModel,
-            trackerModel,
-            challengeModel,
-            achModel,
-            child,
-          ) {
+          builder: (context, userModel, eventModel, trackerModel,
+              challengeModel, achModel, child) {
             if (userModel.userData == null) {
               return Center(child: CircularProgressIndicator());
             }
@@ -153,7 +147,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
-                        colors: [Color(0xFF58B171), Color(0xFF31B346)],
+                        colors: [AppColors.green, AppColors.greenDark],
                       ),
                     ),
                     child: Stack(
@@ -167,7 +161,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             width: ovalWidth * 2,
                             height: ovalHeight * 2,
                             decoration: ShapeDecoration(
-                              color: const Color(0xFFB3EBF6),
+                              color: AppColors.skyBlue,
                               shape: OvalBorder(),
                             ),
                           ),
@@ -277,13 +271,13 @@ class _ProfilePageState extends State<ProfilePage> {
                                   ),
                                   clipBehavior: Clip.antiAlias,
                                   decoration: ShapeDecoration(
-                                    color: const Color(0xFFC17E19),
+                                    color: AppColors.gold,
                                     shape: RoundedRectangleBorder(
                                       side: BorderSide(
                                         width: 2,
                                         strokeAlign:
                                             BorderSide.strokeAlignCenter,
-                                        color: const Color(0xFFFFC737),
+                                        color: AppColors.yellow,
                                       ),
                                       borderRadius: BorderRadius.circular(100),
                                     ),
@@ -408,19 +402,20 @@ class _ProfilePageState extends State<ProfilePage> {
                           var totalOriginalPoints = 0;
                           var locationImage;
                           // Get tracker for this event to access prevChallenges
-                          var eventTracker =
-                              trackerModel.trackerByEventId(event.id);
+                          var eventTracker = trackerModel.trackerByEventId(
+                            event.id,
+                          );
                           if (eventTracker != null) {
                             for (var prevChallenge
                                 in eventTracker.prevChallenges) {
-                              var challenge = challengeModel
-                                  .getChallengeById(prevChallenge.challengeId);
+                              var challenge = challengeModel.getChallengeById(
+                                prevChallenge.challengeId,
+                              );
                               if (locationImage == null) {
                                 locationImage = challenge?.imageUrl;
                                 if (locationImage == null ||
                                     locationImage.length == 0)
-                                  locationImage =
-                                      "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png";
+                                  locationImage = AppStrings.missingImageUrl;
                               }
                               if (challenge != null) {
                                 // Calculate adjusted points: first apply extension deduction, then hint adjustment
@@ -443,11 +438,14 @@ class _ProfilePageState extends State<ProfilePage> {
                                   }
                                   int extensionAdjustedPoints =
                                       calculateExtensionAdjustedPoints(
-                                          basePoints, extensionsUsed);
+                                    basePoints,
+                                    extensionsUsed,
+                                  );
                                   int finalAdjustedPoints =
                                       calculateHintAdjustedPoints(
-                                          extensionAdjustedPoints,
-                                          prevChallenge.hintsUsed);
+                                    extensionAdjustedPoints,
+                                    prevChallenge.hintsUsed,
+                                  );
                                   totalAdjustedPoints += finalAdjustedPoints;
                                 }
                               }

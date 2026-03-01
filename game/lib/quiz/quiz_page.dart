@@ -14,6 +14,7 @@ import 'package:game/utils/utility_functions.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:confetti/confetti.dart';
 import 'dart:math';
+import 'package:game/constants/constants.dart';
 
 /// Entry widget for quiz page that uses the existing QuizModel
 class QuizPage extends StatelessWidget {
@@ -104,9 +105,8 @@ class _QuizScreenState extends State<_QuizScreen> {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => ChallengeCompletedPage(
-                      challengeId: widget.challengeId,
-                    ),
+                    builder: (context) =>
+                        ChallengeCompletedPage(challengeId: widget.challengeId),
                   ),
                 );
               }
@@ -127,9 +127,9 @@ class _QuizScreenState extends State<_QuizScreen> {
         // Show loading indicator
         if (quizModel.isLoading && quizModel.currentQuestion == null) {
           return Scaffold(
-            backgroundColor: const Color(0xFFF9F5F1),
+            backgroundColor: AppColors.quizBackground,
             appBar: AppBar(
-              backgroundColor: const Color(0xFFE95755),
+              backgroundColor: AppColors.accentRed,
               elevation: 0,
               leading: IconButton(
                 icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -145,9 +145,9 @@ class _QuizScreenState extends State<_QuizScreen> {
         // Show error state if no question available
         if (quizModel.currentQuestion == null && !quizModel.isLoading) {
           return Scaffold(
-            backgroundColor: const Color(0xFFF9F5F1),
+            backgroundColor: AppColors.quizBackground,
             appBar: AppBar(
-              backgroundColor: const Color(0xFFE95755),
+              backgroundColor: AppColors.accentRed,
               elevation: 0,
               leading: IconButton(
                 icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -181,9 +181,9 @@ class _QuizScreenState extends State<_QuizScreen> {
         }
 
         return Scaffold(
-          backgroundColor: const Color(0xFFF9F5F1),
+          backgroundColor: AppColors.quizBackground,
           appBar: AppBar(
-            backgroundColor: const Color(0xFFE95755),
+            backgroundColor: AppColors.accentRed,
             elevation: 0,
             leading: IconButton(
               icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -245,8 +245,9 @@ class _QuizScreenState extends State<_QuizScreen> {
       );
       final groupModel = Provider.of<GroupModel>(context, listen: false);
 
-      final challenge =
-          challengeModel.getChallengeById(question.challengeId ?? "");
+      final challenge = challengeModel.getChallengeById(
+        question.challengeId ?? "",
+      );
       final eventId = challenge?.linkedEventId ?? groupModel.curEventId;
       final event = eventModel.getEventById(eventId ?? "");
       category = event?.category;
@@ -272,7 +273,7 @@ class _QuizScreenState extends State<_QuizScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF9EDDA),
+                  color: AppColors.cream,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -297,7 +298,7 @@ class _QuizScreenState extends State<_QuizScreen> {
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFFC17E19),
+                      color: AppColors.gold,
                     ),
                   ),
                 ],
@@ -319,7 +320,7 @@ class _QuizScreenState extends State<_QuizScreen> {
               child: OutlinedButton(
                 onPressed: () => quizModel.shuffleQuestion(),
                 style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Color(0xFFE95755)),
+                  side: const BorderSide(color: AppColors.accentRed),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -327,7 +328,7 @@ class _QuizScreenState extends State<_QuizScreen> {
                 child: Text(
                   'Shuffle (${quizModel.shufflesRemaining})',
                   style: const TextStyle(
-                    color: Color(0xFFE95755),
+                    color: AppColors.accentRed,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -355,7 +356,7 @@ class _QuizScreenState extends State<_QuizScreen> {
               color: active ? const Color(0xFFFFDDBE) : Colors.white,
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: active ? const Color(0xFFFFAA5B) : Colors.grey[300]!,
+                color: active ? AppColors.orange : Colors.grey[300]!,
                 width: 1.5,
               ),
             ),
@@ -365,7 +366,7 @@ class _QuizScreenState extends State<_QuizScreen> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
-                  color: active ? const Color(0xFFE95755) : Colors.black,
+                  color: active ? AppColors.accentRed : Colors.black,
                 ),
               ),
             ),
@@ -383,7 +384,7 @@ class _QuizScreenState extends State<_QuizScreen> {
     return ElevatedButton(
       onPressed: enabled ? () => quizModel.submitAnswer() : null,
       style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFFE95755).withOpacity(enabled ? 1 : 0.6),
+        backgroundColor: AppColors.accentRed.withOpacity(enabled ? 1 : 0.6),
         padding: const EdgeInsets.only(
           right: 15,
           left: 15,
@@ -491,8 +492,8 @@ class _QuizScreenState extends State<_QuizScreen> {
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                   color: isCorrect
-                                      ? const Color(0xFF58B171)
-                                      : const Color(0xFFE95755),
+                                      ? AppColors.green
+                                      : AppColors.accentRed,
                                 ),
                               ),
                             ],
@@ -525,7 +526,7 @@ class _QuizScreenState extends State<_QuizScreen> {
                                   style: const TextStyle(
                                     fontSize: 24,
                                     fontWeight: FontWeight.bold,
-                                    color: Color(0xFFC17E19),
+                                    color: AppColors.gold,
                                   ), // Golden-brown color
                                 ),
                               ],
@@ -614,12 +615,8 @@ class _QuizScreenState extends State<_QuizScreen> {
                                 ),
                                 side: MaterialStateProperty.all<BorderSide>(
                                   BorderSide(
-                                    color: Color.fromARGB(
-                                      255,
-                                      237,
-                                      86,
-                                      86,
-                                    ), // Specify the border color
+                                    color: AppColors
+                                        .primaryRed, // Specify the border color
                                     width: 2.0, // Specify the border width
                                   ),
                                 ),
@@ -637,7 +634,7 @@ class _QuizScreenState extends State<_QuizScreen> {
                                       MediaQuery.devicePixelRatioOf(context) < 3
                                           ? 12
                                           : 14,
-                                  color: Color.fromARGB(255, 237, 86, 86),
+                                  color: AppColors.primaryRed,
                                 ),
                               ),
                             ),

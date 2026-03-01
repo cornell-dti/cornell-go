@@ -169,6 +169,7 @@ model EventBase {
   achievements    Achievement[]
   difficulty      DifficultyMode
   category        EventCategoryType
+  featured        Boolean            @default(false)
 }
 
 enum EventCategoryType {

@@ -378,6 +378,7 @@ export class EventService {
       endTime: ev.endTime.toUTCString(),
       requiredMembers: ev.requiredMembers,
       indexable: ev.indexable,
+      featured: ev.featured,
       challenges: sortedChals.map(c => c.id),
       difficulty:
         ev.difficulty === DifficultyMode.EASY
@@ -620,6 +621,7 @@ export class EventService {
           : TimeLimitationType.PERPETUAL,
       endTime: event.endTime && new Date(event.endTime),
       indexable: event.indexable,
+      featured: event.featured,
       difficulty:
         event.difficulty &&
         (event.difficulty === 'Easy'
@@ -662,6 +664,7 @@ export class EventService {
         timeLimitation: assignData.timeLimitation,
         endTime: assignData.endTime ?? defaultEventData.endTime,
         indexable: assignData.indexable ?? defaultEventData.indexable,
+        featured: assignData.featured ?? false,
         difficulty: assignData.difficulty ?? defaultEventData.difficulty,
         latitude: assignData.latitude ?? defaultEventData.latitude,
         longitude: assignData.longitude ?? defaultEventData.longitude,

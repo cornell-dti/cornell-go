@@ -105,10 +105,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
           print("Tapped anywhere on step 11");
           _removeBearOverlay();
           ShowcaseView.getNamed("bottom_navbar_profile").dismiss();
-          Provider.of<OnboardingModel>(
-            context,
-            listen: false,
-          ).completeStep11();
+          Provider.of<OnboardingModel>(context, listen: false).completeStep11();
         },
       ),
     );
@@ -133,10 +130,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
           print("Tapped anywhere on step 12");
           _removeBearOverlay();
           ShowcaseView.getNamed("bottom_navbar_leaderboard").dismiss();
-          Provider.of<OnboardingModel>(
-            context,
-            listen: false,
-          ).completeStep12();
+          Provider.of<OnboardingModel>(context, listen: false).completeStep12();
         },
       ),
     );
@@ -418,7 +412,11 @@ class _BottomNavBarState extends State<BottomNavBar> {
         if (!onboarding.isLoadingFromBackend &&
             !onboarding.step0WelcomeComplete &&
             onboarding.canStartOnboarding(
-                userModel, eventModel, trackerModel, challengeModel))
+              userModel,
+              eventModel,
+              trackerModel,
+              challengeModel,
+            ))
           GestureDetector(
             onTap: () {
               print('👆 Step 0: Dismissing welcome overlay');

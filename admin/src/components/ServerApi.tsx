@@ -121,20 +121,6 @@ export class ServerApi {
     >;
   }
 
-  startChallengeTimer(data: dto.StartChallengeTimerDto) {
-    return this.send('startChallengeTimer', data) as Promise<
-      string | undefined
-    >;
-  }
-
-  extendTimer(data: dto.ExtendTimerDto) {
-    return this.send('extendTimer', data) as Promise<string | undefined>;
-  }
-
-  completeTimer(data: dto.TimerCompletedDto) {
-    return this.send('completeTimer', data) as Promise<boolean | undefined>;
-  }
-
   requestQuizQuestion(data: dto.RequestQuizQuestionDto) {
     return this.send('requestQuizQuestion', data) as Promise<
       boolean | undefined
@@ -165,6 +151,20 @@ export class ServerApi {
     return this.send('updateQuizQuestionData', data) as Promise<
       string | undefined
     >;
+  }
+
+  startChallengeTimer(data: dto.StartChallengeTimerDto) {
+    return this.send('startChallengeTimer', data) as Promise<
+      string | undefined
+    >;
+  }
+
+  extendTimer(data: dto.ExtendTimerDto) {
+    return this.send('extendTimer', data) as Promise<string | undefined>;
+  }
+
+  completeTimer(data: dto.TimerCompletedDto) {
+    return this.send('completeTimer', data) as Promise<boolean | undefined>;
   }
 
   requestAllUserData(data: dto.RequestAllUserDataDto) {

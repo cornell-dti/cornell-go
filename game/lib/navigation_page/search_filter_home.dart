@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:game/constants/constants.dart';
 import 'package:game/journeys/journeys_page.dart';
 import 'package:game/challenges/challenges_page.dart';
 import 'package:game/journeys/filter_form.dart';
@@ -73,7 +74,7 @@ class _SearchFilterBarState extends State<SearchFilterBar>
     return Scaffold(
       resizeToAvoidBottomInset: true,
       body: Container(
-        color: Color(0xFFED5656),
+        color: AppColors.primaryRed,
         child: SafeArea(
           child: Column(
             children: [
@@ -92,7 +93,7 @@ class _SearchFilterBarState extends State<SearchFilterBar>
                       physics: NeverScrollableScrollPhysics(),
                       child: Container(
                         decoration: BoxDecoration(
-                          color: Color.fromARGB(255, 255, 248, 241),
+                          color: AppColors.warmWhite,
                           borderRadius: BorderRadius.circular(30),
                         ),
                         child: SizedBox(

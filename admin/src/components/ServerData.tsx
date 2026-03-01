@@ -134,22 +134,28 @@ export function ServerDataProvider(props: { children: ReactNode }) {
         });
       },
       updateChallenge(challenge: ChallengeDto) {
-        return sock.updateChallengeData({ challenge, deleted: false });
+        return sock.send('updateChallengeData', { challenge, deleted: false });
       },
       deleteChallenge(id: string) {
-        return sock.updateChallengeData({ challenge: { id }, deleted: true });
+        return sock.send('updateChallengeData', {
+          challenge: { id },
+          deleted: true,
+        });
       },
       updateEvent(event: EventDto) {
-        return sock.updateEventData({ event: event, deleted: false });
+        return sock.send('updateEventData', { event: event, deleted: false });
       },
       deleteEvent(id: string) {
-        return sock.updateEventData({ event: { id }, deleted: true });
+        return sock.send('updateEventData', { event: { id }, deleted: true });
       },
       updateAchievement(achievement: AchievementDto) {
-        return sock.updateAchievementData({ achievement, deleted: false });
+        return sock.send('updateAchievementData', {
+          achievement,
+          deleted: false,
+        });
       },
       deleteAchievement(id: string) {
-        return sock.updateAchievementData({
+        return sock.send('updateAchievementData', {
           achievement: { id },
           deleted: true,
         });
@@ -177,16 +183,16 @@ export function ServerDataProvider(props: { children: ReactNode }) {
         return sock.updateGroupData({ group: { id }, deleted: true });
       },
       updateOrganization(organization: OrganizationDto) {
-        return sock.updateOrganizationData({
+        return sock.send('updateOrganizationData', {
           organization,
           deleted: false,
         });
       },
       addManager(email: string, organizationId: string) {
-        return sock.addManager({ email, organizationId });
+        return sock.send('addManager', { email, organizationId });
       },
       deleteOrganization(id: string) {
-        return sock.updateOrganizationData({
+        return sock.send('updateOrganizationData', {
           organization: { id },
           deleted: true,
         });
@@ -205,7 +211,7 @@ export function ServerDataProvider(props: { children: ReactNode }) {
   );
 
   useEffect(() => {
-    sock.requestOrganizationData({ admin: true });
+    sock.send('requestOrganizationData', { admin: true });
     sock.requestAllUserData({});
     sock.requestGroupData({});
   }, [sock]);
@@ -246,10 +252,7 @@ export function ServerDataProvider(props: { children: ReactNode }) {
               ) ?? [],
           });
 
-          newEvents.set(
-            (data.event as EventDto).id,
-            data.event as EventDto,
-          );
+          newEvents.set((data.event as EventDto).id, data.event as EventDto);
         }
         return { ...prev, events: newEvents, selectedEvent: newSelectedEvent };
       });
@@ -285,10 +288,7 @@ export function ServerDataProvider(props: { children: ReactNode }) {
         if (data.deleted) {
           newGroups.delete((data.group as GroupDto).id);
         } else {
-          newGroups.set(
-            (data.group as GroupDto).id,
-            data.group as GroupDto,
-          );
+          newGroups.set((data.group as GroupDto).id, data.group as GroupDto);
         }
         return { ...prev, groups: newGroups };
       });
@@ -300,14 +300,12 @@ export function ServerDataProvider(props: { children: ReactNode }) {
           newOrganizations.delete(data.organization.id);
         } else {
           const oldEvents =
-            prev.organizations.get(
-              (data.organization as OrganizationDto).id,
-            )?.events ?? [];
+            prev.organizations.get((data.organization as OrganizationDto).id)
+              ?.events ?? [];
 
           const oldAchievements =
-            prev.organizations.get(
-              (data.organization as OrganizationDto).id,
-            )?.achivements ?? [];
+            prev.organizations.get((data.organization as OrganizationDto).id)
+              ?.achivements ?? [];
 
           sock.requestEventData({
             events: (data.organization as OrganizationDto).events?.filter(

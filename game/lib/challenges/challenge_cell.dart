@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:game/preview/preview.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:game/constants/constants.dart';
 
 /**
  * `ChallengeCell` Widget - Individual challenge display component.
@@ -34,6 +35,7 @@ class ChallengeCell extends StatefulWidget {
   final int points;
   final String eventId;
   final double? distanceFromChallenge;
+  final bool featured;
 
   const ChallengeCell(
     this.location,
@@ -46,7 +48,8 @@ class ChallengeCell extends StatefulWidget {
     this.difficulty,
     this.points,
     this.eventId,
-    this.distanceFromChallenge, {
+    this.distanceFromChallenge,
+    this.featured, {
     Key? key,
   }) : super(key: key);
 
@@ -63,6 +66,7 @@ class ChallengeCell extends StatefulWidget {
         points,
         eventId,
         distanceFromChallenge,
+        featured,
       );
 }
 
@@ -77,9 +81,8 @@ class _ChallengeCellState extends State<ChallengeCell> {
   final String difficulty;
   final int points;
   final String eventId;
-  // newly added field
-  // final int totalDistance;
   final double? distanceFromChallenge;
+  final bool featured;
 
   _ChallengeCellState(
     this.location,
@@ -92,9 +95,8 @@ class _ChallengeCellState extends State<ChallengeCell> {
     this.difficulty,
     this.points,
     this.eventId,
-    // newly added field
-    // this.totalDistance
     this.distanceFromChallenge,
+    this.featured,
   );
 
   @override
@@ -170,14 +172,14 @@ class _ChallengeCellState extends State<ChallengeCell> {
                           Icon(
                             Icons.location_on,
                             size: MediaQuery.sizeOf(context).height * 0.025,
-                            color: Color.fromARGB(255, 131, 90, 124),
+                            color: AppColors.purple,
                           ),
                           Expanded(
                             child: Text(
                               location,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
-                                color: Color.fromARGB(255, 131, 90, 124),
+                                color: AppColors.purple,
                                 fontSize:
                                     MediaQuery.sizeOf(context).height * 0.016,
                                 fontFamily: 'Poppins',
@@ -189,7 +191,7 @@ class _ChallengeCellState extends State<ChallengeCell> {
                             Icon(
                               Icons.directions_walk,
                               size: MediaQuery.sizeOf(context).height * 0.02,
-                              color: Color.fromARGB(255, 110, 110, 110),
+                              color: AppColors.grayText,
                             ),
                             Text(
                               ' ' +
@@ -197,7 +199,7 @@ class _ChallengeCellState extends State<ChallengeCell> {
                                       .toStringAsFixed(1) +
                                   ' mi away',
                               style: TextStyle(
-                                color: Color.fromARGB(255, 110, 110, 110),
+                                color: AppColors.grayText,
                                 fontSize:
                                     MediaQuery.sizeOf(context).height * 0.011,
                                 fontFamily: 'Poppins',
@@ -222,41 +224,69 @@ class _ChallengeCellState extends State<ChallengeCell> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
+                        if (featured) ...[
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: deviceWidth * 0.02,
+                              vertical: deviceHeight * 0.003,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Color.fromARGB(255, 220, 53, 69),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              'Featured',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: deviceHeight * 0.014,
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: deviceWidth * 0.01),
+                        ],
                         Container(
                           padding: EdgeInsets.symmetric(
                             horizontal: deviceWidth * 0.02,
                             vertical: deviceHeight * 0.003,
                           ),
                           decoration: BoxDecoration(
-                            color: Color.fromARGB(255, 249, 237, 218),
+                            color: AppColors.cream,
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
                             difficulty,
                             style: TextStyle(
                               color: Color.fromARGB(204, 0, 0, 0),
-                              fontSize: deviceHeight * 0.016,
+                              fontSize: deviceHeight * 0.014,
                               fontFamily: 'Poppins',
                               fontWeight: FontWeight.w300,
                             ),
                           ),
                         ),
-                        SizedBox(width: deviceWidth * 0.02),
-                        Row(
-                          children: [
-                            SvgPicture.asset(
-                              "assets/icons/bearcoins.svg",
-                              width: deviceWidth * 0.06,
-                            ),
-                            Text(
-                              ' ' + points.toString() + " PTS",
-                              style: TextStyle(
-                                fontSize: deviceHeight * 0.018,
-                                fontWeight: FontWeight.w500,
-                                color: Color(0xFFC17E19),
+                        SizedBox(width: deviceWidth * 0.01),
+                        Flexible(
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              SvgPicture.asset(
+                                "assets/icons/bearcoins.svg",
+                                width: deviceWidth * 0.05,
                               ),
-                            ),
-                          ],
+                              Flexible(
+                                child: Text(
+                                  ' ' + points.toString() + " PTS",
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: deviceHeight * 0.016,
+                                    fontWeight: FontWeight.w500,
+                                    color: AppColors.gold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
