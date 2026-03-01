@@ -11,10 +11,12 @@ export interface ClubSubmissionDto {
     description: string; 
     startTime: string; 
     endTime: string; 
-    location: string; 
-    category: CampusEventCategory; 
-    imageUrl?: string; 
-    registrationLink? string; 
+    location: string; // location/venue name
     latitude?: number; 
-    longtitude?: number; 
+    longitude?: number; 
+    category: CampusEventCategory; 
+    address?: string; 
+    imageUrl?: string; 
+    registrationLink?: string; 
+    
 }
