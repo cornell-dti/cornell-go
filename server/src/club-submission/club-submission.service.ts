@@ -1,3 +1,4 @@
+import { Injectable } from '@nestjs/common';
 /**
  * Build admin-facing service methods: 
  * get all pending events, 
@@ -5,3 +6,5 @@
  * reject with a reason (sets status to REJECTED). 
  * 
  */
+@Injectable()
+export class ClubSubmissionService {}

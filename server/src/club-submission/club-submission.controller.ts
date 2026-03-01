@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Query } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
 /**
  * - 
 - Build a REST controller (not WebSocket — this receives HTTP POST requests) with an endpoint 
@@ -9,6 +9,4 @@ like image URL and registration link)
 - Secure the endpoint with an API key header (`x-api-key`) so only our Google Form script can call it
  */
 @Controller('club-submission')
-export class ClubSubmissionController{
-
-}
+export class ClubSubmissionController {}
