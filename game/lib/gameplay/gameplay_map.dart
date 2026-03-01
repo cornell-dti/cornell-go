@@ -868,8 +868,9 @@ class _GameplayMapState extends State<GameplayMap>
       _consecutiveLocationFailures = 0;
       _locationWarningToastShown = false;
       _locationTimeoutTimer?.cancel();
-      _locationTimeoutTimer =
-          Timer.periodic(Duration(seconds: 10), (timer) async {
+      _locationTimeoutTimer = Timer.periodic(Duration(seconds: 10), (
+        timer,
+      ) async {
         if (!mounted || _locationWarningShown) {
           timer.cancel();
           return;
@@ -1938,6 +1939,17 @@ class _GameplayMapState extends State<GameplayMap>
                         : LatLng(currentLocation!.lat, currentLocation!.long),
                     zoom: 16,
                   ),
+                  markers: {
+                    Marker(
+                      markerId: const MarkerId("currentLocation"),
+                      icon: currentLocationIcon,
+                      position: currentLocation == null
+                          ? _center
+                          : LatLng(currentLocation!.lat, currentLocation!.long),
+                      anchor: Offset(0.5, 0.5),
+                      rotation: _compassHeading,
+                    ),
+                  },
                   circles: {
                     Circle(
                       circleId: CircleId("hintCircle"),
@@ -2722,8 +2734,12 @@ class _GameplayMapState extends State<GameplayMap>
         widget.awardingRadius;
   }
 
-  Container displayDialog(BuildContext context, hasArrived, String challengeId,
-      String? challengeName) {
+  Container displayDialog(
+    BuildContext context,
+    hasArrived,
+    String challengeId,
+    String? challengeName,
+  ) {
     final name = challengeName ?? "";
     return hasArrived
         ? Container(
