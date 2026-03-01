@@ -1938,8 +1938,7 @@ class _GameplayMapState extends State<GameplayMap>
                         : LatLng(currentLocation!.lat, currentLocation!.long),
                     zoom: 16,
                   ),
-                },
-                circles: {
+                  circles: {
                   Circle(
                     circleId: CircleId("hintCircle"),
                     center: hintCenter != null
@@ -1980,8 +1979,9 @@ class _GameplayMapState extends State<GameplayMap>
                   ),
                 },
               ),
-              // Only show timer if challenge has a timer
-              if (hasTimer)
+            ),
+            // Only show timer if challenge has a timer
+            if (hasTimer)
                 Positioned(
                   top: MediaQuery.of(context).size.height *
                       0.02, // Adjust top position
