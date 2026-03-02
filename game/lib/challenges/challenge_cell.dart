@@ -12,7 +12,12 @@ import 'package:game/constants/constants.dart';
  * It displays key information about a challenge and handles tap interactions
  * to show more details.
  * 
- *
+ * Image loading uses CachedNetworkImage, with a shimmer placeholder for 
+ * when the image is loading and an error icon with a gray background if 
+ * the image cannot be loaded. The gray background of the error matches the
+ * original size of the image. A ValueKey based on imgUrl (the link to the image) 
+ * is used so when the list rebuilds, the same image widget is preserved and there
+ * is no flickering of the loading state.
  * @param props - Contains:
  *   - `location`: Challenge location
  *   - `challengeName`: Name of the challenge
