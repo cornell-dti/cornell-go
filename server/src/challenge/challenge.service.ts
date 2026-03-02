@@ -160,7 +160,10 @@ export class ChallengeService {
    * Starts timer if the selected challenge has one.
    * Returns the updated EventTracker or null if validation fails.
    */
-  async setCurrentChallenge(user: User, challengeId: string): Promise<EventTracker | null> {
+  async setCurrentChallenge(
+    user: User,
+    challengeId: string,
+  ): Promise<EventTracker | null> {
     const evTracker =
       await this.eventService.getCurrentEventTrackerForUser(user);
 

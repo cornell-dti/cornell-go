@@ -49,8 +49,7 @@ export class ChallengeGateway {
     @CallingUser() user: User,
     @MessageBody() data: RequestAvailableChallengesDto,
   ) {
-    const challenges =
-      await this.challengeService.getAvailableChallenges(user);
+    const challenges = await this.challengeService.getAvailableChallenges(user);
     const dtos = await Promise.all(
       challenges.map(ch => this.challengeService.dtoForChallenge(ch)),
     );
