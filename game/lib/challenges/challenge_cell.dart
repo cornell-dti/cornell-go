@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:game/preview/preview.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:game/widget/cached_image.dart';
 import 'package:game/constants/constants.dart';
 
 /**
@@ -11,6 +12,7 @@ import 'package:game/constants/constants.dart';
  * It displays key information about a challenge and handles tap interactions
  * to show more details.
  * 
+ *
  * @param props - Contains:
  *   - `location`: Challenge location
  *   - `challengeName`: Name of the challenge
@@ -149,11 +151,10 @@ class _ChallengeCellState extends State<ChallengeCell> {
                 padding: const EdgeInsets.only(right: 14),
                 child: ClipRRect(
                   borderRadius: BorderRadius.all(Radius.circular(4.6)),
-                  child: Image.network(
-                    imgUrl,
+                  child: AppCachedImage(
+                    imageUrl: imgUrl,
                     width: deviceHeight * 0.1,
                     height: deviceHeight * 0.1,
-                    fit: BoxFit.cover,
                   ),
                 ),
               ),

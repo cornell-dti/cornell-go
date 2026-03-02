@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:game/widget/cached_image.dart';
 import 'package:game/constants/constants.dart';
 
 /**
@@ -88,11 +89,11 @@ class _CompletedChallengeFullState extends State<CompletedChallengeFull> {
                   builder: (BuildContext context) {
                     return ClipRRect(
                       borderRadius: BorderRadius.circular(8),
-                      child: Image.network(
-                        picture,
-                        fit: BoxFit.cover,
-                        width: 390,
-                        height: 20,
+                      child: AppCachedImage(
+                        imageUrl: picture,
+                        width: double.infinity,
+                        height: double.infinity,
+                        borderRadius: BorderRadius.circular(8),
                       ),
                     );
                   },

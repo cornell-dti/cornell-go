@@ -4,6 +4,7 @@ import 'package:game/gameplay/gameplay_page.dart';
 import 'package:provider/provider.dart';
 import 'package:game/api/game_client_dto.dart';
 import 'package:game/utils/utility_functions.dart';
+import 'package:game/widget/cached_image.dart';
 
 import 'package:geolocator/geolocator.dart';
 import 'package:game/api/geopoint.dart';
@@ -275,11 +276,10 @@ class _PreviewState extends State<Preview> {
             child: Column(
               children: [
                 //Image
-                Image.network(
-                  imgUrl,
+                AppCachedImage(
+                  imageUrl: imgUrl,
                   height: MediaQuery.of(context).size.height * 0.25,
                   width: double.infinity,
-                  fit: BoxFit.cover,
                 ),
                 SizedBox(height: 20),
 

@@ -13,6 +13,7 @@ import 'package:game/gameplay/challenge_failed.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'dart:ui' as ui;
 import 'package:flutter_compass/flutter_compass.dart';
+import 'package:game/widget/cached_image.dart';
 
 // for backend connection
 import 'package:provider/provider.dart';
@@ -1554,11 +1555,11 @@ class _GameplayMapState extends State<GameplayMap>
       alignment: pictureAlign,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(10),
-        child: Image.network(
-          imageUrl,
-          fit: BoxFit.cover,
+        child: AppCachedImage(
+          imageUrl: imageUrl,
           width: pictureWidth,
           height: pictureHeight,
+          borderRadius: BorderRadius.circular(10),
         ),
       ),
     );
