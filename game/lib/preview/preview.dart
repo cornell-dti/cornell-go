@@ -277,19 +277,11 @@ class _PreviewState extends State<Preview> {
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                //Image
-                AppCachedImage(
-                  imageUrl: imgUrl,
-                  height: MediaQuery.of(context).size.height * 0.25,
-                  width: double.infinity,
-                ),
-                SizedBox(height: 20),
-
-                // Row with starting location and distance
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20.0,
-                    vertical: 5,
+                  //Image
+                  AppCachedImage(
+                    imageUrl: imgUrl,
+                    height: MediaQuery.of(context).size.height * 0.25,
+                    width: double.infinity,
                   ),
                   SizedBox(height: 20),
 
