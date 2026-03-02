@@ -17,7 +17,8 @@ export const EventSourceDto = {
   ADMIN_CREATED: 'ADMIN_CREATED',
   COMMUNITY_SUBMITTED: 'COMMUNITY_SUBMITTED',
 } as const;
-export type EventSourceDto = (typeof EventSourceDto)[keyof typeof EventSourceDto];
+export type EventSourceDto =
+  (typeof EventSourceDto)[keyof typeof EventSourceDto];
 
 export const CheckInMethodDto = {
   LOCATION: 'LOCATION',

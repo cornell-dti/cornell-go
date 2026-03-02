@@ -88,7 +88,7 @@ export class CampusEventService {
     ]);
 
     const eventDtos = await Promise.all(
-      events.map((ev) => this.toCampusEventDto(ev)),
+      events.map(ev => this.toCampusEventDto(ev)),
     );
 
     return {
@@ -231,7 +231,10 @@ export class CampusEventService {
   }
 
   /** Broadcast single event update to all connected clients */
-  async emitUpdateCampusEvent(ev: CampusEvent, deleted: boolean): Promise<void> {
+  async emitUpdateCampusEvent(
+    ev: CampusEvent,
+    deleted: boolean,
+  ): Promise<void> {
     const dto = deleted
       ? { event: { id: ev.id }, deleted: true }
       : {

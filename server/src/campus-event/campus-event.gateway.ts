@@ -32,11 +32,9 @@ export class CampusEventGateway {
     @MessageBody() data: RequestCampusEventsDto,
   ) {
     const list = await this.campusEventService.getUpcomingEvents(data);
-    await this.clientService.sendEvent(
-      ['user/' + user.id],
-      'campusEventList',
-      { list },
-    );
+    await this.clientService.sendEvent(['user/' + user.id], 'campusEventList', {
+      list,
+    });
     return list.totalPages;
   }
 
