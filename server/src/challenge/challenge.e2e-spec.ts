@@ -276,8 +276,6 @@ describe('ChallengeModule E2E', () => {
 
     it('should reject setCurrentChallenge for completed challenge', async () => {
       await challengeService.completeChallenge(user);
-      const trackerAfterComplete =
-        await eventService.getCurrentEventTrackerForUser(user);
       const completedId = chal2.id;
 
       const result = await challengeService.setCurrentChallenge(
@@ -327,6 +325,16 @@ describe('ChallengeModule E2E', () => {
       );
       expect(result).not.toBeNull();
       expect(result!.curChallengeId).toEqual(timedChal.id);
+
+      const timer = await prisma.challengeTimer.findFirst({
+        where: {
+          eventTrackerId: result!.id,
+          challengeId: timedChal.id,
+          currentStatus: 'ACTIVE',
+        },
+      });
+      expect(timer).not.toBeNull();
+      expect(timer!.totalTime).toEqual(300);
     });
   });
 

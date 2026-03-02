@@ -202,6 +202,13 @@ export class ChallengeService {
           where: { id: prevTimer.id },
           data: { currentStatus: ChallengeTimerStatus.CANCELLED },
         });
+        await this.clientService.sendEvent(
+          [`user/${user.id}`],
+          'stopTimerForChallenge',
+          {
+            challengeId: evTracker.curChallengeId,
+          },
+        );
       }
     }
 
