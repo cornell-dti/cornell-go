@@ -50,6 +50,13 @@ class AppColors {
   static const Color lightGray = Color(0xFFF1F1F1);
   static const Color lightGrayBorder = Color(0xFFE5E5E5);
 
+  // Placeholder & Loading
+  static const Color shimmerBase = Color(0xFFE0E0E0); // Colors.grey[300]
+  static const Color shimmerHighlight = Color(0xFFF5F5F5); // Colors.grey[100]
+  static const Color placeholderBackground =
+      Color(0xFFEEEEEE); // Colors.grey.shade200
+  static const Color placeholderIcon = Color(0xFF9E9E9E); // Colors.grey
+
   // Special
   static const Color leaderboardGoldBorder = Color(0xFFFBDDAF);
   static const Color fadedRed = Color(0xFFF08988);

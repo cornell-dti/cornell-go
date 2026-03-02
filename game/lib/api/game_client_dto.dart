@@ -621,6 +621,45 @@ class SetCurrentChallengeDto {
   late String challengeId;
 }
 
+class RequestAvailableChallengesDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    return fields;
+  }
+
+  RequestAvailableChallengesDto.fromJson(Map<String, dynamic> fields) {}
+
+  void partialUpdate(RequestAvailableChallengesDto other) {}
+
+  RequestAvailableChallengesDto();
+}
+
+class AvailableChallengesResponseDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['challenges'] = challenges!
+        .map<Map<String, dynamic>>((dynamic val) => val!.toJson())
+        .toList();
+    return fields;
+  }
+
+  AvailableChallengesResponseDto.fromJson(Map<String, dynamic> fields) {
+    challenges = fields["challenges"]
+        .map<ChallengeDto>((dynamic val) => ChallengeDto.fromJson(val))
+        .toList();
+  }
+
+  void partialUpdate(AvailableChallengesResponseDto other) {
+    challenges = other.challenges;
+  }
+
+  AvailableChallengesResponseDto({
+    required this.challenges,
+  });
+
+  late List<ChallengeDto> challenges;
+}
+
 class UpdateErrorDto {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> fields = {};

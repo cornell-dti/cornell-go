@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:game/widget/cached_image.dart';
 import 'package:game/constants/constants.dart';
 
 final defaultStyle = TextStyle(
@@ -52,9 +53,8 @@ Widget leaderBoardUserCell(
             ),
             CircleAvatar(
               child: ClipOval(
-                child: Image.network(
-                  'https://www.w3schools.com/howto/img_avatar.png',
-                  fit: BoxFit.cover,
+                child: AppCachedImage(
+                  imageUrl: 'https://www.w3schools.com/howto/img_avatar.png',
                   width: 90,
                   height: 90,
                 ),
