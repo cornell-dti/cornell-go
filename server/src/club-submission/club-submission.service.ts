@@ -2,6 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { ApprovalStatus, EventSource } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { ClubSubmissionDto } from './club-submission.dto';
+
+const DEFAULT_LAT = 42.4534; 
+const DEFAULT_LONG = -76.4735;
 /**
  * Build admin-facing service methods: 
  * get all pending events, 
@@ -15,8 +18,6 @@ export class ClubSubmissionService {
         private  prisma: PrismaService
     ){}
 
-    const DEFAULT_LAT = 42.4534; 
-    const DEFAULT_LONG = -76.4735;
 
     /**
      * Creates a CampusEvent from ClubSubmission Google Form data
@@ -35,7 +36,7 @@ export class ClubSubmissionService {
                 locationName: dto.location,
                 address: dto.address ?? null,
                 latitude: dto.latitude ?? DEFAULT_LAT,
-                longitude: dto.longtitude ?? DEFAULT_LONG,
+                longitude: dto.longitude ?? DEFAULT_LONG,
 
                 categories: [dto.category],
                 tags: [],
