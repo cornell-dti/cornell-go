@@ -138,6 +138,12 @@ class ApiClient extends ChangeNotifier {
       }
       _clientApi.connectSocket(socket);
 
+      // Send pending FCM token if we have one
+      if (_pendingFcmToken != null) {
+        updateFcmToken(_pendingFcmToken!);
+        _pendingFcmToken = null;
+      }
+
       notifyListeners();
     });
 
@@ -412,6 +418,25 @@ class ApiClient extends ChangeNotifier {
     authenticated = false;
     notifyListeners();
   }
+
+  /// Update the FCM token on the server for push notifications
+  ///
+  /// This is called when:
+  /// - The app initializes and gets an FCM token
+  /// - The FCM token is refreshed
+  /// - After successful login/registration
+  void updateFcmToken(String token) {
+    if (_socket != null && _socket!.connected) {
+      print('Sending FCM token to server: $token');
+      _socket!.emit('updateFcmToken', {'fcmToken': token});
+    } else {
+      print('Socket not connected, FCM token will be sent when connected');
+      // Store the token to send later when socket connects
+      _pendingFcmToken = token;
+    }
+  }
+
+  String? _pendingFcmToken;
 
   // Generic method to check if a user exists for any auth provider
   Future<bool> checkUserExists(

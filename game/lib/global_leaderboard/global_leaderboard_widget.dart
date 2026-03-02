@@ -168,7 +168,7 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
                     width: MediaQuery.sizeOf(context).width * 0.88,
                     height: MediaQuery.sizeOf(context).height * 0.5,
                     decoration: BoxDecoration(
-                      color: Color.fromRGBO(255, 170, 91, 0.15),
+                      color: AppColors.orangeLight,
                       borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(10.0),
                         topRight: Radius.circular(10.0),

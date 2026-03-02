@@ -6,7 +6,9 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_config_plus/flutter_config_plus.dart';
 import 'package:device_preview/device_preview.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:game/api/geopoint.dart';
+import 'package:game/api/notification_service.dart';
 import 'package:game/loading_page/loading_page.dart';
 import 'package:game/model/achievement_model.dart';
 import 'package:device_preview/device_preview.dart';
@@ -37,10 +39,17 @@ const bool USE_DEVICE_PREVIEW = false;
 final storage = FlutterSecureStorage();
 late final String API_URL;
 late final ApiClient client;
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   // Initialize Flutter bindings first - required for ALL plugins
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Firebase (guard against double-init on iOS)
+  if (Firebase.apps.isEmpty) {
+    await Firebase.initializeApp();
+  }
+  print('Firebase initialized');
 
   // Load environment variables from .env file
   await FlutterConfigPlus.loadEnvVariables();
@@ -58,6 +67,15 @@ void main() async {
 
   // Initialize API client
   client = ApiClient(storage, API_URL);
+
+  // Initialize notification service with callback to send token to server
+  await NotificationService().initialize(
+    onTokenRefresh: (token) {
+      // Send FCM token to server when available or refreshed
+      client.updateFcmToken(token);
+    },
+    navigatorKey: navigatorKey,
+  );
 
   // Init Google Maps platform
   final GoogleMapsFlutterPlatform platform = GoogleMapsFlutterPlatform.instance;
@@ -139,6 +157,7 @@ class MyApp extends StatelessWidget {
       ],
       child: GameWidget(
         child: MaterialApp(
+          navigatorKey: navigatorKey,
           useInheritedMediaQuery: USE_DEVICE_PREVIEW,
           locale: USE_DEVICE_PREVIEW ? DevicePreview.locale(context) : null,
           builder: USE_DEVICE_PREVIEW ? DevicePreview.appBuilder : null,
@@ -154,6 +173,9 @@ class MyApp extends StatelessWidget {
             primarySwatch: AppColors.primaryRedSwatch,
             useMaterial3: false,
           ),
+          routes: {
+            '/home': (context) => BottomNavBar(),
+          },
           home: LoadingPageWidget(client.tryRelog()),
         ),
       ),

@@ -207,7 +207,7 @@ class _JourneyCellState extends State<JourneyCell> {
         height: MediaQuery.sizeOf(context).height * 0.3,
         decoration: BoxDecoration(
           color: Colors.white,
-          border: Border.all(color: Color.fromARGB(255, 255, 255, 255)),
+          border: Border.all(color: Colors.white),
           borderRadius: BorderRadius.circular(10),
           boxShadow: [
             BoxShadow(

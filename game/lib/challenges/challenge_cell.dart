@@ -139,7 +139,7 @@ class _ChallengeCellState extends State<ChallengeCell> {
           borderRadius: BorderRadius.circular(15),
           boxShadow: [
             BoxShadow(
-              color: Color.fromARGB(255, 198, 198, 198),
+              color: AppColors.silverGray,
               blurRadius: 2,
               offset: Offset(0, 4),
             ),
@@ -220,7 +220,7 @@ class _ChallengeCellState extends State<ChallengeCell> {
                       challengeName,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        color: Color.fromARGB(204, 0, 0, 0),
+                        color: AppColors.black80,
                         fontSize: deviceHeight * 0.02,
                         fontFamily: 'Poppins',
                         fontWeight: FontWeight.w600,
@@ -237,7 +237,7 @@ class _ChallengeCellState extends State<ChallengeCell> {
                               vertical: deviceHeight * 0.003,
                             ),
                             decoration: BoxDecoration(
-                              color: Color.fromARGB(255, 220, 53, 69),
+                              color: AppColors.dangerRed,
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
@@ -264,7 +264,7 @@ class _ChallengeCellState extends State<ChallengeCell> {
                           child: Text(
                             difficulty,
                             style: TextStyle(
-                              color: Color.fromARGB(204, 0, 0, 0),
+                              color: AppColors.black80,
                               fontSize: deviceHeight * 0.014,
                               fontFamily: 'Poppins',
                               fontWeight: FontWeight.w300,

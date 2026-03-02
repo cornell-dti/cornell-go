@@ -245,12 +245,7 @@ class _ButtonRow extends StatelessWidget {
               ),
               side: MaterialStateProperty.all<BorderSide>(
                 BorderSide(
-                  color: Color.fromARGB(
-                    255,
-                    237,
-                    86,
-                    86,
-                  ), // Specify the border color
+                  color: AppColors.primaryRed, // Specify the border color
                   width: 2.0, // Specify the border width
                 ),
               ),

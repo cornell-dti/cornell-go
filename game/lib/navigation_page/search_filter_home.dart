@@ -81,10 +81,7 @@ class _SearchFilterBarState extends State<SearchFilterBar>
               // Search bar section
               Padding(
                 padding: EdgeInsets.only(
-                  top: Platform.isIOS
-                      ? deviceHeight * 0.01
-                      : MediaQuery.of(context).padding.top +
-                          deviceHeight * 0.01, // Android padding
+                  top: deviceHeight * 0.01,
                   bottom: deviceHeight * 0.01,
                 ),
                 child: Stack(
@@ -101,20 +98,20 @@ class _SearchFilterBarState extends State<SearchFilterBar>
                           height: deviceHeight * 0.055,
                           child: TextField(
                             onSubmitted: onSearchTextChanged,
+                            textAlignVertical: TextAlignVertical.center,
                             decoration: InputDecoration(
                               border: InputBorder.none,
+                              isDense: true,
+                              contentPadding: EdgeInsets.zero,
                               prefixIcon: Icon(
                                 Icons.search,
-                                color: Color.fromARGB(76, 0, 0, 0),
+                                color: AppColors.black30,
                                 size: 20,
                               ),
-                              labelText: "Search a name, location, etc...",
-                              labelStyle: TextStyle(
-                                // color: Color(0xFFB9B9B9),
+                              hintText: "Search a name, location, etc...",
+                              hintStyle: TextStyle(
                                 fontSize: 12,
                                 fontFamily: 'Poppins',
-                                // backgroundColor:
-                                //     Color.fromARGB(255, 255, 248, 241),
                               ),
                             ),
                           ),

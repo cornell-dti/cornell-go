@@ -67,7 +67,7 @@ class _RegisterPageWidgetState extends State<RegisterPageWidget> {
                 Text(
                   "Who are you?",
                   style: TextStyle(
-                    color: Color.fromARGB(255, 71, 71, 71),
+                    color: AppColors.mediumText,
                     fontSize: 24,
                     fontWeight: FontWeight.w900,
                   ),
@@ -85,7 +85,7 @@ class _RegisterPageWidgetState extends State<RegisterPageWidget> {
                                 width: 2.0,
                                 color: name == _selectedOption
                                     ? AppColors.orange
-                                    : Color.fromARGB(255, 217, 217, 217),
+                                    : AppColors.inputGray,
                               ),
                               borderRadius: BorderRadius.circular(10.0),
                             ),

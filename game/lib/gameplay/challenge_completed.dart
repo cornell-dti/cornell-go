@@ -687,18 +687,8 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                                     children: [
                                       ElevatedButton(
                                         style: ElevatedButton.styleFrom(
-                                          backgroundColor: Color.fromARGB(
-                                            0,
-                                            255,
-                                            255,
-                                            255,
-                                          ),
-                                          shadowColor: Color.fromARGB(
-                                            0,
-                                            255,
-                                            255,
-                                            255,
-                                          ),
+                                          backgroundColor: Colors.transparent,
+                                          shadowColor: Colors.transparent,
                                           padding: EdgeInsets.only(
                                             right: 15,
                                             left: 15,
