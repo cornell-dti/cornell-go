@@ -1,7 +1,15 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Modal } from './Modal';
 import styled from 'styled-components';
-import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet';
+import {
+  GoogleMap,
+  useJsApiLoader,
+  Marker,
+  Circle,
+} from '@react-google-maps/api';
+
+const AWARDING_RADIUS_COLOR = '#4CAF50';
+const CLOSE_RADIUS_COLOR = '#FF9800';
 
 export type OptionEntryForm = {
   name: string;
@@ -26,6 +34,8 @@ export type MapEntryForm = {
   name: string;
   latitude: number;
   longitude: number;
+  awardingRadiusF?: number;
+  closeRadiusF?: number;
 };
 
 export type DateEntryForm = {
@@ -156,7 +166,10 @@ function DateEntryFormBox(props: { form: DateEntryForm }) {
   );
 }
 
-function NumberEntryFormBox(props: { form: NumberEntryForm }) {
+function NumberEntryFormBox(props: {
+  form: NumberEntryForm;
+  onChange?: (value: number) => void;
+}) {
   const [val, setVal] = useState('');
 
   useEffect(() => setVal('' + props.form.value), [props.form]);
@@ -170,8 +183,10 @@ function NumberEntryFormBox(props: { form: NumberEntryForm }) {
         min={props.form.min}
         max={props.form.max}
         onChange={e => {
+          const num = +e.target.value;
           setVal(e.target.value);
-          props.form.value = +e.target.value;
+          props.form.value = num;
+          props.onChange?.(num);
         }}
       />
     </EntryBox>
@@ -226,49 +241,56 @@ const MapBox = styled.div`
   height: 300px;
   margin-bottom: 32px;
   overflow: hidden;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 `;
 
-function DraggableMarker(props: {
-  center: [number, number];
-  onLocationChange: (lat: number, long: number) => void;
+const mapContainerStyle = {
+  width: '100%',
+  height: '300px',
+};
+
+function MapEntryFormBox(props: {
+  form: MapEntryForm;
+  allForms?: EntryForm[];
 }) {
-  const [position, setPosition] = useState(props.center);
-  const markerRef = useRef<any>(null);
-  const eventHandlers = useMemo(
-    () => ({
-      dragend() {
-        const marker = markerRef.current;
-        if (marker != null) {
-          const { lat, lng } = marker.getLatLng();
-          props.onLocationChange(lat, lng);
-          setPosition(marker.getLatLng());
-        }
-      },
-    }),
-    [],
-  );
-
-  return (
-    <Marker
-      draggable={true}
-      eventHandlers={eventHandlers}
-      position={position}
-      ref={markerRef}
-    >
-      <Popup minWidth={90}>
-        <span>Drag the pin to move the location</span>
-      </Popup>
-    </Marker>
-  );
-}
-
-function MapEntryFormBox(props: { form: MapEntryForm }) {
   const [lat, setLat] = useState(props.form.latitude);
   const [lng, setLng] = useState(props.form.longitude);
+  const [markerPosition, setMarkerPosition] =
+    useState<google.maps.LatLngLiteral>({
+      lat: props.form.latitude,
+      lng: props.form.longitude,
+    });
+
+  const { isLoaded } = useJsApiLoader({
+    googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY || '',
+  });
+
+  // Derive radii from form so map updates when Awarding/Close Distance fields change
+  const awardingRadius =
+    (
+      props.allForms?.find(
+        f => 'name' in f && f.name === 'Awarding Distance (meters)',
+      ) as NumberEntryForm | undefined
+    )?.value ??
+    props.form.awardingRadiusF ??
+    0;
+  const closeRadius =
+    (
+      props.allForms?.find(
+        f => 'name' in f && f.name === 'Close Distance (meters)',
+      ) as NumberEntryForm | undefined
+    )?.value ??
+    props.form.closeRadiusF ??
+    0;
 
   useEffect(() => {
     setLat(props.form.latitude);
     setLng(props.form.longitude);
+    setMarkerPosition({
+      lat: props.form.latitude,
+      lng: props.form.longitude,
+    });
   }, [props.form.latitude, props.form.longitude]);
 
   const handleLatChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -276,6 +298,7 @@ function MapEntryFormBox(props: { form: MapEntryForm }) {
     if (!isNaN(newLat)) {
       setLat(newLat);
       props.form.latitude = newLat;
+      setMarkerPosition({ lat: newLat, lng });
     }
   };
 
@@ -284,34 +307,70 @@ function MapEntryFormBox(props: { form: MapEntryForm }) {
     if (!isNaN(newLng)) {
       setLng(newLng);
       props.form.longitude = newLng;
+      setMarkerPosition({ lat, lng: newLng });
     }
   };
+
+  const onMarkerDragEnd = (e: google.maps.MapMouseEvent) => {
+    if (e.latLng) {
+      const newLat = e.latLng.lat();
+      const newLng = e.latLng.lng();
+      setLat(newLat);
+      setLng(newLng);
+      props.form.latitude = newLat;
+      props.form.longitude = newLng;
+      setMarkerPosition({ lat: newLat, lng: newLng });
+    }
+  };
+
+  if (!isLoaded) return <MapBox>Loading map...</MapBox>;
 
   return (
     <>
       <MapBox>
-        <MapContainer
-          center={[lat, lng]}
+        <GoogleMap
+          mapContainerStyle={mapContainerStyle}
+          center={markerPosition}
           zoom={20}
-          style={{
-            width: '100%',
-            height: 300,
+          options={{
+            disableDefaultUI: false,
+            zoomControl: true,
+            streetViewControl: false,
           }}
         >
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          <Marker
+            position={markerPosition}
+            draggable={true}
+            onDragEnd={onMarkerDragEnd}
+            title="Drag the pin to move the location"
           />
-          <DraggableMarker
-            center={[lat, lng]}
-            onLocationChange={(newLat, newLng) => {
-              setLat(newLat);
-              setLng(newLng);
-              props.form.latitude = newLat;
-              props.form.longitude = newLng;
-            }}
-          />
-        </MapContainer>
+          {awardingRadius > 0 && (
+            <Circle
+              center={markerPosition}
+              radius={awardingRadius}
+              options={{
+                fillColor: AWARDING_RADIUS_COLOR,
+                fillOpacity: 0.2,
+                strokeColor: AWARDING_RADIUS_COLOR,
+                strokeOpacity: 0.8,
+                strokeWeight: 2,
+              }}
+            />
+          )}
+          {closeRadius > 0 && (
+            <Circle
+              center={markerPosition}
+              radius={closeRadius}
+              options={{
+                fillColor: CLOSE_RADIUS_COLOR,
+                fillOpacity: 0.2,
+                strokeColor: CLOSE_RADIUS_COLOR,
+                strokeOpacity: 0.8,
+                strokeWeight: 2,
+              }}
+            />
+          )}
+        </GoogleMap>
       </MapBox>
       <EntryBox>
         <span>Latitude:</span>
@@ -493,7 +552,22 @@ export function EntryModal(props: {
   entryButtonText: string;
   onEntry: () => void;
   onCancel: () => void;
+  /** When provided, radius number changes update parent state so the map re-renders. */
+  onRadiusChange?: (awardingRadius: number, closeRadius: number) => void;
 }) {
+  const getAwarding = () =>
+    (
+      props.form.find(
+        f => 'name' in f && f.name === 'Awarding Distance (meters)',
+      ) as NumberEntryForm | undefined
+    )?.value ?? 0;
+  const getClose = () =>
+    (
+      props.form.find(
+        f => 'name' in f && f.name === 'Close Distance (meters)',
+      ) as NumberEntryForm | undefined
+    )?.value ?? 0;
+
   return (
     <Modal
       title={props.title}
@@ -516,11 +590,34 @@ export function EntryModal(props: {
         } else if ('checked' in form) {
           return <CheckboxNumberEntryFormBox form={form} key={form.name} />;
         } else if ('min' in form) {
-          return <NumberEntryFormBox form={form} key={form.name} />;
+          const isAwarding = form.name === 'Awarding Distance (meters)';
+          const isClose = form.name === 'Close Distance (meters)';
+          const onRadiusChange = props.onRadiusChange;
+          return (
+            <NumberEntryFormBox
+              form={form}
+              key={form.name}
+              onChange={
+                (isAwarding || isClose) && onRadiusChange
+                  ? value =>
+                      onRadiusChange(
+                        isAwarding ? value : getAwarding(),
+                        isClose ? value : getClose(),
+                      )
+                  : undefined
+              }
+            />
+          );
         } else if ('date' in form) {
           return <DateEntryFormBox form={form} key={form.name} />;
         } else {
-          return <MapEntryFormBox form={form} key={form.name} />;
+          return (
+            <MapEntryFormBox
+              form={form}
+              allForms={props.form}
+              key={form.name}
+            />
+          );
         }
       })}
     </Modal>
