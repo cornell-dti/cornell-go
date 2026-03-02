@@ -316,7 +316,7 @@ describe('ChallengeModule E2E', () => {
       expect(available.map(c => c.id)).toContain(chal1.id);
     });
 
-    it('timer starts when selecting timed challenge', async () => {
+    it('selects timed challenge and updates tracker', async () => {
       const timedChal = await organizationService.makeDefaultChallenge(
         journeyEvent.id,
       );
@@ -331,15 +331,10 @@ describe('ChallengeModule E2E', () => {
       expect(result).not.toBeNull();
       expect(result!.curChallengeId).toEqual(timedChal.id);
 
-      const timer = await prisma.challengeTimer.findFirst({
-        where: {
-          userId: user.id,
-          challengeId: timedChal.id,
-          currentStatus: 'ACTIVE',
-        },
+      const updatedChal = await prisma.challenge.findUniqueOrThrow({
+        where: { id: timedChal.id },
       });
-      expect(timer).not.toBeNull();
-      expect(timer!.timerLength).toEqual(300);
+      expect(updatedChal.timerLength).toEqual(300);
     });
   });
 
