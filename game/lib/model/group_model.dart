@@ -23,7 +23,7 @@ import 'package:game/api/game_client_dto.dart';
 ///
 /// 1. [updateGroupDataStream] The client listens to when the server sends group updates using this stream. The update is placed into [event].
 /// First, we check if [event.group] is a [String]; if it is, then we ignore this update, since it is not
-/// relevant to our group. If [event.group] is not a [String], we update [group] to match the new one given.Then, we run 
+/// relevant to our group. If [event.group] is not a [String], we update [group] to match the new one given.Then, we run
 /// removeWhere, clear, and sort on [members] before calling [notifyListeners()].
 ///
 /// 2. [connectedStream] If the user reconnects, we clear the [members], the member list of the group,
@@ -32,7 +32,7 @@ import 'package:game/api/game_client_dto.dart';
 /// Edge Cases:
 /// - When [curEventId] is null: this is possible when the user has not yet reconnected. [groupModel.curEventId] should be null-checked when called.
 /// - When [group] is null or [members] is empty: this is possible when [updateGroupDataStream] has just started and not yet sent any updates. To access
-/// the member list, use [group?.members]. 
+/// the member list, use [group?.members].
 ///
 ///
 /// Runtime:
