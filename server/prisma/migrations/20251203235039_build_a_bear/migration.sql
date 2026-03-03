@@ -16,31 +16,34 @@
 
 */
 -- CreateEnum
-CREATE TYPE "BearSlot" AS ENUM ('EYES', 'MOUTH', 'COLOR', 'ACCESSORY');
+DO $$ BEGIN
+  CREATE TYPE "BearSlot" AS ENUM ('EYES', 'MOUTH', 'COLOR', 'ACCESSORY');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AlterTable
 ALTER TABLE "EventBase" ALTER COLUMN "longDescription" DROP DEFAULT;
 
 -- AlterTable
-ALTER TABLE "_AchievementToOrganization" DROP CONSTRAINT "_AchievementToOrganization_AB_pkey";
+ALTER TABLE "_AchievementToOrganization" DROP CONSTRAINT IF EXISTS "_AchievementToOrganization_AB_pkey";
 
 -- AlterTable
-ALTER TABLE "_EventBaseToUser" DROP CONSTRAINT "_EventBaseToUser_AB_pkey";
+ALTER TABLE "_EventBaseToUser" DROP CONSTRAINT IF EXISTS "_EventBaseToUser_AB_pkey";
 
 -- AlterTable
-ALTER TABLE "_eventOrgs" DROP CONSTRAINT "_eventOrgs_AB_pkey";
+ALTER TABLE "_eventOrgs" DROP CONSTRAINT IF EXISTS "_eventOrgs_AB_pkey";
 
 -- AlterTable
-ALTER TABLE "_orgManager" DROP CONSTRAINT "_orgManager_AB_pkey";
+ALTER TABLE "_orgManager" DROP CONSTRAINT IF EXISTS "_orgManager_AB_pkey";
 
 -- AlterTable
-ALTER TABLE "_orgToUser" DROP CONSTRAINT "_orgToUser_AB_pkey";
+ALTER TABLE "_orgToUser" DROP CONSTRAINT IF EXISTS "_orgToUser_AB_pkey";
 
 -- AlterTable
-ALTER TABLE "_prevChallengeParticipant" DROP CONSTRAINT "_prevChallengeParticipant_AB_pkey";
+ALTER TABLE "_prevChallengeParticipant" DROP CONSTRAINT IF EXISTS "_prevChallengeParticipant_AB_pkey";
 
 -- CreateTable
-CREATE TABLE "BearItem" (
+CREATE TABLE IF NOT EXISTS "BearItem" (
     "id" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -56,7 +59,7 @@ CREATE TABLE "BearItem" (
 );
 
 -- CreateTable
-CREATE TABLE "UserBearInventory" (
+CREATE TABLE IF NOT EXISTS "UserBearInventory" (
     "id" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -68,7 +71,7 @@ CREATE TABLE "UserBearInventory" (
 );
 
 -- CreateTable
-CREATE TABLE "UserBearEquipped" (
+CREATE TABLE IF NOT EXISTS "UserBearEquipped" (
     "id" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -86,22 +89,22 @@ CREATE UNIQUE INDEX "UserBearInventory_userId_bearItemId_key" ON "UserBearInvent
 CREATE UNIQUE INDEX "UserBearEquipped_userId_slot_key" ON "UserBearEquipped"("userId", "slot");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "_AchievementToOrganization_AB_unique" ON "_AchievementToOrganization"("A", "B");
+CREATE UNIQUE INDEX IF NOT EXISTS "_AchievementToOrganization_AB_unique" ON "_AchievementToOrganization"("A", "B");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "_EventBaseToUser_AB_unique" ON "_EventBaseToUser"("A", "B");
+CREATE UNIQUE INDEX IF NOT EXISTS "_EventBaseToUser_AB_unique" ON "_EventBaseToUser"("A", "B");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "_eventOrgs_AB_unique" ON "_eventOrgs"("A", "B");
+CREATE UNIQUE INDEX IF NOT EXISTS "_eventOrgs_AB_unique" ON "_eventOrgs"("A", "B");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "_orgManager_AB_unique" ON "_orgManager"("A", "B");
+CREATE UNIQUE INDEX IF NOT EXISTS "_orgManager_AB_unique" ON "_orgManager"("A", "B");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "_orgToUser_AB_unique" ON "_orgToUser"("A", "B");
+CREATE UNIQUE INDEX IF NOT EXISTS "_orgToUser_AB_unique" ON "_orgToUser"("A", "B");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "_prevChallengeParticipant_AB_unique" ON "_prevChallengeParticipant"("A", "B");
+CREATE UNIQUE INDEX IF NOT EXISTS "_prevChallengeParticipant_AB_unique" ON "_prevChallengeParticipant"("A", "B");
 
 -- AddForeignKey
 ALTER TABLE "UserBearInventory" ADD CONSTRAINT "UserBearInventory_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
