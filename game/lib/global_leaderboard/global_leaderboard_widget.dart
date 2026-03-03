@@ -7,6 +7,7 @@ import 'package:game/global_leaderboard/podium_widgets.dart';
 import 'package:game/widget/leaderboard_cell.dart';
 import 'package:game/widget/podium_cell.dart';
 import 'package:provider/provider.dart';
+import 'package:game/constants/constants.dart';
 
 /**
  * This widget defines the leaderboard page. 
@@ -42,11 +43,11 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
 
     return Scaffold(
       key: scaffoldKey,
-      backgroundColor: Color.fromARGB(255, 255, 248, 241),
+      backgroundColor: AppColors.warmWhite,
       appBar: AppBar(
         toolbarHeight: MediaQuery.sizeOf(context).height * 0.08,
         automaticallyImplyLeading: false,
-        backgroundColor: Color.fromARGB(255, 237, 86, 86),
+        backgroundColor: AppColors.primaryRed,
         flexibleSpace: FlexibleSpaceBar(
           title: Padding(
             padding: EdgeInsets.only(
@@ -167,7 +168,7 @@ class _GlobalLeaderboardWidgetState extends State<GlobalLeaderboardWidget> {
                     width: MediaQuery.sizeOf(context).width * 0.88,
                     height: MediaQuery.sizeOf(context).height * 0.5,
                     decoration: BoxDecoration(
-                      color: Color.fromRGBO(255, 170, 91, 0.15),
+                      color: AppColors.orangeLight,
                       borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(10.0),
                         topRight: Radius.circular(10.0),

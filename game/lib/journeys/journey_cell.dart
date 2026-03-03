@@ -3,6 +3,7 @@ import 'package:game/preview/preview.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'dart:math';
+import 'package:game/constants/constants.dart';
 
 class LoadingBar extends StatelessWidget {
   final int totalTasks;
@@ -27,7 +28,7 @@ class LoadingBar extends StatelessWidget {
                       alignment: Alignment.centerLeft,
                       child: Container(
                         decoration: new BoxDecoration(
-                          color: Color.fromARGB(255, 241, 241, 241),
+                          color: AppColors.lightGray,
                           shape: BoxShape.rectangle,
                           borderRadius: BorderRadius.all(Radius.circular(16.0)),
                         ),
@@ -40,7 +41,7 @@ class LoadingBar extends StatelessWidget {
                       alignment: Alignment.centerLeft,
                       child: Container(
                         decoration: new BoxDecoration(
-                          color: Color.fromARGB(197, 237, 86, 86),
+                          color: AppColors.primaryRed.withAlpha(197),
                           shape: BoxShape.rectangle,
                           borderRadius: BorderRadius.all(Radius.circular(16.0)),
                         ),
@@ -57,7 +58,7 @@ class LoadingBar extends StatelessWidget {
                       margin: EdgeInsets.only(left: 8, top: 3),
                       alignment: Alignment.centerLeft,
                       decoration: new BoxDecoration(
-                        color: Color(0x99F3C6C6),
+                        color: AppColors.lightRedBackground.withAlpha(153),
                         shape: BoxShape.rectangle,
                         borderRadius: BorderRadius.all(Radius.circular(5.0)),
                       ),
@@ -78,7 +79,7 @@ class LoadingBar extends StatelessWidget {
               Text(
                 tasksFinished.toString() + "/" + totalTasks.toString(),
                 style: TextStyle(
-                  color: Color.fromARGB(255, 110, 110, 110),
+                  color: AppColors.grayText,
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                   fontFamily: 'Poppins',
@@ -206,7 +207,7 @@ class _JourneyCellState extends State<JourneyCell> {
         height: MediaQuery.sizeOf(context).height * 0.3,
         decoration: BoxDecoration(
           color: Colors.white,
-          border: Border.all(color: Color.fromARGB(255, 255, 255, 255)),
+          border: Border.all(color: Colors.white),
           borderRadius: BorderRadius.circular(10),
           boxShadow: [
             BoxShadow(
@@ -258,7 +259,7 @@ class _JourneyCellState extends State<JourneyCell> {
                     Text(
                       widget.location,
                       style: TextStyle(
-                        color: Color(0xFF835A7C),
+                        color: AppColors.purple,
                         fontSize: 16,
                         fontFamily: 'Poppins',
                         fontWeight: FontWeight.w400,
@@ -321,7 +322,7 @@ class _JourneyCellState extends State<JourneyCell> {
                             vertical: 2,
                           ),
                           decoration: ShapeDecoration(
-                            color: Color(0xFFF9EDDA),
+                            color: AppColors.cream,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20),
                             ),
@@ -350,7 +351,7 @@ class _JourneyCellState extends State<JourneyCell> {
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w500,
-                                color: Color(0xFFC17E19),
+                                color: AppColors.gold,
                               ),
                             ),
                           ],
@@ -360,61 +361,6 @@ class _JourneyCellState extends State<JourneyCell> {
                     Padding(
                       padding: const EdgeInsets.only(top: 15.0, bottom: 5),
                       child: LoadingBar(numberCompleted, locationCount),
-                      // child: Row(
-                      //   children: [
-                      // Stack(children: [
-                      //   Container(
-                      //     width: MediaQuery.sizeOf(context).width * 0.66,
-                      //     height: 22,
-                      //     alignment: Alignment.centerLeft,
-                      //     child: Container(
-                      //       decoration: new BoxDecoration(
-                      //         color: Color.fromARGB(255, 241, 241, 241),
-                      //         shape: BoxShape.rectangle,
-                      //         borderRadius:
-                      //             BorderRadius.all(Radius.circular(16.0)),
-                      //       ),
-                      //     ),
-                      //   ),
-                      //   Container(
-                      //     width: (locationCount > 0
-                      //             ? numberCompleted / locationCount
-                      //             : 0) *
-                      //         MediaQuery.sizeOf(context).width *
-                      //         0.66,
-                      //     height: 20,
-                      //     alignment: Alignment.centerLeft,
-                      //     child: Container(
-                      //       decoration: new BoxDecoration(
-                      //         color: Color.fromARGB(191, 237, 86, 86),
-                      //         shape: BoxShape.rectangle,
-                      //         borderRadius:
-                      //             BorderRadius.all(Radius.circular(16.0)),
-                      //       ),
-                      //     ),
-                      //   ),
-                      // ]),
-                      // SizedBox(width: 8),
-                      // Container(
-                      //   width: 50,
-                      //   child: Row(children: [
-                      //     SvgPicture.asset("assets/icons/pin.svg"),
-                      //     Text(
-                      //       " " +
-                      //           numberCompleted.toString() +
-                      //           "/" +
-                      //           locationCount.toString(),
-                      //       style: TextStyle(
-                      //         color: Color.fromARGB(255, 110, 110, 110),
-                      //         fontSize: 16,
-                      //         fontWeight: FontWeight.w600,
-                      //         fontFamily: 'Poppins',
-                      //       ),
-                      //     ),
-                      //   ]),
-                      // )
-                      //   ],
-                      // ),
                     ),
                   ],
                 ),

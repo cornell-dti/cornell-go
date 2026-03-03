@@ -10,6 +10,7 @@ import 'package:game/model/group_model.dart';
 import 'package:game/gameplay/challenge_completed.dart';
 import 'package:game/quiz/quiz_page.dart';
 import 'package:game/gameplay/gameplay_page.dart';
+import 'package:game/constants/constants.dart';
 
 /// Widget that displays the arrival dialog for challenges
 /// Handles both hasArrived and !hasArrived states
@@ -244,12 +245,7 @@ class _ButtonRow extends StatelessWidget {
               ),
               side: MaterialStateProperty.all<BorderSide>(
                 BorderSide(
-                  color: Color.fromARGB(
-                    255,
-                    237,
-                    86,
-                    86,
-                  ), // Specify the border color
+                  color: AppColors.primaryRed, // Specify the border color
                   width: 2.0, // Specify the border width
                 ),
               ),
@@ -262,7 +258,7 @@ class _ButtonRow extends StatelessWidget {
                 style: TextStyle(
                   fontSize:
                       MediaQuery.devicePixelRatioOf(context) < 3 ? 12 : 14,
-                  color: Color.fromARGB(255, 237, 86, 86),
+                  color: AppColors.primaryRed,
                 ),
               ),
             ),
@@ -312,7 +308,7 @@ class _ButtonRow extends StatelessWidget {
                   ),
                 ),
                 backgroundColor: MaterialStateProperty.all<Color>(
-                  Color(0xFFED5656),
+                  AppColors.primaryRed,
                 ),
               ),
             ),

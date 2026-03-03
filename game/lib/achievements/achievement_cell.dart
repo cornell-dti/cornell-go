@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:game/constants/constants.dart';
 import 'package:game/widget/progress_bar.dart';
 
 class AchievementCell extends StatefulWidget {
@@ -49,7 +50,7 @@ class _AchievementCellState extends State<AchievementCell> {
           borderRadius: BorderRadius.circular(15),
           boxShadow: [
             BoxShadow(
-              color: Color.fromARGB(255, 198, 198, 198),
+              color: AppColors.silverGray,
               blurRadius: 2,
               offset: Offset(0, 4),
             ),
@@ -71,7 +72,7 @@ class _AchievementCellState extends State<AchievementCell> {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        color: Color.fromARGB(204, 0, 0, 0),
+                        color: AppColors.black80,
                         fontSize: 14,
                         fontFamily: 'Poppins',
                         fontWeight: FontWeight.w500,
