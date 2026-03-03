@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:game/widget/cached_image.dart';
+import 'package:game/constants/constants.dart';
 
 /**
  * Widget that represents each completed challenge 
@@ -22,7 +24,8 @@ class CompletedChallengeFull extends StatefulWidget {
   final String date;
   final String location;
   final String difficulty;
-  final int points;
+  final int adjustedPoints;
+  final int originalPoints;
 
   CompletedChallengeFull({
     Key? key,
@@ -32,7 +35,8 @@ class CompletedChallengeFull extends StatefulWidget {
     required this.date,
     required this.location,
     required this.difficulty,
-    required this.points,
+    required this.adjustedPoints,
+    required this.originalPoints,
   }) : super(key: key);
 
   @override
@@ -47,7 +51,11 @@ class _CompletedChallengeFullState extends State<CompletedChallengeFull> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(
-          left: 24.0, right: 24.0, top: 24.0, bottom: 5.0),
+        left: 24.0,
+        right: 24.0,
+        top: 24.0,
+        bottom: 5.0,
+      ),
       child: Container(
         width: MediaQuery.sizeOf(context).width * 0.9,
         height: MediaQuery.sizeOf(context).height * 0.6,
@@ -81,11 +89,11 @@ class _CompletedChallengeFullState extends State<CompletedChallengeFull> {
                   builder: (BuildContext context) {
                     return ClipRRect(
                       borderRadius: BorderRadius.circular(8),
-                      child: Image.network(
-                        picture,
-                        fit: BoxFit.cover,
-                        width: 390,
-                        height: 20,
+                      child: AppCachedImage(
+                        imageUrl: picture,
+                        width: double.infinity,
+                        height: double.infinity,
+                        borderRadius: BorderRadius.circular(8),
                       ),
                     );
                   },
@@ -99,8 +107,10 @@ class _CompletedChallengeFullState extends State<CompletedChallengeFull> {
                   // location type label
                   Container(
                     height: 31.58,
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
                     decoration: ShapeDecoration(
                       color: Colors.white.withOpacity(0.7),
                       shape: RoundedRectangleBorder(
@@ -119,7 +129,7 @@ class _CompletedChallengeFullState extends State<CompletedChallengeFull> {
                         Text(
                           widget.location,
                           style: TextStyle(
-                            color: Color(0xFF835A7C),
+                            color: AppColors.purple,
                             fontSize: 16,
                             fontFamily: 'Poppins',
                             fontWeight: FontWeight.w400,
@@ -226,9 +236,11 @@ class _CompletedChallengeFullState extends State<CompletedChallengeFull> {
                                   width: 70,
                                   height: 29,
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 2, vertical: 4),
+                                    horizontal: 2,
+                                    vertical: 4,
+                                  ),
                                   decoration: ShapeDecoration(
-                                    color: Color(0xFFF9EDDA),
+                                    color: AppColors.cream,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(20),
                                     ),
@@ -246,17 +258,26 @@ class _CompletedChallengeFullState extends State<CompletedChallengeFull> {
                                   ),
                                 ),
                                 SizedBox(width: 8),
-                                Row(children: [
-                                  SvgPicture.asset(
-                                    "assets/icons/bearcoins.svg",
-                                    width: 25,
-                                  ),
-                                  Text(' ' + widget.points.toString() + " PTS",
+                                Row(
+                                  children: [
+                                    SvgPicture.asset(
+                                      "assets/icons/bearcoins.svg",
+                                      width: 25,
+                                    ),
+                                    Text(
+                                      ' ' +
+                                          widget.adjustedPoints.toString() +
+                                          "/" +
+                                          widget.originalPoints.toString() +
+                                          " PTS",
                                       style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w500,
-                                          color: Color(0xFFC17E19)))
-                                ]),
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                        color: AppColors.gold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ],
                             ),
                           ],

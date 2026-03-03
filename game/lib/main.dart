@@ -1,14 +1,20 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_config_plus/flutter_config_plus.dart';
+import 'package:device_preview/device_preview.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:game/api/geopoint.dart';
+import 'package:game/api/notification_service.dart';
 import 'package:game/loading_page/loading_page.dart';
 import 'package:game/model/achievement_model.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:game/model/onboarding_model.dart';
+import 'package:game/model/timer_model.dart';
+import 'package:game/model/quiz_model.dart';
 
 // imports for google maps
 import 'dart:io' show Platform;
@@ -27,28 +33,49 @@ import 'package:game/navigation_page/bottom_navbar.dart';
 import 'package:game/splash_page/splash_page.dart';
 import 'package:game/widget/game_widget.dart';
 import 'package:provider/provider.dart';
-import 'package:game/color_palette.dart';
+import 'package:game/constants/constants.dart';
 
 const bool USE_DEVICE_PREVIEW = false;
 final storage = FlutterSecureStorage();
 late final String API_URL;
 late final ApiClient client;
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   // Initialize Flutter bindings first - required for ALL plugins
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Initialize Firebase (guard against double-init on iOS)
+  if (Firebase.apps.isEmpty) {
+    await Firebase.initializeApp();
+  }
+  print('Firebase initialized');
+
   // Load environment variables from .env file
   await FlutterConfigPlus.loadEnvVariables();
 
-  // Define LOOPBACK and get API_URL from FlutterConfigPlus
-  final LOOPBACK =
-      (Platform.isAndroid ? "http://10.0.2.2:8080" : "http://0.0.0.0:8080");
-  API_URL = FlutterConfigPlus.get('API_URL') ?? LOOPBACK;
+  // Define LOOPBACK and get API_URL from dart-define OR .env file
+  final localServerURL =
+      (Platform.isAndroid ? "http://10.0.2.2:8080" : "http://localhost:8080");
+
+  // First try dart-define (for production builds), then .env file (for development), then fallback to loopback
+  API_URL = const String.fromEnvironment('API_URL', defaultValue: '').isEmpty
+      ? (FlutterConfigPlus.get('API_URL') ?? localServerURL)
+      : const String.fromEnvironment('API_URL');
+
   print('Using API URL: $API_URL');
 
   // Initialize API client
   client = ApiClient(storage, API_URL);
+
+  // Initialize notification service with callback to send token to server
+  await NotificationService().initialize(
+    onTokenRefresh: (token) {
+      // Send FCM token to server when available or refreshed
+      client.updateFcmToken(token);
+    },
+    navigatorKey: navigatorKey,
+  );
 
   // Init Google Maps platform
   final GoogleMapsFlutterPlatform platform = GoogleMapsFlutterPlatform.instance;
@@ -66,10 +93,7 @@ void main() async {
 
   runApp(
     USE_DEVICE_PREVIEW
-        ? DevicePreview(
-            enabled: !kReleaseMode,
-            builder: (context) => MyApp(),
-          )
+        ? DevicePreview(enabled: !kReleaseMode, builder: (context) => MyApp())
         : MyApp(),
   );
 }
@@ -111,7 +135,9 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider.value(value: client),
         ChangeNotifierProvider(create: (_) => UserModel(client), lazy: false),
         ChangeNotifierProvider(
-            create: (_) => OnboardingModel(client), lazy: false),
+          create: (_) => OnboardingModel(client),
+          lazy: false,
+        ),
         ChangeNotifierProvider(create: (_) => GroupModel(client), lazy: false),
         ChangeNotifierProvider(create: (_) => EventModel(client), lazy: false),
         ChangeNotifierProvider(
@@ -126,9 +152,12 @@ class MyApp extends StatelessWidget {
           create: (_) => ChallengeModel(client),
           lazy: false,
         ),
+        ChangeNotifierProvider(create: (_) => TimerModel(client), lazy: false),
+        ChangeNotifierProvider(create: (_) => QuizModel(client), lazy: false),
       ],
       child: GameWidget(
         child: MaterialApp(
+          navigatorKey: navigatorKey,
           useInheritedMediaQuery: USE_DEVICE_PREVIEW,
           locale: USE_DEVICE_PREVIEW ? DevicePreview.locale(context) : null,
           builder: USE_DEVICE_PREVIEW ? DevicePreview.appBuilder : null,
@@ -141,9 +170,12 @@ class MyApp extends StatelessWidget {
           supportedLocales: const [Locale('en', '')],
           theme: ThemeData(
             fontFamily: 'Poppins',
-            primarySwatch: ColorPalette.BigRed,
+            primarySwatch: AppColors.primaryRedSwatch,
             useMaterial3: false,
           ),
+          routes: {
+            '/home': (context) => BottomNavBar(),
+          },
           home: LoadingPageWidget(client.tryRelog()),
         ),
       ),

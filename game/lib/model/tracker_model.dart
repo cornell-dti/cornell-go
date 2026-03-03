@@ -35,7 +35,8 @@ class TrackerModel extends ChangeNotifier {
       return _trackers[eventId];
     } else {
       _client.serverApi?.requestEventTrackerData(
-          RequestEventTrackerDataDto(trackedEvents: [eventId]));
+        RequestEventTrackerDataDto(trackedEvents: [eventId]),
+      );
       return null;
     }
   }

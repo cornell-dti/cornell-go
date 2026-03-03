@@ -1,0 +1,5 @@
+#!/bin/sh
+
+# Auto-format Dart files and stage changes
+dart format game/lib
+git add game/lib

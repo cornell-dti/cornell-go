@@ -32,25 +32,27 @@ class LoadingPageWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.white,
-        body: Center(
-          child: StreamBuilder(
-            stream: Stream.fromFuture(awaitRelogResult()),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => snapshot.data!
-                              ? BottomNavBar()
-                              : SplashPageWidget()));
-                });
-              }
+      backgroundColor: Colors.white,
+      body: Center(
+        child: StreamBuilder(
+          stream: Stream.fromFuture(awaitRelogResult()),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        snapshot.data! ? BottomNavBar() : SplashPageWidget(),
+                  ),
+                );
+              });
+            }
 
-              return CircularProgressIndicator();
-            },
-          ),
-        ));
+            return CircularProgressIndicator();
+          },
+        ),
+      ),
+    );
   }
 }

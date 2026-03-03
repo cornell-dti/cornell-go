@@ -18,6 +18,8 @@ import {
   PrevChallenge,
   SessionLogEntry,
   User,
+  QuizQuestion,
+  QuizAnswer,
 } from '@prisma/client';
 
 export type SubjectTypes = {
@@ -31,6 +33,8 @@ export type SubjectTypes = {
   SessionLogEntry: SessionLogEntry;
   Achievement: Achievement;
   AchievementTracker: AchievementTracker;
+  QuizQuestion: QuizQuestion;
+  QuizAnswer: QuizAnswer;
 };
 
 export type AppAbility = PureAbility<

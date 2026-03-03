@@ -16,7 +16,8 @@ async function main() {
   process.env[`DB_RESET`] = "true";
   console.log("Setting up database through docker");
   execSync(
-    "docker compose up --build --no-attach postgres --exit-code-from server"
+    "docker compose up --build --no-attach postgres --exit-code-from server",
+    { stdio: "inherit" }
   );
   chdir("./server");
   console.log("Installing server dependencies");

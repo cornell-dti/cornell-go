@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:game/constants/constants.dart';
 import 'package:game/utils/utility_functions.dart';
 
 /**
@@ -9,7 +10,7 @@ import 'package:game/utils/utility_functions.dart';
  */
 Widget podiumCell(context, String name, bool isUser) {
   var nameStyle = TextStyle(
-    color: Color(0xFF1E1E1E),
+    color: AppColors.darkText,
     fontSize: 14,
     fontFamily: 'Poppins',
     fontWeight: FontWeight.w500,
@@ -17,18 +18,18 @@ Widget podiumCell(context, String name, bool isUser) {
   );
 
   return Container(
-      width: 78,
-      height: 88.824,
-      child: Column(children: [
+    width: 78,
+    height: 88.824,
+    child: Column(
+      children: [
         Container(
           width: 49.128,
           height: 49.128,
           decoration: BoxDecoration(
             color: constructColorFromUserName(name),
             borderRadius: BorderRadius.circular(49.128),
-            border: isUser
-                ? Border.all(color: Color.fromRGBO(255, 170, 91, 1), width: 2.5)
-                : null,
+            border:
+                isUser ? Border.all(color: AppColors.orange, width: 2.5) : null,
           ),
         ),
         SizedBox(
@@ -41,6 +42,8 @@ Widget podiumCell(context, String name, bool isUser) {
             // Allowing wrapping of the names in the podium
             overflow: TextOverflow.ellipsis,
           ),
-        )
-      ]));
+        ),
+      ],
+    ),
+  );
 }

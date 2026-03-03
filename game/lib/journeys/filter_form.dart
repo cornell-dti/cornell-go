@@ -2,19 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:game/api/game_client_dto.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:sticky_headers/sticky_headers.dart';
+import 'package:game/constants/constants.dart';
 
 class FilterForm extends StatefulWidget {
   final void Function(List<String>, List<String>, String) onSubmit;
   String? myDifficulty;
   List<String>? myLocations;
   List<String>? myCategories;
-  FilterForm(
-      {Key? key,
-      required this.onSubmit,
-      String? difficulty,
-      List<String>? locations,
-      List<String>? categories})
-      : super(key: key) {
+  FilterForm({
+    Key? key,
+    required this.onSubmit,
+    String? difficulty,
+    List<String>? locations,
+    List<String>? categories,
+  }) : super(key: key) {
     myDifficulty = difficulty;
     myLocations = locations;
     myCategories = categories;
@@ -35,7 +36,10 @@ class _FilterFormState extends State<FilterForm> {
   int filterCount = 0;
 
   _FilterFormState(
-      String? difficulty, List<String>? locations, List<String>? categories) {
+    String? difficulty,
+    List<String>? locations,
+    List<String>? categories,
+  ) {
     selectedDifficulty = difficulty ?? '';
     selectedLocations = locations ?? [];
     selectedCategories = categories ?? [];
@@ -146,236 +150,242 @@ class _FilterFormState extends State<FilterForm> {
   Widget build(BuildContext context) {
     return FractionallySizedBox(
       heightFactor: 0.8,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Container(
-            padding: EdgeInsets.symmetric(vertical: 12.0),
-            color: Color.fromARGB(255, 237, 86, 86),
-            child: Stack(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Filters',
+      child: SafeArea(
+        top: false,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
+              padding: EdgeInsets.symmetric(vertical: 12.0),
+              color: AppColors.primaryRed,
+              child: Stack(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Filters',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
+                    ],
+                  ),
+                  Positioned(
+                    top: -4.0,
+                    right: 5.0,
+                    child: Container(
+                      width: 40.0,
+                      height: 40.0,
+                      child: CloseButton(color: Colors.white),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // SizedBox(height: 20.0),
+            Expanded(
+              child: ListView(
+                padding: EdgeInsets.symmetric(horizontal: 20.0),
+                children: [
+                  ListTile(
+                    title: Text(
+                      'Category',
                       style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 22,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
                         fontFamily: 'Poppins',
                       ),
                     ),
-                  ],
-                ),
-                Positioned(
-                  top: -4.0,
-                  right: 5.0,
-                  child: Container(
-                    width: 40.0,
-                    height: 40.0,
-                    child: CloseButton(color: Colors.white),
+                    contentPadding: EdgeInsets.zero,
                   ),
-                ),
-              ],
+                  Wrap(
+                    spacing: 4,
+                    runSpacing: 4,
+                    children: categories.map((category) {
+                      return ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            toggleCategory(category.name);
+                          });
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              selectedCategories.contains(category.name)
+                                  ? AppColors.cream
+                                  : AppColors.chipDisabledGray,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20.0),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 8.0),
+                          child: Text(
+                            friendlyCategory[category] ?? '',
+                            style: TextStyle(
+                              fontSize: 16.0,
+                              color: Colors.black.withOpacity(0.6),
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                  SizedBox(height: 10.0),
+                  ListTile(
+                    title: Text(
+                      'Location',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Poppins',
+                      ),
+                    ),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  Wrap(
+                    spacing: 4,
+                    runSpacing: 4,
+                    children: locations.map((location) {
+                      return ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            toggleLocation(location.name);
+                          });
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              selectedLocations.contains(location.name)
+                                  ? AppColors.cream
+                                  : AppColors.chipDisabledGray,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20.0),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 8.0),
+                          child: Text(
+                            friendlyLocation[location] ?? '',
+                            style: TextStyle(
+                              fontSize: 16.0,
+                              color: Colors.black.withOpacity(0.6),
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                  SizedBox(height: 10.0),
+                  ListTile(
+                    title: Text(
+                      'Difficulty Levels',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Poppins',
+                      ),
+                    ),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  Wrap(
+                    spacing: 4,
+                    runSpacing: 4,
+                    children: difficulties.map((diff) {
+                      return ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            setDifficulty(diff.name);
+                          });
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              selectedDifficulty.contains(diff.name)
+                                  ? AppColors.cream
+                                  : AppColors.chipDisabledGray,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20.0),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 1.0),
+                          child: Text(
+                            friendlyDifficulty[diff] ?? '',
+                            style: TextStyle(
+                              fontSize: 16.0,
+                              color: Colors.black.withOpacity(0.6),
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
             ),
-          ),
-          // SizedBox(height: 20.0),
-          Expanded(
-              child: ListView(
-                  padding: EdgeInsets.symmetric(horizontal: 20.0),
-                  children: [
-                ListTile(
-                  title: Text(
-                    'Category',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'Poppins',
-                    ),
+            SizedBox(height: 20.0),
+            Container(
+              width: 600,
+              decoration: ShapeDecoration(
+                shape: RoundedRectangleBorder(
+                  side: BorderSide(
+                    width: 1,
+                    strokeAlign: BorderSide.strokeAlignCenter,
+                    color: AppColors.lightGrayBorder,
                   ),
-                  contentPadding: EdgeInsets.zero,
-                ),
-                Wrap(
-                  spacing: 4,
-                  runSpacing: 4,
-                  children: categories.map((category) {
-                    return ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          toggleCategory(category.name);
-                        });
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            selectedCategories.contains(category.name)
-                                ? Color.fromARGB(255, 249, 237, 218)
-                                : Color.fromARGB(100, 210, 210, 210),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20.0),
-                        ),
-                        elevation: 0,
-                      ),
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(vertical: 8.0),
-                        child: Text(
-                          friendlyCategory[category] ?? '',
-                          style: TextStyle(
-                            fontSize: 16.0,
-                            color: Colors.black.withOpacity(0.6),
-                          ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-                SizedBox(height: 10.0),
-                ListTile(
-                  title: Text(
-                    'Location',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'Poppins',
-                    ),
-                  ),
-                  contentPadding: EdgeInsets.zero,
-                ),
-                Wrap(
-                  spacing: 4,
-                  runSpacing: 4,
-                  children: locations.map((location) {
-                    return ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          toggleLocation(location.name);
-                        });
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            selectedLocations.contains(location.name)
-                                ? Color.fromARGB(255, 249, 237, 218)
-                                : Color.fromARGB(100, 210, 210, 210),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20.0),
-                        ),
-                        elevation: 0,
-                      ),
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(vertical: 8.0),
-                        child: Text(
-                          friendlyLocation[location] ?? '',
-                          style: TextStyle(
-                            fontSize: 16.0,
-                            color: Colors.black.withOpacity(0.6),
-                          ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-                SizedBox(height: 10.0),
-                ListTile(
-                  title: Text(
-                    'Difficulty Levels',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'Poppins',
-                    ),
-                  ),
-                  contentPadding: EdgeInsets.zero,
-                ),
-                Wrap(
-                  spacing: 4,
-                  runSpacing: 4,
-                  children: difficulties.map((diff) {
-                    return ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          setDifficulty(diff.name);
-                        });
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: selectedDifficulty.contains(diff.name)
-                            ? Color.fromARGB(255, 249, 237, 218)
-                            : Color.fromARGB(100, 210, 210, 210),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20.0),
-                        ),
-                        elevation: 0,
-                      ),
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(vertical: 1.0),
-                        child: Text(
-                          friendlyDifficulty[diff] ?? '',
-                          style: TextStyle(
-                            fontSize: 16.0,
-                            color: Colors.black.withOpacity(0.6),
-                          ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ])),
-          SizedBox(height: 20.0),
-          Container(
-            width: 600,
-            decoration: ShapeDecoration(
-              shape: RoundedRectangleBorder(
-                side: BorderSide(
-                  width: 1,
-                  strokeAlign: BorderSide.strokeAlignCenter,
-                  color: Color(0xFFE5E5E5),
                 ),
               ),
             ),
-          ),
-          SizedBox(height: 10.0),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                TextButton(
-                  onPressed: () {
-                    setState(() {
-                      selectedCategories = [];
-                      selectedLocations = [];
-                      selectedDifficulty = '';
-                      clearFilters();
-                    });
-                  },
-                  child: Text('Clear'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color.fromARGB(255, 255, 255, 255),
-                    foregroundColor: Color.fromARGB(255, 0, 0, 0),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
+            SizedBox(height: 10.0),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        selectedCategories = [];
+                        selectedLocations = [];
+                        selectedDifficulty = '';
+                        clearFilters();
+                      });
+                    },
+                    child: Text('Clear'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.black,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
                     ),
                   ),
-                ),
-                Stack(
-                  children: [
-                    TextButton(
-                      onPressed: filterCount > 0 ? filterChallenges : null,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: filterCount > 0
-                            ? const Color(0xFFEC5555) // Active color
-                            : Colors.grey, // Disabled color
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10.0),
+                  Stack(
+                    children: [
+                      TextButton(
+                        onPressed: filterCount > 0 ? filterChallenges : null,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: filterCount > 0
+                              ? AppColors.activeRed // Active color
+                              : Colors.grey, // Disabled color
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
                         ),
+                        child: Text("See results"),
                       ),
-                      child: Text("See results"),
-                    ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

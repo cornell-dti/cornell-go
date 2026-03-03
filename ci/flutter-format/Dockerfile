@@ -1,4 +1,5 @@
 FROM ghcr.io/cirruslabs/flutter
+ENV FLUTTER_ALLOW_SUPER_USER=true
 
 WORKDIR /app/game
 COPY game .

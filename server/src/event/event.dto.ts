@@ -96,13 +96,16 @@ export interface EventDto {
   indexable?: boolean;
   longitudeF?: number;
   latitudeF?: number;
+  featured?: boolean;
 }
 
 /** DTO for PrevChallenge as used in EventTrackerDto */
 export interface PrevChallengeDto {
   challengeId: string;
   hintsUsed: number;
+  extensionsUsed?: number;
   dateCompleted: string;
+  failed?: boolean; // True if challenge was failed due to timer expiration
 }
 
 /** DTO for event tracker in updateEventTrackerData */

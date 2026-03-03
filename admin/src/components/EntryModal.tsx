@@ -1,7 +1,15 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Modal } from './Modal';
 import styled from 'styled-components';
-import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet';
+import {
+  GoogleMap,
+  useJsApiLoader,
+  Marker,
+  Circle,
+} from '@react-google-maps/api';
+
+const AWARDING_RADIUS_COLOR = '#4CAF50';
+const CLOSE_RADIUS_COLOR = '#FF9800';
 
 export type OptionEntryForm = {
   name: string;
@@ -26,6 +34,8 @@ export type MapEntryForm = {
   name: string;
   latitude: number;
   longitude: number;
+  awardingRadiusF?: number;
+  closeRadiusF?: number;
 };
 
 export type DateEntryForm = {
@@ -33,12 +43,39 @@ export type DateEntryForm = {
   date: Date;
 };
 
+export type CheckboxNumberEntryForm = {
+  name: string;
+  checked: boolean;
+  value: number;
+  min: number;
+  max: number;
+  numberLabel: string;
+};
+
+export type AnswersEntryForm = {
+  name: string;
+  answers: Array<{ text: string; isCorrect: boolean }>;
+  minAnswers: number;
+  maxAnswers: number;
+};
+
+export type OptionWithCustomEntryForm = {
+  name: string;
+  value: number;
+  options: string[];
+  customValue: string;
+  customOptionLabel: string;
+};
+
 export type EntryForm =
   | OptionEntryForm
   | FreeEntryForm
   | NumberEntryForm
   | MapEntryForm
-  | DateEntryForm;
+  | DateEntryForm
+  | CheckboxNumberEntryForm
+  | AnswersEntryForm
+  | OptionWithCustomEntryForm;
 
 const EntryBox = styled.div`
   margin-bottom: 12px;
@@ -129,7 +166,10 @@ function DateEntryFormBox(props: { form: DateEntryForm }) {
   );
 }
 
-function NumberEntryFormBox(props: { form: NumberEntryForm }) {
+function NumberEntryFormBox(props: {
+  form: NumberEntryForm;
+  onChange?: (value: number) => void;
+}) {
   const [val, setVal] = useState('');
 
   useEffect(() => setVal('' + props.form.value), [props.form]);
@@ -143,11 +183,56 @@ function NumberEntryFormBox(props: { form: NumberEntryForm }) {
         min={props.form.min}
         max={props.form.max}
         onChange={e => {
+          const num = +e.target.value;
           setVal(e.target.value);
-          props.form.value = +e.target.value;
+          props.form.value = num;
+          props.onChange?.(num);
         }}
       />
     </EntryBox>
+  );
+}
+
+function CheckboxNumberEntryFormBox(props: { form: CheckboxNumberEntryForm }) {
+  const [checked, setChecked] = useState(props.form.checked);
+  const [val, setVal] = useState('' + props.form.value);
+
+  useEffect(() => {
+    setChecked(props.form.checked);
+    setVal('' + props.form.value);
+  }, [props.form]);
+
+  return (
+    <>
+      <EntryBox>
+        <label>
+          <input
+            type="checkbox"
+            checked={checked}
+            onChange={e => {
+              setChecked(e.target.checked);
+              props.form.checked = e.target.checked;
+            }}
+          />
+          {' ' + props.form.name}
+        </label>
+      </EntryBox>
+      {checked && (
+        <EntryBox>
+          {props.form.numberLabel + ': '}
+          <EntryTextBox
+            type="number"
+            value={val}
+            min={props.form.min}
+            max={props.form.max}
+            onChange={e => {
+              setVal(e.target.value);
+              props.form.value = +e.target.value;
+            }}
+          />
+        </EntryBox>
+      )}
+    </>
   );
 }
 
@@ -156,49 +241,56 @@ const MapBox = styled.div`
   height: 300px;
   margin-bottom: 32px;
   overflow: hidden;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 `;
 
-function DraggableMarker(props: {
-  center: [number, number];
-  onLocationChange: (lat: number, long: number) => void;
+const mapContainerStyle = {
+  width: '100%',
+  height: '300px',
+};
+
+function MapEntryFormBox(props: {
+  form: MapEntryForm;
+  allForms?: EntryForm[];
 }) {
-  const [position, setPosition] = useState(props.center);
-  const markerRef = useRef<any>(null);
-  const eventHandlers = useMemo(
-    () => ({
-      dragend() {
-        const marker = markerRef.current;
-        if (marker != null) {
-          const { lat, lng } = marker.getLatLng();
-          props.onLocationChange(lat, lng);
-          setPosition(marker.getLatLng());
-        }
-      },
-    }),
-    [],
-  );
-
-  return (
-    <Marker
-      draggable={true}
-      eventHandlers={eventHandlers}
-      position={position}
-      ref={markerRef}
-    >
-      <Popup minWidth={90}>
-        <span>Drag the pin to move the location</span>
-      </Popup>
-    </Marker>
-  );
-}
-
-function MapEntryFormBox(props: { form: MapEntryForm }) {
   const [lat, setLat] = useState(props.form.latitude);
   const [lng, setLng] = useState(props.form.longitude);
+  const [markerPosition, setMarkerPosition] =
+    useState<google.maps.LatLngLiteral>({
+      lat: props.form.latitude,
+      lng: props.form.longitude,
+    });
+
+  const { isLoaded } = useJsApiLoader({
+    googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY || '',
+  });
+
+  // Derive radii from form so map updates when Awarding/Close Distance fields change
+  const awardingRadius =
+    (
+      props.allForms?.find(
+        f => 'name' in f && f.name === 'Awarding Distance (meters)',
+      ) as NumberEntryForm | undefined
+    )?.value ??
+    props.form.awardingRadiusF ??
+    0;
+  const closeRadius =
+    (
+      props.allForms?.find(
+        f => 'name' in f && f.name === 'Close Distance (meters)',
+      ) as NumberEntryForm | undefined
+    )?.value ??
+    props.form.closeRadiusF ??
+    0;
 
   useEffect(() => {
     setLat(props.form.latitude);
     setLng(props.form.longitude);
+    setMarkerPosition({
+      lat: props.form.latitude,
+      lng: props.form.longitude,
+    });
   }, [props.form.latitude, props.form.longitude]);
 
   const handleLatChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -206,6 +298,7 @@ function MapEntryFormBox(props: { form: MapEntryForm }) {
     if (!isNaN(newLat)) {
       setLat(newLat);
       props.form.latitude = newLat;
+      setMarkerPosition({ lat: newLat, lng });
     }
   };
 
@@ -214,34 +307,70 @@ function MapEntryFormBox(props: { form: MapEntryForm }) {
     if (!isNaN(newLng)) {
       setLng(newLng);
       props.form.longitude = newLng;
+      setMarkerPosition({ lat, lng: newLng });
     }
   };
+
+  const onMarkerDragEnd = (e: google.maps.MapMouseEvent) => {
+    if (e.latLng) {
+      const newLat = e.latLng.lat();
+      const newLng = e.latLng.lng();
+      setLat(newLat);
+      setLng(newLng);
+      props.form.latitude = newLat;
+      props.form.longitude = newLng;
+      setMarkerPosition({ lat: newLat, lng: newLng });
+    }
+  };
+
+  if (!isLoaded) return <MapBox>Loading map...</MapBox>;
 
   return (
     <>
       <MapBox>
-        <MapContainer
-          center={[lat, lng]}
+        <GoogleMap
+          mapContainerStyle={mapContainerStyle}
+          center={markerPosition}
           zoom={20}
-          style={{
-            width: '100%',
-            height: 300,
+          options={{
+            disableDefaultUI: false,
+            zoomControl: true,
+            streetViewControl: false,
           }}
         >
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          <Marker
+            position={markerPosition}
+            draggable={true}
+            onDragEnd={onMarkerDragEnd}
+            title="Drag the pin to move the location"
           />
-          <DraggableMarker
-            center={[lat, lng]}
-            onLocationChange={(newLat, newLng) => {
-              setLat(newLat);
-              setLng(newLng);
-              props.form.latitude = newLat;
-              props.form.longitude = newLng;
-            }}
-          />
-        </MapContainer>
+          {awardingRadius > 0 && (
+            <Circle
+              center={markerPosition}
+              radius={awardingRadius}
+              options={{
+                fillColor: AWARDING_RADIUS_COLOR,
+                fillOpacity: 0.2,
+                strokeColor: AWARDING_RADIUS_COLOR,
+                strokeOpacity: 0.8,
+                strokeWeight: 2,
+              }}
+            />
+          )}
+          {closeRadius > 0 && (
+            <Circle
+              center={markerPosition}
+              radius={closeRadius}
+              options={{
+                fillColor: CLOSE_RADIUS_COLOR,
+                fillOpacity: 0.2,
+                strokeColor: CLOSE_RADIUS_COLOR,
+                strokeOpacity: 0.8,
+                strokeWeight: 2,
+              }}
+            />
+          )}
+        </GoogleMap>
       </MapBox>
       <EntryBox>
         <span>Latitude:</span>
@@ -255,6 +384,167 @@ function MapEntryFormBox(props: { form: MapEntryForm }) {
   );
 }
 
+// Styled components for AnswersEntryForm
+const AnswerRow = styled.div`
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  gap: 8px;
+`;
+
+const AnswerInput = styled.input`
+  flex: 1;
+  font-size: 16px;
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+`;
+
+const CorrectRadio = styled.input`
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+`;
+
+const AnswerButton = styled.button`
+  padding: 4px 12px;
+  cursor: pointer;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #f5f5f5;
+  &:hover {
+    background: #e0e0e0;
+  }
+`;
+
+const AnswersContainer = styled.div`
+  margin-bottom: 16px;
+`;
+
+function AnswersEntryFormBox(props: { form: AnswersEntryForm }) {
+  const [answers, setAnswers] = useState(props.form.answers);
+
+  useEffect(() => {
+    setAnswers([...props.form.answers]);
+  }, [props.form]);
+
+  const updateAnswerText = (index: number, text: string) => {
+    const newAnswers = [...answers];
+    newAnswers[index].text = text;
+    setAnswers(newAnswers);
+    props.form.answers = newAnswers;
+  };
+
+  const toggleCorrect = (index: number) => {
+    const newAnswers = answers.map((a, i) => ({
+      ...a,
+      isCorrect: i === index,
+    }));
+    setAnswers(newAnswers);
+    props.form.answers = newAnswers;
+  };
+
+  const addAnswer = () => {
+    if (answers.length < props.form.maxAnswers) {
+      const newAnswers = [...answers, { text: '', isCorrect: false }];
+      setAnswers(newAnswers);
+      props.form.answers = newAnswers;
+    }
+  };
+
+  const removeAnswer = (index: number) => {
+    if (answers.length > props.form.minAnswers) {
+      const newAnswers = answers.filter((_, i) => i !== index);
+      if (!newAnswers.some(a => a.isCorrect) && newAnswers.length > 0) {
+        newAnswers[0].isCorrect = true;
+      }
+      setAnswers(newAnswers);
+      props.form.answers = newAnswers;
+    }
+  };
+
+  return (
+    <AnswersContainer>
+      <div style={{ marginBottom: 8 }}>{props.form.name}:</div>
+      {answers.map((answer, index) => (
+        <AnswerRow key={index}>
+          <CorrectRadio
+            type="radio"
+            name="correctAnswer"
+            checked={answer.isCorrect}
+            onChange={() => toggleCorrect(index)}
+            title="Mark as correct"
+          />
+          <AnswerInput
+            value={answer.text}
+            placeholder={`Answer ${index + 1}`}
+            onChange={e => updateAnswerText(index, e.target.value)}
+          />
+          {answers.length > props.form.minAnswers && (
+            <AnswerButton onClick={() => removeAnswer(index)}>-</AnswerButton>
+          )}
+        </AnswerRow>
+      ))}
+      {answers.length < props.form.maxAnswers && (
+        <AnswerButton onClick={addAnswer}>+ Add Answer</AnswerButton>
+      )}
+    </AnswersContainer>
+  );
+}
+
+function OptionWithCustomEntryFormBox(props: {
+  form: OptionWithCustomEntryForm;
+}) {
+  const [selectedIndex, setSelectedIndex] = useState(props.form.value);
+  const [customText, setCustomText] = useState(props.form.customValue);
+
+  const isCustomSelected = selectedIndex === props.form.options.length;
+
+  useEffect(() => {
+    setSelectedIndex(props.form.value);
+    setCustomText(props.form.customValue);
+  }, [props.form]);
+
+  return (
+    <>
+      <EntryBox>
+        <label htmlFor={props.form.name}>{props.form.name + ':'}</label>
+        <EntrySelect
+          name={props.form.name}
+          value={
+            isCustomSelected
+              ? props.form.customOptionLabel
+              : props.form.options[selectedIndex]
+          }
+          onChange={e => {
+            const idx = e.target.selectedIndex;
+            setSelectedIndex(idx);
+            props.form.value = idx;
+          }}
+        >
+          {props.form.options.map(opt => (
+            <option key={opt}>{opt}</option>
+          ))}
+          <option>{props.form.customOptionLabel}</option>
+        </EntrySelect>
+      </EntryBox>
+      {isCustomSelected && (
+        <EntryBox>
+          <span>Custom value:</span>
+          <EntryTextBox
+            value={customText}
+            placeholder="Enter custom category"
+            onChange={e => {
+              setCustomText(e.target.value);
+              props.form.customValue = e.target.value;
+            }}
+          />
+        </EntryBox>
+      )}
+    </>
+  );
+}
+
 export function EntryModal(props: {
   title: string;
   form: EntryForm[];
@@ -262,7 +552,22 @@ export function EntryModal(props: {
   entryButtonText: string;
   onEntry: () => void;
   onCancel: () => void;
+  /** When provided, radius number changes update parent state so the map re-renders. */
+  onRadiusChange?: (awardingRadius: number, closeRadius: number) => void;
 }) {
+  const getAwarding = () =>
+    (
+      props.form.find(
+        f => 'name' in f && f.name === 'Awarding Distance (meters)',
+      ) as NumberEntryForm | undefined
+    )?.value ?? 0;
+  const getClose = () =>
+    (
+      props.form.find(
+        f => 'name' in f && f.name === 'Close Distance (meters)',
+      ) as NumberEntryForm | undefined
+    )?.value ?? 0;
+
   return (
     <Modal
       title={props.title}
@@ -274,16 +579,45 @@ export function EntryModal(props: {
       }}
     >
       {props.form.map(form => {
-        if ('options' in form) {
+        if ('answers' in form) {
+          return <AnswersEntryFormBox form={form} key={form.name} />;
+        } else if ('customOptionLabel' in form) {
+          return <OptionWithCustomEntryFormBox form={form} key={form.name} />;
+        } else if ('options' in form) {
           return <OptionEntryFormBox form={form} key={form.name} />;
         } else if ('characterLimit' in form) {
           return <FreeEntryFormBox form={form} key={form.name} />;
+        } else if ('checked' in form) {
+          return <CheckboxNumberEntryFormBox form={form} key={form.name} />;
         } else if ('min' in form) {
-          return <NumberEntryFormBox form={form} key={form.name} />;
+          const isAwarding = form.name === 'Awarding Distance (meters)';
+          const isClose = form.name === 'Close Distance (meters)';
+          const onRadiusChange = props.onRadiusChange;
+          return (
+            <NumberEntryFormBox
+              form={form}
+              key={form.name}
+              onChange={
+                (isAwarding || isClose) && onRadiusChange
+                  ? value =>
+                      onRadiusChange(
+                        isAwarding ? value : getAwarding(),
+                        isClose ? value : getClose(),
+                      )
+                  : undefined
+              }
+            />
+          );
         } else if ('date' in form) {
           return <DateEntryFormBox form={form} key={form.name} />;
         } else {
-          return <MapEntryFormBox form={form} key={form.name} />;
+          return (
+            <MapEntryFormBox
+              form={form}
+              allForms={props.form}
+              key={form.name}
+            />
+          );
         }
       })}
     </Modal>

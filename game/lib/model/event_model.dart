@@ -18,8 +18,9 @@ class EventModel extends ChangeNotifier {
         if (!_events.containsKey(event.event.id)) {
           searchResults!.add(event.event);
         } else {
-          var index = searchResults!
-              .indexWhere((element) => element.id == event.event.id);
+          var index = searchResults!.indexWhere(
+            (element) => element.id == event.event.id,
+          );
           searchResults![index] = event.event;
         }
         _events[event.event.id] = event.event;
@@ -74,8 +75,10 @@ class EventModel extends ChangeNotifier {
 
       if (forEvent != null) {
         forEvent
-            .firstWhere((element) => element.userId == event.playerId,
-                orElse: () => LeaderDto(userId: "", username: "", score: 0))
+            .firstWhere(
+              (element) => element.userId == event.playerId,
+              orElse: () => LeaderDto(userId: "", username: "", score: 0),
+            )
             .score = event.newEventScore;
 
         forEvent.sort((a, b) => b.score.compareTo(a.score));
@@ -83,8 +86,10 @@ class EventModel extends ChangeNotifier {
 
       if (forGlobal != null) {
         forGlobal
-            .firstWhere((element) => element.userId == event.playerId,
-                orElse: () => LeaderDto(userId: "", username: "", score: 0))
+            .firstWhere(
+              (element) => element.userId == event.playerId,
+              orElse: () => LeaderDto(userId: "", username: "", score: 0),
+            )
             .score = event.newTotalScore;
 
         forGlobal.sort((a, b) => b.score.compareTo(a.score));
@@ -105,8 +110,13 @@ class EventModel extends ChangeNotifier {
     final topPlayers = _topPlayers[eventId ?? ""];
     final diff = count - (topPlayers?.length ?? 0);
     if (topPlayers == null) {
-      _client.serverApi?.requestEventLeaderData(RequestEventLeaderDataDto(
-          offset: (topPlayers?.length ?? 0), count: diff, eventId: eventId));
+      _client.serverApi?.requestEventLeaderData(
+        RequestEventLeaderDataDto(
+          offset: (topPlayers?.length ?? 0),
+          count: diff,
+          eventId: eventId,
+        ),
+      );
     }
     return topPlayers;
   }
@@ -121,12 +131,13 @@ class EventModel extends ChangeNotifier {
   }
 
   void searchEvents(
-      int offset,
-      int count,
-      List<EventTimeLimitationDto> timeLimitations,
-      bool closestToEnding,
-      bool shortestFirst,
-      bool skippableOnly) {
+    int offset,
+    int count,
+    List<EventTimeLimitationDto> timeLimitations,
+    bool closestToEnding,
+    bool shortestFirst,
+    bool skippableOnly,
+  ) {
     searchResults = null;
     _client.serverApi?.requestEventData(RequestEventDataDto());
   }

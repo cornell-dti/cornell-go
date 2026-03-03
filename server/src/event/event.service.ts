@@ -220,6 +220,18 @@ export class EventService {
       },
     });
 
+    //Emit timer start event for the first challenge if it has a timer length
+    if (closestChallenge.timerLength) {
+      await this.clientService.sendEvent(
+        [`user/${user.id}`],
+        'startTimerForChallenge',
+        {
+          challengeId: closestChallenge.id,
+          timerLength: closestChallenge.timerLength,
+        },
+      );
+    }
+
     const progress = await this.prisma.eventTracker.create({
       data: {
         score: 0,
@@ -366,6 +378,7 @@ export class EventService {
       endTime: ev.endTime.toUTCString(),
       requiredMembers: ev.requiredMembers,
       indexable: ev.indexable,
+      featured: ev.featured,
       challenges: sortedChals.map(c => c.id),
       difficulty:
         ev.difficulty === DifficultyMode.EASY
@@ -402,7 +415,9 @@ export class EventService {
       prevChallenges: prevChallenges.map(pc => ({
         challengeId: pc.challengeId,
         hintsUsed: pc.hintsUsed,
+        extensionsUsed: pc.extensionsUsed ?? 0, // Default to 0 for backwards compatibility
         dateCompleted: pc.timestamp.toUTCString(),
+        failed: pc.failed, // True if challenge was failed due to timer expiration
       })),
     };
   }
@@ -606,6 +621,7 @@ export class EventService {
           : TimeLimitationType.PERPETUAL,
       endTime: event.endTime && new Date(event.endTime),
       indexable: event.indexable,
+      featured: event.featured,
       difficulty:
         event.difficulty &&
         (event.difficulty === 'Easy'
@@ -648,6 +664,7 @@ export class EventService {
         timeLimitation: assignData.timeLimitation,
         endTime: assignData.endTime ?? defaultEventData.endTime,
         indexable: assignData.indexable ?? defaultEventData.indexable,
+        featured: assignData.featured ?? false,
         difficulty: assignData.difficulty ?? defaultEventData.difficulty,
         latitude: assignData.latitude ?? defaultEventData.latitude,
         longitude: assignData.longitude ?? defaultEventData.longitude,

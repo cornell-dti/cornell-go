@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:game/constants/constants.dart';
 import 'package:game/journeys/journeys_page.dart';
 import 'package:game/challenges/challenges_page.dart';
 import 'package:game/model/onboarding_model.dart';
@@ -116,13 +117,15 @@ class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
   ) {
     final journeysTab = Tab(
       child: Padding(
-        padding:
-            EdgeInsets.only(bottom: MediaQuery.sizeOf(context).height * 0.02),
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.sizeOf(context).height * 0.02,
+        ),
         child: Text(
           'Journeys',
           style: TextStyle(
-              fontSize: MediaQuery.sizeOf(context).height * 0.02,
-              fontWeight: FontWeight.w600),
+            fontSize: MediaQuery.sizeOf(context).height * 0.02,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
     );
@@ -159,8 +162,9 @@ class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
         !onboarding.step2JourneysComplete) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          ShowcaseView.getNamed("home_navbar")
-              .startShowCase([onboarding.step2JourneysTabKey]);
+          ShowcaseView.getNamed(
+            "home_navbar",
+          ).startShowCase([onboarding.step2JourneysTabKey]);
           // Show bear overlay on top of showcase
           _showBearOverlay();
         }
@@ -168,25 +172,25 @@ class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
     }
 
     return Scaffold(
-      backgroundColor: Color(0xFFED5656),
+      backgroundColor: AppColors.primaryRed,
       resizeToAvoidBottomInset: false,
       appBar: PreferredSize(
-        preferredSize:
-            Size.fromHeight(MediaQuery.sizeOf(context).height * 0.08),
+        preferredSize: Size.fromHeight(
+          MediaQuery.sizeOf(context).height * 0.08,
+        ),
         child: AppBar(
+          automaticallyImplyLeading: false,
           elevation: 0.0,
-          backgroundColor: Color(0xFFED5656),
+          backgroundColor: AppColors.primaryRed,
           titleTextStyle: TextStyle(
-              fontSize: MediaQuery.sizeOf(context).height * 0.03,
-              fontWeight: FontWeight.w500),
+            fontSize: MediaQuery.sizeOf(context).height * 0.03,
+            fontWeight: FontWeight.w500,
+          ),
           bottom: TabBar(
             controller: _tabController,
             indicator: BoxDecoration(
               border: Border(
-                bottom: BorderSide(
-                  color: Color(0xFFFFAA5B),
-                  width: 2.0,
-                ),
+                bottom: BorderSide(color: AppColors.orange, width: 2.0),
               ),
             ),
             overlayColor: MaterialStateProperty.resolveWith<Color?>(
@@ -204,12 +208,14 @@ class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
               Tab(
                 child: Padding(
                   padding: EdgeInsets.only(
-                      bottom: MediaQuery.sizeOf(context).height * 0.02),
+                    bottom: MediaQuery.sizeOf(context).height * 0.02,
+                  ),
                   child: Text(
                     'Challenges',
                     style: TextStyle(
-                        fontSize: MediaQuery.sizeOf(context).height * 0.02,
-                        fontWeight: FontWeight.w600),
+                      fontSize: MediaQuery.sizeOf(context).height * 0.02,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ),

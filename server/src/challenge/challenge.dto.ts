@@ -27,6 +27,7 @@ export interface ChallengeDto {
   awardingRadiusF?: number;
   closeRadiusF?: number;
   linkedEventId?: string;
+  timerLength?: number;
 }
 
 /** DTO for requestChallengeData */
@@ -47,4 +48,12 @@ export interface RequestEventTrackerDataDto {
 /** DTO for setCurrentChallenge */
 export interface SetCurrentChallengeDto {
   challengeId: string;
+}
+
+/** DTO for requestAvailableChallenges */
+export interface RequestAvailableChallengesDto {}
+
+/** DTO for response to requestAvailableChallenges - list of available challenge DTOs */
+export interface AvailableChallengesResponseDto {
+  challenges: ChallengeDto[];
 }

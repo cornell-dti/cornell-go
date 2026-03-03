@@ -192,10 +192,13 @@ export function Organizations() {
               setDeleteModalOpen(true);
             }}
             onEdit={() => {
-              setCurrentId(org.id);
-              setForm(toForm(org));
-              setOldDto(org);
-              setEditModalOpen(true);
+              const freshOrg = serverData.organizations.get(org.id);
+              if (freshOrg) {
+                setCurrentId(org.id);
+                setForm(toForm(freshOrg));
+                setOldDto(freshOrg);
+                setEditModalOpen(true);
+              }
             }}
             onAddManager={() => {
               setCurrentId(org.id);

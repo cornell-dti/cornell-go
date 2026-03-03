@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:game/preview/preview.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:game/widget/cached_image.dart';
+import 'package:game/constants/constants.dart';
 
 /**
  * `ChallengeCell` Widget - Individual challenge display component.
@@ -10,6 +12,12 @@ import 'package:flutter_svg/flutter_svg.dart';
  * It displays key information about a challenge and handles tap interactions
  * to show more details.
  * 
+ * Image loading uses CachedNetworkImage, with a shimmer placeholder for 
+ * when the image is loading and an error icon with a gray background if 
+ * the image cannot be loaded. The gray background of the error matches the
+ * original size of the image. A ValueKey based on imgUrl (the link to the image) 
+ * is used so when the list rebuilds, the same image widget is preserved and there
+ * is no flickering of the loading state.
  * @param props - Contains:
  *   - `location`: Challenge location
  *   - `challengeName`: Name of the challenge
@@ -34,35 +42,39 @@ class ChallengeCell extends StatefulWidget {
   final int points;
   final String eventId;
   final double? distanceFromChallenge;
+  final bool featured;
 
   const ChallengeCell(
-      this.location,
-      this.challengeName,
-      this.challengeLat,
-      this.challengeLong,
-      this.imgUrl,
-      this.isCompleted,
-      this.description,
-      this.difficulty,
-      this.points,
-      this.eventId,
-      this.distanceFromChallenge,
-      {Key? key})
-      : super(key: key);
+    this.location,
+    this.challengeName,
+    this.challengeLat,
+    this.challengeLong,
+    this.imgUrl,
+    this.isCompleted,
+    this.description,
+    this.difficulty,
+    this.points,
+    this.eventId,
+    this.distanceFromChallenge,
+    this.featured, {
+    Key? key,
+  }) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _ChallengeCellState(
-      location,
-      challengeName,
-      challengeLat,
-      challengeLong,
-      imgUrl,
-      isCompleted,
-      description,
-      difficulty,
-      points,
-      eventId,
-      distanceFromChallenge);
+        location,
+        challengeName,
+        challengeLat,
+        challengeLong,
+        imgUrl,
+        isCompleted,
+        description,
+        difficulty,
+        points,
+        eventId,
+        distanceFromChallenge,
+        featured,
+      );
 }
 
 class _ChallengeCellState extends State<ChallengeCell> {
@@ -76,24 +88,23 @@ class _ChallengeCellState extends State<ChallengeCell> {
   final String difficulty;
   final int points;
   final String eventId;
-  // newly added field
-  // final int totalDistance;
   final double? distanceFromChallenge;
+  final bool featured;
 
   _ChallengeCellState(
-      this.location,
-      this.challengeName,
-      this.challengeLat,
-      this.challengeLong,
-      this.imgUrl,
-      this.isCompleted,
-      this.description,
-      this.difficulty,
-      this.points,
-      this.eventId,
-      // newly added field
-      // this.totalDistance
-      this.distanceFromChallenge);
+    this.location,
+    this.challengeName,
+    this.challengeLat,
+    this.challengeLong,
+    this.imgUrl,
+    this.isCompleted,
+    this.description,
+    this.difficulty,
+    this.points,
+    this.eventId,
+    this.distanceFromChallenge,
+    this.featured,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -103,22 +114,24 @@ class _ChallengeCellState extends State<ChallengeCell> {
     return GestureDetector(
       onTap: () async {
         await showModalBottomSheet(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(10.0)),
-            ),
-            context: context,
-            isScrollControlled: true,
-            builder: (context) => Preview(
-                challengeName,
-                challengeLat,
-                challengeLong,
-                description,
-                imgUrl,
-                difficulty,
-                points,
-                PreviewType.CHALLENGE,
-                location,
-                eventId));
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(10.0)),
+          ),
+          context: context,
+          isScrollControlled: true,
+          builder: (context) => Preview(
+            challengeName,
+            challengeLat,
+            challengeLong,
+            description,
+            imgUrl,
+            difficulty,
+            points,
+            PreviewType.CHALLENGE,
+            location,
+            eventId,
+          ),
+        );
       },
       child: Container(
         decoration: BoxDecoration(
@@ -126,7 +139,7 @@ class _ChallengeCellState extends State<ChallengeCell> {
           borderRadius: BorderRadius.circular(15),
           boxShadow: [
             BoxShadow(
-              color: Color.fromARGB(255, 198, 198, 198),
+              color: AppColors.silverGray,
               blurRadius: 2,
               offset: Offset(0, 4),
             ),
@@ -143,10 +156,11 @@ class _ChallengeCellState extends State<ChallengeCell> {
                 padding: const EdgeInsets.only(right: 14),
                 child: ClipRRect(
                   borderRadius: BorderRadius.all(Radius.circular(4.6)),
-                  child: Image.network(imgUrl,
-                      width: deviceHeight * 0.1,
-                      height: deviceHeight * 0.1,
-                      fit: BoxFit.cover),
+                  child: AppCachedImage(
+                    imageUrl: imgUrl,
+                    width: deviceHeight * 0.1,
+                    height: deviceHeight * 0.1,
+                  ),
                 ),
               ),
               Expanded(
@@ -161,15 +175,17 @@ class _ChallengeCellState extends State<ChallengeCell> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          Icon(Icons.location_on,
-                              size: MediaQuery.sizeOf(context).height * 0.025,
-                              color: Color.fromARGB(255, 131, 90, 124)),
+                          Icon(
+                            Icons.location_on,
+                            size: MediaQuery.sizeOf(context).height * 0.025,
+                            color: AppColors.purple,
+                          ),
                           Expanded(
                             child: Text(
                               location,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
-                                color: Color.fromARGB(255, 131, 90, 124),
+                                color: AppColors.purple,
                                 fontSize:
                                     MediaQuery.sizeOf(context).height * 0.016,
                                 fontFamily: 'Poppins',
@@ -178,16 +194,18 @@ class _ChallengeCellState extends State<ChallengeCell> {
                           ),
                           //match formatting of previous distance display and text above (text shown adjacent to this icon)
                           if (distanceFromChallenge != null) ...[
-                            Icon(Icons.directions_walk,
-                                size: MediaQuery.sizeOf(context).height * 0.02,
-                                color: Color.fromARGB(255, 110, 110, 110)),
+                            Icon(
+                              Icons.directions_walk,
+                              size: MediaQuery.sizeOf(context).height * 0.02,
+                              color: AppColors.grayText,
+                            ),
                             Text(
                               ' ' +
                                   (distanceFromChallenge! / 1609.34)
                                       .toStringAsFixed(1) +
                                   ' mi away',
                               style: TextStyle(
-                                color: Color.fromARGB(255, 110, 110, 110),
+                                color: AppColors.grayText,
                                 fontSize:
                                     MediaQuery.sizeOf(context).height * 0.011,
                                 fontFamily: 'Poppins',
@@ -202,7 +220,7 @@ class _ChallengeCellState extends State<ChallengeCell> {
                       challengeName,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        color: Color.fromARGB(204, 0, 0, 0),
+                        color: AppColors.black80,
                         fontSize: deviceHeight * 0.02,
                         fontFamily: 'Poppins',
                         fontWeight: FontWeight.w600,
@@ -212,45 +230,75 @@ class _ChallengeCellState extends State<ChallengeCell> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
+                        if (featured) ...[
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: deviceWidth * 0.02,
+                              vertical: deviceHeight * 0.003,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.dangerRed,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              'Featured',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: deviceHeight * 0.014,
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: deviceWidth * 0.01),
+                        ],
                         Container(
                           padding: EdgeInsets.symmetric(
                             horizontal: deviceWidth * 0.02,
                             vertical: deviceHeight * 0.003,
                           ),
                           decoration: BoxDecoration(
-                            color: Color.fromARGB(255, 249, 237, 218),
+                            color: AppColors.cream,
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
                             difficulty,
                             style: TextStyle(
-                              color: Color.fromARGB(204, 0, 0, 0),
-                              fontSize: deviceHeight * 0.016,
+                              color: AppColors.black80,
+                              fontSize: deviceHeight * 0.014,
                               fontFamily: 'Poppins',
                               fontWeight: FontWeight.w300,
                             ),
                           ),
                         ),
-                        SizedBox(width: deviceWidth * 0.02),
-                        Row(children: [
-                          SvgPicture.asset(
-                            "assets/icons/bearcoins.svg",
-                            width: deviceWidth * 0.06,
+                        SizedBox(width: deviceWidth * 0.01),
+                        Flexible(
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              SvgPicture.asset(
+                                "assets/icons/bearcoins.svg",
+                                width: deviceWidth * 0.05,
+                              ),
+                              Flexible(
+                                child: Text(
+                                  ' ' + points.toString() + " PTS",
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: deviceHeight * 0.016,
+                                    fontWeight: FontWeight.w500,
+                                    color: AppColors.gold,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                          Text(
-                            ' ' + points.toString() + " PTS",
-                            style: TextStyle(
-                              fontSize: deviceHeight * 0.018,
-                              fontWeight: FontWeight.w500,
-                              color: Color(0xFFC17E19),
-                            ),
-                          ),
-                        ]),
+                        ),
                       ],
                     ),
                   ],
                 ),
-              )
+              ),
             ],
           ),
         ),

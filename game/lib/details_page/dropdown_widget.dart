@@ -3,6 +3,7 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:math' as math;
 
+import 'package:game/constants/constants.dart';
 import 'package:velocity_x/velocity_x.dart';
 
 class DropdownWidget extends StatefulWidget {
@@ -11,9 +12,12 @@ class DropdownWidget extends StatefulWidget {
 
   final Function(String? val) notifyParent;
 
-  const DropdownWidget(this.value, this.menuOptions,
-      {Key? key, required this.notifyParent})
-      : super(key: key);
+  const DropdownWidget(
+    this.value,
+    this.menuOptions, {
+    Key? key,
+    required this.notifyParent,
+  }) : super(key: key);
 
   @override
   State<StatefulWidget> createState() =>
@@ -32,28 +36,35 @@ class _DropdownWidgetState extends State<DropdownWidget> {
       child: DropdownButton2<String>(
         isExpanded: true,
         dropdownStyleData: DropdownStyleData(
-            maxHeight: 200,
-            offset: Offset.fromDirection(math.pi / 2, -10),
-            decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: List.empty(),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                    color: Color.fromARGB(77, 0, 0, 0), width: 1.5))),
+          maxHeight: 200,
+          offset: Offset.fromDirection(math.pi / 2, -10),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: List.empty(),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: AppColors.black30, width: 1.5),
+          ),
+        ),
         iconStyleData: IconStyleData(
-            icon: Padding(
-          padding: const EdgeInsets.only(right: 20.0),
-          child: SvgPicture.asset("assets/icons/dropdown.svg"),
-        )),
+          icon: Padding(
+            padding: const EdgeInsets.only(right: 20.0),
+            child: SvgPicture.asset("assets/icons/dropdown.svg"),
+          ),
+        ),
         buttonStyleData: ButtonStyleData(
           decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border.all(
-                  width: 2.0, color: Color.fromARGB(255, 217, 217, 217)),
-              borderRadius: BorderRadius.circular(10.0)),
+            color: Colors.white,
+            border: Border.all(
+              width: 2.0,
+              color: AppColors.inputGray,
+            ),
+            borderRadius: BorderRadius.circular(10.0),
+          ),
         ),
         style: TextStyle(
-            color: Color.fromARGB(77, 0, 0, 0), fontWeight: FontWeight.w400),
+          color: AppColors.black30,
+          fontWeight: FontWeight.w400,
+        ),
         value: value,
         onChanged: (newValue) {
           setState(() {
@@ -64,10 +75,11 @@ class _DropdownWidgetState extends State<DropdownWidget> {
         hint: Text(
           "Select one",
           style: TextStyle(
-              color: Color.fromARGB(77, 0, 0, 0),
-              fontWeight: FontWeight.w400,
-              fontFamily: 'Poppins',
-              fontSize: 16),
+            color: AppColors.black30,
+            fontWeight: FontWeight.w400,
+            fontFamily: 'Poppins',
+            fontSize: 16,
+          ),
         ),
         items: menuOptions == null
             ? null
@@ -75,12 +87,15 @@ class _DropdownWidgetState extends State<DropdownWidget> {
                 return DropdownMenuItem(
                   child: Align(
                     alignment: Alignment.centerLeft,
-                    child: Text(item,
-                        style: TextStyle(
-                            fontFamily: 'Poppins',
-                            color: Color.fromARGB(255, 0, 0, 0),
-                            fontSize: 16,
-                            fontWeight: FontWeight.w400)),
+                    child: Text(
+                      item,
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        color: Colors.black,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
                   ),
                   value: item,
                 );
