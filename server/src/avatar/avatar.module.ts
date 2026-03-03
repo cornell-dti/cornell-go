@@ -7,15 +7,13 @@ import { AvatarGateway } from './avatar.gateway';
 import { AvatarService } from './avatar.service';
 
 @Module({
-    imports: [
-        forwardRef(() => AuthModule),
-        ClientModule,
-        PrismaModule,
-        CaslModule,
-    ],
-    providers: [AvatarService, AvatarGateway],
-    exports: [AvatarService, AvatarGateway],
+  imports: [
+    forwardRef(() => AuthModule),
+    ClientModule,
+    PrismaModule,
+    CaslModule,
+  ],
+  providers: [AvatarService, AvatarGateway],
+  exports: [AvatarService, AvatarGateway],
 })
-export class AvatarModule { }
-
-
+export class AvatarModule {}

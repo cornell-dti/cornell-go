@@ -82,7 +82,7 @@ export class ClientService {
     private gateway: ClientGateway,
     private abilityFactory: CaslAbilityFactory,
     private prisma: PrismaService,
-  ) { }
+  ) {}
 
   public subscribe(user: User, resourceId: string) {
     if (process.env.TESTING_E2E === 'true') {

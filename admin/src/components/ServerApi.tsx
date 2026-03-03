@@ -6,7 +6,7 @@ import { Socket } from 'socket.io-client';
 import * as dto from '../all.dto';
 
 export class ServerApi {
-  constructor(private socket: Socket) { }
+  constructor(private socket: Socket) {}
 
   send(ev: string, data: {}) {
     console.log(`Sending ${ev} with ${JSON.stringify(data)}`);

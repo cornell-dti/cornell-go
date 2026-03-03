@@ -140,7 +140,7 @@ function toQuizForm(question: QuizQuestionDto): EntryForm[] {
       name: 'Category',
       options: categoryOptions,
       value: isCustomCategory ? categoryOptions.length : categoryIndex,
-      customValue: isCustomCategory ? (question.category ?? '') : '',
+      customValue: isCustomCategory ? question.category ?? '' : '',
       customOptionLabel: 'Custom...',
     },
     { name: 'Difficulty', min: 1, max: 5, value: question.difficulty ?? 1 },
@@ -151,9 +151,9 @@ function toQuizForm(question: QuizQuestionDto): EntryForm[] {
         text: a.answerText,
         isCorrect: a.isCorrect ?? false,
       })) ?? [
-          { text: '', isCorrect: true },
-          { text: '', isCorrect: false },
-        ],
+        { text: '', isCorrect: true },
+        { text: '', isCorrect: false },
+      ],
       minAnswers: 2,
       maxAnswers: 4,
     },
@@ -271,7 +271,9 @@ function ChallengeCard(props: {
         Timer:{' '}
         <b>
           {props.challenge.timerLength
-            ? `${Math.floor(props.challenge.timerLength / 60)}m ${props.challenge.timerLength % 60}s`
+            ? `${Math.floor(props.challenge.timerLength / 60)}m ${
+                props.challenge.timerLength % 60
+              }s`
             : 'None'}
         </b>
       </ListCardBody>
@@ -318,7 +320,12 @@ function makeForm(): EntryForm[] {
     { name: 'Description', characterLimit: 2048, value: '' },
     { name: 'Points', min: 1, max: 1000, value: 50 },
     { name: 'Image URL', characterLimit: 2048, value: '' },
-    { name: 'Awarding Distance (meters)', min: 1, max: 1000, value: awardingRadius },
+    {
+      name: 'Awarding Distance (meters)',
+      min: 1,
+      max: 1000,
+      value: awardingRadius,
+    },
     { name: 'Close Distance (meters)', min: 1, max: 1000, value: closeRadius },
     {
       name: 'Enable Timer',
@@ -595,7 +602,7 @@ export function Challenges() {
         <CenterText>Select an event to view challenges</CenterText>
       ) : serverData.events.get(serverData.selectedEvent) ? (
         serverData.events.get(serverData.selectedEvent)?.challenges?.length ===
-        0 && <CenterText>No challenges in event</CenterText>
+          0 && <CenterText>No challenges in event</CenterText>
       ) : (
         <CenterText>Error getting challenges</CenterText>
       )}
@@ -606,9 +613,9 @@ export function Challenges() {
           query === ''
             ? 0
             : compareTwoStrings(b.name ?? '', query) -
-            compareTwoStrings(a.name ?? '', query) +
-            compareTwoStrings(b.description ?? '', query) -
-            compareTwoStrings(a.description ?? '', query),
+              compareTwoStrings(a.name ?? '', query) +
+              compareTwoStrings(b.description ?? '', query) -
+              compareTwoStrings(a.description ?? '', query),
         )
         .map((chal: ChallengeDto) => (
           <ChallengeCard

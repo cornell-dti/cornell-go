@@ -151,8 +151,7 @@ class _BuildABearPageState extends State<BuildABearPage> {
 
     // Determine whether to show the action button (purchase, equip, or unequip)
     final isSelectedEquipped = _isSelectedItemEquipped();
-    final showActionButton =
-        _selectedItemId != null && !isSelectedEquipped;
+    final showActionButton = _selectedItemId != null && !isSelectedEquipped;
     final isSelectedOwned =
         _selectedItemId != null && _ownedItemIds.contains(_selectedItemId);
 
@@ -167,291 +166,295 @@ class _BuildABearPageState extends State<BuildABearPage> {
       body: Stack(
         children: [
           Column(
-        children: [
-          // Top section: background aligned to top, bear + back button overlay
-          SizedBox(
-            height: topSectionHeight,
-            width: double.infinity,
-            child: Stack(
-              fit: StackFit.expand,
-              alignment: Alignment.topCenter,
-              children: [
-                Positioned.fill(
-                  child: Image.asset(
-                    'assets/images/bearbackground.png',
-                    fit: BoxFit.cover,
-                    alignment: Alignment.topCenter,
-                  ),
-                ),
-                // Bear preview (shared widget)
-                Positioned(
-                  top: topSectionHeight * 0.40,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  child: Center(
-                    child: BearPreview(
-                      bearWidth: bearWidth,
-                      bearHeight: bearHeight,
-                      itemForSlot: _displayedItemForSlot,
-                    ),
-                  ),
-                ),
-                Positioned(
-                  top: topPadding,
-                  left: 0,
-                  child: IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.black),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ),
-                // Points badge in top right
-                Positioned(
-                  top: topPadding + 8,
-                  right: screenWidth * 0.04,
-                  child: Consumer<UserModel>(
-                    builder: (context, userModel, _) {
-                      final coins = userModel.userData?.coins;
-                      if (coins == null) return const SizedBox.shrink();
-                      return Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 2),
-                        clipBehavior: Clip.antiAlias,
-                        decoration: ShapeDecoration(
-                          color: const Color(0xFFC17E19),
-                          shape: RoundedRectangleBorder(
-                            side: BorderSide(
-                              width: 2,
-                              strokeAlign: BorderSide.strokeAlignCenter,
-                              color: const Color(0xFFFFC737),
-                            ),
-                            borderRadius: BorderRadius.circular(100),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Image.asset(
-                              'assets/images/pawcoin.png',
-                              width: 16,
-                              height: 16,
-                              fit: BoxFit.contain,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              '$coins',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: screenWidth * 0.035,
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // Bottom section: tab bar + color grid
-          Expanded(
-            child: Container(
-              color: const Color(0xFFF5F0E8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Navbar: Eyes, Mouth, Color, Accessories (evenly spaced, white background)
-                  Container(
-                    color: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    child: Row(
-                      children: [
-                        Expanded(
-                            child: _buildNavTab('Eyes', _BuildABearTab.eyes)),
-                        Expanded(
-                            child: _buildNavTab('Mouth', _BuildABearTab.mouth)),
-                        Expanded(
-                            child: _buildNavTab('Color', _BuildABearTab.color)),
-                        Expanded(
-                            child: _buildNavTab(
-                                'Accessories', _BuildABearTab.accessories)),
-                      ],
-                    ),
-                  ),
-                  const Divider(height: 1),
-                  // 3x3 item grid (scrollable to prevent overflow)
-                  Expanded(
-                    child: SingleChildScrollView(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: screenWidth * 0.06,
-                        vertical: 12,
+            children: [
+              // Top section: background aligned to top, bear + back button overlay
+              SizedBox(
+                height: topSectionHeight,
+                width: double.infinity,
+                child: Stack(
+                  fit: StackFit.expand,
+                  alignment: Alignment.topCenter,
+                  children: [
+                    Positioned.fill(
+                      child: Image.asset(
+                        'assets/images/bearbackground.png',
+                        fit: BoxFit.cover,
+                        alignment: Alignment.topCenter,
                       ),
-                      child: LayoutBuilder(
-                        builder: (context, constraints) {
-                          const spacing = 12.0;
-                          final cellWidth =
-                              (constraints.maxWidth - spacing * 2) / 3;
-                          final cellHeight = cellWidth * 1.1;
-                          final List<BearItemDto> items;
-                          switch (_selectedTab) {
-                            case _BuildABearTab.color:
-                              items = _colorItems;
-                              break;
-                            case _BuildABearTab.eyes:
-                              items = _eyeItems;
-                              break;
-                            case _BuildABearTab.mouth:
-                              items = _mouthItems;
-                              break;
-                            case _BuildABearTab.accessories:
-                              items = _accessoryItems;
-                              break;
-                          }
-
-                          if (_isLoading) {
-                            return SizedBox(
-                              height: cellHeight * 3 + spacing * 2,
-                              child: const Center(
-                                child: CircularProgressIndicator(),
+                    ),
+                    // Bear preview (shared widget)
+                    Positioned(
+                      top: topSectionHeight * 0.40,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      child: Center(
+                        child: BearPreview(
+                          bearWidth: bearWidth,
+                          bearHeight: bearHeight,
+                          itemForSlot: _displayedItemForSlot,
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      top: topPadding,
+                      left: 0,
+                      child: IconButton(
+                        icon: const Icon(Icons.arrow_back, color: Colors.black),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ),
+                    // Points badge in top right
+                    Positioned(
+                      top: topPadding + 8,
+                      right: screenWidth * 0.04,
+                      child: Consumer<UserModel>(
+                        builder: (context, userModel, _) {
+                          final coins = userModel.userData?.coins;
+                          if (coins == null) return const SizedBox.shrink();
+                          return Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 2),
+                            clipBehavior: Clip.antiAlias,
+                            decoration: ShapeDecoration(
+                              color: const Color(0xFFC17E19),
+                              shape: RoundedRectangleBorder(
+                                side: BorderSide(
+                                  width: 2,
+                                  strokeAlign: BorderSide.strokeAlignCenter,
+                                  color: const Color(0xFFFFC737),
+                                ),
+                                borderRadius: BorderRadius.circular(100),
                               ),
-                            );
-                          }
-
-                          if (items.isEmpty) {
-                            return SizedBox(
-                              height: cellHeight * 3 + spacing * 2,
-                              child: const Center(
-                                child: Text(
-                                  'No items available yet.',
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Image.asset(
+                                  'assets/images/pawcoin.png',
+                                  width: 16,
+                                  height: 16,
+                                  fit: BoxFit.contain,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '$coins',
                                   style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: screenWidth * 0.035,
                                     fontFamily: 'Poppins',
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
-                              ),
-                            );
-                          }
-
-                          final rows = (items.length / 3).ceil();
-                          return Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              for (var row = 0; row < rows; row++)
-                                Padding(
-                                  padding: EdgeInsets.only(
-                                    bottom: row < rows - 1 ? spacing : 0,
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      for (var col = 0; col < 3; col++) ...[
-                                        if (col > 0) SizedBox(width: spacing),
-                                        if (row * 3 + col < items.length)
-                                          SizedBox(
-                                            width: cellWidth,
-                                            height: cellHeight,
-                                            child: _buildItemCell(
-                                              item: items[row * 3 + col],
-                                              cellSize: cellWidth,
-                                            ),
-                                          )
-                                        else
-                                          const Expanded(
-                                              child: SizedBox.shrink()),
-                                      ],
-                                    ],
-                                  ),
-                                ),
-                            ],
+                              ],
+                            ),
                           );
                         },
                       ),
                     ),
+                  ],
+                ),
+              ),
+              // Bottom section: tab bar + color grid
+              Expanded(
+                child: Container(
+                  color: const Color(0xFFF5F0E8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Navbar: Eyes, Mouth, Color, Accessories (evenly spaced, white background)
+                      Container(
+                        color: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        child: Row(
+                          children: [
+                            Expanded(
+                                child:
+                                    _buildNavTab('Eyes', _BuildABearTab.eyes)),
+                            Expanded(
+                                child: _buildNavTab(
+                                    'Mouth', _BuildABearTab.mouth)),
+                            Expanded(
+                                child: _buildNavTab(
+                                    'Color', _BuildABearTab.color)),
+                            Expanded(
+                                child: _buildNavTab(
+                                    'Accessories', _BuildABearTab.accessories)),
+                          ],
+                        ),
+                      ),
+                      const Divider(height: 1),
+                      // 3x3 item grid (scrollable to prevent overflow)
+                      Expanded(
+                        child: SingleChildScrollView(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: screenWidth * 0.06,
+                            vertical: 12,
+                          ),
+                          child: LayoutBuilder(
+                            builder: (context, constraints) {
+                              const spacing = 12.0;
+                              final cellWidth =
+                                  (constraints.maxWidth - spacing * 2) / 3;
+                              final cellHeight = cellWidth * 1.1;
+                              final List<BearItemDto> items;
+                              switch (_selectedTab) {
+                                case _BuildABearTab.color:
+                                  items = _colorItems;
+                                  break;
+                                case _BuildABearTab.eyes:
+                                  items = _eyeItems;
+                                  break;
+                                case _BuildABearTab.mouth:
+                                  items = _mouthItems;
+                                  break;
+                                case _BuildABearTab.accessories:
+                                  items = _accessoryItems;
+                                  break;
+                              }
+
+                              if (_isLoading) {
+                                return SizedBox(
+                                  height: cellHeight * 3 + spacing * 2,
+                                  child: const Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                );
+                              }
+
+                              if (items.isEmpty) {
+                                return SizedBox(
+                                  height: cellHeight * 3 + spacing * 2,
+                                  child: const Center(
+                                    child: Text(
+                                      'No items available yet.',
+                                      style: TextStyle(
+                                        fontFamily: 'Poppins',
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }
+
+                              final rows = (items.length / 3).ceil();
+                              return Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  for (var row = 0; row < rows; row++)
+                                    Padding(
+                                      padding: EdgeInsets.only(
+                                        bottom: row < rows - 1 ? spacing : 0,
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          for (var col = 0; col < 3; col++) ...[
+                                            if (col > 0)
+                                              SizedBox(width: spacing),
+                                            if (row * 3 + col < items.length)
+                                              SizedBox(
+                                                width: cellWidth,
+                                                height: cellHeight,
+                                                child: _buildItemCell(
+                                                  item: items[row * 3 + col],
+                                                  cellSize: cellWidth,
+                                                ),
+                                              )
+                                            else
+                                              const Expanded(
+                                                  child: SizedBox.shrink()),
+                                          ],
+                                        ],
+                                      ),
+                                    ),
+                                ],
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
+              ),
+            ],
+          ),
+          if (showActionButton)
+            Positioned(
+              bottom: screenHeight * 0.0025,
+              left: screenWidth * 0.06,
+              right: screenWidth * 0.06,
+              child: SafeArea(
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      final item = _getSelectedItem();
+                      if (item == null) return;
+                      if (isSelectedOwned) {
+                        _showEquipDialog(item);
+                      } else {
+                        _showPurchaseDialog(item);
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: isSelectedOwned
+                          ? const Color(0xFF8B4513)
+                          : const Color(0xFFC85C5C),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(26),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: Text(
+                      isSelectedOwned ? 'Equip Item' : 'Purchase Item',
+                      style: const TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ),
-          ),
+          if (showUnequipButton)
+            Positioned(
+              bottom: screenHeight * 0.0025,
+              left: screenWidth * 0.06,
+              right: screenWidth * 0.06,
+              child: SafeArea(
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      _showUnequipDialog();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF8B4513),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(26),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: const Text(
+                      'Unequip Accessory',
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
         ],
-      ),
-      if (showActionButton)
-        Positioned(
-          bottom: screenHeight * 0.0025,
-          left: screenWidth * 0.06,
-          right: screenWidth * 0.06,
-          child: SafeArea(
-            child: SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: ElevatedButton(
-                onPressed: () {
-                  final item = _getSelectedItem();
-                  if (item == null) return;
-                  if (isSelectedOwned) {
-                    _showEquipDialog(item);
-                  } else {
-                    _showPurchaseDialog(item);
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: isSelectedOwned
-                      ? const Color(0xFF8B4513)
-                      : const Color(0xFFC85C5C),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(26),
-                  ),
-                  elevation: 0,
-                ),
-                child: Text(
-                  isSelectedOwned ? 'Equip Item' : 'Purchase Item',
-                  style: const TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      if (showUnequipButton)
-        Positioned(
-          bottom: screenHeight * 0.0025,
-          left: screenWidth * 0.06,
-          right: screenWidth * 0.06,
-          child: SafeArea(
-            child: SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: ElevatedButton(
-                onPressed: () {
-                  _showUnequipDialog();
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF8B4513),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(26),
-                  ),
-                  elevation: 0,
-                ),
-                child: const Text(
-                  'Unequip Accessory',
-                  style: TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
       ),
     );
   }
@@ -497,8 +500,8 @@ class _BuildABearPageState extends State<BuildABearPage> {
               ),
               backgroundColor: const Color(0xFFFFF5EA),
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 28, vertical: 32),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 28, vertical: 32),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -566,8 +569,7 @@ class _BuildABearPageState extends State<BuildABearPage> {
                               onPressed: isLoading
                                   ? null
                                   : () async {
-                                      setDialogState(
-                                          () => isLoading = true);
+                                      setDialogState(() => isLoading = true);
                                       await onConfirm(dialogContext);
                                     },
                               style: ElevatedButton.styleFrom(
@@ -622,8 +624,7 @@ class _BuildABearPageState extends State<BuildABearPage> {
         'assets/${item.assetKey}.png',
         fit: BoxFit.contain,
       ),
-      message:
-          'Would you like to purchase this item for ${item.cost} coins?',
+      message: 'Would you like to purchase this item for ${item.cost} coins?',
       actionLabel: 'Purchase',
       actionColor: const Color(0xFFC85C5C),
       onConfirm: (dialogContext) => _handlePurchase(item, dialogContext),
@@ -643,8 +644,7 @@ class _BuildABearPageState extends State<BuildABearPage> {
     server.purchaseBearItem(PurchaseBearItemDto(itemId: item.id));
 
     // Wait for the purchase result from the server
-    final result =
-        await apiClient.clientApi.updatePurchaseResultStream.first;
+    final result = await apiClient.clientApi.updatePurchaseResultStream.first;
 
     if (!mounted) return;
 
@@ -880,9 +880,8 @@ class _BuildABearPageState extends State<BuildABearPage> {
     required double cellSize,
   }) {
     final isEquipped = _equippedBySlot[item.slot] == item.id;
-    final isHighlighted = _selectedItemId != null
-        ? _selectedItemId == item.id
-        : isEquipped;
+    final isHighlighted =
+        _selectedItemId != null ? _selectedItemId == item.id : isEquipped;
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -895,8 +894,7 @@ class _BuildABearPageState extends State<BuildABearPage> {
           color: Colors.white,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color:
-                isHighlighted ? const Color(0xFF8B4513) : Colors.transparent,
+            color: isHighlighted ? const Color(0xFF8B4513) : Colors.transparent,
             width: 2,
           ),
         ),
@@ -970,4 +968,3 @@ class _BuildABearPageState extends State<BuildABearPage> {
     );
   }
 }
-

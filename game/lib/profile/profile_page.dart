@@ -85,18 +85,14 @@ class _ProfilePageState extends State<ProfilePage> {
     _bearItemsSub ??=
         apiClient.clientApi.updateBearItemsDataStream.listen((update) {
       setState(() {
-        _colorItems = update.items
-            .where((i) => i.slot == BearSlotDto.COLOR)
-            .toList();
-        _eyeItems = update.items
-            .where((i) => i.slot == BearSlotDto.EYES)
-            .toList();
-        _mouthItems = update.items
-            .where((i) => i.slot == BearSlotDto.MOUTH)
-            .toList();
-        _accessoryItems = update.items
-            .where((i) => i.slot == BearSlotDto.ACCESSORY)
-            .toList();
+        _colorItems =
+            update.items.where((i) => i.slot == BearSlotDto.COLOR).toList();
+        _eyeItems =
+            update.items.where((i) => i.slot == BearSlotDto.EYES).toList();
+        _mouthItems =
+            update.items.where((i) => i.slot == BearSlotDto.MOUTH).toList();
+        _accessoryItems =
+            update.items.where((i) => i.slot == BearSlotDto.ACCESSORY).toList();
       });
     });
 
@@ -165,14 +161,14 @@ class _ProfilePageState extends State<ProfilePage> {
       backgroundColor: Color(0xFFFFF5EA),
       body: Container(
         child: Consumer5<UserModel, EventModel, TrackerModel, ChallengeModel,
-                AchievementModel>(
-            builder: (context, userModel, eventModel, trackerModel,
-                challengeModel, achModel, child) {
-          if (userModel.userData == null) {
-            return Center(
-              child: CircularProgressIndicator(),
-            );
-          }
+            AchievementModel>(
+          builder: (context, userModel, eventModel, trackerModel,
+              challengeModel, achModel, child) {
+            if (userModel.userData == null) {
+              return Center(
+                child: CircularProgressIndicator(),
+              );
+            }
 
             final achIds = userModel.getAvailableAchievementIds();
             final achList = achModel.getAvailableTrackerPairs(
@@ -232,210 +228,215 @@ class _ProfilePageState extends State<ProfilePage> {
                 .take(2)
                 .toList();
 
-          return SingleChildScrollView(
-            child: Column(
-              children: [
-                // Green gradient background with blue oval
-                Container(
-                  width: double.infinity,
-                  height: headerHeight,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [AppColors.green, AppColors.greenDark],
-                    ),
-                  ),
-                  child: Stack(
-                    children: [
-                      Positioned(
-                        top: -headerHeight *
-                            0.7, // Position to cut off more at top
-                        left: -ovalWidth /
-                            2, // Center the oval, the left edge starts halfway to left of screen
-                        child: Container(
-                          width: ovalWidth * 2,
-                          height: ovalHeight * 2,
-                          decoration: ShapeDecoration(
-                            color: AppColors.skyBlue,
-                            shape: OvalBorder(),
-                          ),
-                        ),
-                      ),
-                      // Sun icon in top left corner
-                      Positioned(
-                        top: MediaQuery.of(context).padding.top + 10,
-                        left: 45,
-                        child: Container(
-                          width: iconSize,
-                          height: iconSize,
-                          child: Image.asset(
-                            'assets/icons/sun.png',
-                            fit: BoxFit.contain,
-                          ),
-                        ),
-                      ),
-                      // Cloud icon positioned on layer above sun to partially cover it
-                      Positioned(
-                        top: MediaQuery.of(context).padding.top - 17,
-                        left: 30,
-                        child: Container(
-                          width: iconSize * 3,
-                          height: iconSize * 3,
-                          child: Image.asset(
-                            'assets/icons/cloud.png',
-                            fit: BoxFit.contain,
-                          ),
-                        ),
-                      ),
-                      // Clothes hanger and settings icons positioned on the right
-                      Positioned(
-                        right: screenWidth * 0.05,
-                        top: MediaQuery.of(context)
-                            .padding
-                            .top, // for status bar
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: SvgPicture.asset(
-                                'assets/icons/clotheshanger.svg',
-                                width: iconSize,
-                                height: iconSize,
-                              ),
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        const BuildABearPage(),
-                                  ),
-                                );
-                              },
-                            ),
-                            IconButton(
-                              icon: Icon(Icons.settings,
-                                  size: iconSize, color: Colors.black),
-                              onPressed: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            SettingsPage(isGuest)));
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                      // Bear: anchored at bottom-center of header, sized to header
-                      Positioned(
-                        left: 0,
-                        right: 0,
-                        bottom:
-                            -headerHeight * 0.04, // Slight overlap with content
-                        height: bearHeight,
-                        child: Center(
-                          child: BearPreview(
-                            bearWidth: bearWidth,
-                            bearHeight: bearHeight,
-                            itemForSlot: _equippedItemForSlot,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                // Profile header section
-                SizedBox(height: screenHeight * 0.018),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
-                  child: Container(
+            return SingleChildScrollView(
+              child: Column(
+                children: [
+                  // Green gradient background with blue oval
+                  Container(
                     width: double.infinity,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    height: headerHeight,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [AppColors.green, AppColors.greenDark],
+                      ),
+                    ),
+                    child: Stack(
                       children: [
-                        Container(
-                          width: double.infinity,
+                        Positioned(
+                          top: -headerHeight *
+                              0.7, // Position to cut off more at top
+                          left: -ovalWidth /
+                              2, // Center the oval, the left edge starts halfway to left of screen
+                          child: Container(
+                            width: ovalWidth * 2,
+                            height: ovalHeight * 2,
+                            decoration: ShapeDecoration(
+                              color: AppColors.skyBlue,
+                              shape: OvalBorder(),
+                            ),
+                          ),
+                        ),
+                        // Sun icon in top left corner
+                        Positioned(
+                          top: MediaQuery.of(context).padding.top + 10,
+                          left: 45,
+                          child: Container(
+                            width: iconSize,
+                            height: iconSize,
+                            child: Image.asset(
+                              'assets/icons/sun.png',
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                        ),
+                        // Cloud icon positioned on layer above sun to partially cover it
+                        Positioned(
+                          top: MediaQuery.of(context).padding.top - 17,
+                          left: 30,
+                          child: Container(
+                            width: iconSize * 3,
+                            height: iconSize * 3,
+                            child: Image.asset(
+                              'assets/icons/cloud.png',
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                        ),
+                        // Clothes hanger and settings icons positioned on the right
+                        Positioned(
+                          right: screenWidth * 0.05,
+                          top: MediaQuery.of(context)
+                              .padding
+                              .top, // for status bar
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Text(
-                                username!,
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: screenWidth * 0.055,
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.w700,
-                                  height: 1.50,
+                              IconButton(
+                                icon: SvgPicture.asset(
+                                  'assets/icons/clotheshanger.svg',
+                                  width: iconSize,
+                                  height: iconSize,
                                 ),
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          const BuildABearPage(),
+                                    ),
+                                  );
+                                },
                               ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 12, vertical: 2),
-                                clipBehavior: Clip.antiAlias,
-                                decoration: ShapeDecoration(
-                                  color: AppColors.gold,
-                                  shape: RoundedRectangleBorder(
-                                    side: BorderSide(
-                                      width: 2,
-                                      strokeAlign: BorderSide.strokeAlignCenter,
-                                      color: AppColors.yellow,
-                                    ),
-                                    borderRadius: BorderRadius.circular(100),
-                                  ),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      '${score} PTS',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: smallFontSize,
-                                        fontFamily: 'Poppins',
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                              IconButton(
+                                icon: Icon(Icons.settings,
+                                    size: iconSize, color: Colors.black),
+                                onPressed: () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              SettingsPage(isGuest)));
+                                },
                               ),
                             ],
                           ),
                         ),
-                        SizedBox(height: 4),
-                        SizedBox(
-                          width: double.infinity,
-                          child: Text(
-                            '@${username.toLowerCase().replaceAll(' ', '')}',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: mediumFontSize,
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w500,
-                              height: 1.50,
+                        // Bear: anchored at bottom-center of header, sized to header
+                        Positioned(
+                          left: 0,
+                          right: 0,
+                          bottom: -headerHeight *
+                              0.04, // Slight overlap with content
+                          height: bearHeight,
+                          child: Center(
+                            child: BearPreview(
+                              bearWidth: bearWidth,
+                              bearHeight: bearHeight,
+                              itemForSlot: _equippedItemForSlot,
                             ),
                           ),
                         ),
                       ],
                     ),
                   ),
-                ),
-                SizedBox(height: screenHeight * 0.018), // 2.5% of screen height
-                //Completed Events
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: screenWidth * 0.06), // 6% of screen width
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text("Completed",
+                  // Profile header section
+                  SizedBox(height: screenHeight * 0.018),
+                  Padding(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+                    child: Container(
+                      width: double.infinity,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: double.infinity,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Text(
+                                  username!,
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: screenWidth * 0.055,
+                                    fontFamily: 'Poppins',
+                                    fontWeight: FontWeight.w700,
+                                    height: 1.50,
+                                  ),
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 2),
+                                  clipBehavior: Clip.antiAlias,
+                                  decoration: ShapeDecoration(
+                                    color: AppColors.gold,
+                                    shape: RoundedRectangleBorder(
+                                      side: BorderSide(
+                                        width: 2,
+                                        strokeAlign:
+                                            BorderSide.strokeAlignCenter,
+                                        color: AppColors.yellow,
+                                      ),
+                                      borderRadius: BorderRadius.circular(100),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        '${score} PTS',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: smallFontSize,
+                                          fontFamily: 'Poppins',
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          SizedBox(
+                            width: double.infinity,
+                            child: Text(
+                              '@${username.toLowerCase().replaceAll(' ', '')}',
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: mediumFontSize,
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w500,
+                                height: 1.50,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                      height: screenHeight * 0.018), // 2.5% of screen height
+                  //Completed Events
+                  Padding(
+                    padding: EdgeInsets.symmetric(
+                        horizontal: screenWidth * 0.06), // 6% of screen width
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Completed",
                           style: TextStyle(
                             fontSize: mediumFontSize, // 4% of screen width
                             fontWeight: FontWeight.bold,
@@ -498,7 +499,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               ? "Journeys"
                               : "Challenge";
 
-                           // Calculate both adjusted and original total points
+                          // Calculate both adjusted and original total points
                           var totalAdjustedPoints = 0;
                           var totalOriginalPoints = 0;
                           var locationImage;
