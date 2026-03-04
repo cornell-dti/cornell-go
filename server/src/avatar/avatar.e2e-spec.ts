@@ -47,11 +47,15 @@ describe('AvatarModule E2E', () => {
       'avatar-auth',
       'UNDERGRADUATE',
     );
-    // Ensure deterministic score for purchases
+    // Ensure deterministic balance for purchases (service reads `coins`, not `score`)
     user = await prisma.user.update({
       where: { id: user.id },
-      data: { score: 200 },
+      data: { coins: 200 },
     });
+
+    // Clear default items granted during registration so tests start clean
+    await prisma.userBearEquipped.deleteMany({ where: { userId: user.id } });
+    await prisma.userBearInventory.deleteMany({ where: { userId: user.id } });
 
     // Seed a small catalog of bear items used by tests
     const eyesDefault = await prisma.bearItem.create({
@@ -166,7 +170,7 @@ describe('AvatarModule E2E', () => {
       // Lower user balance to below the colorPaid cost (60)
       await prisma.user.update({
         where: { id: user.id },
-        data: { score: 10 },
+        data: { coins: 10 },
       });
       const before = await avatarService.getInventory(user.id);
       const res = await avatarService.purchaseItem(user.id, {
@@ -181,7 +185,7 @@ describe('AvatarModule E2E', () => {
       // Restore balance for subsequent tests
       await prisma.user.update({
         where: { id: user.id },
-        data: { score: 200 },
+        data: { coins: 200 },
       });
     });
 
