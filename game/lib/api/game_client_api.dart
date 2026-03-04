@@ -68,6 +68,26 @@ class GameClientApi {
   Stream<UpdateLeaderPositionDto> get updateLeaderPositionStream =>
       _updateLeaderPositionController.stream;
 
+  final _updateBearItemsDataController =
+      StreamController<UpdateBearItemsDataDto>.broadcast(sync: true);
+  Stream<UpdateBearItemsDataDto> get updateBearItemsDataStream =>
+      _updateBearItemsDataController.stream;
+
+  final _updateUserInventoryDataController =
+      StreamController<UpdateUserInventoryDataDto>.broadcast(sync: true);
+  Stream<UpdateUserInventoryDataDto> get updateUserInventoryDataStream =>
+      _updateUserInventoryDataController.stream;
+
+  final _updateUserBearLoadoutDataController =
+      StreamController<UpdateUserBearLoadoutDataDto>.broadcast(sync: true);
+  Stream<UpdateUserBearLoadoutDataDto> get updateUserBearLoadoutDataStream =>
+      _updateUserBearLoadoutDataController.stream;
+
+  final _updatePurchaseResultController =
+      StreamController<UpdatePurchaseResultDto>.broadcast(sync: true);
+  Stream<UpdatePurchaseResultDto> get updatePurchaseResultStream =>
+      _updatePurchaseResultController.stream;
+
   final _timerStartedController =
       StreamController<TimerStartedDto>.broadcast(sync: true);
   Stream<TimerStartedDto> get timerStartedStream =>
@@ -192,6 +212,26 @@ class GameClientApi {
         "updateLeaderPosition",
         (data) => _updateLeaderPositionController
             .add(UpdateLeaderPositionDto.fromJson(data)));
+
+    sock.on(
+        "updateBearItemsData",
+        (data) => _updateBearItemsDataController
+            .add(UpdateBearItemsDataDto.fromJson(data)));
+
+    sock.on(
+        "updateUserInventoryData",
+        (data) => _updateUserInventoryDataController
+            .add(UpdateUserInventoryDataDto.fromJson(data)));
+
+    sock.on(
+        "updateUserBearLoadoutData",
+        (data) => _updateUserBearLoadoutDataController
+            .add(UpdateUserBearLoadoutDataDto.fromJson(data)));
+
+    sock.on(
+        "updatePurchaseResult",
+        (data) => _updatePurchaseResultController
+            .add(UpdatePurchaseResultDto.fromJson(data)));
 
     sock.on("timerStarted",
         (data) => _timerStartedController.add(TimerStartedDto.fromJson(data)));
