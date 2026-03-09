@@ -6,6 +6,7 @@ import { GroupModule } from './group/group.module';
 import { UserModule } from './user/user.module';
 
 import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { ClientModule } from './client/client.module';
@@ -16,10 +17,12 @@ import { AchievementModule } from './achievement/achievement.module';
 import { CaslModule } from './casl/casl.module';
 import { TimerModule } from './timer/timer.module';
 import { QuizModule } from './quiz/quiz.module';
+import { EventSyncModule } from './event-sync/event-sync.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
+    ScheduleModule.forRoot(),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', '..', '..', 'admin', 'build'),
     }),
@@ -36,6 +39,7 @@ import { QuizModule } from './quiz/quiz.module';
     CaslModule,
     TimerModule,
     QuizModule,
+    EventSyncModule,
   ],
   controllers: [],
   providers: [],
