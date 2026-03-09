@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:game/widget/cached_image.dart';
+import 'package:game/constants/constants.dart';
 
 final defaultStyle = TextStyle(
   fontWeight: FontWeight.normal,
@@ -11,7 +13,6 @@ Widget leaderBoardUserCell(
   int total_positions,
   int points,
 ) {
-  Color Carnelian = Color(0xFFB31B1B);
   var posStyle = defaultStyle.copyWith(
     fontWeight: FontWeight.bold,
     color: Colors.white,
@@ -27,7 +28,7 @@ Widget leaderBoardUserCell(
       clipBehavior: Clip.none,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
-        color: Carnelian,
+        color: AppColors.carnelian,
         border: Border.all(color: Colors.grey),
       ),
       width: MediaQuery.of(context).size.width,
@@ -52,9 +53,8 @@ Widget leaderBoardUserCell(
             ),
             CircleAvatar(
               child: ClipOval(
-                child: Image.network(
-                  'https://www.w3schools.com/howto/img_avatar.png',
-                  fit: BoxFit.cover,
+                child: AppCachedImage(
+                  imageUrl: 'https://www.w3schools.com/howto/img_avatar.png',
                   width: 90,
                   height: 90,
                 ),
