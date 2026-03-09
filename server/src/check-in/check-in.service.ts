@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { EventService } from '../event/event.service';
 import { UserService } from '../user/user.service';
@@ -64,18 +65,34 @@ export class CheckInService {
     }
   }
 
-  private async ensureNotAlreadyCheckedIn(eventId: string, userId: string) {
-    const existing = await (this.prisma as any).eventAttendance.findUnique({
-      where: {
-        userId_campusEventId: {
+  /**
+   * Create EventAttendance. Throws 'User has already checked in to this event'
+   * on unique constraint violation (P2002) to avoid TOCTOU race when two requests run concurrently.
+   */
+  private async createAttendance(
+    userId: string,
+    campusEventId: string,
+    checkInMethod: 'LOCATION' | 'QR_CODE',
+    pointsAwarded: number,
+  ): Promise<{ id: string }> {
+    try {
+      const attendance = await (this.prisma as any).eventAttendance.create({
+        data: {
           userId,
-          campusEventId: eventId,
+          campusEventId,
+          checkInMethod,
+          pointsAwarded,
         },
-      },
-    });
-
-    if (existing) {
-      throw new Error('User has already checked in to this event');
+      });
+      return attendance;
+    } catch (err) {
+      if (
+        err instanceof Prisma.PrismaClientKnownRequestError &&
+        err.code === 'P2002'
+      ) {
+        throw new Error('User has already checked in to this event');
+      }
+      throw err;
     }
   }
 
@@ -134,7 +151,6 @@ export class CheckInService {
 
     this.ensureEventActive(event);
     this.ensureMethodAllowed(event, 'LOCATION');
-    await this.ensureNotAlreadyCheckedIn(event.id, user.id);
 
     const distance = this.calculateDistanceInMeters(
       data.latitude,
@@ -149,14 +165,12 @@ export class CheckInService {
 
     const points = event.pointsForAttendance ?? 0;
 
-    const attendance = await (this.prisma as any).eventAttendance.create({
-      data: {
-        userId: user.id,
-        campusEventId: event.id,
-        checkInMethod: 'LOCATION',
-        pointsAwarded: points,
-      },
-    });
+    const attendance = await this.createAttendance(
+      user.id,
+      event.id,
+      'LOCATION',
+      points,
+    );
 
     const { newTotalScore } = await this.awardPoints(user, points);
 
@@ -183,18 +197,15 @@ export class CheckInService {
 
     this.ensureEventActive(event);
     this.ensureMethodAllowed(event, 'QR_CODE');
-    await this.ensureNotAlreadyCheckedIn(event.id, user.id);
 
     const points = event.pointsForAttendance ?? 0;
 
-    const attendance = await (this.prisma as any).eventAttendance.create({
-      data: {
-        userId: user.id,
-        campusEventId: event.id,
-        checkInMethod: 'QR_CODE',
-        pointsAwarded: points,
-      },
-    });
+    const attendance = await this.createAttendance(
+      user.id,
+      event.id,
+      'QR_CODE',
+      points,
+    );
 
     const { newTotalScore } = await this.awardPoints(user, points);
 
