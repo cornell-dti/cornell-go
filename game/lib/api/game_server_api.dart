@@ -116,6 +116,9 @@ class GameServerApi {
   Future<bool?> sendGroupInvite(SendGroupInviteDto dto) async =>
       await _invokeWithRefresh("sendGroupInvite", dto.toJson());
 
+  Future<bool?> updateFcmToken(UpdatePushTokenDto dto) async =>
+      await _invokeWithRefresh("updateFcmToken", dto.toJson());
+
   Future<int?> requestOrganizationData(RequestOrganizationDataDto dto) async =>
       await _invokeWithRefresh("requestOrganizationData", dto.toJson());
 

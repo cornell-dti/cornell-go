@@ -276,7 +276,8 @@ class _JourneysPageState extends State<JourneysPage> {
                                 (numberCompleted == event.challenges?.length);
                             var locationCount = event.challenges?.length ?? 0;
 
-                            if (locationCount < 2) continue;
+                            if (event.isJourney != true) continue;
+                            if (event.indexable == false) continue;
                             var totalPoints = 0;
 
                             var challenge = challengeModel.getChallengeById(
