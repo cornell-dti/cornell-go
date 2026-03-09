@@ -85,7 +85,7 @@ class _QuizScreenState extends State<_QuizScreen> {
           final eventId = groupModel.curEventId;
           final event = eventModel.getEventById(eventId ?? "");
           final tracker = trackerModel.trackerByEventId(eventId ?? "");
-          final isJourney = (event?.challenges?.length ?? 0) > 1;
+          final isJourney = event?.isJourney == true;
           final journeyCompleted = isJourney &&
               tracker != null &&
               tracker.prevChallenges.length >= (event?.challenges?.length ?? 0);
@@ -447,7 +447,7 @@ class _QuizScreenState extends State<_QuizScreen> {
         final eventId = groupModel.curEventId;
         final event = eventModel.getEventById(eventId ?? "");
         final tracker = trackerModel.trackerByEventId(eventId ?? "");
-        final isJourney = (event?.challenges?.length ?? 0) > 1;
+        final isJourney = event?.isJourney == true;
 
         // Check if journey is completed (all challenges done)
         final journeyCompleted = isJourney &&

@@ -190,10 +190,10 @@ class OnboardingModel extends ChangeNotifier {
 
       if (isComplete) continue;
 
-      if (locationCount == 1) {
+      if (event.isJourney != true) {
         // Single challenge - timer status doesn't matter
         hasUncompletedChallenge = true;
-      } else if (locationCount > 1) {
+      } else {
         // Journey - check if any challenge has a timer
         bool journeyHasTimer = false;
         for (var challengeId in event.challenges ?? []) {

@@ -974,6 +974,9 @@ class EventDto {
     if (featured != null) {
       fields['featured'] = featured;
     }
+    if (isJourney != null) {
+      fields['isJourney'] = isJourney;
+    }
     return fields;
   }
 
@@ -1015,6 +1018,7 @@ class EventDto {
         ? (fields["latitudeF"]!.toDouble())
         : null;
     featured = fields.containsKey('featured') ? (fields["featured"]) : null;
+    isJourney = fields.containsKey('isJourney') ? (fields["isJourney"]) : null;
   }
 
   void partialUpdate(EventDto other) {
@@ -1040,6 +1044,7 @@ class EventDto {
     longitudeF = other.longitudeF == null ? longitudeF : other.longitudeF;
     latitudeF = other.latitudeF == null ? latitudeF : other.latitudeF;
     featured = other.featured == null ? featured : other.featured;
+    isJourney = other.isJourney == null ? isJourney : other.isJourney;
   }
 
   EventDto({
@@ -1059,6 +1064,7 @@ class EventDto {
     this.longitudeF,
     this.latitudeF,
     this.featured,
+    this.isJourney,
   });
 
   late String id;
@@ -1077,6 +1083,7 @@ class EventDto {
   late double? longitudeF;
   late double? latitudeF;
   late bool? featured;
+  late bool? isJourney;
 }
 
 class PrevChallengeDto {
@@ -1485,6 +1492,110 @@ class SendGroupInviteDto {
   });
 
   late String targetUsername;
+}
+
+class UpdatePushTokenDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['fcmToken'] = fcmToken;
+    return fields;
+  }
+
+  UpdatePushTokenDto.fromJson(Map<String, dynamic> fields) {
+    fcmToken = fields["fcmToken"];
+  }
+
+  void partialUpdate(UpdatePushTokenDto other) {
+    fcmToken = other.fcmToken;
+  }
+
+  UpdatePushTokenDto({
+    required this.fcmToken,
+  });
+
+  late String fcmToken;
+}
+
+class SendNotificationDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['title'] = title;
+    fields['body'] = body;
+    if (userIds != null) {
+      fields['userIds'] = userIds;
+    }
+    if (organizationId != null) {
+      fields['organizationId'] = organizationId;
+    }
+    return fields;
+  }
+
+  SendNotificationDto.fromJson(Map<String, dynamic> fields) {
+    title = fields["title"];
+    body = fields["body"];
+    userIds = fields.containsKey('userIds')
+        ? (List<String>.from(fields['userIds']))
+        : null;
+    organizationId = fields.containsKey('organizationId')
+        ? (fields["organizationId"])
+        : null;
+  }
+
+  void partialUpdate(SendNotificationDto other) {
+    title = other.title;
+    body = other.body;
+    userIds = other.userIds == null ? userIds : other.userIds;
+    organizationId =
+        other.organizationId == null ? organizationId : other.organizationId;
+  }
+
+  SendNotificationDto({
+    required this.title,
+    required this.body,
+    this.userIds,
+    this.organizationId,
+  });
+
+  late String title;
+  late String body;
+  late List<String>? userIds;
+  late String? organizationId;
+}
+
+class NotificationResultDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['successCount'] = successCount;
+    fields['failureCount'] = failureCount;
+    if (errors != null) {
+      fields['errors'] = errors;
+    }
+    return fields;
+  }
+
+  NotificationResultDto.fromJson(Map<String, dynamic> fields) {
+    successCount = fields["successCount"];
+    failureCount = fields["failureCount"];
+    errors = fields.containsKey('errors')
+        ? (List<String>.from(fields['errors']))
+        : null;
+  }
+
+  void partialUpdate(NotificationResultDto other) {
+    successCount = other.successCount;
+    failureCount = other.failureCount;
+    errors = other.errors == null ? errors : other.errors;
+  }
+
+  NotificationResultDto({
+    required this.successCount,
+    required this.failureCount,
+    this.errors,
+  });
+
+  late int successCount;
+  late int failureCount;
+  late List<String>? errors;
 }
 
 class OrganizationDto {

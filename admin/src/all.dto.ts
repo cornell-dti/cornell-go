@@ -236,6 +236,7 @@ export interface EventDto {
   longitudeF?: number;
   latitudeF?: number;
   featured?: boolean;
+  isJourney?: boolean;
 }
 
 export interface PrevChallengeDto {
@@ -304,6 +305,23 @@ export interface GroupInviteDto {
 
 export interface SendGroupInviteDto {
   targetUsername: string;
+}
+
+export interface UpdatePushTokenDto {
+  fcmToken: string;
+}
+
+export interface SendNotificationDto {
+  title: string;
+  body: string;
+  userIds?: string[];
+  organizationId?: string;
+}
+
+export interface NotificationResultDto {
+  successCount: number;
+  failureCount: number;
+  errors?: string[];
 }
 
 export interface OrganizationDto {

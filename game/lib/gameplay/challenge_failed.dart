@@ -181,7 +181,7 @@ class _ChallengeFailedState extends State<ChallengeFailedPage>
         }
 
         // If this event is a journey
-        if ((event?.challenges?.length ?? 0) > 1)
+        if (event?.isJourney == true)
           // Determine whether the journey is done
           journeyCompleted =
               tracker.prevChallenges.length == (event?.challenges?.length ?? 0);
@@ -607,7 +607,7 @@ class _ChallengeFailedState extends State<ChallengeFailedPage>
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Text(
-                                    ((event?.challenges?.length ?? 0) > 1)
+                                    (event?.isJourney == true)
                                         ? "Journey Progress "
                                         : "Return Home ",
                                     style: TextStyle(
@@ -623,7 +623,7 @@ class _ChallengeFailedState extends State<ChallengeFailedPage>
                                 ],
                               ),
                               onPressed: () {
-                                if ((event?.challenges?.length ?? 0) > 1) {
+                                if (event?.isJourney == true) {
                                   journeyPage = true;
                                   setState(() {});
                                 } else {
