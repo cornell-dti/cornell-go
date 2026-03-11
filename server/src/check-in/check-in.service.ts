@@ -57,10 +57,7 @@ export class CheckInService {
   }
 
   private ensureMethodAllowed(event: any, method: CheckInMethodDto) {
-    if (
-      event.checkInMethod !== 'EITHER' &&
-      event.checkInMethod !== method
-    ) {
+    if (event.checkInMethod !== 'EITHER' && event.checkInMethod !== method) {
       throw new Error('This check-in method is not allowed for this event');
     }
   }
@@ -237,4 +234,3 @@ export class CheckInService {
     return updated.qrCode!;
   }
 }
-

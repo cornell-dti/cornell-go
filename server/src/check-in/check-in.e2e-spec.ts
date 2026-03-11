@@ -149,7 +149,9 @@ describe('CheckInModule E2E', () => {
         if (activeEventId && futureEventId && pastEventId && qrEventId) {
           await (prisma as any).campusEvent.deleteMany({
             where: {
-              id: { in: [activeEventId, futureEventId, pastEventId, qrEventId] },
+              id: {
+                in: [activeEventId, futureEventId, pastEventId, qrEventId],
+              },
             },
           });
         }

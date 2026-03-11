@@ -36,4 +36,3 @@ export interface CheckInErrorDto {
   message: string;
   code: CheckInErrorCode;
 }
-

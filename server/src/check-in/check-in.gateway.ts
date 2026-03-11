@@ -90,4 +90,3 @@ export class CheckInGateway {
     return 'UNKNOWN_ERROR';
   }
 }
-
