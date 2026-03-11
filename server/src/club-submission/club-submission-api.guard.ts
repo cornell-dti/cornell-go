@@ -15,7 +15,7 @@ export class ClubSubmissionApiGuard implements CanActivate {
     if (!headerKey) {
       throw new ForbiddenException('Missing API key');
     }
-    if (headerKey != expected) {
+    if (headerKey !== expected) {
       throw new ForbiddenException('Invalid API key');
     }
 

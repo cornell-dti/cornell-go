@@ -109,13 +109,9 @@ model User {
   achievementTrackers    AchievementTracker[]
   challengeTimers        ChallengeTimer[]
   UserQuizAnswer         UserQuizAnswer[]
-<<<<<<< as4288/club-submission
   hasCompletedOnboarding Boolean              @default(false)
   eventAttendances       EventAttendance[]
   eventRSVPs             EventRSVP[]
-=======
-  hasCompletedOnboarding Boolean
->>>>>>> master
 }
 
 model Group {
