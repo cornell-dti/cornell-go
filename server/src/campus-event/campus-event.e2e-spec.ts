@@ -185,7 +185,7 @@ describe('CampusEventModule E2E', () => {
 
   afterAll(async () => {
     for (const id of createdCampusEventIds) {
-      await campusEventService.deleteEvent(id).catch(() => { });
+      await campusEventService.deleteEvent(id).catch(() => {});
     }
     await app.close();
   });
