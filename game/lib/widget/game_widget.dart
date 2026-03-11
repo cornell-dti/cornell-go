@@ -5,6 +5,7 @@ import 'package:game/api/game_api.dart';
 import 'package:game/api/geopoint.dart';
 import 'package:game/model/challenge_model.dart';
 import 'package:game/model/event_model.dart';
+import 'package:game/constants/constants.dart';
 import 'package:game/model/game_model.dart';
 import 'package:game/model/group_model.dart';
 import 'package:game/model/tracker_model.dart';
@@ -94,8 +95,8 @@ class _GameWidgetState extends State<GameWidget> {
                   gameModel.challengeId = curChallenge.id;
                   gameModel.description = curChallenge.description ?? "";
                   gameModel.name = curChallenge.name ?? "";
-                  gameModel.imageUrl = curChallenge.imageUrl ??
-                      "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png";
+                  gameModel.imageUrl =
+                      curChallenge.imageUrl ?? AppStrings.missingImageUrl;
                 }
 
                 if (serviceStatus == ServiceStatus.disabled ||

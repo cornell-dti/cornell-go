@@ -20,6 +20,7 @@ import 'package:game/utils/utility_functions.dart';
 import 'package:provider/provider.dart';
 import 'package:showcaseview/showcaseview.dart';
 import 'package:velocity_x/velocity_x.dart';
+import 'package:game/constants/constants.dart';
 
 /** A Data Transfer Object that holds information about a challenge 
  * cell in the UI */
@@ -223,7 +224,7 @@ class _JourneysPageState extends State<JourneysPage> {
         width: double.infinity,
         height: double.infinity,
         decoration: BoxDecoration(
-          color: Color.fromARGB(255, 255, 248, 241), // Background color
+          color: AppColors.warmWhite, // Background color
         ),
         child: Center(
           child: Padding(

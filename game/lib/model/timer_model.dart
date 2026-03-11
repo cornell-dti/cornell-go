@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/api/game_client_dto.dart';
+import 'package:game/constants/constants.dart';
 
 /**
  * TimerModel - Manages timer state and syncs with backend using ChangeNotifier
@@ -122,7 +123,7 @@ class TimerModel extends ChangeNotifier {
     late StreamSubscription errorSubscription;
 
     // Timeout for if backend doesn't respond within 5 seconds
-    timeoutTimer = Timer(Duration(seconds: 5), () {
+    timeoutTimer = Timer(AppDurations.apiTimeout, () {
       if (!completer.isCompleted) {
         completer.complete('Request timeout');
       }

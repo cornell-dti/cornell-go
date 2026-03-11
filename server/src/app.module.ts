@@ -15,6 +15,7 @@ import { SessionLogModule } from './session-log/session-log.module';
 import { OrganizationModule } from './organization/organization.module';
 import { AchievementModule } from './achievement/achievement.module';
 import { CaslModule } from './casl/casl.module';
+import { NotificationModule } from './notification/notification.module';
 import { TimerModule } from './timer/timer.module';
 import { QuizModule } from './quiz/quiz.module';
 import { EventSyncModule } from './event-sync/event-sync.module';
@@ -37,6 +38,7 @@ import { EventSyncModule } from './event-sync/event-sync.module';
     SessionLogModule,
     OrganizationModule,
     CaslModule,
+    NotificationModule,
     TimerModule,
     QuizModule,
     EventSyncModule,

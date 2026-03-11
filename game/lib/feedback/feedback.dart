@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:game/constants/constants.dart';
 import 'package:game/widget/back_btn.dart';
 
 class FeedbackWidget extends StatefulWidget {
@@ -16,7 +17,7 @@ class _LeaderboardWidgetState extends State<FeedbackWidget> {
     return Scaffold(
       key: scaffoldKey,
       floatingActionButton: backBtn(scaffoldKey, context, "Feedback"),
-      backgroundColor: Color(0xFFDBE2E7),
+      backgroundColor: AppColors.pageGrayBackground,
       body: Center(child: Text("TODO")),
     );
   }
