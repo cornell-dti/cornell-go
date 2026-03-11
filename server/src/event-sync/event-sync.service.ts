@@ -147,9 +147,7 @@ export class EventSyncService implements OnModuleInit {
     await this.syncEvents();
   }
 
-  async syncEvents(
-    days?: number,
-  ): Promise<{
+  async syncEvents(days?: number): Promise<{
     created: number;
     updated: number;
     archived: number;
