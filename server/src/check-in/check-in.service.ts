@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
-import { EventService } from '../event/event.service';
 import { UserService } from '../user/user.service';
 import { v4 as uuidv4 } from 'uuid';
 import {
@@ -16,7 +15,6 @@ import {
 export class CheckInService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly eventService: EventService,
     private readonly userService: UserService,
   ) {}
 
@@ -73,7 +71,7 @@ export class CheckInService {
     pointsAwarded: number,
   ): Promise<{ id: string }> {
     try {
-      const attendance = await (this.prisma as any).eventAttendance.create({
+      const attendance = await this.prisma.eventAttendance.create({
         data: {
           userId,
           campusEventId,
@@ -110,20 +108,6 @@ export class CheckInService {
       data: { score: { increment: points } },
     });
 
-    const eventTracker =
-      await this.eventService.getCurrentEventTrackerForUser(user);
-    const updatedTracker = await this.prisma.eventTracker.update({
-      where: { id: eventTracker.id },
-      data: { score: { increment: points } },
-    });
-
-    await this.eventService.emitUpdateLeaderPosition({
-      playerId: updatedUser.id,
-      newTotalScore: updatedUser.score,
-      newEventScore: updatedTracker.score,
-      eventId: updatedTracker.eventId,
-    });
-
     await this.userService.emitUpdateUserData(
       updatedUser,
       false,
@@ -138,7 +122,7 @@ export class CheckInService {
     user: User,
     data: LocationCheckInDto,
   ): Promise<CheckInResultDto> {
-    const event = await (this.prisma as any).campusEvent.findUnique({
+    const event = await this.prisma.campusEvent.findUnique({
       where: { id: data.campusEventId },
     });
 
@@ -184,7 +168,7 @@ export class CheckInService {
     user: User,
     data: QrCodeCheckInDto,
   ): Promise<CheckInResultDto> {
-    const event = await (this.prisma as any).campusEvent.findFirst({
+    const event = await this.prisma.campusEvent.findFirst({
       where: { qrCode: data.qrCode },
     });
 
@@ -216,7 +200,7 @@ export class CheckInService {
   }
 
   async generateQrCodeForEvent(eventId: string): Promise<string> {
-    const event = await (this.prisma as any).campusEvent.findUnique({
+    const event = await this.prisma.campusEvent.findUnique({
       where: { id: eventId },
     });
 
@@ -226,7 +210,7 @@ export class CheckInService {
 
     const qrCode = uuidv4();
 
-    const updated = await (this.prisma as any).campusEvent.update({
+    const updated = await this.prisma.campusEvent.update({
       where: { id: event.id },
       data: { qrCode },
     });

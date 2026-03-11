@@ -58,7 +58,7 @@ describe('CheckInModule E2E', () => {
     const twoHoursAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000);
     const twoHoursLater = new Date(now.getTime() + 2 * 60 * 60 * 1000);
 
-    const activeEvent = await (prisma as any).campusEvent.create({
+    const activeEvent = await prisma.campusEvent.create({
       data: {
         title: 'Active Test Event',
         description: 'Event currently happening',
@@ -78,7 +78,7 @@ describe('CheckInModule E2E', () => {
     });
     activeEventId = activeEvent.id;
 
-    const futureEvent = await (prisma as any).campusEvent.create({
+    const futureEvent = await prisma.campusEvent.create({
       data: {
         title: 'Future Test Event',
         description: 'Event not yet started',
@@ -98,7 +98,7 @@ describe('CheckInModule E2E', () => {
     });
     futureEventId = futureEvent.id;
 
-    const pastEvent = await (prisma as any).campusEvent.create({
+    const pastEvent = await prisma.campusEvent.create({
       data: {
         title: 'Past Test Event',
         description: 'Event already ended',
@@ -118,7 +118,7 @@ describe('CheckInModule E2E', () => {
     });
     pastEventId = pastEvent.id;
 
-    const qrEvent = await (prisma as any).campusEvent.create({
+    const qrEvent = await prisma.campusEvent.create({
       data: {
         title: 'QR Test Event',
         description: 'Event for QR check-in',
@@ -143,11 +143,11 @@ describe('CheckInModule E2E', () => {
   afterAll(async () => {
     try {
       if (prisma && user?.id) {
-        await (prisma as any).eventAttendance.deleteMany({
+        await prisma.eventAttendance.deleteMany({
           where: { userId: user.id },
         });
         if (activeEventId && futureEventId && pastEventId && qrEventId) {
-          await (prisma as any).campusEvent.deleteMany({
+          await prisma.campusEvent.deleteMany({
             where: {
               id: {
                 in: [activeEventId, futureEventId, pastEventId, qrEventId],
@@ -177,7 +177,7 @@ describe('CheckInModule E2E', () => {
       expect(typeof qrCode).toBe('string');
       expect(qrCode.length).toBeGreaterThan(0);
 
-      const event = await (prisma as any).campusEvent.findUnique({
+      const event = await prisma.campusEvent.findUnique({
         where: { id: activeEventId },
       });
       expect(event.qrCode).toBe(qrCode);
@@ -193,7 +193,7 @@ describe('CheckInModule E2E', () => {
   describe('checkInByLocation', () => {
     it('should check in when user is within radius and award points', async () => {
       const initialScore = user.score;
-      const countBefore = await (prisma as any).eventAttendance.count({
+      const countBefore = await prisma.eventAttendance.count({
         where: { userId: user.id, campusEventId: activeEventId },
       });
       expect(countBefore).toBe(0);
@@ -210,7 +210,7 @@ describe('CheckInModule E2E', () => {
       expect(result.pointsAwarded).toBe(15);
       expect(result.newTotalScore).toBe(initialScore + 15);
 
-      const attendance = await (prisma as any).eventAttendance.findUnique({
+      const attendance = await prisma.eventAttendance.findUnique({
         where: {
           userId_campusEventId: {
             userId: user.id,
@@ -230,7 +230,7 @@ describe('CheckInModule E2E', () => {
     });
 
     it('should reject check-in when user is outside radius', async () => {
-      const farAwayEvent = await (prisma as any).campusEvent.create({
+      const farAwayEvent = await prisma.campusEvent.create({
         data: {
           title: 'Far Event',
           description: 'Event far away',
@@ -257,7 +257,7 @@ describe('CheckInModule E2E', () => {
         }),
       ).rejects.toThrow('User is not within check-in radius');
 
-      await (prisma as any).campusEvent.delete({
+      await prisma.campusEvent.delete({
         where: { id: farAwayEvent.id },
       });
     });
@@ -315,7 +315,7 @@ describe('CheckInModule E2E', () => {
       expect(result.pointsAwarded).toBe(20);
       expect(result.newTotalScore).toBe(initialScore + 20);
 
-      const attendance = await (prisma as any).eventAttendance.findUnique({
+      const attendance = await prisma.eventAttendance.findUnique({
         where: {
           userId_campusEventId: {
             userId: user.id,
