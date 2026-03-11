@@ -39,6 +39,11 @@ import {
   QuizErrorDto,
   QuizProgressDto,
 } from '../quiz/quiz.dto';
+import {
+  UpdateCampusEventDataDto,
+  CampusEventListResponseDto,
+  CampusEventDto,
+} from '../campus-event/campus-event.dto';
 import { ExtractSubjectType } from '@casl/ability';
 
 export type ClientApiDef = {
@@ -64,6 +69,9 @@ export type ClientApiDef = {
   quizResult: QuizResultDto;
   quizError: QuizErrorDto;
   quizProgress: QuizProgressDto;
+  updateCampusEventData: UpdateCampusEventDataDto;
+  campusEventList: CampusEventListResponseDto;
+  campusEventDetails: { event: CampusEventDto };
 };
 
 @Injectable()
