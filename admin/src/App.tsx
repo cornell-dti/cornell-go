@@ -4,6 +4,7 @@ import { Events } from './components/Events';
 import { Organizations } from './components/Organizations';
 import { ErrorAlert } from './components/ErrorAlert';
 import { Users } from './components/Users';
+import { Notifications } from './components/Notifications';
 
 import {
   AppBar,
@@ -28,6 +29,7 @@ import {
   faSitemap,
   faBuilding,
   faPerson,
+  faBell,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -82,6 +84,12 @@ const routes = [
     element: <Groups />,
     icon: faUserGroup,
     name: 'Groups',
+  },
+  {
+    path: '/notifications',
+    element: <Notifications />,
+    icon: faBell,
+    name: 'Notifications',
   },
 ];
 

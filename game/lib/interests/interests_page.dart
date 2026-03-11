@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:game/constants/constants.dart';
 import 'package:game/api/game_client_dto.dart';
 import 'package:game/challenges/challenges_page.dart';
 import 'package:game/main.dart';
@@ -79,7 +80,7 @@ class _InterestsPageWidgetState extends State<InterestsPageWidget> {
                   Text(
                     "What are your interests?",
                     style: TextStyle(
-                      color: Color.fromARGB(255, 71, 71, 71),
+                      color: AppColors.mediumText,
                       fontSize: 24,
                       fontWeight: FontWeight.w900,
                     ),
@@ -87,7 +88,7 @@ class _InterestsPageWidgetState extends State<InterestsPageWidget> {
                   Text(
                     "Select one or more categories below.",
                     style: TextStyle(
-                      color: Color.fromARGB(255, 186, 186, 186),
+                      color: AppColors.disabledGray,
                       fontSize: 14,
                       fontWeight: FontWeight.w400,
                     ),
@@ -106,21 +107,19 @@ class _InterestsPageWidgetState extends State<InterestsPageWidget> {
                         value: _checked[i],
                         controlAffinity: ListTileControlAffinity.leading,
                         tileColor: _checked[i]
-                            ? Color.fromARGB(77, 255, 170, 91)
+                            ? AppColors.orange.withAlpha(77)
                             : Colors.white,
                         fillColor: MaterialStateProperty.all<Color>(
-                          _checked[i]
-                              ? Colors.white
-                              : Color.fromARGB(25, 0, 0, 0),
+                          _checked[i] ? Colors.white : AppColors.black10,
                         ),
-                        checkColor: Color.fromARGB(255, 110, 74, 40),
+                        checkColor: AppColors.brown,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                           side: BorderSide(
                             width: 2,
                             color: _checked[i]
-                                ? Color.fromARGB(255, 255, 170, 91)
-                                : Color.fromARGB(255, 228, 228, 228),
+                                ? AppColors.orange
+                                : AppColors.borderGray,
                           ),
                         ),
                         checkboxShape: RoundedRectangleBorder(
@@ -190,7 +189,7 @@ class _InterestsPageWidgetState extends State<InterestsPageWidget> {
                         ),
                       ),
                       backgroundColor: MaterialStatePropertyAll<Color>(
-                        Color.fromARGB(255, 233, 87, 85),
+                        AppColors.accentRed,
                       ),
                     ),
                     child: Container(

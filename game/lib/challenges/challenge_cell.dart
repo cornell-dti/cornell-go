@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:game/preview/preview.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:game/widget/cached_image.dart';
+import 'package:game/constants/constants.dart';
 
 /**
  * `ChallengeCell` Widget - Individual challenge display component.
@@ -10,6 +12,12 @@ import 'package:flutter_svg/flutter_svg.dart';
  * It displays key information about a challenge and handles tap interactions
  * to show more details.
  * 
+ * Image loading uses CachedNetworkImage, with a shimmer placeholder for 
+ * when the image is loading and an error icon with a gray background if 
+ * the image cannot be loaded. The gray background of the error matches the
+ * original size of the image. A ValueKey based on imgUrl (the link to the image) 
+ * is used so when the list rebuilds, the same image widget is preserved and there
+ * is no flickering of the loading state.
  * @param props - Contains:
  *   - `location`: Challenge location
  *   - `challengeName`: Name of the challenge
@@ -131,7 +139,7 @@ class _ChallengeCellState extends State<ChallengeCell> {
           borderRadius: BorderRadius.circular(15),
           boxShadow: [
             BoxShadow(
-              color: Color.fromARGB(255, 198, 198, 198),
+              color: AppColors.silverGray,
               blurRadius: 2,
               offset: Offset(0, 4),
             ),
@@ -148,11 +156,10 @@ class _ChallengeCellState extends State<ChallengeCell> {
                 padding: const EdgeInsets.only(right: 14),
                 child: ClipRRect(
                   borderRadius: BorderRadius.all(Radius.circular(4.6)),
-                  child: Image.network(
-                    imgUrl,
+                  child: AppCachedImage(
+                    imageUrl: imgUrl,
                     width: deviceHeight * 0.1,
                     height: deviceHeight * 0.1,
-                    fit: BoxFit.cover,
                   ),
                 ),
               ),
@@ -171,14 +178,14 @@ class _ChallengeCellState extends State<ChallengeCell> {
                           Icon(
                             Icons.location_on,
                             size: MediaQuery.sizeOf(context).height * 0.025,
-                            color: Color.fromARGB(255, 131, 90, 124),
+                            color: AppColors.purple,
                           ),
                           Expanded(
                             child: Text(
                               location,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
-                                color: Color.fromARGB(255, 131, 90, 124),
+                                color: AppColors.purple,
                                 fontSize:
                                     MediaQuery.sizeOf(context).height * 0.016,
                                 fontFamily: 'Poppins',
@@ -190,7 +197,7 @@ class _ChallengeCellState extends State<ChallengeCell> {
                             Icon(
                               Icons.directions_walk,
                               size: MediaQuery.sizeOf(context).height * 0.02,
-                              color: Color.fromARGB(255, 110, 110, 110),
+                              color: AppColors.grayText,
                             ),
                             Text(
                               ' ' +
@@ -198,7 +205,7 @@ class _ChallengeCellState extends State<ChallengeCell> {
                                       .toStringAsFixed(1) +
                                   ' mi away',
                               style: TextStyle(
-                                color: Color.fromARGB(255, 110, 110, 110),
+                                color: AppColors.grayText,
                                 fontSize:
                                     MediaQuery.sizeOf(context).height * 0.011,
                                 fontFamily: 'Poppins',
@@ -213,7 +220,7 @@ class _ChallengeCellState extends State<ChallengeCell> {
                       challengeName,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        color: Color.fromARGB(204, 0, 0, 0),
+                        color: AppColors.black80,
                         fontSize: deviceHeight * 0.02,
                         fontFamily: 'Poppins',
                         fontWeight: FontWeight.w600,
@@ -230,7 +237,7 @@ class _ChallengeCellState extends State<ChallengeCell> {
                               vertical: deviceHeight * 0.003,
                             ),
                             decoration: BoxDecoration(
-                              color: Color.fromARGB(255, 220, 53, 69),
+                              color: AppColors.dangerRed,
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
@@ -251,13 +258,13 @@ class _ChallengeCellState extends State<ChallengeCell> {
                             vertical: deviceHeight * 0.003,
                           ),
                           decoration: BoxDecoration(
-                            color: Color.fromARGB(255, 249, 237, 218),
+                            color: AppColors.cream,
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
                             difficulty,
                             style: TextStyle(
-                              color: Color.fromARGB(204, 0, 0, 0),
+                              color: AppColors.black80,
                               fontSize: deviceHeight * 0.014,
                               fontFamily: 'Poppins',
                               fontWeight: FontWeight.w300,
@@ -280,7 +287,7 @@ class _ChallengeCellState extends State<ChallengeCell> {
                                   style: TextStyle(
                                     fontSize: deviceHeight * 0.016,
                                     fontWeight: FontWeight.w500,
-                                    color: Color(0xFFC17E19),
+                                    color: AppColors.gold,
                                   ),
                                 ),
                               ),

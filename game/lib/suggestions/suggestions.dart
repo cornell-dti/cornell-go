@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:game/constants/constants.dart';
 import 'package:game/widget/back_btn.dart';
 
 class SuggestionsWidget extends StatefulWidget {
@@ -21,7 +22,7 @@ class _VisitedPlacesWidgetState extends State<SuggestionsWidget> {
     return Scaffold(
       key: scaffoldKey,
       floatingActionButton: backBtn(scaffoldKey, context, "Suggestions"),
-      backgroundColor: Color(0xFFDBE2E7),
+      backgroundColor: AppColors.pageGrayBackground,
       body: Center(child: Text("TODO")),
     );
   }
