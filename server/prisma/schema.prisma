@@ -94,6 +94,7 @@ model User {
   enrollmentType         EnrollmentType
   score                  Int
   isBanned               Boolean              @default(false)
+  fcmToken               String? // Firebase Cloud Messaging token for push notifications
   group                  Group                @relation("member", fields: [groupId], references: [id])
   groupId                String
   hostOf                 Group?               @relation("host")

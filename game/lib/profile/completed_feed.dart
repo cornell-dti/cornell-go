@@ -10,6 +10,7 @@ import 'package:game/utils/utility_functions.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
+import 'package:game/constants/constants.dart';
 
 /* The page view of all the completed challenges */
 
@@ -17,16 +18,16 @@ class CompletedFeedWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var headerStyle = TextStyle(
-      color: Color(0xFFFFF8F1),
+      color: AppColors.warmWhite,
       fontSize: 20,
       fontFamily: 'Poppins',
       fontWeight: FontWeight.w600,
     );
 
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 255, 248, 241),
+      backgroundColor: AppColors.warmWhite,
       appBar: AppBar(
-        backgroundColor: Color.fromARGB(255, 237, 86, 86),
+        backgroundColor: AppColors.primaryRed,
         toolbarHeight: MediaQuery.of(context).size.height * 0.08,
         leading: Align(
           alignment: Alignment.center,
@@ -102,8 +103,7 @@ class CompletedFeedWidget extends StatelessWidget {
                   );
                   var imageUrl = challenge?.imageUrl;
                   if (imageUrl == null || imageUrl.length == 0) {
-                    imageUrl =
-                        "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png";
+                    imageUrl = AppStrings.missingImageUrl;
                   }
 
                   if (challenge != null) {

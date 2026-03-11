@@ -13,7 +13,9 @@ import flutter_config_plus
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
     GeneratedPluginRegistrant.register(with: self)
-    FirebaseApp.configure()
+    if FirebaseApp.app() == nil {
+      FirebaseApp.configure()
+    }
     if let apiKey = FlutterConfigPlusPlugin.env(for: "IOS_MAP_API_KEY") {
       GMSServices.provideAPIKey(apiKey)
     }
