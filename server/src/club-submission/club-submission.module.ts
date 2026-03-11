@@ -6,6 +6,6 @@ import { PrismaModule } from '../prisma/prisma.module';
 @Module({
   imports: [PrismaModule],
   controllers: [ClubSubmissionController],
-  providers: [ClubSubmissionService]
+  providers: [ClubSubmissionService],
 })
 export class ClubSubmissionModule {}
