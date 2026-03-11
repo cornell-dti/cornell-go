@@ -3,6 +3,7 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:math' as math;
 
+import 'package:game/constants/constants.dart';
 import 'package:velocity_x/velocity_x.dart';
 
 class DropdownWidget extends StatefulWidget {
@@ -41,7 +42,7 @@ class _DropdownWidgetState extends State<DropdownWidget> {
             color: Colors.white,
             boxShadow: List.empty(),
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: Color.fromARGB(77, 0, 0, 0), width: 1.5),
+            border: Border.all(color: AppColors.black30, width: 1.5),
           ),
         ),
         iconStyleData: IconStyleData(
@@ -55,13 +56,13 @@ class _DropdownWidgetState extends State<DropdownWidget> {
             color: Colors.white,
             border: Border.all(
               width: 2.0,
-              color: Color.fromARGB(255, 217, 217, 217),
+              color: AppColors.inputGray,
             ),
             borderRadius: BorderRadius.circular(10.0),
           ),
         ),
         style: TextStyle(
-          color: Color.fromARGB(77, 0, 0, 0),
+          color: AppColors.black30,
           fontWeight: FontWeight.w400,
         ),
         value: value,
@@ -74,7 +75,7 @@ class _DropdownWidgetState extends State<DropdownWidget> {
         hint: Text(
           "Select one",
           style: TextStyle(
-            color: Color.fromARGB(77, 0, 0, 0),
+            color: AppColors.black30,
             fontWeight: FontWeight.w400,
             fontFamily: 'Poppins',
             fontSize: 16,
@@ -90,7 +91,7 @@ class _DropdownWidgetState extends State<DropdownWidget> {
                       item,
                       style: TextStyle(
                         fontFamily: 'Poppins',
-                        color: Color.fromARGB(255, 0, 0, 0),
+                        color: Colors.black,
                         fontSize: 16,
                         fontWeight: FontWeight.w400,
                       ),
