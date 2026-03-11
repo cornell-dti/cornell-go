@@ -41,7 +41,10 @@ export class EventSyncGateway {
     }
 
     if (this.running) {
-      await this.clientService.emitErrorData(user, 'Event sync already in progress');
+      await this.clientService.emitErrorData(
+        user,
+        'Event sync already in progress',
+      );
       return null;
     }
 

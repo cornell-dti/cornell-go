@@ -78,37 +78,37 @@ interface LocalistEventsResponse {
 }
 
 const EVENT_TYPE_CATEGORY_MAP: Record<string, CampusEventCategory> = {
-  'athletic': CampusEventCategory.ATHLETIC,
-  'music': CampusEventCategory.ARTS,
-  'performance': CampusEventCategory.ARTS,
-  'film': CampusEventCategory.ARTS,
+  athletic: CampusEventCategory.ATHLETIC,
+  music: CampusEventCategory.ARTS,
+  performance: CampusEventCategory.ARTS,
+  film: CampusEventCategory.ARTS,
   'dance (performance)': CampusEventCategory.ARTS,
   'arts & culture': CampusEventCategory.CULTURAL,
-  'cultural': CampusEventCategory.CULTURAL,
-  'exhibit': CampusEventCategory.CULTURAL,
-  'exhibition': CampusEventCategory.CULTURAL,
-  'seminar': CampusEventCategory.ACADEMIC,
-  'lecture': CampusEventCategory.ACADEMIC,
+  cultural: CampusEventCategory.CULTURAL,
+  exhibit: CampusEventCategory.CULTURAL,
+  exhibition: CampusEventCategory.CULTURAL,
+  seminar: CampusEventCategory.ACADEMIC,
+  lecture: CampusEventCategory.ACADEMIC,
   'class/ workshop': CampusEventCategory.ACADEMIC,
-  'colloquium': CampusEventCategory.ACADEMIC,
-  'webinar': CampusEventCategory.ACADEMIC,
-  'research': CampusEventCategory.ACADEMIC,
-  'symposium': CampusEventCategory.ACADEMIC,
-  'presentation': CampusEventCategory.ACADEMIC,
+  colloquium: CampusEventCategory.ACADEMIC,
+  webinar: CampusEventCategory.ACADEMIC,
+  research: CampusEventCategory.ACADEMIC,
+  symposium: CampusEventCategory.ACADEMIC,
+  presentation: CampusEventCategory.ACADEMIC,
   'panel discussion': CampusEventCategory.ACADEMIC,
-  'training': CampusEventCategory.ACADEMIC,
-  'career': CampusEventCategory.CAREER,
-  'networking': CampusEventCategory.CAREER,
-  'fair': CampusEventCategory.CAREER,
+  training: CampusEventCategory.ACADEMIC,
+  career: CampusEventCategory.CAREER,
+  networking: CampusEventCategory.CAREER,
+  fair: CampusEventCategory.CAREER,
   'community forum': CampusEventCategory.COMMUNITY,
   'special event': CampusEventCategory.COMMUNITY,
-  'conference': CampusEventCategory.COMMUNITY,
+  conference: CampusEventCategory.COMMUNITY,
   'conference/workshop': CampusEventCategory.COMMUNITY,
   'charity/fundraiser': CampusEventCategory.COMMUNITY,
-  'meeting': CampusEventCategory.SOCIAL,
+  meeting: CampusEventCategory.SOCIAL,
   'food/catering': CampusEventCategory.SOCIAL,
   'dance (social)': CampusEventCategory.SOCIAL,
-  'wellness': CampusEventCategory.WELLNESS,
+  wellness: CampusEventCategory.WELLNESS,
 };
 
 @Injectable()
@@ -125,9 +125,14 @@ export class EventSyncService implements OnModuleInit {
 
   async onModuleInit() {
     if (SYNC_ON_STARTUP) {
-      this.logger.log('SYNC_ON_STARTUP is enabled — running initial event sync now');
-      this.syncEvents().catch((err) =>
-        this.logger.error('Initial sync failed', err instanceof Error ? err.stack : err),
+      this.logger.log(
+        'SYNC_ON_STARTUP is enabled — running initial event sync now',
+      );
+      this.syncEvents().catch(err =>
+        this.logger.error(
+          'Initial sync failed',
+          err instanceof Error ? err.stack : err,
+        ),
       );
     } else {
       this.logger.log(
@@ -144,7 +149,12 @@ export class EventSyncService implements OnModuleInit {
 
   async syncEvents(
     days?: number,
-  ): Promise<{ created: number; updated: number; archived: number; totalFetched: number }> {
+  ): Promise<{
+    created: number;
+    updated: number;
+    archived: number;
+    totalFetched: number;
+  }> {
     const stats = { created: 0, updated: 0, archived: 0, totalFetched: 0 };
 
     try {
@@ -164,7 +174,10 @@ export class EventSyncService implements OnModuleInit {
         `Sync complete — created: ${stats.created}, updated: ${stats.updated}, archived: ${stats.archived}`,
       );
     } catch (error) {
-      this.logger.error('Event sync failed', error instanceof Error ? error.stack : error);
+      this.logger.error(
+        'Event sync failed',
+        error instanceof Error ? error.stack : error,
+      );
     }
 
     return stats;
@@ -193,7 +206,9 @@ export class EventSyncService implements OnModuleInit {
         allEvents.push(wrapper.event);
       }
 
-      this.logger.debug(`Fetched page ${currentPage}/${totalPages} (${events.length} events)`);
+      this.logger.debug(
+        `Fetched page ${currentPage}/${totalPages} (${events.length} events)`,
+      );
       currentPage++;
 
       if (currentPage <= totalPages) {
@@ -217,7 +232,11 @@ export class EventSyncService implements OnModuleInit {
       ? new Date(localistEvent.updated_at)
       : null;
 
-    if (existing && localistUpdatedAt && existing.updatedAt >= localistUpdatedAt) {
+    if (
+      existing &&
+      localistUpdatedAt &&
+      existing.updatedAt >= localistUpdatedAt
+    ) {
       return 'skipped';
     }
 
@@ -244,27 +263,29 @@ export class EventSyncService implements OnModuleInit {
 
   private mapLocalistEvent(event: LocalistEvent) {
     const instance = this.pickNextInstance(event.event_instances);
-    const startTime = instance ? new Date(instance.event_instance.start) : new Date();
+    const startTime = instance
+      ? new Date(instance.event_instance.start)
+      : new Date();
     const endTime = instance?.event_instance.end
       ? new Date(instance.event_instance.end)
       : new Date(startTime.getTime() + 60 * 60 * 1000);
     const allDay = instance?.event_instance.all_day ?? false;
 
-    const lat = event.geo?.latitude ? parseFloat(event.geo.latitude) : CORNELL_DEFAULT_LAT;
-    const lng = event.geo?.longitude ? parseFloat(event.geo.longitude) : CORNELL_DEFAULT_LNG;
+    const lat = event.geo?.latitude
+      ? parseFloat(event.geo.latitude)
+      : CORNELL_DEFAULT_LAT;
+    const lng = event.geo?.longitude
+      ? parseFloat(event.geo.longitude)
+      : CORNELL_DEFAULT_LNG;
 
     const categories = this.mapCategories(event.filters?.event_types);
-    const tags = [
-      ...(event.tags ?? []),
-      ...(event.keywords ?? []),
-    ];
+    const tags = [...(event.tags ?? []), ...(event.keywords ?? [])];
 
-    const description = event.description_text?.trim() || 'No description available';
+    const description =
+      event.description_text?.trim() || 'No description available';
 
     const organizerName =
-      event.filters?.departments?.[0]?.name ??
-      event.groups?.[0]?.name ??
-      null;
+      event.filters?.departments?.[0]?.name ?? event.groups?.[0]?.name ?? null;
 
     return {
       title: event.title,
@@ -293,7 +314,7 @@ export class EventSyncService implements OnModuleInit {
 
     const now = new Date();
     const upcoming = instances
-      .filter((i) => new Date(i.event_instance.start) >= now)
+      .filter(i => new Date(i.event_instance.start) >= now)
       .sort(
         (a, b) =>
           new Date(a.event_instance.start).getTime() -
@@ -333,6 +354,6 @@ export class EventSyncService implements OnModuleInit {
   }
 
   private delay(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 }

@@ -17,17 +17,21 @@ function makeLocalistEvent(overrides: Record<string, any> = {}) {
     photo_url: overrides.photo_url ?? 'https://example.com/photo.jpg',
     location_name: overrides.location_name ?? 'Olin Library',
     address: overrides.address ?? '161 Ho Plaza, Ithaca, NY',
-    geo: 'geo' in overrides ? overrides.geo : {
-      latitude: '42.4479',
-      longitude: '-76.4841',
-    },
+    geo:
+      'geo' in overrides
+        ? overrides.geo
+        : {
+            latitude: '42.4479',
+            longitude: '-76.4841',
+          },
     tags: overrides.tags ?? ['test'],
     keywords: overrides.keywords ?? [],
     filters: overrides.filters ?? {
       event_types: [{ id: 1, name: 'Lecture' }],
       departments: [{ id: 100, name: 'Computer Science' }],
     },
-    localist_url: overrides.localist_url ?? `https://events.cornell.edu/event/${id}`,
+    localist_url:
+      overrides.localist_url ?? `https://events.cornell.edu/event/${id}`,
     ticket_url: overrides.ticket_url ?? '',
     featured: overrides.featured ?? false,
     updated_at: overrides.updated_at ?? new Date().toISOString(),
@@ -48,7 +52,7 @@ function makeLocalistEvent(overrides: Record<string, any> = {}) {
 function makeLocalistResponse(events: any[], page = 1, totalPages = 1) {
   return {
     data: {
-      events: events.map((e) => ({ event: e })),
+      events: events.map(e => ({ event: e })),
       page: { current: page, size: 100, total: totalPages },
     },
   };
@@ -106,7 +110,7 @@ describe('EventSyncModule E2E', () => {
     });
     expect(dbEvents).toHaveLength(2);
 
-    const lecture = dbEvents.find((e) => e.externalId === '1001');
+    const lecture = dbEvents.find(e => e.externalId === '1001');
     expect(lecture).toBeDefined();
     expect(lecture!.title).toBe('CS 4120 Lecture');
     expect(lecture!.source).toBe(EventSource.API_EVENTS);
