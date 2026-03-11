@@ -7,6 +7,7 @@ import 'package:game/model/user_model.dart';
 import 'package:provider/provider.dart';
 
 import '../utils/utility_functions.dart';
+import 'package:game/constants/constants.dart';
 
 /**
  * `EditProfileWidget` - A form interface for editing user profile information.
@@ -94,31 +95,31 @@ class _EditProfileState extends State<EditProfileWidget> {
       bottom: 10,
     ),
     labelStyle: TextStyle(
-      color: Color.fromARGB(51, 0, 0, 0),
+      color: Colors.black.withOpacity(0.2),
       fontWeight: FontWeight.w400,
     ),
     enabledBorder: OutlineInputBorder(
-      borderSide: BorderSide(color: Color.fromARGB(51, 0, 0, 0), width: 1.5),
+      borderSide: BorderSide(color: Colors.black.withOpacity(0.2), width: 1.5),
       borderRadius: BorderRadius.all(Radius.circular(10.0)),
     ),
     focusedBorder: OutlineInputBorder(
       borderRadius: BorderRadius.all(Radius.circular(10.0)),
       borderSide: BorderSide(
-        color: Color.fromARGB(255, 255, 170, 91),
+        color: AppColors.orange,
         width: 1.5,
       ),
     ),
     errorBorder: OutlineInputBorder(
       borderRadius: BorderRadius.all(Radius.circular(10.0)),
       borderSide: BorderSide(
-        color: Color.fromARGB(153, 233, 87, 85),
+        color: AppColors.accentRed.withOpacity(0.6),
         width: 1.5,
       ),
     ),
     focusedErrorBorder: OutlineInputBorder(
       borderRadius: BorderRadius.all(Radius.circular(10.0)),
       borderSide: BorderSide(
-        color: Color.fromARGB(153, 233, 87, 85),
+        color: AppColors.accentRed.withOpacity(0.6),
         width: 1.5,
       ),
     ),
@@ -285,17 +286,17 @@ class _EditProfileState extends State<EditProfileWidget> {
   @override
   Widget build(BuildContext context) {
     var headerStyle = TextStyle(
-      color: Color(0xFFFFF8F1),
+      color: AppColors.warmWhite,
       fontSize: 20,
       fontFamily: 'Poppins',
       fontWeight: FontWeight.w600,
     );
 
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 255, 248, 241),
+      backgroundColor: AppColors.warmWhite,
       appBar: AppBar(
         toolbarHeight: 70,
-        backgroundColor: Color.fromARGB(255, 237, 86, 86),
+        backgroundColor: AppColors.primaryRed,
         // Set widget before appBar title
         leading: IconButton(
           icon: const Icon(Icons.navigate_before),
@@ -514,7 +515,7 @@ class _EditProfileState extends State<EditProfileWidget> {
                                           setState(() {});
                                         },
                                   style: TextButton.styleFrom(
-                                    backgroundColor: Color(0xFFE95755),
+                                    backgroundColor: AppColors.accentRed,
                                     disabledBackgroundColor: Color(
                                       0xFFB9B9B9,
                                     ),

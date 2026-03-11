@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:game/constants/constants.dart';
 import 'package:game/journeys/journeys_page.dart';
 import 'package:game/challenges/challenges_page.dart';
 import 'package:game/journeys/filter_form.dart';
@@ -73,17 +74,14 @@ class _SearchFilterBarState extends State<SearchFilterBar>
     return Scaffold(
       resizeToAvoidBottomInset: true,
       body: Container(
-        color: Color(0xFFED5656),
+        color: AppColors.primaryRed,
         child: SafeArea(
           child: Column(
             children: [
               // Search bar section
               Padding(
                 padding: EdgeInsets.only(
-                  top: Platform.isIOS
-                      ? deviceHeight * 0.01
-                      : MediaQuery.of(context).padding.top +
-                          deviceHeight * 0.01, // Android padding
+                  top: deviceHeight * 0.01,
                   bottom: deviceHeight * 0.01,
                 ),
                 child: Stack(
@@ -92,7 +90,7 @@ class _SearchFilterBarState extends State<SearchFilterBar>
                       physics: NeverScrollableScrollPhysics(),
                       child: Container(
                         decoration: BoxDecoration(
-                          color: Color.fromARGB(255, 255, 248, 241),
+                          color: AppColors.warmWhite,
                           borderRadius: BorderRadius.circular(30),
                         ),
                         child: SizedBox(
@@ -100,20 +98,20 @@ class _SearchFilterBarState extends State<SearchFilterBar>
                           height: deviceHeight * 0.055,
                           child: TextField(
                             onSubmitted: onSearchTextChanged,
+                            textAlignVertical: TextAlignVertical.center,
                             decoration: InputDecoration(
                               border: InputBorder.none,
+                              isDense: true,
+                              contentPadding: EdgeInsets.zero,
                               prefixIcon: Icon(
                                 Icons.search,
-                                color: Color.fromARGB(76, 0, 0, 0),
+                                color: AppColors.black30,
                                 size: 20,
                               ),
-                              labelText: "Search a name, location, etc...",
-                              labelStyle: TextStyle(
-                                // color: Color(0xFFB9B9B9),
+                              hintText: "Search a name, location, etc...",
+                              hintStyle: TextStyle(
                                 fontSize: 12,
                                 fontFamily: 'Poppins',
-                                // backgroundColor:
-                                //     Color.fromARGB(255, 255, 248, 241),
                               ),
                             ),
                           ),

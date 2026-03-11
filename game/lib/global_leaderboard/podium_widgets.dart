@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:game/constants/constants.dart';
 
 /**
  * 'PodiumBlock' widget - Displays leaderboard podium 
@@ -46,7 +47,7 @@ Widget FirstPodium(context, int points, bool isUser) {
             height: 29,
             padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
             decoration: ShapeDecoration(
-              color: Color.fromRGBO(234, 177, 17, 1),
+              color: AppColors.podiumGold,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
@@ -94,7 +95,7 @@ Widget SecondPodium(context, int points, bool isUser) {
             height: 29,
             padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
             decoration: ShapeDecoration(
-              color: Color.fromRGBO(171, 173, 173, 1),
+              color: AppColors.podiumSilver,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
@@ -142,7 +143,7 @@ Widget ThirdPodium(context, int points, bool isUser) {
             height: 25,
             padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
             decoration: ShapeDecoration(
-              color: Color.fromRGBO(219, 120, 42, 1),
+              color: AppColors.podiumBronze,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),

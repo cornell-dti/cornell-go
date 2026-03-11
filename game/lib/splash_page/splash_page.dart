@@ -5,10 +5,9 @@ When the user tries to log in, we verify the user with their information, the im
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:provider/provider.dart';
 import 'package:game/api/game_api.dart';
-import 'package:game/api/game_client_dto.dart';
+import 'package:game/constants/constants.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:game/register_page/register_page.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -29,7 +28,7 @@ class SplashPageWidget extends StatelessWidget {
 
   // Shared text style for button labels
   TextStyle get _authButtonTextStyle => TextStyle(
-        color: Color.fromARGB(255, 93, 100, 112),
+        color: AppColors.slateGray,
         fontSize: 20,
         fontWeight: FontWeight.w500,
       );
@@ -151,27 +150,47 @@ class SplashPageWidget extends StatelessWidget {
     );
   }
 
-  // Builds guest login button for Android users
-  // Maintains the original guest access functionality for non-iOS platforms
-  Widget _buildGuestButton(ApiClient client) {
-    return TextButton(
-      style: _authButtonStyle,
-      onPressed: () async {
-        // Connect as device guest user (original functionality)
-        final connectionResult = await client.connectDevice(
-          "",
-          LoginEnrollmentTypeDto.GUEST,
-          "",
-          "",
-          "",
-          [],
-        );
+  // Builds unrestricted Google Sign-In button for Android users
+  // No domain restriction - allows any Google account for Play Store review compliance
+  Widget _buildGoogleLoginButton(ApiClient client) {
+    return Consumer<ApiClient>(
+      builder: (context, apiClient, child) {
+        return TextButton(
+          style: _authButtonStyle,
+          onPressed: () async {
+            final GoogleSignInAccount? account = await apiClient.signinGoogle();
 
-        if (connectionResult == null) {
-          displayToast("An error occurred while signing you up!", Status.error);
-        }
+            if (account == null) {
+              displayToast("An error occurred while signing you into Google!",
+                  Status.error);
+              return;
+            }
+
+            // No domain restriction - allows any Google account
+            final auth = await account.authentication;
+            final idToken = auth.idToken;
+
+            bool userExists = await apiClient.checkUserExists(
+                AuthProviderType.google, idToken ?? "");
+            if (userExists) {
+              final gRelogResult =
+                  await client.connectGoogleNoRegister(account);
+
+              if (gRelogResult != null) {
+                return;
+              }
+            } else {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) =>
+                      RegisterPageWidget(googleUser: account, idToken: idToken),
+                ),
+              );
+            }
+          },
+          child: Text("Google Login", style: _authButtonTextStyle),
+        );
       },
-      child: Text("Continue as Guest", style: _authButtonTextStyle),
     );
   }
 
@@ -230,10 +249,10 @@ class SplashPageWidget extends StatelessWidget {
                 ],
               ),
               SizedBox(height: 16),
-              // Platform-specific authentication: Apple Sign-In for iOS, Guest access for Android
+              // Platform-specific authentication: Apple Sign-In for iOS, unrestricted Google Sign-In for Android
               Platform.isIOS
                   ? _buildAppleSignInButton(client)
-                  : _buildGuestButton(client),
+                  : _buildGoogleLoginButton(client),
               SizedBox(height: 80),
             ],
           ),

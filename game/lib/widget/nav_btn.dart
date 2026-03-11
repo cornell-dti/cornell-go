@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:game/constants/constants.dart';
 
 Widget navBtn(scaffoldKey, context) {
-  Color Carnelian = Color(0xFFB31B1B);
   return Align(
     alignment: Alignment.topLeft,
     child: Padding(
@@ -16,7 +16,7 @@ Widget navBtn(scaffoldKey, context) {
           onPressed: () {
             scaffoldKey.currentState?.openDrawer();
           },
-          backgroundColor: Carnelian,
+          backgroundColor: AppColors.carnelian,
           child: const Icon(Icons.menu),
         ),
       ),
