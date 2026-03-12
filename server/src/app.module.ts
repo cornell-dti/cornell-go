@@ -17,6 +17,7 @@ import { CaslModule } from './casl/casl.module';
 import { NotificationModule } from './notification/notification.module';
 import { TimerModule } from './timer/timer.module';
 import { QuizModule } from './quiz/quiz.module';
+import { CheckInModule } from './check-in/check-in.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { QuizModule } from './quiz/quiz.module';
     NotificationModule,
     TimerModule,
     QuizModule,
+    CheckInModule,
   ],
   controllers: [],
   providers: [],
