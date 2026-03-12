@@ -180,7 +180,8 @@ describe('CheckInModule E2E', () => {
       const event = await prisma.campusEvent.findUnique({
         where: { id: activeEventId },
       });
-      expect(event.qrCode).toBe(qrCode);
+      expect(event).not.toBeNull();
+      expect(event!.qrCode).toBe(qrCode);
     });
 
     it('should throw when event not found', async () => {
@@ -218,9 +219,9 @@ describe('CheckInModule E2E', () => {
           },
         },
       });
-      expect(attendance).toBeDefined();
-      expect(attendance.checkInMethod).toBe('LOCATION');
-      expect(attendance.pointsAwarded).toBe(15);
+      expect(attendance).not.toBeNull();
+      expect(attendance!.checkInMethod).toBe('LOCATION');
+      expect(attendance!.pointsAwarded).toBe(15);
 
       const updatedUser = await prisma.user.findUniqueOrThrow({
         where: { id: user.id },
@@ -323,9 +324,9 @@ describe('CheckInModule E2E', () => {
           },
         },
       });
-      expect(attendance).toBeDefined();
-      expect(attendance.checkInMethod).toBe('QR_CODE');
-      expect(attendance.pointsAwarded).toBe(20);
+      expect(attendance).not.toBeNull();
+      expect(attendance!.checkInMethod).toBe('QR_CODE');
+      expect(attendance!.pointsAwarded).toBe(20);
 
       user = await prisma.user.findUniqueOrThrow({
         where: { id: user.id },
