@@ -14,6 +14,7 @@ import { SessionLogModule } from './session-log/session-log.module';
 import { OrganizationModule } from './organization/organization.module';
 import { AchievementModule } from './achievement/achievement.module';
 import { CaslModule } from './casl/casl.module';
+import { AvatarModule } from './avatar/avatar.module';
 import { NotificationModule } from './notification/notification.module';
 import { TimerModule } from './timer/timer.module';
 import { QuizModule } from './quiz/quiz.module';
@@ -35,6 +36,7 @@ import { QuizModule } from './quiz/quiz.module';
     SessionLogModule,
     OrganizationModule,
     CaslModule,
+    AvatarModule,
     NotificationModule,
     TimerModule,
     QuizModule,
