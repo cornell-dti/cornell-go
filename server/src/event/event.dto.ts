@@ -97,6 +97,7 @@ export interface EventDto {
   longitudeF?: number;
   latitudeF?: number;
   featured?: boolean;
+  isJourney?: boolean;
 }
 
 /** DTO for PrevChallenge as used in EventTrackerDto */

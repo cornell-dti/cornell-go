@@ -133,6 +133,10 @@ export class ServerApi {
     return this.send('sendGroupInvite', data) as Promise<boolean | undefined>;
   }
 
+  updateFcmToken(data: dto.UpdatePushTokenDto) {
+    return this.send('updateFcmToken', data) as Promise<boolean | undefined>;
+  }
+
   requestOrganizationData(data: dto.RequestOrganizationDataDto) {
     return this.send('requestOrganizationData', data) as Promise<
       number | undefined

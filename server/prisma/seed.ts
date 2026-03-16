@@ -84,6 +84,7 @@ async function main() {
       longitude: -76.484807,
       difficulty: 'EASY',
       category: 'HISTORICAL',
+      isJourney: true,
       usedIn: {
         connect: [{ id: cornellOrg.id }],
       },
@@ -104,6 +105,7 @@ async function main() {
       longitude: -76.484807,
       difficulty: 'NORMAL',
       category: 'FOOD',
+      isJourney: true,
       usedIn: {
         connect: [{ id: cornellOrg.id }],
       },
@@ -125,6 +127,7 @@ async function main() {
       longitude: -76.484807,
       difficulty: 'HARD',
       category: 'NATURE',
+      isJourney: true,
       usedIn: {
         connect: [{ id: cornellOrg.id }],
       },
