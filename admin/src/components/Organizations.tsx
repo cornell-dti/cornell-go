@@ -173,6 +173,11 @@ export function Organizations() {
         <CenterText>No organizations available</CenterText>
       )}
       {Array.from(serverData.organizations.values())
+        .filter(org => {
+          if (query === '') return true;
+          const q = query.toLowerCase();
+          return (org.name ?? '').toLowerCase().includes(q);
+        })
         .sort(
           (a, b) =>
             compareTwoStrings(b.name ?? '', query) -

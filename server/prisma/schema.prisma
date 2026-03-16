@@ -93,6 +93,7 @@ model User {
   administrator          Boolean
   enrollmentType         EnrollmentType
   score                  Int
+  coins               Int                  @default(0)
   isBanned               Boolean              @default(false)
   fcmToken               String? // Firebase Cloud Messaging token for push notifications
   group                  Group                @relation("member", fields: [groupId], references: [id])
@@ -107,6 +108,8 @@ model User {
   participatedIn         PrevChallenge[]      @relation("prevChallengeParticipant")
   sessionLogEntries      SessionLogEntry[]
   achievementTrackers    AchievementTracker[]
+  bearInventories     UserBearInventory[]
+  bearEquipped        UserBearEquipped[]
   challengeTimers        ChallengeTimer[]
   UserQuizAnswer         UserQuizAnswer[]
   hasCompletedOnboarding Boolean              @default(false)
@@ -173,6 +176,7 @@ model EventBase {
   difficulty      DifficultyMode
   category        EventCategoryType
   featured        Boolean            @default(false)
+  isJourney       Boolean            @default(false)
 }
 
 enum EventCategoryType {
@@ -270,6 +274,59 @@ model AchievementTracker {
   dateComplete  DateTime?
   achievementId String
   userId        String
+}
+
+// BUILD-A-BEAR MODELS
+enum BearSlot {
+  EYES
+  MOUTH
+  COLOR
+  ACCESSORY
+}
+
+model BearItem {
+  id          String              @id @default(uuid())
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt()
+  name        String
+  slot        BearSlot
+  cost       Int
+
+  assetKey   String
+  mimeType   String?
+  zIndex     Int?
+
+  isDefault   Boolean             @default(false)
+  inventories UserBearInventory[]
+  equipped    UserBearEquipped[]
+}
+
+model UserBearInventory {
+  id           String   @id @default(uuid())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt()
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
+  bearItem     BearItem @relation(fields: [bearItemId], references: [id], onDelete: Cascade)
+  bearItemId   String
+  acquiredDate DateTime @default(now())
+
+  @@unique([userId, bearItemId])
+}
+
+model UserBearEquipped {
+  id         String   @id @default(uuid())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt()
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String
+  bearItem   BearItem @relation(fields: [bearItemId], references: [id], onDelete: Cascade)
+  bearItemId String
+  slot       BearSlot
+
+  @@unique([userId, slot])
 }
 
 enum ChallengeTimerStatus {

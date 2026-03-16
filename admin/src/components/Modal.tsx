@@ -12,7 +12,10 @@ const ModalBackground = styled.div<{ opacity: number }>`
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 999;
   transition: opacity 0.15s;
-  overflow-y: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 0;
 
   ${props => css`
     opacity: ${props.opacity};
@@ -20,16 +23,15 @@ const ModalBackground = styled.div<{ opacity: number }>`
 `;
 
 const ModalLayout = styled.div`
-  position: relative;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
   width: min(700px, calc(100% - 20px));
+  max-height: calc(100vh - 40px);
   border-radius: 5px;
   background-color: white;
   padding: 12px 18px 12px 18px;
   font-family: 'Roboto';
   box-shadow: 0 0 32px 0.1px rgb(80, 80, 80);
+  display: flex;
+  flex-direction: column;
 `;
 
 const ModalTitle = styled.div`
@@ -45,6 +47,7 @@ const ModalBody = styled.div`
   color: gray;
   font-size: 18px;
   overflow-y: auto;
+  flex: 1;
 `;
 
 const ModalButtonPanel = styled.div`

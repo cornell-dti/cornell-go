@@ -21,6 +21,7 @@ export type FreeEntryForm = {
   name: string;
   value: string;
   characterLimit: number;
+  multiline?: boolean;
 };
 
 export type NumberEntryForm = {
@@ -92,6 +93,17 @@ const EntryTextBox = styled.input`
   flex-grow: 1;
 `;
 
+const EntryTextArea = styled.textarea`
+  font-size: 18px;
+  margin-left: 12px;
+  border-width: 1px;
+  border-radius: 2px;
+  flex-grow: 1;
+  min-height: 80px;
+  resize: vertical;
+  font-family: inherit;
+`;
+
 const EntrySelect = styled.select`
   margin-left: 12px;
   border-width: 1px;
@@ -134,11 +146,19 @@ function FreeEntryFormBox(props: { form: FreeEntryForm }) {
   return (
     <EntryBox>
       <span>{props.form.name + ':'}</span>
-      <EntryTextBox
-        value={val}
-        maxLength={props.form.characterLimit}
-        onChange={e => setVal((props.form.value = e.target.value))}
-      />
+      {props.form.multiline ? (
+        <EntryTextArea
+          value={val}
+          maxLength={props.form.characterLimit}
+          onChange={e => setVal((props.form.value = e.target.value))}
+        />
+      ) : (
+        <EntryTextBox
+          value={val}
+          maxLength={props.form.characterLimit}
+          onChange={e => setVal((props.form.value = e.target.value))}
+        />
+      )}
     </EntryBox>
   );
 }

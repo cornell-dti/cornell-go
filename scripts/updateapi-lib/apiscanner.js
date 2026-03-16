@@ -37,8 +37,14 @@ function getApiDefinitions() {
                     .getArguments()[0]
                     .asKindOrThrow(ts_morph_1.SyntaxKind.StringLiteral)
                     .getLiteralValue();
-                let dto = func
-                    .getParameterOrThrow((param) => !!param.getDecorator("MessageBody"))
+                const messageBodyParam = func
+                    .getParameters()
+                    .find((param) => !!param.getDecorator("MessageBody"));
+                if (!messageBodyParam) {
+                    console.log(`Function ${ev} has no @MessageBody parameter! Skipping...`);
+                    continue;
+                }
+                let dto = messageBodyParam
                     .getType()
                     .getText();
                 if (!func.getReturnType().getText().startsWith("Promise")) {
