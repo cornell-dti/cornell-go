@@ -18,6 +18,7 @@ import { AvatarModule } from './avatar/avatar.module';
 import { NotificationModule } from './notification/notification.module';
 import { TimerModule } from './timer/timer.module';
 import { QuizModule } from './quiz/quiz.module';
+import { ClubSubmissionModule } from './club-submission/club-submission.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { QuizModule } from './quiz/quiz.module';
     NotificationModule,
     TimerModule,
     QuizModule,
+    ClubSubmissionModule,
   ],
   controllers: [],
   providers: [],
