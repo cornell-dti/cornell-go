@@ -14,14 +14,22 @@ export class CampusEventService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly clientService: ClientService,
-  ) {}
+  ) { }
 
-  /** Map Prisma model to API DTO with counts */
-  async toCampusEventDto(ev: CampusEvent): Promise<CampusEventDto> {
-    const [attendanceCount, rsvpCount] = await Promise.all([
-      this.prisma.eventAttendance.count({ where: { campusEventId: ev.id } }),
-      this.prisma.eventRSVP.count({ where: { campusEventId: ev.id } }),
-    ]);
+  /** Map Prisma model to API DTO with counts.*/
+  async toCampusEventDto(
+    ev: CampusEvent,
+    counts?: { attendanceCount: number; rsvpCount: number },
+  ): Promise<CampusEventDto> {
+    const [attendanceCount, rsvpCount] =
+      counts !== undefined
+        ? [counts.attendanceCount, counts.rsvpCount]
+        : await Promise.all([
+          this.prisma.eventAttendance.count({
+            where: { campusEventId: ev.id },
+          }),
+          this.prisma.eventRSVP.count({ where: { campusEventId: ev.id } }),
+        ]);
     return {
       id: ev.id,
       title: ev.title,
@@ -83,12 +91,22 @@ export class CampusEventService {
         orderBy: { startTime: 'asc' },
         skip,
         take: limit,
+        include: {
+          _count: {
+            select: { attendances: true, rsvps: true },
+          },
+        },
       }),
       this.prisma.campusEvent.count({ where }),
     ]);
 
     const eventDtos = await Promise.all(
-      events.map(ev => this.toCampusEventDto(ev)),
+      events.map(ev =>
+        this.toCampusEventDto(ev, {
+          attendanceCount: ev._count.attendances,
+          rsvpCount: ev._count.rsvps,
+        }),
+      ),
     );
 
     return {
@@ -238,9 +256,9 @@ export class CampusEventService {
     const dto = deleted
       ? { event: { id: ev.id }, deleted: true }
       : {
-          event: await this.toCampusEventDto(ev),
-          deleted: false,
-        };
+        event: await this.toCampusEventDto(ev),
+        deleted: false,
+      };
     await this.clientService.sendEvent<typeof dto>(
       null,
       'updateCampusEventData',
