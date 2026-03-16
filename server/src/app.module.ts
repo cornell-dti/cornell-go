@@ -6,6 +6,7 @@ import { GroupModule } from './group/group.module';
 import { UserModule } from './user/user.module';
 
 import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { ClientModule } from './client/client.module';
@@ -18,11 +19,13 @@ import { AvatarModule } from './avatar/avatar.module';
 import { NotificationModule } from './notification/notification.module';
 import { TimerModule } from './timer/timer.module';
 import { QuizModule } from './quiz/quiz.module';
+import { EventSyncModule } from './event-sync/event-sync.module';
 import { ClubSubmissionModule } from './club-submission/club-submission.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
+    ScheduleModule.forRoot(),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', '..', '..', 'admin', 'build'),
     }),
@@ -41,6 +44,7 @@ import { ClubSubmissionModule } from './club-submission/club-submission.module';
     NotificationModule,
     TimerModule,
     QuizModule,
+    EventSyncModule,
     ClubSubmissionModule,
   ],
   controllers: [],
