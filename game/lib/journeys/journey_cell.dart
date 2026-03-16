@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:game/widget/cached_image.dart';
 
 import 'dart:math';
 import 'package:game/constants/constants.dart';
@@ -152,14 +153,16 @@ class JourneyCell extends StatelessWidget {
             Container(
               width: double.infinity,
               height: MediaQuery.sizeOf(context).height * 0.15,
-              decoration: BoxDecoration(
+              child: ClipRRect(
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(10),
                   topRight: Radius.circular(10),
                 ),
-                image: DecorationImage(
-                  fit: BoxFit.cover,
-                  image: NetworkImage(imgUrl),
+                child: AppCachedImage(
+                  imageUrl: imgUrl,
+                  width: double.infinity,
+                  height: MediaQuery.sizeOf(context).height * 0.15,
+                  borderRadius: BorderRadius.zero,
                 ),
               ),
             ),
