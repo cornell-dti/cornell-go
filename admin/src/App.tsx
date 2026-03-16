@@ -1,6 +1,6 @@
 import { Home } from './components/Home';
 import { Challenges } from './components/Challenges';
-import { Events } from './components/Events';
+import { Journeys } from './components/Journeys';
 import { Organizations } from './components/Organizations';
 import { ErrorAlert } from './components/ErrorAlert';
 import { Users } from './components/Users';
@@ -56,10 +56,10 @@ const routes = [
     name: 'Organizations',
   },
   {
-    path: '/events',
-    element: <Events />,
+    path: '/journeys',
+    element: <Journeys />,
     icon: faPersonWalking,
-    name: 'Events',
+    name: 'Journeys',
   },
   {
     path: '/challenges',
@@ -149,9 +149,6 @@ export default function App() {
         </SidebarButton>
         <SidebarText>
           {data.organizations.get(data.selectedOrg)?.name ?? 'No Org. Selected'}
-        </SidebarText>
-        <SidebarText>
-          {data.events.get(data.selectedEvent)?.name ?? 'No Event Selected'}
         </SidebarText>
       </Sidebar>
       <Container>

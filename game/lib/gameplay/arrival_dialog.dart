@@ -96,7 +96,7 @@ class _ArrivedDialog extends StatelessWidget {
     final eventId = groupModel.curEventId;
     final event = eventModel.getEventById(eventId ?? "");
     final tracker = trackerModel.trackerByEventId(eventId ?? "");
-    final isJourney = (event?.challenges?.length ?? 0) > 1;
+    final isJourney = event?.isJourney == true;
     final journeyCompleted = isJourney &&
         tracker != null &&
         tracker.prevChallenges.length >= (event?.challenges?.length ?? 0);

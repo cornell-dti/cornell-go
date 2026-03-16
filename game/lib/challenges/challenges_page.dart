@@ -239,7 +239,8 @@ class _ChallengesPageState extends State<ChallengesPage> {
                           Duration timeTillExpire = endtime.difference(
                             now,
                           );
-                          if (locationCount != 1) continue;
+                          if (event.isJourney == true) continue;
+                          if (event.indexable == false) continue;
                           var challenge = challengeModel.getChallengeById(
                             event.challenges?[0] ?? "",
                           );

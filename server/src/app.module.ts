@@ -15,10 +15,12 @@ import { SessionLogModule } from './session-log/session-log.module';
 import { OrganizationModule } from './organization/organization.module';
 import { AchievementModule } from './achievement/achievement.module';
 import { CaslModule } from './casl/casl.module';
+import { AvatarModule } from './avatar/avatar.module';
 import { NotificationModule } from './notification/notification.module';
 import { TimerModule } from './timer/timer.module';
 import { QuizModule } from './quiz/quiz.module';
 import { EventSyncModule } from './event-sync/event-sync.module';
+import { ClubSubmissionModule } from './club-submission/club-submission.module';
 
 @Module({
   imports: [
@@ -38,10 +40,12 @@ import { EventSyncModule } from './event-sync/event-sync.module';
     SessionLogModule,
     OrganizationModule,
     CaslModule,
+    AvatarModule,
     NotificationModule,
     TimerModule,
     QuizModule,
     EventSyncModule,
+    ClubSubmissionModule,
   ],
   controllers: [],
   providers: [],

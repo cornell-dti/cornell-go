@@ -117,6 +117,20 @@ export class UserService {
 
     await this.achievementService.createAchievementTrackers(user);
 
+    // Seed default bear items into inventory & equipped loadout
+    const defaultBearItems = await this.prisma.bearItem.findMany({
+      where: { isDefault: true },
+    });
+
+    for (const item of defaultBearItems) {
+      await this.prisma.userBearInventory.create({
+        data: { userId: user.id, bearItemId: item.id },
+      });
+      await this.prisma.userBearEquipped.create({
+        data: { userId: user.id, bearItemId: item.id, slot: item.slot },
+      });
+    }
+
     return user;
   }
 
@@ -283,6 +297,7 @@ export class UserService {
       major: joinedUser.major,
       year: joinedUser.year,
       score: joinedUser.score,
+      coins: joinedUser.coins,
       groupId: joinedUser.group.friendlyId,
       hasCompletedOnboarding: joinedUser.hasCompletedOnboarding,
       isBanned: joinedUser.isBanned,
