@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/gameplay/gameplay_page.dart';
+import 'package:game/journeys/journey_flow_result.dart';
 import 'package:provider/provider.dart';
 import 'package:game/api/game_client_dto.dart';
 import 'package:game/utils/utility_functions.dart';
@@ -126,46 +127,13 @@ class Preview extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => _PreviewState(
-        challengeName,
-        challengeLat,
-        challengeLong,
-        description,
-        imgUrl,
-        difficulty,
-        points,
-        type,
-        locationCount,
-        numberCompleted,
-        location,
-        eventId,
-        // need to figure out newly added parameters; commented out for now
-        // totalDistance,
-      );
+  State<StatefulWidget> createState() => _PreviewState();
 }
 
 /**Builds a widget based on the current state which is needed for toggleable 
  * challenge_on button */
 class _PreviewState extends State<Preview> {
-  final String challengeName;
-  final double? challengeLong;
-  final double? challengeLat;
-  final String description;
-  final String imgUrl;
-  final String difficulty;
-  final int points;
-  final PreviewType type;
-  // newly added parameter; need to implement higher up in hierarchy
-  // final int
-  //     totalDistance;
-  final String location;
-
   static Color backgroundRed = AppColors.primaryRed;
-
-  //fields unique to journeys
-  final int locationCount;
-  final int numberCompleted;
-  final String eventId;
 
   //Temporary image for now. Will have to change later
   final String imgPath = "assets/images/38582.jpg";
@@ -221,25 +189,9 @@ class _PreviewState extends State<Preview> {
     });
   }
 
-  _PreviewState(
-    this.challengeName,
-    this.challengeLat,
-    this.challengeLong,
-    this.description,
-    this.imgUrl,
-    this.difficulty,
-    this.points,
-    this.type,
-    this.locationCount,
-    this.numberCompleted,
-    this.location,
-    this.eventId,
-    // newly added; commented out for now
-    // this.totalDistance,
-  );
   @override
   Widget build(BuildContext context) {
-    if (challengeLat == null || challengeLong == null) {
+    if (widget.challengeLat == null || widget.challengeLong == null) {
       return SizedBox(
         height: MediaQuery.of(context).size.height * 0.75,
         child: ClipRRect(
@@ -279,7 +231,7 @@ class _PreviewState extends State<Preview> {
                 children: [
                   //Image
                   AppCachedImage(
-                    imageUrl: imgUrl,
+                    imageUrl: widget.imgUrl,
                     height: MediaQuery.of(context).size.height * 0.25,
                     width: double.infinity,
                   ),
@@ -301,7 +253,7 @@ class _PreviewState extends State<Preview> {
                             color: Preview.purpleColor,
                           ),
                           Text(
-                            location,
+                            widget.location,
                             style: TextStyle(
                               fontSize: 20,
                               color: Preview.purpleColor,
@@ -316,12 +268,12 @@ class _PreviewState extends State<Preview> {
                           Text(
                             ' ' +
                                 (currentLocation != null &&
-                                        challengeLat != null &&
-                                        challengeLong != null
+                                        widget.challengeLat != null &&
+                                        widget.challengeLong != null
                                     ? (currentLocation!.distanceTo(
                                               GeoPoint(
-                                                challengeLat!,
-                                                challengeLong!,
+                                                widget.challengeLat!,
+                                                widget.challengeLong!,
                                                 0,
                                               ),
                                             ) /
@@ -347,7 +299,7 @@ class _PreviewState extends State<Preview> {
                     child: Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        challengeName,
+                        widget.challengeName,
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 25,
@@ -367,7 +319,7 @@ class _PreviewState extends State<Preview> {
                         alignment: Alignment.topLeft,
                         child: SingleChildScrollView(
                           child: Text(
-                            description,
+                            widget.description,
                             style: TextStyle(
                               // fontWeight: FontWeight.bold,
                               fontSize: 16,
@@ -417,8 +369,10 @@ class _PreviewState extends State<Preview> {
                                           child: Align(
                                             alignment: Alignment.center,
                                             child: Text(
-                                              difficulty[0].toUpperCase() +
-                                                  difficulty.substring(1),
+                                              widget.difficulty[0]
+                                                      .toUpperCase() +
+                                                  widget.difficulty
+                                                      .substring(1),
                                               style: TextStyle(
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.w400,
@@ -450,7 +404,7 @@ class _PreviewState extends State<Preview> {
                                               left: 4,
                                             ),
                                             child: Text(
-                                              points.toString() + " PTS",
+                                              widget.points.toString() + " PTS",
                                               style: TextStyle(
                                                 fontSize: 20,
                                                 fontWeight: FontWeight.w500,
@@ -470,7 +424,7 @@ class _PreviewState extends State<Preview> {
                       ],
                     ),
                   ),
-                  (type == PreviewType.JOURNEY)
+                  (widget.type == PreviewType.JOURNEY)
                       ? Column(
                           children: [
                             Padding(
@@ -478,7 +432,10 @@ class _PreviewState extends State<Preview> {
                                 horizontal: 25,
                                 vertical: 5,
                               ),
-                              child: LoadingBar(numberCompleted, locationCount),
+                              child: LoadingBar(
+                                widget.numberCompleted,
+                                widget.locationCount,
+                              ),
                             ),
                             Padding(
                               padding: const EdgeInsets.only(
@@ -503,9 +460,11 @@ class _PreviewState extends State<Preview> {
                                             ),
                                             Text(
                                               " " +
-                                                  numberCompleted.toString() +
+                                                  widget.numberCompleted
+                                                      .toString() +
                                                   "/" +
-                                                  locationCount.toString(),
+                                                  widget.locationCount
+                                                      .toString(),
                                               style: TextStyle(
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.w600,
@@ -559,22 +518,34 @@ class _PreviewState extends State<Preview> {
                             return;
                           }
 
-                          Provider.of<ApiClient>(
+                          await Provider.of<ApiClient>(
                             context,
                             listen: false,
                           ).serverApi?.setCurrentEvent(
-                                SetCurrentEventDto(eventId: eventId),
+                                SetCurrentEventDto(eventId: widget.eventId),
                               );
-                          Navigator.pop(context);
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => GameplayPage(),
-                            ),
-                          );
+
+                          // Journeys need one extra step: picking which challenge to start.
+                          // Single challenges can go straight into gameplay.
+                          if (widget.type == PreviewType.JOURNEY) {
+                            if (context.mounted) {
+                              Navigator.pop(context, startJourneyResult);
+                            }
+                            return;
+                          }
+
+                          if (context.mounted) {
+                            Navigator.pop(context);
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => GameplayPage(),
+                              ),
+                            );
+                          }
                         },
                         child: Text(
-                          (numberCompleted == 0)
+                          (widget.numberCompleted == 0)
                               ? "Let's Go!"
                               : "Continue exploring",
                           style: TextStyle(

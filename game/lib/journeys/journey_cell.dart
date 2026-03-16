@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:game/preview/preview.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'dart:math';
@@ -93,7 +92,7 @@ class LoadingBar extends StatelessWidget {
   }
 }
 
-class JourneyCell extends StatefulWidget {
+class JourneyCell extends StatelessWidget {
   final int locationCount;
   final String location;
   final String journeyName;
@@ -107,6 +106,7 @@ class JourneyCell extends StatefulWidget {
   final String difficulty;
   final int points;
   final String id;
+  final VoidCallback onTap;
 
   const JourneyCell(
     this.journeyName,
@@ -122,86 +122,14 @@ class JourneyCell extends StatefulWidget {
     this.difficulty,
     this.points,
     this.id, {
+    required this.onTap,
     Key? key,
   }) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => _JourneyCellState(
-        journeyName,
-        challengeLat,
-        challengeLong,
-        location,
-        imgUrl,
-        description,
-        longDescription,
-        locationCount,
-        numberCompleted,
-        isCompleted,
-        difficulty,
-        points,
-        id,
-      );
-}
-
-class _JourneyCellState extends State<JourneyCell> {
-  final int locationCount;
-  final String journeyName;
-  final double? challengeLong;
-  final double? challengeLat;
-  final String location;
-  final String imgUrl;
-  final String description;
-  final String? longDescription;
-  final int numberCompleted;
-  final bool isCompleted;
-  final String difficulty;
-  final int points;
-  final String id;
-  // final int totalDistance;
-
-  _JourneyCellState(
-    this.journeyName,
-    this.challengeLat,
-    this.challengeLong,
-    this.location,
-    this.imgUrl,
-    this.description,
-    this.longDescription,
-    this.locationCount,
-    this.numberCompleted,
-    this.isCompleted,
-    this.difficulty,
-    this.points,
-    this.id,
-    // this.totalDistance
-  );
-
-  @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () async {
-        await showModalBottomSheet(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(10.0)),
-          ),
-          context: context,
-          isScrollControlled: true,
-          builder: (BuildContext context) => Preview(
-            journeyName,
-            challengeLat,
-            challengeLong,
-            longDescription ?? description,
-            imgUrl,
-            difficulty,
-            points,
-            PreviewType.JOURNEY,
-            location,
-            id,
-            locationCount: locationCount,
-            numberCompleted: numberCompleted,
-          ),
-        );
-      },
+      onTap: onTap,
       child: Container(
         width: MediaQuery.sizeOf(context).width * 0.9,
         height: MediaQuery.sizeOf(context).height * 0.3,
@@ -257,7 +185,7 @@ class _JourneyCellState extends State<JourneyCell> {
                     ),
                     Padding(padding: EdgeInsets.symmetric(horizontal: 5)),
                     Text(
-                      widget.location,
+                      location,
                       style: TextStyle(
                         color: AppColors.purple,
                         fontSize: 16,
@@ -292,7 +220,7 @@ class _JourneyCellState extends State<JourneyCell> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      widget.journeyName,
+                      journeyName,
                       style: TextStyle(
                         color: Colors.black,
                         fontSize: 20,
@@ -301,7 +229,7 @@ class _JourneyCellState extends State<JourneyCell> {
                       ),
                     ),
                     Text(
-                      widget.description,
+                      description,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -329,7 +257,7 @@ class _JourneyCellState extends State<JourneyCell> {
                           ),
                           child: Center(
                             child: Text(
-                              widget.difficulty,
+                              difficulty,
                               style: TextStyle(
                                 fontSize: 14,
                                 fontFamily: 'Poppins',
