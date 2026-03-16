@@ -268,16 +268,20 @@ class _BuildABearPageState extends State<BuildABearPage> {
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         child: Row(
                           children: [
-                            Expanded(
+                            Flexible(
+                                flex: 3,
                                 child:
                                     _buildNavTab('Eyes', _BuildABearTab.eyes)),
-                            Expanded(
+                            Flexible(
+                                flex: 3,
                                 child: _buildNavTab(
                                     'Mouth', _BuildABearTab.mouth)),
-                            Expanded(
+                            Flexible(
+                                flex: 3,
                                 child: _buildNavTab(
                                     'Color', _BuildABearTab.color)),
-                            Expanded(
+                            Flexible(
+                                flex: 5,
                                 child: _buildNavTab(
                                     'Accessories', _BuildABearTab.accessories)),
                           ],

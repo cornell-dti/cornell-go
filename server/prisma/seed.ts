@@ -2084,7 +2084,9 @@ async function main() {
   console.log(`   👀 Created 9 bear eyes items`);
   console.log(`   👄 Created 9 bear mouth items`);
   console.log(`   🎀 Created 9 bear accessory items`);
-  console.log(`   🧸 Seeded ${defaultBearItems.length} default items x ${users.length} users = ${defaultBearItems.length * users.length} inventory + equipped entries`);
+  console.log(
+    `   🧸 Seeded ${defaultBearItems.length} default items x ${users.length} users = ${defaultBearItems.length * users.length} inventory + equipped entries`,
+  );
 }
 
 main()
