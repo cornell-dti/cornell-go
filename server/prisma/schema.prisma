@@ -115,6 +115,7 @@ model User {
   hasCompletedOnboarding Boolean              @default(false)
   eventAttendances       EventAttendance[]
   eventRSVPs             EventRSVP[]
+  feedbacks              Feedback[]
 }
 
 model Group {
@@ -510,6 +511,23 @@ model EventAttendance {
   pointsAwarded Int
 
   @@unique([userId, campusEventId])
+}
+
+enum FeedbackCategory {
+  BUG_REPORT
+  SUGGESTION
+  GENERAL
+}
+
+model Feedback {
+  id          String           @id @default(uuid())
+  createdAt   DateTime         @default(now())
+  category    FeedbackCategory
+  text        String
+  rating      Int?
+  challengeId String?
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
 }
 
 model EventRSVP {

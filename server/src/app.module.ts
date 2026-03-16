@@ -22,6 +22,7 @@ import { QuizModule } from './quiz/quiz.module';
 import { CheckInModule } from './check-in/check-in.module';
 import { EventSyncModule } from './event-sync/event-sync.module';
 import { ClubSubmissionModule } from './club-submission/club-submission.module';
+import { FeedbackModule } from './feedback/feedback.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { ClubSubmissionModule } from './club-submission/club-submission.module';
     CheckInModule,
     EventSyncModule,
     ClubSubmissionModule,
+    FeedbackModule,
   ],
   controllers: [],
   providers: [],

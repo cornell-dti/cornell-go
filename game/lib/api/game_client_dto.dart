@@ -43,6 +43,34 @@ enum ChallengeLocationDto {
   ANY,
 }
 
+enum CheckInResultCheckInMethodDto {
+  LOCATION,
+  QR_CODE,
+}
+
+enum CheckInErrorCodeDto {
+  EVENT_NOT_FOUND,
+  EVENT_NOT_ACTIVE,
+  EVENT_NOT_APPROVED,
+  ALREADY_CHECKED_IN,
+  OUT_OF_RADIUS,
+  METHOD_NOT_ALLOWED,
+  INVALID_QR_CODE,
+  UNKNOWN_ERROR,
+}
+
+enum ClubSubmissionCategoryDto {
+  SOCIAL,
+  CULTURAL,
+  ATHLETIC,
+  WELLNESS,
+  ACADEMIC,
+  ARTS,
+  CAREER,
+  COMMUNITY,
+  OTHER,
+}
+
 enum EventCategoryDto {
   FOOD,
   NATURE,
@@ -61,6 +89,12 @@ enum EventDifficultyDto {
   Easy,
   Normal,
   Hard,
+}
+
+enum FeedbackCategoryDto {
+  BUG_REPORT,
+  SUGGESTION,
+  GENERAL,
 }
 
 enum QuizErrorCodeDto {
@@ -1084,6 +1118,152 @@ class AvailableChallengesResponseDto {
   late List<ChallengeDto> challenges;
 }
 
+class LocationCheckInDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['campusEventId'] = campusEventId;
+    fields['latitude'] = latitude;
+    fields['longitude'] = longitude;
+    return fields;
+  }
+
+  LocationCheckInDto.fromJson(Map<String, dynamic> fields) {
+    campusEventId = fields["campusEventId"];
+    latitude = fields["latitude"];
+    longitude = fields["longitude"];
+  }
+
+  void partialUpdate(LocationCheckInDto other) {
+    campusEventId = other.campusEventId;
+    latitude = other.latitude;
+    longitude = other.longitude;
+  }
+
+  LocationCheckInDto({
+    required this.campusEventId,
+    required this.latitude,
+    required this.longitude,
+  });
+
+  late String campusEventId;
+  late int latitude;
+  late int longitude;
+}
+
+class QrCodeCheckInDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['qrCode'] = qrCode;
+    return fields;
+  }
+
+  QrCodeCheckInDto.fromJson(Map<String, dynamic> fields) {
+    qrCode = fields["qrCode"];
+  }
+
+  void partialUpdate(QrCodeCheckInDto other) {
+    qrCode = other.qrCode;
+  }
+
+  QrCodeCheckInDto({
+    required this.qrCode,
+  });
+
+  late String qrCode;
+}
+
+class GenerateQrCodeDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['campusEventId'] = campusEventId;
+    return fields;
+  }
+
+  GenerateQrCodeDto.fromJson(Map<String, dynamic> fields) {
+    campusEventId = fields["campusEventId"];
+  }
+
+  void partialUpdate(GenerateQrCodeDto other) {
+    campusEventId = other.campusEventId;
+  }
+
+  GenerateQrCodeDto({
+    required this.campusEventId,
+  });
+
+  late String campusEventId;
+}
+
+class CheckInResultDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['attendanceId'] = attendanceId;
+    fields['campusEventId'] = campusEventId;
+    fields['checkInMethod'] = checkInMethod!.name;
+    fields['pointsAwarded'] = pointsAwarded;
+    fields['newTotalScore'] = newTotalScore;
+    return fields;
+  }
+
+  CheckInResultDto.fromJson(Map<String, dynamic> fields) {
+    attendanceId = fields["attendanceId"];
+    campusEventId = fields["campusEventId"];
+    checkInMethod =
+        CheckInResultCheckInMethodDto.values.byName(fields['checkInMethod']);
+    pointsAwarded = fields["pointsAwarded"];
+    newTotalScore = fields["newTotalScore"];
+  }
+
+  void partialUpdate(CheckInResultDto other) {
+    attendanceId = other.attendanceId;
+    campusEventId = other.campusEventId;
+    checkInMethod = other.checkInMethod;
+    pointsAwarded = other.pointsAwarded;
+    newTotalScore = other.newTotalScore;
+  }
+
+  CheckInResultDto({
+    required this.attendanceId,
+    required this.campusEventId,
+    required this.checkInMethod,
+    required this.pointsAwarded,
+    required this.newTotalScore,
+  });
+
+  late String attendanceId;
+  late String campusEventId;
+  late CheckInResultCheckInMethodDto checkInMethod;
+  late int pointsAwarded;
+  late int newTotalScore;
+}
+
+class CheckInErrorDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['message'] = message;
+    fields['code'] = code!.name;
+    return fields;
+  }
+
+  CheckInErrorDto.fromJson(Map<String, dynamic> fields) {
+    message = fields["message"];
+    code = CheckInErrorCodeDto.values.byName(fields['code']);
+  }
+
+  void partialUpdate(CheckInErrorDto other) {
+    message = other.message;
+    code = other.code;
+  }
+
+  CheckInErrorDto({
+    required this.message,
+    required this.code,
+  });
+
+  late String message;
+  late CheckInErrorCodeDto code;
+}
+
 class UpdateErrorDto {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> fields = {};
@@ -1109,6 +1289,102 @@ class UpdateErrorDto {
 
   late String id;
   late String message;
+}
+
+class ClubSubmissionDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['clubName'] = clubName;
+    fields['contactEmail'] = contactEmail;
+    fields['eventTitle'] = eventTitle;
+    fields['description'] = description;
+    fields['startTime'] = startTime;
+    fields['endTime'] = endTime;
+    fields['location'] = location;
+    if (latitude != null) {
+      fields['latitude'] = latitude;
+    }
+    if (longitude != null) {
+      fields['longitude'] = longitude;
+    }
+    fields['category'] = category!.name;
+    if (address != null) {
+      fields['address'] = address;
+    }
+    if (imageUrl != null) {
+      fields['imageUrl'] = imageUrl;
+    }
+    if (registrationLink != null) {
+      fields['registrationLink'] = registrationLink;
+    }
+    return fields;
+  }
+
+  ClubSubmissionDto.fromJson(Map<String, dynamic> fields) {
+    clubName = fields["clubName"];
+    contactEmail = fields["contactEmail"];
+    eventTitle = fields["eventTitle"];
+    description = fields["description"];
+    startTime = fields["startTime"];
+    endTime = fields["endTime"];
+    location = fields["location"];
+    latitude = fields.containsKey('latitude') ? (fields["latitude"]) : null;
+    longitude = fields.containsKey('longitude') ? (fields["longitude"]) : null;
+    category = ClubSubmissionCategoryDto.values.byName(fields['category']);
+    address = fields.containsKey('address') ? (fields["address"]) : null;
+    imageUrl = fields.containsKey('imageUrl') ? (fields["imageUrl"]) : null;
+    registrationLink = fields.containsKey('registrationLink')
+        ? (fields["registrationLink"])
+        : null;
+  }
+
+  void partialUpdate(ClubSubmissionDto other) {
+    clubName = other.clubName;
+    contactEmail = other.contactEmail;
+    eventTitle = other.eventTitle;
+    description = other.description;
+    startTime = other.startTime;
+    endTime = other.endTime;
+    location = other.location;
+    latitude = other.latitude == null ? latitude : other.latitude;
+    longitude = other.longitude == null ? longitude : other.longitude;
+    category = other.category;
+    address = other.address == null ? address : other.address;
+    imageUrl = other.imageUrl == null ? imageUrl : other.imageUrl;
+    registrationLink = other.registrationLink == null
+        ? registrationLink
+        : other.registrationLink;
+  }
+
+  ClubSubmissionDto({
+    required this.clubName,
+    required this.contactEmail,
+    required this.eventTitle,
+    required this.description,
+    required this.startTime,
+    required this.endTime,
+    required this.location,
+    this.latitude,
+    this.longitude,
+    required this.category,
+    this.address,
+    this.imageUrl,
+    this.registrationLink,
+  });
+
+  late String clubName;
+  late String contactEmail;
+  late String eventTitle;
+  late String description;
+  late String startTime;
+  late String endTime;
+  late String location;
+  late int? latitude;
+  late int? longitude;
+  late ClubSubmissionCategoryDto category;
+  late String? address;
+  late String? imageUrl;
+  late String? registrationLink;
 }
 
 class RequestFilteredEventsDto {
@@ -1670,6 +1946,154 @@ class UseEventTrackerHintDto {
   void partialUpdate(UseEventTrackerHintDto other) {}
 
   UseEventTrackerHintDto();
+}
+
+class TriggerEventSyncDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    if (days != null) {
+      fields['days'] = days;
+    }
+    return fields;
+  }
+
+  TriggerEventSyncDto.fromJson(Map<String, dynamic> fields) {
+    days = fields.containsKey('days') ? (fields["days"]) : null;
+  }
+
+  void partialUpdate(TriggerEventSyncDto other) {
+    days = other.days == null ? days : other.days;
+  }
+
+  TriggerEventSyncDto({
+    this.days,
+  });
+
+  late int? days;
+}
+
+class EventSyncResultDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['created'] = created;
+    fields['updated'] = updated;
+    fields['archived'] = archived;
+    fields['totalFetched'] = totalFetched;
+    fields['syncedAt'] = syncedAt;
+    return fields;
+  }
+
+  EventSyncResultDto.fromJson(Map<String, dynamic> fields) {
+    created = fields["created"];
+    updated = fields["updated"];
+    archived = fields["archived"];
+    totalFetched = fields["totalFetched"];
+    syncedAt = fields["syncedAt"];
+  }
+
+  void partialUpdate(EventSyncResultDto other) {
+    created = other.created;
+    updated = other.updated;
+    archived = other.archived;
+    totalFetched = other.totalFetched;
+    syncedAt = other.syncedAt;
+  }
+
+  EventSyncResultDto({
+    required this.created,
+    required this.updated,
+    required this.archived,
+    required this.totalFetched,
+    required this.syncedAt,
+  });
+
+  late int created;
+  late int updated;
+  late int archived;
+  late int totalFetched;
+  late String syncedAt;
+}
+
+class RequestEventSyncStatusDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    return fields;
+  }
+
+  RequestEventSyncStatusDto.fromJson(Map<String, dynamic> fields) {}
+
+  void partialUpdate(RequestEventSyncStatusDto other) {}
+
+  RequestEventSyncStatusDto();
+}
+
+class UpdateEventSyncStatusDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['running'] = running;
+    fields['lastResult'] = lastResult!.toJson();
+    return fields;
+  }
+
+  UpdateEventSyncStatusDto.fromJson(Map<String, dynamic> fields) {
+    running = fields["running"];
+    lastResult = EventSyncResultDto.fromJson(fields['lastResult']);
+  }
+
+  void partialUpdate(UpdateEventSyncStatusDto other) {
+    running = other.running;
+    lastResult = other.lastResult;
+  }
+
+  UpdateEventSyncStatusDto({
+    required this.running,
+    required this.lastResult,
+  });
+
+  late bool running;
+  late EventSyncResultDto lastResult;
+}
+
+class SubmitFeedbackDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['category'] = category!.name;
+    fields['text'] = text;
+    if (rating != null) {
+      fields['rating'] = rating;
+    }
+    if (challengeId != null) {
+      fields['challengeId'] = challengeId;
+    }
+    return fields;
+  }
+
+  SubmitFeedbackDto.fromJson(Map<String, dynamic> fields) {
+    category = FeedbackCategoryDto.values.byName(fields['category']);
+    text = fields["text"];
+    rating = fields.containsKey('rating') ? (fields["rating"]) : null;
+    challengeId =
+        fields.containsKey('challengeId') ? (fields["challengeId"]) : null;
+  }
+
+  void partialUpdate(SubmitFeedbackDto other) {
+    category = other.category;
+    text = other.text;
+    rating = other.rating == null ? rating : other.rating;
+    challengeId = other.challengeId == null ? challengeId : other.challengeId;
+  }
+
+  SubmitFeedbackDto({
+    required this.category,
+    required this.text,
+    this.rating,
+    this.challengeId,
+  });
+
+  late FeedbackCategoryDto category;
+  late String text;
+  late int? rating;
+  late String? challengeId;
 }
 
 class JoinGroupDto {
