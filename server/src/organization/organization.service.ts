@@ -260,6 +260,7 @@ export class OrganizationService {
    */
   async dtoForOrganization(
     organization: Organization,
+    indexableOnly = false,
   ): Promise<OrganizationDto> {
     const org = this.prisma.organization.findUniqueOrThrow({
       where: { id: organization.id },
@@ -269,7 +270,12 @@ export class OrganizationService {
       id: organization.id,
       name: organization.name,
       members: (await org.members({ select: { id: true } })).map(e => e.id),
-      events: (await org.events({ select: { id: true } })).map(e => e.id),
+      events: (
+        await org.events({
+          where: indexableOnly ? { indexable: true } : undefined,
+          select: { id: true },
+        })
+      ).map(e => e.id),
       managers: (await org.managers({ select: { id: true } })).map(e => e.id),
       achivements: (await org.achievements({ select: { id: true } })).map(
         e => e.id,
@@ -295,11 +301,12 @@ export class OrganizationService {
     organization: Organization,
     deleted: boolean,
     target?: User,
+    indexableOnly = false,
   ) {
     const dto: UpdateOrganizationDataDto = {
       organization: deleted
         ? { id: organization.id }
-        : await this.dtoForOrganization(organization),
+        : await this.dtoForOrganization(organization, indexableOnly),
       deleted,
     };
 

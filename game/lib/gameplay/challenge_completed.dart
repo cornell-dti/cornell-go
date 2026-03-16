@@ -226,10 +226,7 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
           return CircularIndicator();
         }
 
-        // BOTH: Check if this event is a journey (multiple challenges)
-        // Timer used: (event?.challenges?.length ?? 0) > 1 inline
-        // Quiz used: final isJourney = ...
-        final isJourney = (event?.challenges?.length ?? 0) > 1;
+        final isJourney = event?.isJourney == true;
 
         // BOTH: Determine whether the journey is done
         if (isJourney) {

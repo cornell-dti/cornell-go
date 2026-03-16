@@ -3,10 +3,12 @@ import { compareTwoStrings } from 'string-similarity';
 import styled, { css } from 'styled-components';
 import {
   ChallengeDto,
-  ChallengeLocationDto,
+  EventDto,
+  EventDifficultyDto,
+  EventTimeLimitationDto,
+  EventCategoryDto,
   QuizQuestionDto,
 } from '../all.dto';
-import { moveDown, moveUp } from '../ordering';
 import { AlertModal } from './AlertModal';
 import { DeleteModal } from './DeleteModal';
 import {
@@ -16,9 +18,8 @@ import {
   NumberEntryForm,
   OptionEntryForm,
   MapEntryForm,
+  DateEntryForm,
   CheckboxNumberEntryForm,
-  AnswersEntryForm,
-  OptionWithCustomEntryForm,
 } from './EntryModal';
 import { HButton } from './HButton';
 import {
@@ -31,274 +32,30 @@ import {
 } from './ListCard';
 import { SearchBar } from './SearchBar';
 import { ServerDataContext } from './ServerData';
+import {
+  ChallengeImage,
+  locationOptions,
+  QuizQuestionSection,
+  makeQuizForm,
+  fromQuizForm,
+  toQuizForm,
+} from './ChallengeCardComponents';
 
-const ChallengeImage = styled.div<{ url: string }>`
-  width: calc(100% + 23px);
-  height: 250px;
-  margin-left: -12px;
-  margin-bottom: 8px;
-  background-size: cover;
-  background-position: center;
-  ${props => css`
-    background-image: url(${'"' + props.url + '"'});
-  `}
-`;
-
-const locationOptions: ChallengeLocationDto[] = [
-  ChallengeLocationDto.ENG_QUAD,
-  ChallengeLocationDto.ARTS_QUAD,
-  ChallengeLocationDto.AG_QUAD,
-  ChallengeLocationDto.CENTRAL_CAMPUS,
-  ChallengeLocationDto.NORTH_CAMPUS,
-  ChallengeLocationDto.WEST_CAMPUS,
-  ChallengeLocationDto.CORNELL_ATHLETICS,
-  ChallengeLocationDto.VET_SCHOOL,
-  ChallengeLocationDto.COLLEGETOWN,
-  ChallengeLocationDto.ITHACA_COMMONS,
-  ChallengeLocationDto.ANY,
-];
-
-// Category options for quiz questions
-const categoryOptions = [
-  'HISTORICAL',
-  'SCIENCE',
-  'CULTURE',
-  'PHYSICAL',
+const eventCategoryOptions = [
   'FOOD',
   'NATURE',
+  'HISTORICAL',
+  'CAFE',
+  'DININGHALL',
+  'DORM',
 ];
 
-// Styled components for quiz section
-const QuizSection = styled.div`
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid #eee;
-`;
-
-const QuizHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  cursor: pointer;
-  padding: 4px 0;
-  &:hover {
-    background: #f9f9f9;
-  }
-`;
-
-const QuizQuestionItem = styled.div`
-  background: #f5f5f5;
-  border-radius: 4px;
-  padding: 8px;
-  margin: 8px 0;
-`;
-
-// Quiz form helpers
-function makeQuizForm(): EntryForm[] {
-  return [
-    { name: 'Question', characterLimit: 2048, value: '' },
-    { name: 'Explanation (optional)', characterLimit: 2048, value: '' },
-    {
-      name: 'Category',
-      options: categoryOptions,
-      value: 0,
-      customValue: '',
-      customOptionLabel: 'Custom...',
-    },
-    { name: 'Difficulty', min: 1, max: 5, value: 1 },
-    { name: 'Point Value', min: 1, max: 100, value: 10 },
-    {
-      name: 'Answers (select correct answer)',
-      answers: [
-        { text: '', isCorrect: true },
-        { text: '', isCorrect: false },
-      ],
-      minAnswers: 2,
-      maxAnswers: 4,
-    },
-  ];
-}
-
-function toQuizForm(question: QuizQuestionDto): EntryForm[] {
-  const categoryIndex = categoryOptions.indexOf(
-    question.category ?? 'HISTORICAL',
-  );
-  const isCustomCategory = categoryIndex === -1;
-
-  return [
-    {
-      name: 'Question',
-      characterLimit: 2048,
-      value: question.questionText ?? '',
-    },
-    {
-      name: 'Explanation (optional)',
-      characterLimit: 2048,
-      value: question.explanation ?? '',
-    },
-    {
-      name: 'Category',
-      options: categoryOptions,
-      value: isCustomCategory ? categoryOptions.length : categoryIndex,
-      customValue: isCustomCategory ? (question.category ?? '') : '',
-      customOptionLabel: 'Custom...',
-    },
-    { name: 'Difficulty', min: 1, max: 5, value: question.difficulty ?? 1 },
-    { name: 'Point Value', min: 1, max: 100, value: question.pointValue ?? 10 },
-    {
-      name: 'Answers (select correct answer)',
-      answers: question.answers?.map(a => ({
-        text: a.answerText,
-        isCorrect: a.isCorrect ?? false,
-      })) ?? [
-          { text: '', isCorrect: true },
-          { text: '', isCorrect: false },
-        ],
-      minAnswers: 2,
-      maxAnswers: 4,
-    },
-  ];
-}
-
-function fromQuizForm(
-  form: EntryForm[],
-  challengeId: string,
-  id: string,
-): QuizQuestionDto {
-  const categoryForm = form[2] as OptionWithCustomEntryForm;
-  const isCustom = categoryForm.value === categoryOptions.length;
-
-  return {
-    id,
-    challengeId,
-    questionText: (form[0] as FreeEntryForm).value,
-    explanation: (form[1] as FreeEntryForm).value || undefined,
-    category: isCustom
-      ? categoryForm.customValue.trim() || 'GENERAL'
-      : categoryOptions[categoryForm.value],
-    difficulty: (form[3] as NumberEntryForm).value,
-    pointValue: (form[4] as NumberEntryForm).value,
-    answers: (form[5] as AnswersEntryForm).answers.map(a => ({
-      answerText: a.text,
-      isCorrect: a.isCorrect,
-    })),
-  };
-}
-
-// QuizQuestionSection component
-function QuizQuestionSection(props: {
-  challengeId: string;
-  onCreateQuiz: () => void;
-  onEditQuiz: (question: QuizQuestionDto) => void;
-  onDeleteQuiz: (questionId: string) => void;
-}) {
-  const [expanded, setExpanded] = useState(false);
-  const serverData = useContext(ServerDataContext);
-
-  // Filter questions for this challenge
-  const questions = Array.from(serverData.quizQuestions.values()).filter(
-    q => q.challengeId === props.challengeId,
-  );
-
-  useEffect(() => {
-    if (expanded) {
-      serverData.requestQuizQuestions(props.challengeId);
-    }
-  }, [expanded, props.challengeId]);
-
-  return (
-    <QuizSection>
-      <QuizHeader onClick={() => setExpanded(!expanded)}>
-        <span>
-          <b>Quiz Questions</b> ({questions.length})
-        </span>
-        <span>{expanded ? '▼' : '▶'}</span>
-      </QuizHeader>
-
-      {expanded && (
-        <>
-          {questions.map(q => (
-            <QuizQuestionItem key={q.id}>
-              <div>
-                <b>Q:</b> {q.questionText}
-              </div>
-              <div>
-                <small>
-                  Category: {q.category} | Difficulty: {q.difficulty} | Points:{' '}
-                  {q.pointValue}
-                </small>
-              </div>
-              <div style={{ marginTop: 4 }}>
-                <HButton onClick={() => props.onEditQuiz(q)}>EDIT</HButton>
-                <HButton onClick={() => props.onDeleteQuiz(q.id)} float="right">
-                  DELETE
-                </HButton>
-              </div>
-            </QuizQuestionItem>
-          ))}
-          <HButton onClick={props.onCreateQuiz}>+ ADD QUESTION</HButton>
-        </>
-      )}
-    </QuizSection>
-  );
-}
-
-function ChallengeCard(props: {
-  challenge: ChallengeDto;
-  onUp: () => void;
-  onDown: () => void;
-  onDelete: () => void;
-  onEdit: () => void;
-  onCopy: () => void;
-  onCreateQuiz: () => void;
-  onEditQuiz: (question: QuizQuestionDto) => void;
-  onDeleteQuiz: (questionId: string) => void;
-}) {
-  return (
-    <ListCardBox>
-      <ListCardTitle>{props.challenge.name}</ListCardTitle>
-      <ListCardDescription>{props.challenge.description}</ListCardDescription>
-      <ChallengeImage url={props.challenge.imageUrl ?? ''} />
-      <ListCardBody>
-        Id: <b>{props.challenge.id}</b> <br />
-        Location: <b>{props.challenge.location}</b> <br />
-        Score: <b>{props.challenge.points}</b> <br />
-        Latitude: <b>{props.challenge.latF}</b>, Longitude:{' '}
-        <b>{props.challenge.longF}</b> <br />
-        Awarding Distance: <b>{props.challenge.awardingRadiusF} meters</b>{' '}
-        <br />
-        Close Distance: <b>{props.challenge.closeRadiusF} meters</b> <br />
-        Timer:{' '}
-        <b>
-          {props.challenge.timerLength
-            ? `${Math.floor(props.challenge.timerLength / 60)}m ${props.challenge.timerLength % 60}s`
-            : 'None'}
-        </b>
-      </ListCardBody>
-      <ListCardButtons>
-        <HButton onClick={props.onUp}>UP</HButton>
-        <HButton onClick={props.onDown}>DOWN</HButton>
-        <HButton onClick={props.onDelete} float="right">
-          DELETE
-        </HButton>
-        <HButton onClick={props.onEdit} float="right">
-          EDIT
-        </HButton>
-        <HButton onClick={props.onCopy} float="right">
-          COPY
-        </HButton>
-      </ListCardButtons>
-      <QuizQuestionSection
-        challengeId={props.challenge.id}
-        onCreateQuiz={props.onCreateQuiz}
-        onEditQuiz={props.onEditQuiz}
-        onDeleteQuiz={props.onDeleteQuiz}
-      />
-    </ListCardBox>
-  );
-}
-
-function makeForm(): EntryForm[] {
+// Combined form indices:
+// 0: Location (map), 1: Name, 2: Description, 3: Location Description,
+// 4: Category, 5: Difficulty, 6: Points, 7: Image URL,
+// 8: Awarding Distance, 9: Close Distance, 10: Enable Timer,
+// 11: Time Limitation, 12: Publicly Visible, 13: Featured, 14: Available Until
+function makeCombinedForm(): EntryForm[] {
   const awardingRadius = 1;
   const closeRadius = 1;
   return [
@@ -309,17 +66,37 @@ function makeForm(): EntryForm[] {
       awardingRadiusF: awardingRadius,
       closeRadiusF: closeRadius,
     },
+    { name: 'Name', characterLimit: 256, value: '' },
+    { name: 'Description', characterLimit: 2048, value: '', multiline: true },
     {
       name: 'Location Description',
       options: locationOptions as string[],
       value: 0,
     },
-    { name: 'Name', characterLimit: 256, value: '' },
-    { name: 'Description', characterLimit: 2048, value: '' },
+    {
+      name: 'Category',
+      options: eventCategoryOptions,
+      value: 1,
+    },
+    {
+      name: 'Difficulty',
+      options: ['Easy', 'Normal', 'Hard'],
+      value: 0,
+    },
     { name: 'Points', min: 1, max: 1000, value: 50 },
     { name: 'Image URL', characterLimit: 2048, value: '' },
-    { name: 'Awarding Distance (meters)', min: 1, max: 1000, value: awardingRadius },
-    { name: 'Close Distance (meters)', min: 1, max: 1000, value: closeRadius },
+    {
+      name: 'Awarding Distance (meters)',
+      min: 1,
+      max: 1000,
+      value: awardingRadius,
+    },
+    {
+      name: 'Close Distance (meters)',
+      min: 1,
+      max: 1000,
+      value: closeRadius,
+    },
     {
       name: 'Enable Timer',
       checked: false,
@@ -328,10 +105,18 @@ function makeForm(): EntryForm[] {
       max: 3600,
       numberLabel: 'Timer Length (seconds)',
     },
+    {
+      name: 'Time Limitation',
+      options: ['Unlimited', 'Limited'],
+      value: 0,
+    },
+    { name: 'Publicly Visible', options: ['No', 'Yes'], value: 0 },
+    { name: 'Featured', options: ['No', 'Yes'], value: 0 },
+    { name: 'Available Until', date: new Date('2050') },
   ];
 }
 
-function toForm(challenge: ChallengeDto) {
+function combinedToForm(event: EventDto, challenge: ChallengeDto): EntryForm[] {
   const awardingRadius = challenge.awardingRadiusF ?? 0;
   const closeRadius = challenge.closeRadiusF ?? 0;
   return [
@@ -342,19 +127,34 @@ function toForm(challenge: ChallengeDto) {
       awardingRadiusF: awardingRadius,
       closeRadiusF: closeRadius,
     },
+    { name: 'Name', characterLimit: 256, value: event.name ?? '' },
+    {
+      name: 'Description',
+      characterLimit: 2048,
+      value: event.description ?? '',
+      multiline: true,
+    },
     {
       name: 'Location Description',
-      options: locationOptions,
+      options: locationOptions as string[],
       value:
         challenge.location !== undefined
           ? locationOptions.indexOf(challenge.location)
           : 0,
     },
-    { name: 'Name', characterLimit: 256, value: challenge.name ?? '' },
     {
-      name: 'Description',
-      characterLimit: 2048,
-      value: challenge.description ?? '',
+      name: 'Category',
+      options: eventCategoryOptions,
+      value:
+        event.category !== undefined
+          ? eventCategoryOptions.indexOf(event.category)
+          : 0,
+    },
+    {
+      name: 'Difficulty',
+      options: ['Easy', 'Normal', 'Hard'],
+      value:
+        event.difficulty === 'Easy' ? 0 : event.difficulty === 'Normal' ? 1 : 2,
     },
     {
       name: 'Points',
@@ -389,56 +189,172 @@ function toForm(challenge: ChallengeDto) {
       max: 3600,
       numberLabel: 'Timer Length (seconds)',
     },
+    {
+      name: 'Time Limitation',
+      options: ['Unlimited', 'Limited'],
+      value: event.timeLimitation === 'PERPETUAL' ? 0 : 1,
+    },
+    {
+      name: 'Publicly Visible',
+      options: ['No', 'Yes'],
+      value: event.indexable ? 1 : 0,
+    },
+    {
+      name: 'Featured',
+      options: ['No', 'Yes'],
+      value: event.featured ? 1 : 0,
+    },
+    {
+      name: 'Available Until',
+      date: event.endTime ? new Date(event.endTime) : new Date('2050'),
+    },
   ];
 }
 
-function fromForm(
+function eventFromCombinedForm(form: EntryForm[], id: string): EventDto {
+  return {
+    id,
+    requiredMembers: -1,
+    name: (form[1] as FreeEntryForm).value,
+    description: (form[2] as FreeEntryForm).value,
+    category: eventCategoryOptions[
+      (form[4] as OptionEntryForm).value
+    ] as EventCategoryDto,
+    difficulty:
+      (form[5] as OptionEntryForm).value === 0
+        ? EventDifficultyDto.Easy
+        : (form[5] as OptionEntryForm).value === 1
+          ? EventDifficultyDto.Normal
+          : EventDifficultyDto.Hard,
+    timeLimitation:
+      (form[11] as OptionEntryForm).value === 0
+        ? EventTimeLimitationDto.PERPETUAL
+        : EventTimeLimitationDto.LIMITED_TIME,
+    indexable: (form[12] as OptionEntryForm).value === 1,
+    featured: (form[13] as OptionEntryForm).value === 1,
+    endTime: (form[14] as DateEntryForm).date.toUTCString(),
+    challenges: [],
+    latitudeF: 0,
+    longitudeF: 0,
+    isJourney: false,
+  };
+}
+
+function challengeFromCombinedForm(
   form: EntryForm[],
   eventId: string,
   id: string,
 ): ChallengeDto {
-  const timerForm = form[8] as CheckboxNumberEntryForm;
+  const timerForm = form[10] as CheckboxNumberEntryForm;
   return {
     id,
-    name: (form[2] as FreeEntryForm).value,
-    location: locationOptions[(form[1] as OptionEntryForm).value],
-    description: (form[3] as FreeEntryForm).value,
-    points: (form[4] as NumberEntryForm).value,
-    imageUrl: (form[5] as FreeEntryForm).value,
+    name: (form[1] as FreeEntryForm).value,
+    description: (form[2] as FreeEntryForm).value,
+    location: locationOptions[(form[3] as OptionEntryForm).value],
+    points: (form[6] as NumberEntryForm).value,
+    imageUrl: (form[7] as FreeEntryForm).value,
     latF: (form[0] as MapEntryForm).latitude,
     longF: (form[0] as MapEntryForm).longitude,
-    awardingRadiusF: (form[6] as NumberEntryForm).value,
-    closeRadiusF: (form[7] as NumberEntryForm).value,
+    awardingRadiusF: (form[8] as NumberEntryForm).value,
+    closeRadiusF: (form[9] as NumberEntryForm).value,
     linkedEventId: eventId,
     timerLength: timerForm.checked ? timerForm.value : undefined,
   };
 }
 
-function makeCopyForm(evOptions: string[], initialIndex: number) {
+function makeCopyForm(orgOptions: string[], initialIndex: number) {
   return [
     {
-      name: 'Target Event',
-      options: evOptions,
+      name: 'Target Organization',
+      options: orgOptions,
       value: initialIndex,
     },
   ] as EntryForm[];
 }
 
+function StandaloneChallengeCard(props: {
+  event: EventDto;
+  challenge: ChallengeDto;
+  onEdit: () => void;
+  onDelete: () => void;
+  onCopy: () => void;
+  onCreateQuiz: () => void;
+  onEditQuiz: (question: QuizQuestionDto) => void;
+  onDeleteQuiz: (questionId: string) => void;
+}) {
+  const difficultyMode =
+    props.event.difficulty === 'Easy'
+      ? 'Easy'
+      : props.event.difficulty === 'Normal'
+        ? 'Normal'
+        : 'Hard';
+
+  let categoryInput = props.event.category as string;
+  const categoryType =
+    categoryInput[0] + categoryInput.substring(1).toLowerCase();
+
+  return (
+    <ListCardBox>
+      <ListCardTitle>{props.event.name}</ListCardTitle>
+      <ListCardDescription>{props.event.description}</ListCardDescription>
+      <ChallengeImage url={props.challenge.imageUrl ?? ''} />
+      <ListCardBody>
+        Category: <b>{categoryType}</b> <br />
+        Difficulty: <b>{difficultyMode}</b> <br />
+        Location: <b>{props.challenge.location}</b> <br />
+        Points: <b>{props.challenge.points}</b> <br />
+        Latitude: <b>{props.challenge.latF}</b>, Longitude:{' '}
+        <b>{props.challenge.longF}</b> <br />
+        Awarding Distance: <b>{props.challenge.awardingRadiusF} meters</b>{' '}
+        <br />
+        Close Distance: <b>{props.challenge.closeRadiusF} meters</b> <br />
+        Timer:{' '}
+        <b>
+          {props.challenge.timerLength
+            ? `${Math.floor(props.challenge.timerLength / 60)}m ${props.challenge.timerLength % 60}s`
+            : 'None'}
+        </b>{' '}
+        <br />
+        Publicly Visible: <b>{props.event.indexable ? 'Yes' : 'No'}</b> <br />
+        Featured: <b>{props.event.featured ? 'Yes' : 'No'}</b> <br />
+      </ListCardBody>
+      <ListCardButtons>
+        <HButton onClick={props.onDelete}>DELETE</HButton>
+        <HButton onClick={props.onEdit} float="right">
+          EDIT
+        </HButton>
+        <HButton onClick={props.onCopy} float="right">
+          COPY
+        </HButton>
+      </ListCardButtons>
+      <QuizQuestionSection
+        challengeId={props.challenge.id}
+        onCreateQuiz={props.onCreateQuiz}
+        onEditQuiz={props.onEditQuiz}
+        onDeleteQuiz={props.onDeleteQuiz}
+      />
+    </ListCardBox>
+  );
+}
+
 export function Challenges() {
+  const serverData = useContext(ServerDataContext);
+  const selectedOrg = serverData.organizations.get(serverData.selectedOrg);
+
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectModalOpen, setSelectModalOpen] = useState(false);
-
-  const [form, setForm] = useState(() => makeForm());
-  const [currentId, setCurrentId] = useState('');
-  const [query, setQuery] = useState('');
-
   const [isCopyModalOpen, setCopyModalOpen] = useState(false);
   const [copyForm, setCopyForm] = useState(() => ({
     form: makeCopyForm([], 0),
-    evIds: [] as string[],
+    orgIds: [] as string[],
   }));
+
+  const [form, setForm] = useState(() => makeCombinedForm());
+  const [currentEventId, setCurrentEventId] = useState('');
+  const [currentChalId, setCurrentChalId] = useState('');
+  const [query, setQuery] = useState('');
 
   // Quiz state
   const [createQuizModalOpen, setCreateQuizModalOpen] = useState(false);
@@ -446,10 +362,7 @@ export function Challenges() {
   const [deleteQuizModalOpen, setDeleteQuizModalOpen] = useState(false);
   const [quizForm, setQuizForm] = useState<EntryForm[]>(() => makeQuizForm());
   const [currentQuizId, setCurrentQuizId] = useState('');
-  const [currentChallengeId, setCurrentChallengeId] = useState('');
-
-  const serverData = useContext(ServerDataContext);
-  const selectedEvent = serverData.events.get(serverData.selectedEvent);
+  const [currentQuizChalId, setCurrentQuizChalId] = useState('');
 
   const handleRadiusChange = (awardingRadius: number, closeRadius: number) => {
     setForm(prev => {
@@ -460,25 +373,57 @@ export function Challenges() {
         awardingRadiusF: awardingRadius,
         closeRadiusF: closeRadius,
       };
-      next[6] = { ...(next[6] as NumberEntryForm), value: awardingRadius };
-      next[7] = { ...(next[7] as NumberEntryForm), value: closeRadius };
+      next[8] = { ...(next[8] as NumberEntryForm), value: awardingRadius };
+      next[9] = { ...(next[9] as NumberEntryForm), value: closeRadius };
       return next;
     });
   };
 
-  // Fetch quiz questions for all challenges when event is selected
+  // Filter events to standalone challenges (isJourney !== true)
+  const standaloneEvents = Array.from<EventDto>(
+    serverData.organizations
+      .get(serverData.selectedOrg)
+      ?.events?.map((evId: string) => serverData.events.get(evId)!)
+      .filter((ev?: EventDto) => !!ev && !ev.isJourney) ?? [],
+  );
+
+  // Build pairs of (event, challenge) for display
+  const challengePairs = standaloneEvents
+    .map(ev => {
+      const chalId = ev.challenges?.[0];
+      const chal = chalId ? serverData.challenges.get(chalId) : undefined;
+      return { event: ev, challenge: chal };
+    })
+    .filter(pair => pair.challenge)
+    .filter(pair => {
+      if (query === '') return true;
+      const q = query.toLowerCase();
+      return (
+        (pair.event.name ?? '').toLowerCase().includes(q) ||
+        (pair.event.description ?? '').toLowerCase().includes(q)
+      );
+    })
+    .sort(
+      (a, b) =>
+        compareTwoStrings(b.event.name ?? '', query) -
+        compareTwoStrings(a.event.name ?? '', query) +
+        compareTwoStrings(b.event.description ?? '', query) -
+        compareTwoStrings(a.event.description ?? '', query),
+    );
+
+  // Fetch quiz questions for all visible standalone challenges
   useEffect(() => {
-    if (selectedEvent?.challenges) {
-      for (const challengeId of selectedEvent.challenges) {
-        serverData.requestQuizQuestions(challengeId);
+    for (const pair of challengePairs) {
+      if (pair.challenge) {
+        serverData.requestQuizQuestions(pair.challenge.id);
       }
     }
-  }, [serverData.selectedEvent, selectedEvent?.challenges?.length]);
+  }, [serverData.selectedOrg, standaloneEvents.length]);
 
   return (
     <>
       <AlertModal
-        description="To create a challenge, select an event."
+        description="To create a challenge, select an organization."
         isOpen={selectModalOpen}
         onClose={() => setSelectModalOpen(false)}
       />
@@ -486,15 +431,19 @@ export function Challenges() {
         title="Create Challenge"
         isOpen={createModalOpen}
         entryButtonText="CREATE"
-        onEntry={() => {
-          serverData.updateChallenge(
-            fromForm(form, serverData.selectedEvent, ''),
-          );
+        onEntry={async () => {
+          const evId = await serverData.updateEvent({
+            ...eventFromCombinedForm(form, ''),
+            initialOrganizationId: serverData.selectedOrg,
+          });
+          if (evId) {
+            serverData.updateChallenge(
+              challengeFromCombinedForm(form, evId, ''),
+            );
+          }
           setCreateModalOpen(false);
         }}
-        onCancel={() => {
-          setCreateModalOpen(false);
-        }}
+        onCancel={() => setCreateModalOpen(false)}
         form={form}
         onRadiusChange={handleRadiusChange}
       />
@@ -503,23 +452,27 @@ export function Challenges() {
         isOpen={editModalOpen}
         entryButtonText="EDIT"
         onEntry={() => {
+          const ev = serverData.events.get(currentEventId)!;
+          serverData.updateEvent({
+            ...eventFromCombinedForm(form, currentEventId),
+            challenges: ev.challenges,
+            isJourney: false,
+          });
           serverData.updateChallenge(
-            fromForm(form, serverData.selectedEvent, currentId),
+            challengeFromCombinedForm(form, currentEventId, currentChalId),
           );
           setEditModalOpen(false);
         }}
-        onCancel={() => {
-          setEditModalOpen(false);
-        }}
+        onCancel={() => setEditModalOpen(false)}
         form={form}
         onRadiusChange={handleRadiusChange}
       />
       <DeleteModal
-        objectName={serverData.challenges.get(currentId)?.name ?? ''}
+        objectName={serverData.events.get(currentEventId)?.name ?? ''}
         isOpen={deleteModalOpen}
         onClose={() => setDeleteModalOpen(false)}
         onDelete={() => {
-          serverData.deleteChallenge(currentId);
+          serverData.deleteEvent(currentEventId);
           setDeleteModalOpen(false);
         }}
       />
@@ -528,18 +481,30 @@ export function Challenges() {
         isOpen={isCopyModalOpen}
         entryButtonText="COPY"
         onEntry={async () => {
-          const chal = serverData.challenges.get(currentId)!;
-          serverData.updateChallenge({
-            ...chal,
-            linkedEventId:
-              copyForm.evIds[(copyForm.form[0] as OptionEntryForm).value],
+          const ev = serverData.events.get(currentEventId)!;
+          const evId = await serverData.updateEvent({
+            ...ev,
+            challenges: [],
+            initialOrganizationId:
+              copyForm.orgIds[(copyForm.form[0] as OptionEntryForm).value],
             id: '',
           });
+          if (!evId) {
+            setCopyModalOpen(false);
+            return;
+          }
+          const chalId = ev.challenges?.[0];
+          if (chalId) {
+            const chal = serverData.challenges.get(chalId)!;
+            serverData.updateChallenge({
+              ...chal,
+              linkedEventId: evId,
+              id: '',
+            });
+          }
           setCopyModalOpen(false);
         }}
-        onCancel={() => {
-          setCopyModalOpen(false);
-        }}
+        onCancel={() => setCopyModalOpen(false)}
         form={copyForm.form}
       />
 
@@ -550,7 +515,7 @@ export function Challenges() {
         entryButtonText="CREATE"
         onEntry={() => {
           serverData.updateQuizQuestion(
-            fromQuizForm(quizForm, currentChallengeId, ''),
+            fromQuizForm(quizForm, currentQuizChalId, ''),
           );
           setCreateQuizModalOpen(false);
         }}
@@ -563,7 +528,7 @@ export function Challenges() {
         entryButtonText="SAVE"
         onEntry={() => {
           serverData.updateQuizQuestion(
-            fromQuizForm(quizForm, currentChallengeId, currentQuizId),
+            fromQuizForm(quizForm, currentQuizChalId, currentQuizId),
           );
           setEditQuizModalOpen(false);
         }}
@@ -582,103 +547,80 @@ export function Challenges() {
 
       <SearchBar
         onCreate={() => {
-          setForm(makeForm());
-          setCreateModalOpen(!!selectedEvent);
-          if (!selectedEvent) {
+          if (!selectedOrg) {
             setSelectModalOpen(true);
+            return;
           }
+          setForm(makeCombinedForm());
+          setCreateModalOpen(true);
         }}
         onSearch={query => setQuery(query)}
       />
 
-      {serverData.selectedEvent === '' ? (
-        <CenterText>Select an event to view challenges</CenterText>
-      ) : serverData.events.get(serverData.selectedEvent) ? (
-        serverData.events.get(serverData.selectedEvent)?.challenges?.length ===
-        0 && <CenterText>No challenges in event</CenterText>
+      {serverData.selectedOrg === '' ? (
+        <CenterText>Select an organization to view challenges</CenterText>
+      ) : serverData.organizations.get(serverData.selectedOrg) ? (
+        challengePairs.length === 0 && (
+          <CenterText>No standalone challenges in organization</CenterText>
+        )
       ) : (
         <CenterText>Error getting challenges</CenterText>
       )}
-      {selectedEvent?.challenges
-        ?.filter((chalId: string) => serverData.challenges.get(chalId))
-        .map((chalId: string) => serverData.challenges.get(chalId)!)
-        .sort((a: ChallengeDto, b: ChallengeDto) =>
-          query === ''
-            ? 0
-            : compareTwoStrings(b.name ?? '', query) -
-            compareTwoStrings(a.name ?? '', query) +
-            compareTwoStrings(b.description ?? '', query) -
-            compareTwoStrings(a.description ?? '', query),
-        )
-        .map((chal: ChallengeDto) => (
-          <ChallengeCard
-            key={chal.id}
-            challenge={chal}
-            onUp={() => {
-              if (query !== '' || !selectedEvent.challenges) return;
-              selectedEvent.challenges = moveUp(
-                selectedEvent.challenges,
-                selectedEvent.challenges.findIndex(
-                  (id: string) => id === chal.id,
-                ) ?? 0,
-              );
-              serverData.updateEvent(selectedEvent);
-            }}
-            onDown={() => {
-              if (query !== '' || !selectedEvent.challenges) return;
-              selectedEvent.challenges = moveDown(
-                selectedEvent.challenges,
-                selectedEvent.challenges.findIndex(
-                  (id: string) => id === chal.id,
-                ),
-              );
-              serverData.updateEvent(selectedEvent);
-            }}
-            onEdit={() => {
-              const freshChallenge = serverData.challenges.get(chal.id);
-              if (freshChallenge) {
-                setCurrentId(chal.id);
-                setForm(toForm(freshChallenge));
-                setEditModalOpen(true);
-              }
-            }}
-            onDelete={() => {
-              setCurrentId(chal.id);
-              setDeleteModalOpen(true);
-            }}
-            onCopy={() => {
-              const evs = Array.from(serverData.events.values());
-              const myEvIndex = evs.findIndex(v => v.id === selectedEvent?.id);
-              setCurrentId(chal.id);
-              setCopyForm({
-                form: makeCopyForm(
-                  evs.map(ev => ev.name ?? ''),
-                  myEvIndex,
-                ),
-                evIds: evs.map(ev => ev.id),
-              });
-              setCopyModalOpen(true);
-            }}
-            onCreateQuiz={() => {
-              setCurrentChallengeId(chal.id);
-              setQuizForm(makeQuizForm());
-              setCreateQuizModalOpen(true);
-            }}
-            onEditQuiz={question => {
-              const freshQuestion = serverData.quizQuestions.get(question.id);
-              if (freshQuestion) {
-                setCurrentChallengeId(chal.id);
-                setCurrentQuizId(question.id);
-                setQuizForm(toQuizForm(freshQuestion));
-                setEditQuizModalOpen(true);
-              }
-            }}
-            onDeleteQuiz={questionId => {
-              setCurrentQuizId(questionId);
-              setDeleteQuizModalOpen(true);
-            }}
-          />
-        ))}
+
+      {challengePairs.map(({ event: ev, challenge: chal }) => (
+        <StandaloneChallengeCard
+          key={ev.id}
+          event={ev}
+          challenge={chal!}
+          onEdit={() => {
+            const freshEvent = serverData.events.get(ev.id);
+            const freshChal = chal
+              ? serverData.challenges.get(chal.id)
+              : undefined;
+            if (freshEvent && freshChal) {
+              setCurrentEventId(ev.id);
+              setCurrentChalId(freshChal.id);
+              setForm(combinedToForm(freshEvent, freshChal));
+              setEditModalOpen(true);
+            }
+          }}
+          onDelete={() => {
+            setCurrentEventId(ev.id);
+            setDeleteModalOpen(true);
+          }}
+          onCopy={() => {
+            const orgs = Array.from(serverData.organizations.values());
+            const myOrgIndex = orgs.findIndex(v => v.id === selectedOrg?.id);
+            setCurrentEventId(ev.id);
+            setCopyForm({
+              form: makeCopyForm(
+                orgs.map(org => org.name ?? ''),
+                myOrgIndex,
+              ),
+              orgIds: orgs.map(org => org.id),
+            });
+            setCopyModalOpen(true);
+          }}
+          onCreateQuiz={() => {
+            setCurrentQuizChalId(chal!.id);
+            setQuizForm(makeQuizForm());
+            setCreateQuizModalOpen(true);
+          }}
+          onEditQuiz={question => {
+            const freshQuestion = serverData.quizQuestions.get(question.id);
+            if (freshQuestion) {
+              setCurrentQuizChalId(chal!.id);
+              setCurrentQuizId(question.id);
+              setQuizForm(toQuizForm(freshQuestion));
+              setEditQuizModalOpen(true);
+            }
+          }}
+          onDeleteQuiz={questionId => {
+            setCurrentQuizId(questionId);
+            setDeleteQuizModalOpen(true);
+          }}
+        />
+      ))}
     </>
   );
 }
