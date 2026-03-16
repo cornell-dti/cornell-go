@@ -447,6 +447,26 @@ export interface SubmitFeedbackDto {
   challengeId?: string;
 }
 
+export interface FeedbackDto {
+  id: string;
+  createdAt: string;
+  category: FeedbackCategoryDto;
+  text: string;
+  rating?: number;
+  challengeId?: string;
+  userId: string;
+  username?: string;
+  challengeName?: string;
+}
+
+export interface RequestFeedbackDataDto {
+  dummy?: string;
+}
+
+export interface UpdateFeedbackDataDto {
+  feedbacks: FeedbackDto[];
+}
+
 export interface JoinGroupDto {
   groupId: string;
 }

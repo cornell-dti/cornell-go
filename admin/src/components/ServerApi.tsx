@@ -123,6 +123,12 @@ export class ServerApi {
     return this.send('submitFeedback', data) as Promise<boolean | undefined>;
   }
 
+  requestFeedbackData(data: dto.RequestFeedbackDataDto) {
+    return this.send('requestFeedbackData', data) as Promise<
+      boolean | undefined
+    >;
+  }
+
   requestGroupData(data: dto.RequestGroupDataDto) {
     return this.send('requestGroupData', data) as Promise<boolean | undefined>;
   }
@@ -399,5 +405,10 @@ export class ServerApi {
   onQuizProgress(callback: (data: dto.QuizProgressDto) => void) {
     this.socket.removeAllListeners('quizProgress');
     this.socket.on('quizProgress', data => callback(data));
+  }
+
+  onUpdateFeedbackData(callback: (data: dto.UpdateFeedbackDataDto) => void) {
+    this.socket.removeAllListeners('updateFeedbackData');
+    this.socket.on('updateFeedbackData', data => callback(data));
   }
 }

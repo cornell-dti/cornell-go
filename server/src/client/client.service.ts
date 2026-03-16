@@ -45,6 +45,7 @@ import {
   QuizErrorDto,
   QuizProgressDto,
 } from '../quiz/quiz.dto';
+import { UpdateFeedbackDataDto } from '../feedback/feedback.dto';
 import { ExtractSubjectType } from '@casl/ability';
 
 export type ClientApiDef = {
@@ -74,6 +75,7 @@ export type ClientApiDef = {
   quizResult: QuizResultDto;
   quizError: QuizErrorDto;
   quizProgress: QuizProgressDto;
+  updateFeedbackData: UpdateFeedbackDataDto;
 };
 
 @Injectable()
