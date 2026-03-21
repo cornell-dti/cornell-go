@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { AppModule } from '../app.module';
+import { ApprovalStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CampusEventService } from './campus-event.service';
 import { ClientService } from '../client/client.service';
@@ -91,6 +92,42 @@ describe('CampusEventModule E2E', () => {
     const found = list.events.find(e => e.id === ev.id);
     expect(found).toBeDefined();
     expect(found?.title).toBe('E2E Campus Event');
+  });
+
+  it('getUpcomingEvents with approvedOnly false includes non-approved events', async () => {
+    if (!campusEventTableExists) return;
+    const start = new Date(Date.now() + 172800_000);
+    const end = new Date(start.getTime() + 3600_000);
+    const pending = await prisma.campusEvent.create({
+      data: {
+        title: 'E2E Pending Campus Event',
+        description: 'pending',
+        startTime: start,
+        endTime: end,
+        locationName: 'Test',
+        latitude: 42.45,
+        longitude: -76.47,
+        categories: ['OTHER'],
+        tags: ['e2e-pending'],
+        source: 'COMMUNITY_SUBMITTED',
+        approvalStatus: ApprovalStatus.PENDING,
+      },
+    });
+    createdCampusEventIds.push(pending.id);
+
+    const publicList = await campusEventService.getUpcomingEvents({
+      page: 1,
+      limit: 50,
+    });
+    expect(publicList.events.find(e => e.id === pending.id)).toBeUndefined();
+
+    const adminList = await campusEventService.getUpcomingEvents(
+      { page: 1, limit: 50 },
+      { approvedOnly: false },
+    );
+    const fromAdmin = adminList.events.find(e => e.id === pending.id);
+    expect(fromAdmin).toBeDefined();
+    expect(fromAdmin?.title).toBe('E2E Pending Campus Event');
   });
 
   it('getEventById returns event when approved', async () => {
@@ -185,7 +222,7 @@ describe('CampusEventModule E2E', () => {
 
   afterAll(async () => {
     for (const id of createdCampusEventIds) {
-      await campusEventService.deleteEvent(id).catch(() => {});
+      await campusEventService.deleteEvent(id).catch(() => { });
     }
     await app.close();
   });

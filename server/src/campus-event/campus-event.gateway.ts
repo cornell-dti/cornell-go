@@ -24,7 +24,7 @@ export class CampusEventGateway {
   constructor(
     private readonly clientService: ClientService,
     private readonly campusEventService: CampusEventService,
-  ) {}
+  ) { }
 
   @SubscribeMessage('requestCampusEvents')
   async requestCampusEvents(
@@ -43,7 +43,10 @@ export class CampusEventGateway {
     @CallingUser() user: User,
     @MessageBody() data: RequestCampusEventDetailsDto,
   ) {
-    const ev = await this.campusEventService.getEventById(data.eventId, true);
+    const ev = await this.campusEventService.getEventById(
+      data.eventId,
+      !user.administrator,
+    );
     if (!ev) {
       await this.clientService.emitErrorData(user, 'Campus event not found.');
       return;
@@ -55,6 +58,24 @@ export class CampusEventGateway {
       { event: dto },
     );
     return dto.id;
+  }
+
+  @SubscribeMessage('requestAllCampusEvents')
+  async requestAllCampusEvents(
+    @CallingUser() user: User,
+    @MessageBody() data: RequestCampusEventsDto,
+  ) {
+    if (!user.administrator) {
+      await this.clientService.emitErrorData(user, 'Forbidden.');
+      return;
+    }
+    const list = await this.campusEventService.getUpcomingEvents(data, {
+      approvedOnly: false,
+    });
+    await this.clientService.sendEvent(['user/' + user.id], 'campusEventList', {
+      list,
+    });
+    return list.totalPages;
   }
 
   @SubscribeMessage('createCampusEvent')

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { CampusEvent, ApprovalStatus } from '@prisma/client';
+import { CampusEvent, ApprovalStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { ClientService } from '../client/client.service';
 import {
@@ -56,16 +56,19 @@ export class CampusEventService {
     };
   }
 
-  /** Get paginated upcoming events with filters (only APPROVED) */
+  /** Paginated campus events with shared filters. */
   async getUpcomingEvents(
     dto: RequestCampusEventsDto,
+    options: { approvedOnly?: boolean } = {},
   ): Promise<CampusEventListDto> {
     const { page, limit, dateFrom, dateTo, categories, search, featured } = dto;
     const skip = (page - 1) * limit;
+    const approvedOnly = options.approvedOnly !== false;
 
-    const where: any = {
-      approvalStatus: ApprovalStatus.APPROVED,
-    };
+    const where: Prisma.CampusEventWhereInput = {};
+    if (approvedOnly) {
+      where.approvalStatus = ApprovalStatus.APPROVED;
+    }
 
     if (dateFrom || dateTo) {
       where.startTime = {};
