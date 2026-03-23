@@ -5,19 +5,25 @@ import {
   UserBearEquipped,
 } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { ClientService } from '../client/client.service';
 import {
+  AdminBearItemDto,
   BearItemDto,
   BearSlotDto,
   EquipBearItemDto,
   PurchaseBearItemDto,
   PurchaseResultDto,
+  UpdateBearItemDataDto,
   UserBearLoadoutDto,
   UserInventoryDto,
 } from './avatar.dto';
 
 @Injectable()
 export class AvatarService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly clientService: ClientService,
+  ) {}
 
   /** Map Prisma enum to DTO enum */
   private toDtoSlot(slot: PrismaBearSlot): BearSlotDto {
@@ -181,5 +187,84 @@ export class AvatarService {
     });
 
     return this.getLoadout(userId);
+  }
+
+  // ── Admin CRUD ──
+
+  async getBearItemById(id: string): Promise<BearItem | null> {
+    return this.prisma.bearItem.findUnique({ where: { id } });
+  }
+
+  async createBearItem(dto: AdminBearItemDto): Promise<BearItem> {
+    return this.prisma.bearItem.create({
+      data: {
+        name: dto.name?.substring(0, 256) ?? 'New Item',
+        slot: this.toPrismaSlot(dto.slot ?? BearSlotDto.ACCESSORY),
+        cost: dto.cost ?? 0,
+        assetKey: dto.assetKey ?? '',
+        mimeType: dto.mimeType ?? null,
+        zIndex: dto.zIndex ?? null,
+        isDefault: dto.isDefault ?? false,
+      },
+    });
+  }
+
+  async updateBearItem(
+    id: string,
+    dto: AdminBearItemDto,
+  ): Promise<BearItem | null> {
+    const existing = await this.prisma.bearItem.findUnique({ where: { id } });
+    if (!existing) return null;
+
+    return this.prisma.bearItem.update({
+      where: { id },
+      data: {
+        name: dto.name?.substring(0, 256),
+        slot: dto.slot ? this.toPrismaSlot(dto.slot) : undefined,
+        cost: dto.cost,
+        assetKey: dto.assetKey,
+        mimeType: dto.mimeType,
+        zIndex: dto.zIndex,
+        isDefault: dto.isDefault,
+      },
+    });
+  }
+
+  async deleteBearItem(id: string): Promise<boolean> {
+    const existing = await this.prisma.bearItem.findUnique({ where: { id } });
+    if (!existing) return false;
+
+    await this.prisma.bearItem.delete({ where: { id } });
+    return true;
+  }
+
+  toAdminBearItemDto(item: BearItem): AdminBearItemDto {
+    return {
+      id: item.id,
+      name: item.name,
+      slot: this.toDtoSlot(item.slot),
+      cost: item.cost,
+      assetKey: item.assetKey,
+      mimeType: item.mimeType ?? undefined,
+      zIndex: item.zIndex ?? undefined,
+      isDefault: item.isDefault,
+    };
+  }
+
+  async emitUpdateBearItemData(
+    item: BearItem,
+    deleted: boolean,
+    target?: string,
+  ) {
+    const dto: UpdateBearItemDataDto = {
+      bearItem: deleted ? { id: item.id } : this.toAdminBearItemDto(item),
+      deleted,
+    };
+
+    await this.clientService.sendProtected(
+      'updateBearItemData',
+      target ?? null,
+      dto,
+    );
   }
 }
