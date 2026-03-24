@@ -19,6 +19,7 @@ import { AvatarModule } from './avatar/avatar.module';
 import { NotificationModule } from './notification/notification.module';
 import { TimerModule } from './timer/timer.module';
 import { QuizModule } from './quiz/quiz.module';
+import { CampusEventModule } from './campus-event/campus-event.module';
 import { CheckInModule } from './check-in/check-in.module';
 import { EventSyncModule } from './event-sync/event-sync.module';
 import { ClubSubmissionModule } from './club-submission/club-submission.module';
@@ -46,6 +47,7 @@ import { FeedbackModule } from './feedback/feedback.module';
     NotificationModule,
     TimerModule,
     QuizModule,
+    CampusEventModule,
     CheckInModule,
     EventSyncModule,
     ClubSubmissionModule,
