@@ -315,9 +315,15 @@ class _GameplayPageState extends State<GameplayPage> {
               return CircularIndicator();
             }
 
-            var challenge = challengeModel.getChallengeById(
-              tracker.curChallengeId ?? tracker.prevChallenges.last.challengeId,
-            );
+            final challengeId = tracker.curChallengeId ??
+                (tracker.prevChallenges.isNotEmpty
+                    ? tracker.prevChallenges.last.challengeId
+                    : null);
+            if (challengeId == null) {
+              return CircularIndicator();
+            }
+
+            var challenge = challengeModel.getChallengeById(challengeId);
 
             if (challenge == null) {
               return Scaffold(body: Text("No challenge data"));
@@ -416,7 +422,10 @@ class _GameplayPageState extends State<GameplayPage> {
                                   Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => BottomNavBar(),
+                                      builder: (context) => BottomNavBar(
+                                        initialHomeTab:
+                                            event!.isJourney == true ? 1 : 0,
+                                      ),
                                     ),
                                   );
                                 },

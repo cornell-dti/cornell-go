@@ -6,7 +6,10 @@ import 'package:game/api/game_api.dart';
 import 'package:game/api/game_client_dto.dart';
 import 'package:game/api/geopoint.dart';
 import 'package:game/journeys/journey_cell.dart';
+import 'package:game/journeys/journey_challenge_list_sheet.dart';
 import 'package:game/journeys/filter_form.dart';
+import 'package:game/journeys/journey_flow_result.dart';
+import 'package:game/preview/preview.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/group_model.dart';
 import 'package:game/model/tracker_model.dart';
@@ -208,6 +211,48 @@ class _JourneysPageState extends State<JourneysPage> {
     );
   }
 
+  Future<void> _startJourneyFlow(JourneyCellDto journey) async {
+    final previewResult = await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(10.0)),
+      ),
+      builder: (BuildContext context) => Preview(
+        journey.name,
+        journey.lat,
+        journey.long,
+        journey.longDescription ?? journey.description,
+        journey.imgUrl,
+        journey.difficulty,
+        journey.points,
+        PreviewType.JOURNEY,
+        journey.location,
+        journey.eventId,
+        locationCount: journey.locationCount,
+        numberCompleted: journey.numberCompleted,
+      ),
+    );
+
+    if (!mounted || previewResult != startJourneyResult) {
+      return;
+    }
+
+    final challengeResult = await JourneyChallengeListSheet.show(
+      context,
+      journey.eventId,
+    );
+
+    if (!mounted || challengeResult != challengeSelectedResult) {
+      return;
+    }
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => GameplayPage()),
+    );
+  }
+
   // Callback function to receive updated state values from the child
   void handleFilterSubmit(List<String> a, List<String> b, String c) {
     setState(() {
@@ -363,10 +408,6 @@ class _JourneysPageState extends State<JourneysPage> {
                                   eventId: event.id,
                                 ),
                               );
-                            } else if (event.id == groupModel.curEventId) {
-                              apiClient.serverApi?.setCurrentEvent(
-                                SetCurrentEventDto(eventId: ""),
-                              );
                             }
                           }
 
@@ -402,21 +443,23 @@ class _JourneysPageState extends State<JourneysPage> {
                             ),
                             itemCount: eventData.length,
                             itemBuilder: (context, index) {
+                              final journey = eventData[index];
                               final journeyCell = JourneyCell(
                                 key: index == 0 ? null : UniqueKey(),
-                                eventData[index].name,
-                                eventData[index].lat,
-                                eventData[index].long,
-                                eventData[index].location,
-                                eventData[index].imgUrl,
-                                eventData[index].description,
-                                eventData[index].longDescription,
-                                eventData[index].locationCount,
-                                eventData[index].numberCompleted,
-                                eventData[index].complete,
-                                eventData[index].difficulty,
-                                eventData[index].points,
-                                eventData[index].eventId,
+                                journey.name,
+                                journey.lat,
+                                journey.long,
+                                journey.location,
+                                journey.imgUrl,
+                                journey.description,
+                                journey.longDescription,
+                                journey.locationCount,
+                                journey.numberCompleted,
+                                journey.complete,
+                                journey.difficulty,
+                                journey.points,
+                                journey.eventId,
+                                onTap: () => _startJourneyFlow(journey),
                               );
 
                               // Onboarding: Wrap first journey card with showcase highlight

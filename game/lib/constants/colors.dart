@@ -44,11 +44,13 @@ class AppColors {
 
   // Grays & Text
   static const Color darkText = Color(0xFF1E1E1E);
+  static const Color darkGrayText = Color(0xFF2E2E2E);
   static const Color mediumText = Color(0xFF474747);
   static const Color grayText = Color(0xFF6E6E6E);
   static const Color mediumGray = Color(0xFFA4A4A4);
   static const Color lightGray = Color(0xFFF1F1F1);
   static const Color lightGrayBorder = Color(0xFFE5E5E5);
+  static const Color dragHandle = Color(0xFFE9E9E9);
 
   // Placeholder & Loading
   static const Color shimmerBase = Color(0xFFE0E0E0); // Colors.grey[300]

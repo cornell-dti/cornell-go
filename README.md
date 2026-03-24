@@ -54,7 +54,7 @@ cd server
 npx prisma studio
 ```
 
-### Run Database Seed Script (Mock DB Data) 
+### Run Database Seed Script (Mock DB Data)
 
 ```
 cd server

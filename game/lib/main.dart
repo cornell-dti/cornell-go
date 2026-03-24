@@ -35,7 +35,7 @@ import 'package:game/widget/game_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:game/constants/constants.dart';
 
-const bool USE_DEVICE_PREVIEW = true;
+const bool USE_DEVICE_PREVIEW = false;
 final storage = FlutterSecureStorage();
 late final String API_URL;
 late final ApiClient client;
