@@ -1,6 +1,6 @@
 import 'package:game/constants/constants.dart';
 import 'package:flutter/material.dart';
-import 'package:game/gameplay/gameplay_page.dart';
+import 'package:game/journeys/journey_challenge_list_sheet.dart';
 import 'package:game/navigation_page/bottom_navbar.dart';
 import 'package:game/progress_indicators/circular_progress_indicator.dart';
 
@@ -745,7 +745,9 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                                       Navigator.pushReplacement(
                                         context,
                                         MaterialPageRoute(
-                                          builder: (context) => BottomNavBar(),
+                                          builder: (context) => BottomNavBar(
+                                            initialHomeTab: 1,
+                                          ),
                                         ),
                                       );
                                     },
@@ -774,8 +776,9 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                                             Navigator.pushReplacement(
                                           context,
                                           MaterialPageRoute(
-                                            builder: (context) =>
-                                                BottomNavBar(),
+                                            builder: (context) => BottomNavBar(
+                                              initialHomeTab: 1,
+                                            ),
                                           ),
                                         ),
                                         child: Text(
@@ -808,7 +811,9 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                                           context,
                                           MaterialPageRoute(
                                             builder: (context) =>
-                                                GameplayPage(),
+                                                ChallengeListLauncher(
+                                              eventId: eventId!,
+                                            ),
                                           ),
                                         ),
                                         child: Row(
@@ -879,7 +884,9 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                                   Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => BottomNavBar(),
+                                      builder: (context) => BottomNavBar(
+                                        initialHomeTab: 0,
+                                      ),
                                     ),
                                   );
                                 }

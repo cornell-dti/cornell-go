@@ -1,5 +1,5 @@
 #!/bin/sh
 
-# Auto-format Dart files and stage changes
-dart format game/lib
-git add game/lib
+# Auto-format all code and stage changes
+npm run formatall
+git add -u

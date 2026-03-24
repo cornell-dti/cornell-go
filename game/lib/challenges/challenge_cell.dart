@@ -30,7 +30,7 @@ import 'package:game/constants/constants.dart';
  *   - `points`: Points awarded for completion
  *   - `eventId`: Unique identifier for the challenge
  */
-class ChallengeCell extends StatefulWidget {
+class ChallengeCell extends StatelessWidget {
   final String location;
   final String challengeName;
   final double? challengeLat;
@@ -59,52 +59,6 @@ class ChallengeCell extends StatefulWidget {
     this.featured, {
     Key? key,
   }) : super(key: key);
-
-  @override
-  State<StatefulWidget> createState() => _ChallengeCellState(
-        location,
-        challengeName,
-        challengeLat,
-        challengeLong,
-        imgUrl,
-        isCompleted,
-        description,
-        difficulty,
-        points,
-        eventId,
-        distanceFromChallenge,
-        featured,
-      );
-}
-
-class _ChallengeCellState extends State<ChallengeCell> {
-  final String location;
-  final String challengeName;
-  final double? challengeLat;
-  final double? challengeLong;
-  final String imgUrl;
-  final bool isCompleted;
-  final String description;
-  final String difficulty;
-  final int points;
-  final String eventId;
-  final double? distanceFromChallenge;
-  final bool featured;
-
-  _ChallengeCellState(
-    this.location,
-    this.challengeName,
-    this.challengeLat,
-    this.challengeLong,
-    this.imgUrl,
-    this.isCompleted,
-    this.description,
-    this.difficulty,
-    this.points,
-    this.eventId,
-    this.distanceFromChallenge,
-    this.featured,
-  );
 
   @override
   Widget build(BuildContext context) {
