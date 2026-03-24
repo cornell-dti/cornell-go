@@ -50,6 +50,8 @@ const CategoryBadge = styled.span<{ category: string }>`
         return '#e74c3c';
       case 'SUGGESTION':
         return '#3498db';
+      case 'LIKE':
+        return '#27ae60';
       default:
         return '#95a5a6';
     }
@@ -83,7 +85,7 @@ export function Feedback() {
       setFeedbacks(data.feedbacks);
     });
 
-    sock.requestFeedbackData({});
+    sock.requestFeedbackData();
   }, [sock]);
 
   const filtered = feedbacks.filter(
@@ -93,8 +95,9 @@ export function Feedback() {
       f.category.toLowerCase().includes(query.toLowerCase()),
   );
 
-  const categoryLabel = (cat: string) => {
-    switch (cat) {
+  const categoryLabel = (f: FeedbackDto) => {
+    if (f.rating === true && f.text === 'Liked this challenge') return 'Like';
+    switch (f.category) {
       case 'BUG_REPORT':
         return 'Bug Report';
       case 'SUGGESTION':
@@ -102,6 +105,11 @@ export function Feedback() {
       default:
         return 'General';
     }
+  };
+
+  const categoryForBadge = (f: FeedbackDto) => {
+    if (f.rating === true && f.text === 'Liked this challenge') return 'LIKE';
+    return f.category;
   };
 
   return (
@@ -118,14 +126,18 @@ export function Feedback() {
         filtered.map(f => (
           <ListCardBox key={f.id}>
             <ListCardTitle>
-              <CategoryBadge category={f.category}>
-                {categoryLabel(f.category)}
+              <CategoryBadge category={categoryForBadge(f)}>
+                {categoryLabel(f)}
               </CategoryBadge>
               {f.rating != null && (
-                <RatingIcon>{f.rating > 0 ? '👍' : '👎'}</RatingIcon>
+                <RatingIcon>{f.rating ? '👍' : '👎'}</RatingIcon>
               )}
             </ListCardTitle>
-            <ListCardBody>{f.text}</ListCardBody>
+            <ListCardBody>
+              {f.rating === true && f.text === 'Liked this challenge'
+                ? `${f.username ?? 'User'} liked this challenge`
+                : f.text}
+            </ListCardBody>
             <FeedbackMeta>
               {f.username ?? f.userId} &middot;{' '}
               {new Date(f.createdAt).toLocaleDateString('en-US', {

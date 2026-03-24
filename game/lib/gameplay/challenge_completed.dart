@@ -656,9 +656,19 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                                 : Colors.white,
                             size: 28,
                           ),
-                          onPressed: () {
-                            setState(() => thumbsSelection = true);
-                          },
+                          onPressed: thumbsSelection != null
+                              ? null
+                              : () {
+                                  setState(() => thumbsSelection = true);
+                                  apiClient.serverApi?.submitFeedback(
+                                    SubmitFeedbackDto(
+                                      category: FeedbackCategoryDto.GENERAL,
+                                      text: 'Liked this challenge',
+                                      rating: true,
+                                      challengeId: challenge.id,
+                                    ),
+                                  );
+                                },
                         ),
                         SizedBox(width: 8),
                         IconButton(
@@ -671,18 +681,20 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                                 : Colors.white,
                             size: 28,
                           ),
-                          onPressed: () {
-                            setState(() => thumbsSelection = false);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => FeedbackPage(
-                                  challengeId: challenge.id,
-                                  rating: -1,
-                                ),
-                              ),
-                            );
-                          },
+                          onPressed: thumbsSelection != null
+                              ? null
+                              : () {
+                                  setState(() => thumbsSelection = false);
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => FeedbackPage(
+                                        challengeId: challenge.id,
+                                        rating: false,
+                                      ),
+                                    ),
+                                  );
+                                },
                         ),
                       ],
                     ),

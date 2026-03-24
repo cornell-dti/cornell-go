@@ -9,7 +9,7 @@ import 'package:game/constants/constants.dart';
 
 class FeedbackPage extends StatefulWidget {
   final String? challengeId;
-  final int? rating;
+  final bool? rating;
 
   const FeedbackPage({Key? key, this.challengeId, this.rating})
       : super(key: key);

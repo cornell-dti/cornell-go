@@ -524,10 +524,12 @@ model Feedback {
   createdAt   DateTime         @default(now())
   category    FeedbackCategory
   text        String
-  rating      Int?
+  rating      Boolean?
   challengeId String?
   user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId      String
+
+  @@unique([userId, challengeId])
 }
 
 model EventRSVP {

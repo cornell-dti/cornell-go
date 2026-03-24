@@ -11,13 +11,32 @@ export class FeedbackService {
   constructor(private readonly prisma: PrismaService) {}
 
   async createFeedback(userId: string, dto: SubmitFeedbackDto) {
+    if (dto.challengeId) {
+      return this.prisma.feedback.upsert({
+        where: {
+          userId_challengeId: { userId, challengeId: dto.challengeId },
+        },
+        update: {
+          category: dto.category,
+          text: dto.text,
+          rating: dto.rating,
+        },
+        create: {
+          userId,
+          category: dto.category,
+          text: dto.text,
+          rating: dto.rating,
+          challengeId: dto.challengeId,
+        },
+      });
+    }
+
     return this.prisma.feedback.create({
       data: {
         userId,
         category: dto.category,
         text: dto.text,
         rating: dto.rating,
-        challengeId: dto.challengeId,
       },
     });
   }
@@ -47,7 +66,7 @@ export class FeedbackService {
       createdAt: f.createdAt.toISOString(),
       category: f.category as unknown as FeedbackCategoryDto,
       text: f.text,
-      rating: f.rating ?? undefined,
+      rating: f.rating != null ? f.rating : undefined,
       challengeId: f.challengeId ?? undefined,
       userId: f.userId,
       username: f.user.username,

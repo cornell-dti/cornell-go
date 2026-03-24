@@ -123,10 +123,8 @@ export class ServerApi {
     return this.send('submitFeedback', data) as Promise<boolean | undefined>;
   }
 
-  requestFeedbackData(data: dto.RequestFeedbackDataDto) {
-    return this.send('requestFeedbackData', data) as Promise<
-      boolean | undefined
-    >;
+  requestFeedbackData() {
+    return this.send('requestFeedbackData', {}) as Promise<boolean | undefined>;
   }
 
   requestGroupData(data: dto.RequestGroupDataDto) {

@@ -10,7 +10,7 @@ CREATE TABLE "Feedback" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "category" "FeedbackCategory" NOT NULL,
     "text" TEXT NOT NULL,
-    "rating" INTEGER,
+    "rating" BOOLEAN,
     "challengeId" TEXT,
     "userId" TEXT NOT NULL,
 

@@ -7,7 +7,7 @@ export enum FeedbackCategoryDto {
 export interface SubmitFeedbackDto {
   category: FeedbackCategoryDto;
   text: string;
-  rating?: number;
+  rating?: boolean;
   challengeId?: string;
 }
 
@@ -16,15 +16,11 @@ export interface FeedbackDto {
   createdAt: string;
   category: FeedbackCategoryDto;
   text: string;
-  rating?: number;
+  rating?: boolean;
   challengeId?: string;
   userId: string;
   username?: string;
   challengeName?: string;
-}
-
-export interface RequestFeedbackDataDto {
-  dummy?: string;
 }
 
 export interface UpdateFeedbackDataDto {

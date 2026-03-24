@@ -2092,7 +2092,7 @@ class SubmitFeedbackDto {
 
   late FeedbackCategoryDto category;
   late String text;
-  late int? rating;
+  late bool? rating;
   late String? challengeId;
 }
 

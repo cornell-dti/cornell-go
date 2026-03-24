@@ -10,7 +10,7 @@ import { User } from '@prisma/client';
 import { UserGuard } from '../auth/jwt-auth.guard';
 import { CallingUser } from '../auth/calling-user.decorator';
 import { FeedbackService } from './feedback.service';
-import { RequestFeedbackDataDto, SubmitFeedbackDto } from './feedback.dto';
+import { SubmitFeedbackDto } from './feedback.dto';
 
 @WebSocketGateway({ cors: true })
 @UseGuards(UserGuard)
@@ -35,7 +35,6 @@ export class FeedbackGateway {
   @SubscribeMessage('requestFeedbackData')
   async handleRequestFeedbackData(
     @CallingUser() user: User,
-    @MessageBody() data: RequestFeedbackDataDto,
     @ConnectedSocket() client: Socket,
   ): Promise<boolean> {
     if (!user.administrator) {
