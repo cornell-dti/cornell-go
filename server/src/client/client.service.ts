@@ -45,6 +45,7 @@ import {
   QuizErrorDto,
   QuizProgressDto,
 } from '../quiz/quiz.dto';
+import { UpdateFeedbackDataDto } from '../feedback/feedback.dto';
 import {
   UpdateCampusEventDataDto,
   CampusEventListResponseDto,
@@ -79,6 +80,7 @@ export type ClientApiDef = {
   quizResult: QuizResultDto;
   quizError: QuizErrorDto;
   quizProgress: QuizProgressDto;
+  updateFeedbackData: UpdateFeedbackDataDto;
   updateCampusEventData: UpdateCampusEventDataDto;
   campusEventList: CampusEventListResponseDto;
   campusEventDetails: { event: CampusEventDto };

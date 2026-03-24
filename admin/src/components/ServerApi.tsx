@@ -71,6 +71,16 @@ export class ServerApi {
     >;
   }
 
+  checkInWithLocation(data: dto.LocationCheckInDto) {
+    return this.send('checkInWithLocation', data) as Promise<
+      boolean | undefined
+    >;
+  }
+
+  checkInWithQrCode(data: dto.QrCodeCheckInDto) {
+    return this.send('checkInWithQrCode', data) as Promise<boolean | undefined>;
+  }
+
   requestEventData(data: dto.RequestEventDataDto) {
     return this.send('requestEventData', data) as Promise<number | undefined>;
   }
@@ -107,6 +117,14 @@ export class ServerApi {
 
   updateEventData(data: dto.UpdateEventDataDto) {
     return this.send('updateEventData', data) as Promise<string | undefined>;
+  }
+
+  submitFeedback(data: dto.SubmitFeedbackDto) {
+    return this.send('submitFeedback', data) as Promise<boolean | undefined>;
+  }
+
+  requestFeedbackData() {
+    return this.send('requestFeedbackData', {}) as Promise<boolean | undefined>;
   }
 
   requestGroupData(data: dto.RequestGroupDataDto) {
@@ -385,5 +403,10 @@ export class ServerApi {
   onQuizProgress(callback: (data: dto.QuizProgressDto) => void) {
     this.socket.removeAllListeners('quizProgress');
     this.socket.on('quizProgress', data => callback(data));
+  }
+
+  onUpdateFeedbackData(callback: (data: dto.UpdateFeedbackDataDto) => void) {
+    this.socket.removeAllListeners('updateFeedbackData');
+    this.socket.on('updateFeedbackData', data => callback(data));
   }
 }
