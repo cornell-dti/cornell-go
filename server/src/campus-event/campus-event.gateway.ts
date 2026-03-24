@@ -24,7 +24,7 @@ export class CampusEventGateway {
   constructor(
     private readonly clientService: ClientService,
     private readonly campusEventService: CampusEventService,
-  ) { }
+  ) {}
 
   @SubscribeMessage('requestCampusEvents')
   async requestCampusEvents(

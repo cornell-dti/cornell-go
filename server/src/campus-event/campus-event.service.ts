@@ -14,7 +14,7 @@ export class CampusEventService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly clientService: ClientService,
-  ) { }
+  ) {}
 
   /** Map Prisma model to API DTO with counts.*/
   async toCampusEventDto(
@@ -25,11 +25,11 @@ export class CampusEventService {
       counts !== undefined
         ? [counts.attendanceCount, counts.rsvpCount]
         : await Promise.all([
-          this.prisma.eventAttendance.count({
-            where: { campusEventId: ev.id },
-          }),
-          this.prisma.eventRSVP.count({ where: { campusEventId: ev.id } }),
-        ]);
+            this.prisma.eventAttendance.count({
+              where: { campusEventId: ev.id },
+            }),
+            this.prisma.eventRSVP.count({ where: { campusEventId: ev.id } }),
+          ]);
     return {
       id: ev.id,
       title: ev.title,
@@ -259,9 +259,9 @@ export class CampusEventService {
     const dto = deleted
       ? { event: { id: ev.id }, deleted: true }
       : {
-        event: await this.toCampusEventDto(ev),
-        deleted: false,
-      };
+          event: await this.toCampusEventDto(ev),
+          deleted: false,
+        };
     await this.clientService.sendEvent<typeof dto>(
       null,
       'updateCampusEventData',
