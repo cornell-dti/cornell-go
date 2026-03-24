@@ -26,6 +26,12 @@ import {
   UpdateAchievementDataDto,
 } from '../achievement/achievement.dto';
 import {
+  UpdateBearItemsDataDto,
+  UpdatePurchaseResultDto,
+  UpdateUserBearLoadoutDataDto,
+  UpdateUserInventoryDataDto,
+} from '../avatar/avatar.dto';
+import {
   TimerStartedDto,
   TimerExtendedDto,
   TimerCompletedDto,
@@ -59,6 +65,10 @@ export type ClientApiDef = {
   updateGroupData: UpdateGroupDataDto;
   updateOrganizationData: UpdateOrganizationDataDto;
   updateLeaderPosition: UpdateLeaderPositionDto;
+  updateBearItemsData: UpdateBearItemsDataDto;
+  updateUserInventoryData: UpdateUserInventoryDataDto;
+  updateUserBearLoadoutData: UpdateUserBearLoadoutDataDto;
+  updatePurchaseResult: UpdatePurchaseResultDto;
   timerStarted: TimerStartedDto;
   timerExtended: TimerExtendedDto;
   timerCompleted: TimerCompletedDto;

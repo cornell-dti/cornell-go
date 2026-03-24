@@ -282,6 +282,14 @@ export function Achievements() {
           )
           .filter((ach?: AchievementDto) => !!ach) ?? [],
       )
+        .filter((ach: AchievementDto) => {
+          if (query === '') return true;
+          const q = query.toLowerCase();
+          return (
+            (ach.name ?? '').toLowerCase().includes(q) ||
+            (ach.description ?? '').toLowerCase().includes(q)
+          );
+        })
         .sort(
           (a: AchievementDto, b: AchievementDto) =>
             compareTwoStrings(b.name ?? '', query) -

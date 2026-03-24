@@ -67,6 +67,21 @@ class GameServerApi {
   Future<String?> updateAchievementData(UpdateAchievementDataDto dto) async =>
       await _invokeWithRefresh("updateAchievementData", dto.toJson());
 
+  Future<int?> requestBearItems(RequestBearItemsDto dto) async =>
+      await _invokeWithRefresh("requestBearItems", dto.toJson());
+
+  Future<int?> requestUserInventory(RequestUserInventoryDto dto) async =>
+      await _invokeWithRefresh("requestUserInventory", dto.toJson());
+
+  Future<int?> requestUserBearLoadout(RequestUserBearLoadoutDto dto) async =>
+      await _invokeWithRefresh("requestUserBearLoadout", dto.toJson());
+
+  Future<bool?> purchaseBearItem(PurchaseBearItemDto dto) async =>
+      await _invokeWithRefresh("purchaseBearItem", dto.toJson());
+
+  Future<bool?> equipBearItem(EquipBearItemDto dto) async =>
+      await _invokeWithRefresh("equipBearItem", dto.toJson());
+
   Future<int?> requestChallengeData(RequestChallengeDataDto dto) async =>
       await _invokeWithRefresh("requestChallengeData", dto.toJson());
 
@@ -115,6 +130,9 @@ class GameServerApi {
 
   Future<bool?> sendGroupInvite(SendGroupInviteDto dto) async =>
       await _invokeWithRefresh("sendGroupInvite", dto.toJson());
+
+  Future<bool?> updateFcmToken(UpdatePushTokenDto dto) async =>
+      await _invokeWithRefresh("updateFcmToken", dto.toJson());
 
   Future<int?> requestOrganizationData(RequestOrganizationDataDto dto) async =>
       await _invokeWithRefresh("requestOrganizationData", dto.toJson());
