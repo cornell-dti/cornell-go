@@ -77,3 +77,23 @@ export interface UpdatePurchaseResultDto {
   newBalance: number;
   itemId: string;
 }
+
+/** Admin DTOs for managing BearItems */
+
+export interface AdminBearItemDto {
+  id: string;
+  name?: string;
+  slot?: BearSlotDto;
+  cost?: number;
+  assetKey?: string;
+  mimeType?: string;
+  zIndex?: number | null;
+  isDefault?: boolean;
+}
+
+export interface UpdateBearItemDataDto {
+  bearItem: AdminBearItemDto;
+  deleted: boolean;
+}
+
+export interface RequestAllBearItemsDto {}
