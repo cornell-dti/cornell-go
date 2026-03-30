@@ -146,10 +146,7 @@ export class AvatarGateway {
         data.bearItem.id,
       );
       if (!existing) {
-        await this.clientService.emitErrorData(
-          user,
-          'Bear item not found!',
-        );
+        await this.clientService.emitErrorData(user, 'Bear item not found!');
         return;
       }
 
