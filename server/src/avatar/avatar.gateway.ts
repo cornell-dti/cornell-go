@@ -11,9 +11,11 @@ import { ClientService } from '../client/client.service';
 import {
   EquipBearItemDto,
   PurchaseBearItemDto,
+  RequestAllBearItemsDto,
   RequestBearItemsDto,
   RequestUserBearLoadoutDto,
   RequestUserInventoryDto,
+  UpdateBearItemDataDto,
 } from './avatar.dto';
 import { AvatarService } from './avatar.service';
 import { PoliciesGuard } from '../casl/policy.guard';
@@ -101,5 +103,112 @@ export class AvatarGateway {
       loadout,
     );
     return true;
+  }
+
+  // ── Admin endpoints ──
+
+  @SubscribeMessage('requestAllBearItems')
+  async requestAllBearItems(
+    @CallingUser() user: User,
+    @MessageBody() _data: RequestAllBearItemsDto,
+  ) {
+    if (!user.administrator) {
+      await this.clientService.emitErrorData(user, 'Unauthorized');
+      return;
+    }
+
+    const items = await this.avatarService.listItems();
+    for (const item of items) {
+      const fullItem = await this.avatarService.getBearItemById(item.id);
+      if (fullItem) {
+        await this.avatarService.emitUpdateBearItemData(
+          fullItem,
+          false,
+          'user/' + user.id,
+        );
+      }
+    }
+    return items.length;
+  }
+
+  @SubscribeMessage('updateBearItemData')
+  async updateBearItemData(
+    @CallingUser() user: User,
+    @MessageBody() data: UpdateBearItemDataDto,
+  ) {
+    if (!user.administrator) {
+      await this.clientService.emitErrorData(user, 'Unauthorized');
+      return;
+    }
+
+    if (data.deleted) {
+      const existing = await this.avatarService.getBearItemById(
+        data.bearItem.id,
+      );
+      if (!existing) {
+        await this.clientService.emitErrorData(user, 'Bear item not found!');
+        return;
+      }
+
+      const [affectedUserIds, equippedEntries] = await Promise.all([
+        this.avatarService.getAffectedUserIds(data.bearItem.id),
+        this.avatarService.getEquippedEntries(data.bearItem.id),
+      ]);
+
+      const deleted = await this.avatarService.deleteBearItem(data.bearItem.id);
+      if (!deleted) {
+        await this.clientService.emitErrorData(
+          user,
+          'Failed to delete bear item!',
+        );
+        return;
+      }
+
+      await this.avatarService.reEquipDefaults(equippedEntries);
+      await this.avatarService.emitUpdateBearItemData(existing, true);
+
+      for (const userId of affectedUserIds) {
+        const [inv, loadout] = await Promise.all([
+          this.avatarService.getInventory(userId),
+          this.avatarService.getLoadout(userId),
+        ]);
+        await Promise.all([
+          this.clientService.sendProtected(
+            'updateUserInventoryData',
+            'user/' + userId,
+            inv,
+          ),
+          this.clientService.sendProtected(
+            'updateUserBearLoadoutData',
+            'user/' + userId,
+            loadout,
+          ),
+        ]);
+      }
+
+      return existing.id;
+    }
+
+    if (data.bearItem.id) {
+      const updated = await this.avatarService.updateBearItem(
+        data.bearItem.id,
+        data.bearItem,
+      );
+
+      if (!updated) {
+        await this.clientService.emitErrorData(
+          user,
+          'Failed to update bear item!',
+        );
+        return;
+      }
+
+      await this.avatarService.emitUpdateBearItemData(updated, false);
+      return updated.id;
+    }
+
+    const created = await this.avatarService.createBearItem(data.bearItem);
+    await this.avatarService.emitUpdateBearItemData(created, false);
+    return created.id;
   }
 }
