@@ -241,6 +241,25 @@ export class ServerApi {
     return this.send('closeAccount', data) as Promise<boolean | undefined>;
   }
 
+  requestAllBearItems(data: dto.RequestAllBearItemsDto) {
+    return this.send('requestAllBearItems', data) as Promise<
+      number | undefined
+    >;
+  }
+
+  updateBearItemData(data: dto.UpdateBearItemDataDto) {
+    return this.send('updateBearItemData', data) as Promise<
+      string | undefined
+    >;
+  }
+
+  onUpdateBearItemData(
+    callback: (data: dto.UpdateBearItemDataDto) => void,
+  ) {
+    this.socket.removeAllListeners('updateBearItemData');
+    this.socket.on('updateBearItemData', data => callback(data));
+  }
+
   onUpdateUserData(callback: (data: dto.UpdateUserDataDto) => void) {
     this.socket.removeAllListeners('updateUserData');
     this.socket.on('updateUserData', data => callback(data));
