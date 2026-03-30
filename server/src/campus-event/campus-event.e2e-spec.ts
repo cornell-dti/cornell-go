@@ -230,8 +230,7 @@ describe('CampusEventModule E2E', () => {
     const LEAD_TIME_MS = 3 * 60 * 60 * 1000;
 
     beforeAll(() => {
-      reminderService =
-        moduleRef.get<RsvpReminderService>(RsvpReminderService);
+      reminderService = moduleRef.get<RsvpReminderService>(RsvpReminderService);
       const notificationService =
         moduleRef.get<NotificationService>(NotificationService);
       sendToUserMock = jest
