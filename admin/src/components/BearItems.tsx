@@ -162,9 +162,7 @@ export function BearItems() {
         }}
         onSearch={q => setQuery(q)}
       />
-      {allItems.length === 0 && (
-        <CenterText>No bear items found</CenterText>
-      )}
+      {allItems.length === 0 && <CenterText>No bear items found</CenterText>}
       {allItems
         .filter(item => {
           if (query === '') return true;
@@ -177,8 +175,7 @@ export function BearItems() {
         })
         .sort((a, b) => {
           if (query === '') {
-            const slotCmp =
-              (a.slot ?? '').localeCompare(b.slot ?? '');
+            const slotCmp = (a.slot ?? '').localeCompare(b.slot ?? '');
             if (slotCmp !== 0) return slotCmp;
             return (a.name ?? '').localeCompare(b.name ?? '');
           }

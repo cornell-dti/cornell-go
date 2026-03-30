@@ -248,14 +248,10 @@ export class ServerApi {
   }
 
   updateBearItemData(data: dto.UpdateBearItemDataDto) {
-    return this.send('updateBearItemData', data) as Promise<
-      string | undefined
-    >;
+    return this.send('updateBearItemData', data) as Promise<string | undefined>;
   }
 
-  onUpdateBearItemData(
-    callback: (data: dto.UpdateBearItemDataDto) => void,
-  ) {
+  onUpdateBearItemData(callback: (data: dto.UpdateBearItemDataDto) => void) {
     this.socket.removeAllListeners('updateBearItemData');
     this.socket.on('updateBearItemData', data => callback(data));
   }
