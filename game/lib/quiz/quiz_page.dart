@@ -8,7 +8,7 @@ import 'package:game/model/event_model.dart';
 import 'package:game/model/tracker_model.dart';
 import 'package:game/model/group_model.dart';
 import 'package:game/model/challenge_model.dart';
-import 'package:game/gameplay/challenge_completed.dart';
+import 'package:game/gameplay/take_photo_page.dart';
 import 'package:game/gameplay/gameplay_page.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:flutter/scheduler.dart';
@@ -104,7 +104,7 @@ class _QuizScreenState extends State<_QuizScreen> {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => ChallengeCompletedPage(
+                    builder: (context) => TakePhotoPage(
                       challengeId: widget.challengeId,
                     ),
                   ),
@@ -584,8 +584,7 @@ class _QuizScreenState extends State<_QuizScreen> {
                                   Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) =>
-                                          ChallengeCompletedPage(
+                                      builder: (context) => TakePhotoPage(
                                         challengeId: widget.challengeId,
                                       ),
                                     ),

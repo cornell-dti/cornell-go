@@ -8,7 +8,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:async';
 import 'dart:math';
-import 'package:game/gameplay/challenge_completed.dart';
+import 'package:game/gameplay/take_photo_page.dart';
 import 'package:game/gameplay/challenge_failed.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'dart:ui' as ui;
@@ -2763,7 +2763,7 @@ class _GameplayMapState extends State<GameplayMap>
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => ChallengeCompletedPage(
+                            builder: (context) => TakePhotoPage(
                                   challengeId: challengeId,
                                 )),
                       );

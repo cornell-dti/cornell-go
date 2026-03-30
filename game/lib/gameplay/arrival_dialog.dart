@@ -7,7 +7,7 @@ import 'package:game/api/game_client_dto.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/tracker_model.dart';
 import 'package:game/model/group_model.dart';
-import 'package:game/gameplay/challenge_completed.dart';
+import 'package:game/gameplay/take_photo_page.dart';
 import 'package:game/quiz/quiz_page.dart';
 import 'package:game/gameplay/gameplay_page.dart';
 
@@ -222,8 +222,7 @@ class _ButtonRow extends StatelessWidget {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>
-                        ChallengeCompletedPage(challengeId: challengeId),
+                    builder: (context) => TakePhotoPage(challengeId: challengeId),
                   ),
                 );
               }

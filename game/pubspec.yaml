@@ -65,6 +65,7 @@ dependencies:
   device_preview: ^1.2.0
   showcaseview: ^5.0.1
   flutter_compass: ^0.8.0
+  camera: ^0.11.2+1
 
 dev_dependencies:
   flutter_test:

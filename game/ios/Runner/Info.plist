@@ -39,6 +39,8 @@
 	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>CornellGO uses the camera so you can take a completion photo for challenges and journeys.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>We use your location to help improve your experience using CornellGo, including detecting when you have successfully found an event's location so you can gain points and move on to the next challenge.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
@@ -61,7 +63,6 @@
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 	</array>
-
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
 </dict>
