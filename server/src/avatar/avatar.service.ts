@@ -220,7 +220,6 @@ export class AvatarService {
       where: { id },
       data: {
         name: dto.name?.substring(0, 256),
-        slot: dto.slot ? this.toPrismaSlot(dto.slot) : undefined,
         cost: dto.cost,
         assetKey: dto.assetKey,
         mimeType: dto.mimeType,
@@ -228,6 +227,62 @@ export class AvatarService {
         isDefault: dto.isDefault,
       },
     });
+  }
+
+  async getAffectedUserIds(bearItemId: string): Promise<string[]> {
+    const [invUsers, equipUsers] = await Promise.all([
+      this.prisma.userBearInventory.findMany({
+        where: { bearItemId },
+        select: { userId: true },
+      }),
+      this.prisma.userBearEquipped.findMany({
+        where: { bearItemId },
+        select: { userId: true },
+      }),
+    ]);
+
+    return [
+      ...new Set([
+        ...invUsers.map(r => r.userId),
+        ...equipUsers.map(r => r.userId),
+      ]),
+    ];
+  }
+
+  async getEquippedEntries(
+    bearItemId: string,
+  ): Promise<{ userId: string; slot: PrismaBearSlot }[]> {
+    return this.prisma.userBearEquipped.findMany({
+      where: { bearItemId },
+      select: { userId: true, slot: true },
+    });
+  }
+
+  /**
+   * For each (userId, slot) pair, equip the default item for that slot.
+   * If no default exists for a slot, the slot stays empty.
+   */
+  async reEquipDefaults(
+    entries: { userId: string; slot: PrismaBearSlot }[],
+  ): Promise<void> {
+    if (entries.length === 0) return;
+
+    const slots = [...new Set(entries.map(e => e.slot))];
+    const defaultItems = await this.prisma.bearItem.findMany({
+      where: { isDefault: true, slot: { in: slots } },
+    });
+    const defaultBySlot = new Map(defaultItems.map(i => [i.slot, i]));
+
+    for (const { userId, slot } of entries) {
+      const defaultItem = defaultBySlot.get(slot);
+      if (!defaultItem) continue;
+
+      await this.prisma.userBearEquipped.upsert({
+        where: { userId_slot: { userId, slot } },
+        create: { userId, slot, bearItemId: defaultItem.id },
+        update: { bearItemId: defaultItem.id },
+      });
+    }
   }
 
   async deleteBearItem(id: string): Promise<boolean> {

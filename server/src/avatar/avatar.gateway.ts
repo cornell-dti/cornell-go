@@ -153,6 +153,11 @@ export class AvatarGateway {
         return;
       }
 
+      const [affectedUserIds, equippedEntries] = await Promise.all([
+        this.avatarService.getAffectedUserIds(data.bearItem.id),
+        this.avatarService.getEquippedEntries(data.bearItem.id),
+      ]);
+
       const deleted = await this.avatarService.deleteBearItem(data.bearItem.id);
       if (!deleted) {
         await this.clientService.emitErrorData(
@@ -162,7 +167,28 @@ export class AvatarGateway {
         return;
       }
 
+      await this.avatarService.reEquipDefaults(equippedEntries);
       await this.avatarService.emitUpdateBearItemData(existing, true);
+
+      for (const userId of affectedUserIds) {
+        const [inv, loadout] = await Promise.all([
+          this.avatarService.getInventory(userId),
+          this.avatarService.getLoadout(userId),
+        ]);
+        await Promise.all([
+          this.clientService.sendProtected(
+            'updateUserInventoryData',
+            'user/' + userId,
+            inv,
+          ),
+          this.clientService.sendProtected(
+            'updateUserBearLoadoutData',
+            'user/' + userId,
+            loadout,
+          ),
+        ]);
+      }
+
       return existing.id;
     }
 
