@@ -588,3 +588,21 @@ export interface JoinOrganizationDto {
 export interface CompleteOnboardingDto {}
 
 export interface ResetOnboardingDto {}
+
+export interface AdminBearItemDto {
+  id: string;
+  name?: string;
+  slot?: BearSlotDto;
+  cost?: number;
+  assetKey?: string;
+  mimeType?: string;
+  zIndex?: number | null;
+  isDefault?: boolean;
+}
+
+export interface UpdateBearItemDataDto {
+  bearItem: AdminBearItemDto;
+  deleted: boolean;
+}
+
+export interface RequestAllBearItemsDto {}
