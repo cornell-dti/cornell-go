@@ -7,6 +7,7 @@ import {
   useState,
 } from 'react';
 import {
+  AdminBearItemDto,
   ChallengeDto,
   UpdateErrorDto,
   EventDto,
@@ -29,6 +30,7 @@ const defaultData = {
   users: new Map<string, UserDto>(),
   groups: new Map<string, GroupDto>(),
   quizQuestions: new Map<string, QuizQuestionDto>(),
+  bearItems: new Map<string, AdminBearItemDto>(),
   selectedEvent: '' as string,
   selectedOrg: '' as string,
   errors: new Map<string, UpdateErrorDto>(),
@@ -91,6 +93,17 @@ const defaultData = {
     return undefined;
   },
   async requestQuizQuestions(challengeId: string): Promise<number | undefined> {
+    return undefined;
+  },
+  async updateBearItem(
+    bearItem: AdminBearItemDto,
+  ): Promise<string | undefined> {
+    return undefined;
+  },
+  async deleteBearItem(id: string): Promise<string | undefined> {
+    return undefined;
+  },
+  async requestAllBearItems(): Promise<number | undefined> {
     return undefined;
   },
 };
@@ -206,6 +219,18 @@ export function ServerDataProvider(props: { children: ReactNode }) {
       requestQuizQuestions(challengeId: string) {
         return sock.requestQuizQuestions({ challengeId });
       },
+      updateBearItem(bearItem: AdminBearItemDto) {
+        return sock.updateBearItemData({ bearItem, deleted: false });
+      },
+      deleteBearItem(id: string) {
+        return sock.updateBearItemData({
+          bearItem: { id },
+          deleted: true,
+        });
+      },
+      requestAllBearItems() {
+        return sock.requestAllBearItems({});
+      },
     }),
     [sock],
   );
@@ -214,6 +239,7 @@ export function ServerDataProvider(props: { children: ReactNode }) {
     sock.send('requestOrganizationData', { admin: true });
     sock.requestAllUserData({});
     sock.requestGroupData({});
+    sock.requestAllBearItems({});
   }, [sock]);
 
   /** Update defaultData object when ServerApi websocket receives a response */
@@ -348,6 +374,20 @@ export function ServerDataProvider(props: { children: ReactNode }) {
           );
         }
         return { ...prev, quizQuestions: newQuizQuestions };
+      });
+    });
+    sock.onUpdateBearItemData(data => {
+      setServerData(prev => {
+        const newBearItems = new Map(prev.bearItems);
+        if (data.deleted) {
+          newBearItems.delete(data.bearItem.id);
+        } else {
+          newBearItems.set(
+            (data.bearItem as AdminBearItemDto).id,
+            data.bearItem as AdminBearItemDto,
+          );
+        }
+        return { ...prev, bearItems: newBearItems };
       });
     });
   }, [sock]);

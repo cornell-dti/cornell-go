@@ -6,6 +6,7 @@ import { ErrorAlert } from './components/ErrorAlert';
 import { Users } from './components/Users';
 import { Notifications } from './components/Notifications';
 import { Feedback } from './components/Feedback';
+import { BearItems } from './components/BearItems';
 
 import {
   AppBar,
@@ -32,6 +33,7 @@ import {
   faPerson,
   faBell,
   faComment,
+  faPaw,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -99,6 +101,12 @@ const routes = [
     icon: faComment,
     name: 'Feedback',
   },
+  {
+    path: '/bear-items',
+    element: <BearItems />,
+    icon: faPaw,
+    name: 'Bear Items',
+  }
 ];
 
 const SidebarIcon = styled.span`

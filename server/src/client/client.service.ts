@@ -26,6 +26,7 @@ import {
   UpdateAchievementDataDto,
 } from '../achievement/achievement.dto';
 import {
+  UpdateBearItemDataDto,
   UpdateBearItemsDataDto,
   UpdatePurchaseResultDto,
   UpdateUserBearLoadoutDataDto,
@@ -67,6 +68,7 @@ export type ClientApiDef = {
   updateOrganizationData: UpdateOrganizationDataDto;
   updateLeaderPosition: UpdateLeaderPositionDto;
   updateBearItemsData: UpdateBearItemsDataDto;
+  updateBearItemData: UpdateBearItemDataDto;
   updateUserInventoryData: UpdateUserInventoryDataDto;
   updateUserBearLoadoutData: UpdateUserBearLoadoutDataDto;
   updatePurchaseResult: UpdatePurchaseResultDto;
