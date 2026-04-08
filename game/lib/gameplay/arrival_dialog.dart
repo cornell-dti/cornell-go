@@ -9,7 +9,6 @@ import 'package:game/model/tracker_model.dart';
 import 'package:game/model/group_model.dart';
 import 'package:game/gameplay/challenge_completed.dart';
 import 'package:game/quiz/quiz_page.dart';
-import 'package:game/gameplay/gameplay_page.dart';
 import 'package:game/constants/constants.dart';
 
 /// Widget that displays the arrival dialog for challenges
@@ -92,16 +91,6 @@ class _ArrivedDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final name = challengeName ?? "";
 
-    // Check if this is a journey completed or single challenge
-    final eventId = groupModel.curEventId;
-    final event = eventModel.getEventById(eventId ?? "");
-    final tracker = trackerModel.trackerByEventId(eventId ?? "");
-    final isJourney = event?.isJourney == true;
-    final journeyCompleted = isJourney &&
-        tracker != null &&
-        tracker.prevChallenges.length >= (event?.challenges?.length ?? 0);
-    final shouldCheckQuiz = journeyCompleted || !isJourney;
-
     return Container(
       color: Colors.white,
       padding: EdgeInsets.all(25),
@@ -145,8 +134,6 @@ class _ArrivedDialog extends StatelessWidget {
               return _ButtonRow(
                 challengeId: challengeId,
                 hasQuiz: hasQuiz,
-                isJourneyInProgress:
-                    !shouldCheckQuiz, // Journey in progress if not completed/single
               );
             },
           ),
@@ -193,13 +180,11 @@ class _ArrivedDialog extends StatelessWidget {
 class _ButtonRow extends StatelessWidget {
   final String challengeId;
   final bool hasQuiz;
-  final bool isJourneyInProgress;
 
   const _ButtonRow({
     Key? key,
     required this.challengeId,
     required this.hasQuiz,
-    required this.isJourneyInProgress,
   }) : super(key: key);
 
   @override
@@ -211,23 +196,13 @@ class _ButtonRow extends StatelessWidget {
           child: ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
-              if (isJourneyInProgress) {
-                // Journey in progress - go to next challenge (GameplayPage)
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => GameplayPage()),
-                );
-              } else {
-                // Journey completed or single challenge - go directly to ChallengeCompletedPage
-                // (regardless of whether quiz exists, since user clicked "Point Breakdown")
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        ChallengeCompletedPage(challengeId: challengeId),
-                  ),
-                );
-              }
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      ChallengeCompletedPage(challengeId: challengeId),
+                ),
+              );
             },
             style: ButtonStyle(
               padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
@@ -254,7 +229,7 @@ class _ButtonRow extends StatelessWidget {
             child: FittedBox(
               fit: BoxFit.scaleDown,
               child: Text(
-                isJourneyInProgress ? "Next Challenge" : "Point Breakdown",
+                "Point Breakdown",
                 style: TextStyle(
                   fontSize:
                       MediaQuery.devicePixelRatioOf(context) < 3 ? 12 : 14,
