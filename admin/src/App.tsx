@@ -106,7 +106,7 @@ const routes = [
     element: <BearItems />,
     icon: faPaw,
     name: 'Bear Items',
-  }
+  },
 ];
 
 const SidebarIcon = styled.span`
