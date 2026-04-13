@@ -6,6 +6,10 @@ import 'package:permission_handler/permission_handler.dart';
 
 import 'package:game/gameplay/challenge_completed.dart';
 
+"""
+Camera capture for a challenge completion photo.
+On success, the primary action continues to [ChallengeCompletedPage]
+"""
 class TakePhotoPage extends StatefulWidget {
   final String challengeId;
 
