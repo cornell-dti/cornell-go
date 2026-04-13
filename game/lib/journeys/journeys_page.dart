@@ -292,40 +292,43 @@ class _JourneysPageState extends State<JourneysPage> {
                 Column(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.only(top: 48, left: 64, right: 64),
-                      child: Center(
-                        child: SizedBox(
-                          width: 345,
-                          height: 168,
-                          child: DottedBorder(
-                            color: AppColors.primaryRed,
-                            strokeWidth: 1.5,
-                            dashPattern: const [5, 4],
-                            padding: EdgeInsets.zero,
-                            borderType: BorderType.Rect,
-                            stackFit: StackFit.expand,
-                            child: Material(
-                              color: Colors.transparent,
-                              child: InkWell(
-                                onTap: () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute<void>(
-                                      builder: (_) =>
-                                          const CustomJourneyCreationsPage(),
+                      padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
+                      child: SizedBox(
+                        width: double.infinity,
+                        height: 168,
+                        child: DottedBorder(
+                          color: AppColors.primaryRed,
+                          strokeWidth: 1.5,
+                          dashPattern: const [5, 4],
+                          padding: EdgeInsets.zero,
+                          borderType: BorderType.Rect,
+                          stackFit: StackFit.expand,
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute<void>(
+                                    builder: (_) =>
+                                        const CustomJourneyCreationsPage(),
+                                  ),
+                                );
+                              },
+                              borderRadius: BorderRadius.circular(4),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  SvgPicture.asset(
+                                    'assets/icons/pluscircle_red.svg',
+                                    width: 56,
+                                    height: 56,
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 24,
                                     ),
-                                  );
-                                },
-                                borderRadius: BorderRadius.circular(4),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    SvgPicture.asset(
-                                      'assets/icons/pluscircle_red.svg',
-                                      width: 56,
-                                      height: 56,
-                                    ),
-                                    const SizedBox(height: 12),
-                                    Text(
+                                    child: Text(
                                       'Create your own journey',
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
@@ -335,8 +338,8 @@ class _JourneysPageState extends State<JourneysPage> {
                                         color: AppColors.darkText,
                                       ),
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
