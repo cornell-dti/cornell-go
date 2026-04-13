@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/api/game_client_dto.dart';
+import 'package:game/api/geopoint.dart';
 import 'package:game/constants/constants.dart';
 import 'package:game/model/challenge_model.dart';
 import 'package:game/model/event_model.dart';
@@ -36,6 +37,26 @@ class EventsDraggableSheet extends StatefulWidget {
 class _EventsDraggableSheetState extends State<EventsDraggableSheet> {
   final DraggableScrollableController _sheetController =
       DraggableScrollableController();
+
+  /// User location for distance tie-break (first challenge coords vs. user).
+  GeoPoint? _currentUserLocation;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserLocation();
+  }
+
+  Future<void> _loadUserLocation() async {
+    try {
+      final location = await GeoPoint.current();
+      if (mounted) {
+        setState(() => _currentUserLocation = location);
+      }
+    } catch (e) {
+      print('Error loading user location for events sheet: $e');
+    }
+  }
 
   @override
   void dispose() {
@@ -97,7 +118,8 @@ class _EventsDraggableSheetState extends State<EventsDraggableSheet> {
         .map((e) => e!)
         .toList();
 
-    final List<EventDto> out = [];
+    final List<({EventDto event, DateTime end, double? distanceMeters})> rows =
+        [];
 
     for (final event in events) {
       final tracker = trackerModel.trackerByEventId(event.id);
@@ -128,22 +150,36 @@ class _EventsDraggableSheetState extends State<EventsDraggableSheet> {
       );
 
       if (!complete && !timeTillExpire.isNegative && matches) {
-        out.add(event);
+        double? distanceMeters;
+        final userLoc = _currentUserLocation;
+        if (userLoc != null &&
+            challenge.latF != null &&
+            challenge.longF != null) {
+          try {
+            distanceMeters = userLoc.distanceTo(
+              GeoPoint(challenge.latF!, challenge.longF!, 0),
+            );
+          } catch (_) {
+            distanceMeters = null;
+          }
+        }
+        rows.add((event: event, end: endtime, distanceMeters: distanceMeters));
       } else if (event.id == groupModel.curEventId) {
         apiClient.serverApi?.setCurrentEvent(SetCurrentEventDto(eventId: ""));
       }
     }
 
-    out.sort((a, b) {
-      try {
-        return HttpDate.parse(a.endTime ?? '')
-            .compareTo(HttpDate.parse(b.endTime ?? ''));
-      } catch (_) {
-        return 0;
-      }
+    rows.sort((a, b) {
+      final byEnd = a.end.compareTo(b.end);
+      if (byEnd != 0) return byEnd;
+      // Secondary: nearer first; unknown distance last
+      if (a.distanceMeters == null && b.distanceMeters == null) return 0;
+      if (a.distanceMeters == null) return 1;
+      if (b.distanceMeters == null) return -1;
+      return a.distanceMeters!.compareTo(b.distanceMeters!);
     });
 
-    return out;
+    return rows.map((r) => r.event).toList();
   }
 
   Future<void> _collapseToPeek() async {
