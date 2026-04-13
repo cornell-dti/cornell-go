@@ -104,7 +104,8 @@ class _CustomJourneyCreationsPageState
   }
 
   String _longDescriptionForEvent() {
-    final start = DateFormat('MM/dd/yyyy HH:mm').format(_startDateTime!);
+    final start =
+        DateFormat('MM/dd/yyyy h:mm a', 'en_US').format(_startDateTime!);
     final body = _descriptionController.text.trim();
     return 'Scheduled start: $start\nCategory: $_selectedCategory\n\n$body';
   }
@@ -219,19 +220,29 @@ class _CustomJourneyCreationsPageState
     super.dispose();
   }
 
-  InputDecoration _darkFieldDecoration({String? hint, int? hintMaxLines}) {
+  InputDecoration _fieldDecoration({String? hint, int? hintMaxLines}) {
+    const radius = BorderRadius.all(Radius.circular(8));
+    const borderSide = BorderSide(color: AppColors.borderGray);
     return InputDecoration(
       hintText: hint,
       hintMaxLines: hintMaxLines,
       filled: true,
-      fillColor: AppColors.black50,
+      fillColor: AppColors.white,
       contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide.none,
+      border: const OutlineInputBorder(
+        borderRadius: radius,
+        borderSide: borderSide,
+      ),
+      enabledBorder: const OutlineInputBorder(
+        borderRadius: radius,
+        borderSide: borderSide,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: radius,
+        borderSide: BorderSide(color: AppColors.primaryRed, width: 1.5),
       ),
       hintStyle: const TextStyle(
-        color: AppColors.white50,
+        color: AppColors.grayText,
         fontFamily: 'Poppins',
         fontSize: 14,
       ),
@@ -239,7 +250,7 @@ class _CustomJourneyCreationsPageState
   }
 
   TextStyle get _fieldTextStyle => const TextStyle(
-        color: AppColors.white,
+        color: AppColors.darkText,
         fontFamily: 'Poppins',
         fontSize: 14,
       );
@@ -289,26 +300,54 @@ class _CustomJourneyCreationsPageState
     );
   }
 
+  /// Date first, then 12-hour time with AM/PM (`showTime12hPicker`).
   Future<void> _pickStartDate() async {
     final now = DateTime.now();
-    await DatePicker.showDateTimePicker(
+    final minTime = DateTime(now.year - 1, 1, 1);
+    final maxTime = DateTime(now.year + 5, 12, 31, 23, 59);
+    final initial = _startDateTime ?? now;
+
+    final pickedDate = await DatePicker.showDatePicker(
       context,
       showTitleActions: true,
-      minTime: DateTime(now.year - 1, 1, 1),
-      maxTime: DateTime(now.year + 5, 12, 31, 23, 59),
-      currentTime: _startDateTime ?? now,
+      minTime: minTime,
+      maxTime: maxTime,
+      currentTime: initial,
       locale: LocaleType.en,
-      onConfirm: (date) {
-        if (!mounted) return;
-        setState(() => _startDateTime = date);
-      },
     );
+    if (!mounted || pickedDate == null) return;
+
+    final timeSeed = DateTime(
+      pickedDate.year,
+      pickedDate.month,
+      pickedDate.day,
+      initial.hour,
+      initial.minute,
+    );
+
+    final pickedClock = await DatePicker.showTime12hPicker(
+      context,
+      showTitleActions: true,
+      currentTime: timeSeed,
+      locale: LocaleType.en,
+    );
+    if (!mounted || pickedClock == null) return;
+
+    setState(() {
+      _startDateTime = DateTime(
+        pickedDate.year,
+        pickedDate.month,
+        pickedDate.day,
+        pickedClock.hour,
+        pickedClock.minute,
+      );
+    });
   }
 
   Widget _startDateSelector() {
     final hasValue = _startDateTime != null;
     final label = hasValue
-        ? DateFormat('MM/dd/yyyy HH:mm').format(_startDateTime!)
+        ? DateFormat('MM/dd/yyyy h:mm a', 'en_US').format(_startDateTime!)
         : 'Choose date & time';
 
     return Material(
@@ -318,8 +357,9 @@ class _CustomJourneyCreationsPageState
         borderRadius: BorderRadius.circular(8),
         child: Ink(
           decoration: BoxDecoration(
-            color: AppColors.black50,
+            color: AppColors.white,
             borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: AppColors.borderGray),
           ),
           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
           child: Row(
@@ -331,14 +371,14 @@ class _CustomJourneyCreationsPageState
                     fontFamily: 'Poppins',
                     fontSize: 14,
                     fontWeight: FontWeight.w400,
-                    color: hasValue ? AppColors.white : AppColors.white50,
+                    color: hasValue ? AppColors.darkText : AppColors.grayText,
                   ),
                 ),
               ),
               Icon(
                 Icons.calendar_today_outlined,
                 size: 20,
-                color: hasValue ? AppColors.white : AppColors.white50,
+                color: hasValue ? AppColors.darkText : AppColors.grayText,
               ),
             ],
           ),
@@ -372,7 +412,7 @@ class _CustomJourneyCreationsPageState
                   TextField(
                     controller: _nameController,
                     style: _fieldTextStyle,
-                    decoration: _darkFieldDecoration(
+                    decoration: _fieldDecoration(
                       hint: 'e.g. study spots',
                     ),
                   ),
@@ -442,7 +482,7 @@ class _CustomJourneyCreationsPageState
                     controller: _descriptionController,
                     style: _fieldTextStyle,
                     maxLines: 5,
-                    decoration: _darkFieldDecoration(
+                    decoration: _fieldDecoration(
                       hint:
                           'Add some more details to the locations so that your friends will join!',
                       hintMaxLines: 5,
