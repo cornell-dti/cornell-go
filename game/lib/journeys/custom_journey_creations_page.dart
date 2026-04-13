@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:game/constants/constants.dart';
+import 'package:game/utils/utility_functions.dart';
 import 'package:intl/intl.dart';
+
 /**
  * Custom journey creation page 
  * TODO: connect to backend 
@@ -15,7 +17,8 @@ class CustomJourneyCreationsPage extends StatefulWidget {
       _CustomJourneyCreationsPageState();
 }
 
-class _CustomJourneyCreationsPageState extends State<CustomJourneyCreationsPage> {
+class _CustomJourneyCreationsPageState
+    extends State<CustomJourneyCreationsPage> {
   static const double _fieldWidth = 345;
 
   final TextEditingController _nameController = TextEditingController();
@@ -24,20 +27,50 @@ class _CustomJourneyCreationsPageState extends State<CustomJourneyCreationsPage>
   /// Set only via datetime picker (not typed).
   DateTime? _startDateTime;
 
-  String? _selectedCategory;
+  final Set<String> _selectedCategories = {};
   String? _selectedDifficulty;
 
   static const List<String> _categories = [
     'Food',
     'Cafe',
     'Libraries',
-    'Others',
+    'Other',
   ];
 
   static const List<String> _difficulties = ['Easy', 'Medium', 'Hard'];
 
   @override
+  void initState() {
+    super.initState();
+    _nameController.addListener(_onFormFieldChanged);
+    _descriptionController.addListener(_onFormFieldChanged);
+  }
+
+  void _onFormFieldChanged() => setState(() {});
+
+  // True when all fields are filled out
+  bool get _canProceed {
+    return _nameController.text.trim().isNotEmpty &&
+        _selectedCategories.isNotEmpty &&
+        _selectedDifficulty != null &&
+        _startDateTime != null &&
+        _descriptionController.text.trim().isNotEmpty;
+  }
+
+  void _toggleCategory(String category) {
+    setState(() {
+      if (_selectedCategories.contains(category)) {
+        _selectedCategories.remove(category);
+      } else {
+        _selectedCategories.add(category);
+      }
+    });
+  }
+
+  @override
   void dispose() {
+    _nameController.removeListener(_onFormFieldChanged);
+    _descriptionController.removeListener(_onFormFieldChanged);
     _nameController.dispose();
     _descriptionController.dispose();
     super.dispose();
@@ -208,9 +241,8 @@ class _CustomJourneyCreationsPageState extends State<CustomJourneyCreationsPage>
                     children: _categories.map((c) {
                       return _pill(
                         label: c,
-                        selected: _selectedCategory == c,
-                        onTap: () =>
-                            setState(() => _selectedCategory = c),
+                        selected: _selectedCategories.contains(c),
+                        onTap: () => _toggleCategory(c),
                       );
                     }).toList(),
                   ),
@@ -223,8 +255,7 @@ class _CustomJourneyCreationsPageState extends State<CustomJourneyCreationsPage>
                       return _pill(
                         label: d,
                         selected: _selectedDifficulty == d,
-                        onTap: () =>
-                            setState(() => _selectedDifficulty = d),
+                        onTap: () => setState(() => _selectedDifficulty = d),
                       );
                     }).toList(),
                   ),
@@ -277,10 +308,13 @@ class _CustomJourneyCreationsPageState extends State<CustomJourneyCreationsPage>
                   Align(
                     alignment: Alignment.centerRight,
                     child: Material(
-                      color: AppColors.primaryRed,
+                      color: _canProceed
+                          ? AppColors.primaryRed
+                          : AppColors.primaryRed.withOpacity(0.45),
                       borderRadius: BorderRadius.circular(8),
                       child: InkWell(
-                        onTap: () {},
+                        onTap:
+                            () {}, //TODO: redirect to first page of Challenge Selection flow
                         borderRadius: BorderRadius.circular(8),
                         child: const Padding(
                           padding: EdgeInsets.symmetric(
