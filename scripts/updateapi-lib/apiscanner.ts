@@ -21,6 +21,14 @@ export function getApiDefinitions() {
     const ev = prop.getValueDeclarationOrThrow().getChildAtIndex(0).getText();
     const dto = prop.getValueDeclarationOrThrow().getChildAtIndex(2).getText();
 
+    // Skip inline object types like { event: CampusEventDto }
+    if (dto.startsWith("{")) {
+      console.log(
+        `Client event "${ev}" uses inline object type — skipping. Use a named DTO instead.`
+      );
+      continue;
+    }
+
     apiDefs.clientEntrypoints.set(ev, dto);
   }
 
@@ -45,10 +53,27 @@ export function getApiDefinitions() {
           .asKindOrThrow(SyntaxKind.StringLiteral)
           .getLiteralValue();
 
-        let dto = func
-          .getParameterOrThrow((param) => !!param.getDecorator("MessageBody"))
-          .getType()
-          .getText();
+        const messageBodyParam = func
+          .getParameters()
+          .find((param) => !!param.getDecorator("MessageBody"));
+
+        if (!messageBodyParam) {
+          console.log(
+            `Function ${ev} has no @MessageBody parameter! Skipping...`
+          );
+          continue;
+        }
+
+        let dto = messageBodyParam.getType().getText();
+
+        // Strip intersection types: "FooDto & { id: string; }" → "FooDto"
+        if (dto.includes("&")) {
+          const base = dto.split("&")[0].trim();
+          console.log(
+            `Function ${ev} uses intersection type, using base type: ${base}`
+          );
+          dto = base;
+        }
 
         if (!func.getReturnType().getText().startsWith("Promise")) {
           console.log(

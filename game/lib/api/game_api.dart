@@ -195,6 +195,7 @@ class ApiClient extends ChangeNotifier {
           key: ApiConfig.refreshTokenKey, value: _refreshToken);
     }
     if (_accessToken != null) {
+      // access token needed for server to identify user for geofence notficiations
       await _storage.write(key: 'spotlight_access_token', value: _accessToken);
     }
   }

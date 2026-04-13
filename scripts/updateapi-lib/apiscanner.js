@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getApiDefinitions = void 0;
+exports.getApiDefinitions = getApiDefinitions;
 const ts_morph_1 = require("ts-morph");
 function getApiDefinitions() {
     const project = new ts_morph_1.Project({});
@@ -17,6 +17,11 @@ function getApiDefinitions() {
     for (const prop of clientApiDef.getType().getProperties()) {
         const ev = prop.getValueDeclarationOrThrow().getChildAtIndex(0).getText();
         const dto = prop.getValueDeclarationOrThrow().getChildAtIndex(2).getText();
+        // Skip inline object types like { event: CampusEventDto }
+        if (dto.startsWith("{")) {
+            console.log(`Client event "${ev}" uses inline object type — skipping. Use a named DTO instead.`);
+            continue;
+        }
         apiDefs.clientEntrypoints.set(ev, dto);
     }
     console.log(`Processed ${apiDefs.clientEntrypoints.size} client functions!`);
@@ -44,9 +49,13 @@ function getApiDefinitions() {
                     console.log(`Function ${ev} has no @MessageBody parameter! Skipping...`);
                     continue;
                 }
-                let dto = messageBodyParam
-                    .getType()
-                    .getText();
+                let dto = messageBodyParam.getType().getText();
+                // Strip intersection types: "FooDto & { id: string; }" → "FooDto"
+                if (dto.includes("&")) {
+                    const base = dto.split("&")[0].trim();
+                    console.log(`Function ${ev} uses intersection type, using base type: ${base}`);
+                    dto = base;
+                }
                 if (!func.getReturnType().getText().startsWith("Promise")) {
                     console.log(`Function ${ev} does not return a promise/is not async! Skipping...`);
                     continue;
@@ -81,4 +90,3 @@ function getApiDefinitions() {
     console.log();
     return apiDefs;
 }
-exports.getApiDefinitions = getApiDefinitions;

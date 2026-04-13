@@ -78,6 +78,7 @@ describe('SpotlightService', () => {
     const userLng = -76.4735;
 
     it('should send notification when all checks pass', async () => {
+      // mockResolvedValue mocks when calls that occur in this test (to test that specific scenario)
       prisma.locationSpotlight.findUnique.mockResolvedValue(mockSpotlight());
       prisma.spotlightNotificationLog.count.mockResolvedValue(0);
       prisma.spotlightNotificationLog.findFirst.mockResolvedValue(null);

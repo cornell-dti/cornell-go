@@ -36,6 +36,7 @@ export class SpotlightService {
     return spotlights;
   }
 
+  // Runs through every anti-spam check before deciding to send
   async requestNotification(
     userId: string,
     spotlightId: string,
