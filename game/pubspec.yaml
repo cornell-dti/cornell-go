@@ -70,6 +70,8 @@ dependencies:
   device_preview: ^1.2.0
   showcaseview: ^5.0.1
   flutter_compass: ^0.8.0
+  dotted_border: ^2.1.0
+  flutter_datetime_picker_plus: ^2.2.0
 
 dev_dependencies:
   flutter_test:
