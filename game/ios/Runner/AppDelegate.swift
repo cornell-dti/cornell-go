@@ -13,16 +13,16 @@ import native_geofence
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
+    NativeGeofencePlugin.setPluginRegistrantCallback { registry in
+      GeneratedPluginRegistrant.register(with: registry)
+    }
+
     GeneratedPluginRegistrant.register(with: self)
     if FirebaseApp.app() == nil {
       FirebaseApp.configure()
     }
     if let apiKey = FlutterConfigPlusPlugin.env(for: "IOS_MAP_API_KEY") {
       GMSServices.provideAPIKey(apiKey)
-    }
-
-    NativeGeofencePlugin.setPluginRegistrantCallback { registry in
-      GeneratedPluginRegistrant.register(with: registry)
     }
 
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)

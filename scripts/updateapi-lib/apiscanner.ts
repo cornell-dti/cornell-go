@@ -57,14 +57,10 @@ export function getApiDefinitions() {
           .getParameters()
           .find((param) => !!param.getDecorator("MessageBody"));
 
-        if (!messageBodyParam) {
-          console.log(
-            `Function ${ev} has no @MessageBody parameter! Skipping...`
-          );
-          continue;
+        let dto = "";
+        if (messageBodyParam) {
+          dto = messageBodyParam.getType().getText();
         }
-
-        let dto = messageBodyParam.getType().getText();
 
         // Strip intersection types: "FooDto & { id: string; }" → "FooDto"
         if (dto.includes("&")) {
@@ -73,6 +69,18 @@ export function getApiDefinitions() {
             `Function ${ev} uses intersection type, using base type: ${base}`
           );
           dto = base;
+        }
+
+        // Strip utility types: "Omit<FooDto, "id">" → "FooDto"
+        // ts-morph may resolve to full path like: Omit<import("...").SpotlightDto, "id">
+        const utilityMatch = dto.match(
+          /^(?:Omit|Pick|Partial|Required)<(?:import\([^)]*\)\.)?(\w+)/
+        );
+        if (utilityMatch) {
+          console.log(
+            `Function ${ev} uses utility type, using base type: ${utilityMatch[1]}`
+          );
+          dto = utilityMatch[1];
         }
 
         if (!func.getReturnType().getText().startsWith("Promise")) {
@@ -102,13 +110,11 @@ export function getApiDefinitions() {
         if (
           !(ackType.isString() || ackType.isNumber() || ackType.isBoolean())
         ) {
-          console.log(
-            `Function ${ev} does not return one of number, boolean, or string! Skipping...`
-          );
-          continue;
+          // Use "dynamic" for complex return types instead of skipping
+          apiDefs.serverAcks.set(ev, "dynamic");
+        } else {
+          apiDefs.serverAcks.set(ev, ackType.getText());
         }
-
-        apiDefs.serverAcks.set(ev, ackType.getText());
 
         if (dto.includes(".")) {
           dto = dto.split(".").pop()!;

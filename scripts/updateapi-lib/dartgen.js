@@ -296,11 +296,20 @@ function getDartServerApiFile(apiDefs) {
   `;
     for (const [ev, dto] of apiDefs.serverEntrypoints.entries()) {
         const ackType = toDartType(apiDefs.serverAcks.get(ev), "x");
-        dartCode += `
+        if (dto) {
+            dartCode += `
       Future<${ackType}?> ${ev}(${dto} dto) async => await _invokeWithRefresh(
         "${ev}", dto.toJson());
 
     `;
+        }
+        else {
+            dartCode += `
+      Future<${ackType}?> ${ev}(Map<String, dynamic> dto) async => await _invokeWithRefresh(
+        "${ev}", dto);
+
+    `;
+        }
     }
     dartCode += "}";
     return dartCode;

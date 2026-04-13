@@ -103,6 +103,16 @@ export class ServerApi {
     return this.send('unRsvpCampusEvent', data) as Promise<boolean | undefined>;
   }
 
+  requestAvailableChallenges(data: dto.RequestAvailableChallengesDto) {
+    return this.send('requestAvailableChallenges', data) as Promise<
+      any | undefined
+    >;
+  }
+
+  setCurrentChallenge(data: dto.SetCurrentChallengeDto) {
+    return this.send('setCurrentChallenge', data) as Promise<any | undefined>;
+  }
+
   requestChallengeData(data: dto.RequestChallengeDataDto) {
     return this.send('requestChallengeData', data) as Promise<
       number | undefined
@@ -167,8 +177,20 @@ export class ServerApi {
     return this.send('updateEventData', data) as Promise<string | undefined>;
   }
 
+  triggerEventSync(data: dto.TriggerEventSyncDto) {
+    return this.send('triggerEventSync', data) as Promise<any | undefined>;
+  }
+
+  requestEventSyncStatus() {
+    return this.send('requestEventSyncStatus', {}) as Promise<any | undefined>;
+  }
+
   submitFeedback(data: dto.SubmitFeedbackDto) {
     return this.send('submitFeedback', data) as Promise<boolean | undefined>;
+  }
+
+  requestFeedbackData() {
+    return this.send('requestFeedbackData', {}) as Promise<boolean | undefined>;
   }
 
   requestGroupData(data: dto.RequestGroupDataDto) {
@@ -197,6 +219,14 @@ export class ServerApi {
 
   updateFcmToken(data: dto.UpdatePushTokenDto) {
     return this.send('updateFcmToken', data) as Promise<boolean | undefined>;
+  }
+
+  sendNotification(data: dto.SendNotificationDto) {
+    return this.send('sendNotification', data) as Promise<any | undefined>;
+  }
+
+  removeFcmToken() {
+    return this.send('removeFcmToken', {}) as Promise<boolean | undefined>;
   }
 
   requestOrganizationData(data: dto.RequestOrganizationDataDto) {
@@ -241,6 +271,28 @@ export class ServerApi {
     return this.send('updateQuizQuestionData', data) as Promise<
       string | undefined
     >;
+  }
+
+  getActiveSpotlights() {
+    return this.send('getActiveSpotlights', {}) as Promise<any | undefined>;
+  }
+
+  requestSpotlightNotification(data: dto.RequestSpotlightNotificationDto) {
+    return this.send('requestSpotlightNotification', data) as Promise<
+      any | undefined
+    >;
+  }
+
+  getAllSpotlights() {
+    return this.send('getAllSpotlights', {}) as Promise<any | undefined>;
+  }
+
+  createSpotlight(data: dto.SpotlightDto) {
+    return this.send('createSpotlight', data) as Promise<any | undefined>;
+  }
+
+  updateSpotlight(data: dto.SpotlightDto) {
+    return this.send('updateSpotlight', data) as Promise<any | undefined>;
   }
 
   deleteSpotlight(data: dto.DeleteSpotlightDto) {
