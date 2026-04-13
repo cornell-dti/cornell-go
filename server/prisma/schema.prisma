@@ -115,6 +115,7 @@ model User {
   hasCompletedOnboarding Boolean              @default(false)
   eventAttendances       EventAttendance[]
   eventRSVPs             EventRSVP[]
+  spotlightNotifications SpotlightNotificationLog[]
 }
 
 model Group {
@@ -177,6 +178,7 @@ model EventBase {
   category        EventCategoryType
   featured        Boolean            @default(false)
   isJourney       Boolean            @default(false)
+  spotlights      LocationSpotlight[]
 }
 
 enum EventCategoryType {
@@ -489,6 +491,7 @@ model CampusEvent {
   // Tracking
   attendances EventAttendance[]
   rsvps       EventRSVP[]
+  spotlights  LocationSpotlight[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -522,4 +525,42 @@ model EventRSVP {
   rsvpAt DateTime @default(now())
 
   @@unique([userId, campusEventId])
+}
+
+// ---- Location Spotlights ----
+
+model LocationSpotlight {
+  id           String   @id @default(uuid())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt()
+  title        String
+  body         String
+  latitude     Float
+  longitude    Float
+  radiusMeters Float
+  cooldownDays Int      @default(7)
+  startDate    DateTime
+  endDate      DateTime
+  startHour    Int      @default(9)
+  endHour      Int      @default(21)
+  isActive     Boolean  @default(true)
+
+  linkedEvent         EventBase?   @relation(fields: [linkedEventId], references: [id])
+  linkedEventId       String?
+  linkedCampusEvent   CampusEvent? @relation(fields: [linkedCampusEventId], references: [id])
+  linkedCampusEventId String?
+
+  notificationLogs SpotlightNotificationLog[]
+}
+
+model SpotlightNotificationLog {
+  id          String            @id @default(uuid())
+  userId      String
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  spotlightId String
+  spotlight   LocationSpotlight @relation(fields: [spotlightId], references: [id], onDelete: Cascade)
+  notifiedAt  DateTime          @default(now())
+
+  @@index([userId, spotlightId])
+  @@index([userId, notifiedAt])
 }

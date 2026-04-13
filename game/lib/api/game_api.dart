@@ -12,6 +12,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:http/http.dart' as http;
 import 'package:game/api/geopoint.dart';
+import 'package:game/api/spotlight_service.dart';
 import 'package:game/constants/constants.dart';
 
 enum AuthProviderType { google, apple }
@@ -144,6 +145,9 @@ class ApiClient extends ChangeNotifier {
         _pendingFcmToken = null;
       }
 
+      // Start spotlight geofence monitoring
+      SpotlightService().start(socket, _apiUrl);
+
       notifyListeners();
     });
 
@@ -189,6 +193,9 @@ class ApiClient extends ChangeNotifier {
     if (_refreshToken != null) {
       await _storage.write(
           key: ApiConfig.refreshTokenKey, value: _refreshToken);
+    }
+    if (_accessToken != null) {
+      await _storage.write(key: 'spotlight_access_token', value: _accessToken);
     }
   }
 
@@ -408,6 +415,8 @@ class ApiClient extends ChangeNotifier {
   Future<void> disconnect() async {
     await _storage.delete(key: ApiConfig.refreshTokenKey);
     await _googleSignIn.signOut();
+
+    SpotlightService().stop();
 
     _refreshToken = null;
     _accessToken = null;

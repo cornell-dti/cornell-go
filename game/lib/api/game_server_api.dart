@@ -91,6 +91,12 @@ class GameServerApi {
   Future<String?> updateChallengeData(UpdateChallengeDataDto dto) async =>
       await _invokeWithRefresh("updateChallengeData", dto.toJson());
 
+  Future<bool?> checkInWithLocation(LocationCheckInDto dto) async =>
+      await _invokeWithRefresh("checkInWithLocation", dto.toJson());
+
+  Future<bool?> checkInWithQrCode(QrCodeCheckInDto dto) async =>
+      await _invokeWithRefresh("checkInWithQrCode", dto.toJson());
+
   Future<int?> requestEventData(RequestEventDataDto dto) async =>
       await _invokeWithRefresh("requestEventData", dto.toJson());
 
@@ -157,6 +163,9 @@ class GameServerApi {
 
   Future<String?> updateQuizQuestionData(UpdateQuizQuestionDataDto dto) async =>
       await _invokeWithRefresh("updateQuizQuestionData", dto.toJson());
+
+  Future<bool?> deleteSpotlight(DeleteSpotlightDto dto) async =>
+      await _invokeWithRefresh("deleteSpotlight", dto.toJson());
 
   Future<String?> startChallengeTimer(StartChallengeTimerDto dto) async =>
       await _invokeWithRefresh("startChallengeTimer", dto.toJson());

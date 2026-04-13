@@ -43,6 +43,34 @@ export enum ChallengeLocationDto {
   ANY = 'ANY',
 }
 
+export enum CheckInResultCheckInMethodDto {
+  LOCATION = 'LOCATION',
+  QR_CODE = 'QR_CODE',
+}
+
+export enum CheckInErrorCodeDto {
+  EVENT_NOT_FOUND = 'EVENT_NOT_FOUND',
+  EVENT_NOT_ACTIVE = 'EVENT_NOT_ACTIVE',
+  EVENT_NOT_APPROVED = 'EVENT_NOT_APPROVED',
+  ALREADY_CHECKED_IN = 'ALREADY_CHECKED_IN',
+  OUT_OF_RADIUS = 'OUT_OF_RADIUS',
+  METHOD_NOT_ALLOWED = 'METHOD_NOT_ALLOWED',
+  INVALID_QR_CODE = 'INVALID_QR_CODE',
+  UNKNOWN_ERROR = 'UNKNOWN_ERROR',
+}
+
+export enum ClubSubmissionCategoryDto {
+  SOCIAL = 'SOCIAL',
+  CULTURAL = 'CULTURAL',
+  ATHLETIC = 'ATHLETIC',
+  WELLNESS = 'WELLNESS',
+  ACADEMIC = 'ACADEMIC',
+  ARTS = 'ARTS',
+  CAREER = 'CAREER',
+  COMMUNITY = 'COMMUNITY',
+  OTHER = 'OTHER',
+}
+
 export enum EventCategoryDto {
   FOOD = 'FOOD',
   NATURE = 'NATURE',
@@ -250,9 +278,52 @@ export interface AvailableChallengesResponseDto {
   challenges: ChallengeDto[];
 }
 
+export interface LocationCheckInDto {
+  campusEventId: string;
+  latitude: number;
+  longitude: number;
+}
+
+export interface QrCodeCheckInDto {
+  qrCode: string;
+}
+
+export interface GenerateQrCodeDto {
+  campusEventId: string;
+}
+
+export interface CheckInResultDto {
+  attendanceId: string;
+  campusEventId: string;
+  checkInMethod: CheckInResultCheckInMethodDto;
+  pointsAwarded: number;
+  newTotalScore: number;
+}
+
+export interface CheckInErrorDto {
+  message: string;
+  code: CheckInErrorCodeDto;
+}
+
 export interface UpdateErrorDto {
   id: string;
   message: string;
+}
+
+export interface ClubSubmissionDto {
+  clubName: string;
+  contactEmail: string;
+  eventTitle: string;
+  description: string;
+  startTime: string;
+  endTime: string;
+  location: string;
+  latitude?: number;
+  longitude?: number;
+  category: ClubSubmissionCategoryDto;
+  address?: string;
+  imageUrl?: string;
+  registrationLink?: string;
 }
 
 export interface RequestFilteredEventsDto {
@@ -343,6 +414,25 @@ export interface UpdateEventDataDto {
 }
 
 export interface UseEventTrackerHintDto {}
+
+export interface TriggerEventSyncDto {
+  days?: number;
+}
+
+export interface EventSyncResultDto {
+  created: number;
+  updated: number;
+  archived: number;
+  totalFetched: number;
+  syncedAt: string;
+}
+
+export interface RequestEventSyncStatusDto {}
+
+export interface UpdateEventSyncStatusDto {
+  running: boolean;
+  lastResult: EventSyncResultDto;
+}
 
 export interface JoinGroupDto {
   groupId: string;
@@ -477,6 +567,45 @@ export interface QuizErrorDto {
 export interface UpdateQuizQuestionDataDto {
   question: QuizQuestionDto;
   deleted: boolean;
+}
+
+export interface SpotlightDto {
+  id: string;
+  title: string;
+  body: string;
+  latitude: number;
+  longitude: number;
+  radiusMeters: number;
+  cooldownDays: number;
+  startDate: string;
+  endDate: string;
+  startHour: number;
+  endHour: number;
+  isActive: boolean;
+  linkedEventId?: string;
+  linkedCampusEventId?: string;
+}
+
+export interface ActiveSpotlightDto {
+  id: string;
+  latitude: number;
+  longitude: number;
+  radiusMeters: number;
+}
+
+export interface RequestSpotlightNotificationDto {
+  spotlightId: string;
+  latitude: number;
+  longitude: number;
+}
+
+export interface SpotlightNotificationResultDto {
+  sent: boolean;
+  reason?: string;
+}
+
+export interface DeleteSpotlightDto {
+  id: string;
 }
 
 export interface TimerStartedDto {

@@ -5,6 +5,7 @@ import { Organizations } from './components/Organizations';
 import { ErrorAlert } from './components/ErrorAlert';
 import { Users } from './components/Users';
 import { Notifications } from './components/Notifications';
+import { Spotlights } from './components/Spotlights';
 
 import {
   AppBar,
@@ -30,6 +31,7 @@ import {
   faBuilding,
   faPerson,
   faBell,
+  faMapPin,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -90,6 +92,12 @@ const routes = [
     element: <Notifications />,
     icon: faBell,
     name: 'Notifications',
+  },
+  {
+    path: '/spotlights',
+    element: <Spotlights />,
+    icon: faMapPin,
+    name: 'Spotlights',
   },
 ];
 

@@ -71,6 +71,16 @@ export class ServerApi {
     >;
   }
 
+  checkInWithLocation(data: dto.LocationCheckInDto) {
+    return this.send('checkInWithLocation', data) as Promise<
+      boolean | undefined
+    >;
+  }
+
+  checkInWithQrCode(data: dto.QrCodeCheckInDto) {
+    return this.send('checkInWithQrCode', data) as Promise<boolean | undefined>;
+  }
+
   requestEventData(data: dto.RequestEventDataDto) {
     return this.send('requestEventData', data) as Promise<number | undefined>;
   }
@@ -179,6 +189,10 @@ export class ServerApi {
     return this.send('updateQuizQuestionData', data) as Promise<
       string | undefined
     >;
+  }
+
+  deleteSpotlight(data: dto.DeleteSpotlightDto) {
+    return this.send('deleteSpotlight', data) as Promise<boolean | undefined>;
   }
 
   startChallengeTimer(data: dto.StartChallengeTimerDto) {

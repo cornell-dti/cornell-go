@@ -43,6 +43,34 @@ enum ChallengeLocationDto {
   ANY,
 }
 
+enum CheckInResultCheckInMethodDto {
+  LOCATION,
+  QR_CODE,
+}
+
+enum CheckInErrorCodeDto {
+  EVENT_NOT_FOUND,
+  EVENT_NOT_ACTIVE,
+  EVENT_NOT_APPROVED,
+  ALREADY_CHECKED_IN,
+  OUT_OF_RADIUS,
+  METHOD_NOT_ALLOWED,
+  INVALID_QR_CODE,
+  UNKNOWN_ERROR,
+}
+
+enum ClubSubmissionCategoryDto {
+  SOCIAL,
+  CULTURAL,
+  ATHLETIC,
+  WELLNESS,
+  ACADEMIC,
+  ARTS,
+  CAREER,
+  COMMUNITY,
+  OTHER,
+}
+
 enum EventCategoryDto {
   FOOD,
   NATURE,
@@ -1084,6 +1112,152 @@ class AvailableChallengesResponseDto {
   late List<ChallengeDto> challenges;
 }
 
+class LocationCheckInDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['campusEventId'] = campusEventId;
+    fields['latitude'] = latitude;
+    fields['longitude'] = longitude;
+    return fields;
+  }
+
+  LocationCheckInDto.fromJson(Map<String, dynamic> fields) {
+    campusEventId = fields["campusEventId"];
+    latitude = fields["latitude"];
+    longitude = fields["longitude"];
+  }
+
+  void partialUpdate(LocationCheckInDto other) {
+    campusEventId = other.campusEventId;
+    latitude = other.latitude;
+    longitude = other.longitude;
+  }
+
+  LocationCheckInDto({
+    required this.campusEventId,
+    required this.latitude,
+    required this.longitude,
+  });
+
+  late String campusEventId;
+  late int latitude;
+  late int longitude;
+}
+
+class QrCodeCheckInDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['qrCode'] = qrCode;
+    return fields;
+  }
+
+  QrCodeCheckInDto.fromJson(Map<String, dynamic> fields) {
+    qrCode = fields["qrCode"];
+  }
+
+  void partialUpdate(QrCodeCheckInDto other) {
+    qrCode = other.qrCode;
+  }
+
+  QrCodeCheckInDto({
+    required this.qrCode,
+  });
+
+  late String qrCode;
+}
+
+class GenerateQrCodeDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['campusEventId'] = campusEventId;
+    return fields;
+  }
+
+  GenerateQrCodeDto.fromJson(Map<String, dynamic> fields) {
+    campusEventId = fields["campusEventId"];
+  }
+
+  void partialUpdate(GenerateQrCodeDto other) {
+    campusEventId = other.campusEventId;
+  }
+
+  GenerateQrCodeDto({
+    required this.campusEventId,
+  });
+
+  late String campusEventId;
+}
+
+class CheckInResultDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['attendanceId'] = attendanceId;
+    fields['campusEventId'] = campusEventId;
+    fields['checkInMethod'] = checkInMethod!.name;
+    fields['pointsAwarded'] = pointsAwarded;
+    fields['newTotalScore'] = newTotalScore;
+    return fields;
+  }
+
+  CheckInResultDto.fromJson(Map<String, dynamic> fields) {
+    attendanceId = fields["attendanceId"];
+    campusEventId = fields["campusEventId"];
+    checkInMethod =
+        CheckInResultCheckInMethodDto.values.byName(fields['checkInMethod']);
+    pointsAwarded = fields["pointsAwarded"];
+    newTotalScore = fields["newTotalScore"];
+  }
+
+  void partialUpdate(CheckInResultDto other) {
+    attendanceId = other.attendanceId;
+    campusEventId = other.campusEventId;
+    checkInMethod = other.checkInMethod;
+    pointsAwarded = other.pointsAwarded;
+    newTotalScore = other.newTotalScore;
+  }
+
+  CheckInResultDto({
+    required this.attendanceId,
+    required this.campusEventId,
+    required this.checkInMethod,
+    required this.pointsAwarded,
+    required this.newTotalScore,
+  });
+
+  late String attendanceId;
+  late String campusEventId;
+  late CheckInResultCheckInMethodDto checkInMethod;
+  late int pointsAwarded;
+  late int newTotalScore;
+}
+
+class CheckInErrorDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['message'] = message;
+    fields['code'] = code!.name;
+    return fields;
+  }
+
+  CheckInErrorDto.fromJson(Map<String, dynamic> fields) {
+    message = fields["message"];
+    code = CheckInErrorCodeDto.values.byName(fields['code']);
+  }
+
+  void partialUpdate(CheckInErrorDto other) {
+    message = other.message;
+    code = other.code;
+  }
+
+  CheckInErrorDto({
+    required this.message,
+    required this.code,
+  });
+
+  late String message;
+  late CheckInErrorCodeDto code;
+}
+
 class UpdateErrorDto {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> fields = {};
@@ -1109,6 +1283,102 @@ class UpdateErrorDto {
 
   late String id;
   late String message;
+}
+
+class ClubSubmissionDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['clubName'] = clubName;
+    fields['contactEmail'] = contactEmail;
+    fields['eventTitle'] = eventTitle;
+    fields['description'] = description;
+    fields['startTime'] = startTime;
+    fields['endTime'] = endTime;
+    fields['location'] = location;
+    if (latitude != null) {
+      fields['latitude'] = latitude;
+    }
+    if (longitude != null) {
+      fields['longitude'] = longitude;
+    }
+    fields['category'] = category!.name;
+    if (address != null) {
+      fields['address'] = address;
+    }
+    if (imageUrl != null) {
+      fields['imageUrl'] = imageUrl;
+    }
+    if (registrationLink != null) {
+      fields['registrationLink'] = registrationLink;
+    }
+    return fields;
+  }
+
+  ClubSubmissionDto.fromJson(Map<String, dynamic> fields) {
+    clubName = fields["clubName"];
+    contactEmail = fields["contactEmail"];
+    eventTitle = fields["eventTitle"];
+    description = fields["description"];
+    startTime = fields["startTime"];
+    endTime = fields["endTime"];
+    location = fields["location"];
+    latitude = fields.containsKey('latitude') ? (fields["latitude"]) : null;
+    longitude = fields.containsKey('longitude') ? (fields["longitude"]) : null;
+    category = ClubSubmissionCategoryDto.values.byName(fields['category']);
+    address = fields.containsKey('address') ? (fields["address"]) : null;
+    imageUrl = fields.containsKey('imageUrl') ? (fields["imageUrl"]) : null;
+    registrationLink = fields.containsKey('registrationLink')
+        ? (fields["registrationLink"])
+        : null;
+  }
+
+  void partialUpdate(ClubSubmissionDto other) {
+    clubName = other.clubName;
+    contactEmail = other.contactEmail;
+    eventTitle = other.eventTitle;
+    description = other.description;
+    startTime = other.startTime;
+    endTime = other.endTime;
+    location = other.location;
+    latitude = other.latitude == null ? latitude : other.latitude;
+    longitude = other.longitude == null ? longitude : other.longitude;
+    category = other.category;
+    address = other.address == null ? address : other.address;
+    imageUrl = other.imageUrl == null ? imageUrl : other.imageUrl;
+    registrationLink = other.registrationLink == null
+        ? registrationLink
+        : other.registrationLink;
+  }
+
+  ClubSubmissionDto({
+    required this.clubName,
+    required this.contactEmail,
+    required this.eventTitle,
+    required this.description,
+    required this.startTime,
+    required this.endTime,
+    required this.location,
+    this.latitude,
+    this.longitude,
+    required this.category,
+    this.address,
+    this.imageUrl,
+    this.registrationLink,
+  });
+
+  late String clubName;
+  late String contactEmail;
+  late String eventTitle;
+  late String description;
+  late String startTime;
+  late String endTime;
+  late String location;
+  late int? latitude;
+  late int? longitude;
+  late ClubSubmissionCategoryDto category;
+  late String? address;
+  late String? imageUrl;
+  late String? registrationLink;
 }
 
 class RequestFilteredEventsDto {
@@ -1670,6 +1940,112 @@ class UseEventTrackerHintDto {
   void partialUpdate(UseEventTrackerHintDto other) {}
 
   UseEventTrackerHintDto();
+}
+
+class TriggerEventSyncDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    if (days != null) {
+      fields['days'] = days;
+    }
+    return fields;
+  }
+
+  TriggerEventSyncDto.fromJson(Map<String, dynamic> fields) {
+    days = fields.containsKey('days') ? (fields["days"]) : null;
+  }
+
+  void partialUpdate(TriggerEventSyncDto other) {
+    days = other.days == null ? days : other.days;
+  }
+
+  TriggerEventSyncDto({
+    this.days,
+  });
+
+  late int? days;
+}
+
+class EventSyncResultDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['created'] = created;
+    fields['updated'] = updated;
+    fields['archived'] = archived;
+    fields['totalFetched'] = totalFetched;
+    fields['syncedAt'] = syncedAt;
+    return fields;
+  }
+
+  EventSyncResultDto.fromJson(Map<String, dynamic> fields) {
+    created = fields["created"];
+    updated = fields["updated"];
+    archived = fields["archived"];
+    totalFetched = fields["totalFetched"];
+    syncedAt = fields["syncedAt"];
+  }
+
+  void partialUpdate(EventSyncResultDto other) {
+    created = other.created;
+    updated = other.updated;
+    archived = other.archived;
+    totalFetched = other.totalFetched;
+    syncedAt = other.syncedAt;
+  }
+
+  EventSyncResultDto({
+    required this.created,
+    required this.updated,
+    required this.archived,
+    required this.totalFetched,
+    required this.syncedAt,
+  });
+
+  late int created;
+  late int updated;
+  late int archived;
+  late int totalFetched;
+  late String syncedAt;
+}
+
+class RequestEventSyncStatusDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    return fields;
+  }
+
+  RequestEventSyncStatusDto.fromJson(Map<String, dynamic> fields) {}
+
+  void partialUpdate(RequestEventSyncStatusDto other) {}
+
+  RequestEventSyncStatusDto();
+}
+
+class UpdateEventSyncStatusDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['running'] = running;
+    fields['lastResult'] = lastResult!.toJson();
+    return fields;
+  }
+
+  UpdateEventSyncStatusDto.fromJson(Map<String, dynamic> fields) {
+    running = fields["running"];
+    lastResult = EventSyncResultDto.fromJson(fields['lastResult']);
+  }
+
+  void partialUpdate(UpdateEventSyncStatusDto other) {
+    running = other.running;
+    lastResult = other.lastResult;
+  }
+
+  UpdateEventSyncStatusDto({
+    required this.running,
+    required this.lastResult,
+  });
+
+  late bool running;
+  late EventSyncResultDto lastResult;
 }
 
 class JoinGroupDto {
@@ -2489,6 +2865,223 @@ class UpdateQuizQuestionDataDto {
 
   late QuizQuestionDto question;
   late bool deleted;
+}
+
+class SpotlightDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['id'] = id;
+    fields['title'] = title;
+    fields['body'] = body;
+    fields['latitude'] = latitude;
+    fields['longitude'] = longitude;
+    fields['radiusMeters'] = radiusMeters;
+    fields['cooldownDays'] = cooldownDays;
+    fields['startDate'] = startDate;
+    fields['endDate'] = endDate;
+    fields['startHour'] = startHour;
+    fields['endHour'] = endHour;
+    fields['isActive'] = isActive;
+    if (linkedEventId != null) {
+      fields['linkedEventId'] = linkedEventId;
+    }
+    if (linkedCampusEventId != null) {
+      fields['linkedCampusEventId'] = linkedCampusEventId;
+    }
+    return fields;
+  }
+
+  SpotlightDto.fromJson(Map<String, dynamic> fields) {
+    id = fields["id"];
+    title = fields["title"];
+    body = fields["body"];
+    latitude = fields["latitude"];
+    longitude = fields["longitude"];
+    radiusMeters = fields["radiusMeters"];
+    cooldownDays = fields["cooldownDays"];
+    startDate = fields["startDate"];
+    endDate = fields["endDate"];
+    startHour = fields["startHour"];
+    endHour = fields["endHour"];
+    isActive = fields["isActive"];
+    linkedEventId =
+        fields.containsKey('linkedEventId') ? (fields["linkedEventId"]) : null;
+    linkedCampusEventId = fields.containsKey('linkedCampusEventId')
+        ? (fields["linkedCampusEventId"])
+        : null;
+  }
+
+  void partialUpdate(SpotlightDto other) {
+    id = other.id;
+    title = other.title;
+    body = other.body;
+    latitude = other.latitude;
+    longitude = other.longitude;
+    radiusMeters = other.radiusMeters;
+    cooldownDays = other.cooldownDays;
+    startDate = other.startDate;
+    endDate = other.endDate;
+    startHour = other.startHour;
+    endHour = other.endHour;
+    isActive = other.isActive;
+    linkedEventId =
+        other.linkedEventId == null ? linkedEventId : other.linkedEventId;
+    linkedCampusEventId = other.linkedCampusEventId == null
+        ? linkedCampusEventId
+        : other.linkedCampusEventId;
+  }
+
+  SpotlightDto({
+    required this.id,
+    required this.title,
+    required this.body,
+    required this.latitude,
+    required this.longitude,
+    required this.radiusMeters,
+    required this.cooldownDays,
+    required this.startDate,
+    required this.endDate,
+    required this.startHour,
+    required this.endHour,
+    required this.isActive,
+    this.linkedEventId,
+    this.linkedCampusEventId,
+  });
+
+  late String id;
+  late String title;
+  late String body;
+  late int latitude;
+  late int longitude;
+  late int radiusMeters;
+  late int cooldownDays;
+  late String startDate;
+  late String endDate;
+  late int startHour;
+  late int endHour;
+  late bool isActive;
+  late String? linkedEventId;
+  late String? linkedCampusEventId;
+}
+
+class ActiveSpotlightDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['id'] = id;
+    fields['latitude'] = latitude;
+    fields['longitude'] = longitude;
+    fields['radiusMeters'] = radiusMeters;
+    return fields;
+  }
+
+  ActiveSpotlightDto.fromJson(Map<String, dynamic> fields) {
+    id = fields["id"];
+    latitude = fields["latitude"];
+    longitude = fields["longitude"];
+    radiusMeters = fields["radiusMeters"];
+  }
+
+  void partialUpdate(ActiveSpotlightDto other) {
+    id = other.id;
+    latitude = other.latitude;
+    longitude = other.longitude;
+    radiusMeters = other.radiusMeters;
+  }
+
+  ActiveSpotlightDto({
+    required this.id,
+    required this.latitude,
+    required this.longitude,
+    required this.radiusMeters,
+  });
+
+  late String id;
+  late int latitude;
+  late int longitude;
+  late int radiusMeters;
+}
+
+class RequestSpotlightNotificationDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['spotlightId'] = spotlightId;
+    fields['latitude'] = latitude;
+    fields['longitude'] = longitude;
+    return fields;
+  }
+
+  RequestSpotlightNotificationDto.fromJson(Map<String, dynamic> fields) {
+    spotlightId = fields["spotlightId"];
+    latitude = fields["latitude"];
+    longitude = fields["longitude"];
+  }
+
+  void partialUpdate(RequestSpotlightNotificationDto other) {
+    spotlightId = other.spotlightId;
+    latitude = other.latitude;
+    longitude = other.longitude;
+  }
+
+  RequestSpotlightNotificationDto({
+    required this.spotlightId,
+    required this.latitude,
+    required this.longitude,
+  });
+
+  late String spotlightId;
+  late int latitude;
+  late int longitude;
+}
+
+class SpotlightNotificationResultDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['sent'] = sent;
+    if (reason != null) {
+      fields['reason'] = reason;
+    }
+    return fields;
+  }
+
+  SpotlightNotificationResultDto.fromJson(Map<String, dynamic> fields) {
+    sent = fields["sent"];
+    reason = fields.containsKey('reason') ? (fields["reason"]) : null;
+  }
+
+  void partialUpdate(SpotlightNotificationResultDto other) {
+    sent = other.sent;
+    reason = other.reason == null ? reason : other.reason;
+  }
+
+  SpotlightNotificationResultDto({
+    required this.sent,
+    this.reason,
+  });
+
+  late bool sent;
+  late String? reason;
+}
+
+class DeleteSpotlightDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['id'] = id;
+    return fields;
+  }
+
+  DeleteSpotlightDto.fromJson(Map<String, dynamic> fields) {
+    id = fields["id"];
+  }
+
+  void partialUpdate(DeleteSpotlightDto other) {
+    id = other.id;
+  }
+
+  DeleteSpotlightDto({
+    required this.id,
+  });
+
+  late String id;
 }
 
 class TimerStartedDto {
