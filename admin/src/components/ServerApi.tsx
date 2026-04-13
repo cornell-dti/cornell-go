@@ -55,6 +55,54 @@ export class ServerApi {
     return this.send('equipBearItem', data) as Promise<boolean | undefined>;
   }
 
+  requestAllBearItems(data: dto.RequestAllBearItemsDto) {
+    return this.send('requestAllBearItems', data) as Promise<
+      number | undefined
+    >;
+  }
+
+  updateBearItemData(data: dto.UpdateBearItemDataDto) {
+    return this.send('updateBearItemData', data) as Promise<string | undefined>;
+  }
+
+  requestCampusEvents(data: dto.RequestCampusEventsDto) {
+    return this.send('requestCampusEvents', data) as Promise<
+      number | undefined
+    >;
+  }
+
+  requestCampusEventDetails(data: dto.RequestCampusEventDetailsDto) {
+    return this.send('requestCampusEventDetails', data) as Promise<
+      string | undefined
+    >;
+  }
+
+  requestAllCampusEvents(data: dto.RequestCampusEventsDto) {
+    return this.send('requestAllCampusEvents', data) as Promise<
+      number | undefined
+    >;
+  }
+
+  createCampusEvent(data: dto.UpsertCampusEventDto) {
+    return this.send('createCampusEvent', data) as Promise<string | undefined>;
+  }
+
+  updateCampusEvent(data: dto.UpsertCampusEventDto) {
+    return this.send('updateCampusEvent', data) as Promise<string | undefined>;
+  }
+
+  deleteCampusEvent(data: dto.DeleteCampusEventDto) {
+    return this.send('deleteCampusEvent', data) as Promise<boolean | undefined>;
+  }
+
+  rsvpCampusEvent(data: dto.RsvpCampusEventDto) {
+    return this.send('rsvpCampusEvent', data) as Promise<boolean | undefined>;
+  }
+
+  unRsvpCampusEvent(data: dto.UnRsvpCampusEventDto) {
+    return this.send('unRsvpCampusEvent', data) as Promise<boolean | undefined>;
+  }
+
   requestChallengeData(data: dto.RequestChallengeDataDto) {
     return this.send('requestChallengeData', data) as Promise<
       number | undefined
@@ -117,6 +165,10 @@ export class ServerApi {
 
   updateEventData(data: dto.UpdateEventDataDto) {
     return this.send('updateEventData', data) as Promise<string | undefined>;
+  }
+
+  submitFeedback(data: dto.SubmitFeedbackDto) {
+    return this.send('submitFeedback', data) as Promise<boolean | undefined>;
   }
 
   requestGroupData(data: dto.RequestGroupDataDto) {
@@ -328,6 +380,11 @@ export class ServerApi {
     this.socket.on('updateBearItemsData', data => callback(data));
   }
 
+  onUpdateBearItemData(callback: (data: dto.UpdateBearItemDataDto) => void) {
+    this.socket.removeAllListeners('updateBearItemData');
+    this.socket.on('updateBearItemData', data => callback(data));
+  }
+
   onUpdateUserInventoryData(
     callback: (data: dto.UpdateUserInventoryDataDto) => void,
   ) {
@@ -399,5 +456,27 @@ export class ServerApi {
   onQuizProgress(callback: (data: dto.QuizProgressDto) => void) {
     this.socket.removeAllListeners('quizProgress');
     this.socket.on('quizProgress', data => callback(data));
+  }
+
+  onUpdateFeedbackData(callback: (data: dto.UpdateFeedbackDataDto) => void) {
+    this.socket.removeAllListeners('updateFeedbackData');
+    this.socket.on('updateFeedbackData', data => callback(data));
+  }
+
+  onUpdateCampusEventData(
+    callback: (data: dto.UpdateCampusEventDataDto) => void,
+  ) {
+    this.socket.removeAllListeners('updateCampusEventData');
+    this.socket.on('updateCampusEventData', data => callback(data));
+  }
+
+  onCampusEventList(callback: (data: dto.CampusEventListResponseDto) => void) {
+    this.socket.removeAllListeners('campusEventList');
+    this.socket.on('campusEventList', data => callback(data));
+  }
+
+  onCampusEventDetails(callback: (data: dto.CampusEventDetailsDto) => void) {
+    this.socket.removeAllListeners('campusEventDetails');
+    this.socket.on('campusEventDetails', data => callback(data));
   }
 }

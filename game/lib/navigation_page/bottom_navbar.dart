@@ -48,7 +48,8 @@ import 'search_filter_home.dart';
 */
 
 class BottomNavBar extends StatefulWidget {
-  const BottomNavBar({Key? key}) : super(key: key);
+  final int initialHomeTab;
+  const BottomNavBar({Key? key, this.initialHomeTab = 0}) : super(key: key);
 
   @override
   State<BottomNavBar> createState() => _BottomNavBarState();
@@ -63,11 +64,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
     fontSize: 30,
     fontWeight: FontWeight.bold,
   );
-  static List<Widget> _widgetOptions = <Widget>[
-    SearchFilterBar(),
-    GlobalLeaderboardWidget(),
-    ProfilePage(),
-  ];
+  late final List<Widget> _widgetOptions;
 
   void _onItemTapped(int index) {
     setState(() {
@@ -78,6 +75,11 @@ class _BottomNavBarState extends State<BottomNavBar> {
   @override
   void initState() {
     super.initState();
+    _widgetOptions = <Widget>[
+      SearchFilterBar(initialHomeTab: widget.initialHomeTab),
+      GlobalLeaderboardWidget(),
+      ProfilePage(),
+    ];
   }
 
   @override

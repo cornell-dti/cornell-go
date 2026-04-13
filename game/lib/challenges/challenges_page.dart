@@ -241,8 +241,10 @@ class _ChallengesPageState extends State<ChallengesPage> {
                           );
                           if (event.isJourney == true) continue;
                           if (event.indexable == false) continue;
+                          if (event.challenges == null ||
+                              event.challenges!.isEmpty) continue;
                           var challenge = challengeModel.getChallengeById(
-                            event.challenges?[0] ?? "",
+                            event.challenges![0],
                           );
 
                           if (challenge == null) {

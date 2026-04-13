@@ -5,6 +5,8 @@ import { Organizations } from './components/Organizations';
 import { ErrorAlert } from './components/ErrorAlert';
 import { Users } from './components/Users';
 import { Notifications } from './components/Notifications';
+import { Feedback } from './components/Feedback';
+import { BearItems } from './components/BearItems';
 import { Spotlights } from './components/Spotlights';
 
 import {
@@ -31,6 +33,8 @@ import {
   faBuilding,
   faPerson,
   faBell,
+  faComment,
+  faPaw,
   faMapPin,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -92,6 +96,18 @@ const routes = [
     element: <Notifications />,
     icon: faBell,
     name: 'Notifications',
+  },
+  {
+    path: '/feedback',
+    element: <Feedback />,
+    icon: faComment,
+    name: 'Feedback',
+  },
+  {
+    path: '/bear-items',
+    element: <BearItems />,
+    icon: faPaw,
+    name: 'Bear Items',
   },
   {
     path: '/spotlights',

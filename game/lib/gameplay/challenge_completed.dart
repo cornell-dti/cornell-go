@@ -1,6 +1,6 @@
 import 'package:game/constants/constants.dart';
 import 'package:flutter/material.dart';
-import 'package:game/gameplay/gameplay_page.dart';
+import 'package:game/journeys/journey_challenge_list_sheet.dart';
 import 'package:game/navigation_page/bottom_navbar.dart';
 import 'package:game/progress_indicators/circular_progress_indicator.dart';
 
@@ -22,6 +22,7 @@ import 'dart:math';
 import 'dart:async';
 
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:game/feedback/feedback_page.dart';
 
 // TIMER: LoadingBar widget (unchanged from Timer version)
 class LoadingBar extends StatelessWidget {
@@ -124,10 +125,14 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
   // BOTH: journeyCompleted state
   bool journeyCompleted = false;
 
+  // Feedback thumbs state: null = not selected, true = thumbs up, false = thumbs down
+  bool? thumbsSelection;
+
   // QUIZ: Quiz-related state variables
   int totalQuizPoints = 0;
   bool isLoadingQuizPoints = false;
   Map<String, int> quizPointsByChallenge = {};
+  bool hasFetchedQuizPoints = false;
 
   @override
   void initState() {
@@ -195,6 +200,7 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
     if (mounted) {
       setState(() {
         isLoadingQuizPoints = false;
+        hasFetchedQuizPoints = true;
       });
     }
   }
@@ -297,7 +303,7 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  SizedBox(width: 8),
+                  Spacer(),
                   Text(
                     // TIMER: Show "0 points" if failed
                     prevChal.failed == true
@@ -314,7 +320,7 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
         // QUIZ: Fetch quiz points for journeys when on journey page and completed
         // Changed from Quiz's (isJourney && journeyCompleted) to (journeyPage && journeyCompleted)
         // because Timer version uses journeyPage state toggle
-        if (journeyPage && journeyCompleted && !isLoadingQuizPoints) {
+        if (journeyPage && !isLoadingQuizPoints && !hasFetchedQuizPoints) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             _fetchQuizPointsForJourney(
               apiClient,
@@ -327,8 +333,8 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
         // QUIZ: Determine quiz points to display
         // Changed from Quiz's isJourney to journeyPage to match Timer's state-based approach
         int displayQuizPoints = 0;
-        if (journeyPage && journeyCompleted) {
-          // For completed journey page: use accumulated quiz points from all challenges
+        if (journeyPage) {
+          // For journey page (in progress or completed): use accumulated quiz points from all challenges
           displayQuizPoints = totalQuizPoints;
         } else if (!journeyPage) {
           // For single challenge view: use quiz points specifically earned for THIS challenge
@@ -628,6 +634,70 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
+                    SizedBox(height: 10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'How was this experience?',
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.8),
+                            fontSize: 14.0,
+                          ),
+                        ),
+                        SizedBox(width: 12),
+                        IconButton(
+                          icon: Icon(
+                            thumbsSelection == true
+                                ? Icons.thumb_up
+                                : Icons.thumb_up_outlined,
+                            color: thumbsSelection == true
+                                ? Colors.blue
+                                : Colors.white,
+                            size: 28,
+                          ),
+                          onPressed: thumbsSelection != null
+                              ? null
+                              : () {
+                                  setState(() => thumbsSelection = true);
+                                  apiClient.serverApi?.submitFeedback(
+                                    SubmitFeedbackDto(
+                                      category: FeedbackCategoryDto.GENERAL,
+                                      text: 'Liked this challenge',
+                                      rating: true,
+                                      challengeId: challenge.id,
+                                    ),
+                                  );
+                                },
+                        ),
+                        SizedBox(width: 8),
+                        IconButton(
+                          icon: Icon(
+                            thumbsSelection == false
+                                ? Icons.thumb_down
+                                : Icons.thumb_down_outlined,
+                            color: thumbsSelection == false
+                                ? Colors.blue
+                                : Colors.white,
+                            size: 28,
+                          ),
+                          onPressed: thumbsSelection != null
+                              ? null
+                              : () {
+                                  setState(() => thumbsSelection = false);
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => FeedbackPage(
+                                        challengeId: challenge.id,
+                                        rating: false,
+                                      ),
+                                    ),
+                                  );
+                                },
+                        ),
+                      ],
+                    ),
                     // Only use Spacer for single challenge view (journey page has Expanded ListView)
                     if (!journeyPage) Spacer(),
                     // TIMER: Button logic with journeyPage state toggle
@@ -675,7 +745,9 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                                       Navigator.pushReplacement(
                                         context,
                                         MaterialPageRoute(
-                                          builder: (context) => BottomNavBar(),
+                                          builder: (context) => BottomNavBar(
+                                            initialHomeTab: 1,
+                                          ),
                                         ),
                                       );
                                     },
@@ -704,8 +776,9 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                                             Navigator.pushReplacement(
                                           context,
                                           MaterialPageRoute(
-                                            builder: (context) =>
-                                                BottomNavBar(),
+                                            builder: (context) => BottomNavBar(
+                                              initialHomeTab: 1,
+                                            ),
                                           ),
                                         ),
                                         child: Text(
@@ -738,7 +811,9 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                                           context,
                                           MaterialPageRoute(
                                             builder: (context) =>
-                                                GameplayPage(),
+                                                ChallengeListLauncher(
+                                              eventId: eventId!,
+                                            ),
                                           ),
                                         ),
                                         child: Row(
@@ -809,7 +884,9 @@ class _ChallengeCompletedState extends State<ChallengeCompletedPage> {
                                   Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => BottomNavBar(),
+                                      builder: (context) => BottomNavBar(
+                                        initialHomeTab: 0,
+                                      ),
                                     ),
                                   );
                                 }

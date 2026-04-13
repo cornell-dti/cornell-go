@@ -82,6 +82,37 @@ class GameServerApi {
   Future<bool?> equipBearItem(EquipBearItemDto dto) async =>
       await _invokeWithRefresh("equipBearItem", dto.toJson());
 
+  Future<int?> requestAllBearItems(RequestAllBearItemsDto dto) async =>
+      await _invokeWithRefresh("requestAllBearItems", dto.toJson());
+
+  Future<String?> updateBearItemData(UpdateBearItemDataDto dto) async =>
+      await _invokeWithRefresh("updateBearItemData", dto.toJson());
+
+  Future<int?> requestCampusEvents(RequestCampusEventsDto dto) async =>
+      await _invokeWithRefresh("requestCampusEvents", dto.toJson());
+
+  Future<String?> requestCampusEventDetails(
+          RequestCampusEventDetailsDto dto) async =>
+      await _invokeWithRefresh("requestCampusEventDetails", dto.toJson());
+
+  Future<int?> requestAllCampusEvents(RequestCampusEventsDto dto) async =>
+      await _invokeWithRefresh("requestAllCampusEvents", dto.toJson());
+
+  Future<String?> createCampusEvent(UpsertCampusEventDto dto) async =>
+      await _invokeWithRefresh("createCampusEvent", dto.toJson());
+
+  Future<String?> updateCampusEvent(UpsertCampusEventDto dto) async =>
+      await _invokeWithRefresh("updateCampusEvent", dto.toJson());
+
+  Future<bool?> deleteCampusEvent(DeleteCampusEventDto dto) async =>
+      await _invokeWithRefresh("deleteCampusEvent", dto.toJson());
+
+  Future<bool?> rsvpCampusEvent(RsvpCampusEventDto dto) async =>
+      await _invokeWithRefresh("rsvpCampusEvent", dto.toJson());
+
+  Future<bool?> unRsvpCampusEvent(UnRsvpCampusEventDto dto) async =>
+      await _invokeWithRefresh("unRsvpCampusEvent", dto.toJson());
+
   Future<int?> requestChallengeData(RequestChallengeDataDto dto) async =>
       await _invokeWithRefresh("requestChallengeData", dto.toJson());
 
@@ -118,6 +149,9 @@ class GameServerApi {
 
   Future<String?> updateEventData(UpdateEventDataDto dto) async =>
       await _invokeWithRefresh("updateEventData", dto.toJson());
+
+  Future<bool?> submitFeedback(SubmitFeedbackDto dto) async =>
+      await _invokeWithRefresh("submitFeedback", dto.toJson());
 
   Future<bool?> requestGroupData(RequestGroupDataDto dto) async =>
       await _invokeWithRefresh("requestGroupData", dto.toJson());

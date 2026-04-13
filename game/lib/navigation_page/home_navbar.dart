@@ -26,8 +26,10 @@ class HomeNavBar extends StatefulWidget {
   List<String>? myLocations;
   List<String>? myCategories;
   String? mySearchText;
+  final int initialTab;
   HomeNavBar({
     Key? key,
+    this.initialTab = 0,
     String? difficulty,
     List<String>? locations,
     List<String>? categories,
@@ -51,7 +53,11 @@ class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(
+      length: 2,
+      vsync: this,
+      initialIndex: widget.initialTab,
+    );
 
     // Onboarding: Register showcase scope for highlighting Journeys tab (step 2)
     // Hot restart fix: unregister old instance if exists

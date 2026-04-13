@@ -135,6 +135,38 @@ export class UserService {
   }
 
   /**
+   * Ensure all default bear items are in the user's inventory and equipped.
+   * No-ops for slots that already have an equipped item.
+   */
+  async ensureDefaultBearItems(userId: string) {
+    const defaultItems = await this.prisma.bearItem.findMany({
+      where: { isDefault: true },
+    });
+
+    for (const item of defaultItems) {
+      // Add to inventory if not already owned
+      const owned = await this.prisma.userBearInventory.count({
+        where: { userId, bearItemId: item.id },
+      });
+      if (owned === 0) {
+        await this.prisma.userBearInventory.create({
+          data: { userId, bearItemId: item.id },
+        });
+      }
+
+      // Equip if nothing is equipped in this slot
+      const equipped = await this.prisma.userBearEquipped.findUnique({
+        where: { userId_slot: { userId, slot: item.slot } },
+      });
+      if (!equipped) {
+        await this.prisma.userBearEquipped.create({
+          data: { userId, bearItemId: item.id, slot: item.slot },
+        });
+      }
+    }
+  }
+
+  /**
    *
    * @param id Get user by id
    * @returns The user
