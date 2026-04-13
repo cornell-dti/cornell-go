@@ -173,8 +173,8 @@ class _EventsDraggableSheetState extends State<EventsDraggableSheet> {
                   _sheetController.isAttached ? _sheetController.size : 0.26;
               final showExpandedChrome = extent > 0.88;
 
-              return Consumer6<UserModel, EventModel, GroupModel,
-                  TrackerModel, ChallengeModel, ApiClient>(
+              return Consumer6<UserModel, EventModel, GroupModel, TrackerModel,
+                  ChallengeModel, ApiClient>(
                 builder: (
                   context,
                   userModel,
