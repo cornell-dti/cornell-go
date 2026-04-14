@@ -23,6 +23,7 @@ import { CampusEventModule } from './campus-event/campus-event.module';
 import { CheckInModule } from './check-in/check-in.module';
 import { EventSyncModule } from './event-sync/event-sync.module';
 import { ClubSubmissionModule } from './club-submission/club-submission.module';
+import { FeatureFlagsController } from './feature-flags/feature-flags.controller';
 
 @Module({
   imports: [
@@ -51,7 +52,7 @@ import { ClubSubmissionModule } from './club-submission/club-submission.module';
     EventSyncModule,
     ClubSubmissionModule,
   ],
-  controllers: [],
+  controllers: [FeatureFlagsController],
   providers: [],
 })
 export class AppModule {}
