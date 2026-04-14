@@ -91,6 +91,11 @@ class GameServerApi {
   Future<String?> updateChallengeData(UpdateChallengeDataDto dto) async =>
       await _invokeWithRefresh("updateChallengeData", dto.toJson());
 
+  Future<bool?> checkInWithLocation(LocationCheckInDto dto) async =>
+      await _invokeWithRefresh("checkInWithLocation", dto.toJson());
+
+  Future<bool?> checkInWithQrCode(QrCodeCheckInDto dto) async =>
+      await _invokeWithRefresh("checkInWithQrCode", dto.toJson());
   Future<dynamic> requestAvailableChallenges(
           RequestAvailableChallengesDto dto) async =>
       await _invokeWithRefresh("requestAvailableChallenges", dto.toJson());
@@ -119,6 +124,9 @@ class GameServerApi {
 
   Future<String?> updateEventData(UpdateEventDataDto dto) async =>
       await _invokeWithRefresh("updateEventData", dto.toJson());
+
+  Future<bool?> submitFeedback(SubmitFeedbackDto dto) async =>
+      await _invokeWithRefresh("submitFeedback", dto.toJson());
 
   Future<bool?> requestGroupData(RequestGroupDataDto dto) async =>
       await _invokeWithRefresh("requestGroupData", dto.toJson());
