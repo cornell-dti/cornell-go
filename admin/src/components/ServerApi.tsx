@@ -21,12 +21,14 @@ export class ServerApi {
 
   requestAchievementTrackerData(data: dto.RequestAchievementTrackerDataDto) {
     return this.send('requestAchievementTrackerData', data) as Promise<
-      any | undefined
+      number | undefined
     >;
   }
 
   updateAchievementData(data: dto.UpdateAchievementDataDto) {
-    return this.send('updateAchievementData', data) as Promise<any | undefined>;
+    return this.send('updateAchievementData', data) as Promise<
+      string | undefined
+    >;
   }
 
   requestBearItems(data: dto.RequestBearItemsDto) {
@@ -60,7 +62,7 @@ export class ServerApi {
   }
 
   updateBearItemData(data: dto.UpdateBearItemDataDto) {
-    return this.send('updateBearItemData', data) as Promise<any | undefined>;
+    return this.send('updateBearItemData', data) as Promise<string | undefined>;
   }
 
   requestCampusEvents(data: dto.RequestCampusEventsDto) {
@@ -82,11 +84,11 @@ export class ServerApi {
   }
 
   createCampusEvent(data: dto.UpsertCampusEventDto) {
-    return this.send('createCampusEvent', data) as Promise<any | undefined>;
+    return this.send('createCampusEvent', data) as Promise<string | undefined>;
   }
 
   updateCampusEvent(data: dto.UpsertCampusEventDto) {
-    return this.send('updateCampusEvent', data) as Promise<any | undefined>;
+    return this.send('updateCampusEvent', data) as Promise<string | undefined>;
   }
 
   deleteCampusEvent(data: dto.DeleteCampusEventDto) {
@@ -118,11 +120,13 @@ export class ServerApi {
   }
 
   completedChallenge(data: dto.CompletedChallengeDto) {
-    return this.send('completedChallenge', data) as Promise<any | undefined>;
+    return this.send('completedChallenge', data) as Promise<string | undefined>;
   }
 
   updateChallengeData(data: dto.UpdateChallengeDataDto) {
-    return this.send('updateChallengeData', data) as Promise<any | undefined>;
+    return this.send('updateChallengeData', data) as Promise<
+      string | undefined
+    >;
   }
 
   checkInWithLocation(data: dto.LocationCheckInDto) {
@@ -159,7 +163,7 @@ export class ServerApi {
 
   requestEventTrackerData(data: dto.RequestEventTrackerDataDto) {
     return this.send('requestEventTrackerData', data) as Promise<
-      any | undefined
+      number | undefined
     >;
   }
 
@@ -170,7 +174,7 @@ export class ServerApi {
   }
 
   updateEventData(data: dto.UpdateEventDataDto) {
-    return this.send('updateEventData', data) as Promise<any | undefined>;
+    return this.send('updateEventData', data) as Promise<string | undefined>;
   }
 
   triggerEventSync(data: dto.TriggerEventSyncDto) {
@@ -227,13 +231,13 @@ export class ServerApi {
 
   requestOrganizationData(data: dto.RequestOrganizationDataDto) {
     return this.send('requestOrganizationData', data) as Promise<
-      any | undefined
+      number | undefined
     >;
   }
 
   updateOrganizationData(data: dto.UpdateOrganizationDataDto) {
     return this.send('updateOrganizationData', data) as Promise<
-      any | undefined
+      string | undefined
     >;
   }
 
@@ -308,7 +312,7 @@ export class ServerApi {
   }
 
   addManager(data: dto.AddManagerDto) {
-    return this.send('addManager', data) as Promise<any | undefined>;
+    return this.send('addManager', data) as Promise<string | undefined>;
   }
 
   joinOrganization(data: dto.JoinOrganizationDto) {

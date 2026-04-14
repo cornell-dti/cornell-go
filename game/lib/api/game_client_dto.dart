@@ -143,6 +143,18 @@ enum CheckInErrorCodeDto {
   UNKNOWN_ERROR,
 }
 
+enum ClubSubmissionCategoryDto {
+  SOCIAL,
+  CULTURAL,
+  ATHLETIC,
+  WELLNESS,
+  ACADEMIC,
+  ARTS,
+  CAREER,
+  COMMUNITY,
+  OTHER,
+}
+
 enum EventCategoryDto {
   FOOD,
   NATURE,
@@ -1690,6 +1702,12 @@ class ChallengeDto {
     if (timerLength != null) {
       fields['timerLength'] = timerLength;
     }
+    if (scheduledStartTime != null) {
+      fields['scheduledStartTime'] = scheduledStartTime;
+    }
+    if (scheduledEndTime != null) {
+      fields['scheduledEndTime'] = scheduledEndTime;
+    }
     return fields;
   }
 
@@ -1715,6 +1733,12 @@ class ChallengeDto {
         fields.containsKey('linkedEventId') ? (fields["linkedEventId"]) : null;
     timerLength =
         fields.containsKey('timerLength') ? (fields["timerLength"]) : null;
+    scheduledStartTime = fields.containsKey('scheduledStartTime')
+        ? (fields["scheduledStartTime"])
+        : null;
+    scheduledEndTime = fields.containsKey('scheduledEndTime')
+        ? (fields["scheduledEndTime"])
+        : null;
   }
 
   void partialUpdate(ChallengeDto other) {
@@ -1733,6 +1757,12 @@ class ChallengeDto {
     linkedEventId =
         other.linkedEventId == null ? linkedEventId : other.linkedEventId;
     timerLength = other.timerLength == null ? timerLength : other.timerLength;
+    scheduledStartTime = other.scheduledStartTime == null
+        ? scheduledStartTime
+        : other.scheduledStartTime;
+    scheduledEndTime = other.scheduledEndTime == null
+        ? scheduledEndTime
+        : other.scheduledEndTime;
   }
 
   ChallengeDto({
@@ -1748,6 +1778,8 @@ class ChallengeDto {
     this.closeRadiusF,
     this.linkedEventId,
     this.timerLength,
+    this.scheduledStartTime,
+    this.scheduledEndTime,
   });
 
   late String id;
@@ -1762,6 +1794,8 @@ class ChallengeDto {
   late double? closeRadiusF;
   late String? linkedEventId;
   late int? timerLength;
+  late String? scheduledStartTime;
+  late String? scheduledEndTime;
 }
 
 class RequestChallengeDataDto {
@@ -2085,6 +2119,7 @@ class ClubSubmissionDto {
     if (longitude != null) {
       fields['longitude'] = longitude;
     }
+    fields['category'] = category!.name;
     if (address != null) {
       fields['address'] = address;
     }
@@ -2107,6 +2142,7 @@ class ClubSubmissionDto {
     location = fields["location"];
     latitude = fields.containsKey('latitude') ? (fields["latitude"]) : null;
     longitude = fields.containsKey('longitude') ? (fields["longitude"]) : null;
+    category = ClubSubmissionCategoryDto.values.byName(fields['category']);
     address = fields.containsKey('address') ? (fields["address"]) : null;
     imageUrl = fields.containsKey('imageUrl') ? (fields["imageUrl"]) : null;
     registrationLink = fields.containsKey('registrationLink')
@@ -2124,6 +2160,7 @@ class ClubSubmissionDto {
     location = other.location;
     latitude = other.latitude == null ? latitude : other.latitude;
     longitude = other.longitude == null ? longitude : other.longitude;
+    category = other.category;
     address = other.address == null ? address : other.address;
     imageUrl = other.imageUrl == null ? imageUrl : other.imageUrl;
     registrationLink = other.registrationLink == null
@@ -2141,6 +2178,7 @@ class ClubSubmissionDto {
     required this.location,
     this.latitude,
     this.longitude,
+    required this.category,
     this.address,
     this.imageUrl,
     this.registrationLink,
@@ -2155,6 +2193,7 @@ class ClubSubmissionDto {
   late String location;
   late int? latitude;
   late int? longitude;
+  late ClubSubmissionCategoryDto category;
   late String? address;
   late String? imageUrl;
   late String? registrationLink;
@@ -2571,6 +2610,9 @@ class PrevChallengeDto {
     if (failed != null) {
       fields['failed'] = failed;
     }
+    if (dateExpired != null) {
+      fields['dateExpired'] = dateExpired;
+    }
     return fields;
   }
 
@@ -2582,6 +2624,8 @@ class PrevChallengeDto {
         : null;
     dateCompleted = fields["dateCompleted"];
     failed = fields.containsKey('failed') ? (fields["failed"]) : null;
+    dateExpired =
+        fields.containsKey('dateExpired') ? (fields["dateExpired"]) : null;
   }
 
   void partialUpdate(PrevChallengeDto other) {
@@ -2591,6 +2635,7 @@ class PrevChallengeDto {
         other.extensionsUsed == null ? extensionsUsed : other.extensionsUsed;
     dateCompleted = other.dateCompleted;
     failed = other.failed == null ? failed : other.failed;
+    dateExpired = other.dateExpired == null ? dateExpired : other.dateExpired;
   }
 
   PrevChallengeDto({
@@ -2599,6 +2644,7 @@ class PrevChallengeDto {
     this.extensionsUsed,
     required this.dateCompleted,
     this.failed,
+    this.dateExpired,
   });
 
   late String challengeId;
@@ -2606,6 +2652,7 @@ class PrevChallengeDto {
   late int? extensionsUsed;
   late String dateCompleted;
   late bool? failed;
+  late bool? dateExpired;
 }
 
 class EventTrackerDto {
