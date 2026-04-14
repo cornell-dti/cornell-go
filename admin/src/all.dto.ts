@@ -143,6 +143,18 @@ export enum CheckInErrorCodeDto {
   UNKNOWN_ERROR = 'UNKNOWN_ERROR',
 }
 
+export enum ClubSubmissionCategoryDto {
+  SOCIAL = 'SOCIAL',
+  CULTURAL = 'CULTURAL',
+  ATHLETIC = 'ATHLETIC',
+  WELLNESS = 'WELLNESS',
+  ACADEMIC = 'ACADEMIC',
+  ARTS = 'ARTS',
+  CAREER = 'CAREER',
+  COMMUNITY = 'COMMUNITY',
+  OTHER = 'OTHER',
+}
+
 export enum EventCategoryDto {
   FOOD = 'FOOD',
   NATURE = 'NATURE',
@@ -448,6 +460,8 @@ export interface ChallengeDto {
   closeRadiusF?: number;
   linkedEventId?: string;
   timerLength?: number;
+  scheduledStartTime?: string;
+  scheduledEndTime?: string;
 }
 
 export interface RequestChallengeDataDto {
@@ -515,6 +529,7 @@ export interface ClubSubmissionDto {
   location: string;
   latitude?: number;
   longitude?: number;
+  category: ClubSubmissionCategoryDto;
   address?: string;
   imageUrl?: string;
   registrationLink?: string;
@@ -588,6 +603,7 @@ export interface PrevChallengeDto {
   extensionsUsed?: number;
   dateCompleted: string;
   failed?: boolean;
+  dateExpired?: boolean;
 }
 
 export interface EventTrackerDto {

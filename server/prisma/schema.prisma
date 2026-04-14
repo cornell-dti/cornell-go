@@ -148,7 +148,9 @@ model Challenge {
   longitude      Float
   awardingRadius Float
   closeRadius    Float
-  timerLength    Int?
+  timerLength         Int?
+  scheduledStartTime  DateTime?
+  scheduledEndTime    DateTime?
   completions    PrevChallenge[]
   activeTrackers EventTracker[]
   QuizQuestion   QuizQuestion[]
@@ -224,6 +226,7 @@ model PrevChallenge {
   extensionsUsed Int          @default(0)
   timestamp      DateTime     @default(now())
   failed         Boolean      @default(false) // True if challenge was failed due to timer expiration
+  dateExpired    Boolean      @default(false) // True if auto-completed because time window passed
 }
 
 model Organization {

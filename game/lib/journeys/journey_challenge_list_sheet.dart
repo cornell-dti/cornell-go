@@ -14,6 +14,7 @@ import 'package:game/navigation_page/bottom_navbar.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:game/widget/cached_image.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'dart:async';
 
@@ -182,8 +183,29 @@ class _JourneyChallengeListSheetState extends State<JourneyChallengeListSheet> {
     final totalChallenges = event?.challenges?.length ?? 0;
     final remaining = availableChallenges.length;
 
+    // Partition available challenges into available now vs upcoming
+    final now = DateTime.now();
+    final availableNow = <ChallengeDto>[];
+    final upcoming = <ChallengeDto>[];
+
+    for (final challenge in availableChallenges) {
+      final startStr = challenge.scheduledStartTime;
+      final endStr = challenge.scheduledEndTime;
+      final start = startStr != null ? DateTime.tryParse(startStr) : null;
+      final end = endStr != null ? DateTime.tryParse(endStr) : null;
+
+      if (start != null && now.isBefore(start)) {
+        upcoming.add(challenge);
+      } else if (end != null && now.isAfter(end)) {
+        // Should already be auto-completed by server, skip
+        continue;
+      } else {
+        availableNow.add(challenge);
+      }
+    }
+
     // Sort available challenges by distance
-    final sortedAvailable = List<ChallengeDto>.from(availableChallenges);
+    final sortedAvailable = List<ChallengeDto>.from(availableNow);
     sortedAvailable.sort((a, b) {
       final distA = _distanceTo(a);
       final distB = _distanceTo(b);
@@ -368,6 +390,59 @@ class _JourneyChallengeListSheetState extends State<JourneyChallengeListSheet> {
                                 ),
                               ),
                             ],
+                            // Upcoming section
+                            if (upcoming.isNotEmpty) ...[
+                              Padding(
+                                padding:
+                                    const EdgeInsets.only(top: 12, bottom: 4),
+                                child: Text(
+                                  'Upcoming',
+                                  style: TextStyle(
+                                    fontFamily: 'Poppins',
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.grayText,
+                                  ),
+                                ),
+                              ),
+                              ...upcoming.map(
+                                (challenge) => _JourneyChallengeCard(
+                                  challenge: challenge,
+                                  isCompleted: false,
+                                  isUpcoming: true,
+                                  walkingTime:
+                                      _walkingTime(_distanceTo(challenge)),
+                                  onTap: () {
+                                    final startStr =
+                                        challenge.scheduledStartTime;
+                                    final start = startStr != null
+                                        ? DateTime.tryParse(startStr)
+                                        : null;
+                                    final formatted = start != null
+                                        ? DateFormat.yMMMd()
+                                            .add_jm()
+                                            .format(start.toLocal())
+                                        : 'a future date';
+                                    showDialog(
+                                      context: context,
+                                      builder: (_) => AlertDialog(
+                                        title: Text('Not Yet Available'),
+                                        content: Text(
+                                          'This challenge is available on $formatted. Come back then!',
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () =>
+                                                Navigator.pop(context),
+                                            child: Text('OK'),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
                             // Completed section
                             if (completedChallenges.isNotEmpty) ...[
                               Padding(
@@ -386,6 +461,8 @@ class _JourneyChallengeListSheetState extends State<JourneyChallengeListSheet> {
                               ...completedChallenges.map(
                                 (challenge) {
                                   final prev = prevChallengeMap[challenge.id];
+                                  final isDateExpired =
+                                      prev?.dateExpired == true;
                                   final totalPts = challenge.points ?? 0;
                                   int earned;
                                   if (prev?.failed == true) {
@@ -406,6 +483,7 @@ class _JourneyChallengeListSheetState extends State<JourneyChallengeListSheet> {
                                   return _JourneyChallengeCard(
                                     challenge: challenge,
                                     isCompleted: true,
+                                    isDateExpired: isDateExpired,
                                     walkingTime:
                                         _walkingTime(_distanceTo(challenge)),
                                     earnedPoints: earned,
@@ -429,6 +507,8 @@ class _JourneyChallengeListSheetState extends State<JourneyChallengeListSheet> {
 class _JourneyChallengeCard extends StatelessWidget {
   final ChallengeDto challenge;
   final bool isCompleted;
+  final bool isUpcoming;
+  final bool isDateExpired;
   final String walkingTime;
   final int? earnedPoints;
   final VoidCallback? onTap;
@@ -437,132 +517,234 @@ class _JourneyChallengeCard extends StatelessWidget {
     required this.challenge,
     required this.isCompleted,
     required this.walkingTime,
+    this.isUpcoming = false,
+    this.isDateExpired = false,
     this.earnedPoints,
     this.onTap,
   });
 
+  bool get _isTodayOnly {
+    final startStr = challenge.scheduledStartTime;
+    final endStr = challenge.scheduledEndTime;
+    if (startStr == null && endStr == null) return false;
+    final start = startStr != null ? DateTime.tryParse(startStr) : null;
+    final end = endStr != null ? DateTime.tryParse(endStr) : null;
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final tomorrow = today.add(Duration(days: 1));
+    final isAfterStart = start == null || !now.isBefore(start);
+    final isBeforeEnd = end == null || now.isBefore(end);
+    final endsToday = end != null && end.isBefore(tomorrow);
+    return isAfterStart && isBeforeEnd && endsToday;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isGrayed = isUpcoming || isCompleted;
+    final cardColor = isGrayed ? AppColors.lightGray : Colors.white;
+
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 8),
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(8),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.black10,
-              offset: Offset(0, 2),
-              blurRadius: 6,
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            // Left content
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Name + walking time row
-                  Row(
-                    children: [
-                      Flexible(
-                        child: Text(
-                          challenge.name ?? '',
-                          overflow: TextOverflow.ellipsis,
+      child: Opacity(
+        opacity: isGrayed ? 0.6 : 1.0,
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 8),
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: cardColor,
+            borderRadius: BorderRadius.circular(8),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.black10,
+                offset: Offset(0, 2),
+                blurRadius: 6,
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              // Left content
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Name + walking time row + badges
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            challenge.name ?? '',
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.darkGrayText,
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          child: Container(
+                            width: 4,
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: AppColors.darkGrayText,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        ),
+                        if (isUpcoming) ...[
+                          Icon(
+                            Icons.calendar_today,
+                            size: 16,
+                            color: AppColors.grayText,
+                          ),
+                          SizedBox(width: 4),
+                          Text(
+                            _formatScheduledDate(),
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.grayText,
+                            ),
+                          ),
+                        ] else ...[
+                          Icon(
+                            Icons.directions_walk,
+                            size: 18,
+                            color: AppColors.darkGrayText,
+                          ),
+                          SizedBox(width: 2),
+                          Text(
+                            walkingTime,
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.darkGrayText,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    SizedBox(height: 8),
+                    // Badges row
+                    if (_isTodayOnly || isDateExpired)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Row(
+                          children: [
+                            if (_isTodayOnly)
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.orange,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Text(
+                                  'Today Only',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 11,
+                                    fontFamily: 'Poppins',
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            if (isDateExpired)
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.mediumGray,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Text(
+                                  'Expired',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 11,
+                                    fontFamily: 'Poppins',
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    // Description
+                    Text(
+                      challenge.description ?? '',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 12,
+                        fontWeight:
+                            isCompleted ? FontWeight.bold : FontWeight.normal,
+                        color: AppColors.grayText,
+                      ),
+                    ),
+                    SizedBox(height: 12),
+                    // Points
+                    Row(
+                      children: [
+                        SvgPicture.asset(
+                          'assets/icons/bearcoins.svg',
+                          width: 20,
+                          height: 20,
+                        ),
+                        SizedBox(width: 5),
+                        Text(
+                          isDateExpired
+                              ? 'Expired — 0 PTS'
+                              : isCompleted
+                                  ? '${earnedPoints ?? challenge.points ?? 0} PTS / ${challenge.points ?? 0} PTS'
+                                  : '${challenge.points ?? 0} PTS',
                           style: TextStyle(
                             fontFamily: 'Poppins',
-                            fontSize: 16,
+                            fontSize: 12,
                             fontWeight: FontWeight.bold,
-                            color: AppColors.darkGrayText,
+                            color: isDateExpired
+                                ? AppColors.mediumGray
+                                : AppColors.gold,
                           ),
                         ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        child: Container(
-                          width: 4,
-                          height: 4,
-                          decoration: BoxDecoration(
-                            color: AppColors.darkGrayText,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                      ),
-                      Icon(
-                        Icons.directions_walk,
-                        size: 18,
-                        color: AppColors.darkGrayText,
-                      ),
-                      SizedBox(width: 2),
-                      Text(
-                        walkingTime,
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.darkGrayText,
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 8),
-                  // Description
-                  Text(
-                    challenge.description ?? '',
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 12,
-                      fontWeight:
-                          isCompleted ? FontWeight.bold : FontWeight.normal,
-                      color: AppColors.grayText,
+                      ],
                     ),
-                  ),
-                  SizedBox(height: 12),
-                  // Points
-                  Row(
-                    children: [
-                      SvgPicture.asset(
-                        'assets/icons/bearcoins.svg',
-                        width: 20,
-                        height: 20,
-                      ),
-                      SizedBox(width: 5),
-                      Text(
-                        isCompleted
-                            ? '${earnedPoints ?? challenge.points ?? 0} PTS / ${challenge.points ?? 0} PTS'
-                            : '${challenge.points ?? 0} PTS',
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.gold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            SizedBox(width: 8),
-            // Thumbnail
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: AppCachedImage(
-                imageUrl: challenge.imageUrl ?? '',
-                width: 82,
-                height: 81,
+              SizedBox(width: 8),
+              // Thumbnail
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: AppCachedImage(
+                  imageUrl: challenge.imageUrl ?? '',
+                  width: 82,
+                  height: 81,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  String _formatScheduledDate() {
+    final startStr = challenge.scheduledStartTime;
+    if (startStr == null) return '';
+    final start = DateTime.tryParse(startStr);
+    if (start == null) return '';
+    return DateFormat.MMMd().format(start.toLocal());
   }
 }
 
