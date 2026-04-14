@@ -15,8 +15,6 @@ RUN npm install --legacy-peer-deps
 
 WORKDIR /app/admin
 COPY admin .
-ARG REACT_APP_GOOGLE_MAPS_API_KEY
-ENV REACT_APP_GOOGLE_MAPS_API_KEY=$REACT_APP_GOOGLE_MAPS_API_KEY
 RUN npm run build
 
 WORKDIR /app/server

@@ -25,6 +25,7 @@ import { EventSyncModule } from './event-sync/event-sync.module';
 import { ClubSubmissionModule } from './club-submission/club-submission.module';
 import { FeedbackModule } from './feedback/feedback.module';
 import { FeatureFlagsController } from './feature-flags/feature-flags.controller';
+import { FrontendConfigController } from './frontend-config/frontend-config.controller';
 
 @Module({
   imports: [
@@ -54,7 +55,7 @@ import { FeatureFlagsController } from './feature-flags/feature-flags.controller
     ClubSubmissionModule,
     FeedbackModule,
   ],
-  controllers: [FeatureFlagsController],
+  controllers: [FeatureFlagsController, FrontendConfigController],
   providers: [],
 })
 export class AppModule {}
