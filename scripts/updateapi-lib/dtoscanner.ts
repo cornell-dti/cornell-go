@@ -1,4 +1,4 @@
-import { Project } from "ts-morph";
+import { Project, SyntaxKind } from "ts-morph";
 import { BaseDto, DtoDefs, EnumDto, FieldType } from "./types";
 
 export function getDtoDefinitions(): DtoDefs {
@@ -16,6 +16,9 @@ export function getDtoDefinitions(): DtoDefs {
     const interfs = file.getInterfaces();
     const enums = file.getEnums();
 
+    // Count as const objects that qualify as enums
+    let constEnumCount = 0;
+
     console.log(
       `${file.getBaseName()}: ${enums.length} enums, ${interfs.length} DTOs`
     );
@@ -23,6 +26,41 @@ export function getDtoDefinitions(): DtoDefs {
     for (const enum_ of enums) {
       const vals = enum_.getMembers().map((val) => val.getName());
       enumDtos.set(enum_.getName(), vals);
+    }
+
+    // Support `as const` objects as enums:
+    // const FooDto = { A: 'A', B: 'B' } as const;
+    for (const varStmt of file.getVariableStatements()) {
+      for (const decl of varStmt.getDeclarations()) {
+        const init = decl.getInitializer();
+        if (init?.getKind() === SyntaxKind.AsExpression) {
+          const inner = init.getChildAtIndex(0);
+          if (inner.getKind() === SyntaxKind.ObjectLiteralExpression) {
+            const name = decl.getName();
+            if (name.endsWith("Dto")) {
+              const props = inner
+                .asKindOrThrow(SyntaxKind.ObjectLiteralExpression)
+                .getProperties()
+                .filter(
+                  (p) => p.getKind() === SyntaxKind.PropertyAssignment
+                )
+                .map((p) =>
+                  p.asKindOrThrow(SyntaxKind.PropertyAssignment).getName()
+                );
+              if (props.length > 0) {
+                enumDtos.set(name, props);
+                constEnumCount++;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    if (constEnumCount > 0) {
+      console.log(
+        `  (also found ${constEnumCount} 'as const' enum${constEnumCount > 1 ? "s" : ""})`
+      );
     }
 
     for (const interf of interfs) {
@@ -57,7 +95,7 @@ export function getDtoDefinitions(): DtoDefs {
           propType.isBoolean() ||
           propType.getArrayElementType()?.isBoolean()
         ) {
-          // num
+          // bool
           baseDto.set(propName, [
             "boolean",
             propType.isArray() ? "PRIMITIVE[]" : "PRIMITIVE",
@@ -93,25 +131,66 @@ export function getDtoDefinitions(): DtoDefs {
           propType.isUnion() ||
           propType.getArrayElementType()?.isUnion()
         ) {
-          // enum
-          const enumName =
-            interfName.replace("Dto", "") +
-            propName[0].toUpperCase() +
-            propName.substring(1) +
-            "Dto";
+          const unionTypes = propType.isArray()
+            ? propType.getArrayElementTypeOrThrow().getUnionTypes()
+            : propType.getUnionTypes();
 
-          enumDtos.set(
-            enumName,
-            propType
-              .getUnionTypes()
-              .map((t) => t.getLiteralValue()?.toString() ?? "")
+          // Filter out null/undefined from the union
+          const nonNullTypes = unionTypes.filter(
+            (t) => !t.isNull() && !t.isUndefined()
           );
 
-          baseDto.set(propName, [
-            enumName,
-            propType.isArray() ? "ENUM_DTO[]" : "ENUM_DTO",
-            isOptional,
-          ]);
+          // Collect string literal values
+          const literalValues = nonNullTypes
+            .map((t) => t.getLiteralValue()?.toString())
+            .filter((v): v is string => v !== undefined && v !== "");
+
+          if (literalValues.length > 0) {
+            // String literal union → generate enum (existing behavior)
+            const enumName =
+              interfName.replace("Dto", "") +
+              propName[0].toUpperCase() +
+              propName.substring(1) +
+              "Dto";
+
+            enumDtos.set(enumName, literalValues);
+            baseDto.set(propName, [
+              enumName,
+              propType.isArray() ? "ENUM_DTO[]" : "ENUM_DTO",
+              isOptional,
+            ]);
+          } else {
+            // Union of DTOs/objects (e.g. `FooDto | { id: string }`)
+            // Use the first named interface/enum type in the union
+            const namedType = nonNullTypes.find(
+              (t) => t.isInterface() || t.isEnum()
+            );
+            if (namedType) {
+              let name = namedType.getText();
+              if (name.includes(".")) name = name.split(".").pop()!;
+
+              const isEnum = namedType.isEnum();
+              const fieldType = propType.isArray()
+                ? isEnum
+                  ? "ENUM_DTO[]"
+                  : "DEPENDENT_DTO[]"
+                : isEnum
+                ? "ENUM_DTO"
+                : "DEPENDENT_DTO";
+
+              baseDto.set(propName, [name, fieldType, isOptional]);
+            } else if (nonNullTypes.length === 1 && nonNullTypes[0].isNumber()) {
+              // number | null → treat as optional number
+              baseDto.set(propName, ["number", "PRIMITIVE", true]);
+            } else if (nonNullTypes.length === 1 && nonNullTypes[0].isString()) {
+              // string | null → treat as optional string
+              baseDto.set(propName, ["string", "PRIMITIVE", true]);
+            } else if (nonNullTypes.length === 1 && nonNullTypes[0].isBoolean()) {
+              // boolean | null → treat as optional boolean
+              baseDto.set(propName, ["boolean", "PRIMITIVE", true]);
+            }
+            // else: skip field entirely (can't represent it)
+          }
         }
       }
     }
