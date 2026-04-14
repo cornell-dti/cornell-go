@@ -48,9 +48,13 @@ const categoryOptions = [
   'FOOD',
   'NATURE',
   'HISTORICAL',
-  'CAFE',
-  'DININGHALL',
-  'DORM',
+  'RESIDENTIAL',
+  'LANDMARK',
+  'ARTS',
+  'ATHLETICS',
+  'LIBRARY',
+  'ACADEMIC',
+  'RECREATION',
 ];
 
 // Event form helpers
