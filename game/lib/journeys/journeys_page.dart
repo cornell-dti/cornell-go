@@ -24,6 +24,9 @@ import 'package:provider/provider.dart';
 import 'package:showcaseview/showcaseview.dart';
 import 'package:velocity_x/velocity_x.dart';
 import 'package:game/constants/constants.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:dotted_border/dotted_border.dart';
+import 'package:game/journeys/custom_journey_creations_page.dart';
 
 /** A Data Transfer Object that holds information about a challenge 
  * cell in the UI */
@@ -288,6 +291,61 @@ class _JourneysPageState extends State<JourneysPage> {
                 ),
                 Column(
                   children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
+                      child: SizedBox(
+                        width: double.infinity,
+                        height: 168,
+                        child: DottedBorder(
+                          color: AppColors.primaryRed,
+                          strokeWidth: 1.5,
+                          dashPattern: const [5, 4],
+                          padding: EdgeInsets.zero,
+                          borderType: BorderType.Rect,
+                          stackFit: StackFit.expand,
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute<void>(
+                                    builder: (_) =>
+                                        const CustomJourneyCreationsPage(),
+                                  ),
+                                );
+                              },
+                              borderRadius: BorderRadius.circular(4),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  SvgPicture.asset(
+                                    'assets/icons/pluscircle_red.svg',
+                                    width: 56,
+                                    height: 56,
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 24,
+                                    ),
+                                    child: Text(
+                                      'Create your own journey',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontFamily: 'Poppins',
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppColors.darkText,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                     Expanded(
                       child: Consumer6<UserModel, EventModel, GroupModel,
                           TrackerModel, ChallengeModel, ApiClient>(
