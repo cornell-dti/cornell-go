@@ -2,5 +2,8 @@ setup:
   addons:
     - plan: heroku-postgresql
 build:
+  config:
+    REACT_APP_GOOGLE_MAPS_API_KEY:
+      description: "Google Maps API key for admin dashboard"
   docker:
     web: Dockerfile
