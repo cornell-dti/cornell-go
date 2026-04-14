@@ -24,6 +24,7 @@ import { CheckInModule } from './check-in/check-in.module';
 import { EventSyncModule } from './event-sync/event-sync.module';
 import { ClubSubmissionModule } from './club-submission/club-submission.module';
 import { FeedbackModule } from './feedback/feedback.module';
+import { SpotlightModule } from './spotlight/spotlight.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { FeedbackModule } from './feedback/feedback.module';
     EventSyncModule,
     ClubSubmissionModule,
     FeedbackModule,
+    SpotlightModule,
   ],
   controllers: [],
   providers: [],

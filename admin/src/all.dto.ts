@@ -29,6 +29,30 @@ export enum BearSlotDto {
   ACCESSORY = 'ACCESSORY',
 }
 
+export enum CampusEventCategoryDto {
+  SOCIAL = 'SOCIAL',
+  CULTURAL = 'CULTURAL',
+  ATHLETIC = 'ATHLETIC',
+  WELLNESS = 'WELLNESS',
+  ACADEMIC = 'ACADEMIC',
+  ARTS = 'ARTS',
+  CAREER = 'CAREER',
+  COMMUNITY = 'COMMUNITY',
+  OTHER = 'OTHER',
+}
+
+export enum EventSourceDto {
+  API_EVENTS = 'API_EVENTS',
+  ADMIN_CREATED = 'ADMIN_CREATED',
+  COMMUNITY_SUBMITTED = 'COMMUNITY_SUBMITTED',
+}
+
+export enum CheckInMethodDto {
+  LOCATION = 'LOCATION',
+  QR_CODE = 'QR_CODE',
+  EITHER = 'EITHER',
+}
+
 export enum ChallengeLocationDto {
   ENG_QUAD = 'ENG_QUAD',
   ARTS_QUAD = 'ARTS_QUAD',
@@ -242,6 +266,123 @@ export interface UpdatePurchaseResultDto {
   success: boolean;
   newBalance: number;
   itemId: string;
+}
+
+export interface AdminBearItemDto {
+  id: string;
+  name?: string;
+  slot?: BearSlotDto;
+  cost?: number;
+  assetKey?: string;
+  mimeType?: string;
+  zIndex?: number;
+  isDefault?: boolean;
+}
+
+export interface UpdateBearItemDataDto {
+  bearItem: AdminBearItemDto;
+  deleted: boolean;
+}
+
+export interface RequestAllBearItemsDto {}
+
+export interface CampusEventDto {
+  id: string;
+  title: string;
+  description: string;
+  imageUrl?: string;
+  startTime: string;
+  endTime: string;
+  allDay: boolean;
+  locationName: string;
+  address?: string;
+  latitude: number;
+  longitude: number;
+  categories: CampusEventCategoryDto[];
+  tags: string[];
+  source: EventSourceDto;
+  externalUrl?: string;
+  organizerName?: string;
+  registrationUrl?: string;
+  checkInMethod: CheckInMethodDto;
+  pointsForAttendance: number;
+  featured: boolean;
+  attendanceCount: number;
+  rsvpCount: number;
+}
+
+export interface RequestCampusEventsDto {
+  page: number;
+  limit: number;
+  dateFrom?: string;
+  dateTo?: string;
+  categories?: CampusEventCategoryDto[];
+  search?: string;
+  featured?: boolean;
+}
+
+export interface CampusEventListDto {
+  events: CampusEventDto[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface RequestCampusEventDetailsDto {
+  eventId: string;
+}
+
+export interface UpsertCampusEventDto {
+  id?: string;
+  title: string;
+  description: string;
+  imageUrl?: string;
+  startTime: string;
+  endTime: string;
+  allDay?: boolean;
+  locationName: string;
+  address?: string;
+  latitude: number;
+  longitude: number;
+  checkInRadius?: number;
+  categories: CampusEventCategoryDto[];
+  tags: string[];
+  source: EventSourceDto;
+  externalId?: string;
+  externalUrl?: string;
+  organizerName?: string;
+  organizerEmail?: string;
+  organizerId?: string;
+  checkInMethod?: CheckInMethodDto;
+  pointsForAttendance?: number;
+  featured?: boolean;
+  registrationUrl?: string;
+}
+
+export interface DeleteCampusEventDto {
+  eventId: string;
+}
+
+export interface RsvpCampusEventDto {
+  eventId: string;
+}
+
+export interface UnRsvpCampusEventDto {
+  eventId: string;
+}
+
+export interface UpdateCampusEventDataDto {
+  event: CampusEventDto;
+  deleted: boolean;
+}
+
+export interface CampusEventDetailsDto {
+  event: CampusEventDto;
+}
+
+export interface CampusEventListResponseDto {
+  list: CampusEventListDto;
 }
 
 export interface CompletedChallengeDto {}
@@ -598,6 +739,45 @@ export interface UpdateQuizQuestionDataDto {
   deleted: boolean;
 }
 
+export interface SpotlightDto {
+  id: string;
+  title: string;
+  body: string;
+  latitude: number;
+  longitude: number;
+  radiusMeters: number;
+  cooldownDays: number;
+  startDate: string;
+  endDate: string;
+  startHour: number;
+  endHour: number;
+  isActive: boolean;
+  linkedEventId?: string;
+  linkedCampusEventId?: string;
+}
+
+export interface ActiveSpotlightDto {
+  id: string;
+  latitude: number;
+  longitude: number;
+  radiusMeters: number;
+}
+
+export interface RequestSpotlightNotificationDto {
+  spotlightId: string;
+  latitude: number;
+  longitude: number;
+}
+
+export interface SpotlightNotificationResultDto {
+  sent: boolean;
+  reason?: string;
+}
+
+export interface DeleteSpotlightDto {
+  id: string;
+}
+
 export interface TimerStartedDto {
   timerId: string;
   endTime: string;
@@ -707,21 +887,3 @@ export interface JoinOrganizationDto {
 export interface CompleteOnboardingDto {}
 
 export interface ResetOnboardingDto {}
-
-export interface AdminBearItemDto {
-  id: string;
-  name?: string;
-  slot?: BearSlotDto;
-  cost?: number;
-  assetKey?: string;
-  mimeType?: string;
-  zIndex?: number | null;
-  isDefault?: boolean;
-}
-
-export interface UpdateBearItemDataDto {
-  bearItem: AdminBearItemDto;
-  deleted: boolean;
-}
-
-export interface RequestAllBearItemsDto {}

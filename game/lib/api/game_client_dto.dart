@@ -29,6 +29,30 @@ enum BearSlotDto {
   ACCESSORY,
 }
 
+enum CampusEventCategoryDto {
+  SOCIAL,
+  CULTURAL,
+  ATHLETIC,
+  WELLNESS,
+  ACADEMIC,
+  ARTS,
+  CAREER,
+  COMMUNITY,
+  OTHER,
+}
+
+enum EventSourceDto {
+  API_EVENTS,
+  ADMIN_CREATED,
+  COMMUNITY_SUBMITTED,
+}
+
+enum CheckInMethodDto {
+  LOCATION,
+  QR_CODE,
+  EITHER,
+}
+
 enum ChallengeLocationDto {
   ENG_QUAD,
   ARTS_QUAD,
@@ -860,6 +884,728 @@ class UpdatePurchaseResultDto {
   late bool success;
   late int newBalance;
   late String itemId;
+}
+
+class AdminBearItemDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['id'] = id;
+    if (name != null) {
+      fields['name'] = name;
+    }
+    if (slot != null) {
+      fields['slot'] = slot!.name;
+    }
+    if (cost != null) {
+      fields['cost'] = cost;
+    }
+    if (assetKey != null) {
+      fields['assetKey'] = assetKey;
+    }
+    if (mimeType != null) {
+      fields['mimeType'] = mimeType;
+    }
+    if (zIndex != null) {
+      fields['zIndex'] = zIndex;
+    }
+    if (isDefault != null) {
+      fields['isDefault'] = isDefault;
+    }
+    return fields;
+  }
+
+  AdminBearItemDto.fromJson(Map<String, dynamic> fields) {
+    id = fields["id"];
+    name = fields.containsKey('name') ? (fields["name"]) : null;
+    slot = fields.containsKey('slot')
+        ? (BearSlotDto.values.byName(fields['slot']))
+        : null;
+    cost = fields.containsKey('cost') ? (fields["cost"]) : null;
+    assetKey = fields.containsKey('assetKey') ? (fields["assetKey"]) : null;
+    mimeType = fields.containsKey('mimeType') ? (fields["mimeType"]) : null;
+    zIndex = fields.containsKey('zIndex') ? (fields["zIndex"]) : null;
+    isDefault = fields.containsKey('isDefault') ? (fields["isDefault"]) : null;
+  }
+
+  void partialUpdate(AdminBearItemDto other) {
+    id = other.id;
+    name = other.name == null ? name : other.name;
+    slot = other.slot == null ? slot : other.slot;
+    cost = other.cost == null ? cost : other.cost;
+    assetKey = other.assetKey == null ? assetKey : other.assetKey;
+    mimeType = other.mimeType == null ? mimeType : other.mimeType;
+    zIndex = other.zIndex == null ? zIndex : other.zIndex;
+    isDefault = other.isDefault == null ? isDefault : other.isDefault;
+  }
+
+  AdminBearItemDto({
+    required this.id,
+    this.name,
+    this.slot,
+    this.cost,
+    this.assetKey,
+    this.mimeType,
+    this.zIndex,
+    this.isDefault,
+  });
+
+  late String id;
+  late String? name;
+  late BearSlotDto? slot;
+  late int? cost;
+  late String? assetKey;
+  late String? mimeType;
+  late int? zIndex;
+  late bool? isDefault;
+}
+
+class UpdateBearItemDataDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['bearItem'] = bearItem!.toJson();
+    fields['deleted'] = deleted;
+    return fields;
+  }
+
+  UpdateBearItemDataDto.fromJson(Map<String, dynamic> fields) {
+    bearItem = AdminBearItemDto.fromJson(fields['bearItem']);
+    deleted = fields["deleted"];
+  }
+
+  void partialUpdate(UpdateBearItemDataDto other) {
+    bearItem = other.bearItem;
+    deleted = other.deleted;
+  }
+
+  UpdateBearItemDataDto({
+    required this.bearItem,
+    required this.deleted,
+  });
+
+  late AdminBearItemDto bearItem;
+  late bool deleted;
+}
+
+class RequestAllBearItemsDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    return fields;
+  }
+
+  RequestAllBearItemsDto.fromJson(Map<String, dynamic> fields) {}
+
+  void partialUpdate(RequestAllBearItemsDto other) {}
+
+  RequestAllBearItemsDto();
+}
+
+class CampusEventDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['id'] = id;
+    fields['title'] = title;
+    fields['description'] = description;
+    if (imageUrl != null) {
+      fields['imageUrl'] = imageUrl;
+    }
+    fields['startTime'] = startTime;
+    fields['endTime'] = endTime;
+    fields['allDay'] = allDay;
+    fields['locationName'] = locationName;
+    if (address != null) {
+      fields['address'] = address;
+    }
+    fields['latitude'] = latitude;
+    fields['longitude'] = longitude;
+    fields['categories'] =
+        categories!.map<String>((dynamic val) => val!.name).toList();
+    fields['tags'] = tags;
+    fields['source'] = source!.name;
+    if (externalUrl != null) {
+      fields['externalUrl'] = externalUrl;
+    }
+    if (organizerName != null) {
+      fields['organizerName'] = organizerName;
+    }
+    if (registrationUrl != null) {
+      fields['registrationUrl'] = registrationUrl;
+    }
+    fields['checkInMethod'] = checkInMethod!.name;
+    fields['pointsForAttendance'] = pointsForAttendance;
+    fields['featured'] = featured;
+    fields['attendanceCount'] = attendanceCount;
+    fields['rsvpCount'] = rsvpCount;
+    return fields;
+  }
+
+  CampusEventDto.fromJson(Map<String, dynamic> fields) {
+    id = fields["id"];
+    title = fields["title"];
+    description = fields["description"];
+    imageUrl = fields.containsKey('imageUrl') ? (fields["imageUrl"]) : null;
+    startTime = fields["startTime"];
+    endTime = fields["endTime"];
+    allDay = fields["allDay"];
+    locationName = fields["locationName"];
+    address = fields.containsKey('address') ? (fields["address"]) : null;
+    latitude = fields["latitude"];
+    longitude = fields["longitude"];
+    categories = fields["categories"]
+        .map<CampusEventCategoryDto>(
+            (dynamic val) => CampusEventCategoryDto.values.byName(val))
+        .toList();
+    tags = List<String>.from(fields['tags']);
+    source = EventSourceDto.values.byName(fields['source']);
+    externalUrl =
+        fields.containsKey('externalUrl') ? (fields["externalUrl"]) : null;
+    organizerName =
+        fields.containsKey('organizerName') ? (fields["organizerName"]) : null;
+    registrationUrl = fields.containsKey('registrationUrl')
+        ? (fields["registrationUrl"])
+        : null;
+    checkInMethod = CheckInMethodDto.values.byName(fields['checkInMethod']);
+    pointsForAttendance = fields["pointsForAttendance"];
+    featured = fields["featured"];
+    attendanceCount = fields["attendanceCount"];
+    rsvpCount = fields["rsvpCount"];
+  }
+
+  void partialUpdate(CampusEventDto other) {
+    id = other.id;
+    title = other.title;
+    description = other.description;
+    imageUrl = other.imageUrl == null ? imageUrl : other.imageUrl;
+    startTime = other.startTime;
+    endTime = other.endTime;
+    allDay = other.allDay;
+    locationName = other.locationName;
+    address = other.address == null ? address : other.address;
+    latitude = other.latitude;
+    longitude = other.longitude;
+    categories = other.categories;
+    tags = other.tags;
+    source = other.source;
+    externalUrl = other.externalUrl == null ? externalUrl : other.externalUrl;
+    organizerName =
+        other.organizerName == null ? organizerName : other.organizerName;
+    registrationUrl =
+        other.registrationUrl == null ? registrationUrl : other.registrationUrl;
+    checkInMethod = other.checkInMethod;
+    pointsForAttendance = other.pointsForAttendance;
+    featured = other.featured;
+    attendanceCount = other.attendanceCount;
+    rsvpCount = other.rsvpCount;
+  }
+
+  CampusEventDto({
+    required this.id,
+    required this.title,
+    required this.description,
+    this.imageUrl,
+    required this.startTime,
+    required this.endTime,
+    required this.allDay,
+    required this.locationName,
+    this.address,
+    required this.latitude,
+    required this.longitude,
+    required this.categories,
+    required this.tags,
+    required this.source,
+    this.externalUrl,
+    this.organizerName,
+    this.registrationUrl,
+    required this.checkInMethod,
+    required this.pointsForAttendance,
+    required this.featured,
+    required this.attendanceCount,
+    required this.rsvpCount,
+  });
+
+  late String id;
+  late String title;
+  late String description;
+  late String? imageUrl;
+  late String startTime;
+  late String endTime;
+  late bool allDay;
+  late String locationName;
+  late String? address;
+  late int latitude;
+  late int longitude;
+  late List<CampusEventCategoryDto> categories;
+  late List<String> tags;
+  late EventSourceDto source;
+  late String? externalUrl;
+  late String? organizerName;
+  late String? registrationUrl;
+  late CheckInMethodDto checkInMethod;
+  late int pointsForAttendance;
+  late bool featured;
+  late int attendanceCount;
+  late int rsvpCount;
+}
+
+class RequestCampusEventsDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['page'] = page;
+    fields['limit'] = limit;
+    if (dateFrom != null) {
+      fields['dateFrom'] = dateFrom;
+    }
+    if (dateTo != null) {
+      fields['dateTo'] = dateTo;
+    }
+    if (categories != null) {
+      fields['categories'] =
+          categories!.map<String>((dynamic val) => val!.name).toList();
+    }
+    if (search != null) {
+      fields['search'] = search;
+    }
+    if (featured != null) {
+      fields['featured'] = featured;
+    }
+    return fields;
+  }
+
+  RequestCampusEventsDto.fromJson(Map<String, dynamic> fields) {
+    page = fields["page"];
+    limit = fields["limit"];
+    dateFrom = fields.containsKey('dateFrom') ? (fields["dateFrom"]) : null;
+    dateTo = fields.containsKey('dateTo') ? (fields["dateTo"]) : null;
+    categories = fields.containsKey('categories')
+        ? (fields["categories"]
+            .map<CampusEventCategoryDto>(
+                (dynamic val) => CampusEventCategoryDto.values.byName(val))
+            .toList())
+        : null;
+    search = fields.containsKey('search') ? (fields["search"]) : null;
+    featured = fields.containsKey('featured') ? (fields["featured"]) : null;
+  }
+
+  void partialUpdate(RequestCampusEventsDto other) {
+    page = other.page;
+    limit = other.limit;
+    dateFrom = other.dateFrom == null ? dateFrom : other.dateFrom;
+    dateTo = other.dateTo == null ? dateTo : other.dateTo;
+    categories = other.categories == null ? categories : other.categories;
+    search = other.search == null ? search : other.search;
+    featured = other.featured == null ? featured : other.featured;
+  }
+
+  RequestCampusEventsDto({
+    required this.page,
+    required this.limit,
+    this.dateFrom,
+    this.dateTo,
+    this.categories,
+    this.search,
+    this.featured,
+  });
+
+  late int page;
+  late int limit;
+  late String? dateFrom;
+  late String? dateTo;
+  late List<CampusEventCategoryDto>? categories;
+  late String? search;
+  late bool? featured;
+}
+
+class CampusEventListDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['events'] = events!
+        .map<Map<String, dynamic>>((dynamic val) => val!.toJson())
+        .toList();
+    fields['total'] = total;
+    fields['page'] = page;
+    fields['limit'] = limit;
+    fields['totalPages'] = totalPages;
+    return fields;
+  }
+
+  CampusEventListDto.fromJson(Map<String, dynamic> fields) {
+    events = fields["events"]
+        .map<CampusEventDto>((dynamic val) => CampusEventDto.fromJson(val))
+        .toList();
+    total = fields["total"];
+    page = fields["page"];
+    limit = fields["limit"];
+    totalPages = fields["totalPages"];
+  }
+
+  void partialUpdate(CampusEventListDto other) {
+    events = other.events;
+    total = other.total;
+    page = other.page;
+    limit = other.limit;
+    totalPages = other.totalPages;
+  }
+
+  CampusEventListDto({
+    required this.events,
+    required this.total,
+    required this.page,
+    required this.limit,
+    required this.totalPages,
+  });
+
+  late List<CampusEventDto> events;
+  late int total;
+  late int page;
+  late int limit;
+  late int totalPages;
+}
+
+class RequestCampusEventDetailsDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['eventId'] = eventId;
+    return fields;
+  }
+
+  RequestCampusEventDetailsDto.fromJson(Map<String, dynamic> fields) {
+    eventId = fields["eventId"];
+  }
+
+  void partialUpdate(RequestCampusEventDetailsDto other) {
+    eventId = other.eventId;
+  }
+
+  RequestCampusEventDetailsDto({
+    required this.eventId,
+  });
+
+  late String eventId;
+}
+
+class UpsertCampusEventDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    if (id != null) {
+      fields['id'] = id;
+    }
+    fields['title'] = title;
+    fields['description'] = description;
+    if (imageUrl != null) {
+      fields['imageUrl'] = imageUrl;
+    }
+    fields['startTime'] = startTime;
+    fields['endTime'] = endTime;
+    if (allDay != null) {
+      fields['allDay'] = allDay;
+    }
+    fields['locationName'] = locationName;
+    if (address != null) {
+      fields['address'] = address;
+    }
+    fields['latitude'] = latitude;
+    fields['longitude'] = longitude;
+    if (checkInRadius != null) {
+      fields['checkInRadius'] = checkInRadius;
+    }
+    fields['categories'] =
+        categories!.map<String>((dynamic val) => val!.name).toList();
+    fields['tags'] = tags;
+    fields['source'] = source!.name;
+    if (externalId != null) {
+      fields['externalId'] = externalId;
+    }
+    if (externalUrl != null) {
+      fields['externalUrl'] = externalUrl;
+    }
+    if (organizerName != null) {
+      fields['organizerName'] = organizerName;
+    }
+    if (organizerEmail != null) {
+      fields['organizerEmail'] = organizerEmail;
+    }
+    if (organizerId != null) {
+      fields['organizerId'] = organizerId;
+    }
+    if (checkInMethod != null) {
+      fields['checkInMethod'] = checkInMethod!.name;
+    }
+    if (pointsForAttendance != null) {
+      fields['pointsForAttendance'] = pointsForAttendance;
+    }
+    if (featured != null) {
+      fields['featured'] = featured;
+    }
+    if (registrationUrl != null) {
+      fields['registrationUrl'] = registrationUrl;
+    }
+    return fields;
+  }
+
+  UpsertCampusEventDto.fromJson(Map<String, dynamic> fields) {
+    id = fields.containsKey('id') ? (fields["id"]) : null;
+    title = fields["title"];
+    description = fields["description"];
+    imageUrl = fields.containsKey('imageUrl') ? (fields["imageUrl"]) : null;
+    startTime = fields["startTime"];
+    endTime = fields["endTime"];
+    allDay = fields.containsKey('allDay') ? (fields["allDay"]) : null;
+    locationName = fields["locationName"];
+    address = fields.containsKey('address') ? (fields["address"]) : null;
+    latitude = fields["latitude"];
+    longitude = fields["longitude"];
+    checkInRadius =
+        fields.containsKey('checkInRadius') ? (fields["checkInRadius"]) : null;
+    categories = fields["categories"]
+        .map<CampusEventCategoryDto>(
+            (dynamic val) => CampusEventCategoryDto.values.byName(val))
+        .toList();
+    tags = List<String>.from(fields['tags']);
+    source = EventSourceDto.values.byName(fields['source']);
+    externalId =
+        fields.containsKey('externalId') ? (fields["externalId"]) : null;
+    externalUrl =
+        fields.containsKey('externalUrl') ? (fields["externalUrl"]) : null;
+    organizerName =
+        fields.containsKey('organizerName') ? (fields["organizerName"]) : null;
+    organizerEmail = fields.containsKey('organizerEmail')
+        ? (fields["organizerEmail"])
+        : null;
+    organizerId =
+        fields.containsKey('organizerId') ? (fields["organizerId"]) : null;
+    checkInMethod = fields.containsKey('checkInMethod')
+        ? (CheckInMethodDto.values.byName(fields['checkInMethod']))
+        : null;
+    pointsForAttendance = fields.containsKey('pointsForAttendance')
+        ? (fields["pointsForAttendance"])
+        : null;
+    featured = fields.containsKey('featured') ? (fields["featured"]) : null;
+    registrationUrl = fields.containsKey('registrationUrl')
+        ? (fields["registrationUrl"])
+        : null;
+  }
+
+  void partialUpdate(UpsertCampusEventDto other) {
+    id = other.id == null ? id : other.id;
+    title = other.title;
+    description = other.description;
+    imageUrl = other.imageUrl == null ? imageUrl : other.imageUrl;
+    startTime = other.startTime;
+    endTime = other.endTime;
+    allDay = other.allDay == null ? allDay : other.allDay;
+    locationName = other.locationName;
+    address = other.address == null ? address : other.address;
+    latitude = other.latitude;
+    longitude = other.longitude;
+    checkInRadius =
+        other.checkInRadius == null ? checkInRadius : other.checkInRadius;
+    categories = other.categories;
+    tags = other.tags;
+    source = other.source;
+    externalId = other.externalId == null ? externalId : other.externalId;
+    externalUrl = other.externalUrl == null ? externalUrl : other.externalUrl;
+    organizerName =
+        other.organizerName == null ? organizerName : other.organizerName;
+    organizerEmail =
+        other.organizerEmail == null ? organizerEmail : other.organizerEmail;
+    organizerId = other.organizerId == null ? organizerId : other.organizerId;
+    checkInMethod =
+        other.checkInMethod == null ? checkInMethod : other.checkInMethod;
+    pointsForAttendance = other.pointsForAttendance == null
+        ? pointsForAttendance
+        : other.pointsForAttendance;
+    featured = other.featured == null ? featured : other.featured;
+    registrationUrl =
+        other.registrationUrl == null ? registrationUrl : other.registrationUrl;
+  }
+
+  UpsertCampusEventDto({
+    this.id,
+    required this.title,
+    required this.description,
+    this.imageUrl,
+    required this.startTime,
+    required this.endTime,
+    this.allDay,
+    required this.locationName,
+    this.address,
+    required this.latitude,
+    required this.longitude,
+    this.checkInRadius,
+    required this.categories,
+    required this.tags,
+    required this.source,
+    this.externalId,
+    this.externalUrl,
+    this.organizerName,
+    this.organizerEmail,
+    this.organizerId,
+    this.checkInMethod,
+    this.pointsForAttendance,
+    this.featured,
+    this.registrationUrl,
+  });
+
+  late String? id;
+  late String title;
+  late String description;
+  late String? imageUrl;
+  late String startTime;
+  late String endTime;
+  late bool? allDay;
+  late String locationName;
+  late String? address;
+  late int latitude;
+  late int longitude;
+  late int? checkInRadius;
+  late List<CampusEventCategoryDto> categories;
+  late List<String> tags;
+  late EventSourceDto source;
+  late String? externalId;
+  late String? externalUrl;
+  late String? organizerName;
+  late String? organizerEmail;
+  late String? organizerId;
+  late CheckInMethodDto? checkInMethod;
+  late int? pointsForAttendance;
+  late bool? featured;
+  late String? registrationUrl;
+}
+
+class DeleteCampusEventDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['eventId'] = eventId;
+    return fields;
+  }
+
+  DeleteCampusEventDto.fromJson(Map<String, dynamic> fields) {
+    eventId = fields["eventId"];
+  }
+
+  void partialUpdate(DeleteCampusEventDto other) {
+    eventId = other.eventId;
+  }
+
+  DeleteCampusEventDto({
+    required this.eventId,
+  });
+
+  late String eventId;
+}
+
+class RsvpCampusEventDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['eventId'] = eventId;
+    return fields;
+  }
+
+  RsvpCampusEventDto.fromJson(Map<String, dynamic> fields) {
+    eventId = fields["eventId"];
+  }
+
+  void partialUpdate(RsvpCampusEventDto other) {
+    eventId = other.eventId;
+  }
+
+  RsvpCampusEventDto({
+    required this.eventId,
+  });
+
+  late String eventId;
+}
+
+class UnRsvpCampusEventDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['eventId'] = eventId;
+    return fields;
+  }
+
+  UnRsvpCampusEventDto.fromJson(Map<String, dynamic> fields) {
+    eventId = fields["eventId"];
+  }
+
+  void partialUpdate(UnRsvpCampusEventDto other) {
+    eventId = other.eventId;
+  }
+
+  UnRsvpCampusEventDto({
+    required this.eventId,
+  });
+
+  late String eventId;
+}
+
+class UpdateCampusEventDataDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['event'] = event!.toJson();
+    fields['deleted'] = deleted;
+    return fields;
+  }
+
+  UpdateCampusEventDataDto.fromJson(Map<String, dynamic> fields) {
+    event = CampusEventDto.fromJson(fields['event']);
+    deleted = fields["deleted"];
+  }
+
+  void partialUpdate(UpdateCampusEventDataDto other) {
+    event = other.event;
+    deleted = other.deleted;
+  }
+
+  UpdateCampusEventDataDto({
+    required this.event,
+    required this.deleted,
+  });
+
+  late CampusEventDto event;
+  late bool deleted;
+}
+
+class CampusEventDetailsDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['event'] = event!.toJson();
+    return fields;
+  }
+
+  CampusEventDetailsDto.fromJson(Map<String, dynamic> fields) {
+    event = CampusEventDto.fromJson(fields['event']);
+  }
+
+  void partialUpdate(CampusEventDetailsDto other) {
+    event = other.event;
+  }
+
+  CampusEventDetailsDto({
+    required this.event,
+  });
+
+  late CampusEventDto event;
+}
+
+class CampusEventListResponseDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['list'] = list!.toJson();
+    return fields;
+  }
+
+  CampusEventListResponseDto.fromJson(Map<String, dynamic> fields) {
+    list = CampusEventListDto.fromJson(fields['list']);
+  }
+
+  void partialUpdate(CampusEventListResponseDto other) {
+    list = other.list;
+  }
+
+  CampusEventListResponseDto({
+    required this.list,
+  });
+
+  late CampusEventListDto list;
 }
 
 class CompletedChallengeDto {
@@ -2096,6 +2842,105 @@ class SubmitFeedbackDto {
   late String? challengeId;
 }
 
+class FeedbackDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['id'] = id;
+    fields['createdAt'] = createdAt;
+    fields['category'] = category!.name;
+    fields['text'] = text;
+    if (rating != null) {
+      fields['rating'] = rating;
+    }
+    if (challengeId != null) {
+      fields['challengeId'] = challengeId;
+    }
+    fields['userId'] = userId;
+    if (username != null) {
+      fields['username'] = username;
+    }
+    if (challengeName != null) {
+      fields['challengeName'] = challengeName;
+    }
+    return fields;
+  }
+
+  FeedbackDto.fromJson(Map<String, dynamic> fields) {
+    id = fields["id"];
+    createdAt = fields["createdAt"];
+    category = FeedbackCategoryDto.values.byName(fields['category']);
+    text = fields["text"];
+    rating = fields.containsKey('rating') ? (fields["rating"]) : null;
+    challengeId =
+        fields.containsKey('challengeId') ? (fields["challengeId"]) : null;
+    userId = fields["userId"];
+    username = fields.containsKey('username') ? (fields["username"]) : null;
+    challengeName =
+        fields.containsKey('challengeName') ? (fields["challengeName"]) : null;
+  }
+
+  void partialUpdate(FeedbackDto other) {
+    id = other.id;
+    createdAt = other.createdAt;
+    category = other.category;
+    text = other.text;
+    rating = other.rating == null ? rating : other.rating;
+    challengeId = other.challengeId == null ? challengeId : other.challengeId;
+    userId = other.userId;
+    username = other.username == null ? username : other.username;
+    challengeName =
+        other.challengeName == null ? challengeName : other.challengeName;
+  }
+
+  FeedbackDto({
+    required this.id,
+    required this.createdAt,
+    required this.category,
+    required this.text,
+    this.rating,
+    this.challengeId,
+    required this.userId,
+    this.username,
+    this.challengeName,
+  });
+
+  late String id;
+  late String createdAt;
+  late FeedbackCategoryDto category;
+  late String text;
+  late bool? rating;
+  late String? challengeId;
+  late String userId;
+  late String? username;
+  late String? challengeName;
+}
+
+class UpdateFeedbackDataDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['feedbacks'] = feedbacks!
+        .map<Map<String, dynamic>>((dynamic val) => val!.toJson())
+        .toList();
+    return fields;
+  }
+
+  UpdateFeedbackDataDto.fromJson(Map<String, dynamic> fields) {
+    feedbacks = fields["feedbacks"]
+        .map<FeedbackDto>((dynamic val) => FeedbackDto.fromJson(val))
+        .toList();
+  }
+
+  void partialUpdate(UpdateFeedbackDataDto other) {
+    feedbacks = other.feedbacks;
+  }
+
+  UpdateFeedbackDataDto({
+    required this.feedbacks,
+  });
+
+  late List<FeedbackDto> feedbacks;
+}
+
 class JoinGroupDto {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> fields = {};
@@ -2913,6 +3758,223 @@ class UpdateQuizQuestionDataDto {
 
   late QuizQuestionDto question;
   late bool deleted;
+}
+
+class SpotlightDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['id'] = id;
+    fields['title'] = title;
+    fields['body'] = body;
+    fields['latitude'] = latitude;
+    fields['longitude'] = longitude;
+    fields['radiusMeters'] = radiusMeters;
+    fields['cooldownDays'] = cooldownDays;
+    fields['startDate'] = startDate;
+    fields['endDate'] = endDate;
+    fields['startHour'] = startHour;
+    fields['endHour'] = endHour;
+    fields['isActive'] = isActive;
+    if (linkedEventId != null) {
+      fields['linkedEventId'] = linkedEventId;
+    }
+    if (linkedCampusEventId != null) {
+      fields['linkedCampusEventId'] = linkedCampusEventId;
+    }
+    return fields;
+  }
+
+  SpotlightDto.fromJson(Map<String, dynamic> fields) {
+    id = fields["id"];
+    title = fields["title"];
+    body = fields["body"];
+    latitude = fields["latitude"];
+    longitude = fields["longitude"];
+    radiusMeters = fields["radiusMeters"];
+    cooldownDays = fields["cooldownDays"];
+    startDate = fields["startDate"];
+    endDate = fields["endDate"];
+    startHour = fields["startHour"];
+    endHour = fields["endHour"];
+    isActive = fields["isActive"];
+    linkedEventId =
+        fields.containsKey('linkedEventId') ? (fields["linkedEventId"]) : null;
+    linkedCampusEventId = fields.containsKey('linkedCampusEventId')
+        ? (fields["linkedCampusEventId"])
+        : null;
+  }
+
+  void partialUpdate(SpotlightDto other) {
+    id = other.id;
+    title = other.title;
+    body = other.body;
+    latitude = other.latitude;
+    longitude = other.longitude;
+    radiusMeters = other.radiusMeters;
+    cooldownDays = other.cooldownDays;
+    startDate = other.startDate;
+    endDate = other.endDate;
+    startHour = other.startHour;
+    endHour = other.endHour;
+    isActive = other.isActive;
+    linkedEventId =
+        other.linkedEventId == null ? linkedEventId : other.linkedEventId;
+    linkedCampusEventId = other.linkedCampusEventId == null
+        ? linkedCampusEventId
+        : other.linkedCampusEventId;
+  }
+
+  SpotlightDto({
+    required this.id,
+    required this.title,
+    required this.body,
+    required this.latitude,
+    required this.longitude,
+    required this.radiusMeters,
+    required this.cooldownDays,
+    required this.startDate,
+    required this.endDate,
+    required this.startHour,
+    required this.endHour,
+    required this.isActive,
+    this.linkedEventId,
+    this.linkedCampusEventId,
+  });
+
+  late String id;
+  late String title;
+  late String body;
+  late int latitude;
+  late int longitude;
+  late int radiusMeters;
+  late int cooldownDays;
+  late String startDate;
+  late String endDate;
+  late int startHour;
+  late int endHour;
+  late bool isActive;
+  late String? linkedEventId;
+  late String? linkedCampusEventId;
+}
+
+class ActiveSpotlightDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['id'] = id;
+    fields['latitude'] = latitude;
+    fields['longitude'] = longitude;
+    fields['radiusMeters'] = radiusMeters;
+    return fields;
+  }
+
+  ActiveSpotlightDto.fromJson(Map<String, dynamic> fields) {
+    id = fields["id"];
+    latitude = fields["latitude"];
+    longitude = fields["longitude"];
+    radiusMeters = fields["radiusMeters"];
+  }
+
+  void partialUpdate(ActiveSpotlightDto other) {
+    id = other.id;
+    latitude = other.latitude;
+    longitude = other.longitude;
+    radiusMeters = other.radiusMeters;
+  }
+
+  ActiveSpotlightDto({
+    required this.id,
+    required this.latitude,
+    required this.longitude,
+    required this.radiusMeters,
+  });
+
+  late String id;
+  late int latitude;
+  late int longitude;
+  late int radiusMeters;
+}
+
+class RequestSpotlightNotificationDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['spotlightId'] = spotlightId;
+    fields['latitude'] = latitude;
+    fields['longitude'] = longitude;
+    return fields;
+  }
+
+  RequestSpotlightNotificationDto.fromJson(Map<String, dynamic> fields) {
+    spotlightId = fields["spotlightId"];
+    latitude = fields["latitude"];
+    longitude = fields["longitude"];
+  }
+
+  void partialUpdate(RequestSpotlightNotificationDto other) {
+    spotlightId = other.spotlightId;
+    latitude = other.latitude;
+    longitude = other.longitude;
+  }
+
+  RequestSpotlightNotificationDto({
+    required this.spotlightId,
+    required this.latitude,
+    required this.longitude,
+  });
+
+  late String spotlightId;
+  late int latitude;
+  late int longitude;
+}
+
+class SpotlightNotificationResultDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['sent'] = sent;
+    if (reason != null) {
+      fields['reason'] = reason;
+    }
+    return fields;
+  }
+
+  SpotlightNotificationResultDto.fromJson(Map<String, dynamic> fields) {
+    sent = fields["sent"];
+    reason = fields.containsKey('reason') ? (fields["reason"]) : null;
+  }
+
+  void partialUpdate(SpotlightNotificationResultDto other) {
+    sent = other.sent;
+    reason = other.reason == null ? reason : other.reason;
+  }
+
+  SpotlightNotificationResultDto({
+    required this.sent,
+    this.reason,
+  });
+
+  late bool sent;
+  late String? reason;
+}
+
+class DeleteSpotlightDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['id'] = id;
+    return fields;
+  }
+
+  DeleteSpotlightDto.fromJson(Map<String, dynamic> fields) {
+    id = fields["id"];
+  }
+
+  void partialUpdate(DeleteSpotlightDto other) {
+    id = other.id;
+  }
+
+  DeleteSpotlightDto({
+    required this.id,
+  });
+
+  late String id;
 }
 
 class TimerStartedDto {

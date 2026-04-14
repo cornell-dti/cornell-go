@@ -4,6 +4,7 @@ import Firebase
 import GoogleMaps
 // import flutter_config
 import flutter_config_plus
+import native_geofence
 
 
 @main
@@ -12,6 +13,10 @@ import flutter_config_plus
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
+    NativeGeofencePlugin.setPluginRegistrantCallback { registry in
+      GeneratedPluginRegistrant.register(with: registry)
+    }
+
     GeneratedPluginRegistrant.register(with: self)
     if FirebaseApp.app() == nil {
       FirebaseApp.configure()
@@ -19,6 +24,7 @@ import flutter_config_plus
     if let apiKey = FlutterConfigPlusPlugin.env(for: "IOS_MAP_API_KEY") {
       GMSServices.provideAPIKey(apiKey)
     }
+
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 }

@@ -50,7 +50,7 @@ import { UpdateFeedbackDataDto } from '../feedback/feedback.dto';
 import {
   UpdateCampusEventDataDto,
   CampusEventListResponseDto,
-  CampusEventDto,
+  CampusEventDetailsDto,
 } from '../campus-event/campus-event.dto';
 import { ExtractSubjectType } from '@casl/ability';
 
@@ -85,7 +85,7 @@ export type ClientApiDef = {
   updateFeedbackData: UpdateFeedbackDataDto;
   updateCampusEventData: UpdateCampusEventDataDto;
   campusEventList: CampusEventListResponseDto;
-  campusEventDetails: { event: CampusEventDto };
+  campusEventDetails: CampusEventDetailsDto;
 };
 
 @Injectable()

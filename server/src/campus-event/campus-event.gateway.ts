@@ -99,7 +99,7 @@ export class CampusEventGateway {
   @SubscribeMessage('updateCampusEvent')
   async updateCampusEvent(
     @CallingUser() user: User,
-    @MessageBody() data: UpsertCampusEventDto & { id: string },
+    @MessageBody() data: UpsertCampusEventDto,
   ) {
     if (!user.administrator) {
       await this.clientService.emitErrorData(user, 'Forbidden.');

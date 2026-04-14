@@ -7,6 +7,7 @@ import { Users } from './components/Users';
 import { Notifications } from './components/Notifications';
 import { Feedback } from './components/Feedback';
 import { BearItems } from './components/BearItems';
+import { Spotlights } from './components/Spotlights';
 
 import {
   AppBar,
@@ -34,6 +35,7 @@ import {
   faBell,
   faComment,
   faPaw,
+  faMapPin,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -106,6 +108,12 @@ const routes = [
     element: <BearItems />,
     icon: faPaw,
     name: 'Bear Items',
+  },
+  {
+    path: '/spotlights',
+    element: <Spotlights />,
+    icon: faMapPin,
+    name: 'Spotlights',
   },
 ];
 

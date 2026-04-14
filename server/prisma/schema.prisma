@@ -77,13 +77,13 @@ enum OrganizationSpecialUsage {
 }
 
 model User {
-  id                     String               @id() @default(uuid())
-  createdAt              DateTime             @default(now())
-  updatedAt              DateTime             @updatedAt()
-  subject                String               @default("User")
-  authToken              String               @unique
+  id                     String                     @id() @default(uuid())
+  createdAt              DateTime                   @default(now())
+  updatedAt              DateTime                   @updatedAt()
+  subject                String                     @default("User")
+  authToken              String                     @unique
   authType               AuthType
-  username               String               @unique
+  username               String                     @unique
   year                   String
   college                String
   major                  String
@@ -93,29 +93,30 @@ model User {
   administrator          Boolean
   enrollmentType         EnrollmentType
   score                  Int
-  coins               Int                  @default(0)
-  isBanned               Boolean              @default(false)
+  coins                  Int                        @default(0)
+  isBanned               Boolean                    @default(false)
   fcmToken               String? // Firebase Cloud Messaging token for push notifications
-  group                  Group                @relation("member", fields: [groupId], references: [id])
+  group                  Group                      @relation("member", fields: [groupId], references: [id])
   groupId                String
-  hostOf                 Group?               @relation("host")
+  hostOf                 Group?                     @relation("host")
   eventTrackers          EventTracker[]
   favorites              EventBase[]
-  completedChallenges    PrevChallenge[]      @relation("owner")
-  memberOf               Organization[]       @relation("orgToUser")
-  managerOf              Organization[]       @relation("orgManager")
-  isRanked               Boolean              @default(true)
-  participatedIn         PrevChallenge[]      @relation("prevChallengeParticipant")
+  completedChallenges    PrevChallenge[]            @relation("owner")
+  memberOf               Organization[]             @relation("orgToUser")
+  managerOf              Organization[]             @relation("orgManager")
+  isRanked               Boolean                    @default(true)
+  participatedIn         PrevChallenge[]            @relation("prevChallengeParticipant")
   sessionLogEntries      SessionLogEntry[]
   achievementTrackers    AchievementTracker[]
-  bearInventories     UserBearInventory[]
-  bearEquipped        UserBearEquipped[]
+  bearInventories        UserBearInventory[]
+  bearEquipped           UserBearEquipped[]
   challengeTimers        ChallengeTimer[]
   UserQuizAnswer         UserQuizAnswer[]
-  hasCompletedOnboarding Boolean              @default(false)
+  hasCompletedOnboarding Boolean                    @default(false)
   eventAttendances       EventAttendance[]
   eventRSVPs             EventRSVP[]
   feedbacks              Feedback[]
+  spotlightNotifications SpotlightNotificationLog[]
 }
 
 model Group {
@@ -155,10 +156,10 @@ model Challenge {
 }
 
 model EventBase {
-  id              String             @id @default(uuid())
-  createdAt       DateTime           @default(now())
-  updatedAt       DateTime           @updatedAt()
-  subject         String             @default("EventBase")
+  id              String              @id @default(uuid())
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt()
+  subject         String              @default("EventBase")
   requiredMembers Int
   name            String
   description     String
@@ -166,9 +167,9 @@ model EventBase {
   timeLimitation  TimeLimitationType
   indexable       Boolean
   endTime         DateTime
-  challenges      Challenge[]        @relation("all")
+  challenges      Challenge[]         @relation("all")
   userFavorite    User[]
-  usedIn          Organization[]     @relation("eventOrgs")
+  usedIn          Organization[]      @relation("eventOrgs")
   trackers        EventTracker[]
   activeGroups    Group[]
   latitude        Float
@@ -176,8 +177,9 @@ model EventBase {
   achievements    Achievement[]
   difficulty      DifficultyMode
   category        EventCategoryType
-  featured        Boolean            @default(false)
-  isJourney       Boolean            @default(false)
+  featured        Boolean             @default(false)
+  isJourney       Boolean             @default(false)
+  spotlights      LocationSpotlight[]
 }
 
 enum EventCategoryType {
@@ -286,16 +288,16 @@ enum BearSlot {
 }
 
 model BearItem {
-  id          String              @id @default(uuid())
-  createdAt   DateTime            @default(now())
-  updatedAt   DateTime            @updatedAt()
-  name        String
-  slot        BearSlot
-  cost       Int
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
+  name      String
+  slot      BearSlot
+  cost      Int
 
-  assetKey   String
-  mimeType   String?
-  zIndex     Int?
+  assetKey String
+  mimeType String?
+  zIndex   Int?
 
   isDefault   Boolean             @default(false)
   inventories UserBearInventory[]
@@ -303,9 +305,9 @@ model BearItem {
 }
 
 model UserBearInventory {
-  id           String   @id @default(uuid())
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt()
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
 
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId       String
@@ -317,9 +319,9 @@ model UserBearInventory {
 }
 
 model UserBearEquipped {
-  id         String   @id @default(uuid())
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt()
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
 
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId     String
@@ -490,6 +492,7 @@ model CampusEvent {
   // Tracking
   attendances EventAttendance[]
   rsvps       EventRSVP[]
+  spotlights  LocationSpotlight[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -542,4 +545,42 @@ model EventRSVP {
   rsvpAt DateTime @default(now())
 
   @@unique([userId, campusEventId])
+}
+
+// ---- Location Spotlights ----
+
+model LocationSpotlight {
+  id           String   @id @default(uuid())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt()
+  title        String
+  body         String
+  latitude     Float
+  longitude    Float
+  radiusMeters Float
+  cooldownDays Int      @default(7)
+  startDate    DateTime
+  endDate      DateTime
+  startHour    Int      @default(9)
+  endHour      Int      @default(21)
+  isActive     Boolean  @default(true)
+
+  linkedEvent         EventBase?   @relation(fields: [linkedEventId], references: [id])
+  linkedEventId       String?
+  linkedCampusEvent   CampusEvent? @relation(fields: [linkedCampusEventId], references: [id])
+  linkedCampusEventId String?
+
+  notificationLogs SpotlightNotificationLog[]
+}
+
+model SpotlightNotificationLog {
+  id          String            @id @default(uuid())
+  userId      String
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  spotlightId String
+  spotlight   LocationSpotlight @relation(fields: [spotlightId], references: [id], onDelete: Cascade)
+  notifiedAt  DateTime          @default(now())
+
+  @@index([userId, spotlightId])
+  @@index([userId, notifiedAt])
 }

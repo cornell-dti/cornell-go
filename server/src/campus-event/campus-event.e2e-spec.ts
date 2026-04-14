@@ -5,6 +5,7 @@ import { ApprovalStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CampusEventService } from './campus-event.service';
 import { ClientService } from '../client/client.service';
+import { CampusEventCategoryDto, EventSourceDto } from './campus-event.dto';
 
 jest.setTimeout(20000);
 
@@ -76,9 +77,9 @@ describe('CampusEventModule E2E', () => {
       locationName: 'Barton Hall',
       latitude: 42.4534,
       longitude: -76.4735,
-      categories: ['SOCIAL'],
+      categories: [CampusEventCategoryDto.SOCIAL],
       tags: ['e2e'],
-      source: 'ADMIN_CREATED',
+      source: EventSourceDto.ADMIN_CREATED,
     });
     createdCampusEventIds.push(ev.id);
     expect(ev.id).toBeDefined();
@@ -162,9 +163,9 @@ describe('CampusEventModule E2E', () => {
       locationName: 'Barton Hall',
       latitude: 42.4534,
       longitude: -76.4735,
-      categories: ['SOCIAL'],
+      categories: [CampusEventCategoryDto.SOCIAL],
       tags: ['e2e', 'updated'],
-      source: 'ADMIN_CREATED',
+      source: EventSourceDto.ADMIN_CREATED,
     });
     expect(updated).not.toBeNull();
     expect(updated?.title).toBe('E2E Campus Event Updated');

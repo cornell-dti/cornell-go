@@ -1,32 +1,26 @@
-export const CampusEventCategoryDto = {
-  SOCIAL: 'SOCIAL',
-  CULTURAL: 'CULTURAL',
-  ATHLETIC: 'ATHLETIC',
-  WELLNESS: 'WELLNESS',
-  ACADEMIC: 'ACADEMIC',
-  ARTS: 'ARTS',
-  CAREER: 'CAREER',
-  COMMUNITY: 'COMMUNITY',
-  OTHER: 'OTHER',
-} as const;
-export type CampusEventCategoryDto =
-  (typeof CampusEventCategoryDto)[keyof typeof CampusEventCategoryDto];
+export enum CampusEventCategoryDto {
+  SOCIAL = 'SOCIAL',
+  CULTURAL = 'CULTURAL',
+  ATHLETIC = 'ATHLETIC',
+  WELLNESS = 'WELLNESS',
+  ACADEMIC = 'ACADEMIC',
+  ARTS = 'ARTS',
+  CAREER = 'CAREER',
+  COMMUNITY = 'COMMUNITY',
+  OTHER = 'OTHER',
+}
 
-export const EventSourceDto = {
-  API_EVENTS: 'API_EVENTS',
-  ADMIN_CREATED: 'ADMIN_CREATED',
-  COMMUNITY_SUBMITTED: 'COMMUNITY_SUBMITTED',
-} as const;
-export type EventSourceDto =
-  (typeof EventSourceDto)[keyof typeof EventSourceDto];
+export enum EventSourceDto {
+  API_EVENTS = 'API_EVENTS',
+  ADMIN_CREATED = 'ADMIN_CREATED',
+  COMMUNITY_SUBMITTED = 'COMMUNITY_SUBMITTED',
+}
 
-export const CheckInMethodDto = {
-  LOCATION: 'LOCATION',
-  QR_CODE: 'QR_CODE',
-  EITHER: 'EITHER',
-} as const;
-export type CheckInMethodDto =
-  (typeof CheckInMethodDto)[keyof typeof CheckInMethodDto];
+export enum CheckInMethodDto {
+  LOCATION = 'LOCATION',
+  QR_CODE = 'QR_CODE',
+  EITHER = 'EITHER',
+}
 
 /** Core campus event DTO for API responses */
 export interface CampusEventDto {
@@ -124,8 +118,13 @@ export interface UnRsvpCampusEventDto {
 
 /** Emit: single event update (create/update/delete) for broadcasting */
 export interface UpdateCampusEventDataDto {
-  event: CampusEventDto | { id: string };
+  event: CampusEventDto;
   deleted: boolean;
+}
+
+/** Emit: single event details response */
+export interface CampusEventDetailsDto {
+  event: CampusEventDto;
 }
 
 /** Emit: paginated list response (for requestCampusEvents ack) */
