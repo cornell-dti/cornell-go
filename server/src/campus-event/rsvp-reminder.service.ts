@@ -6,6 +6,8 @@ import { NotificationService } from '../notification/notification.service';
 const REMINDER_LEAD_TIME_MS = 3 * 60 * 60 * 1000; // 3 hours before event
 const CRON_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes (matches cron frequency)
 const CLAIM_TIMEOUT_MS = 10 * 60 * 1000; // Reclaim stale in-flight reminders
+const REMINDER_TIME_LOCALE = 'en-US';
+const REMINDER_TIME_ZONE = 'America/New_York';
 
 @Injectable()
 export class RsvpReminderService {
@@ -63,9 +65,10 @@ export class RsvpReminderService {
         if (claimResult.count === 0) continue;
 
         const { title, startTime } = rsvp.campusEvent;
-        const timeStr = startTime.toLocaleTimeString([], {
+        const timeStr = startTime.toLocaleTimeString(REMINDER_TIME_LOCALE, {
           hour: '2-digit',
           minute: '2-digit',
+          timeZone: REMINDER_TIME_ZONE,
         });
 
         await this.notificationService.sendToUser(
