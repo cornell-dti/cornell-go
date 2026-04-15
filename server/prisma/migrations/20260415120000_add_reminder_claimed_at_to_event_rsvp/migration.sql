@@ -1,0 +1,1 @@
+ALTER TABLE "EventRSVP" ADD COLUMN "reminderClaimedAt" TIMESTAMP(3);

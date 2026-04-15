@@ -519,8 +519,9 @@ model EventRSVP {
   campusEventId String
   campusEvent   CampusEvent @relation(fields: [campusEventId], references: [id])
 
-  rsvpAt       DateTime @default(now())
-  reminderSent Boolean  @default(false)
+  rsvpAt             DateTime  @default(now())
+  reminderSent       Boolean   @default(false)
+  reminderClaimedAt  DateTime?
 
   @@unique([userId, campusEventId])
 }

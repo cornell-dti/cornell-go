@@ -5,6 +5,7 @@ import { NotificationService } from '../notification/notification.service';
 
 const REMINDER_LEAD_TIME_MS = 3 * 60 * 60 * 1000; // 3 hours before event
 const CRON_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes (matches cron frequency)
+const CLAIM_TIMEOUT_MS = 10 * 60 * 1000; // Reclaim stale in-flight reminders
 
 @Injectable()
 export class RsvpReminderService {
@@ -20,10 +21,15 @@ export class RsvpReminderService {
     const now = Date.now();
     const windowStart = new Date(now + REMINDER_LEAD_TIME_MS);
     const windowEnd = new Date(now + REMINDER_LEAD_TIME_MS + CRON_INTERVAL_MS);
+    const staleClaimThreshold = new Date(now - CLAIM_TIMEOUT_MS);
 
     const rsvps = await this.prisma.eventRSVP.findMany({
       where: {
         reminderSent: false,
+        OR: [
+          { reminderClaimedAt: null },
+          { reminderClaimedAt: { lt: staleClaimThreshold } },
+        ],
         campusEvent: {
           startTime: {
             gte: windowStart,
@@ -41,23 +47,51 @@ export class RsvpReminderService {
     this.logger.log(`Sending reminders for ${rsvps.length} RSVPs`);
 
     for (const rsvp of rsvps) {
+      const claimResult = await this.prisma.eventRSVP.updateMany({
+        where: {
+          id: rsvp.id,
+          reminderSent: false,
+          OR: [
+            { reminderClaimedAt: null },
+            { reminderClaimedAt: { lt: staleClaimThreshold } },
+          ],
+        },
+        data: { reminderClaimedAt: new Date() },
+      });
+
+      if (claimResult.count === 0) continue;
+
       const { title, startTime } = rsvp.campusEvent;
       const timeStr = startTime.toLocaleTimeString([], {
         hour: '2-digit',
         minute: '2-digit',
       });
 
-      await this.notificationService.sendToUser(
-        rsvp.userId,
-        `Upcoming Event: ${title}`,
-        `Starts at ${timeStr} — see you there!`,
-        { campusEventId: rsvp.campusEventId },
-      );
+      try {
+        await this.notificationService.sendToUser(
+          rsvp.userId,
+          `Upcoming Event: ${title}`,
+          `Starts at ${timeStr} — see you there!`,
+          { campusEventId: rsvp.campusEventId },
+        );
 
-      await this.prisma.eventRSVP.update({
-        where: { id: rsvp.id },
-        data: { reminderSent: true },
-      });
+        await this.prisma.eventRSVP.update({
+          where: { id: rsvp.id },
+          data: {
+            reminderSent: true,
+            reminderClaimedAt: null,
+          },
+        });
+      } catch (error) {
+        this.logger.error(
+          `Failed to send RSVP reminder for RSVP ${rsvp.id}`,
+          error instanceof Error ? error.stack : undefined,
+        );
+        await this.prisma.eventRSVP.updateMany({
+          where: { id: rsvp.id, reminderSent: false },
+          data: { reminderClaimedAt: null },
+        });
+      }
     }
 
     this.logger.log(`Finished sending ${rsvps.length} reminders`);

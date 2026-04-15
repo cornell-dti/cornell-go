@@ -296,6 +296,42 @@ describe('CampusEventModule E2E', () => {
       expect(sendToUserMock).not.toHaveBeenCalled();
     });
 
+    it('prevents duplicate sends during concurrent cron runs', async () => {
+      if (!campusEventTableExists || !testUserId) return;
+
+      const startTime = new Date(Date.now() + LEAD_TIME_MS + 90_000);
+      const endTime = new Date(startTime.getTime() + 3600_000);
+      const ev = await campusEventService.createEvent({
+        title: 'Concurrent Reminder Event',
+        description: 'Should only send one reminder',
+        startTime: startTime.toISOString(),
+        endTime: endTime.toISOString(),
+        locationName: 'Statler Hall',
+        latitude: 42.4458,
+        longitude: -76.4821,
+        categories: ['SOCIAL'],
+        tags: ['test-concurrent-reminder'],
+        source: 'ADMIN_CREATED',
+      });
+      createdCampusEventIds.push(ev.id);
+
+      await campusEventService.rsvp(testUserId, ev.id);
+
+      sendToUserMock.mockClear();
+      sendToUserMock.mockImplementation(
+        () => new Promise((resolve) => setTimeout(() => resolve(true), 100)),
+      );
+
+      await Promise.all([
+        reminderService.handleReminderCron(),
+        reminderService.handleReminderCron(),
+      ]);
+
+      expect(sendToUserMock).toHaveBeenCalledTimes(1);
+
+      sendToUserMock.mockResolvedValue(true);
+    });
+
     it('does not send reminders for events outside the window', async () => {
       if (!campusEventTableExists || !testUserId) return;
 
