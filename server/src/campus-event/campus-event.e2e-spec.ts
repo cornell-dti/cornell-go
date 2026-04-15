@@ -228,6 +228,7 @@ describe('CampusEventModule E2E', () => {
     let reminderEventId: string;
 
     const LEAD_TIME_MS = 3 * 60 * 60 * 1000;
+    const REMINDER_WINDOW_BUFFER_MS = 2 * 60 * 1000;
 
     beforeAll(() => {
       reminderService = moduleRef.get<RsvpReminderService>(RsvpReminderService);
@@ -251,7 +252,9 @@ describe('CampusEventModule E2E', () => {
     it('sends reminder for RSVP within the cron window', async () => {
       if (!campusEventTableExists || !testUserId) return;
 
-      const startTime = new Date(Date.now() + LEAD_TIME_MS + 60_000);
+      const startTime = new Date(
+        Date.now() + LEAD_TIME_MS + REMINDER_WINDOW_BUFFER_MS,
+      );
       const endTime = new Date(startTime.getTime() + 3600_000);
 
       const ev = await campusEventService.createEvent({
@@ -299,7 +302,9 @@ describe('CampusEventModule E2E', () => {
     it('prevents duplicate sends during concurrent cron runs', async () => {
       if (!campusEventTableExists || !testUserId) return;
 
-      const startTime = new Date(Date.now() + LEAD_TIME_MS + 90_000);
+      const startTime = new Date(
+        Date.now() + LEAD_TIME_MS + REMINDER_WINDOW_BUFFER_MS,
+      );
       const endTime = new Date(startTime.getTime() + 3600_000);
       const ev = await campusEventService.createEvent({
         title: 'Concurrent Reminder Event',
