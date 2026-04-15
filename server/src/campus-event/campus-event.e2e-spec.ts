@@ -324,7 +324,7 @@ describe('CampusEventModule E2E', () => {
 
       sendToUserMock.mockClear();
       sendToUserMock.mockImplementation(
-        () => new Promise((resolve) => setTimeout(() => resolve(true), 100)),
+        () => new Promise(resolve => setTimeout(() => resolve(true), 100)),
       );
 
       await Promise.all([
