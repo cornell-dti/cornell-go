@@ -47,27 +47,27 @@ export class RsvpReminderService {
     this.logger.log(`Sending reminders for ${rsvps.length} RSVPs`);
 
     for (const rsvp of rsvps) {
-      const claimResult = await this.prisma.eventRSVP.updateMany({
-        where: {
-          id: rsvp.id,
-          reminderSent: false,
-          OR: [
-            { reminderClaimedAt: null },
-            { reminderClaimedAt: { lt: staleClaimThreshold } },
-          ],
-        },
-        data: { reminderClaimedAt: new Date() },
-      });
-
-      if (claimResult.count === 0) continue;
-
-      const { title, startTime } = rsvp.campusEvent;
-      const timeStr = startTime.toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit',
-      });
-
       try {
+        const claimResult = await this.prisma.eventRSVP.updateMany({
+          where: {
+            id: rsvp.id,
+            reminderSent: false,
+            OR: [
+              { reminderClaimedAt: null },
+              { reminderClaimedAt: { lt: staleClaimThreshold } },
+            ],
+          },
+          data: { reminderClaimedAt: new Date() },
+        });
+
+        if (claimResult.count === 0) continue;
+
+        const { title, startTime } = rsvp.campusEvent;
+        const timeStr = startTime.toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit',
+        });
+
         await this.notificationService.sendToUser(
           rsvp.userId,
           `Upcoming Event: ${title}`,
@@ -87,10 +87,17 @@ export class RsvpReminderService {
           `Failed to send RSVP reminder for RSVP ${rsvp.id}`,
           error instanceof Error ? error.stack : undefined,
         );
-        await this.prisma.eventRSVP.updateMany({
-          where: { id: rsvp.id, reminderSent: false },
-          data: { reminderClaimedAt: null },
-        });
+        try {
+          await this.prisma.eventRSVP.updateMany({
+            where: { id: rsvp.id, reminderSent: false },
+            data: { reminderClaimedAt: null },
+          });
+        } catch (releaseError) {
+          this.logger.error(
+            `Failed to release RSVP reminder claim for RSVP ${rsvp.id}`,
+            releaseError instanceof Error ? releaseError.stack : undefined,
+          );
+        }
       }
     }
 
