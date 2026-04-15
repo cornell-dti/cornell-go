@@ -136,6 +136,7 @@ ui.Size _pinRasterSize(String assetPath, double scaleMultiplier) {
   return ui.Size(vb.width * s, vb.height * s);
 }
 
+// TODO: Replace with real event data from API
 const _kExamplePins = <_ExampleMapPin>[
   _ExampleMapPin(
     id: 'e1',

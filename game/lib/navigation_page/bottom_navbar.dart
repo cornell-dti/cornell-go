@@ -64,12 +64,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
     fontSize: 30,
     fontWeight: FontWeight.bold,
   );
-  static List<Widget> _widgetOptions = <Widget>[
-    HomeMapPage(),
-    SearchFilterBar(),
-    GlobalLeaderboardWidget(),
-    ProfilePage(),
-  ];
+  late final List<Widget> _widgetOptions;
 
   void _onItemTapped(int index) {
     setState(() {
@@ -80,6 +75,12 @@ class _BottomNavBarState extends State<BottomNavBar> {
   @override
   void initState() {
     super.initState();
+    _widgetOptions = <Widget>[
+      HomeMapPage(),
+      SearchFilterBar(),
+      GlobalLeaderboardWidget(),
+      ProfilePage(),
+    ];
   }
 
   @override
