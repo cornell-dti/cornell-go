@@ -11,6 +11,7 @@ import 'package:game/api/geopoint.dart';
 import 'package:game/api/notification_service.dart';
 import 'package:game/loading_page/loading_page.dart';
 import 'package:game/model/achievement_model.dart';
+import 'package:game/model/campus_event_model.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:game/model/onboarding_model.dart';
 import 'package:game/model/timer_model.dart';
@@ -161,6 +162,10 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(create: (_) => TimerModel(client), lazy: false),
         ChangeNotifierProvider(create: (_) => QuizModel(client), lazy: false),
+        ChangeNotifierProvider(
+          create: (_) => CampusEventModel(client),
+          lazy: false,
+        ),
       ],
       child: GameWidget(
         child: MaterialApp(
