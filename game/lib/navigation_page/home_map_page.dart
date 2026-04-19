@@ -11,182 +11,69 @@ import 'package:game/constants/constants.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 
-Future<BitmapDescriptor> _bitmapDescriptorFromSvgAsset(
-  BuildContext context,
-  String assetPath, {
-  double width = 50,
-  double height = 53,
-}) async {
-  final dpr = MediaQuery.devicePixelRatioOf(context);
-  final loader = SvgAssetLoader(assetPath);
-  final PictureInfo info = await vg.loadPicture(loader, context);
-  ui.Picture? composed;
-  ui.Image? image;
-  try {
-    final src = info.size;
-    if (src.width <= 0 || src.height <= 0) {
-      throw StateError(
-          '_bitmapDescriptorFromSvgAsset: invalid PictureInfo.size');
-    }
+import 'package:game/navigation_page/home_map/category_chips.dart';
+import 'package:game/navigation_page/home_map/home_map_search_bar.dart';
+import 'package:game/navigation_page/home_map/map_pin_utils.dart';
 
-    final outW = (width * dpr).round().clamp(1, 4096);
-    final outH = (height * dpr).round().clamp(1, 4096);
-
-    final recorder = ui.PictureRecorder();
-    final canvas = ui.Canvas(recorder);
-    canvas.scale(outW / src.width, outH / src.height);
-    canvas.drawPicture(info.picture);
-    composed = recorder.endRecording();
-
-    image = await composed.toImage(outW, outH);
-    final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-    if (byteData == null) {
-      throw StateError(
-          '_bitmapDescriptorFromSvgAsset: toByteData returned null');
-    }
-    return BitmapDescriptor.bytes(
-      byteData.buffer.asUint8List(),
-      width: width,
-      height: height,
-      bitmapScaling: MapBitmapScaling.auto,
-    );
-  } finally {
-    image?.dispose();
-    composed?.dispose();
-    info.picture.dispose();
-  }
-}
-
-enum EventPinState {
-  later,
-  soon,
-  now,
-}
-
-class _ExampleMapPin {
-  final String id;
-  final LatLng position;
-  final int categoryIndex;
-  final EventPinState state;
-
-  const _ExampleMapPin({
-    required this.id,
-    required this.position,
-    required this.categoryIndex,
-    required this.state,
-  });
-}
-
-String _pinStateColorName(EventPinState state) => switch (state) {
-      EventPinState.later => 'green',
-      EventPinState.soon => 'yellow',
-      EventPinState.now => 'red',
-    };
-
-String _pinAssetPath(int categoryIndex, EventPinState state) {
-  final color = _pinStateColorName(state);
-  final base = switch (categoryIndex) {
-    0 => 'burger_pin',
-    1 => 'fund_pin',
-    2 => 'mic_pin',
-    3 => 'speaker_pin',
-    _ => 'burger_pin',
-  };
-  return 'assets/icons/${base}_$color.svg';
-}
-
-String _pinIconKey(int categoryIndex, EventPinState state) =>
-    '${categoryIndex}_${state.name}';
-
-String _selectedPinAssetPath(EventPinState state) =>
-    'assets/icons/selected_pin_${_pinStateColorName(state)}.svg';
-
-String _selectedPinIconKey(EventPinState state) => 'selected_${state.name}';
-
-const Map<String, ui.Size> _kPinSvgViewBox = {
-  'burger_pin_green.svg': ui.Size(62, 58),
-  'burger_pin_yellow.svg': ui.Size(66, 58),
-  'burger_pin_red.svg': ui.Size(62, 58),
-  'fund_pin_green.svg': ui.Size(62, 58),
-  'fund_pin_yellow.svg': ui.Size(66, 58),
-  'fund_pin_red.svg': ui.Size(66, 58),
-  'mic_pin_green.svg': ui.Size(66, 58),
-  'mic_pin_yellow.svg': ui.Size(66, 58),
-  'mic_pin_red.svg': ui.Size(66, 58),
-  'speaker_pin_green.svg': ui.Size(62, 58),
-  'speaker_pin_yellow.svg': ui.Size(66, 58),
-  'speaker_pin_red.svg': ui.Size(66, 58),
-  'selected_pin_green.svg': ui.Size(52, 77),
-  'selected_pin_yellow.svg': ui.Size(52, 77),
-  'selected_pin_red.svg': ui.Size(52, 77),
-};
-
-ui.Size _pinRasterSize(String assetPath, double scaleMultiplier) {
-  final name = assetPath.split('/').last;
-  final vb = _kPinSvgViewBox[name] ?? const ui.Size(62, 58);
-  final selected = name.startsWith('selected_pin_');
-  final refW = selected ? 52.0 : 62.0;
-  final refH = selected ? 77.0 : 58.0;
-  final targetW = selected ? 60.0 : 50.0;
-  final targetH = selected ? 71.0 : 53.0;
-  final sw = targetW / refW;
-  final sh = targetH / refH;
-  final refScale = selected ? (sw > sh ? sw : sh) : (sw < sh ? sw : sh);
-  final s = refScale * scaleMultiplier;
-  return ui.Size(vb.width * s, vb.height * s);
-}
+/**
+ * Home Map Page - Primary "Home" tab map experience.
+ *
+ * This page owns Google Maps setup, location/compass subscriptions, and the
+ * pin marker animation/cache. UI overlay widgets (search + category chips)
+ * are split into dedicated files under `navigation_page/home_map/`.
+ */
 
 // TODO: Replace with real event data from API
-const _kExamplePins = <_ExampleMapPin>[
-  _ExampleMapPin(
+const _kExamplePins = <ExampleMapPin>[
+  ExampleMapPin(
     id: 'e1',
     position: LatLng(42.4482, -76.4880),
     categoryIndex: 0,
     state: EventPinState.later,
   ),
-  _ExampleMapPin(
+  ExampleMapPin(
     id: 'e2',
     position: LatLng(42.4465, -76.4865),
     categoryIndex: 0,
     state: EventPinState.soon,
   ),
-  _ExampleMapPin(
+  ExampleMapPin(
     id: 'e3',
     position: LatLng(42.4475, -76.4890),
     categoryIndex: 0,
     state: EventPinState.now,
   ),
-  _ExampleMapPin(
+  ExampleMapPin(
     id: 'e4',
     position: LatLng(42.4490, -76.4870),
     categoryIndex: 1,
     state: EventPinState.later,
   ),
-  _ExampleMapPin(
+  ExampleMapPin(
     id: 'e5',
     position: LatLng(42.4455, -76.4855),
     categoryIndex: 1,
     state: EventPinState.now,
   ),
-  _ExampleMapPin(
+  ExampleMapPin(
     id: 'e6',
     position: LatLng(42.4470, -76.4900),
     categoryIndex: 2,
     state: EventPinState.soon,
   ),
-  _ExampleMapPin(
+  ExampleMapPin(
     id: 'e7',
     position: LatLng(42.4485, -76.4860),
     categoryIndex: 2,
     state: EventPinState.later,
   ),
-  _ExampleMapPin(
+  ExampleMapPin(
     id: 'e8',
     position: LatLng(42.4460, -76.4885),
     categoryIndex: 3,
     state: EventPinState.now,
   ),
-  _ExampleMapPin(
+  ExampleMapPin(
     id: 'e9',
     position: LatLng(42.4495, -76.4865),
     categoryIndex: 3,
@@ -203,14 +90,17 @@ class HomeMapPage extends StatefulWidget {
 
 class _HomeMapPageState extends State<HomeMapPage>
     with SingleTickerProviderStateMixin {
+  // Overlay state (category selection / pin selection)
   int? _selectedCategoryIndex;
 
   String? _selectedMapPinId;
 
+  // Pin icon cache for animated bounce tiers
   List<Map<String, BitmapDescriptor>>? _pinIconsByScale;
 
   late final AnimationController _pinBounceController;
 
+  // Discrete scale multipliers for the bounce animation.
   static const List<double> _scaleMultipliers = [
     0.91,
     0.935,
@@ -225,6 +115,7 @@ class _HomeMapPageState extends State<HomeMapPage>
 
   static const LatLng _mapDefaultCenter = LatLng(42.447, -76.4875);
 
+  // Initial camera bias
   static const double _kInitialCameraNorthOffsetLat = 0.001;
 
   static LatLng _cameraTargetBiasedNorth(LatLng userPosition) => LatLng(
@@ -237,6 +128,7 @@ class _HomeMapPageState extends State<HomeMapPage>
 
   static const double _kHomeMapZoom = 16;
 
+  // Google Map controller + live sensors
   final Completer<GoogleMapController> _mapCompleter =
       Completer<GoogleMapController>();
   GeoPoint? _currentLocation;
@@ -247,8 +139,10 @@ class _HomeMapPageState extends State<HomeMapPage>
   static const int _kUserLocationMarkerLogicalPx = 72;
   double _compassHeading = 0;
 
+  // When true, the camera keeps tracking user updates.
   bool _followUserCamera = false;
 
+  // Marker bounce animation
   double _bounceScale(double t) {
     final x = t.clamp(0.0, 1.0);
     const med = 0.94;
@@ -318,6 +212,7 @@ class _HomeMapPageState extends State<HomeMapPage>
         ),
       );
 
+  // Animate the map to the home camera config.
   Future<void> _animateHomeCameraTo(
     LatLng target, {
     required bool followUser,
@@ -391,6 +286,7 @@ class _HomeMapPageState extends State<HomeMapPage>
         : LatLng(_currentLocation!.lat, _currentLocation!.long);
     return {
       ...pins,
+      // Current user marker.
       Marker(
         markerId: const MarkerId('currentLocation'),
         icon: _currentLocationIcon,
@@ -435,7 +331,7 @@ class _HomeMapPageState extends State<HomeMapPage>
     _pinBounceController.forward(from: 0);
   }
 
-  List<_ExampleMapPin> _pinsMatchingFilter() {
+  List<ExampleMapPin> _pinsMatchingFilter() {
     return [
       for (final pin in _kExamplePins)
         if (_selectedCategoryIndex == null ||
@@ -450,8 +346,8 @@ class _HomeMapPageState extends State<HomeMapPage>
     String key,
     double scaleMul,
   ) async {
-    final sz = _pinRasterSize(path, scaleMul);
-    tierMap[key] = await _bitmapDescriptorFromSvgAsset(
+    final sz = pinRasterSize(path, scaleMul);
+    tierMap[key] = await bitmapDescriptorFromSvgAsset(
       context,
       path,
       width: sz.width,
@@ -468,22 +364,22 @@ class _HomeMapPageState extends State<HomeMapPage>
         final tierMap = <String, BitmapDescriptor>{};
         for (var cat = 0; cat < 4; cat++) {
           for (final state in EventPinState.values) {
-            final path = _pinAssetPath(cat, state);
+            final path = pinAssetPath(cat, state);
             await _putPinBitmapInTier(
               tierMap,
               path,
-              _pinIconKey(cat, state),
+              pinIconKey(cat, state),
               m,
             );
           }
         }
         for (final state in EventPinState.values) {
           if (!mounted) return;
-          final path = _selectedPinAssetPath(state);
+          final path = selectedPinAssetPath(state);
           await _putPinBitmapInTier(
             tierMap,
             path,
-            _selectedPinIconKey(state),
+            selectedPinIconKey(state),
             m,
           );
         }
@@ -516,8 +412,8 @@ class _HomeMapPageState extends State<HomeMapPage>
           markerId: MarkerId('${pin.id}_$tier'),
           position: pin.position,
           icon: icons[_selectedMapPinId == pin.id
-              ? _selectedPinIconKey(pin.state)
-              : _pinIconKey(pin.categoryIndex, pin.state)]!,
+              ? selectedPinIconKey(pin.state)
+              : pinIconKey(pin.categoryIndex, pin.state)]!,
           anchor: _selectedMapPinId == pin.id
               ? const Offset(0.5, 0.96)
               : const Offset(0.5, 0.52),
@@ -605,9 +501,9 @@ class _HomeMapOverlay extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const _HomeMapSearchBarExpandable(),
+                  const HomeMapSearchBarExpandable(),
                   SizedBox(height: dH * 0.01),
-                  _CategoryChipsRow(
+                  CategoryChipsRow(
                     selectedIndex: selectedCategoryIndex,
                     onCategorySelected: onCategorySelected,
                   ),
@@ -624,507 +520,6 @@ class _HomeMapOverlay extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _HomeMapSearchBarExpandable extends StatefulWidget {
-  const _HomeMapSearchBarExpandable();
-
-  @override
-  State<_HomeMapSearchBarExpandable> createState() =>
-      _HomeMapSearchBarExpandableState();
-}
-
-class _HomeMapSearchBarExpandableState
-    extends State<_HomeMapSearchBarExpandable> {
-  bool _expanded = false;
-  String? _distance = '5 min';
-  String? _time;
-  String? _date;
-
-  final FocusNode _searchFocus = FocusNode();
-
-  @override
-  void initState() {
-    super.initState();
-    _searchFocus.addListener(_onSearchFocusChanged);
-  }
-
-  void _onSearchFocusChanged() => setState(() {});
-
-  @override
-  void dispose() {
-    _searchFocus.removeListener(_onSearchFocusChanged);
-    _searchFocus.dispose();
-    super.dispose();
-  }
-
-  void _toggleFilter() {
-    setState(() => _expanded = !_expanded);
-  }
-
-  ColorFilter? get _filterIconColorFilter {
-    if (_searchFocus.hasFocus) {
-      return const ColorFilter.mode(AppColors.grayText, BlendMode.srcIn);
-    }
-    if (_expanded) {
-      return const ColorFilter.mode(AppColors.purple, BlendMode.srcIn);
-    }
-    return const ColorFilter.mode(AppColors.black30, BlendMode.srcIn);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final searchFocused = _searchFocus.hasFocus;
-    final dH = MediaQuery.sizeOf(context).height;
-    final barH = dH * 0.055;
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 220),
-      curve: Curves.easeOutCubic,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(30),
-        border: Border.all(
-          width: 1,
-          color: searchFocused ? AppColors.lightGray : Colors.transparent,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: searchFocused ? AppColors.black20 : AppColors.black10,
-            blurRadius: searchFocused ? 16 : 10,
-            offset: Offset(0, searchFocused ? 6 : 4),
-          ),
-        ],
-      ),
-      child: AnimatedSize(
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.easeOutCubic,
-        alignment: Alignment.topCenter,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SizedBox(
-              height: barH,
-              width: double.infinity,
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  TextField(
-                    focusNode: _searchFocus,
-                    onTapOutside: (_) =>
-                        FocusManager.instance.primaryFocus?.unfocus(),
-                    textAlignVertical: TextAlignVertical.center,
-                    cursorWidth: 1.5,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontFamily: 'Poppins',
-                      color: AppColors.grayText,
-                    ),
-                    cursorColor: AppColors.darkText,
-                    decoration: InputDecoration(
-                      border: InputBorder.none,
-                      isDense: true,
-                      contentPadding: EdgeInsets.zero,
-                      prefixIcon: Icon(
-                        Icons.search,
-                        color: searchFocused
-                            ? AppColors.darkText
-                            : AppColors.black30,
-                        size: 20,
-                      ),
-                      hintText: searchFocused
-                          ? null
-                          : 'Search a name, location, etc...',
-                      hintStyle: const TextStyle(
-                        fontSize: 12,
-                        fontFamily: 'Poppins',
-                        color: AppColors.black30,
-                        height: 1.2,
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    right: 0,
-                    top: 0,
-                    bottom: 0,
-                    child: SizedBox(
-                      width: 50,
-                      height: 36,
-                      child: Center(
-                        child: InkResponse(
-                          onTap: _toggleFilter,
-                          radius: 22,
-                          child: SvgPicture.asset(
-                            'assets/icons/Group 578.svg',
-                            width: 32,
-                            height: 32,
-                            colorFilter: _filterIconColorFilter,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            if (_expanded) ...[
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 12),
-                child: Divider(
-                  height: 1,
-                  thickness: 1,
-                  color: AppColors.lightGrayBorder,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: _FilterColumn(
-                        title: 'Distance',
-                        children: [
-                          _FilterCheckboxRow(
-                            label: '5 min',
-                            value: _distance == '5 min',
-                            onChanged: (v) =>
-                                setState(() => _distance = v ? '5 min' : null),
-                          ),
-                          _FilterCheckboxRow(
-                            label: '15 min',
-                            value: _distance == '15 min',
-                            onChanged: (v) =>
-                                setState(() => _distance = v ? '15 min' : null),
-                          ),
-                          _FilterCheckboxRow(
-                            label: '20+ min',
-                            value: _distance == '20+ min',
-                            onChanged: (v) => setState(
-                                () => _distance = v ? '20+ min' : null),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: _FilterColumn(
-                        title: 'Time',
-                        children: [
-                          _FilterCheckboxRow(
-                            label: 'Current',
-                            value: _time == 'Current',
-                            onChanged: (v) =>
-                                setState(() => _time = v ? 'Current' : null),
-                          ),
-                          _FilterCheckboxRow(
-                            label: '30 mins',
-                            value: _time == '30 mins',
-                            onChanged: (v) =>
-                                setState(() => _time = v ? '30 mins' : null),
-                          ),
-                          _FilterCheckboxRow(
-                            label: '1+ hour',
-                            value: _time == '1+ hour',
-                            onChanged: (v) =>
-                                setState(() => _time = v ? '1+ hour' : null),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: _FilterColumn(
-                        title: 'Date',
-                        children: [
-                          _FilterCheckboxRow(
-                            label: 'Today',
-                            value: _date == 'Today',
-                            onChanged: (v) =>
-                                setState(() => _date = v ? 'Today' : null),
-                          ),
-                          _FilterCheckboxRow(
-                            label: 'Tomorrow',
-                            value: _date == 'Tomorrow',
-                            onChanged: (v) =>
-                                setState(() => _date = v ? 'Tomorrow' : null),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(top: 2),
-                            child: InkWell(
-                              onTap: () => setState(() => _date = 'Custom'),
-                              borderRadius: BorderRadius.circular(4),
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 4),
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.calendar_today_outlined,
-                                      size: 18,
-                                      color: _date == 'Custom'
-                                          ? AppColors.purple
-                                          : AppColors.grayText,
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      'Custom',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontFamily: 'Poppins',
-                                        fontWeight: FontWeight.w500,
-                                        color: _date == 'Custom'
-                                            ? AppColors.purple
-                                            : AppColors.darkText,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-                child: ElevatedButton(
-                  onPressed: () => setState(() => _expanded = false),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.purple,
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: const Text(
-                    'Apply',
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.w600,
-                      fontSize: 15,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _FilterColumn extends StatelessWidget {
-  final String title;
-  final List<Widget> children;
-
-  const _FilterColumn({required this.title, required this.children});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(
-            fontFamily: 'Poppins',
-            fontWeight: FontWeight.w600,
-            fontSize: 13,
-            color: AppColors.darkText,
-          ),
-        ),
-        const SizedBox(height: 8),
-        ...children,
-      ],
-    );
-  }
-}
-
-class _FilterCheckboxRow extends StatelessWidget {
-  final String label;
-  final bool value;
-  final ValueChanged<bool> onChanged;
-
-  const _FilterCheckboxRow({
-    required this.label,
-    required this.value,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
-      child: InkWell(
-        onTap: () => onChanged(!value),
-        borderRadius: BorderRadius.circular(4),
-        child: Row(
-          children: [
-            SizedBox(
-              width: 22,
-              height: 22,
-              child: Checkbox(
-                value: value,
-                onChanged: (v) => onChanged(v ?? false),
-                activeColor: AppColors.purple,
-                side: const BorderSide(color: AppColors.borderGray, width: 1.5),
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                visualDensity: VisualDensity.compact,
-              ),
-            ),
-            const SizedBox(width: 4),
-            Expanded(
-              child: Text(
-                label,
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: value ? AppColors.purple : AppColors.darkText,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _CategoryChipsRow extends StatelessWidget {
-  const _CategoryChipsRow({
-    required this.selectedIndex,
-    required this.onCategorySelected,
-  });
-
-  final int? selectedIndex;
-  final ValueChanged<int> onCategorySelected;
-
-  static const _chips = <_CategoryChipData>[
-    _CategoryChipData(label: 'Food', iconAsset: 'assets/icons/burger.svg'),
-    _CategoryChipData(label: 'Swag', iconAsset: 'assets/icons/fund.svg'),
-    _CategoryChipData(label: 'Concerts', iconAsset: 'assets/icons/mic.svg'),
-    _CategoryChipData(label: 'Speakers', iconAsset: 'assets/icons/speaker.svg'),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipPath(
-      clipper: const _CategoryChipsScrollClipper(),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        clipBehavior: Clip.none,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(0, 4, 0, 14),
-          child: Row(
-            children: [
-              for (var i = 0; i < _chips.length; i++) ...[
-                _CategoryChip(
-                  data: _chips[i],
-                  selected: selectedIndex != null && i == selectedIndex,
-                  onTap: () => onCategorySelected(i),
-                ),
-                const SizedBox(width: 10),
-              ],
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _CategoryChipsScrollClipper extends CustomClipper<Path> {
-  const _CategoryChipsScrollClipper();
-
-  @override
-  Path getClip(Size size) {
-    return Path()
-      ..addRect(Rect.fromLTRB(-16, -8, size.width, size.height + 20));
-  }
-
-  @override
-  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
-}
-
-class _CategoryChipData {
-  final String label;
-  final String iconAsset;
-
-  const _CategoryChipData({required this.label, required this.iconAsset});
-}
-
-class _CategoryChip extends StatelessWidget {
-  final _CategoryChipData data;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _CategoryChip({
-    required this.data,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return TweenAnimationBuilder<double>(
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOutCubic,
-      tween: Tween<double>(end: selected ? 1 : 0),
-      builder: (_, t, __) {
-        final fg = Color.lerp(AppColors.mediumGray, AppColors.purple, t)!;
-        final bc = Color.lerp(Colors.transparent, AppColors.purple, t)!;
-        return Material(
-          color: Colors.transparent,
-          clipBehavior: Clip.none,
-          child: InkWell(
-            onTap: onTap,
-            borderRadius: BorderRadius.circular(18),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: bc, width: 1.5),
-                boxShadow: const [
-                  BoxShadow(
-                    color: AppColors.black10,
-                    blurRadius: 8,
-                    offset: Offset(0, 3),
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SvgPicture.asset(
-                    data.iconAsset,
-                    width: 16,
-                    height: 16,
-                    colorFilter: ColorFilter.mode(fg, BlendMode.srcIn),
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    data.label,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: fg,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
     );
   }
 }
