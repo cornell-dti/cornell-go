@@ -119,6 +119,13 @@ class _CustomJourneyCreationsPageState
       );
       return;
     }
+    if (_startDateTime!.isBefore(DateTime.now())) {
+      displayToast(
+        'Start date and time cannot be in the past.',
+        Status.error,
+      );
+      return;
+    }
     if (_isSubmitting) return;
 
     final api = Provider.of<ApiClient>(context, listen: false);
@@ -301,16 +308,21 @@ class _CustomJourneyCreationsPageState
   }
 
   /// Date first, then 12-hour time with AM/PM (`showTime12hPicker`).
+  /// Past calendar days are disabled; combined start must not be before now.
   Future<void> _pickStartDate() async {
     final now = DateTime.now();
-    final minTime = DateTime(now.year - 1, 1, 1);
+    final startOfToday = DateTime(now.year, now.month, now.day);
     final maxTime = DateTime(now.year + 5, 12, 31, 23, 59);
-    final initial = _startDateTime ?? now;
+
+    var initial = _startDateTime ?? now;
+    if (initial.isBefore(startOfToday)) {
+      initial = now;
+    }
 
     final pickedDate = await DatePicker.showDatePicker(
       context,
       showTitleActions: true,
-      minTime: minTime,
+      minTime: startOfToday,
       maxTime: maxTime,
       currentTime: initial,
       locale: LocaleType.en,
@@ -333,15 +345,23 @@ class _CustomJourneyCreationsPageState
     );
     if (!mounted || pickedClock == null) return;
 
-    setState(() {
-      _startDateTime = DateTime(
-        pickedDate.year,
-        pickedDate.month,
-        pickedDate.day,
-        pickedClock.hour,
-        pickedClock.minute,
+    final combined = DateTime(
+      pickedDate.year,
+      pickedDate.month,
+      pickedDate.day,
+      pickedClock.hour,
+      pickedClock.minute,
+    );
+
+    if (combined.isBefore(DateTime.now())) {
+      displayToast(
+        'Choose a time in the future for that date.',
+        Status.error,
       );
-    });
+      return;
+    }
+
+    setState(() => _startDateTime = combined);
   }
 
   Widget _startDateSelector() {
