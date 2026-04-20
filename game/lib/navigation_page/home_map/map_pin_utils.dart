@@ -62,11 +62,22 @@ String pinIconKey(int categoryIndex, EventPinState state) =>
     '${categoryIndex}_${state.name}';
 
 // Returns the selected-pin SVG asset path for a given state.
-String selectedPinAssetPath(EventPinState state) =>
-    'assets/icons/selected_pin_${pinStateColorName(state)}.svg';
+String selectedPinAssetPath(int categoryIndex, EventPinState state) {
+  if (state == EventPinState.soon) {
+    return 'assets/icons/selected_pin_yellow.svg';
+  }
+  final color = pinStateColorName(state);
+  return switch (categoryIndex) {
+    1 => 'assets/icons/selected_fund_pin_$color.svg',
+    2 => 'assets/icons/selected_mic_pin_$color.svg',
+    3 => 'assets/icons/selected_speaker_pin_$color.svg',
+    _ => 'assets/icons/selected_pin_$color.svg',
+  };
+}
 
 // Cache key for a selected pin icon.
-String selectedPinIconKey(EventPinState state) => 'selected_${state.name}';
+String selectedPinIconKey(int categoryIndex, EventPinState state) =>
+    'selected_${categoryIndex}_${state.name}';
 
 const Map<String, ui.Size> _kPinSvgViewBox = {
   'burger_pin_green.svg': ui.Size(62, 58),
@@ -84,13 +95,19 @@ const Map<String, ui.Size> _kPinSvgViewBox = {
   'selected_pin_green.svg': ui.Size(52, 77),
   'selected_pin_yellow.svg': ui.Size(52, 77),
   'selected_pin_red.svg': ui.Size(52, 77),
+  'selected_fund_pin_green.svg': ui.Size(64, 78),
+  'selected_fund_pin_red.svg': ui.Size(64, 78),
+  'selected_mic_pin_green.svg': ui.Size(64, 78),
+  'selected_mic_pin_red.svg': ui.Size(64, 78),
+  'selected_speaker_pin_green.svg': ui.Size(64, 78),
+  'selected_speaker_pin_red.svg': ui.Size(64, 78),
 };
 
 //Computes the rasterization size for a pin SVG.
 ui.Size pinRasterSize(String assetPath, double scaleMultiplier) {
   final name = assetPath.split('/').last;
   final vb = _kPinSvgViewBox[name] ?? const ui.Size(62, 58);
-  final selected = name.startsWith('selected_pin_');
+  final selected = name.startsWith('selected_');
   final refW = selected ? 52.0 : 62.0;
   final refH = selected ? 77.0 : 58.0;
   final targetW = selected ? 60.0 : 50.0;
