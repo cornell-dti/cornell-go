@@ -2456,6 +2456,9 @@ class EventDto {
     if (category != null) {
       fields['category'] = category!.name;
     }
+    if (imageUrl != null) {
+      fields['imageUrl'] = imageUrl;
+    }
     if (timeLimitation != null) {
       fields['timeLimitation'] = timeLimitation!.name;
     }
@@ -2489,6 +2492,9 @@ class EventDto {
     if (isJourney != null) {
       fields['isJourney'] = isJourney;
     }
+    if (sortOrder != null) {
+      fields['sortOrder'] = sortOrder;
+    }
     return fields;
   }
 
@@ -2506,6 +2512,7 @@ class EventDto {
     category = fields.containsKey('category')
         ? (EventCategoryDto.values.byName(fields['category']))
         : null;
+    imageUrl = fields.containsKey('imageUrl') ? (fields["imageUrl"]) : null;
     timeLimitation = fields.containsKey('timeLimitation')
         ? (EventTimeLimitationDto.values.byName(fields['timeLimitation']))
         : null;
@@ -2531,6 +2538,7 @@ class EventDto {
         : null;
     featured = fields.containsKey('featured') ? (fields["featured"]) : null;
     isJourney = fields.containsKey('isJourney') ? (fields["isJourney"]) : null;
+    sortOrder = fields.containsKey('sortOrder') ? (fields["sortOrder"]) : null;
   }
 
   void partialUpdate(EventDto other) {
@@ -2542,6 +2550,7 @@ class EventDto {
     longDescription =
         other.longDescription == null ? longDescription : other.longDescription;
     category = other.category == null ? category : other.category;
+    imageUrl = other.imageUrl == null ? imageUrl : other.imageUrl;
     timeLimitation =
         other.timeLimitation == null ? timeLimitation : other.timeLimitation;
     endTime = other.endTime == null ? endTime : other.endTime;
@@ -2557,6 +2566,7 @@ class EventDto {
     latitudeF = other.latitudeF == null ? latitudeF : other.latitudeF;
     featured = other.featured == null ? featured : other.featured;
     isJourney = other.isJourney == null ? isJourney : other.isJourney;
+    sortOrder = other.sortOrder == null ? sortOrder : other.sortOrder;
   }
 
   EventDto({
@@ -2566,6 +2576,7 @@ class EventDto {
     this.description,
     this.longDescription,
     this.category,
+    this.imageUrl,
     this.timeLimitation,
     this.endTime,
     this.challenges,
@@ -2577,6 +2588,7 @@ class EventDto {
     this.latitudeF,
     this.featured,
     this.isJourney,
+    this.sortOrder,
   });
 
   late String id;
@@ -2585,6 +2597,7 @@ class EventDto {
   late String? description;
   late String? longDescription;
   late EventCategoryDto? category;
+  late String? imageUrl;
   late EventTimeLimitationDto? timeLimitation;
   late String? endTime;
   late List<String>? challenges;
@@ -2596,6 +2609,7 @@ class EventDto {
   late double? latitudeF;
   late bool? featured;
   late bool? isJourney;
+  late int? sortOrder;
 }
 
 class PrevChallengeDto {

@@ -178,8 +178,10 @@ model EventBase {
   achievements    Achievement[]
   difficulty      DifficultyMode
   category        EventCategoryType
+  imageUrl        String?
   featured        Boolean            @default(false)
   isJourney       Boolean            @default(false)
+  sortOrder       Int                @default(0)
 }
 
 enum EventCategoryType {

@@ -22,6 +22,7 @@ export type FreeEntryForm = {
   value: string;
   characterLimit: number;
   multiline?: boolean;
+  helpText?: string;
 };
 
 export type NumberEntryForm = {
@@ -145,28 +146,39 @@ function OptionEntryFormBox(props: { form: OptionEntryForm }) {
   );
 }
 
+const HelpText = styled.div`
+  font-size: 12px;
+  color: #666;
+  margin-left: 12px;
+  margin-top: 4px;
+  font-style: italic;
+`;
+
 function FreeEntryFormBox(props: { form: FreeEntryForm }) {
   const [val, setVal] = useState('');
 
   useEffect(() => setVal(props.form.value), [props.form]);
 
   return (
-    <EntryBox>
-      <span>{props.form.name + ':'}</span>
-      {props.form.multiline ? (
-        <EntryTextArea
-          value={val}
-          maxLength={props.form.characterLimit}
-          onChange={e => setVal((props.form.value = e.target.value))}
-        />
-      ) : (
-        <EntryTextBox
-          value={val}
-          maxLength={props.form.characterLimit}
-          onChange={e => setVal((props.form.value = e.target.value))}
-        />
-      )}
-    </EntryBox>
+    <>
+      <EntryBox>
+        <span>{props.form.name + ':'}</span>
+        {props.form.multiline ? (
+          <EntryTextArea
+            value={val}
+            maxLength={props.form.characterLimit}
+            onChange={e => setVal((props.form.value = e.target.value))}
+          />
+        ) : (
+          <EntryTextBox
+            value={val}
+            maxLength={props.form.characterLimit}
+            onChange={e => setVal((props.form.value = e.target.value))}
+          />
+        )}
+      </EntryBox>
+      {props.form.helpText && <HelpText>{props.form.helpText}</HelpText>}
+    </>
   );
 }
 
