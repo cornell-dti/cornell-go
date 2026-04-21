@@ -317,9 +317,81 @@ const mapContainerStyle = {
   height: '300px',
 };
 
+type FrontendConfigResponse = {
+  googleMapsApiKey?: string;
+};
+
 function MapEntryFormBox(props: {
   form: MapEntryForm;
   allForms?: EntryForm[];
+}) {
+  const [googleMapsApiKey, setGoogleMapsApiKey] = useState(
+    process.env.REACT_APP_GOOGLE_MAPS_API_KEY || '',
+  );
+  const [hasLoadedConfig, setHasLoadedConfig] = useState(
+    Boolean(process.env.REACT_APP_GOOGLE_MAPS_API_KEY),
+  );
+
+  useEffect(() => {
+    if (googleMapsApiKey) {
+      setHasLoadedConfig(true);
+      return;
+    }
+
+    let isCancelled = false;
+
+    fetch('/frontend-config')
+      .then(async response => {
+        if (!response.ok) {
+          throw new Error(`Failed to load config: ${response.status}`);
+        }
+
+        const config = (await response.json()) as FrontendConfigResponse;
+
+        if (isCancelled) {
+          return;
+        }
+
+        setGoogleMapsApiKey(config.googleMapsApiKey || '');
+        setHasLoadedConfig(true);
+      })
+      .catch(() => {
+        if (!isCancelled) {
+          setHasLoadedConfig(true);
+        }
+      });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [googleMapsApiKey]);
+
+  if (!hasLoadedConfig) {
+    return <MapBox>Loading map configuration...</MapBox>;
+  }
+
+  if (!googleMapsApiKey) {
+    return (
+      <MapBox>
+        Google Maps is unavailable. Set `REACT_APP_GOOGLE_MAPS_API_KEY` in the
+        running server environment.
+      </MapBox>
+    );
+  }
+
+  return (
+    <LoadedMapEntryFormBox
+      form={props.form}
+      allForms={props.allForms}
+      googleMapsApiKey={googleMapsApiKey}
+    />
+  );
+}
+
+function LoadedMapEntryFormBox(props: {
+  form: MapEntryForm;
+  allForms?: EntryForm[];
+  googleMapsApiKey: string;
 }) {
   const [lat, setLat] = useState(props.form.latitude);
   const [lng, setLng] = useState(props.form.longitude);
@@ -329,8 +401,8 @@ function MapEntryFormBox(props: {
       lng: props.form.longitude,
     });
 
-  const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY || '',
+  const { isLoaded, loadError } = useJsApiLoader({
+    googleMapsApiKey: props.googleMapsApiKey,
   });
 
   // Derive radii from form so map updates when Awarding/Close Distance fields change
@@ -389,6 +461,15 @@ function MapEntryFormBox(props: {
       setMarkerPosition({ lat: newLat, lng: newLng });
     }
   };
+
+  if (loadError) {
+    return (
+      <MapBox>
+        Unable to load Google Maps. Verify the API key, referrer restrictions,
+        and that the Maps JavaScript API is enabled.
+      </MapBox>
+    );
+  }
 
   if (!isLoaded) return <MapBox>Loading map...</MapBox>;
 
