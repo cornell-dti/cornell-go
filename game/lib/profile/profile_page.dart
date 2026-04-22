@@ -10,6 +10,7 @@ import 'package:game/model/achievement_model.dart';
 import 'package:game/model/challenge_model.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/tracker_model.dart';
+import 'package:game/model/feature_flags_model.dart';
 import 'package:game/model/user_model.dart';
 import 'package:game/achievements/achievement_cell.dart';
 import 'package:game/profile/completed_cell.dart';
@@ -293,22 +294,25 @@ class _ProfilePageState extends State<ProfilePage> {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              IconButton(
-                                icon: SvgPicture.asset(
-                                  'assets/icons/clotheshanger.svg',
-                                  width: iconSize,
-                                  height: iconSize,
+                              if (context
+                                  .watch<FeatureFlagsModel>()
+                                  .enableBuildABear)
+                                IconButton(
+                                  icon: SvgPicture.asset(
+                                    'assets/icons/clotheshanger.svg',
+                                    width: iconSize,
+                                    height: iconSize,
+                                  ),
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const BuildABearPage(),
+                                      ),
+                                    );
+                                  },
                                 ),
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          const BuildABearPage(),
-                                    ),
-                                  );
-                                },
-                              ),
                               IconButton(
                                 icon: Icon(Icons.settings,
                                     size: iconSize, color: Colors.black),

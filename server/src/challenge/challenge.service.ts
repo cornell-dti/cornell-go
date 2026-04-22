@@ -136,12 +136,78 @@ export class ChallengeService {
   }
 
   /**
+   * Auto-complete challenges whose scheduled end time has passed.
+   * Creates PrevChallenge records with failed=true, dateExpired=true, 0 points.
+   * Advances curChallengeId if it was pointing to an expired challenge.
+   */
+  private async autoCompleteExpiredScheduledChallenges(
+    user: User,
+    evTracker: EventTracker,
+  ) {
+    const now = new Date();
+
+    const expiredChallenges = await this.prisma.challenge.findMany({
+      where: {
+        linkedEventId: evTracker.eventId,
+        scheduledEndTime: { lt: now },
+        completions: { none: { userId: user.id } },
+      },
+    });
+
+    if (expiredChallenges.length === 0) return;
+
+    for (const challenge of expiredChallenges) {
+      await this.prisma.prevChallenge.create({
+        data: {
+          userId: user.id,
+          challengeId: challenge.id,
+          trackerId: evTracker.id,
+          hintsUsed: 0,
+          failed: true,
+          dateExpired: true,
+        },
+      });
+    }
+
+    // If the current challenge was expired, advance to next available
+    if (
+      evTracker.curChallengeId &&
+      expiredChallenges.some(c => c.id === evTracker.curChallengeId)
+    ) {
+      const nextAvailable = await this.prisma.challenge.findFirst({
+        where: {
+          linkedEventId: evTracker.eventId,
+          completions: { none: { userId: user.id } },
+        },
+        orderBy: { eventIndex: 'asc' },
+      });
+
+      await this.prisma.eventTracker.update({
+        where: { id: evTracker.id },
+        data: {
+          curChallengeId: nextAvailable?.id ?? null,
+          hintsUsed: 0,
+        },
+      });
+    }
+
+    // Emit tracker update so the client sees the new PrevChallenge records
+    const updatedTracker = await this.prisma.eventTracker.findUniqueOrThrow({
+      where: { id: evTracker.id },
+    });
+    await this.eventService.emitUpdateEventTracker(updatedTracker, user);
+  }
+
+  /**
    * Get all available (uncompleted) challenges in the user's current journey.
    * Returns challenges sorted by eventIndex for consistent ordering.
    */
   async getAvailableChallenges(user: User): Promise<Challenge[]> {
     const evTracker =
       await this.eventService.getCurrentEventTrackerForUser(user);
+
+    // Auto-complete any challenges whose scheduled window has passed
+    await this.autoCompleteExpiredScheduledChallenges(user, evTracker);
 
     return await this.prisma.challenge.findMany({
       where: {
@@ -176,6 +242,15 @@ export class ChallengeService {
 
     if (!challenge) {
       return null; // Challenge not found or belongs to different event
+    }
+
+    // Reject if challenge is outside its scheduled time window
+    const now = new Date();
+    if (
+      (challenge.scheduledStartTime && now < challenge.scheduledStartTime) ||
+      (challenge.scheduledEndTime && now > challenge.scheduledEndTime)
+    ) {
+      return null;
     }
 
     const isCompleted =
@@ -248,6 +323,20 @@ export class ChallengeService {
       await this.eventService.getCurrentEventTrackerForUser(user);
 
     if (!eventTracker.curChallengeId) return null;
+
+    // Reject if current challenge is outside its scheduled time window
+    const curChal = await this.prisma.challenge.findFirst({
+      where: { id: eventTracker.curChallengeId },
+    });
+    if (curChal) {
+      const now = new Date();
+      if (
+        (curChal.scheduledStartTime && now < curChal.scheduledStartTime) ||
+        (curChal.scheduledEndTime && now > curChal.scheduledEndTime)
+      ) {
+        return null;
+      }
+    }
 
     const alreadyDone =
       (await this.prisma.prevChallenge.count({
@@ -568,6 +657,8 @@ export class ChallengeService {
       closeRadiusF: ch.closeRadius,
       linkedEventId: ch.linkedEventId!,
       timerLength: ch.timerLength ?? undefined,
+      scheduledStartTime: ch.scheduledStartTime?.toISOString() ?? undefined,
+      scheduledEndTime: ch.scheduledEndTime?.toISOString() ?? undefined,
     };
   }
 
@@ -608,6 +699,12 @@ export class ChallengeService {
         awardingRadius: challenge.awardingRadiusF,
         closeRadius: challenge.closeRadiusF,
         timerLength: challenge.timerLength ?? null,
+        scheduledStartTime: challenge.scheduledStartTime
+          ? new Date(challenge.scheduledStartTime)
+          : null,
+        scheduledEndTime: challenge.scheduledEndTime
+          ? new Date(challenge.scheduledEndTime)
+          : null,
       };
 
       const data = await this.abilityFactory.filterInaccessible(
@@ -647,6 +744,12 @@ export class ChallengeService {
         eventIndex: (maxIndexChallenge._max.eventIndex ?? -1) + 1,
         linkedEventId: challenge.linkedEventId,
         timerLength: challenge.timerLength ?? null,
+        scheduledStartTime: challenge.scheduledStartTime
+          ? new Date(challenge.scheduledStartTime)
+          : null,
+        scheduledEndTime: challenge.scheduledEndTime
+          ? new Date(challenge.scheduledEndTime)
+          : null,
       };
 
       chal = await this.prisma.challenge.create({

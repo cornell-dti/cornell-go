@@ -148,7 +148,9 @@ model Challenge {
   longitude      Float
   awardingRadius Float
   closeRadius    Float
-  timerLength    Int?
+  timerLength         Int?
+  scheduledStartTime  DateTime?
+  scheduledEndTime    DateTime?
   completions    PrevChallenge[]
   activeTrackers EventTracker[]
   QuizQuestion   QuizQuestion[]
@@ -184,9 +186,13 @@ enum EventCategoryType {
   FOOD
   NATURE
   HISTORICAL
-  CAFE
-  DININGHALL
-  DORM
+  RESIDENTIAL
+  LANDMARK
+  ARTS
+  ATHLETICS
+  LIBRARY
+  ACADEMIC
+  RECREATION
 }
 
 model EventTracker {
@@ -220,6 +226,7 @@ model PrevChallenge {
   extensionsUsed Int          @default(0)
   timestamp      DateTime     @default(now())
   failed         Boolean      @default(false) // True if challenge was failed due to timer expiration
+  dateExpired    Boolean      @default(false) // True if auto-completed because time window passed
 }
 
 model Organization {
@@ -539,7 +546,9 @@ model EventRSVP {
   campusEventId String
   campusEvent   CampusEvent @relation(fields: [campusEventId], references: [id])
 
-  rsvpAt DateTime @default(now())
+  rsvpAt             DateTime  @default(now())
+  reminderSent       Boolean   @default(false)
+  reminderClaimedAt  DateTime?
 
   @@unique([userId, campusEventId])
 }

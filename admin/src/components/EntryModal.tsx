@@ -60,6 +60,12 @@ export type AnswersEntryForm = {
   maxAnswers: number;
 };
 
+export type CheckboxDateEntryForm = {
+  name: string;
+  checked: boolean;
+  date: Date;
+};
+
 export type OptionWithCustomEntryForm = {
   name: string;
   value: number;
@@ -76,7 +82,8 @@ export type EntryForm =
   | DateEntryForm
   | CheckboxNumberEntryForm
   | AnswersEntryForm
-  | OptionWithCustomEntryForm;
+  | OptionWithCustomEntryForm
+  | CheckboxDateEntryForm;
 
 const EntryBox = styled.div`
   margin-bottom: 12px;
@@ -256,6 +263,46 @@ function CheckboxNumberEntryFormBox(props: { form: CheckboxNumberEntryForm }) {
   );
 }
 
+function CheckboxDateEntryFormBox(props: { form: CheckboxDateEntryForm }) {
+  const [checked, setChecked] = useState(props.form.checked);
+  const [val, setVal] = useState('');
+
+  useEffect(() => {
+    setChecked(props.form.checked);
+    setVal(props.form.date.toISOString().slice(0, 16));
+  }, [props.form]);
+
+  return (
+    <>
+      <EntryBox>
+        <label>
+          <input
+            type="checkbox"
+            checked={checked}
+            onChange={e => {
+              setChecked(e.target.checked);
+              props.form.checked = e.target.checked;
+            }}
+          />
+          {' ' + props.form.name}
+        </label>
+      </EntryBox>
+      {checked && (
+        <EntryBox>
+          <EntryTextBox
+            type="datetime-local"
+            value={val}
+            onChange={e => {
+              setVal(e.target.value);
+              props.form.date = new Date(e.target.value);
+            }}
+          />
+        </EntryBox>
+      )}
+    </>
+  );
+}
+
 const MapBox = styled.div`
   width: 100%;
   height: 300px;
@@ -270,9 +317,81 @@ const mapContainerStyle = {
   height: '300px',
 };
 
+type FrontendConfigResponse = {
+  googleMapsApiKey?: string;
+};
+
 function MapEntryFormBox(props: {
   form: MapEntryForm;
   allForms?: EntryForm[];
+}) {
+  const [googleMapsApiKey, setGoogleMapsApiKey] = useState(
+    process.env.REACT_APP_GOOGLE_MAPS_API_KEY || '',
+  );
+  const [hasLoadedConfig, setHasLoadedConfig] = useState(
+    Boolean(process.env.REACT_APP_GOOGLE_MAPS_API_KEY),
+  );
+
+  useEffect(() => {
+    if (googleMapsApiKey) {
+      setHasLoadedConfig(true);
+      return;
+    }
+
+    let isCancelled = false;
+
+    fetch('/frontend-config')
+      .then(async response => {
+        if (!response.ok) {
+          throw new Error(`Failed to load config: ${response.status}`);
+        }
+
+        const config = (await response.json()) as FrontendConfigResponse;
+
+        if (isCancelled) {
+          return;
+        }
+
+        setGoogleMapsApiKey(config.googleMapsApiKey || '');
+        setHasLoadedConfig(true);
+      })
+      .catch(() => {
+        if (!isCancelled) {
+          setHasLoadedConfig(true);
+        }
+      });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [googleMapsApiKey]);
+
+  if (!hasLoadedConfig) {
+    return <MapBox>Loading map configuration...</MapBox>;
+  }
+
+  if (!googleMapsApiKey) {
+    return (
+      <MapBox>
+        Google Maps is unavailable. Set `REACT_APP_GOOGLE_MAPS_API_KEY` in the
+        running server environment.
+      </MapBox>
+    );
+  }
+
+  return (
+    <LoadedMapEntryFormBox
+      form={props.form}
+      allForms={props.allForms}
+      googleMapsApiKey={googleMapsApiKey}
+    />
+  );
+}
+
+function LoadedMapEntryFormBox(props: {
+  form: MapEntryForm;
+  allForms?: EntryForm[];
+  googleMapsApiKey: string;
 }) {
   const [lat, setLat] = useState(props.form.latitude);
   const [lng, setLng] = useState(props.form.longitude);
@@ -282,8 +401,8 @@ function MapEntryFormBox(props: {
       lng: props.form.longitude,
     });
 
-  const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY || '',
+  const { isLoaded, loadError } = useJsApiLoader({
+    googleMapsApiKey: props.googleMapsApiKey,
   });
 
   // Derive radii from form so map updates when Awarding/Close Distance fields change
@@ -342,6 +461,15 @@ function MapEntryFormBox(props: {
       setMarkerPosition({ lat: newLat, lng: newLng });
     }
   };
+
+  if (loadError) {
+    return (
+      <MapBox>
+        Unable to load Google Maps. Verify the API key, referrer restrictions,
+        and that the Maps JavaScript API is enabled.
+      </MapBox>
+    );
+  }
 
   if (!isLoaded) return <MapBox>Loading map...</MapBox>;
 
@@ -607,6 +735,8 @@ export function EntryModal(props: {
           return <OptionEntryFormBox form={form} key={form.name} />;
         } else if ('characterLimit' in form) {
           return <FreeEntryFormBox form={form} key={form.name} />;
+        } else if ('date' in form && 'checked' in form) {
+          return <CheckboxDateEntryFormBox form={form} key={form.name} />;
         } else if ('checked' in form) {
           return <CheckboxNumberEntryFormBox form={form} key={form.name} />;
         } else if ('min' in form) {
