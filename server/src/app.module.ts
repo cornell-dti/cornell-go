@@ -23,6 +23,9 @@ import { CampusEventModule } from './campus-event/campus-event.module';
 import { CheckInModule } from './check-in/check-in.module';
 import { EventSyncModule } from './event-sync/event-sync.module';
 import { ClubSubmissionModule } from './club-submission/club-submission.module';
+import { FeedbackModule } from './feedback/feedback.module';
+import { FeatureFlagsController } from './feature-flags/feature-flags.controller';
+import { FrontendConfigController } from './frontend-config/frontend-config.controller';
 
 @Module({
   imports: [
@@ -50,8 +53,9 @@ import { ClubSubmissionModule } from './club-submission/club-submission.module';
     CheckInModule,
     EventSyncModule,
     ClubSubmissionModule,
+    FeedbackModule,
   ],
-  controllers: [],
+  controllers: [FeatureFlagsController, FrontendConfigController],
   providers: [],
 })
 export class AppModule {}

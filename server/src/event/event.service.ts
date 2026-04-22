@@ -420,6 +420,7 @@ export class EventService {
         extensionsUsed: pc.extensionsUsed ?? 0, // Default to 0 for backwards compatibility
         dateCompleted: pc.timestamp.toUTCString(),
         failed: pc.failed, // True if challenge was failed due to timer expiration
+        dateExpired: pc.dateExpired,
       })),
     };
   }

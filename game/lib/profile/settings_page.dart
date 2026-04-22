@@ -8,6 +8,7 @@ import 'package:game/main.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:game/feedback/feedback_page.dart';
 import 'package:game/model/onboarding_model.dart';
 import 'package:game/model/user_model.dart';
 import 'package:game/model/event_model.dart';
@@ -196,7 +197,12 @@ class SettingsPage extends StatelessWidget {
                     ),
                     child: TextButton(
                       onPressed: () {
-                        launchUrl(SUPPORT_URL);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => FeedbackPage(),
+                          ),
+                        );
                       },
                       style: TextButton.styleFrom(
                         padding: EdgeInsets.only(left: 20.0),

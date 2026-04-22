@@ -21,6 +21,14 @@ export function getApiDefinitions() {
     const ev = prop.getValueDeclarationOrThrow().getChildAtIndex(0).getText();
     const dto = prop.getValueDeclarationOrThrow().getChildAtIndex(2).getText();
 
+    // Skip inline object types like { event: CampusEventDto }
+    if (dto.startsWith("{")) {
+      console.log(
+        `Client event "${ev}" uses inline object type — skipping. Use a named DTO instead.`
+      );
+      continue;
+    }
+
     apiDefs.clientEntrypoints.set(ev, dto);
   }
 
@@ -45,10 +53,35 @@ export function getApiDefinitions() {
           .asKindOrThrow(SyntaxKind.StringLiteral)
           .getLiteralValue();
 
-        let dto = func
-          .getParameterOrThrow((param) => !!param.getDecorator("MessageBody"))
-          .getType()
-          .getText();
+        const messageBodyParam = func
+          .getParameters()
+          .find((param) => !!param.getDecorator("MessageBody"));
+
+        let dto = "";
+        if (messageBodyParam) {
+          dto = messageBodyParam.getType().getText();
+        }
+
+        // Strip intersection types: "FooDto & { id: string; }" → "FooDto"
+        if (dto.includes("&")) {
+          const base = dto.split("&")[0].trim();
+          console.log(
+            `Function ${ev} uses intersection type, using base type: ${base}`
+          );
+          dto = base;
+        }
+
+        // Strip utility types: "Omit<FooDto, "id">" → "FooDto"
+        // ts-morph may resolve to full path like: Omit<import("...").SpotlightDto, "id">
+        const utilityMatch = dto.match(
+          /^(?:Omit|Pick|Partial|Required)<(?:import\([^)]*\)\.)?(\w+)/
+        );
+        if (utilityMatch) {
+          console.log(
+            `Function ${ev} uses utility type, using base type: ${utilityMatch[1]}`
+          );
+          dto = utilityMatch[1];
+        }
 
         if (!func.getReturnType().getText().startsWith("Promise")) {
           console.log(
@@ -77,13 +110,11 @@ export function getApiDefinitions() {
         if (
           !(ackType.isString() || ackType.isNumber() || ackType.isBoolean())
         ) {
-          console.log(
-            `Function ${ev} does not return one of number, boolean, or string! Skipping...`
-          );
-          continue;
+          // Use "dynamic" for complex return types instead of skipping
+          apiDefs.serverAcks.set(ev, "dynamic");
+        } else {
+          apiDefs.serverAcks.set(ev, ackType.getText());
         }
-
-        apiDefs.serverAcks.set(ev, ackType.getText());
 
         if (dto.includes(".")) {
           dto = dto.split(".").pop()!;

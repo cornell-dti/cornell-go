@@ -1899,7 +1899,7 @@ async function main() {
         name: 'Angled Eyes',
         slot: 'EYES',
         cost: 25,
-        assetKey: 'buildabear/eyes/><',
+        assetKey: 'buildabear/eyes/squinty_eyes',
         mimeType: 'image/png',
       },
     ],

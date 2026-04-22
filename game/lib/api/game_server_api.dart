@@ -45,7 +45,12 @@ class GameServerApi {
       completer.complete(arg);
     };
 
-    Future.delayed(Duration(seconds: 5)).then((value) => completionFunc(null));
+    // Set up timeout - only complete if not already completed
+    Future.delayed(Duration(seconds: 5)).then((value) {
+      if (!completer.isCompleted) {
+        completionFunc(null);
+      }
+    });
 
     _refreshEv = ev;
     _refreshDat = data;
@@ -82,6 +87,44 @@ class GameServerApi {
   Future<bool?> equipBearItem(EquipBearItemDto dto) async =>
       await _invokeWithRefresh("equipBearItem", dto.toJson());
 
+  Future<int?> requestAllBearItems(RequestAllBearItemsDto dto) async =>
+      await _invokeWithRefresh("requestAllBearItems", dto.toJson());
+
+  Future<String?> updateBearItemData(UpdateBearItemDataDto dto) async =>
+      await _invokeWithRefresh("updateBearItemData", dto.toJson());
+
+  Future<int?> requestCampusEvents(RequestCampusEventsDto dto) async =>
+      await _invokeWithRefresh("requestCampusEvents", dto.toJson());
+
+  Future<String?> requestCampusEventDetails(
+          RequestCampusEventDetailsDto dto) async =>
+      await _invokeWithRefresh("requestCampusEventDetails", dto.toJson());
+
+  Future<int?> requestAllCampusEvents(RequestCampusEventsDto dto) async =>
+      await _invokeWithRefresh("requestAllCampusEvents", dto.toJson());
+
+  Future<String?> createCampusEvent(UpsertCampusEventDto dto) async =>
+      await _invokeWithRefresh("createCampusEvent", dto.toJson());
+
+  Future<String?> updateCampusEvent(UpsertCampusEventDto dto) async =>
+      await _invokeWithRefresh("updateCampusEvent", dto.toJson());
+
+  Future<bool?> deleteCampusEvent(DeleteCampusEventDto dto) async =>
+      await _invokeWithRefresh("deleteCampusEvent", dto.toJson());
+
+  Future<bool?> rsvpCampusEvent(RsvpCampusEventDto dto) async =>
+      await _invokeWithRefresh("rsvpCampusEvent", dto.toJson());
+
+  Future<bool?> unRsvpCampusEvent(UnRsvpCampusEventDto dto) async =>
+      await _invokeWithRefresh("unRsvpCampusEvent", dto.toJson());
+
+  Future<dynamic?> requestAvailableChallenges(
+          RequestAvailableChallengesDto dto) async =>
+      await _invokeWithRefresh("requestAvailableChallenges", dto.toJson());
+
+  Future<dynamic?> setCurrentChallenge(SetCurrentChallengeDto dto) async =>
+      await _invokeWithRefresh("setCurrentChallenge", dto.toJson());
+
   Future<int?> requestChallengeData(RequestChallengeDataDto dto) async =>
       await _invokeWithRefresh("requestChallengeData", dto.toJson());
 
@@ -91,12 +134,11 @@ class GameServerApi {
   Future<String?> updateChallengeData(UpdateChallengeDataDto dto) async =>
       await _invokeWithRefresh("updateChallengeData", dto.toJson());
 
-  Future<dynamic> requestAvailableChallenges(
-          RequestAvailableChallengesDto dto) async =>
-      await _invokeWithRefresh("requestAvailableChallenges", dto.toJson());
+  Future<bool?> checkInWithLocation(LocationCheckInDto dto) async =>
+      await _invokeWithRefresh("checkInWithLocation", dto.toJson());
 
-  Future<dynamic> setCurrentChallenge(SetCurrentChallengeDto dto) async =>
-      await _invokeWithRefresh("setCurrentChallenge", dto.toJson());
+  Future<bool?> checkInWithQrCode(QrCodeCheckInDto dto) async =>
+      await _invokeWithRefresh("checkInWithQrCode", dto.toJson());
 
   Future<int?> requestEventData(RequestEventDataDto dto) async =>
       await _invokeWithRefresh("requestEventData", dto.toJson());
@@ -120,6 +162,18 @@ class GameServerApi {
   Future<String?> updateEventData(UpdateEventDataDto dto) async =>
       await _invokeWithRefresh("updateEventData", dto.toJson());
 
+  Future<dynamic?> triggerEventSync(TriggerEventSyncDto dto) async =>
+      await _invokeWithRefresh("triggerEventSync", dto.toJson());
+
+  Future<dynamic?> requestEventSyncStatus(Map<String, dynamic> dto) async =>
+      await _invokeWithRefresh("requestEventSyncStatus", dto);
+
+  Future<bool?> submitFeedback(SubmitFeedbackDto dto) async =>
+      await _invokeWithRefresh("submitFeedback", dto.toJson());
+
+  Future<bool?> requestFeedbackData(Map<String, dynamic> dto) async =>
+      await _invokeWithRefresh("requestFeedbackData", dto);
+
   Future<bool?> requestGroupData(RequestGroupDataDto dto) async =>
       await _invokeWithRefresh("requestGroupData", dto.toJson());
 
@@ -140,6 +194,12 @@ class GameServerApi {
 
   Future<bool?> updateFcmToken(UpdatePushTokenDto dto) async =>
       await _invokeWithRefresh("updateFcmToken", dto.toJson());
+
+  Future<dynamic?> sendNotification(SendNotificationDto dto) async =>
+      await _invokeWithRefresh("sendNotification", dto.toJson());
+
+  Future<bool?> removeFcmToken(Map<String, dynamic> dto) async =>
+      await _invokeWithRefresh("removeFcmToken", dto);
 
   Future<int?> requestOrganizationData(RequestOrganizationDataDto dto) async =>
       await _invokeWithRefresh("requestOrganizationData", dto.toJson());

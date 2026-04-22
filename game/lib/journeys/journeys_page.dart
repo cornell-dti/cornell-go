@@ -181,6 +181,8 @@ class _JourneysPageState extends State<JourneysPage> {
           ShowcaseView.getNamed("journeys_page").dismiss();
           Provider.of<OnboardingModel>(context, listen: false).completeStep4();
 
+          if (eventData.isEmpty) return;
+
           // Onboarding: Navigate to gameplay page to continue onboarding flow
           apiClient.serverApi?.setCurrentEvent(
             SetCurrentEventDto(eventId: eventData[0].eventId),
@@ -323,10 +325,12 @@ class _JourneysPageState extends State<JourneysPage> {
 
                             if (event.isJourney != true) continue;
                             if (event.indexable == false) continue;
+                            if (event.challenges == null ||
+                                event.challenges!.isEmpty) continue;
                             var totalPoints = 0;
 
                             var challenge = challengeModel.getChallengeById(
-                              event.challenges?[0] ?? "",
+                              event.challenges![0],
                             );
 
                             if (challenge == null) continue;

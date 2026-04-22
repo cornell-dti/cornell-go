@@ -115,6 +115,7 @@ model User {
   hasCompletedOnboarding Boolean              @default(false)
   eventAttendances       EventAttendance[]
   eventRSVPs             EventRSVP[]
+  feedbacks              Feedback[]
 }
 
 model Group {
@@ -147,7 +148,9 @@ model Challenge {
   longitude      Float
   awardingRadius Float
   closeRadius    Float
-  timerLength    Int?
+  timerLength         Int?
+  scheduledStartTime  DateTime?
+  scheduledEndTime    DateTime?
   completions    PrevChallenge[]
   activeTrackers EventTracker[]
   QuizQuestion   QuizQuestion[]
@@ -183,9 +186,13 @@ enum EventCategoryType {
   FOOD
   NATURE
   HISTORICAL
-  CAFE
-  DININGHALL
-  DORM
+  RESIDENTIAL
+  LANDMARK
+  ARTS
+  ATHLETICS
+  LIBRARY
+  ACADEMIC
+  RECREATION
 }
 
 model EventTracker {
@@ -219,6 +226,7 @@ model PrevChallenge {
   extensionsUsed Int          @default(0)
   timestamp      DateTime     @default(now())
   failed         Boolean      @default(false) // True if challenge was failed due to timer expiration
+  dateExpired    Boolean      @default(false) // True if auto-completed because time window passed
 }
 
 model Organization {
@@ -510,6 +518,25 @@ model EventAttendance {
   pointsAwarded Int
 
   @@unique([userId, campusEventId])
+}
+
+enum FeedbackCategory {
+  BUG_REPORT
+  SUGGESTION
+  GENERAL
+}
+
+model Feedback {
+  id          String           @id @default(uuid())
+  createdAt   DateTime         @default(now())
+  category    FeedbackCategory
+  text        String
+  rating      Boolean?
+  challengeId String?
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+
+  @@unique([userId, challengeId])
 }
 
 model EventRSVP {

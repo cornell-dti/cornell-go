@@ -71,9 +71,13 @@ export enum EventCategoryDto {
   FOOD = 'FOOD',
   NATURE = 'NATURE',
   HISTORICAL = 'HISTORICAL',
-  CAFE = 'CAFE',
-  DININGHALL = 'DININGHALL',
-  DORM = 'DORM',
+  RESIDENTIAL = 'RESIDENTIAL',
+  LANDMARK = 'LANDMARK',
+  ARTS = 'ARTS',
+  ATHLETICS = 'ATHLETICS',
+  LIBRARY = 'LIBRARY',
+  ACADEMIC = 'ACADEMIC',
+  RECREATION = 'RECREATION',
 }
 
 /**
@@ -107,6 +111,7 @@ export interface PrevChallengeDto {
   extensionsUsed?: number;
   dateCompleted: string;
   failed?: boolean; // True if challenge was failed due to timer expiration
+  dateExpired?: boolean;
 }
 
 /** DTO for event tracker in updateEventTrackerData */

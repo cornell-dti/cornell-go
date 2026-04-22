@@ -29,6 +29,90 @@ export enum BearSlotDto {
   ACCESSORY = 'ACCESSORY',
 }
 
+export enum CampusEventCategoryDto {
+  SOCIAL = 'SOCIAL',
+  CULTURAL = 'CULTURAL',
+  ATHLETIC = 'ATHLETIC',
+  WELLNESS = 'WELLNESS',
+  ACADEMIC = 'ACADEMIC',
+  ARTS = 'ARTS',
+  CAREER = 'CAREER',
+  COMMUNITY = 'COMMUNITY',
+  OTHER = 'OTHER',
+}
+
+export enum EventSourceDto {
+  API_EVENTS = 'API_EVENTS',
+  ADMIN_CREATED = 'ADMIN_CREATED',
+  COMMUNITY_SUBMITTED = 'COMMUNITY_SUBMITTED',
+}
+
+export enum CheckInMethodDto {
+  LOCATION = 'LOCATION',
+  QR_CODE = 'QR_CODE',
+  EITHER = 'EITHER',
+}
+
+export enum CampusEventCategoriesDto {
+  SOCIAL = 'SOCIAL',
+  CULTURAL = 'CULTURAL',
+  ATHLETIC = 'ATHLETIC',
+  WELLNESS = 'WELLNESS',
+  ACADEMIC = 'ACADEMIC',
+  ARTS = 'ARTS',
+  CAREER = 'CAREER',
+  COMMUNITY = 'COMMUNITY',
+  OTHER = 'OTHER',
+}
+
+export enum CampusEventSourceDto {
+  API_EVENTS = 'API_EVENTS',
+  ADMIN_CREATED = 'ADMIN_CREATED',
+  COMMUNITY_SUBMITTED = 'COMMUNITY_SUBMITTED',
+}
+
+export enum CampusEventCheckInMethodDto {
+  LOCATION = 'LOCATION',
+  QR_CODE = 'QR_CODE',
+  EITHER = 'EITHER',
+}
+
+export enum RequestCampusEventsCategoriesDto {
+  SOCIAL = 'SOCIAL',
+  CULTURAL = 'CULTURAL',
+  ATHLETIC = 'ATHLETIC',
+  WELLNESS = 'WELLNESS',
+  ACADEMIC = 'ACADEMIC',
+  ARTS = 'ARTS',
+  CAREER = 'CAREER',
+  COMMUNITY = 'COMMUNITY',
+  OTHER = 'OTHER',
+}
+
+export enum UpsertCampusEventCategoriesDto {
+  SOCIAL = 'SOCIAL',
+  CULTURAL = 'CULTURAL',
+  ATHLETIC = 'ATHLETIC',
+  WELLNESS = 'WELLNESS',
+  ACADEMIC = 'ACADEMIC',
+  ARTS = 'ARTS',
+  CAREER = 'CAREER',
+  COMMUNITY = 'COMMUNITY',
+  OTHER = 'OTHER',
+}
+
+export enum UpsertCampusEventSourceDto {
+  API_EVENTS = 'API_EVENTS',
+  ADMIN_CREATED = 'ADMIN_CREATED',
+  COMMUNITY_SUBMITTED = 'COMMUNITY_SUBMITTED',
+}
+
+export enum UpsertCampusEventCheckInMethodDto {
+  LOCATION = 'LOCATION',
+  QR_CODE = 'QR_CODE',
+  EITHER = 'EITHER',
+}
+
 export enum ChallengeLocationDto {
   ENG_QUAD = 'ENG_QUAD',
   ARTS_QUAD = 'ARTS_QUAD',
@@ -43,13 +127,45 @@ export enum ChallengeLocationDto {
   ANY = 'ANY',
 }
 
+export enum CheckInResultCheckInMethodDto {
+  LOCATION = 'LOCATION',
+  QR_CODE = 'QR_CODE',
+}
+
+export enum CheckInErrorCodeDto {
+  EVENT_NOT_FOUND = 'EVENT_NOT_FOUND',
+  EVENT_NOT_ACTIVE = 'EVENT_NOT_ACTIVE',
+  EVENT_NOT_APPROVED = 'EVENT_NOT_APPROVED',
+  ALREADY_CHECKED_IN = 'ALREADY_CHECKED_IN',
+  OUT_OF_RADIUS = 'OUT_OF_RADIUS',
+  METHOD_NOT_ALLOWED = 'METHOD_NOT_ALLOWED',
+  INVALID_QR_CODE = 'INVALID_QR_CODE',
+  UNKNOWN_ERROR = 'UNKNOWN_ERROR',
+}
+
+export enum ClubSubmissionCategoryDto {
+  SOCIAL = 'SOCIAL',
+  CULTURAL = 'CULTURAL',
+  ATHLETIC = 'ATHLETIC',
+  WELLNESS = 'WELLNESS',
+  ACADEMIC = 'ACADEMIC',
+  ARTS = 'ARTS',
+  CAREER = 'CAREER',
+  COMMUNITY = 'COMMUNITY',
+  OTHER = 'OTHER',
+}
+
 export enum EventCategoryDto {
   FOOD = 'FOOD',
   NATURE = 'NATURE',
   HISTORICAL = 'HISTORICAL',
-  CAFE = 'CAFE',
-  DININGHALL = 'DININGHALL',
-  DORM = 'DORM',
+  RESIDENTIAL = 'RESIDENTIAL',
+  LANDMARK = 'LANDMARK',
+  ARTS = 'ARTS',
+  ATHLETICS = 'ATHLETICS',
+  LIBRARY = 'LIBRARY',
+  ACADEMIC = 'ACADEMIC',
+  RECREATION = 'RECREATION',
 }
 
 export enum EventTimeLimitationDto {
@@ -61,6 +177,12 @@ export enum EventDifficultyDto {
   Easy = 'Easy',
   Normal = 'Normal',
   Hard = 'Hard',
+}
+
+export enum FeedbackCategoryDto {
+  BUG_REPORT = 'BUG_REPORT',
+  SUGGESTION = 'SUGGESTION',
+  GENERAL = 'GENERAL',
 }
 
 export enum QuizErrorCodeDto {
@@ -210,6 +332,119 @@ export interface UpdatePurchaseResultDto {
   itemId: string;
 }
 
+export interface AdminBearItemDto {
+  id: string;
+  name?: string;
+  slot?: BearSlotDto;
+  cost?: number;
+  assetKey?: string;
+  mimeType?: string;
+  zIndex?: number;
+  isDefault?: boolean;
+}
+
+export interface UpdateBearItemDataDto {
+  bearItem: AdminBearItemDto;
+  deleted: boolean;
+}
+
+export interface RequestAllBearItemsDto {}
+
+export interface CampusEventDto {
+  id: string;
+  title: string;
+  description: string;
+  imageUrl?: string;
+  startTime: string;
+  endTime: string;
+  allDay: boolean;
+  locationName: string;
+  address?: string;
+  latitude: number;
+  longitude: number;
+  categories: CampusEventCategoriesDto[];
+  tags: string[];
+  source: CampusEventSourceDto;
+  externalUrl?: string;
+  organizerName?: string;
+  registrationUrl?: string;
+  checkInMethod: CampusEventCheckInMethodDto;
+  pointsForAttendance: number;
+  featured: boolean;
+  attendanceCount: number;
+  rsvpCount: number;
+}
+
+export interface RequestCampusEventsDto {
+  page: number;
+  limit: number;
+  dateFrom?: string;
+  dateTo?: string;
+  categories?: RequestCampusEventsCategoriesDto[];
+  search?: string;
+  featured?: boolean;
+}
+
+export interface CampusEventListDto {
+  events: CampusEventDto[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface RequestCampusEventDetailsDto {
+  eventId: string;
+}
+
+export interface UpsertCampusEventDto {
+  id?: string;
+  title: string;
+  description: string;
+  imageUrl?: string;
+  startTime: string;
+  endTime: string;
+  allDay?: boolean;
+  locationName: string;
+  address?: string;
+  latitude: number;
+  longitude: number;
+  checkInRadius?: number;
+  categories: UpsertCampusEventCategoriesDto[];
+  tags: string[];
+  source: UpsertCampusEventSourceDto;
+  externalId?: string;
+  externalUrl?: string;
+  organizerName?: string;
+  organizerEmail?: string;
+  organizerId?: string;
+  checkInMethod?: UpsertCampusEventCheckInMethodDto;
+  pointsForAttendance?: number;
+  featured?: boolean;
+  registrationUrl?: string;
+}
+
+export interface DeleteCampusEventDto {
+  eventId: string;
+}
+
+export interface RsvpCampusEventDto {
+  eventId: string;
+}
+
+export interface UnRsvpCampusEventDto {
+  eventId: string;
+}
+
+export interface UpdateCampusEventDataDto {
+  event: CampusEventDto;
+  deleted: boolean;
+}
+
+export interface CampusEventListResponseDto {
+  list: CampusEventListDto;
+}
+
 export interface CompletedChallengeDto {}
 
 export interface ChallengeDto {
@@ -225,6 +460,8 @@ export interface ChallengeDto {
   closeRadiusF?: number;
   linkedEventId?: string;
   timerLength?: number;
+  scheduledStartTime?: string;
+  scheduledEndTime?: string;
 }
 
 export interface RequestChallengeDataDto {
@@ -250,9 +487,52 @@ export interface AvailableChallengesResponseDto {
   challenges: ChallengeDto[];
 }
 
+export interface LocationCheckInDto {
+  campusEventId: string;
+  latitude: number;
+  longitude: number;
+}
+
+export interface QrCodeCheckInDto {
+  qrCode: string;
+}
+
+export interface GenerateQrCodeDto {
+  campusEventId: string;
+}
+
+export interface CheckInResultDto {
+  attendanceId: string;
+  campusEventId: string;
+  checkInMethod: CheckInResultCheckInMethodDto;
+  pointsAwarded: number;
+  newTotalScore: number;
+}
+
+export interface CheckInErrorDto {
+  message: string;
+  code: CheckInErrorCodeDto;
+}
+
 export interface UpdateErrorDto {
   id: string;
   message: string;
+}
+
+export interface ClubSubmissionDto {
+  clubName: string;
+  contactEmail: string;
+  eventTitle: string;
+  description: string;
+  startTime: string;
+  endTime: string;
+  location: string;
+  latitude?: number;
+  longitude?: number;
+  category: ClubSubmissionCategoryDto;
+  address?: string;
+  imageUrl?: string;
+  registrationLink?: string;
 }
 
 export interface RequestFilteredEventsDto {
@@ -323,6 +603,7 @@ export interface PrevChallengeDto {
   extensionsUsed?: number;
   dateCompleted: string;
   failed?: boolean;
+  dateExpired?: boolean;
 }
 
 export interface EventTrackerDto {
@@ -343,6 +624,48 @@ export interface UpdateEventDataDto {
 }
 
 export interface UseEventTrackerHintDto {}
+
+export interface TriggerEventSyncDto {
+  days?: number;
+}
+
+export interface EventSyncResultDto {
+  created: number;
+  updated: number;
+  archived: number;
+  totalFetched: number;
+  syncedAt: string;
+}
+
+export interface RequestEventSyncStatusDto {}
+
+export interface UpdateEventSyncStatusDto {
+  running: boolean;
+  lastResult: EventSyncResultDto;
+}
+
+export interface SubmitFeedbackDto {
+  category: FeedbackCategoryDto;
+  text: string;
+  rating?: boolean;
+  challengeId?: string;
+}
+
+export interface FeedbackDto {
+  id: string;
+  createdAt: string;
+  category: FeedbackCategoryDto;
+  text: string;
+  rating?: boolean;
+  challengeId?: string;
+  userId: string;
+  username?: string;
+  challengeName?: string;
+}
+
+export interface UpdateFeedbackDataDto {
+  feedbacks: FeedbackDto[];
+}
 
 export interface JoinGroupDto {
   groupId: string;
