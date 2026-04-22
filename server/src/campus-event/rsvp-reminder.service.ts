@@ -5,6 +5,7 @@ import { NotificationService } from '../notification/notification.service';
 
 const REMINDER_LEAD_TIME_MS = 3 * 60 * 60 * 1000; // 3 hours before event
 const CRON_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes (matches cron frequency)
+const WINDOW_BUFFER_MS = 60 * 1000; // 1 minute jitter tolerance on each end
 const CLAIM_TIMEOUT_MS = 10 * 60 * 1000; // Reclaim stale in-flight reminders
 const REMINDER_TIME_LOCALE = 'en-US';
 const REMINDER_TIME_ZONE = 'America/New_York';
@@ -21,8 +22,12 @@ export class RsvpReminderService {
   @Cron(CronExpression.EVERY_5_MINUTES)
   async handleReminderCron() {
     const now = Date.now();
-    const windowStart = new Date(now + REMINDER_LEAD_TIME_MS);
-    const windowEnd = new Date(now + REMINDER_LEAD_TIME_MS + CRON_INTERVAL_MS);
+    const windowStart = new Date(
+      now + REMINDER_LEAD_TIME_MS - WINDOW_BUFFER_MS,
+    );
+    const windowEnd = new Date(
+      now + REMINDER_LEAD_TIME_MS + CRON_INTERVAL_MS + WINDOW_BUFFER_MS,
+    );
     const staleClaimThreshold = new Date(now - CLAIM_TIMEOUT_MS);
 
     const rsvps = await this.prisma.eventRSVP.findMany({
