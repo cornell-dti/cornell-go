@@ -192,7 +192,8 @@ class _EventsDraggableSheetState extends State<EventsDraggableSheet> {
       return;
     }
 
-    final stillValid = filteredEvents.any((event) => event.id == currentEventId);
+    final stillValid =
+        filteredEvents.any((event) => event.id == currentEventId);
     if (stillValid) {
       _lastRequestedClearEventId = null;
       return;
@@ -207,7 +208,8 @@ class _EventsDraggableSheetState extends State<EventsDraggableSheet> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       try {
-        await apiClient.serverApi?.setCurrentEvent(SetCurrentEventDto(eventId: ""));
+        await apiClient.serverApi
+            ?.setCurrentEvent(SetCurrentEventDto(eventId: ""));
       } finally {
         _clearingCurrentEvent = false;
       }
