@@ -1,18 +1,21 @@
 /// Takes event fields (title, description, startTime, endTime, locationName) and returns a Google Calendar URL
 /// Separate file from utility_functions.dart so can run gcal_url_test.dart without needing any flutter dart:ui
 
-String getGcalUrl(String title, String description, DateTime startTime,
-    DateTime endTime, String locationName) {
-  final dates = formatDates(startTime, endTime);
+import 'package:game/api/game_client_dto.dart';
+
+String getGcalUrl(CampusEventDto event) {
+  final startTime = DateTime.parse(event.startTime);
+  final endTime = DateTime.parse(event.endTime);
+  final dates = formatDates(startTime, endTime, allDayEvent: event.allDay);
   return Uri(
     scheme: 'https',
     host: 'calendar.google.com',
     path: '/calendar/u/0/r/eventedit',
     queryParameters: <String, String>{
-      'text': title,
+      'text': event.title,
       'dates': dates,
-      'details': description,
-      'location': locationName,
+      'details': event.description,
+      'location': event.locationName,
     },
   ).toString();
 }
@@ -23,45 +26,44 @@ String getGcalUrl(String title, String description, DateTime startTime,
 /// Assumes a timed event is in EST (since it will take place in Ithaca, NY), and converts to UTC for gcal format
 /// 
 
-String formatDates(DateTime startTime, DateTime endTime) {
-  if (isMidnight(startTime) && isMidnight(endTime)) {
+String formatDates(
+  DateTime startTime,
+  DateTime endTime, {
+  required bool allDayEvent,
+}) {
+  if (allDayEvent) {
     // all day event
-    final startYmd = allDay(startTime);
-    var endYmd = allDay(endTime);
+    final startYmd = formatToAllDay(startTime);
+    var endYmd = formatToAllDay(endTime);
     if (startYmd == endYmd) {
       // change end date to one day after since exclusive
-      final localStart = startTime.toLocal();
       final nextDay = DateTime(
-        localStart.year,
-        localStart.month,
-        localStart.day,
+        startTime.year,
+        startTime.month,
+        startTime.day,
       ).add(const Duration(days: 1));
-      endYmd = allDay(nextDay);
+      endYmd = formatToAllDay(nextDay);
     }
     return '$startYmd/$endYmd';
   } // timed event
   return '${formatTime(startTime)}/${formatTime(endTime)}';
 }
 
-bool isMidnight(DateTime d) {
-  return d.hour == 0 && d.minute == 0 && d.second == 0 && d.microsecond == 0;
+
+String formatToAllDay(DateTime date) {
+  final yr = date.year.toString().padLeft(4, '0');
+  final mon = date.month.toString().padLeft(2, '0');
+  final day = date.day.toString().padLeft(2, '0');
+  return '$yr$mon$day';
 }
 
-String allDay(DateTime d) {
-  final l = d.toLocal(); //convert to local date
-  final y = l.year.toString().padLeft(4, '0');
-  final m = l.month.toString().padLeft(2, '0');
-  final day = l.day.toString().padLeft(2, '0');
-  return '$y$m$day';
-}
-
-String formatTime(DateTime d) {
-  final u = d.toUtc();
-  final y = u.year.toString().padLeft(4, '0');
-  final m = u.month.toString().padLeft(2, '0');
-  final day = u.day.toString().padLeft(2, '0');
-  final h = u.hour.toString().padLeft(2, '0');
-  final min = u.minute.toString().padLeft(2, '0');
-  final s = u.second.toString().padLeft(2, '0');
-  return '$y$m${day}T$h$min${s}Z';
+String formatTime(DateTime date) {
+  final universalTime = date.toUtc();
+  final yr = universalTime.year.toString().padLeft(4, '0');
+  final mon = universalTime.month.toString().padLeft(2, '0');
+  final day = universalTime.day.toString().padLeft(2, '0');
+  final hr = universalTime.hour.toString().padLeft(2, '0');
+  final min = universalTime.minute.toString().padLeft(2, '0');
+  final sec = universalTime.second.toString().padLeft(2, '0');
+  return '$yr$mon${day}T$hr$min${sec}Z';
 }
