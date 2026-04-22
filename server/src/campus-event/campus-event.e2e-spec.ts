@@ -5,6 +5,8 @@ import { ApprovalStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CampusEventService } from './campus-event.service';
 import { ClientService } from '../client/client.service';
+import { RsvpReminderService } from './rsvp-reminder.service';
+import { NotificationService } from '../notification/notification.service';
 
 jest.setTimeout(20000);
 
@@ -218,6 +220,157 @@ describe('CampusEventModule E2E', () => {
       'updateCampusEventData',
       expect.any(Object),
     );
+  });
+
+  describe('RsvpReminderService', () => {
+    let reminderService: RsvpReminderService;
+    let sendToUserMock: jest.SpyInstance;
+    let reminderEventId: string;
+
+    const LEAD_TIME_MS = 3 * 60 * 60 * 1000;
+    const REMINDER_WINDOW_BUFFER_MS = 2 * 60 * 1000;
+
+    beforeAll(() => {
+      reminderService = moduleRef.get<RsvpReminderService>(RsvpReminderService);
+      const notificationService =
+        moduleRef.get<NotificationService>(NotificationService);
+      sendToUserMock = jest
+        .spyOn(notificationService, 'sendToUser')
+        .mockResolvedValue(true);
+    });
+
+    afterAll(async () => {
+      sendToUserMock.mockRestore();
+      if (reminderEventId) {
+        await prisma.eventRSVP
+          .deleteMany({ where: { campusEventId: reminderEventId } })
+          .catch(() => {});
+        await campusEventService.deleteEvent(reminderEventId).catch(() => {});
+      }
+    });
+
+    it('sends reminder for RSVP within the cron window', async () => {
+      if (!campusEventTableExists || !testUserId) return;
+
+      const startTime = new Date(
+        Date.now() + LEAD_TIME_MS + REMINDER_WINDOW_BUFFER_MS,
+      );
+      const endTime = new Date(startTime.getTime() + 3600_000);
+
+      const ev = await campusEventService.createEvent({
+        title: 'Reminder Test Event',
+        description: 'Testing RSVP reminders',
+        startTime: startTime.toISOString(),
+        endTime: endTime.toISOString(),
+        locationName: 'Duffield Hall',
+        latitude: 42.4445,
+        longitude: -76.4827,
+        categories: ['SOCIAL'],
+        tags: ['test-reminder'],
+        source: 'ADMIN_CREATED',
+      });
+      reminderEventId = ev.id;
+      createdCampusEventIds.push(ev.id);
+
+      await campusEventService.rsvp(testUserId, ev.id);
+
+      sendToUserMock.mockClear();
+      await reminderService.handleReminderCron();
+
+      expect(sendToUserMock).toHaveBeenCalledWith(
+        testUserId,
+        expect.stringContaining('Reminder Test Event'),
+        expect.any(String),
+        { campusEventId: ev.id },
+      );
+
+      const rsvp = await prisma.eventRSVP.findFirst({
+        where: { userId: testUserId, campusEventId: ev.id },
+      });
+      expect(rsvp?.reminderSent).toBe(true);
+    });
+
+    it('does not send duplicate reminders', async () => {
+      if (!campusEventTableExists || !testUserId || !reminderEventId) return;
+
+      sendToUserMock.mockClear();
+      await reminderService.handleReminderCron();
+
+      expect(sendToUserMock).not.toHaveBeenCalled();
+    });
+
+    it('prevents duplicate sends during concurrent cron runs', async () => {
+      if (!campusEventTableExists || !testUserId) return;
+
+      const startTime = new Date(
+        Date.now() + LEAD_TIME_MS + REMINDER_WINDOW_BUFFER_MS,
+      );
+      const endTime = new Date(startTime.getTime() + 3600_000);
+      const ev = await campusEventService.createEvent({
+        title: 'Concurrent Reminder Event',
+        description: 'Should only send one reminder',
+        startTime: startTime.toISOString(),
+        endTime: endTime.toISOString(),
+        locationName: 'Statler Hall',
+        latitude: 42.4458,
+        longitude: -76.4821,
+        categories: ['SOCIAL'],
+        tags: ['test-concurrent-reminder'],
+        source: 'ADMIN_CREATED',
+      });
+      createdCampusEventIds.push(ev.id);
+
+      await campusEventService.rsvp(testUserId, ev.id);
+
+      sendToUserMock.mockClear();
+      sendToUserMock.mockImplementation(
+        () => new Promise(resolve => setTimeout(() => resolve(true), 100)),
+      );
+
+      await Promise.all([
+        reminderService.handleReminderCron(),
+        reminderService.handleReminderCron(),
+      ]);
+
+      expect(sendToUserMock).toHaveBeenCalledTimes(1);
+
+      sendToUserMock.mockResolvedValue(true);
+    });
+
+    it('does not send reminders for events outside the window', async () => {
+      if (!campusEventTableExists || !testUserId) return;
+
+      const farFuture = new Date(Date.now() + 24 * 60 * 60 * 1000);
+      const endTime = new Date(farFuture.getTime() + 3600_000);
+
+      const ev = await campusEventService.createEvent({
+        title: 'Far Future Event',
+        description: 'Should not trigger reminder',
+        startTime: farFuture.toISOString(),
+        endTime: endTime.toISOString(),
+        locationName: 'Olin Library',
+        latitude: 42.4479,
+        longitude: -76.4841,
+        categories: ['SOCIAL'],
+        tags: ['test-no-reminder'],
+        source: 'ADMIN_CREATED',
+      });
+      createdCampusEventIds.push(ev.id);
+
+      await campusEventService.rsvp(testUserId, ev.id);
+
+      sendToUserMock.mockClear();
+      await reminderService.handleReminderCron();
+
+      expect(sendToUserMock).not.toHaveBeenCalledWith(
+        testUserId,
+        expect.stringContaining('Far Future Event'),
+        expect.any(String),
+        expect.any(Object),
+      );
+
+      await campusEventService.unRsvp(testUserId, ev.id);
+    });
   });
 
   afterAll(async () => {
