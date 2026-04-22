@@ -246,8 +246,9 @@ class _EventsDraggableSheetState extends State<EventsDraggableSheet> {
                           ),
                         ],
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                      child: ListView(
+                        controller: scrollController,
+                        padding: const EdgeInsets.only(bottom: 24),
                         children: [
                           Center(
                             child: Container(
@@ -262,7 +263,7 @@ class _EventsDraggableSheetState extends State<EventsDraggableSheet> {
                           ),
                           if (showExpandedChrome)
                             Padding(
-                              padding: EdgeInsets.only(
+                              padding: const EdgeInsets.only(
                                 left: 4,
                                 right: 8,
                                 top: 4,
@@ -308,49 +309,43 @@ class _EventsDraggableSheetState extends State<EventsDraggableSheet> {
                               ),
                             ),
                           ),
-                          Expanded(
-                            child: events.isEmpty
-                                ? Center(
-                                    child: Text(
-                                      'No events match your filters.',
-                                      style: TextStyle(
-                                        color: AppColors.grayText,
-                                        fontFamily: 'Poppins',
-                                      ),
-                                    ),
-                                  )
-                                : ListView.builder(
-                                    controller: scrollController,
-                                    padding: const EdgeInsets.fromLTRB(
-                                      16,
-                                      0,
-                                      16,
-                                      24,
-                                    ),
-                                    itemCount: events.length,
-                                    itemBuilder: (context, index) {
-                                      final event = events[index];
-                                      final host = _hostLabel(
-                                        event,
-                                        userModel,
-                                      );
-                                      final perk = _perkLine(event);
-                                      final timeStr = _timeLabel(event);
+                          if (events.isEmpty)
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                20,
+                                12,
+                                20,
+                                24,
+                              ),
+                              child: Text(
+                                'No events match your filters.',
+                                style: TextStyle(
+                                  color: AppColors.grayText,
+                                  fontFamily: 'Poppins',
+                                ),
+                              ),
+                            )
+                          else
+                            ...events.map((event) {
+                              final host = _hostLabel(event, userModel);
+                              final perk = _perkLine(event);
+                              final timeStr = _timeLabel(event);
 
-                                      return Padding(
-                                        padding: const EdgeInsets.only(
-                                          bottom: 12,
-                                        ),
-                                        child: _EventCard(
-                                          eventName: event.name ?? 'Event',
-                                          hostName: host,
-                                          perkLine: perk,
-                                          timeLabel: timeStr,
-                                        ),
-                                      );
-                                    },
-                                  ),
-                          ),
+                              return Padding(
+                                padding: const EdgeInsets.fromLTRB(
+                                  16,
+                                  0,
+                                  16,
+                                  12,
+                                ),
+                                child: _EventCard(
+                                  eventName: event.name ?? 'Event',
+                                  hostName: host,
+                                  perkLine: perk,
+                                  timeLabel: timeStr,
+                                ),
+                              );
+                            }),
                         ],
                       ),
                     ),
