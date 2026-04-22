@@ -27,43 +27,27 @@ class CategoryChipsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipPath(
-      clipper: const _CategoryChipsScrollClipper(),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        clipBehavior: Clip.none,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(0, 4, 0, 14),
-          child: Row(
-            children: [
-              for (var i = 0; i < categories.length; i++) ...[
-                _CategoryChip(
-                  label: categories[i].label,
-                  iconAsset: categories[i].chipIconAsset,
-                  selected: selectedIndex != null && i == selectedIndex,
-                  onTap: () => onCategorySelected(i),
-                ),
-                const SizedBox(width: 10),
-              ],
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      clipBehavior: Clip.none,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(0, 4, 0, 14),
+        child: Row(
+          children: [
+            for (var i = 0; i < categories.length; i++) ...[
+              _CategoryChip(
+                label: categories[i].label,
+                iconAsset: categories[i].chipIconAsset,
+                selected: selectedIndex != null && i == selectedIndex,
+                onTap: () => onCategorySelected(i),
+              ),
+              const SizedBox(width: 10),
             ],
-          ),
+          ],
         ),
       ),
     );
   }
-}
-
-class _CategoryChipsScrollClipper extends CustomClipper<Path> {
-  const _CategoryChipsScrollClipper();
-
-  @override
-  Path getClip(Size size) {
-    return Path()
-      ..addRect(Rect.fromLTRB(-16, -8, size.width, size.height + 20));
-  }
-
-  @override
-  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
 }
 
 class _CategoryChip extends StatelessWidget {
@@ -89,8 +73,10 @@ class _CategoryChip extends StatelessWidget {
         final fg = Color.lerp(AppColors.mediumGray, AppColors.purple, t)!;
         final bc = Color.lerp(Colors.transparent, AppColors.purple, t)!;
         return Material(
-          color: Colors.transparent,
-          clipBehavior: Clip.antiAlias,
+          color: Colors.white,
+          elevation: 6,
+          shadowColor: AppColors.black20,
+          clipBehavior: Clip.none,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
@@ -100,16 +86,8 @@ class _CategoryChip extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: bc, width: 2),
-                boxShadow: const [
-                  BoxShadow(
-                    color: AppColors.black10,
-                    blurRadius: 8,
-                    offset: Offset(0, 3),
-                  ),
-                ],
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -121,13 +99,29 @@ class _CategoryChip extends StatelessWidget {
                     colorFilter: ColorFilter.mode(fg, BlendMode.srcIn),
                   ),
                   const SizedBox(width: 6),
-                  Text(
-                    label,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
-                      color: fg,
-                    ),
+                  Stack(
+                    alignment: Alignment.centerLeft,
+                    children: [
+                      Opacity(
+                        opacity: 0,
+                        child: Text(
+                          label,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        label,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight:
+                              selected ? FontWeight.w700 : FontWeight.w400,
+                          color: fg,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),

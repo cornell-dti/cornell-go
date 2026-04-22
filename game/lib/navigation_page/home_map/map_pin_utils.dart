@@ -60,14 +60,10 @@ String pinIconKey(int categoryIndex, EventPinState state) =>
 
 // Returns the selected-pin SVG asset path for a given state.
 String selectedPinAssetPath(int categoryIndex, EventPinState state) {
-  if (state == EventPinState.soon) {
-    return 'assets/icons/selected_pin_yellow.svg';
-  }
+  final base = (categoryIndex >= 0 && categoryIndex < homeMapCategories.length)
+      ? homeMapCategories[categoryIndex].selectedPinBaseAsset
+      : homeMapCategories.first.selectedPinBaseAsset;
   final color = pinStateColorName(state);
-  final base =
-      (categoryIndex >= 0 && categoryIndex < homeMapCategories.length)
-          ? homeMapCategories[categoryIndex].selectedPinBaseAsset
-          : homeMapCategories.first.selectedPinBaseAsset;
   return 'assets/icons/${base}_$color.svg';
 }
 
@@ -92,10 +88,13 @@ const Map<String, ui.Size> _kPinSvgViewBox = {
   'selected_pin_yellow.svg': ui.Size(52, 77),
   'selected_pin_red.svg': ui.Size(52, 77),
   'selected_fund_pin_green.svg': ui.Size(64, 78),
+  'selected_fund_pin_yellow.svg': ui.Size(64, 78),
   'selected_fund_pin_red.svg': ui.Size(64, 78),
   'selected_mic_pin_green.svg': ui.Size(64, 78),
+  'selected_mic_pin_yellow.svg': ui.Size(64, 78),
   'selected_mic_pin_red.svg': ui.Size(64, 78),
   'selected_speaker_pin_green.svg': ui.Size(64, 78),
+  'selected_speaker_pin_yellow.svg': ui.Size(64, 78),
   'selected_speaker_pin_red.svg': ui.Size(64, 78),
 };
 

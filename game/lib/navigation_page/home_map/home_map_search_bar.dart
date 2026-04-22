@@ -358,13 +358,49 @@ class _FilterCheckboxRow extends StatelessWidget {
             SizedBox(
               width: 22,
               height: 22,
-              child: Checkbox(
-                value: value,
-                onChanged: (v) => onChanged(v ?? false),
-                activeColor: AppColors.purple,
-                side: const BorderSide(color: AppColors.borderGray, width: 1.5),
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                visualDensity: VisualDensity.compact,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Checkbox(
+                    value: value,
+                    onChanged: (v) => onChanged(v ?? false),
+                    checkColor: Colors.transparent,
+                    fillColor: WidgetStateProperty.resolveWith(
+                      (states) => states.contains(WidgetState.selected)
+                          ? const Color(0x4C865C7F)
+                          : Colors.white,
+                    ),
+                    side: WidgetStateBorderSide.resolveWith(
+                      (states) => BorderSide(
+                        color: states.contains(WidgetState.selected)
+                            ? AppColors.purple
+                            : AppColors.borderGray,
+                        width: states.contains(WidgetState.selected) ? 2 : 1.5,
+                      ),
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  if (value)
+                    const Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Icon(
+                          Icons.check_rounded,
+                          size: 16,
+                          color: AppColors.purple,
+                        ),
+                        Icon(
+                          Icons.check_rounded,
+                          size: 14,
+                          color: AppColors.purple,
+                        ),
+                      ],
+                    ),
+                ],
               ),
             ),
             const SizedBox(width: 4),

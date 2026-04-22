@@ -31,12 +31,6 @@ const homeMapCategories = <HomeMapCategory>[
     selectedPinBaseAsset: 'selected_pin',
   ),
   HomeMapCategory(
-    label: 'Swag',
-    chipIconAsset: 'assets/icons/fund.svg',
-    pinBaseAsset: 'fund_pin',
-    selectedPinBaseAsset: 'selected_fund_pin',
-  ),
-  HomeMapCategory(
     label: 'Concerts',
     chipIconAsset: 'assets/icons/mic.svg',
     pinBaseAsset: 'mic_pin',
@@ -47,5 +41,11 @@ const homeMapCategories = <HomeMapCategory>[
     chipIconAsset: 'assets/icons/speaker.svg',
     pinBaseAsset: 'speaker_pin',
     selectedPinBaseAsset: 'selected_speaker_pin',
+  ),
+  HomeMapCategory(
+    label: 'Fundraisers',
+    chipIconAsset: 'assets/icons/fund.svg',
+    pinBaseAsset: 'fund_pin',
+    selectedPinBaseAsset: 'selected_fund_pin',
   ),
 ];
