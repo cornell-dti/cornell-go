@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart' as svg;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:game/navigation_page/home_map/home_map_categories.dart';
 
 /**
  * Map Pin Utilities - Icon rasterization + pin asset helpers.
@@ -47,13 +48,9 @@ String pinStateColorName(EventPinState state) => switch (state) {
 // Pin SVG asset path for a category + state.
 String pinAssetPath(int categoryIndex, EventPinState state) {
   final color = pinStateColorName(state);
-  final base = switch (categoryIndex) {
-    0 => 'burger_pin',
-    1 => 'fund_pin',
-    2 => 'mic_pin',
-    3 => 'speaker_pin',
-    _ => 'burger_pin',
-  };
+  final base = (categoryIndex >= 0 && categoryIndex < homeMapCategories.length)
+      ? homeMapCategories[categoryIndex].pinBaseAsset
+      : homeMapCategories.first.pinBaseAsset;
   return 'assets/icons/${base}_$color.svg';
 }
 
@@ -67,12 +64,11 @@ String selectedPinAssetPath(int categoryIndex, EventPinState state) {
     return 'assets/icons/selected_pin_yellow.svg';
   }
   final color = pinStateColorName(state);
-  return switch (categoryIndex) {
-    1 => 'assets/icons/selected_fund_pin_$color.svg',
-    2 => 'assets/icons/selected_mic_pin_$color.svg',
-    3 => 'assets/icons/selected_speaker_pin_$color.svg',
-    _ => 'assets/icons/selected_pin_$color.svg',
-  };
+  final base =
+      (categoryIndex >= 0 && categoryIndex < homeMapCategories.length)
+          ? homeMapCategories[categoryIndex].selectedPinBaseAsset
+          : homeMapCategories.first.selectedPinBaseAsset;
+  return 'assets/icons/${base}_$color.svg';
 }
 
 // Cache key for a selected pin icon.

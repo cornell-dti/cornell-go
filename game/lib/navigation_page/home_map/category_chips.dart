@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:game/constants/constants.dart';
+import 'package:game/navigation_page/home_map/home_map_categories.dart';
 
 /**
  * Category Chips - Horizontal filter chips for Home Map.
@@ -17,17 +18,12 @@ class CategoryChipsRow extends StatelessWidget {
     super.key,
     required this.selectedIndex,
     required this.onCategorySelected,
+    this.categories = homeMapCategories,
   });
 
   final int? selectedIndex;
   final ValueChanged<int> onCategorySelected;
-
-  static const _chips = <_CategoryChipData>[
-    _CategoryChipData(label: 'Food', iconAsset: 'assets/icons/burger.svg'),
-    _CategoryChipData(label: 'Swag', iconAsset: 'assets/icons/fund.svg'),
-    _CategoryChipData(label: 'Concerts', iconAsset: 'assets/icons/mic.svg'),
-    _CategoryChipData(label: 'Speakers', iconAsset: 'assets/icons/speaker.svg'),
-  ];
+  final List<HomeMapCategory> categories;
 
   @override
   Widget build(BuildContext context) {
@@ -40,9 +36,10 @@ class CategoryChipsRow extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(0, 4, 0, 14),
           child: Row(
             children: [
-              for (var i = 0; i < _chips.length; i++) ...[
+              for (var i = 0; i < categories.length; i++) ...[
                 _CategoryChip(
-                  data: _chips[i],
+                  label: categories[i].label,
+                  iconAsset: categories[i].chipIconAsset,
                   selected: selectedIndex != null && i == selectedIndex,
                   onTap: () => onCategorySelected(i),
                 ),
@@ -69,20 +66,15 @@ class _CategoryChipsScrollClipper extends CustomClipper<Path> {
   bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
 }
 
-class _CategoryChipData {
+class _CategoryChip extends StatelessWidget {
   final String label;
   final String iconAsset;
-
-  const _CategoryChipData({required this.label, required this.iconAsset});
-}
-
-class _CategoryChip extends StatelessWidget {
-  final _CategoryChipData data;
   final bool selected;
   final VoidCallback onTap;
 
   const _CategoryChip({
-    required this.data,
+    required this.label,
+    required this.iconAsset,
     required this.selected,
     required this.onTap,
   });
@@ -98,16 +90,19 @@ class _CategoryChip extends StatelessWidget {
         final bc = Color.lerp(Colors.transparent, AppColors.purple, t)!;
         return Material(
           color: Colors.transparent,
-          clipBehavior: Clip.none,
+          clipBehavior: Clip.antiAlias,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           child: InkWell(
             onTap: onTap,
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(16),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: bc, width: 1.5),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: bc, width: 2),
                 boxShadow: const [
                   BoxShadow(
                     color: AppColors.black10,
@@ -120,17 +115,17 @@ class _CategoryChip extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   SvgPicture.asset(
-                    data.iconAsset,
+                    iconAsset,
                     width: 16,
                     height: 16,
                     colorFilter: ColorFilter.mode(fg, BlendMode.srcIn),
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    data.label,
+                    label,
                     style: TextStyle(
                       fontSize: 12,
-                      fontWeight: FontWeight.w500,
+                      fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
                       color: fg,
                     ),
                   ),

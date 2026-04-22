@@ -12,6 +12,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 
 import 'package:game/navigation_page/home_map/category_chips.dart';
+import 'package:game/navigation_page/home_map/home_map_categories.dart';
 import 'package:game/navigation_page/home_map/home_map_search_bar.dart';
 import 'package:game/navigation_page/home_map/map_pin_utils.dart';
 
@@ -362,7 +363,7 @@ class _HomeMapPageState extends State<HomeMapPage>
       for (final m in _scaleMultipliers) {
         if (!mounted) return;
         final tierMap = <String, BitmapDescriptor>{};
-        for (var cat = 0; cat < 4; cat++) {
+        for (var cat = 0; cat < homeMapCategories.length; cat++) {
           for (final state in EventPinState.values) {
             final path = pinAssetPath(cat, state);
             await _putPinBitmapInTier(
@@ -373,15 +374,20 @@ class _HomeMapPageState extends State<HomeMapPage>
             );
           }
         }
-        for (final state in EventPinState.values) {
-          if (!mounted) return;
-          final path = selectedPinAssetPath(state);
-          await _putPinBitmapInTier(
-            tierMap,
-            path,
-            selectedPinIconKey(state),
-            m,
-          );
+        final selectedByPath = <String, BitmapDescriptor>{};
+        for (var cat = 0; cat < homeMapCategories.length; cat++) {
+          for (final state in EventPinState.values) {
+            if (!mounted) return;
+            final path = selectedPinAssetPath(cat, state);
+            final key = selectedPinIconKey(cat, state);
+            final cached = selectedByPath[path];
+            if (cached != null) {
+              tierMap[key] = cached;
+            } else {
+              await _putPinBitmapInTier(tierMap, path, key, m);
+              selectedByPath[path] = tierMap[key]!;
+            }
+          }
         }
         byScale.add(tierMap);
       }
@@ -412,7 +418,7 @@ class _HomeMapPageState extends State<HomeMapPage>
           markerId: MarkerId('${pin.id}_$tier'),
           position: pin.position,
           icon: icons[_selectedMapPinId == pin.id
-              ? selectedPinIconKey(pin.state)
+              ? selectedPinIconKey(pin.categoryIndex, pin.state)
               : pinIconKey(pin.categoryIndex, pin.state)]!,
           anchor: _selectedMapPinId == pin.id
               ? const Offset(0.5, 0.96)
