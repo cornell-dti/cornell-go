@@ -38,9 +38,15 @@ class _CustomJourneyCreationsPageState
 
   static const List<String> _categories = [
     'Food',
-    'Cafe',
     'Nature',
-    'Other',
+    'Historical',
+    'Residential',
+    'Landmark',
+    'Arts',
+    'Athletics',
+    'Library',
+    'Academic',
+    'Recreation'
   ];
 
   static const List<String> _difficulties = ['Easy', 'Medium', 'Hard'];
@@ -73,12 +79,25 @@ class _CustomJourneyCreationsPageState
     switch (label) {
       case 'Food':
         return EventCategoryDto.FOOD;
-      case 'Cafe':
-        return EventCategoryDto.CAFE;
       case 'Nature':
         return EventCategoryDto.NATURE;
-      case 'Other':
+      case 'Historical':
         return EventCategoryDto.HISTORICAL;
+      case 'Residential':
+        return EventCategoryDto.RESIDENTIAL;
+      case 'Landmark':
+        return EventCategoryDto.LANDMARK;
+      case 'Arts':
+        return EventCategoryDto.ARTS;
+      case 'Athletics':
+        return EventCategoryDto.ATHLETICS;
+      case 'Library':
+        return EventCategoryDto.LIBRARY;
+      case 'Academic':
+        return EventCategoryDto.ACADEMIC;
+      case 'Recreation':
+        return EventCategoryDto.RECREATION;
+      
       default:
         return EventCategoryDto.FOOD;
     }
@@ -462,36 +481,6 @@ class _CustomJourneyCreationsPageState
                         onTap: () => setState(() => _selectedDifficulty = d),
                       );
                     }).toList(),
-                  ),
-                  const SizedBox(height: 24),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      const Text(
-                        'Points',
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.darkText,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      SvgPicture.asset(
-                        'assets/icons/bearcoins.svg',
-                        width: 28,
-                        height: 28,
-                      ),
-                      const SizedBox(width: 8),
-                      const Text(
-                        '100 PTS',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.gold,
-                        ),
-                      ),
-                    ],
                   ),
                   const SizedBox(height: 24),
                   _sectionLabel('Start Date'),
