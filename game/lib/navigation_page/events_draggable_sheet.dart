@@ -37,6 +37,8 @@ class EventsDraggableSheet extends StatefulWidget {
 class _EventsDraggableSheetState extends State<EventsDraggableSheet> {
   final DraggableScrollableController _sheetController =
       DraggableScrollableController();
+  bool _clearingCurrentEvent = false;
+  String? _lastRequestedClearEventId;
 
   /// User location for distance tie-break (first challenge coords vs. user).
   GeoPoint? _currentUserLocation;
@@ -109,7 +111,6 @@ class _EventsDraggableSheetState extends State<EventsDraggableSheet> {
     TrackerModel trackerModel,
     ChallengeModel challengeModel,
     GroupModel groupModel,
-    ApiClient apiClient,
   ) {
     final allowedEventIds = userModel.getAvailableEventIds();
     final events = allowedEventIds
@@ -164,8 +165,6 @@ class _EventsDraggableSheetState extends State<EventsDraggableSheet> {
           }
         }
         rows.add((event: event, end: endtime, distanceMeters: distanceMeters));
-      } else if (event.id == groupModel.curEventId) {
-        apiClient.serverApi?.setCurrentEvent(SetCurrentEventDto(eventId: ""));
       }
     }
 
@@ -180,6 +179,39 @@ class _EventsDraggableSheetState extends State<EventsDraggableSheet> {
     });
 
     return rows.map((r) => r.event).toList();
+  }
+
+  void _maybeClearCurrentEvent(
+    GroupModel groupModel,
+    List<EventDto> filteredEvents,
+    ApiClient apiClient,
+  ) {
+    final currentEventId = groupModel.curEventId;
+    if (currentEventId == null || currentEventId.isEmpty) {
+      _lastRequestedClearEventId = null;
+      return;
+    }
+
+    final stillValid = filteredEvents.any((event) => event.id == currentEventId);
+    if (stillValid) {
+      _lastRequestedClearEventId = null;
+      return;
+    }
+
+    if (_clearingCurrentEvent || _lastRequestedClearEventId == currentEventId) {
+      return;
+    }
+
+    _lastRequestedClearEventId = currentEventId;
+    _clearingCurrentEvent = true;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      try {
+        await apiClient.serverApi?.setCurrentEvent(SetCurrentEventDto(eventId: ""));
+      } finally {
+        _clearingCurrentEvent = false;
+      }
+    });
   }
 
   Future<void> _collapseToPeek() async {
@@ -227,8 +259,8 @@ class _EventsDraggableSheetState extends State<EventsDraggableSheet> {
                     trackerModel,
                     challengeModel,
                     groupModel,
-                    apiClient,
                   );
+                  _maybeClearCurrentEvent(groupModel, events, apiClient);
                   final count = events.length;
 
                   return ClipRRect(
