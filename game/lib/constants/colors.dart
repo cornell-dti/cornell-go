@@ -36,6 +36,8 @@ class AppColors {
   static const Color greenDark = Color(0xFF31B346);
 
   // Backgrounds
+  static const Color white = Color(0xFFFFFFFF);
+  static const Color transparent = Color(0x00000000);
   static const Color warmWhite = Color(0xFFFFF8F1);
   static const Color cream = Color(0xFFF9EDDA);
   static const Color quizBackground = Color(0xFFF9F5F1);
@@ -71,7 +73,11 @@ class AppColors {
   static const Color black20 = Color(0x33000000);
   static const Color black25 = Color(0x40000000);
   static const Color black30 = Color(0x4D000000);
+  static const Color black50 = Color(0x80000000);
   static const Color black80 = Color(0xCC000000);
+
+  /// White at 50% opacity (e.g. hint text on dark field fills).
+  static const Color white50 = Color(0x80FFFFFF);
 
   // Extended grays
   static const Color silverGray = Color(0xFFC6C6C6);
