@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Modal } from './Modal';
 import styled from 'styled-components';
 import {
@@ -6,7 +6,11 @@ import {
   useJsApiLoader,
   Marker,
   Circle,
+  Autocomplete,
+  Libraries,
 } from '@react-google-maps/api';
+
+const GOOGLE_MAPS_LIBRARIES: Libraries = ['places'];
 
 const AWARDING_RADIUS_COLOR = '#4CAF50';
 const CLOSE_RADIUS_COLOR = '#FF9800';
@@ -415,7 +419,36 @@ function LoadedMapEntryFormBox(props: {
 
   const { isLoaded, loadError } = useJsApiLoader({
     googleMapsApiKey: props.googleMapsApiKey,
+    libraries: GOOGLE_MAPS_LIBRARIES,
   });
+
+  const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
+
+  useEffect(() => {
+    const styleId = 'pac-container-zindex-fix';
+    if (!document.getElementById(styleId)) {
+      const style = document.createElement('style');
+      style.id = styleId;
+      style.innerHTML = `.pac-container { z-index: 10000 !important; }`;
+      document.head.appendChild(style);
+    }
+    return () => {
+      document.querySelectorAll('.pac-container').forEach(el => el.remove());
+    };
+  }, []);
+
+  const onPlaceChanged = () => {
+    const place = autocompleteRef.current?.getPlace();
+    if (place?.geometry?.location) {
+      const newLat = place.geometry.location.lat();
+      const newLng = place.geometry.location.lng();
+      setLat(newLat);
+      setLng(newLng);
+      props.form.latitude = newLat;
+      props.form.longitude = newLng;
+      setMarkerPosition({ lat: newLat, lng: newLng });
+    }
+  };
 
   // Derive radii from form so map updates when Awarding/Close Distance fields change
   const awardingRadius =
@@ -487,6 +520,20 @@ function LoadedMapEntryFormBox(props: {
 
   return (
     <>
+      <EntryBox>
+        <span>Search:</span>
+        <Autocomplete
+          onLoad={ac => {
+            autocompleteRef.current = ac;
+          }}
+          onPlaceChanged={onPlaceChanged}
+        >
+          <EntryTextBox
+            type="text"
+            placeholder="Search for a place (e.g. Cornell Clock Tower)"
+          />
+        </Autocomplete>
+      </EntryBox>
       <MapBox>
         <GoogleMap
           mapContainerStyle={mapContainerStyle}
