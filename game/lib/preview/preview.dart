@@ -97,6 +97,7 @@ class Preview extends StatefulWidget {
   final int numberCompleted;
   final String location;
   final String eventId;
+  final String? popResultOnConfirm;
 
   // newly added parameters; need to implement higher up in hierarchy
   // final int
@@ -122,6 +123,7 @@ class Preview extends StatefulWidget {
     this.eventId, {
     this.locationCount = 1,
     this.numberCompleted = 0,
+    this.popResultOnConfirm,
     // required this.totalDistance,
     Key? key,
   }) : super(key: key);
@@ -529,6 +531,19 @@ class _PreviewState extends State<Preview> {
                               "Can't join challenge - location not enabled",
                               Status.error,
                             );
+                            return;
+                          }
+
+                          // When the caller wants to handle the confirmation
+                          // itself (e.g. starting a specific challenge from
+                          // inside a journey), just pop with the given result.
+                          if (widget.popResultOnConfirm != null) {
+                            if (context.mounted) {
+                              Navigator.pop(
+                                context,
+                                widget.popResultOnConfirm,
+                              );
+                            }
                             return;
                           }
 
