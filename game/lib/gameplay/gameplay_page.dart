@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/model/event_model.dart';
@@ -473,9 +474,11 @@ class _GameplayPageState extends State<GameplayPage> {
                           Container(
                             margin: EdgeInsets.only(top: 16.45, bottom: 11),
                             alignment: Alignment.centerLeft,
-                            child: Text(
+                            child: AutoSizeText(
                               displayChallenge.description ?? "NO DESCRIPTION",
                               textAlign: TextAlign.left,
+                              maxLines: 3,
+                              minFontSize: 10,
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
