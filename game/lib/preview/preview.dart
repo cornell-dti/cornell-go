@@ -97,6 +97,7 @@ class Preview extends StatefulWidget {
   final int numberCompleted;
   final String location;
   final String eventId;
+  final String? popResultOnConfirm;
 
   // newly added parameters; need to implement higher up in hierarchy
   // final int
@@ -122,6 +123,7 @@ class Preview extends StatefulWidget {
     this.eventId, {
     this.locationCount = 1,
     this.numberCompleted = 0,
+    this.popResultOnConfirm,
     // required this.totalDistance,
     Key? key,
   }) : super(key: key);
@@ -247,11 +249,23 @@ class _PreviewState extends State<Preview> {
                       alignment: Alignment.centerLeft,
                       child: Row(
                         children: [
-                          Icon(
-                            Icons.location_on,
-                            size: 24,
-                            color: Preview.purpleColor,
-                          ),
+                          if (widget.type == PreviewType.JOURNEY)
+                            SvgPicture.asset(
+                              'assets/icons/flag.svg',
+                              width: 24,
+                              height: 24,
+                              colorFilter: ColorFilter.mode(
+                                Preview.purpleColor,
+                                BlendMode.srcIn,
+                              ),
+                            )
+                          else
+                            Icon(
+                              Icons.location_on,
+                              size: 24,
+                              color: Preview.purpleColor,
+                            ),
+                          SizedBox(width: 4),
                           Text(
                             widget.location,
                             style: TextStyle(
@@ -259,33 +273,35 @@ class _PreviewState extends State<Preview> {
                               color: Preview.purpleColor,
                             ),
                           ),
-                          SizedBox(width: 10),
-                          Icon(
-                            Icons.directions_walk,
-                            size: 24,
-                            color: Preview.greyColor,
-                          ),
-                          Text(
-                            ' ' +
-                                (currentLocation != null &&
-                                        widget.challengeLat != null &&
-                                        widget.challengeLong != null
-                                    ? (currentLocation!.distanceTo(
-                                              GeoPoint(
-                                                widget.challengeLat!,
-                                                widget.challengeLong!,
-                                                0,
-                                              ),
-                                            ) /
-                                            1609.34)
-                                        .toStringAsFixed(1)
-                                    : "?.?") +
-                                " mi",
-                            style: TextStyle(
-                              fontSize: 20,
+                          if (widget.type != PreviewType.JOURNEY) ...[
+                            SizedBox(width: 10),
+                            Icon(
+                              Icons.directions_walk,
+                              size: 24,
                               color: Preview.greyColor,
                             ),
-                          ),
+                            Text(
+                              ' ' +
+                                  (currentLocation != null &&
+                                          widget.challengeLat != null &&
+                                          widget.challengeLong != null
+                                      ? (currentLocation!.distanceTo(
+                                                GeoPoint(
+                                                  widget.challengeLat!,
+                                                  widget.challengeLong!,
+                                                  0,
+                                                ),
+                                              ) /
+                                              1609.34)
+                                          .toStringAsFixed(1)
+                                      : "?.?") +
+                                  " mi",
+                              style: TextStyle(
+                                fontSize: 20,
+                                color: Preview.greyColor,
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                     ),
@@ -515,6 +531,19 @@ class _PreviewState extends State<Preview> {
                               "Can't join challenge - location not enabled",
                               Status.error,
                             );
+                            return;
+                          }
+
+                          // When the caller wants to handle the confirmation
+                          // itself (e.g. starting a specific challenge from
+                          // inside a journey), just pop with the given result.
+                          if (widget.popResultOnConfirm != null) {
+                            if (context.mounted) {
+                              Navigator.pop(
+                                context,
+                                widget.popResultOnConfirm,
+                              );
+                            }
                             return;
                           }
 

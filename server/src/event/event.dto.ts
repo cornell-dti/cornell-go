@@ -91,6 +91,7 @@ export interface EventDto {
   description?: string;
   longDescription?: string;
   category?: EventCategoryDto;
+  imageUrl?: string;
   timeLimitation?: 'LIMITED_TIME' | 'PERPETUAL';
   endTime?: string;
   challenges?: string[];
@@ -102,6 +103,7 @@ export interface EventDto {
   latitudeF?: number;
   featured?: boolean;
   isJourney?: boolean;
+  sortOrder?: number;
 }
 
 /** DTO for PrevChallenge as used in EventTrackerDto */

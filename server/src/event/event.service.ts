@@ -372,6 +372,7 @@ export class EventService {
       description: ev.description,
       longDescription: ev.longDescription,
       category: ev.category as EventCategoryDto,
+      imageUrl: ev.imageUrl ?? undefined,
       timeLimitation:
         ev.timeLimitation === TimeLimitationType.LIMITED_TIME
           ? 'LIMITED_TIME'
@@ -390,6 +391,7 @@ export class EventService {
       latitudeF: ev.latitude,
       longitudeF: ev.longitude,
       isJourney: ev.isJourney,
+      sortOrder: ev.sortOrder,
     };
   }
 
@@ -635,7 +637,9 @@ export class EventService {
       latitude: event.latitudeF,
       longitude: event.longitudeF,
       category: event.category,
+      imageUrl: event.imageUrl ?? null,
       isJourney: event.isJourney,
+      sortOrder: event.sortOrder,
     };
 
     if (ev && canUpdateEv) {
@@ -670,6 +674,7 @@ export class EventService {
         indexable: assignData.indexable ?? defaultEventData.indexable,
         featured: assignData.featured ?? false,
         isJourney: assignData.isJourney ?? false,
+        sortOrder: assignData.sortOrder ?? 0,
         difficulty: assignData.difficulty ?? defaultEventData.difficulty,
         latitude: assignData.latitude ?? defaultEventData.latitude,
         longitude: assignData.longitude ?? defaultEventData.longitude,

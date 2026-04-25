@@ -107,6 +107,7 @@ class JourneyCell extends StatelessWidget {
   final String difficulty;
   final int points;
   final String id;
+  final bool featured;
   final VoidCallback onTap;
 
   const JourneyCell(
@@ -122,7 +123,8 @@ class JourneyCell extends StatelessWidget {
     this.isCompleted,
     this.difficulty,
     this.points,
-    this.id, {
+    this.id,
+    this.featured, {
     required this.onTap,
     Key? key,
   }) : super(key: key);
@@ -245,6 +247,34 @@ class JourneyCell extends StatelessWidget {
                     SizedBox(height: 5),
                     Row(
                       children: [
+                        if (featured) ...[
+                          Container(
+                            height: 25,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 2,
+                            ),
+                            decoration: ShapeDecoration(
+                              color: AppColors.dangerRed,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                            ),
+                            child: Center(
+                              child: Text(
+                                'Featured',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w500,
+                                  height: 0,
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 8),
+                        ],
                         Container(
                           width: 70,
                           height: 25,

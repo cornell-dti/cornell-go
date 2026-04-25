@@ -67,6 +67,13 @@ function makeEventForm() {
       options: categoryOptions,
       value: 1,
     },
+    {
+      name: 'Image URL',
+      characterLimit: 2048,
+      value: '',
+      helpText:
+        'If set, this image is shown on the journey card. If left blank, the first challenge\u2019s image is used instead.',
+    },
     { name: 'Required Members', value: -1, min: -1, max: 99 },
     {
       name: 'Time Limitation',
@@ -81,15 +88,17 @@ function makeEventForm() {
     { name: 'Publicly Visible', options: ['No', 'Yes'], value: 0 },
     { name: 'Featured', options: ['No', 'Yes'], value: 0 },
     { name: 'Available Until', date: new Date('2050') },
+    { name: 'Sort Order', value: 0, min: 0, max: 9999 },
   ] as EntryForm[];
 }
 
 function eventFromForm(form: EntryForm[], id: string): EventDto {
+  const imageUrlValue = (form[3] as FreeEntryForm).value.trim();
   return {
     id,
-    requiredMembers: (form[3] as NumberEntryForm).value,
+    requiredMembers: (form[4] as NumberEntryForm).value,
     timeLimitation:
-      (form[4] as OptionEntryForm).value === 0
+      (form[5] as OptionEntryForm).value === 0
         ? EventTimeLimitationDto.PERPETUAL
         : EventTimeLimitationDto.LIMITED_TIME,
     name: (form[0] as FreeEntryForm).value,
@@ -97,19 +106,21 @@ function eventFromForm(form: EntryForm[], id: string): EventDto {
     category: categoryOptions[
       (form[2] as OptionEntryForm).value
     ] as EventCategoryDto,
-    indexable: (form[6] as OptionEntryForm).value === 1,
-    featured: (form[7] as OptionEntryForm).value === 1,
-    endTime: (form[8] as DateEntryForm).date.toUTCString(),
+    imageUrl: imageUrlValue === '' ? undefined : imageUrlValue,
+    indexable: (form[7] as OptionEntryForm).value === 1,
+    featured: (form[8] as OptionEntryForm).value === 1,
+    endTime: (form[9] as DateEntryForm).date.toUTCString(),
     challenges: [],
     difficulty:
-      (form[5] as OptionEntryForm).value === 0
+      (form[6] as OptionEntryForm).value === 0
         ? EventDifficultyDto.Easy
-        : (form[5] as OptionEntryForm).value === 1
+        : (form[6] as OptionEntryForm).value === 1
           ? EventDifficultyDto.Normal
           : EventDifficultyDto.Hard,
     latitudeF: 0,
     longitudeF: 0,
     isJourney: true,
+    sortOrder: (form[10] as NumberEntryForm).value,
   };
 }
 
@@ -129,6 +140,13 @@ function eventToForm(event: EventDto) {
         event.category !== undefined
           ? categoryOptions.indexOf(event.category)
           : 0,
+    },
+    {
+      name: 'Image URL',
+      characterLimit: 2048,
+      value: event.imageUrl ?? '',
+      helpText:
+        'If set, this image is shown on the journey card. If left blank, the first challenge\u2019s image is used instead.',
     },
     {
       name: 'Required Members',
@@ -160,6 +178,12 @@ function eventToForm(event: EventDto) {
     {
       name: 'Available Until',
       date: event.endTime && new Date(event.endTime),
+    },
+    {
+      name: 'Sort Order',
+      value: event.sortOrder ?? 0,
+      min: 0,
+      max: 9999,
     },
   ] as EntryForm[];
 }

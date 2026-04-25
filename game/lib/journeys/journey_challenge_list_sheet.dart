@@ -11,6 +11,7 @@ import 'package:game/model/challenge_model.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/tracker_model.dart';
 import 'package:game/navigation_page/bottom_navbar.dart';
+import 'package:game/preview/preview.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:game/widget/cached_image.dart';
 import 'package:geolocator/geolocator.dart';
@@ -135,13 +136,43 @@ class _JourneyChallengeListSheetState extends State<JourneyChallengeListSheet> {
     return '$minutes min';
   }
 
-  Future<void> _selectChallenge(String challengeId) async {
+  Future<void> _selectChallenge(ChallengeDto challenge) async {
     if (isSelectingChallenge) return;
+
+    final eventModel = Provider.of<EventModel>(context, listen: false);
+    final event = eventModel.getEventById(widget.eventId);
+    final locationLabel =
+        friendlyLocation[challenge.location ?? ChallengeLocationDto.ANY] ??
+            'Cornell';
+
+    final previewResult = await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(10.0)),
+      ),
+      builder: (_) => Preview(
+        challenge.name ?? '',
+        challenge.latF,
+        challenge.longF,
+        challenge.description ?? '',
+        challenge.imageUrl ?? '',
+        event?.difficulty?.name.toLowerCase() ?? 'medium',
+        challenge.points ?? 0,
+        PreviewType.CHALLENGE,
+        locationLabel,
+        widget.eventId,
+        popResultOnConfirm: startChallengeResult,
+      ),
+    );
+
+    if (!mounted || previewResult != startChallengeResult) return;
+
     setState(() => isSelectingChallenge = true);
 
     final apiClient = Provider.of<ApiClient>(context, listen: false);
     final response = await apiClient.serverApi?.setCurrentChallenge(
-      SetCurrentChallengeDto(challengeId: challengeId),
+      SetCurrentChallengeDto(challengeId: challenge.id),
     );
 
     if (!mounted) return;
@@ -386,7 +417,7 @@ class _JourneyChallengeListSheetState extends State<JourneyChallengeListSheet> {
                                   isCompleted: false,
                                   walkingTime:
                                       _walkingTime(_distanceTo(challenge)),
-                                  onTap: () => _selectChallenge(challenge.id),
+                                  onTap: () => _selectChallenge(challenge),
                                 ),
                               ),
                             ],

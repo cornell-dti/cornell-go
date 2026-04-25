@@ -584,6 +584,7 @@ export interface EventDto {
   description?: string;
   longDescription?: string;
   category?: EventCategoryDto;
+  imageUrl?: string;
   timeLimitation?: EventTimeLimitationDto;
   endTime?: string;
   challenges?: string[];
@@ -595,6 +596,7 @@ export interface EventDto {
   latitudeF?: number;
   featured?: boolean;
   isJourney?: boolean;
+  sortOrder?: number;
 }
 
 export interface PrevChallengeDto {
