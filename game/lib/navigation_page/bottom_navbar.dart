@@ -14,6 +14,7 @@ import 'package:game/widgets/bear_mascot_message.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:showcaseview/showcaseview.dart';
 import 'search_filter_home.dart';
+import 'package:game/navigation_page/home_map_page.dart';
 
 /** 
 
@@ -76,7 +77,8 @@ class _BottomNavBarState extends State<BottomNavBar> {
   void initState() {
     super.initState();
     _widgetOptions = <Widget>[
-      SearchFilterBar(initialHomeTab: widget.initialHomeTab),
+      HomeMapPage(),
+      SearchFilterBar(),
       GlobalLeaderboardWidget(),
       ProfilePage(),
     ];
@@ -388,6 +390,8 @@ class _BottomNavBarState extends State<BottomNavBar> {
             ),
           ),
           bottomNavigationBar: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            showUnselectedLabels: true,
             items: [
               BottomNavigationBarItem(
                 icon: SvgPicture.asset(
@@ -399,6 +403,21 @@ class _BottomNavBarState extends State<BottomNavBar> {
                   colorFilter: ColorFilter.mode(Colors.black, BlendMode.srcIn),
                 ),
                 label: 'Home',
+              ),
+              BottomNavigationBarItem(
+                icon: SvgPicture.asset(
+                  "assets/icons/journey.svg",
+                  theme: SvgTheme(
+                    currentColor: Colors.grey,
+                  ),
+                ),
+                activeIcon: SvgPicture.asset(
+                  "assets/icons/journey.svg",
+                  theme: const SvgTheme(
+                    currentColor: Colors.black,
+                  ),
+                ),
+                label: 'Journey',
               ),
               _buildLeaderboardTab(onboarding, screenWidth, screenHeight),
               _buildProfileTab(onboarding, screenWidth, screenHeight),
