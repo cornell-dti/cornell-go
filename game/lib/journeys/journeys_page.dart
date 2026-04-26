@@ -6,7 +6,10 @@ import 'package:game/api/game_api.dart';
 import 'package:game/api/game_client_dto.dart';
 import 'package:game/api/geopoint.dart';
 import 'package:game/journeys/journey_cell.dart';
+import 'package:game/journeys/journey_challenge_list_sheet.dart';
 import 'package:game/journeys/filter_form.dart';
+import 'package:game/journeys/journey_flow_result.dart';
+import 'package:game/preview/preview.dart';
 import 'package:game/model/event_model.dart';
 import 'package:game/model/group_model.dart';
 import 'package:game/model/tracker_model.dart';
@@ -39,6 +42,8 @@ class JourneyCellDto {
     required this.difficulty,
     required this.points,
     required this.eventId,
+    required this.featured,
+    required this.sortOrder,
   });
   late String location;
   late String name;
@@ -53,6 +58,8 @@ class JourneyCellDto {
   late String difficulty;
   late int points;
   late String eventId;
+  late bool featured;
+  late int sortOrder;
 }
 
 class JourneysPage extends StatefulWidget {
@@ -178,6 +185,8 @@ class _JourneysPageState extends State<JourneysPage> {
           ShowcaseView.getNamed("journeys_page").dismiss();
           Provider.of<OnboardingModel>(context, listen: false).completeStep4();
 
+          if (eventData.isEmpty) return;
+
           // Onboarding: Navigate to gameplay page to continue onboarding flow
           apiClient.serverApi?.setCurrentEvent(
             SetCurrentEventDto(eventId: eventData[0].eventId),
@@ -205,6 +214,48 @@ class _JourneysPageState extends State<JourneysPage> {
       builder: (BuildContext context) {
         return FilterForm(onSubmit: handleFilterSubmit);
       },
+    );
+  }
+
+  Future<void> _startJourneyFlow(JourneyCellDto journey) async {
+    final previewResult = await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(10.0)),
+      ),
+      builder: (BuildContext context) => Preview(
+        journey.name,
+        journey.lat,
+        journey.long,
+        journey.longDescription ?? journey.description,
+        journey.imgUrl,
+        journey.difficulty,
+        journey.points,
+        PreviewType.JOURNEY,
+        journey.location,
+        journey.eventId,
+        locationCount: journey.locationCount,
+        numberCompleted: journey.numberCompleted,
+      ),
+    );
+
+    if (!mounted || previewResult != startJourneyResult) {
+      return;
+    }
+
+    final challengeResult = await JourneyChallengeListSheet.show(
+      context,
+      journey.eventId,
+    );
+
+    if (!mounted || challengeResult != challengeSelectedResult) {
+      return;
+    }
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => GameplayPage()),
     );
   }
 
@@ -276,11 +327,14 @@ class _JourneysPageState extends State<JourneysPage> {
                                 (numberCompleted == event.challenges?.length);
                             var locationCount = event.challenges?.length ?? 0;
 
-                            if (locationCount < 2) continue;
+                            if (event.isJourney != true) continue;
+                            if (event.indexable == false) continue;
+                            if (event.challenges == null ||
+                                event.challenges!.isEmpty) continue;
                             var totalPoints = 0;
 
                             var challenge = challengeModel.getChallengeById(
-                              event.challenges?[0] ?? "",
+                              event.challenges![0],
                             );
 
                             if (challenge == null) continue;
@@ -334,9 +388,11 @@ class _JourneysPageState extends State<JourneysPage> {
                               challengeName: challengeName,
                             );
 
-                            var imageUrl = getValidImageUrl(
-                              challenge.imageUrl,
-                            );
+                            final rawImageUrl = (event.imageUrl != null &&
+                                    event.imageUrl!.isNotEmpty)
+                                ? event.imageUrl!
+                                : challenge.imageUrl;
+                            var imageUrl = getValidImageUrl(rawImageUrl);
 
                             if (!complete &&
                                 !timeTillExpire.isNegative &&
@@ -344,8 +400,7 @@ class _JourneysPageState extends State<JourneysPage> {
                               eventData.add(
                                 JourneyCellDto(
                                   location:
-                                      friendlyLocation[challenge.location] ??
-                                          "",
+                                      friendlyCategory[event.category] ?? "",
                                   name: event.name ?? "",
                                   lat: challenge.latF ?? null,
                                   long: challenge.longF ?? null,
@@ -360,14 +415,20 @@ class _JourneysPageState extends State<JourneysPage> {
                                           "",
                                   points: totalPoints,
                                   eventId: event.id,
+                                  featured: event.featured ?? false,
+                                  sortOrder: event.sortOrder ?? 0,
                                 ),
-                              );
-                            } else if (event.id == groupModel.curEventId) {
-                              apiClient.serverApi?.setCurrentEvent(
-                                SetCurrentEventDto(eventId: ""),
                               );
                             }
                           }
+
+                          // Featured journeys first, then higher sortOrder
+                          eventData.sort((a, b) {
+                            if (a.featured != b.featured) {
+                              return a.featured ? -1 : 1;
+                            }
+                            return b.sortOrder.compareTo(a.sortOrder);
+                          });
 
                           // Onboarding: Step 4 - Show showcase for first journey card after journeys explanation
                           final onboarding = Provider.of<OnboardingModel>(
@@ -401,21 +462,24 @@ class _JourneysPageState extends State<JourneysPage> {
                             ),
                             itemCount: eventData.length,
                             itemBuilder: (context, index) {
+                              final journey = eventData[index];
                               final journeyCell = JourneyCell(
                                 key: index == 0 ? null : UniqueKey(),
-                                eventData[index].name,
-                                eventData[index].lat,
-                                eventData[index].long,
-                                eventData[index].location,
-                                eventData[index].imgUrl,
-                                eventData[index].description,
-                                eventData[index].longDescription,
-                                eventData[index].locationCount,
-                                eventData[index].numberCompleted,
-                                eventData[index].complete,
-                                eventData[index].difficulty,
-                                eventData[index].points,
-                                eventData[index].eventId,
+                                journey.name,
+                                journey.lat,
+                                journey.long,
+                                journey.location,
+                                journey.imgUrl,
+                                journey.description,
+                                journey.longDescription,
+                                journey.locationCount,
+                                journey.numberCompleted,
+                                journey.complete,
+                                journey.difficulty,
+                                journey.points,
+                                journey.eventId,
+                                journey.featured,
+                                onTap: () => _startJourneyFlow(journey),
                               );
 
                               // Onboarding: Wrap first journey card with showcase highlight

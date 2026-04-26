@@ -49,7 +49,8 @@ import 'package:game/navigation_page/home_map_page.dart';
 */
 
 class BottomNavBar extends StatefulWidget {
-  const BottomNavBar({Key? key}) : super(key: key);
+  final int initialHomeTab;
+  const BottomNavBar({Key? key, this.initialHomeTab = 0}) : super(key: key);
 
   @override
   State<BottomNavBar> createState() => _BottomNavBarState();

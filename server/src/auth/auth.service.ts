@@ -193,6 +193,9 @@ export class AuthService {
 
     if (user.isBanned) return null;
 
+    // Ensure existing users have default bear items equipped
+    await this.userService.ensureDefaultBearItems(user.id);
+
     const accessToken = await this.jwtService.signAsync(
       {
         userId: user.id,

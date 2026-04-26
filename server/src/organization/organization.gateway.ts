@@ -45,7 +45,12 @@ export class OrganizationGateway {
     );
 
     for (const org of orgs) {
-      await this.orgService.emitUpdateOrganizationData(org, false, user);
+      await this.orgService.emitUpdateOrganizationData(
+        org,
+        false,
+        user,
+        !data.admin,
+      );
     }
 
     return orgs.length;

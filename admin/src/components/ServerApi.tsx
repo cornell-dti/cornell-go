@@ -31,6 +31,88 @@ export class ServerApi {
     >;
   }
 
+  requestBearItems(data: dto.RequestBearItemsDto) {
+    return this.send('requestBearItems', data) as Promise<number | undefined>;
+  }
+
+  requestUserInventory(data: dto.RequestUserInventoryDto) {
+    return this.send('requestUserInventory', data) as Promise<
+      number | undefined
+    >;
+  }
+
+  requestUserBearLoadout(data: dto.RequestUserBearLoadoutDto) {
+    return this.send('requestUserBearLoadout', data) as Promise<
+      number | undefined
+    >;
+  }
+
+  purchaseBearItem(data: dto.PurchaseBearItemDto) {
+    return this.send('purchaseBearItem', data) as Promise<boolean | undefined>;
+  }
+
+  equipBearItem(data: dto.EquipBearItemDto) {
+    return this.send('equipBearItem', data) as Promise<boolean | undefined>;
+  }
+
+  requestAllBearItems(data: dto.RequestAllBearItemsDto) {
+    return this.send('requestAllBearItems', data) as Promise<
+      number | undefined
+    >;
+  }
+
+  updateBearItemData(data: dto.UpdateBearItemDataDto) {
+    return this.send('updateBearItemData', data) as Promise<string | undefined>;
+  }
+
+  requestCampusEvents(data: dto.RequestCampusEventsDto) {
+    return this.send('requestCampusEvents', data) as Promise<
+      number | undefined
+    >;
+  }
+
+  requestCampusEventDetails(data: dto.RequestCampusEventDetailsDto) {
+    return this.send('requestCampusEventDetails', data) as Promise<
+      string | undefined
+    >;
+  }
+
+  requestAllCampusEvents(data: dto.RequestCampusEventsDto) {
+    return this.send('requestAllCampusEvents', data) as Promise<
+      number | undefined
+    >;
+  }
+
+  createCampusEvent(data: dto.UpsertCampusEventDto) {
+    return this.send('createCampusEvent', data) as Promise<string | undefined>;
+  }
+
+  updateCampusEvent(data: dto.UpsertCampusEventDto) {
+    return this.send('updateCampusEvent', data) as Promise<string | undefined>;
+  }
+
+  deleteCampusEvent(data: dto.DeleteCampusEventDto) {
+    return this.send('deleteCampusEvent', data) as Promise<boolean | undefined>;
+  }
+
+  rsvpCampusEvent(data: dto.RsvpCampusEventDto) {
+    return this.send('rsvpCampusEvent', data) as Promise<boolean | undefined>;
+  }
+
+  unRsvpCampusEvent(data: dto.UnRsvpCampusEventDto) {
+    return this.send('unRsvpCampusEvent', data) as Promise<boolean | undefined>;
+  }
+
+  requestAvailableChallenges(data: dto.RequestAvailableChallengesDto) {
+    return this.send('requestAvailableChallenges', data) as Promise<
+      any | undefined
+    >;
+  }
+
+  setCurrentChallenge(data: dto.SetCurrentChallengeDto) {
+    return this.send('setCurrentChallenge', data) as Promise<any | undefined>;
+  }
+
   requestChallengeData(data: dto.RequestChallengeDataDto) {
     return this.send('requestChallengeData', data) as Promise<
       number | undefined
@@ -45,6 +127,16 @@ export class ServerApi {
     return this.send('updateChallengeData', data) as Promise<
       string | undefined
     >;
+  }
+
+  checkInWithLocation(data: dto.LocationCheckInDto) {
+    return this.send('checkInWithLocation', data) as Promise<
+      boolean | undefined
+    >;
+  }
+
+  checkInWithQrCode(data: dto.QrCodeCheckInDto) {
+    return this.send('checkInWithQrCode', data) as Promise<boolean | undefined>;
   }
 
   requestEventData(data: dto.RequestEventDataDto) {
@@ -85,6 +177,22 @@ export class ServerApi {
     return this.send('updateEventData', data) as Promise<string | undefined>;
   }
 
+  triggerEventSync(data: dto.TriggerEventSyncDto) {
+    return this.send('triggerEventSync', data) as Promise<any | undefined>;
+  }
+
+  requestEventSyncStatus() {
+    return this.send('requestEventSyncStatus', {}) as Promise<any | undefined>;
+  }
+
+  submitFeedback(data: dto.SubmitFeedbackDto) {
+    return this.send('submitFeedback', data) as Promise<boolean | undefined>;
+  }
+
+  requestFeedbackData() {
+    return this.send('requestFeedbackData', {}) as Promise<boolean | undefined>;
+  }
+
   requestGroupData(data: dto.RequestGroupDataDto) {
     return this.send('requestGroupData', data) as Promise<boolean | undefined>;
   }
@@ -107,6 +215,18 @@ export class ServerApi {
 
   sendGroupInvite(data: dto.SendGroupInviteDto) {
     return this.send('sendGroupInvite', data) as Promise<boolean | undefined>;
+  }
+
+  updateFcmToken(data: dto.UpdatePushTokenDto) {
+    return this.send('updateFcmToken', data) as Promise<boolean | undefined>;
+  }
+
+  sendNotification(data: dto.SendNotificationDto) {
+    return this.send('sendNotification', data) as Promise<any | undefined>;
+  }
+
+  removeFcmToken() {
+    return this.send('removeFcmToken', {}) as Promise<boolean | undefined>;
   }
 
   requestOrganizationData(data: dto.RequestOrganizationDataDto) {
@@ -281,6 +401,37 @@ export class ServerApi {
     this.socket.on('updateLeaderPosition', data => callback(data));
   }
 
+  onUpdateBearItemsData(callback: (data: dto.UpdateBearItemsDataDto) => void) {
+    this.socket.removeAllListeners('updateBearItemsData');
+    this.socket.on('updateBearItemsData', data => callback(data));
+  }
+
+  onUpdateBearItemData(callback: (data: dto.UpdateBearItemDataDto) => void) {
+    this.socket.removeAllListeners('updateBearItemData');
+    this.socket.on('updateBearItemData', data => callback(data));
+  }
+
+  onUpdateUserInventoryData(
+    callback: (data: dto.UpdateUserInventoryDataDto) => void,
+  ) {
+    this.socket.removeAllListeners('updateUserInventoryData');
+    this.socket.on('updateUserInventoryData', data => callback(data));
+  }
+
+  onUpdateUserBearLoadoutData(
+    callback: (data: dto.UpdateUserBearLoadoutDataDto) => void,
+  ) {
+    this.socket.removeAllListeners('updateUserBearLoadoutData');
+    this.socket.on('updateUserBearLoadoutData', data => callback(data));
+  }
+
+  onUpdatePurchaseResult(
+    callback: (data: dto.UpdatePurchaseResultDto) => void,
+  ) {
+    this.socket.removeAllListeners('updatePurchaseResult');
+    this.socket.on('updatePurchaseResult', data => callback(data));
+  }
+
   onTimerStarted(callback: (data: dto.TimerStartedDto) => void) {
     this.socket.removeAllListeners('timerStarted');
     this.socket.on('timerStarted', data => callback(data));
@@ -331,5 +482,22 @@ export class ServerApi {
   onQuizProgress(callback: (data: dto.QuizProgressDto) => void) {
     this.socket.removeAllListeners('quizProgress');
     this.socket.on('quizProgress', data => callback(data));
+  }
+
+  onUpdateFeedbackData(callback: (data: dto.UpdateFeedbackDataDto) => void) {
+    this.socket.removeAllListeners('updateFeedbackData');
+    this.socket.on('updateFeedbackData', data => callback(data));
+  }
+
+  onUpdateCampusEventData(
+    callback: (data: dto.UpdateCampusEventDataDto) => void,
+  ) {
+    this.socket.removeAllListeners('updateCampusEventData');
+    this.socket.on('updateCampusEventData', data => callback(data));
+  }
+
+  onCampusEventList(callback: (data: dto.CampusEventListResponseDto) => void) {
+    this.socket.removeAllListeners('campusEventList');
+    this.socket.on('campusEventList', data => callback(data));
   }
 }

@@ -319,10 +319,11 @@ export class EventService {
     data: RequestRecommendedEventsDto,
   ) {
     const evs: EventBase[] = await this.prisma.$queryRaw`
-      select * from "EventBase" ev 
+      select * from "EventBase" ev
       where ev."id" in (select e."A" from "_eventOrgs" e inner join "_player" p on e."B" = p."A" and ${
         user.id
       } = p."B")
+      and ev."indexable" = true
       order by ((ev."latitude" - ${data.latitudeF})^2 + (ev."longitude" - ${
         data.longitudeF
       })^2)
@@ -371,6 +372,7 @@ export class EventService {
       description: ev.description,
       longDescription: ev.longDescription,
       category: ev.category as EventCategoryDto,
+      imageUrl: ev.imageUrl ?? undefined,
       timeLimitation:
         ev.timeLimitation === TimeLimitationType.LIMITED_TIME
           ? 'LIMITED_TIME'
@@ -388,6 +390,8 @@ export class EventService {
             : 'Hard',
       latitudeF: ev.latitude,
       longitudeF: ev.longitude,
+      isJourney: ev.isJourney,
+      sortOrder: ev.sortOrder,
     };
   }
 
@@ -418,6 +422,7 @@ export class EventService {
         extensionsUsed: pc.extensionsUsed ?? 0, // Default to 0 for backwards compatibility
         dateCompleted: pc.timestamp.toUTCString(),
         failed: pc.failed, // True if challenge was failed due to timer expiration
+        dateExpired: pc.dateExpired,
       })),
     };
   }
@@ -632,6 +637,9 @@ export class EventService {
       latitude: event.latitudeF,
       longitude: event.longitudeF,
       category: event.category,
+      imageUrl: event.imageUrl ?? null,
+      isJourney: event.isJourney,
+      sortOrder: event.sortOrder,
     };
 
     if (ev && canUpdateEv) {
@@ -665,6 +673,8 @@ export class EventService {
         endTime: assignData.endTime ?? defaultEventData.endTime,
         indexable: assignData.indexable ?? defaultEventData.indexable,
         featured: assignData.featured ?? false,
+        isJourney: assignData.isJourney ?? false,
+        sortOrder: assignData.sortOrder ?? 0,
         difficulty: assignData.difficulty ?? defaultEventData.difficulty,
         latitude: assignData.latitude ?? defaultEventData.latitude,
         longitude: assignData.longitude ?? defaultEventData.longitude,

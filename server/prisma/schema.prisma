@@ -93,6 +93,7 @@ model User {
   administrator          Boolean
   enrollmentType         EnrollmentType
   score                  Int
+  coins               Int                  @default(0)
   isBanned               Boolean              @default(false)
   fcmToken               String? // Firebase Cloud Messaging token for push notifications
   group                  Group                @relation("member", fields: [groupId], references: [id])
@@ -107,9 +108,14 @@ model User {
   participatedIn         PrevChallenge[]      @relation("prevChallengeParticipant")
   sessionLogEntries      SessionLogEntry[]
   achievementTrackers    AchievementTracker[]
+  bearInventories     UserBearInventory[]
+  bearEquipped        UserBearEquipped[]
   challengeTimers        ChallengeTimer[]
   UserQuizAnswer         UserQuizAnswer[]
-  hasCompletedOnboarding Boolean
+  hasCompletedOnboarding Boolean              @default(false)
+  eventAttendances       EventAttendance[]
+  eventRSVPs             EventRSVP[]
+  feedbacks              Feedback[]
 }
 
 model Group {
@@ -142,7 +148,9 @@ model Challenge {
   longitude      Float
   awardingRadius Float
   closeRadius    Float
-  timerLength    Int?
+  timerLength         Int?
+  scheduledStartTime  DateTime?
+  scheduledEndTime    DateTime?
   completions    PrevChallenge[]
   activeTrackers EventTracker[]
   QuizQuestion   QuizQuestion[]
@@ -170,16 +178,23 @@ model EventBase {
   achievements    Achievement[]
   difficulty      DifficultyMode
   category        EventCategoryType
+  imageUrl        String?
   featured        Boolean            @default(false)
+  isJourney       Boolean            @default(false)
+  sortOrder       Int                @default(0)
 }
 
 enum EventCategoryType {
   FOOD
   NATURE
   HISTORICAL
-  CAFE
-  DININGHALL
-  DORM
+  RESIDENTIAL
+  LANDMARK
+  ARTS
+  ATHLETICS
+  LIBRARY
+  ACADEMIC
+  RECREATION
 }
 
 model EventTracker {
@@ -213,20 +228,22 @@ model PrevChallenge {
   extensionsUsed Int          @default(0)
   timestamp      DateTime     @default(now())
   failed         Boolean      @default(false) // True if challenge was failed due to timer expiration
+  dateExpired    Boolean      @default(false) // True if auto-completed because time window passed
 }
 
 model Organization {
-  id           String                   @id @default(uuid())
-  createdAt    DateTime                 @default(now())
-  updatedAt    DateTime                 @updatedAt()
-  subject      String                   @default("Organization")
-  name         String
-  accessCode   String
-  members      User[]                   @relation("orgToUser")
-  managers     User[]                   @relation("orgManager")
-  events       EventBase[]              @relation("eventOrgs")
-  specialUsage OrganizationSpecialUsage
-  achievements Achievement[]
+  id                    String                   @id @default(uuid())
+  createdAt             DateTime                 @default(now())
+  updatedAt             DateTime                 @updatedAt()
+  subject               String                   @default("Organization")
+  name                  String
+  accessCode            String
+  members               User[]                   @relation("orgToUser")
+  managers              User[]                   @relation("orgManager")
+  events                EventBase[]              @relation("eventOrgs")
+  specialUsage          OrganizationSpecialUsage
+  achievements          Achievement[]
+  submittedCampusEvents CampusEvent[]
 }
 
 model SessionLogEntry {
@@ -267,6 +284,59 @@ model AchievementTracker {
   dateComplete  DateTime?
   achievementId String
   userId        String
+}
+
+// BUILD-A-BEAR MODELS
+enum BearSlot {
+  EYES
+  MOUTH
+  COLOR
+  ACCESSORY
+}
+
+model BearItem {
+  id          String              @id @default(uuid())
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt()
+  name        String
+  slot        BearSlot
+  cost       Int
+
+  assetKey   String
+  mimeType   String?
+  zIndex     Int?
+
+  isDefault   Boolean             @default(false)
+  inventories UserBearInventory[]
+  equipped    UserBearEquipped[]
+}
+
+model UserBearInventory {
+  id           String   @id @default(uuid())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt()
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
+  bearItem     BearItem @relation(fields: [bearItemId], references: [id], onDelete: Cascade)
+  bearItemId   String
+  acquiredDate DateTime @default(now())
+
+  @@unique([userId, bearItemId])
+}
+
+model UserBearEquipped {
+  id         String   @id @default(uuid())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt()
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String
+  bearItem   BearItem @relation(fields: [bearItemId], references: [id], onDelete: Cascade)
+  bearItemId String
+  slot       BearSlot
+
+  @@unique([userId, slot])
 }
 
 enum ChallengeTimerStatus {
@@ -347,4 +417,140 @@ model UserQuizAnswer {
 
   @@unique([userId, questionId]) // Enforce one attempt per question
   @@map("UserQuizAnswer")
+}
+
+// ---- Events ----
+
+enum CampusEventCategory {
+  SOCIAL
+  CULTURAL
+  ATHLETIC
+  WELLNESS
+  ACADEMIC
+  ARTS
+  CAREER
+  COMMUNITY
+  OTHER
+}
+
+enum EventSource {
+  API_EVENTS
+  ADMIN_CREATED
+  COMMUNITY_SUBMITTED
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  ARCHIVED
+}
+
+enum CheckInMethod {
+  LOCATION
+  QR_CODE
+  EITHER
+}
+
+model CampusEvent {
+  id String @id @default(uuid())
+
+  // Core info
+  title       String
+  description String
+  imageUrl    String?
+
+  // Date & time
+  startTime DateTime
+  endTime   DateTime
+  allDay    Boolean  @default(false)
+
+  // Location
+  locationName  String
+  address       String?
+  latitude      Float
+  longitude     Float
+  checkInRadius Float   @default(100)
+
+  // Categorization
+  categories CampusEventCategory[]
+  tags       String[]
+
+  // Source & approval
+  source          EventSource
+  externalId      String?        @unique
+  externalUrl     String?
+  approvalStatus  ApprovalStatus
+  rejectionReason String?
+
+  // Organizer
+  organizerName  String?
+  organizerEmail String?
+  organizerId    String?
+  organizer      Organization? @relation(fields: [organizerId], references: [id])
+
+  // Engagement
+  checkInMethod       CheckInMethod @default(EITHER)
+  qrCode              String?       @unique
+  pointsForAttendance Int           @default(10)
+  featured            Boolean       @default(false)
+  registrationUrl     String?
+
+  // Tracking
+  attendances EventAttendance[]
+  rsvps       EventRSVP[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([startTime])
+  @@index([approvalStatus])
+  @@index([source])
+}
+
+model EventAttendance {
+  id            String      @id @default(uuid())
+  userId        String
+  user          User        @relation(fields: [userId], references: [id])
+  campusEventId String
+  campusEvent   CampusEvent @relation(fields: [campusEventId], references: [id])
+
+  checkedInAt   DateTime      @default(now())
+  checkInMethod CheckInMethod
+  pointsAwarded Int
+
+  @@unique([userId, campusEventId])
+}
+
+enum FeedbackCategory {
+  BUG_REPORT
+  SUGGESTION
+  GENERAL
+}
+
+model Feedback {
+  id          String           @id @default(uuid())
+  createdAt   DateTime         @default(now())
+  category    FeedbackCategory
+  text        String
+  rating      Boolean?
+  challengeId String?
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+
+  @@unique([userId, challengeId])
+}
+
+model EventRSVP {
+  id            String      @id @default(uuid())
+  userId        String
+  user          User        @relation(fields: [userId], references: [id])
+  campusEventId String
+  campusEvent   CampusEvent @relation(fields: [campusEventId], references: [id])
+
+  rsvpAt             DateTime  @default(now())
+  reminderSent       Boolean   @default(false)
+  reminderClaimedAt  DateTime?
+
+  @@unique([userId, campusEventId])
 }

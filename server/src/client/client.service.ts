@@ -26,6 +26,13 @@ import {
   UpdateAchievementDataDto,
 } from '../achievement/achievement.dto';
 import {
+  UpdateBearItemDataDto,
+  UpdateBearItemsDataDto,
+  UpdatePurchaseResultDto,
+  UpdateUserBearLoadoutDataDto,
+  UpdateUserInventoryDataDto,
+} from '../avatar/avatar.dto';
+import {
   TimerStartedDto,
   TimerExtendedDto,
   TimerCompletedDto,
@@ -39,6 +46,12 @@ import {
   QuizErrorDto,
   QuizProgressDto,
 } from '../quiz/quiz.dto';
+import { UpdateFeedbackDataDto } from '../feedback/feedback.dto';
+import {
+  UpdateCampusEventDataDto,
+  CampusEventListResponseDto,
+  CampusEventDto,
+} from '../campus-event/campus-event.dto';
 import { ExtractSubjectType } from '@casl/ability';
 
 export type ClientApiDef = {
@@ -54,6 +67,11 @@ export type ClientApiDef = {
   updateGroupData: UpdateGroupDataDto;
   updateOrganizationData: UpdateOrganizationDataDto;
   updateLeaderPosition: UpdateLeaderPositionDto;
+  updateBearItemsData: UpdateBearItemsDataDto;
+  updateBearItemData: UpdateBearItemDataDto;
+  updateUserInventoryData: UpdateUserInventoryDataDto;
+  updateUserBearLoadoutData: UpdateUserBearLoadoutDataDto;
+  updatePurchaseResult: UpdatePurchaseResultDto;
   timerStarted: TimerStartedDto;
   timerExtended: TimerExtendedDto;
   timerCompleted: TimerCompletedDto;
@@ -64,6 +82,10 @@ export type ClientApiDef = {
   quizResult: QuizResultDto;
   quizError: QuizErrorDto;
   quizProgress: QuizProgressDto;
+  updateFeedbackData: UpdateFeedbackDataDto;
+  updateCampusEventData: UpdateCampusEventDataDto;
+  campusEventList: CampusEventListResponseDto;
+  campusEventDetails: { event: CampusEventDto };
 };
 
 @Injectable()

@@ -1,10 +1,12 @@
 import { Home } from './components/Home';
 import { Challenges } from './components/Challenges';
-import { Events } from './components/Events';
+import { Journeys } from './components/Journeys';
 import { Organizations } from './components/Organizations';
 import { ErrorAlert } from './components/ErrorAlert';
 import { Users } from './components/Users';
 import { Notifications } from './components/Notifications';
+import { Feedback } from './components/Feedback';
+import { BearItems } from './components/BearItems';
 
 import {
   AppBar,
@@ -30,6 +32,8 @@ import {
   faBuilding,
   faPerson,
   faBell,
+  faComment,
+  faPaw,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -56,10 +60,10 @@ const routes = [
     name: 'Organizations',
   },
   {
-    path: '/events',
-    element: <Events />,
+    path: '/journeys',
+    element: <Journeys />,
     icon: faPersonWalking,
-    name: 'Events',
+    name: 'Journeys',
   },
   {
     path: '/challenges',
@@ -90,6 +94,18 @@ const routes = [
     element: <Notifications />,
     icon: faBell,
     name: 'Notifications',
+  },
+  {
+    path: '/feedback',
+    element: <Feedback />,
+    icon: faComment,
+    name: 'Feedback',
+  },
+  {
+    path: '/bear-items',
+    element: <BearItems />,
+    icon: faPaw,
+    name: 'Bear Items',
   },
 ];
 
@@ -149,9 +165,6 @@ export default function App() {
         </SidebarButton>
         <SidebarText>
           {data.organizations.get(data.selectedOrg)?.name ?? 'No Org. Selected'}
-        </SidebarText>
-        <SidebarText>
-          {data.events.get(data.selectedEvent)?.name ?? 'No Event Selected'}
         </SidebarText>
       </Sidebar>
       <Container>

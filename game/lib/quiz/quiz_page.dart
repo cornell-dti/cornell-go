@@ -1,17 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
-import 'package:game/api/game_api.dart';
 import 'package:game/api/game_client_dto.dart';
 import 'package:game/model/quiz_model.dart';
 import 'package:game/model/event_model.dart';
-import 'package:game/model/tracker_model.dart';
 import 'package:game/model/group_model.dart';
 import 'package:game/model/challenge_model.dart';
 import 'package:game/gameplay/challenge_completed.dart';
-import 'package:game/gameplay/gameplay_page.dart';
 import 'package:game/utils/utility_functions.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:confetti/confetti.dart';
 import 'dart:math';
 import 'package:game/constants/constants.dart';
@@ -74,42 +70,17 @@ class _QuizScreenState extends State<_QuizScreen> {
                   'no available questions',
                 ) &&
             !quizModel.isLoading) {
-          // Check if this is a journey and navigate accordingly
-          final eventModel = Provider.of<EventModel>(context, listen: false);
-          final trackerModel = Provider.of<TrackerModel>(
-            context,
-            listen: false,
-          );
-          final groupModel = Provider.of<GroupModel>(context, listen: false);
-
-          final eventId = groupModel.curEventId;
-          final event = eventModel.getEventById(eventId ?? "");
-          final tracker = trackerModel.trackerByEventId(eventId ?? "");
-          final isJourney = (event?.challenges?.length ?? 0) > 1;
-          final journeyCompleted = isJourney &&
-              tracker != null &&
-              tracker.prevChallenges.length >= (event?.challenges?.length ?? 0);
-
           // Navigate away immediately
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
               Navigator.pop(context);
-              if (isJourney && !journeyCompleted) {
-                // Journey not completed - go to next challenge
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => GameplayPage()),
-                );
-              } else {
-                // Journey completed OR single challenge - show point breakdown
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        ChallengeCompletedPage(challengeId: widget.challengeId),
-                  ),
-                );
-              }
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      ChallengeCompletedPage(challengeId: widget.challengeId),
+                ),
+              );
             }
           });
           return const SizedBox.shrink();
@@ -439,21 +410,6 @@ class _QuizScreenState extends State<_QuizScreen> {
       barrierColor: Colors.black.withOpacity(0.5),
       context: context,
       builder: (dialogContext) {
-        // Check if this is a journey (multi-challenge event) and if it's completed
-        final eventModel = Provider.of<EventModel>(context, listen: false);
-        final trackerModel = Provider.of<TrackerModel>(context, listen: false);
-        final groupModel = Provider.of<GroupModel>(context, listen: false);
-
-        final eventId = groupModel.curEventId;
-        final event = eventModel.getEventById(eventId ?? "");
-        final tracker = trackerModel.trackerByEventId(eventId ?? "");
-        final isJourney = (event?.challenges?.length ?? 0) > 1;
-
-        // Check if journey is completed (all challenges done)
-        final journeyCompleted = isJourney &&
-            tracker != null &&
-            tracker.prevChallenges.length >= (event?.challenges?.length ?? 0);
-
         final isCorrect = result.isCorrect;
 
         // Play confetti if correct
@@ -570,28 +526,15 @@ class _QuizScreenState extends State<_QuizScreen> {
                               onPressed: () {
                                 confettiController.stop();
                                 Navigator.pop(context);
-                                // For journeys: if completed, show point breakdown; otherwise go to next challenge
-                                // For single challenges: always show point breakdown
-                                if (isJourney && !journeyCompleted) {
-                                  // Journey not completed - go to next challenge
-                                  Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => GameplayPage(),
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        ChallengeCompletedPage(
+                                      challengeId: widget.challengeId,
                                     ),
-                                  );
-                                } else {
-                                  // Journey completed OR single challenge - show point breakdown
-                                  Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          ChallengeCompletedPage(
-                                        challengeId: widget.challengeId,
-                                      ),
-                                    ),
-                                  );
-                                }
+                                  ),
+                                );
                               },
                               style: ButtonStyle(
                                 padding: MaterialStateProperty.all<
@@ -626,9 +569,7 @@ class _QuizScreenState extends State<_QuizScreen> {
                                 ),
                               ),
                               child: Text(
-                                (isJourney && !journeyCompleted)
-                                    ? 'Next Challenge'
-                                    : 'Point Breakdown',
+                                'Point Breakdown',
                                 style: TextStyle(
                                   fontSize:
                                       MediaQuery.devicePixelRatioOf(context) < 3

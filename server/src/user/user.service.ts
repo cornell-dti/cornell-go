@@ -81,6 +81,7 @@ export class UserService {
     const user: User = await this.prisma.user.create({
       data: {
         score: 0,
+        coins: 100,
         group: { connect: { id: group.id } },
         hostOf: { connect: { id: group.id } },
         memberOf: { connect: { id: allOrg.id } },
@@ -117,7 +118,53 @@ export class UserService {
 
     await this.achievementService.createAchievementTrackers(user);
 
+    // Seed default bear items into inventory & equipped loadout
+    const defaultBearItems = await this.prisma.bearItem.findMany({
+      where: { isDefault: true },
+    });
+
+    for (const item of defaultBearItems) {
+      await this.prisma.userBearInventory.create({
+        data: { userId: user.id, bearItemId: item.id },
+      });
+      await this.prisma.userBearEquipped.create({
+        data: { userId: user.id, bearItemId: item.id, slot: item.slot },
+      });
+    }
+
     return user;
+  }
+
+  /**
+   * Ensure all default bear items are in the user's inventory and equipped.
+   * No-ops for slots that already have an equipped item.
+   */
+  async ensureDefaultBearItems(userId: string) {
+    const defaultItems = await this.prisma.bearItem.findMany({
+      where: { isDefault: true },
+    });
+
+    for (const item of defaultItems) {
+      // Add to inventory if not already owned
+      const owned = await this.prisma.userBearInventory.count({
+        where: { userId, bearItemId: item.id },
+      });
+      if (owned === 0) {
+        await this.prisma.userBearInventory.create({
+          data: { userId, bearItemId: item.id },
+        });
+      }
+
+      // Equip if nothing is equipped in this slot
+      const equipped = await this.prisma.userBearEquipped.findUnique({
+        where: { userId_slot: { userId, slot: item.slot } },
+      });
+      if (!equipped) {
+        await this.prisma.userBearEquipped.create({
+          data: { userId, bearItemId: item.id, slot: item.slot },
+        });
+      }
+    }
   }
 
   /**
@@ -283,6 +330,7 @@ export class UserService {
       major: joinedUser.major,
       year: joinedUser.year,
       score: joinedUser.score,
+      coins: joinedUser.coins,
       groupId: joinedUser.group.friendlyId,
       hasCompletedOnboarding: joinedUser.hasCompletedOnboarding,
       isBanned: joinedUser.isBanned,

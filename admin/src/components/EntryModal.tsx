@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Modal } from './Modal';
 import styled from 'styled-components';
 import {
@@ -6,7 +6,11 @@ import {
   useJsApiLoader,
   Marker,
   Circle,
+  Autocomplete,
+  Libraries,
 } from '@react-google-maps/api';
+
+const GOOGLE_MAPS_LIBRARIES: Libraries = ['places'];
 
 const AWARDING_RADIUS_COLOR = '#4CAF50';
 const CLOSE_RADIUS_COLOR = '#FF9800';
@@ -21,6 +25,8 @@ export type FreeEntryForm = {
   name: string;
   value: string;
   characterLimit: number;
+  multiline?: boolean;
+  helpText?: string;
 };
 
 export type NumberEntryForm = {
@@ -59,6 +65,12 @@ export type AnswersEntryForm = {
   maxAnswers: number;
 };
 
+export type CheckboxDateEntryForm = {
+  name: string;
+  checked: boolean;
+  date: Date;
+};
+
 export type OptionWithCustomEntryForm = {
   name: string;
   value: number;
@@ -75,7 +87,8 @@ export type EntryForm =
   | DateEntryForm
   | CheckboxNumberEntryForm
   | AnswersEntryForm
-  | OptionWithCustomEntryForm;
+  | OptionWithCustomEntryForm
+  | CheckboxDateEntryForm;
 
 const EntryBox = styled.div`
   margin-bottom: 12px;
@@ -90,6 +103,17 @@ const EntryTextBox = styled.input`
   height: 28px;
   border-radius: 2px;
   flex-grow: 1;
+`;
+
+const EntryTextArea = styled.textarea`
+  font-size: 18px;
+  margin-left: 12px;
+  border-width: 1px;
+  border-radius: 2px;
+  flex-grow: 1;
+  min-height: 80px;
+  resize: vertical;
+  font-family: inherit;
 `;
 
 const EntrySelect = styled.select`
@@ -126,20 +150,39 @@ function OptionEntryFormBox(props: { form: OptionEntryForm }) {
   );
 }
 
+const HelpText = styled.div`
+  font-size: 12px;
+  color: #666;
+  margin-left: 12px;
+  margin-top: 4px;
+  font-style: italic;
+`;
+
 function FreeEntryFormBox(props: { form: FreeEntryForm }) {
   const [val, setVal] = useState('');
 
   useEffect(() => setVal(props.form.value), [props.form]);
 
   return (
-    <EntryBox>
-      <span>{props.form.name + ':'}</span>
-      <EntryTextBox
-        value={val}
-        maxLength={props.form.characterLimit}
-        onChange={e => setVal((props.form.value = e.target.value))}
-      />
-    </EntryBox>
+    <>
+      <EntryBox>
+        <span>{props.form.name + ':'}</span>
+        {props.form.multiline ? (
+          <EntryTextArea
+            value={val}
+            maxLength={props.form.characterLimit}
+            onChange={e => setVal((props.form.value = e.target.value))}
+          />
+        ) : (
+          <EntryTextBox
+            value={val}
+            maxLength={props.form.characterLimit}
+            onChange={e => setVal((props.form.value = e.target.value))}
+          />
+        )}
+      </EntryBox>
+      {props.form.helpText && <HelpText>{props.form.helpText}</HelpText>}
+    </>
   );
 }
 
@@ -236,6 +279,46 @@ function CheckboxNumberEntryFormBox(props: { form: CheckboxNumberEntryForm }) {
   );
 }
 
+function CheckboxDateEntryFormBox(props: { form: CheckboxDateEntryForm }) {
+  const [checked, setChecked] = useState(props.form.checked);
+  const [val, setVal] = useState('');
+
+  useEffect(() => {
+    setChecked(props.form.checked);
+    setVal(props.form.date.toISOString().slice(0, 16));
+  }, [props.form]);
+
+  return (
+    <>
+      <EntryBox>
+        <label>
+          <input
+            type="checkbox"
+            checked={checked}
+            onChange={e => {
+              setChecked(e.target.checked);
+              props.form.checked = e.target.checked;
+            }}
+          />
+          {' ' + props.form.name}
+        </label>
+      </EntryBox>
+      {checked && (
+        <EntryBox>
+          <EntryTextBox
+            type="datetime-local"
+            value={val}
+            onChange={e => {
+              setVal(e.target.value);
+              props.form.date = new Date(e.target.value);
+            }}
+          />
+        </EntryBox>
+      )}
+    </>
+  );
+}
+
 const MapBox = styled.div`
   width: 100%;
   height: 300px;
@@ -250,9 +333,81 @@ const mapContainerStyle = {
   height: '300px',
 };
 
+type FrontendConfigResponse = {
+  googleMapsApiKey?: string;
+};
+
 function MapEntryFormBox(props: {
   form: MapEntryForm;
   allForms?: EntryForm[];
+}) {
+  const [googleMapsApiKey, setGoogleMapsApiKey] = useState(
+    process.env.REACT_APP_GOOGLE_MAPS_API_KEY || '',
+  );
+  const [hasLoadedConfig, setHasLoadedConfig] = useState(
+    Boolean(process.env.REACT_APP_GOOGLE_MAPS_API_KEY),
+  );
+
+  useEffect(() => {
+    if (googleMapsApiKey) {
+      setHasLoadedConfig(true);
+      return;
+    }
+
+    let isCancelled = false;
+
+    fetch('/frontend-config')
+      .then(async response => {
+        if (!response.ok) {
+          throw new Error(`Failed to load config: ${response.status}`);
+        }
+
+        const config = (await response.json()) as FrontendConfigResponse;
+
+        if (isCancelled) {
+          return;
+        }
+
+        setGoogleMapsApiKey(config.googleMapsApiKey || '');
+        setHasLoadedConfig(true);
+      })
+      .catch(() => {
+        if (!isCancelled) {
+          setHasLoadedConfig(true);
+        }
+      });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [googleMapsApiKey]);
+
+  if (!hasLoadedConfig) {
+    return <MapBox>Loading map configuration...</MapBox>;
+  }
+
+  if (!googleMapsApiKey) {
+    return (
+      <MapBox>
+        Google Maps is unavailable. Set `REACT_APP_GOOGLE_MAPS_API_KEY` in the
+        running server environment.
+      </MapBox>
+    );
+  }
+
+  return (
+    <LoadedMapEntryFormBox
+      form={props.form}
+      allForms={props.allForms}
+      googleMapsApiKey={googleMapsApiKey}
+    />
+  );
+}
+
+function LoadedMapEntryFormBox(props: {
+  form: MapEntryForm;
+  allForms?: EntryForm[];
+  googleMapsApiKey: string;
 }) {
   const [lat, setLat] = useState(props.form.latitude);
   const [lng, setLng] = useState(props.form.longitude);
@@ -262,9 +417,38 @@ function MapEntryFormBox(props: {
       lng: props.form.longitude,
     });
 
-  const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY || '',
+  const { isLoaded, loadError } = useJsApiLoader({
+    googleMapsApiKey: props.googleMapsApiKey,
+    libraries: GOOGLE_MAPS_LIBRARIES,
   });
+
+  const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
+
+  useEffect(() => {
+    const styleId = 'pac-container-zindex-fix';
+    if (!document.getElementById(styleId)) {
+      const style = document.createElement('style');
+      style.id = styleId;
+      style.innerHTML = `.pac-container { z-index: 10000 !important; }`;
+      document.head.appendChild(style);
+    }
+    return () => {
+      document.querySelectorAll('.pac-container').forEach(el => el.remove());
+    };
+  }, []);
+
+  const onPlaceChanged = () => {
+    const place = autocompleteRef.current?.getPlace();
+    if (place?.geometry?.location) {
+      const newLat = place.geometry.location.lat();
+      const newLng = place.geometry.location.lng();
+      setLat(newLat);
+      setLng(newLng);
+      props.form.latitude = newLat;
+      props.form.longitude = newLng;
+      setMarkerPosition({ lat: newLat, lng: newLng });
+    }
+  };
 
   // Derive radii from form so map updates when Awarding/Close Distance fields change
   const awardingRadius =
@@ -323,10 +507,33 @@ function MapEntryFormBox(props: {
     }
   };
 
+  if (loadError) {
+    return (
+      <MapBox>
+        Unable to load Google Maps. Verify the API key, referrer restrictions,
+        and that the Maps JavaScript API is enabled.
+      </MapBox>
+    );
+  }
+
   if (!isLoaded) return <MapBox>Loading map...</MapBox>;
 
   return (
     <>
+      <EntryBox>
+        <span>Search:</span>
+        <Autocomplete
+          onLoad={ac => {
+            autocompleteRef.current = ac;
+          }}
+          onPlaceChanged={onPlaceChanged}
+        >
+          <EntryTextBox
+            type="text"
+            placeholder="Search for a place (e.g. Cornell Clock Tower)"
+          />
+        </Autocomplete>
+      </EntryBox>
       <MapBox>
         <GoogleMap
           mapContainerStyle={mapContainerStyle}
@@ -587,6 +794,8 @@ export function EntryModal(props: {
           return <OptionEntryFormBox form={form} key={form.name} />;
         } else if ('characterLimit' in form) {
           return <FreeEntryFormBox form={form} key={form.name} />;
+        } else if ('date' in form && 'checked' in form) {
+          return <CheckboxDateEntryFormBox form={form} key={form.name} />;
         } else if ('checked' in form) {
           return <CheckboxNumberEntryFormBox form={form} key={form.name} />;
         } else if ('min' in form) {

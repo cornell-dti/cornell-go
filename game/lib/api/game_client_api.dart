@@ -68,6 +68,31 @@ class GameClientApi {
   Stream<UpdateLeaderPositionDto> get updateLeaderPositionStream =>
       _updateLeaderPositionController.stream;
 
+  final _updateBearItemsDataController =
+      StreamController<UpdateBearItemsDataDto>.broadcast(sync: true);
+  Stream<UpdateBearItemsDataDto> get updateBearItemsDataStream =>
+      _updateBearItemsDataController.stream;
+
+  final _updateBearItemDataController =
+      StreamController<UpdateBearItemDataDto>.broadcast(sync: true);
+  Stream<UpdateBearItemDataDto> get updateBearItemDataStream =>
+      _updateBearItemDataController.stream;
+
+  final _updateUserInventoryDataController =
+      StreamController<UpdateUserInventoryDataDto>.broadcast(sync: true);
+  Stream<UpdateUserInventoryDataDto> get updateUserInventoryDataStream =>
+      _updateUserInventoryDataController.stream;
+
+  final _updateUserBearLoadoutDataController =
+      StreamController<UpdateUserBearLoadoutDataDto>.broadcast(sync: true);
+  Stream<UpdateUserBearLoadoutDataDto> get updateUserBearLoadoutDataStream =>
+      _updateUserBearLoadoutDataController.stream;
+
+  final _updatePurchaseResultController =
+      StreamController<UpdatePurchaseResultDto>.broadcast(sync: true);
+  Stream<UpdatePurchaseResultDto> get updatePurchaseResultStream =>
+      _updatePurchaseResultController.stream;
+
   final _timerStartedController =
       StreamController<TimerStartedDto>.broadcast(sync: true);
   Stream<TimerStartedDto> get timerStartedStream =>
@@ -115,6 +140,21 @@ class GameClientApi {
       StreamController<QuizProgressDto>.broadcast(sync: true);
   Stream<QuizProgressDto> get quizProgressStream =>
       _quizProgressController.stream;
+
+  final _updateFeedbackDataController =
+      StreamController<UpdateFeedbackDataDto>.broadcast(sync: true);
+  Stream<UpdateFeedbackDataDto> get updateFeedbackDataStream =>
+      _updateFeedbackDataController.stream;
+
+  final _updateCampusEventDataController =
+      StreamController<UpdateCampusEventDataDto>.broadcast(sync: true);
+  Stream<UpdateCampusEventDataDto> get updateCampusEventDataStream =>
+      _updateCampusEventDataController.stream;
+
+  final _campusEventListController =
+      StreamController<CampusEventListResponseDto>.broadcast(sync: true);
+  Stream<CampusEventListResponseDto> get campusEventListStream =>
+      _campusEventListController.stream;
 
   final _reconnectedController = StreamController<bool>.broadcast(sync: true);
   Stream<bool> get reconnectedStream => _reconnectedController.stream;
@@ -193,6 +233,31 @@ class GameClientApi {
         (data) => _updateLeaderPositionController
             .add(UpdateLeaderPositionDto.fromJson(data)));
 
+    sock.on(
+        "updateBearItemsData",
+        (data) => _updateBearItemsDataController
+            .add(UpdateBearItemsDataDto.fromJson(data)));
+
+    sock.on(
+        "updateBearItemData",
+        (data) => _updateBearItemDataController
+            .add(UpdateBearItemDataDto.fromJson(data)));
+
+    sock.on(
+        "updateUserInventoryData",
+        (data) => _updateUserInventoryDataController
+            .add(UpdateUserInventoryDataDto.fromJson(data)));
+
+    sock.on(
+        "updateUserBearLoadoutData",
+        (data) => _updateUserBearLoadoutDataController
+            .add(UpdateUserBearLoadoutDataDto.fromJson(data)));
+
+    sock.on(
+        "updatePurchaseResult",
+        (data) => _updatePurchaseResultController
+            .add(UpdatePurchaseResultDto.fromJson(data)));
+
     sock.on("timerStarted",
         (data) => _timerStartedController.add(TimerStartedDto.fromJson(data)));
 
@@ -230,6 +295,21 @@ class GameClientApi {
 
     sock.on("quizProgress",
         (data) => _quizProgressController.add(QuizProgressDto.fromJson(data)));
+
+    sock.on(
+        "updateFeedbackData",
+        (data) => _updateFeedbackDataController
+            .add(UpdateFeedbackDataDto.fromJson(data)));
+
+    sock.on(
+        "updateCampusEventData",
+        (data) => _updateCampusEventDataController
+            .add(UpdateCampusEventDataDto.fromJson(data)));
+
+    sock.on(
+        "campusEventList",
+        (data) => _campusEventListController
+            .add(CampusEventListResponseDto.fromJson(data)));
 
     _connectedController.add(true);
   }

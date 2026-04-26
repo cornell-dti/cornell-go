@@ -30,8 +30,8 @@ class SearchFilterBar extends StatefulWidget {
   List<String>? myCategories;
   String? mySearchText;
 
-  // SearchFilterBar({Key? key}):{super(key:key};
-  SearchFilterBar({Key? key}) : super(key: key);
+  final int initialHomeTab;
+  SearchFilterBar({Key? key, this.initialHomeTab = 0}) : super(key: key);
 
   @override
   State<SearchFilterBar> createState() => _SearchFilterBarState();
@@ -183,6 +183,7 @@ class _SearchFilterBarState extends State<SearchFilterBar>
               // HomeNavBar section - use Expanded instead of fixed height Container
               Expanded(
                 child: HomeNavBar(
+                  initialTab: widget.initialHomeTab,
                   difficulty: selectedDifficulty,
                   locations: selectedLocations,
                   categories: selectedCategories,
