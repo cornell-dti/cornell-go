@@ -42,15 +42,19 @@ export class CampusEventService {
       address: ev.address ?? undefined,
       latitude: ev.latitude,
       longitude: ev.longitude,
+      checkInRadius: ev.checkInRadius,
       categories: ev.categories,
       tags: ev.tags,
       source: ev.source,
       externalUrl: ev.externalUrl ?? undefined,
       organizerName: ev.organizerName ?? undefined,
+      organizerEmail: ev.organizerEmail ?? undefined,
       registrationUrl: ev.registrationUrl ?? undefined,
       checkInMethod: ev.checkInMethod,
       pointsForAttendance: ev.pointsForAttendance,
       featured: ev.featured,
+      approvalStatus: ev.approvalStatus,
+      rejectionReason: ev.rejectionReason ?? undefined,
       attendanceCount,
       rsvpCount,
     };
@@ -158,7 +162,8 @@ export class CampusEventService {
         pointsForAttendance: dto.pointsForAttendance ?? 10,
         featured: dto.featured ?? false,
         registrationUrl: dto.registrationUrl,
-        approvalStatus: ApprovalStatus.APPROVED,
+        approvalStatus: (dto.approvalStatus as ApprovalStatus) ?? ApprovalStatus.APPROVED,
+        rejectionReason: dto.rejectionReason ?? null,
       },
     });
     await this.emitUpdateCampusEvent(ev, false);
@@ -201,6 +206,15 @@ export class CampusEventService {
         pointsForAttendance: dto.pointsForAttendance ?? 10,
         featured: dto.featured ?? false,
         registrationUrl: dto.registrationUrl,
+        approvalStatus: dto.approvalStatus
+          ? (dto.approvalStatus as ApprovalStatus)
+          : undefined,
+        rejectionReason:
+          dto.approvalStatus === 'REJECTED'
+            ? dto.rejectionReason ?? existing.rejectionReason
+            : dto.approvalStatus
+              ? null
+              : undefined,
       },
     });
     await this.emitUpdateCampusEvent(ev, false);
