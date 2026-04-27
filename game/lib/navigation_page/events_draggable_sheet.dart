@@ -189,12 +189,26 @@ class _EventsDraggableSheetState extends State<EventsDraggableSheet> {
     return matchesLocation && matchesCategory && matchesSearch;
   }
 
+  bool _hasPhysicalLocation(CampusEventDto event) {
+    final location = event.locationName.trim();
+    final hasNamedLocation = location.isNotEmpty &&
+        location.toLowerCase() != 'virtual' &&
+        location.toLowerCase() != 'online';
+    final hasCoords = event.latitude.isFinite &&
+        event.longitude.isFinite &&
+        !(event.latitude == 0 && event.longitude == 0);
+    return hasNamedLocation && hasCoords;
+  }
+
   List<CampusEventDto> _filteredEvents(CampusEventModel campusEventModel) {
     final events = campusEventModel.currentList?.events ??
         campusEventModel.allCachedEvents;
     final rows = <({CampusEventDto event, DateTime start, double? distance})>[];
 
     for (final event in events) {
+      if (!_hasPhysicalLocation(event)) {
+        continue;
+      }
       final start = _parseCampusEventTime(event.startTime);
       final end = _parseCampusEventTime(event.endTime);
       if (start == null || end == null) {
@@ -222,6 +236,12 @@ class _EventsDraggableSheetState extends State<EventsDraggableSheet> {
     }
 
     rows.sort((a, b) {
+      final aIsTbd = a.event.locationName.trim().toUpperCase() == 'TBD';
+      final bIsTbd = b.event.locationName.trim().toUpperCase() == 'TBD';
+      if (aIsTbd != bIsTbd) {
+        return aIsTbd ? 1 : -1;
+      }
+
       final byStart = a.start.compareTo(b.start);
       if (byStart != 0) return byStart;
       if (a.distance == null && b.distance == null) return 0;

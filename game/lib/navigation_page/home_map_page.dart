@@ -304,10 +304,22 @@ class _HomeMapPageState extends State<HomeMapPage>
     return campusEventModel.currentList?.events ?? campusEventModel.allCachedEvents;
   }
 
+  bool _hasPhysicalLocation(CampusEventDto event) {
+    final location = event.locationName.trim();
+    final hasNamedLocation = location.isNotEmpty &&
+        location.toLowerCase() != 'virtual' &&
+        location.toLowerCase() != 'online';
+    final hasCoords = event.latitude.isFinite &&
+        event.longitude.isFinite &&
+        !(event.latitude == 0 && event.longitude == 0);
+    return hasNamedLocation && hasCoords;
+  }
+
   List<_CampusEventMapPin> _pinsMatchingFilter(List<CampusEventDto> events) {
     final now = DateTime.now();
     final pins = <_CampusEventMapPin>[];
     for (final event in events) {
+      if (!_hasPhysicalLocation(event)) continue;
       final end = _parseEventTime(event.endTime);
       if (end != null && end.isBefore(now)) continue;
 
