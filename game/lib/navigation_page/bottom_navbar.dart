@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:game/api/game_api.dart';
 import 'package:game/global_leaderboard/global_leaderboard_widget.dart';
@@ -12,6 +13,7 @@ import 'package:game/model/tracker_model.dart';
 import 'package:game/model/challenge_model.dart';
 import 'package:game/widgets/bear_mascot_message.dart';
 import 'package:game/utils/utility_functions.dart';
+import 'package:game/widgets/envelope_popup.dart';
 import 'package:showcaseview/showcaseview.dart';
 import 'search_filter_home.dart';
 
@@ -80,6 +82,19 @@ class _BottomNavBarState extends State<BottomNavBar> {
       GlobalLeaderboardWidget(),
       ProfilePage(),
     ];
+
+    // TODO: testing purposes only, remove later
+    if (kDebugMode) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (!mounted) return;
+        await showEnvelopePopup(
+          context,
+          titleText: 'FREE FOOD!',
+          envelopeText: 'BOBA!',
+          buttonLabel: 'Turn On Notifications',
+        );
+      });
+    }
   }
 
   @override
