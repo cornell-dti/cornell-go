@@ -5,6 +5,7 @@ import 'package:game/api/game_client_dto.dart';
 import 'package:game/api/geopoint.dart';
 import 'package:game/constants/constants.dart';
 import 'package:game/model/campus_event_model.dart';
+import 'package:game/utils/google_calendar_utils.dart';
 import 'package:provider/provider.dart';
 import 'package:velocity_x/velocity_x.dart';
 
@@ -188,6 +189,37 @@ class _EventsDraggableSheetState extends State<EventsDraggableSheet> {
       if (event.id == id) return event;
     }
     return null;
+  }
+
+  bool _showAddToGoogleCalendar(CampusEventDto event) {
+    final start = _parseCampusEventTime(event.startTime);
+    if (start == null) return false;
+    return start.isAfter(DateTime.now().add(const Duration(hours: 1)));
+  }
+
+  String _locationLineForCalendar(CampusEventDto event) {
+    final addr = event.address?.trim();
+    if (addr != null && addr.isNotEmpty) {
+      return '${event.locationName}, $addr';
+    }
+    return event.locationName;
+  }
+
+  Future<void> _openCampusEventInGoogleCalendar(CampusEventDto event) async {
+    final start = _parseCampusEventTime(event.startTime);
+    if (start == null) return;
+    final endParsed = _parseCampusEventTime(event.endTime);
+    final end = (endParsed != null && endParsed.isAfter(start))
+        ? endParsed
+        : start.add(const Duration(hours: 1));
+    await openGoogleCalendarCreateEvent(
+      title: event.title,
+      location: _locationLineForCalendar(event),
+      start: start,
+      end: end,
+      details: event.description,
+      allDay: event.allDay,
+    );
   }
 
   DateTime? _parseCampusEventTime(String? raw) {
@@ -465,6 +497,12 @@ class _EventsDraggableSheetState extends State<EventsDraggableSheet> {
                                 milesLabel: _milesLabel(focusedEvent),
                                 timeRangeLabel: _timeRangeLabel(focusedEvent),
                                 hostLabel: _hostLabel(focusedEvent),
+                                showAddToGoogleCalendar:
+                                    _showAddToGoogleCalendar(focusedEvent),
+                                onAddToGoogleCalendar: () =>
+                                    _openCampusEventInGoogleCalendar(
+                                      focusedEvent,
+                                    ),
                                 onGo: isRoutedView
                                     ? null
                                     : () => widget.onGoToEvent?.call(
@@ -641,16 +679,20 @@ class _FocusedEventCard extends StatelessWidget {
   final String milesLabel;
   final String timeRangeLabel;
   final String hostLabel;
+  final bool showAddToGoogleCalendar;
+  final Future<void> Function() onAddToGoogleCalendar;
   final VoidCallback? onGo;
   final VoidCallback? onClose;
 
-  const _FocusedEventCard({
+  _FocusedEventCard({
     required this.event,
     required this.isRoutedView,
     required this.walkLabel,
     required this.milesLabel,
     required this.timeRangeLabel,
     required this.hostLabel,
+    required this.showAddToGoogleCalendar,
+    required this.onAddToGoogleCalendar,
     this.onGo,
     this.onClose,
   });
@@ -796,31 +838,60 @@ class _FocusedEventCard extends StatelessWidget {
               ),
             ] else ...[
               const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                child: Material(
-                  color: AppColors.primaryRed,
-                  borderRadius: BorderRadius.circular(14),
-                  child: InkWell(
-                    onTap: onGo,
+              if (showAddToGoogleCalendar)
+                SizedBox(
+                  width: double.infinity,
+                  child: Material(
+                    color: AppColors.green,
                     borderRadius: BorderRadius.circular(14),
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 13),
-                      child: Center(
-                        child: Text(
-                          'GO!',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 42 / 2,
-                            fontFamily: 'Poppins',
+                    child: InkWell(
+                      onTap: () {
+                        onAddToGoogleCalendar();
+                      },
+                      borderRadius: BorderRadius.circular(14),
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 13),
+                        child: Center(
+                          child: Text(
+                            'Add to GCal',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 42 / 2,
+                              fontFamily: 'Poppins',
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+              else
+                SizedBox(
+                  width: double.infinity,
+                  child: Material(
+                    color: AppColors.primaryRed,
+                    borderRadius: BorderRadius.circular(14),
+                    child: InkWell(
+                      onTap: onGo,
+                      borderRadius: BorderRadius.circular(14),
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 13),
+                        child: Center(
+                          child: Text(
+                            'GO!',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 42 / 2,
+                              fontFamily: 'Poppins',
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
             ],
           ],
         ),
