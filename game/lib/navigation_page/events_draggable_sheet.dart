@@ -15,6 +15,10 @@ class EventsDraggableSheet extends StatefulWidget {
   final List<String>? locations;
   final List<String>? categories;
   final String? searchText;
+  final ValueChanged<CampusEventDto>? onGoToEvent;
+  final String? selectedEventId;
+  final String? routedEventId;
+  final VoidCallback? onClearSelection;
 
   const EventsDraggableSheet({
     super.key,
@@ -22,6 +26,10 @@ class EventsDraggableSheet extends StatefulWidget {
     this.locations,
     this.categories,
     this.searchText,
+    this.onGoToEvent,
+    this.selectedEventId,
+    this.routedEventId,
+    this.onClearSelection,
   });
 
   @override
@@ -91,6 +99,63 @@ class _EventsDraggableSheetState extends State<EventsDraggableSheet> {
     if (diff.inHours > 0) return 'in ${diff.inHours} hours';
     if (diff.inMinutes > 0) return 'in ${diff.inMinutes} min';
     return 'soon';
+  }
+
+  String _formatHourMinute(DateTime dt) {
+    final hour12 = dt.hour % 12 == 0 ? 12 : dt.hour % 12;
+    final minute = dt.minute == 0 ? '' : ':${dt.minute.toString().padLeft(2, '0')}';
+    final ampm = dt.hour >= 12 ? 'pm' : 'am';
+    return '$hour12$minute$ampm';
+  }
+
+  String _timeRangeLabel(CampusEventDto event) {
+    final start = _parseCampusEventTime(event.startTime);
+    final end = _parseCampusEventTime(event.endTime);
+    if (start == null || end == null) return '';
+    final startHour = start.hour % 12 == 0 ? 12 : start.hour % 12;
+    final endHour = end.hour % 12 == 0 ? 12 : end.hour % 12;
+    final endSuffix = end.hour >= 12 ? 'pm' : 'am';
+    if (start.minute == 0 &&
+        end.minute == 0 &&
+        (start.hour >= 12) == (end.hour >= 12)) {
+      return '$startHour-$endHour$endSuffix';
+    }
+    return '${_formatHourMinute(start)}-${_formatHourMinute(end)}';
+  }
+
+  double? _distanceMetersToEvent(CampusEventDto event) {
+    final userLoc = _currentUserLocation;
+    if (userLoc == null) return null;
+    try {
+      return userLoc.distanceTo(
+        GeoPoint(event.latitude.toDouble(), event.longitude.toDouble(), 0),
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
+  String _walkMinutesLabel(CampusEventDto event) {
+    final distanceMeters = _distanceMetersToEvent(event);
+    if (distanceMeters == null) return '';
+    const walkingMetersPerMinute = 84.0; // ~1.4 m/s
+    final min = (distanceMeters / walkingMetersPerMinute).round().clamp(1, 999);
+    return '$min min';
+  }
+
+  String _milesLabel(CampusEventDto event) {
+    final distanceMeters = _distanceMetersToEvent(event);
+    if (distanceMeters == null) return '';
+    final miles = distanceMeters / 1609.344;
+    return '${miles.toStringAsFixed(1)} mi';
+  }
+
+  CampusEventDto? _eventById(List<CampusEventDto> events, String? id) {
+    if (id == null) return null;
+    for (final event in events) {
+      if (event.id == id) return event;
+    }
+    return null;
   }
 
   DateTime? _parseCampusEventTime(String? raw) {
@@ -201,8 +266,21 @@ class _EventsDraggableSheetState extends State<EventsDraggableSheet> {
                   campusEventModel,
                   _,
                 ) {
+                  final allEvents = campusEventModel.currentList?.events ??
+                      campusEventModel.allCachedEvents;
                   final events = _filteredEvents(campusEventModel);
                   final count = events.length;
+                  final selectedEvent = _eventById(
+                    allEvents,
+                    widget.selectedEventId,
+                  );
+                  final routedEvent = _eventById(
+                    allEvents,
+                    widget.routedEventId,
+                  );
+                  final focusedEvent = routedEvent ?? selectedEvent;
+                  final isRoutedView =
+                      focusedEvent != null && routedEvent?.id == focusedEvent.id;
 
                   return ClipRRect(
                     borderRadius: const BorderRadius.vertical(
@@ -234,7 +312,7 @@ class _EventsDraggableSheetState extends State<EventsDraggableSheet> {
                               ),
                             ),
                           ),
-                          if (showExpandedChrome)
+                          if (showExpandedChrome && focusedEvent == null)
                             Padding(
                               padding: const EdgeInsets.only(
                                 left: 4,
@@ -270,55 +348,76 @@ class _EventsDraggableSheetState extends State<EventsDraggableSheet> {
                                 ],
                               ),
                             ),
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
-                            child: Text(
-                              '$count Events Happening Soon',
-                              style: const TextStyle(
-                                fontSize: 17,
-                                fontWeight: FontWeight.w600,
-                                fontFamily: 'Poppins',
-                                color: AppColors.darkText,
+                          if (focusedEvent == null) ...[
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
+                              child: Text(
+                                '$count Events Happening Soon',
+                                style: const TextStyle(
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: 'Poppins',
+                                  color: AppColors.darkText,
+                                ),
                               ),
                             ),
-                          ),
-                          if (events.isEmpty)
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(
-                                20,
-                                12,
-                                20,
-                                24,
-                              ),
-                              child: Text(
-                                'No events match your filters.',
-                                style: TextStyle(
-                                  color: AppColors.grayText,
-                                  fontFamily: 'Poppins',
-                                ),
-                              ),
-                            )
-                          else
-                            ...events.map((event) {
-                              final host = _hostLabel(event);
-                              final perk = _perkLine(event);
-                              final timeStr = _timeLabel(event);
-
-                              return Padding(
+                            if (events.isEmpty)
+                              Padding(
                                 padding: const EdgeInsets.fromLTRB(
-                                  16,
-                                  0,
-                                  16,
+                                  20,
                                   12,
+                                  20,
+                                  24,
                                 ),
-                                child: _EventCard(
-                                  eventName: event.title,
-                                  hostName: host,
-                                  perkLine: perk,
-                                  timeLabel: timeStr,
+                                child: Text(
+                                  'No events match your filters.',
+                                  style: TextStyle(
+                                    color: AppColors.grayText,
+                                    fontFamily: 'Poppins',
+                                  ),
                                 ),
-                              );
-                            }),
+                              )
+                            else
+                              ...events.map((event) {
+                                final host = _hostLabel(event);
+                                final perk = _perkLine(event);
+                                final timeStr = _timeLabel(event);
+
+                                return Padding(
+                                  padding: const EdgeInsets.fromLTRB(
+                                    16,
+                                    0,
+                                    16,
+                                    12,
+                                  ),
+                                  child: _EventCard(
+                                    onGo: () => widget.onGoToEvent?.call(event),
+                                    eventName: event.title,
+                                    hostName: host,
+                                    perkLine: perk,
+                                    timeLabel: timeStr,
+                                  ),
+                                );
+                              }),
+                          ] else ...[
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+                              child: _FocusedEventCard(
+                                event: focusedEvent,
+                                isRoutedView: isRoutedView,
+                                walkLabel: _walkMinutesLabel(focusedEvent),
+                                milesLabel: _milesLabel(focusedEvent),
+                                timeRangeLabel: _timeRangeLabel(focusedEvent),
+                                hostLabel: _hostLabel(focusedEvent),
+                                onGo: isRoutedView
+                                    ? null
+                                    : () => widget.onGoToEvent?.call(
+                                          focusedEvent,
+                                        ),
+                                onClose: widget.onClearSelection,
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                     ),
@@ -334,12 +433,14 @@ class _EventsDraggableSheetState extends State<EventsDraggableSheet> {
 }
 
 class _EventCard extends StatelessWidget {
+  final VoidCallback onGo;
   final String eventName;
   final String hostName;
   final String perkLine;
   final String timeLabel;
 
   const _EventCard({
+    required this.onGo,
     required this.eventName,
     required this.hostName,
     required this.perkLine,
@@ -370,6 +471,8 @@ class _EventCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     perkLine,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       fontSize: 13,
                       color: AppColors.purple,
@@ -393,6 +496,8 @@ class _EventCard extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               eventName,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
@@ -445,7 +550,7 @@ class _EventCard extends StatelessWidget {
                   color: AppColors.purple,
                   borderRadius: BorderRadius.circular(10),
                   child: InkWell(
-                    onTap: () {},
+                    onTap: onGo,
                     borderRadius: BorderRadius.circular(10),
                     child: const Padding(
                       padding: EdgeInsets.symmetric(
@@ -466,6 +571,201 @@ class _EventCard extends StatelessWidget {
                 ),
               ],
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FocusedEventCard extends StatelessWidget {
+  final CampusEventDto event;
+  final bool isRoutedView;
+  final String walkLabel;
+  final String milesLabel;
+  final String timeRangeLabel;
+  final String hostLabel;
+  final VoidCallback? onGo;
+  final VoidCallback? onClose;
+
+  const _FocusedEventCard({
+    required this.event,
+    required this.isRoutedView,
+    required this.walkLabel,
+    required this.milesLabel,
+    required this.timeRangeLabel,
+    required this.hostLabel,
+    this.onGo,
+    this.onClose,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white,
+      elevation: 2,
+      shadowColor: Colors.black26,
+      borderRadius: BorderRadius.circular(14),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: isRoutedView
+                      ? Row(
+                          children: [
+                            const Icon(Icons.directions_walk, size: 21),
+                            const SizedBox(width: 8),
+                            Text(
+                              [walkLabel, milesLabel]
+                                  .where((s) => s.isNotEmpty)
+                                  .join(' \u2022 '),
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w700,
+                                fontFamily: 'Poppins',
+                                color: AppColors.darkText,
+                              ),
+                            ),
+                          ],
+                        )
+                      : Text(
+                          event.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w700,
+                            fontFamily: 'Poppins',
+                            color: AppColors.darkText,
+                          ),
+                        ),
+                ),
+                IconButton(
+                  onPressed: onClose,
+                  icon: const Icon(
+                    Icons.cancel,
+                    size: 36,
+                    color: AppColors.black30,
+                  ),
+                ),
+              ],
+            ),
+            if (!isRoutedView) ...[
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  const Icon(Icons.directions_walk, size: 20),
+                  const SizedBox(width: 6),
+                  Text(
+                    walkLabel,
+                    style: const TextStyle(fontSize: 17, fontFamily: 'Poppins'),
+                  ),
+                  const SizedBox(width: 20),
+                  const Icon(Icons.location_on_outlined, size: 20),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      event.locationName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 17,
+                        fontFamily: 'Poppins',
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  const Icon(Icons.access_time, size: 20),
+                  const SizedBox(width: 6),
+                  Text(
+                    timeRangeLabel,
+                    style: const TextStyle(fontSize: 17, fontFamily: 'Poppins'),
+                  ),
+                ],
+              ),
+            ],
+            const SizedBox(height: 10),
+            Text(
+              event.description,
+              maxLines: isRoutedView ? 2 : 3,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 16,
+                height: 1.4,
+                fontFamily: 'Poppins',
+                color: AppColors.darkText,
+              ),
+            ),
+            if (isRoutedView) ...[
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text(
+                    'Hosted by',
+                    style: TextStyle(
+                      fontSize: 19,
+                      color: AppColors.grayText,
+                      fontFamily: 'Poppins',
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Container(
+                    width: 18,
+                    height: 18,
+                    decoration: const BoxDecoration(
+                      color: AppColors.black30,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: Text(
+                      hostLabel,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 19,
+                        fontFamily: 'Poppins',
+                        color: AppColors.darkText,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ] else ...[
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: Material(
+                  color: AppColors.primaryRed,
+                  borderRadius: BorderRadius.circular(14),
+                  child: InkWell(
+                    onTap: onGo,
+                    borderRadius: BorderRadius.circular(14),
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 13),
+                      child: Center(
+                        child: Text(
+                          'GO!',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 42 / 2,
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),

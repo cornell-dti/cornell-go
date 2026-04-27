@@ -56,6 +56,7 @@ class _HomeMapPageState extends State<HomeMapPage>
   int? _selectedCategoryIndex;
 
   String? _selectedMapPinId;
+  String? _goToEventId;
 
   // Pin icon cache for animated bounce tiers
   List<Map<String, BitmapDescriptor>>? _pinIconsByScale;
@@ -200,6 +201,16 @@ class _HomeMapPageState extends State<HomeMapPage>
     await _animateHomeCameraTo(focus, followUser: false);
   }
 
+  Future<void> _goToEvent(CampusEventDto event) async {
+    setState(() {
+      _selectedCategoryIndex = null;
+      _selectedMapPinId = event.id;
+      _goToEventId = event.id;
+    });
+    await _animateCameraToBiased(LatLng(event.latitude, event.longitude));
+    _runPinBounce();
+  }
+
   Future<void> _startHomePositionStream() async {
     if (_positionSubscription != null) return;
     final GoogleMapController controller = await _mapCompleter.future;
@@ -334,6 +345,37 @@ class _HomeMapPageState extends State<HomeMapPage>
     };
   }
 
+  CampusEventDto? _selectedGoToEvent(List<CampusEventDto> events) {
+    final id = _goToEventId;
+    if (id == null) return null;
+    for (final event in events) {
+      if (event.id == id) return event;
+    }
+    return null;
+  }
+
+  Set<Polyline> _routePolyline(List<CampusEventDto> events) {
+    final selectedEvent = _selectedGoToEvent(events);
+    final userLoc = _currentLocation;
+    if (selectedEvent == null || userLoc == null) return const {};
+    return {
+      Polyline(
+        polylineId: const PolylineId('event_route'),
+        color: AppColors.purple,
+        width: 5,
+        geodesic: true,
+        patterns: <PatternItem>[
+          PatternItem.dash(20),
+          PatternItem.gap(12),
+        ],
+        points: [
+          LatLng(userLoc.lat, userLoc.long),
+          LatLng(selectedEvent.latitude, selectedEvent.longitude),
+        ],
+      ),
+    };
+  }
+
   @override
   void initState() {
     super.initState();
@@ -455,7 +497,10 @@ class _HomeMapPageState extends State<HomeMapPage>
               : const Offset(0.5, 0.52),
           zIndex: _selectedMapPinId == pin.id ? 3 : 2,
           onTap: () {
-            setState(() => _selectedMapPinId = pin.id);
+            setState(() {
+              _selectedMapPinId = pin.id;
+              _goToEventId = null;
+            });
             unawaited(_animateCameraToBiased(pin.position));
             _runPinBounce();
           },
@@ -485,10 +530,14 @@ class _HomeMapPageState extends State<HomeMapPage>
                 zoom: _kHomeMapZoom,
               ),
               markers: _mergedMarkersForMap(campusEvents),
+              polylines: _routePolyline(campusEvents),
               onTap: (_) {
                 FocusManager.instance.primaryFocus?.unfocus();
                 final hadSelection = _selectedMapPinId != null;
-                setState(() => _selectedMapPinId = null);
+                setState(() {
+                  _selectedMapPinId = null;
+                  _goToEventId = null;
+                });
                 if (hadSelection) _runPinBounce();
               },
             ),
@@ -504,7 +553,17 @@ class _HomeMapPageState extends State<HomeMapPage>
             },
             onRecenter: _recenterOnUser,
           ),
-          const EventsDraggableSheet(),
+          EventsDraggableSheet(
+            onGoToEvent: _goToEvent,
+            selectedEventId: _selectedMapPinId,
+            routedEventId: _goToEventId,
+            onClearSelection: () {
+              setState(() {
+                _selectedMapPinId = null;
+                _goToEventId = null;
+              });
+            },
+          ),
         ],
       ),
     );
