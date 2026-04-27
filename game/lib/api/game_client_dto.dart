@@ -1112,8 +1112,8 @@ class CampusEventDto {
     allDay = fields["allDay"];
     locationName = fields["locationName"];
     address = fields.containsKey('address') ? (fields["address"]) : null;
-    latitude = fields["latitude"];
-    longitude = fields["longitude"];
+    latitude = (fields["latitude"] as num).toDouble();
+    longitude = (fields["longitude"] as num).toDouble();
     categories = fields["categories"]
         .map<CampusEventCategoriesDto>(
             (dynamic val) => CampusEventCategoriesDto.values.byName(val))
@@ -1196,8 +1196,8 @@ class CampusEventDto {
   late bool allDay;
   late String locationName;
   late String? address;
-  late int latitude;
-  late int longitude;
+  late double latitude;
+  late double longitude;
   late List<CampusEventCategoriesDto> categories;
   late List<String> tags;
   late CampusEventSourceDto source;
@@ -1416,8 +1416,8 @@ class UpsertCampusEventDto {
     allDay = fields.containsKey('allDay') ? (fields["allDay"]) : null;
     locationName = fields["locationName"];
     address = fields.containsKey('address') ? (fields["address"]) : null;
-    latitude = fields["latitude"];
-    longitude = fields["longitude"];
+    latitude = (fields["latitude"] as num).toDouble();
+    longitude = (fields["longitude"] as num).toDouble();
     checkInRadius =
         fields.containsKey('checkInRadius') ? (fields["checkInRadius"]) : null;
     categories = fields["categories"]
@@ -1520,8 +1520,8 @@ class UpsertCampusEventDto {
   late bool? allDay;
   late String locationName;
   late String? address;
-  late int latitude;
-  late int longitude;
+  late double latitude;
+  late double longitude;
   late int? checkInRadius;
   late List<UpsertCampusEventCategoriesDto> categories;
   late List<String> tags;
@@ -1941,8 +1941,8 @@ class LocationCheckInDto {
 
   LocationCheckInDto.fromJson(Map<String, dynamic> fields) {
     campusEventId = fields["campusEventId"];
-    latitude = fields["latitude"];
-    longitude = fields["longitude"];
+    latitude = (fields["latitude"] as num).toDouble();
+    longitude = (fields["longitude"] as num).toDouble();
   }
 
   void partialUpdate(LocationCheckInDto other) {
@@ -1958,8 +1958,8 @@ class LocationCheckInDto {
   });
 
   late String campusEventId;
-  late int latitude;
-  late int longitude;
+  late double latitude;
+  late double longitude;
 }
 
 class QrCodeCheckInDto {

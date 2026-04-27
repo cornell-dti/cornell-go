@@ -1,16 +1,10 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:game/api/game_api.dart';
 import 'package:game/api/game_client_dto.dart';
 import 'package:game/api/geopoint.dart';
 import 'package:game/constants/constants.dart';
-import 'package:game/model/challenge_model.dart';
-import 'package:game/model/event_model.dart';
-import 'package:game/model/group_model.dart';
-import 'package:game/model/tracker_model.dart';
-import 'package:game/model/user_model.dart';
-import 'package:game/utils/utility_functions.dart';
+import 'package:game/model/campus_event_model.dart';
 import 'package:provider/provider.dart';
 import 'package:velocity_x/velocity_x.dart';
 
@@ -37,8 +31,6 @@ class EventsDraggableSheet extends StatefulWidget {
 class _EventsDraggableSheetState extends State<EventsDraggableSheet> {
   final DraggableScrollableController _sheetController =
       DraggableScrollableController();
-  bool _clearingCurrentEvent = false;
-  String? _lastRequestedClearEventId;
 
   /// User location for distance tie-break (first challenge coords vs. user).
   GeoPoint? _currentUserLocation;
@@ -47,6 +39,10 @@ class _EventsDraggableSheetState extends State<EventsDraggableSheet> {
   void initState() {
     super.initState();
     _loadUserLocation();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<CampusEventModel>().requestCampusEvents(limit: 50);
+    });
   }
 
   Future<void> _loadUserLocation() async {
@@ -66,154 +62,110 @@ class _EventsDraggableSheetState extends State<EventsDraggableSheet> {
     super.dispose();
   }
 
-  String _hostLabel(EventDto event, UserModel userModel) {
-    final oid = event.initialOrganizationId;
-    if (oid != null && userModel.orgData.containsKey(oid)) {
-      return userModel.orgData[oid]?.name ?? 'Host';
+  String _hostLabel(CampusEventDto event) {
+    final organizer = event.organizerName?.trim();
+    if (organizer != null && organizer.isNotEmpty) {
+      return organizer;
     }
-    for (final org in userModel.orgData.values) {
-      if (org.events?.contains(event.id) ?? false) {
-        return org.name ?? 'Host';
-      }
-    }
-    return 'Host';
+    return 'Cornell';
   }
 
-  String _perkLine(EventDto event) {
+  String _perkLine(CampusEventDto event) {
     final d = event.description?.trim();
     if (d != null && d.isNotEmpty) {
       final first = d.split(RegExp(r'\n')).first.trim();
       if (first.length <= 48) return first;
     }
-    if (event.category != null) {
-      return friendlyCategory[event.category!] ?? 'Event';
+    if (event.tags.isNotEmpty) {
+      return event.tags.first;
     }
-    return 'Event';
+    return event.locationName;
   }
 
-  String _timeLabel(EventDto event) {
+  String _timeLabel(CampusEventDto event) {
+    final end = _parseCampusEventTime(event.endTime);
+    if (end == null) return '';
+    final diff = end.difference(DateTime.now());
+    if (diff.isNegative) return 'ended';
+    if (diff.inDays > 0) return 'in ${diff.inDays}d';
+    if (diff.inHours > 0) return 'in ${diff.inHours} hours';
+    if (diff.inMinutes > 0) return 'in ${diff.inMinutes} min';
+    return 'soon';
+  }
+
+  DateTime? _parseCampusEventTime(String? raw) {
+    if (raw == null || raw.trim().isEmpty) return null;
+    final trimmed = raw.trim();
+    final iso = DateTime.tryParse(trimmed);
+    if (iso != null) return iso.toLocal();
     try {
-      final end = HttpDate.parse(event.endTime ?? '');
-      final diff = end.difference(DateTime.now());
-      if (diff.isNegative) return 'ended';
-      if (diff.inDays > 0) return 'in ${diff.inDays}d';
-      if (diff.inHours > 0) return 'in ${diff.inHours} hours';
-      if (diff.inMinutes > 0) return 'in ${diff.inMinutes} min';
-      return 'soon';
+      return HttpDate.parse(trimmed).toLocal();
     } catch (_) {
-      return '';
+      return null;
     }
   }
 
-  List<EventDto> _filteredEvents(
-    UserModel userModel,
-    EventModel eventModel,
-    TrackerModel trackerModel,
-    ChallengeModel challengeModel,
-    GroupModel groupModel,
-  ) {
-    final allowedEventIds = userModel.getAvailableEventIds();
-    final events = allowedEventIds
-        .map((id) => eventModel.getEventById(id))
-        .filter((e) => e != null)
-        .map((e) => e!)
-        .toList();
+  bool _matchesCampusEventFilters(CampusEventDto event) {
+    final matchesLocation = widget.locations == null ||
+        widget.locations!.isEmpty ||
+        widget.locations!.contains(event.locationName);
 
-    final List<({EventDto event, DateTime end, double? distanceMeters})> rows =
-        [];
+    final matchesCategory = widget.categories == null ||
+        widget.categories!.isEmpty ||
+        event.categories.any((c) => widget.categories!.contains(c.name));
+
+    final searchTerm = widget.searchText?.trim().toLowerCase() ?? '';
+    final matchesSearch = searchTerm.isEmpty ||
+        event.title.toLowerCase().contains(searchTerm) ||
+        event.description.toLowerCase().contains(searchTerm) ||
+        event.locationName.toLowerCase().contains(searchTerm) ||
+        event.tags.any((tag) => tag.toLowerCase().contains(searchTerm));
+
+    return matchesLocation && matchesCategory && matchesSearch;
+  }
+
+  List<CampusEventDto> _filteredEvents(CampusEventModel campusEventModel) {
+    final events = campusEventModel.currentList?.events ??
+        campusEventModel.allCachedEvents;
+    final rows = <({CampusEventDto event, DateTime start, double? distance})>[];
 
     for (final event in events) {
-      final tracker = trackerModel.trackerByEventId(event.id);
-      final numberCompleted = tracker?.prevChallenges.length ?? 0;
-      final complete = numberCompleted == (event.challenges?.length ?? 0);
-      DateTime endtime;
-      try {
-        endtime = HttpDate.parse(event.endTime ?? '');
-      } catch (_) {
+      final start = _parseCampusEventTime(event.startTime);
+      final end = _parseCampusEventTime(event.endTime);
+      if (start == null || end == null) {
         continue;
       }
-      final timeTillExpire = endtime.difference(DateTime.now());
-      if (event.isJourney == true) continue;
-      if (event.indexable == false) continue;
-      if (event.challenges == null || event.challenges!.isEmpty) continue;
-      final challenge = challengeModel.getChallengeById(event.challenges![0]);
-      if (challenge == null) continue;
-
-      final challengeLocation = challenge.location?.name ?? '';
-      final matches = eventMatchesFilters(
-        event: event,
-        difficulty: widget.difficulty,
-        locations: widget.locations,
-        categories: widget.categories,
-        searchText: widget.searchText,
-        challengeLocation: challengeLocation,
-        challengeName: challenge.name,
-      );
-
-      if (!complete && !timeTillExpire.isNegative && matches) {
-        double? distanceMeters;
-        final userLoc = _currentUserLocation;
-        if (userLoc != null &&
-            challenge.latF != null &&
-            challenge.longF != null) {
-          try {
-            distanceMeters = userLoc.distanceTo(
-              GeoPoint(challenge.latF!, challenge.longF!, 0),
-            );
-          } catch (_) {
-            distanceMeters = null;
-          }
-        }
-        rows.add((event: event, end: endtime, distanceMeters: distanceMeters));
+      if (end.isBefore(DateTime.now())) {
+        continue;
       }
+      if (!_matchesCampusEventFilters(event)) {
+        continue;
+      }
+
+      double? distanceMeters;
+      final userLoc = _currentUserLocation;
+      if (userLoc != null) {
+        try {
+          distanceMeters = userLoc.distanceTo(
+            GeoPoint(event.latitude.toDouble(), event.longitude.toDouble(), 0),
+          );
+        } catch (_) {
+          distanceMeters = null;
+        }
+      }
+      rows.add((event: event, start: start, distance: distanceMeters));
     }
 
     rows.sort((a, b) {
-      final byEnd = a.end.compareTo(b.end);
-      if (byEnd != 0) return byEnd;
-      // Secondary: nearer first; unknown distance last
-      if (a.distanceMeters == null && b.distanceMeters == null) return 0;
-      if (a.distanceMeters == null) return 1;
-      if (b.distanceMeters == null) return -1;
-      return a.distanceMeters!.compareTo(b.distanceMeters!);
+      final byStart = a.start.compareTo(b.start);
+      if (byStart != 0) return byStart;
+      if (a.distance == null && b.distance == null) return 0;
+      if (a.distance == null) return 1;
+      if (b.distance == null) return -1;
+      return a.distance!.compareTo(b.distance!);
     });
 
     return rows.map((r) => r.event).toList();
-  }
-
-  void _maybeClearCurrentEvent(
-    GroupModel groupModel,
-    List<EventDto> filteredEvents,
-    ApiClient apiClient,
-  ) {
-    final currentEventId = groupModel.curEventId;
-    if (currentEventId == null || currentEventId.isEmpty) {
-      _lastRequestedClearEventId = null;
-      return;
-    }
-
-    final stillValid =
-        filteredEvents.any((event) => event.id == currentEventId);
-    if (stillValid) {
-      _lastRequestedClearEventId = null;
-      return;
-    }
-
-    if (_clearingCurrentEvent || _lastRequestedClearEventId == currentEventId) {
-      return;
-    }
-
-    _lastRequestedClearEventId = currentEventId;
-    _clearingCurrentEvent = true;
-
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      try {
-        await apiClient.serverApi
-            ?.setCurrentEvent(SetCurrentEventDto(eventId: ""));
-      } finally {
-        _clearingCurrentEvent = false;
-      }
-    });
   }
 
   Future<void> _collapseToPeek() async {
@@ -243,26 +195,13 @@ class _EventsDraggableSheetState extends State<EventsDraggableSheet> {
                   _sheetController.isAttached ? _sheetController.size : 0.26;
               final showExpandedChrome = extent > 0.88;
 
-              return Consumer6<UserModel, EventModel, GroupModel, TrackerModel,
-                  ChallengeModel, ApiClient>(
+              return Consumer<CampusEventModel>(
                 builder: (
                   context,
-                  userModel,
-                  eventModel,
-                  groupModel,
-                  trackerModel,
-                  challengeModel,
-                  apiClient,
+                  campusEventModel,
                   _,
                 ) {
-                  final events = _filteredEvents(
-                    userModel,
-                    eventModel,
-                    trackerModel,
-                    challengeModel,
-                    groupModel,
-                  );
-                  _maybeClearCurrentEvent(groupModel, events, apiClient);
+                  final events = _filteredEvents(campusEventModel);
                   final count = events.length;
 
                   return ClipRRect(
@@ -361,7 +300,7 @@ class _EventsDraggableSheetState extends State<EventsDraggableSheet> {
                             )
                           else
                             ...events.map((event) {
-                              final host = _hostLabel(event, userModel);
+                              final host = _hostLabel(event);
                               final perk = _perkLine(event);
                               final timeStr = _timeLabel(event);
 
@@ -373,7 +312,7 @@ class _EventsDraggableSheetState extends State<EventsDraggableSheet> {
                                   12,
                                 ),
                                 child: _EventCard(
-                                  eventName: event.name ?? 'Event',
+                                  eventName: event.title,
                                   hostName: host,
                                   perkLine: perk,
                                   timeLabel: timeStr,
