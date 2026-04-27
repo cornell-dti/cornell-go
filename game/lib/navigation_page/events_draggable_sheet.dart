@@ -70,6 +70,38 @@ class _EventsDraggableSheetState extends State<EventsDraggableSheet> {
     super.dispose();
   }
 
+  @override
+  void didUpdateWidget(EventsDraggableSheet oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.routedEventId != null &&
+        widget.routedEventId != oldWidget.routedEventId) {
+      // After GO, keep navigation card compact; do not let sheet fill the screen.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _snapSheetForRouteView();
+      });
+    }
+  }
+
+  Future<void> _snapSheetForRouteView() async {
+    if (!_sheetController.isAttached) return;
+    final current = _sheetController.size;
+    const target = 0.38;
+    if (current > 0.48) {
+      await _sheetController.animateTo(
+        target,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOutCubic,
+      );
+    } else {
+      await _sheetController.animateTo(
+        target,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOutCubic,
+      );
+    }
+  }
+
   String _hostLabel(CampusEventDto event) {
     final organizer = event.organizerName?.trim();
     if (organizer != null && organizer.isNotEmpty) {
@@ -264,14 +296,18 @@ class _EventsDraggableSheetState extends State<EventsDraggableSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final inRouteMode = widget.routedEventId != null;
+    // Post-GO: cap height so the sheet never expands to the full page.
+    const routeMax = 0.52;
+    const routeSnap = <double>[0.32, 0.42, routeMax];
     return Positioned.fill(
       child: DraggableScrollableSheet(
         controller: _sheetController,
         initialChildSize: 0.26,
         minChildSize: 0.26,
-        maxChildSize: 1.0,
+        maxChildSize: inRouteMode ? routeMax : 1.0,
         snap: true,
-        snapSizes: const [0.58, 1.0],
+        snapSizes: inRouteMode ? routeSnap : const [0.58, 1.0],
         builder: (context, scrollController) {
           return AnimatedBuilder(
             animation: _sheetController,
