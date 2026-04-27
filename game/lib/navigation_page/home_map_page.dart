@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -6,10 +7,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
+import 'package:provider/provider.dart';
+import 'package:game/api/game_client_dto.dart';
 import 'package:game/api/geopoint.dart';
 import 'package:game/constants/constants.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_compass/flutter_compass.dart';
+import 'package:game/model/campus_event_model.dart';
 
 import 'package:game/navigation_page/events_draggable_sheet.dart';
 import 'package:game/navigation_page/home_map/category_chips.dart';
@@ -25,63 +29,19 @@ import 'package:game/navigation_page/home_map/map_pin_utils.dart';
  * are split into dedicated files under `navigation_page/home_map/`.
  */
 
-// TODO: Replace with real event data from API
-const _kExamplePins = <ExampleMapPin>[
-  ExampleMapPin(
-    id: 'e1',
-    position: LatLng(42.4482, -76.4880),
-    categoryIndex: 0,
-    state: EventPinState.later,
-  ),
-  ExampleMapPin(
-    id: 'e2',
-    position: LatLng(42.4465, -76.4865),
-    categoryIndex: 0,
-    state: EventPinState.soon,
-  ),
-  ExampleMapPin(
-    id: 'e3',
-    position: LatLng(42.4475, -76.4890),
-    categoryIndex: 0,
-    state: EventPinState.now,
-  ),
-  ExampleMapPin(
-    id: 'e4',
-    position: LatLng(42.4490, -76.4870),
-    categoryIndex: 1,
-    state: EventPinState.later,
-  ),
-  ExampleMapPin(
-    id: 'e5',
-    position: LatLng(42.4455, -76.4855),
-    categoryIndex: 1,
-    state: EventPinState.now,
-  ),
-  ExampleMapPin(
-    id: 'e6',
-    position: LatLng(42.4470, -76.4900),
-    categoryIndex: 2,
-    state: EventPinState.soon,
-  ),
-  ExampleMapPin(
-    id: 'e7',
-    position: LatLng(42.4485, -76.4860),
-    categoryIndex: 2,
-    state: EventPinState.later,
-  ),
-  ExampleMapPin(
-    id: 'e8',
-    position: LatLng(42.4460, -76.4885),
-    categoryIndex: 3,
-    state: EventPinState.now,
-  ),
-  ExampleMapPin(
-    id: 'e9',
-    position: LatLng(42.4495, -76.4865),
-    categoryIndex: 3,
-    state: EventPinState.soon,
-  ),
-];
+class _CampusEventMapPin {
+  final String id;
+  final LatLng position;
+  final int categoryIndex;
+  final EventPinState state;
+
+  const _CampusEventMapPin({
+    required this.id,
+    required this.position,
+    required this.categoryIndex,
+    required this.state,
+  });
+}
 
 class HomeMapPage extends StatefulWidget {
   const HomeMapPage({super.key});
@@ -281,8 +241,81 @@ class _HomeMapPageState extends State<HomeMapPage>
     );
   }
 
-  Set<Marker> _mergedMarkersForMap() {
-    final pins = _markersForSelectedCategory();
+  DateTime? _parseEventTime(String? raw) {
+    if (raw == null || raw.trim().isEmpty) return null;
+    final trimmed = raw.trim();
+    final iso = DateTime.tryParse(trimmed);
+    if (iso != null) return iso.toLocal();
+    try {
+      return HttpDate.parse(trimmed).toLocal();
+    } catch (_) {
+      return null;
+    }
+  }
+
+  EventPinState _pinStateForEvent(CampusEventDto event) {
+    final now = DateTime.now();
+    final start = _parseEventTime(event.startTime);
+    final end = _parseEventTime(event.endTime);
+    if (start != null && end != null && start.isBefore(now) && end.isAfter(now)) {
+      return EventPinState.now;
+    }
+    if (start == null) return EventPinState.later;
+    final diff = start.difference(now);
+    if (!diff.isNegative && diff <= const Duration(hours: 3)) {
+      return EventPinState.soon;
+    }
+    return EventPinState.later;
+  }
+
+  int _mapCategoryIndex(CampusEventDto event) {
+    final category = event.categories.isNotEmpty
+        ? event.categories.first
+        : CampusEventCategoriesDto.OTHER;
+    switch (category) {
+      case CampusEventCategoriesDto.SOCIAL:
+      case CampusEventCategoriesDto.CULTURAL:
+        return 1; // Concerts
+      case CampusEventCategoriesDto.ARTS:
+      case CampusEventCategoriesDto.ACADEMIC:
+      case CampusEventCategoriesDto.CAREER:
+        return 2; // Speakers
+      case CampusEventCategoriesDto.COMMUNITY:
+      case CampusEventCategoriesDto.OTHER:
+        return 3; // Fundraisers
+      case CampusEventCategoriesDto.ATHLETIC:
+      case CampusEventCategoriesDto.WELLNESS:
+        return 0; // Food bucket (fallback)
+    }
+  }
+
+  List<CampusEventDto> _activeCampusEvents(CampusEventModel campusEventModel) {
+    return campusEventModel.currentList?.events ?? campusEventModel.allCachedEvents;
+  }
+
+  List<_CampusEventMapPin> _pinsMatchingFilter(List<CampusEventDto> events) {
+    final now = DateTime.now();
+    final pins = <_CampusEventMapPin>[];
+    for (final event in events) {
+      final end = _parseEventTime(event.endTime);
+      if (end != null && end.isBefore(now)) continue;
+
+      final pin = _CampusEventMapPin(
+        id: event.id,
+        position: LatLng(event.latitude, event.longitude),
+        categoryIndex: _mapCategoryIndex(event),
+        state: _pinStateForEvent(event),
+      );
+      if (_selectedCategoryIndex == null ||
+          _selectedCategoryIndex == pin.categoryIndex) {
+        pins.add(pin);
+      }
+    }
+    return pins;
+  }
+
+  Set<Marker> _mergedMarkersForMap(List<CampusEventDto> events) {
+    final pins = _markersForSelectedCategory(events);
     final at = _currentLocation == null
         ? _mapDefaultCenter
         : LatLng(_currentLocation!.lat, _currentLocation!.long);
@@ -314,7 +347,11 @@ class _HomeMapPageState extends State<HomeMapPage>
         setState(() => _compassHeading = event.heading!);
       }
     });
-    WidgetsBinding.instance.addPostFrameCallback((_) => _loadPinIcons());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<CampusEventModel>().requestCampusEvents(limit: 50);
+      _loadPinIcons();
+    });
   }
 
   @override
@@ -327,19 +364,11 @@ class _HomeMapPageState extends State<HomeMapPage>
 
   void _runPinBounce() {
     if (_pinIconsByScale == null) return;
-    final pins = _pinsMatchingFilter();
+    final campusEventModel = context.read<CampusEventModel>();
+    final pins = _pinsMatchingFilter(_activeCampusEvents(campusEventModel));
     if (pins.isEmpty) return;
     _pinBounceController.duration = const Duration(milliseconds: 300);
     _pinBounceController.forward(from: 0);
-  }
-
-  List<ExampleMapPin> _pinsMatchingFilter() {
-    return [
-      for (final pin in _kExamplePins)
-        if (_selectedCategoryIndex == null ||
-            pin.categoryIndex == _selectedCategoryIndex)
-          pin,
-    ];
   }
 
   Future<void> _putPinBitmapInTier(
@@ -404,8 +433,8 @@ class _HomeMapPageState extends State<HomeMapPage>
     }
   }
 
-  Set<Marker> _markersForSelectedCategory() {
-    final pins = _pinsMatchingFilter();
+  Set<Marker> _markersForSelectedCategory(List<CampusEventDto> events) {
+    final pins = _pinsMatchingFilter(events);
     if (pins.isEmpty) return {};
     final byScale = _pinIconsByScale;
     if (byScale == null) return {};
@@ -436,6 +465,8 @@ class _HomeMapPageState extends State<HomeMapPage>
 
   @override
   Widget build(BuildContext context) {
+    final campusEventModel = context.watch<CampusEventModel>();
+    final campusEvents = _activeCampusEvents(campusEventModel);
     return Scaffold(
       body: Stack(
         children: [
@@ -453,7 +484,7 @@ class _HomeMapPageState extends State<HomeMapPage>
                 target: _mapInitialCameraTarget,
                 zoom: _kHomeMapZoom,
               ),
-              markers: _mergedMarkersForMap(),
+              markers: _mergedMarkersForMap(campusEvents),
               onTap: (_) {
                 FocusManager.instance.primaryFocus?.unfocus();
                 final hadSelection = _selectedMapPinId != null;
