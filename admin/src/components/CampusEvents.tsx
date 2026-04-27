@@ -9,6 +9,7 @@ import {
   UpsertCampusEventDto,
   UpsertCampusEventSourceDto,
 } from '../all.dto';
+import { AlertModal } from './AlertModal';
 import { DeleteModal } from './DeleteModal';
 import {
   DateEntryForm,
@@ -149,6 +150,17 @@ function makeCampusEventForm(): EntryForm[] {
       helpText: 'Required when Approval Status is REJECTED.',
     },
   ];
+}
+
+function validateCampusEventForm(form: EntryForm[]): string | null {
+  const approvalForm = form[18] as OptionEntryForm;
+  const status = approvalForm.options[approvalForm.value];
+  if (status !== 'REJECTED') return null;
+  const reason = ((form[19] as FreeEntryForm).value ?? '').trim();
+  if (!reason) {
+    return 'Enter a rejection reason when Approval Status is REJECTED.';
+  }
+  return null;
 }
 
 function eventToForm(ev: CampusEventDto): EntryForm[] {
@@ -326,6 +338,8 @@ export function CampusEvents() {
   const [query, setQuery] = useState('');
   const [page, setPage] = useState(1);
   const [form, setForm] = useState<EntryForm[]>(() => makeCampusEventForm());
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
 
   const handleRadiusChange = (radius: number) => {
     setForm(prev => {
@@ -387,11 +401,22 @@ export function CampusEvents() {
 
   return (
     <>
+      <AlertModal
+        description={alertMessage}
+        isOpen={alertOpen}
+        onClose={() => setAlertOpen(false)}
+      />
       <EntryModal
         title="Create Campus Event"
         isOpen={createOpen}
         entryButtonText="CREATE"
         onEntry={async () => {
+          const err = validateCampusEventForm(form);
+          if (err) {
+            setAlertMessage(err);
+            setAlertOpen(true);
+            return;
+          }
           const dto = formToUpsert(form);
           await serverData.createCampusEvent(dto);
           setCreateOpen(false);
@@ -407,6 +432,12 @@ export function CampusEvents() {
         isOpen={editOpen}
         entryButtonText="SAVE"
         onEntry={async () => {
+          const err = validateCampusEventForm(form);
+          if (err) {
+            setAlertMessage(err);
+            setAlertOpen(true);
+            return;
+          }
           const dto = formToUpsert(form, currentId);
           await serverData.updateCampusEvent(dto);
           setEditOpen(false);
