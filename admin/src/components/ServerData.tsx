@@ -9,6 +9,10 @@ import {
 import {
   AdminBearItemDto,
   ChallengeDto,
+  CampusEventDto,
+  CampusEventListDto,
+  RequestCampusEventsDto,
+  UpsertCampusEventDto,
   UpdateErrorDto,
   EventDto,
   GroupDto,
@@ -24,6 +28,8 @@ import { ServerConnectionContext } from './ServerConnection';
 /**  object to store user data fetched from server */
 const defaultData = {
   events: new Map<string, EventDto>(),
+  campusEvents: new Map<string, CampusEventDto>(),
+  campusEventList: undefined as CampusEventListDto | undefined,
   achievements: new Map<string, AchievementDto>(),
   challenges: new Map<string, ChallengeDto>(),
   organizations: new Map<string, OrganizationDto>(),
@@ -37,6 +43,24 @@ const defaultData = {
   selectEvent(id: string) {},
   selectOrg(id: string) {},
   setAdminStatus(id: string, granted: boolean) {},
+  async requestCampusEvents(
+    request: RequestCampusEventsDto,
+  ): Promise<number | undefined> {
+    return undefined;
+  },
+  async createCampusEvent(
+    campusEvent: UpsertCampusEventDto,
+  ): Promise<string | undefined> {
+    return undefined;
+  },
+  async updateCampusEvent(
+    campusEvent: UpsertCampusEventDto,
+  ): Promise<string | undefined> {
+    return undefined;
+  },
+  async deleteCampusEvent(eventId: string): Promise<boolean | undefined> {
+    return undefined;
+  },
   async updateChallenge(challenge: ChallengeDto): Promise<string | undefined> {
     return undefined;
   },
@@ -146,6 +170,18 @@ export function ServerDataProvider(props: { children: ReactNode }) {
           return { ...prev, selectedOrg: id, selectedEvent: '' };
         });
       },
+      requestCampusEvents(request: RequestCampusEventsDto) {
+        return sock.requestAllCampusEvents(request);
+      },
+      createCampusEvent(campusEvent: UpsertCampusEventDto) {
+        return sock.createCampusEvent(campusEvent);
+      },
+      updateCampusEvent(campusEvent: UpsertCampusEventDto) {
+        return sock.updateCampusEvent(campusEvent);
+      },
+      deleteCampusEvent(eventId: string) {
+        return sock.deleteCampusEvent({ eventId });
+      },
       updateChallenge(challenge: ChallengeDto) {
         return sock.send('updateChallengeData', { challenge, deleted: false });
       },
@@ -244,6 +280,49 @@ export function ServerDataProvider(props: { children: ReactNode }) {
 
   /** Update defaultData object when ServerApi websocket receives a response */
   useEffect(() => {
+    sock.onCampusEventList(data => {
+      // get list of events for UI
+      setServerData(prev => {
+        const newCampusEvents = new Map(prev.campusEvents);
+        for (const ev of data.list.events ?? []) {
+          newCampusEvents.set(ev.id, ev);
+        }
+        return {
+          ...prev,
+          campusEvents: newCampusEvents,
+          campusEventList: data.list,
+        };
+      });
+    });
+    // update campus event list if when an event changes
+    sock.onUpdateCampusEventData(data => {
+      setServerData(prev => {
+        const newCampusEvents = new Map(prev.campusEvents);
+        if (data.deleted) {
+          newCampusEvents.delete(data.event.id);
+        } else {
+          newCampusEvents.set(
+            (data.event as CampusEventDto).id,
+            data.event as CampusEventDto,
+          );
+        }
+        const newCampusEventList =
+          prev.campusEventList === undefined
+            ? undefined
+            : {
+                ...prev.campusEventList,
+                events: prev.campusEventList.events
+                  .filter(ev => ev.id !== data.event.id)
+                  .concat(data.deleted ? [] : [data.event as CampusEventDto]),
+              };
+
+        return {
+          ...prev,
+          campusEvents: newCampusEvents,
+          campusEventList: newCampusEventList,
+        };
+      });
+    });
     sock.onUpdateAchievementData(data => {
       setServerData(prev => {
         const newAchievements = new Map(prev.achievements);

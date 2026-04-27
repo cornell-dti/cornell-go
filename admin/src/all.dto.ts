@@ -77,6 +77,13 @@ export enum CampusEventCheckInMethodDto {
   EITHER = 'EITHER',
 }
 
+export enum CampusEventApprovalStatusDto {
+  PENDING = 'PENDING',
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED',
+  ARCHIVED = 'ARCHIVED',
+}
+
 export enum RequestCampusEventsCategoriesDto {
   SOCIAL = 'SOCIAL',
   CULTURAL = 'CULTURAL',
@@ -111,6 +118,13 @@ export enum UpsertCampusEventCheckInMethodDto {
   LOCATION = 'LOCATION',
   QR_CODE = 'QR_CODE',
   EITHER = 'EITHER',
+}
+
+export enum UpsertCampusEventApprovalStatusDto {
+  PENDING = 'PENDING',
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED',
+  ARCHIVED = 'ARCHIVED',
 }
 
 export enum ChallengeLocationDto {
@@ -362,15 +376,19 @@ export interface CampusEventDto {
   address?: string;
   latitude: number;
   longitude: number;
+  checkInRadius: number;
   categories: CampusEventCategoriesDto[];
   tags: string[];
   source: CampusEventSourceDto;
   externalUrl?: string;
   organizerName?: string;
+  organizerEmail?: string;
   registrationUrl?: string;
   checkInMethod: CampusEventCheckInMethodDto;
   pointsForAttendance: number;
   featured: boolean;
+  approvalStatus: CampusEventApprovalStatusDto;
+  rejectionReason?: string;
   attendanceCount: number;
   rsvpCount: number;
 }
@@ -422,6 +440,8 @@ export interface UpsertCampusEventDto {
   pointsForAttendance?: number;
   featured?: boolean;
   registrationUrl?: string;
+  approvalStatus?: UpsertCampusEventApprovalStatusDto;
+  rejectionReason?: string;
 }
 
 export interface DeleteCampusEventDto {
