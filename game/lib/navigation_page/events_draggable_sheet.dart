@@ -136,7 +136,8 @@ class _EventsDraggableSheetState extends State<EventsDraggableSheet> {
 
   String _formatHourMinute(DateTime dt) {
     final hour12 = dt.hour % 12 == 0 ? 12 : dt.hour % 12;
-    final minute = dt.minute == 0 ? '' : ':${dt.minute.toString().padLeft(2, '0')}';
+    final minute =
+        dt.minute == 0 ? '' : ':${dt.minute.toString().padLeft(2, '0')}';
     final ampm = dt.hour >= 12 ? 'pm' : 'am';
     return '$hour12$minute$ampm';
   }
@@ -367,8 +368,8 @@ class _EventsDraggableSheetState extends State<EventsDraggableSheet> {
                     widget.routedEventId,
                   );
                   final focusedEvent = routedEvent ?? selectedEvent;
-                  final isRoutedView =
-                      focusedEvent != null && routedEvent?.id == focusedEvent.id;
+                  final isRoutedView = focusedEvent != null &&
+                      routedEvent?.id == focusedEvent.id;
 
                   return ClipRRect(
                     borderRadius: const BorderRadius.vertical(
@@ -501,8 +502,8 @@ class _EventsDraggableSheetState extends State<EventsDraggableSheet> {
                                     _showAddToGoogleCalendar(focusedEvent),
                                 onAddToGoogleCalendar: () =>
                                     _openCampusEventInGoogleCalendar(
-                                      focusedEvent,
-                                    ),
+                                  focusedEvent,
+                                ),
                                 onGo: isRoutedView
                                     ? null
                                     : () => widget.onGoToEvent?.call(

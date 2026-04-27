@@ -268,7 +268,10 @@ class _HomeMapPageState extends State<HomeMapPage>
     final now = DateTime.now();
     final start = _parseEventTime(event.startTime);
     final end = _parseEventTime(event.endTime);
-    if (start != null && end != null && start.isBefore(now) && end.isAfter(now)) {
+    if (start != null &&
+        end != null &&
+        start.isBefore(now) &&
+        end.isAfter(now)) {
       return EventPinState.now;
     }
     if (start == null) return EventPinState.later;
@@ -301,7 +304,8 @@ class _HomeMapPageState extends State<HomeMapPage>
   }
 
   List<CampusEventDto> _activeCampusEvents(CampusEventModel campusEventModel) {
-    return campusEventModel.currentList?.events ?? campusEventModel.allCachedEvents;
+    return campusEventModel.currentList?.events ??
+        campusEventModel.allCachedEvents;
   }
 
   bool _hasPhysicalLocation(CampusEventDto event) {
