@@ -1,3 +1,14 @@
+
+/**
+ * Campus Events page on the admin dashboard
+ *
+ * Gets campus events from `ServerDataContext` using`requestCampusEvents` → `campusEventList`, 
+ * plus `campusEvents` map and `updateCampusEventData` broadcasts).
+ *
+ * Allows admins to create/edit campus-event fields with location, title, description, 
+ * approval status, and other fields. 
+ * If an event is REJECTED, a rejection reason is required.
+ */
 import { useContext, useEffect, useMemo, useState } from 'react';
 import { compareTwoStrings } from 'string-similarity';
 import styled from 'styled-components';
