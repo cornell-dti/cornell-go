@@ -71,9 +71,13 @@ export enum EventCategoryDto {
   FOOD = 'FOOD',
   NATURE = 'NATURE',
   HISTORICAL = 'HISTORICAL',
-  CAFE = 'CAFE',
-  DININGHALL = 'DININGHALL',
-  DORM = 'DORM',
+  RESIDENTIAL = 'RESIDENTIAL',
+  LANDMARK = 'LANDMARK',
+  ARTS = 'ARTS',
+  ATHLETICS = 'ATHLETICS',
+  LIBRARY = 'LIBRARY',
+  ACADEMIC = 'ACADEMIC',
+  RECREATION = 'RECREATION',
 }
 
 /**
@@ -87,6 +91,7 @@ export interface EventDto {
   description?: string;
   longDescription?: string;
   category?: EventCategoryDto;
+  imageUrl?: string;
   timeLimitation?: 'LIMITED_TIME' | 'PERPETUAL';
   endTime?: string;
   challenges?: string[];
@@ -98,6 +103,7 @@ export interface EventDto {
   latitudeF?: number;
   featured?: boolean;
   isJourney?: boolean;
+  sortOrder?: number;
 }
 
 /** DTO for PrevChallenge as used in EventTrackerDto */
@@ -107,6 +113,7 @@ export interface PrevChallengeDto {
   extensionsUsed?: number;
   dateCompleted: string;
   failed?: boolean; // True if challenge was failed due to timer expiration
+  dateExpired?: boolean;
 }
 
 /** DTO for event tracker in updateEventTrackerData */

@@ -42,6 +42,8 @@ class JourneyCellDto {
     required this.difficulty,
     required this.points,
     required this.eventId,
+    required this.featured,
+    required this.sortOrder,
   });
   late String location;
   late String name;
@@ -56,6 +58,8 @@ class JourneyCellDto {
   late String difficulty;
   late int points;
   late String eventId;
+  late bool featured;
+  late int sortOrder;
 }
 
 class JourneysPage extends StatefulWidget {
@@ -384,9 +388,11 @@ class _JourneysPageState extends State<JourneysPage> {
                               challengeName: challengeName,
                             );
 
-                            var imageUrl = getValidImageUrl(
-                              challenge.imageUrl,
-                            );
+                            final rawImageUrl = (event.imageUrl != null &&
+                                    event.imageUrl!.isNotEmpty)
+                                ? event.imageUrl!
+                                : challenge.imageUrl;
+                            var imageUrl = getValidImageUrl(rawImageUrl);
 
                             if (!complete &&
                                 !timeTillExpire.isNegative &&
@@ -394,8 +400,7 @@ class _JourneysPageState extends State<JourneysPage> {
                               eventData.add(
                                 JourneyCellDto(
                                   location:
-                                      friendlyLocation[challenge.location] ??
-                                          "",
+                                      friendlyCategory[event.category] ?? "",
                                   name: event.name ?? "",
                                   lat: challenge.latF ?? null,
                                   long: challenge.longF ?? null,
@@ -410,10 +415,20 @@ class _JourneysPageState extends State<JourneysPage> {
                                           "",
                                   points: totalPoints,
                                   eventId: event.id,
+                                  featured: event.featured ?? false,
+                                  sortOrder: event.sortOrder ?? 0,
                                 ),
                               );
                             }
                           }
+
+                          // Featured journeys first, then higher sortOrder
+                          eventData.sort((a, b) {
+                            if (a.featured != b.featured) {
+                              return a.featured ? -1 : 1;
+                            }
+                            return b.sortOrder.compareTo(a.sortOrder);
+                          });
 
                           // Onboarding: Step 4 - Show showcase for first journey card after journeys explanation
                           final onboarding = Provider.of<OnboardingModel>(
@@ -463,6 +478,7 @@ class _JourneysPageState extends State<JourneysPage> {
                                 journey.difficulty,
                                 journey.points,
                                 journey.eventId,
+                                journey.featured,
                                 onTap: () => _startJourneyFlow(journey),
                               );
 

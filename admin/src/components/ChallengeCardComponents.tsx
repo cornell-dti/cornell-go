@@ -12,6 +12,7 @@ import {
   OptionEntryForm,
   MapEntryForm,
   CheckboxNumberEntryForm,
+  CheckboxDateEntryForm,
   AnswersEntryForm,
   OptionWithCustomEntryForm,
 } from './EntryModal';
@@ -223,6 +224,16 @@ export function makeChallengeForm(): EntryForm[] {
       max: 3600,
       numberLabel: 'Timer Length (seconds)',
     },
+    {
+      name: 'Scheduled Start Time',
+      checked: false,
+      date: new Date(),
+    },
+    {
+      name: 'Scheduled End Time',
+      checked: false,
+      date: new Date(),
+    },
   ];
 }
 
@@ -285,6 +296,20 @@ export function challengeToForm(challenge: ChallengeDto) {
       max: 3600,
       numberLabel: 'Timer Length (seconds)',
     },
+    {
+      name: 'Scheduled Start Time',
+      checked: !!challenge.scheduledStartTime,
+      date: challenge.scheduledStartTime
+        ? new Date(challenge.scheduledStartTime)
+        : new Date(),
+    },
+    {
+      name: 'Scheduled End Time',
+      checked: !!challenge.scheduledEndTime,
+      date: challenge.scheduledEndTime
+        ? new Date(challenge.scheduledEndTime)
+        : new Date(),
+    },
   ];
 }
 
@@ -294,6 +319,8 @@ export function challengeFromForm(
   id: string,
 ): ChallengeDto {
   const timerForm = form[8] as CheckboxNumberEntryForm;
+  const startForm = form[9] as CheckboxDateEntryForm;
+  const endForm = form[10] as CheckboxDateEntryForm;
   return {
     id,
     name: (form[2] as FreeEntryForm).value,
@@ -307,6 +334,10 @@ export function challengeFromForm(
     closeRadiusF: (form[7] as NumberEntryForm).value,
     linkedEventId: eventId,
     timerLength: timerForm.checked ? timerForm.value : undefined,
+    scheduledStartTime: startForm.checked
+      ? startForm.date.toISOString()
+      : undefined,
+    scheduledEndTime: endForm.checked ? endForm.date.toISOString() : undefined,
   };
 }
 
@@ -410,6 +441,14 @@ export function ChallengeCard(props: {
         <b>
           {props.challenge.timerLength
             ? `${Math.floor(props.challenge.timerLength / 60)}m ${props.challenge.timerLength % 60}s`
+            : 'None'}
+        </b>
+        <br />
+        Scheduled:{' '}
+        <b>
+          {props.challenge.scheduledStartTime ||
+          props.challenge.scheduledEndTime
+            ? `${props.challenge.scheduledStartTime ? new Date(props.challenge.scheduledStartTime).toLocaleString() : '—'} to ${props.challenge.scheduledEndTime ? new Date(props.challenge.scheduledEndTime).toLocaleString() : '—'}`
             : 'None'}
         </b>
       </ListCardBody>

@@ -142,6 +142,8 @@ class _GameplayMapState extends State<GameplayMap>
   int numHintsLeft = 10;
   GeoPoint? startingHintCenter;
   GeoPoint? hintCenter;
+  // Scaled in initState so the hint always fully encompasses the awarding area
+  // regardless of how large awardingRadius is.
   double defaultHintRadius = 200.0;
   double? hintRadius;
   double _compassHeading = 0.0;
@@ -492,6 +494,7 @@ class _GameplayMapState extends State<GameplayMap>
   void initState() {
     super.initState();
     _displayedChallengeId = widget.challengeId;
+    defaultHintRadius = max(200.0, widget.awardingRadius * 1.5);
     setCustomMarkerIcon();
     streamStarted = startPositionStream();
     setStartingHintCircle();
@@ -731,6 +734,7 @@ class _GameplayMapState extends State<GameplayMap>
         startingHintCenter = null;
         hintCenter = null;
         hintRadius = null;
+        defaultHintRadius = max(200.0, widget.awardingRadius * 1.5);
         setStartingHintCircle();
 
         // Remove timer modal if showing
@@ -792,40 +796,20 @@ class _GameplayMapState extends State<GameplayMap>
   }
 
   /**
-   * Sets a center for the hint circle by random such that
-   * the entire circle encompasses the awarding area denoted by
-   * widget.targetLocation and widget.awardingRadius.
-   * 
-   * Sets the radius for the hint circle based on the number of
-   * hints used for this challenge already.
+   * Centers the hint circle on the target location and sets its radius based
+   * on the number of hints already used for this challenge.
    */
   void setStartingHintCircle() {
-    double calculation = defaultHintRadius -
+    hintRadius = defaultHintRadius -
         (defaultHintRadius - widget.awardingRadius) *
             0.33 *
             widget.startingHintsUsed;
 
-    hintRadius = calculation;
-    if (hintRadius == null) {
-      hintRadius = defaultHintRadius;
-    }
-
-    Random _random = Random();
-
-    // Calculate the max distance between the centers of the circles in meters
-    double maxDistance = hintRadius! - widget.awardingRadius;
-    // Center for hint circle can be up to maxDistance away from targetLocation
-    // Generate random angle
-    double angle = _random.nextDouble() * 2 * pi;
-    // Generate random distance within the maxDistance radius in meters
-    double randomDistance = sqrt(_random.nextDouble()) * maxDistance;
-    // Convert to distance in degrees of latitude and longitude
-    randomDistance /= METERS_TO_DEGREES;
-    // Calculate coordinates of the random point within the circle
-    double dx = widget.targetLocation.lat + randomDistance * cos(angle);
-    double dy = widget.targetLocation.long + randomDistance * sin(angle);
-
-    startingHintCenter = GeoPoint(dx, dy, 0);
+    startingHintCenter = GeoPoint(
+      widget.targetLocation.lat,
+      widget.targetLocation.long,
+      0,
+    );
     hintCenter = startingHintCenter;
   }
 
@@ -1164,21 +1148,21 @@ class _GameplayMapState extends State<GameplayMap>
           ? widget.awardingRadius
           : calculatedRadius;
 
-      double newLat = hintCenter!.lat -
-          (startingHintCenter!.lat - widget.targetLocation.lat) * 0.33;
-      double newLong = hintCenter!.long -
-          (startingHintCenter!.long - widget.targetLocation.long) * 0.33;
-
-      return {'radius': newRadius, 'center': GeoPoint(newLat, newLong, 0)};
+      return {
+        'radius': newRadius,
+        'center': GeoPoint(
+          widget.targetLocation.lat,
+          widget.targetLocation.long,
+          0,
+        ),
+      };
     }
     return null;
   }
 
-  /** 
-   * Handles logic to use a hint. This includes updating hints left, 
-   * calculating the updated radius of the hint circle, and changing the
-   * location of the hint center such that it still contains the awarding
-   * radius.
+  /**
+   * Handles logic to use a hint. Shrinks the hint circle radius toward the
+   * awarding radius. The circle stays centered on the target location.
    */
   void useHint() {
     var newValues = _calculateNewHintValues();
@@ -1950,9 +1934,10 @@ class _GameplayMapState extends State<GameplayMap>
                   circles: {
                     Circle(
                       circleId: CircleId("hintCircle"),
-                      center: hintCenter != null
-                          ? LatLng(hintCenter!.lat, hintCenter!.long)
-                          : _center,
+                      center: LatLng(
+                        widget.targetLocation.lat,
+                        widget.targetLocation.long,
+                      ),
                       radius: () {
                         // Use animated radius if animation is in progress
                         double radiusValue;

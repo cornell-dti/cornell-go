@@ -61,13 +61,23 @@ export function getAdminApiFile(apiDefs: ApiDefs) {
   `;
 
   for (const [ev, dto] of apiDefs.serverEntrypoints.entries()) {
-    const ackType = apiDefs.serverAcks.get(ev);
-    tsCode += `
+    const rawAckType = apiDefs.serverAcks.get(ev);
+    const ackType = rawAckType === "dynamic" ? "any" : rawAckType;
+    if (dto) {
+      tsCode += `
       ${ev}(data: dto.${dto}) {
         return this.send("${ev}", data) as Promise<${ackType} | undefined>;
       }
 
     `;
+    } else {
+      tsCode += `
+      ${ev}() {
+        return this.send("${ev}", {}) as Promise<${ackType} | undefined>;
+      }
+
+    `;
+    }
   }
 
   for (const [ev, dto] of apiDefs.clientEntrypoints.entries()) {

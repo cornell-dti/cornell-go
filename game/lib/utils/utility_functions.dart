@@ -241,12 +241,16 @@ final Map<ChallengeLocationDto, String> abbrevLocation = {
 };
 
 final Map<EventCategoryDto, String> friendlyCategory = {
-  EventCategoryDto.CAFE: "Cafe",
-  EventCategoryDto.DININGHALL: "Dining Hall",
-  EventCategoryDto.DORM: "Dorm",
   EventCategoryDto.FOOD: "Food",
-  EventCategoryDto.HISTORICAL: "Historical",
   EventCategoryDto.NATURE: "Nature",
+  EventCategoryDto.HISTORICAL: "Historical",
+  EventCategoryDto.RESIDENTIAL: "Residential",
+  EventCategoryDto.LANDMARK: "Landmark",
+  EventCategoryDto.ARTS: "Arts",
+  EventCategoryDto.ATHLETICS: "Athletics",
+  EventCategoryDto.LIBRARY: "Library",
+  EventCategoryDto.ACADEMIC: "Academic",
+  EventCategoryDto.RECREATION: "Recreation",
 };
 
 /**

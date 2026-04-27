@@ -81,6 +81,7 @@ export class UserService {
     const user: User = await this.prisma.user.create({
       data: {
         score: 0,
+        coins: 100,
         group: { connect: { id: group.id } },
         hostOf: { connect: { id: group.id } },
         memberOf: { connect: { id: allOrg.id } },

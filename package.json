@@ -12,6 +12,7 @@
     "setup": "node ./scripts/setup.js",
     "updateapi": "node ./scripts/updateapi.js",
     "formatall": "node ./scripts/formatall.js",
+    "bulk-add": "node ./scripts/bulk-add-challenges.js",
     "compilescripts": "tsc --project scripts",
     "prepare": "husky"
   },

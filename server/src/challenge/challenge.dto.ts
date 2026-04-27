@@ -28,6 +28,8 @@ export interface ChallengeDto {
   closeRadiusF?: number;
   linkedEventId?: string;
   timerLength?: number;
+  scheduledStartTime?: string;
+  scheduledEndTime?: string;
 }
 
 /** DTO for requestChallengeData */

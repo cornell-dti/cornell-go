@@ -11,9 +11,11 @@ import 'package:game/api/geopoint.dart';
 import 'package:game/api/notification_service.dart';
 import 'package:game/loading_page/loading_page.dart';
 import 'package:game/model/achievement_model.dart';
+import 'package:game/model/campus_event_model.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:game/model/onboarding_model.dart';
 import 'package:game/model/timer_model.dart';
+import 'package:game/model/feature_flags_model.dart';
 import 'package:game/model/quiz_model.dart';
 
 // imports for google maps
@@ -39,6 +41,7 @@ const bool USE_DEVICE_PREVIEW = false;
 final storage = FlutterSecureStorage();
 late final String API_URL;
 late final ApiClient client;
+late final FeatureFlagsModel featureFlags;
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
@@ -67,6 +70,10 @@ void main() async {
 
   // Initialize API client
   client = ApiClient(storage, API_URL);
+
+  // Load feature flags from server
+  featureFlags = FeatureFlagsModel();
+  await featureFlags.load(API_URL);
 
   // Initialize notification service with callback to send token to server
   await NotificationService().initialize(
@@ -132,6 +139,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider.value(value: featureFlags),
         ChangeNotifierProvider.value(value: client),
         ChangeNotifierProvider(create: (_) => UserModel(client), lazy: false),
         ChangeNotifierProvider(
@@ -154,6 +162,10 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(create: (_) => TimerModel(client), lazy: false),
         ChangeNotifierProvider(create: (_) => QuizModel(client), lazy: false),
+        ChangeNotifierProvider(
+          create: (_) => CampusEventModel(client),
+          lazy: false,
+        ),
       ],
       child: GameWidget(
         child: MaterialApp(

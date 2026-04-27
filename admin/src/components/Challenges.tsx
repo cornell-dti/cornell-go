@@ -45,9 +45,13 @@ const eventCategoryOptions = [
   'FOOD',
   'NATURE',
   'HISTORICAL',
-  'CAFE',
-  'DININGHALL',
-  'DORM',
+  'RESIDENTIAL',
+  'LANDMARK',
+  'ARTS',
+  'ATHLETICS',
+  'LIBRARY',
+  'ACADEMIC',
+  'RECREATION',
 ];
 
 // Combined form indices:
