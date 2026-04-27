@@ -1,11 +1,6 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:game/constants/constants.dart';
-import 'package:game/journeys/journeys_page.dart';
-import 'package:game/challenges/challenges_page.dart';
 import 'package:game/journeys/filter_form.dart';
-import 'package:game/navigation_page/events_draggable_sheet.dart';
 import 'package:game/navigation_page/home_navbar.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/services.dart';
@@ -183,25 +178,12 @@ class _SearchFilterBarState extends State<SearchFilterBar>
               ),
               // Home tab content with events bottom sheet over Challenges/Journeys
               Expanded(
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    Positioned.fill(
-                      child: HomeNavBar(
-                        initialTab: widget.initialHomeTab,
-                        difficulty: selectedDifficulty,
-                        locations: selectedLocations,
-                        categories: selectedCategories,
-                        searchText: searchText,
-                      ),
-                    ),
-                    EventsDraggableSheet(
-                      difficulty: selectedDifficulty,
-                      locations: selectedLocations,
-                      categories: selectedCategories,
-                      searchText: searchText,
-                    ),
-                  ],
+                child: HomeNavBar(
+                  initialTab: widget.initialHomeTab,
+                  difficulty: selectedDifficulty,
+                  locations: selectedLocations,
+                  categories: selectedCategories,
+                  searchText: searchText,
                 ),
               ),
             ],

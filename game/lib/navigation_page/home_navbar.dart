@@ -27,9 +27,11 @@ class HomeNavBar extends StatefulWidget {
   List<String>? myCategories;
   String? mySearchText;
   final int initialTab;
+  final ValueChanged<int>? onTabChanged;
   HomeNavBar({
     Key? key,
     this.initialTab = 0,
+    this.onTabChanged,
     String? difficulty,
     List<String>? locations,
     List<String>? categories,
@@ -58,6 +60,7 @@ class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
       vsync: this,
       initialIndex: widget.initialTab,
     );
+    _tabController.addListener(_handleTabChange);
 
     // Onboarding: Register showcase scope for highlighting Journeys tab (step 2)
     // Hot restart fix: unregister old instance if exists
@@ -79,8 +82,14 @@ class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
   @override
   void dispose() {
     _removeBearOverlay();
+    _tabController.removeListener(_handleTabChange);
     _tabController.dispose();
     super.dispose();
+  }
+
+  void _handleTabChange() {
+    if (_tabController.indexIsChanging) return;
+    widget.onTabChanged?.call(_tabController.index);
   }
 
   void _showBearOverlay() {
@@ -102,6 +111,7 @@ class _HomeNavbarState extends State<HomeNavBar> with TickerProviderStateMixin {
           Provider.of<OnboardingModel>(context, listen: false).completeStep2();
           // Onboarding: Switch to Journeys tab (index 1) to trigger step 3 explanation overlay
           _tabController.animateTo(1);
+          widget.onTabChanged?.call(1);
         },
       ),
     );

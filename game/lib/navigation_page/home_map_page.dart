@@ -11,6 +11,7 @@ import 'package:game/constants/constants.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 
+import 'package:game/navigation_page/events_draggable_sheet.dart';
 import 'package:game/navigation_page/home_map/category_chips.dart';
 import 'package:game/navigation_page/home_map/home_map_categories.dart';
 import 'package:game/navigation_page/home_map/home_map_search_bar.dart';
@@ -472,6 +473,7 @@ class _HomeMapPageState extends State<HomeMapPage>
             },
             onRecenter: _recenterOnUser,
           ),
+          const EventsDraggableSheet(),
         ],
       ),
     );
