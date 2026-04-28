@@ -53,9 +53,9 @@ export interface RequestBearItemsDto {
 }
 
 // Empty DTOS for documentation and frontend api generation
-export interface RequestUserInventoryDto {}
+export interface RequestUserInventoryDto { }
 
-export interface RequestUserBearLoadoutDto {}
+export interface RequestUserBearLoadoutDto { }
 
 export interface UpdateBearItemsDataDto {
   items: BearItemDto[];
@@ -96,13 +96,13 @@ export interface UpdateBearItemDataDto {
   deleted: boolean;
 }
 
-export interface RequestAllBearItemsDto {}
+export interface RequestAllBearItemsDto { }
 
-export interface RequestSpinAvailabilityDto {}
+export interface RequestSpinAvailabilityDto { }
 
-export interface RequestSpinWheelItemsDto {}
+export interface RequestSpinWheelItemsDto { }
 
-export interface SpinWheelDto {}
+export interface SpinWheelDto { }
 
 export interface SpinAvailabilityDto {
   canSpin: boolean;

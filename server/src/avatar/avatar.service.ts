@@ -24,7 +24,7 @@ export class AvatarService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly clientService: ClientService,
-  ) {}
+  ) { }
 
   /** Map Prisma enum to DTO enum */
   private toDtoSlot(slot: PrismaBearSlot): BearSlotDto {

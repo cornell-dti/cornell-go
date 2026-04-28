@@ -29,7 +29,7 @@ export class AvatarGateway {
   constructor(
     private clientService: ClientService,
     private avatarService: AvatarService,
-  ) {}
+  ) { }
 
   @SubscribeMessage('requestBearItems')
   async requestBearItems(
