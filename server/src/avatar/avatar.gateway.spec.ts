@@ -39,6 +39,9 @@ const mockAvatarService = {
   updateBearItem: jest.fn(),
   deleteBearItem: jest.fn(),
   emitUpdateBearItemData: jest.fn(),
+  getAffectedUserIds: jest.fn(),
+  getEquippedEntries: jest.fn(),
+  reEquipDefaults: jest.fn(),
   getInventory: jest.fn(),
   getLoadout: jest.fn(),
   purchaseItem: jest.fn(),
@@ -56,6 +59,9 @@ describe('AvatarGateway', () => {
 
   beforeEach(async () => {
     jest.clearAllMocks();
+    mockAvatarService.getAffectedUserIds.mockResolvedValue([]);
+    mockAvatarService.getEquippedEntries.mockResolvedValue([]);
+    mockAvatarService.reEquipDefaults.mockResolvedValue(undefined);
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [

@@ -55,6 +55,22 @@ export class ServerApi {
     return this.send('equipBearItem', data) as Promise<boolean | undefined>;
   }
 
+  requestSpinAvailability(data: dto.RequestSpinAvailabilityDto) {
+    return this.send('requestSpinAvailability', data) as Promise<
+      boolean | undefined
+    >;
+  }
+
+  requestSpinWheelItems(data: dto.RequestSpinWheelItemsDto) {
+    return this.send('requestSpinWheelItems', data) as Promise<
+      number | undefined
+    >;
+  }
+
+  spinWheel(data: dto.SpinWheelDto) {
+    return this.send('spinWheel', data) as Promise<boolean | undefined>;
+  }
+
   requestAllBearItems(data: dto.RequestAllBearItemsDto) {
     return this.send('requestAllBearItems', data) as Promise<
       number | undefined
@@ -430,6 +446,23 @@ export class ServerApi {
   ) {
     this.socket.removeAllListeners('updatePurchaseResult');
     this.socket.on('updatePurchaseResult', data => callback(data));
+  }
+
+  onUpdateSpinAvailabilityData(
+    callback: (data: dto.SpinAvailabilityDto) => void,
+  ) {
+    this.socket.removeAllListeners('updateSpinAvailabilityData');
+    this.socket.on('updateSpinAvailabilityData', data => callback(data));
+  }
+
+  onUpdateSpinWheelItemsData(callback: (data: dto.SpinWheelItemsDto) => void) {
+    this.socket.removeAllListeners('updateSpinWheelItemsData');
+    this.socket.on('updateSpinWheelItemsData', data => callback(data));
+  }
+
+  onUpdateSpinResultData(callback: (data: dto.SpinResultDto) => void) {
+    this.socket.removeAllListeners('updateSpinResultData');
+    this.socket.on('updateSpinResultData', data => callback(data));
   }
 
   onTimerStarted(callback: (data: dto.TimerStartedDto) => void) {

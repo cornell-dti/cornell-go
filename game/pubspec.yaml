@@ -107,6 +107,7 @@ flutter:
     - assets/buildabear/eyes/
     - assets/buildabear/mouth/
     - assets/buildabear/accessories/
+    - assets/wheel/
     - assets/videos/
     - assets/audios/
     - assets/lottie_animations/

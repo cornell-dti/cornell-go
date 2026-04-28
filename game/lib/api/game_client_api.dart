@@ -93,6 +93,21 @@ class GameClientApi {
   Stream<UpdatePurchaseResultDto> get updatePurchaseResultStream =>
       _updatePurchaseResultController.stream;
 
+  final _updateSpinAvailabilityDataController =
+      StreamController<SpinAvailabilityDto>.broadcast(sync: true);
+  Stream<SpinAvailabilityDto> get updateSpinAvailabilityDataStream =>
+      _updateSpinAvailabilityDataController.stream;
+
+  final _updateSpinWheelItemsDataController =
+      StreamController<SpinWheelItemsDto>.broadcast(sync: true);
+  Stream<SpinWheelItemsDto> get updateSpinWheelItemsDataStream =>
+      _updateSpinWheelItemsDataController.stream;
+
+  final _updateSpinResultDataController =
+      StreamController<SpinResultDto>.broadcast(sync: true);
+  Stream<SpinResultDto> get updateSpinResultDataStream =>
+      _updateSpinResultDataController.stream;
+
   final _timerStartedController =
       StreamController<TimerStartedDto>.broadcast(sync: true);
   Stream<TimerStartedDto> get timerStartedStream =>
@@ -257,6 +272,21 @@ class GameClientApi {
         "updatePurchaseResult",
         (data) => _updatePurchaseResultController
             .add(UpdatePurchaseResultDto.fromJson(data)));
+
+    sock.on(
+        "updateSpinAvailabilityData",
+        (data) => _updateSpinAvailabilityDataController
+            .add(SpinAvailabilityDto.fromJson(data)));
+
+    sock.on(
+        "updateSpinWheelItemsData",
+        (data) => _updateSpinWheelItemsDataController
+            .add(SpinWheelItemsDto.fromJson(data)));
+
+    sock.on(
+        "updateSpinResultData",
+        (data) =>
+            _updateSpinResultDataController.add(SpinResultDto.fromJson(data)));
 
     sock.on("timerStarted",
         (data) => _timerStartedController.add(TimerStartedDto.fromJson(data)));

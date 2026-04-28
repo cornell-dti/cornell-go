@@ -13,8 +13,11 @@ import {
   PurchaseBearItemDto,
   RequestAllBearItemsDto,
   RequestBearItemsDto,
+  RequestSpinAvailabilityDto,
+  RequestSpinWheelItemsDto,
   RequestUserBearLoadoutDto,
   RequestUserInventoryDto,
+  SpinWheelDto,
   UpdateBearItemDataDto,
 } from './avatar.dto';
 import { AvatarService } from './avatar.service';
@@ -102,6 +105,54 @@ export class AvatarGateway {
       user,
       loadout,
     );
+    return true;
+  }
+
+  @SubscribeMessage('requestSpinAvailability')
+  async requestSpinAvailability(
+    @CallingUser() user: User,
+    @MessageBody() _data: RequestSpinAvailabilityDto,
+  ) {
+    const availability = await this.avatarService.requestSpinAvailability(user.id);
+    await this.clientService.sendProtected(
+      'updateSpinAvailabilityData',
+      user,
+      availability,
+    );
+    return availability.canSpin;
+  }
+
+  @SubscribeMessage('requestSpinWheelItems')
+  async requestSpinWheelItems(
+    @CallingUser() user: User,
+    @MessageBody() _data: RequestSpinWheelItemsDto,
+  ) {
+    const items = await this.avatarService.requestSpinWheelItems();
+    await this.clientService.sendProtected('updateSpinWheelItemsData', user, {
+      items,
+    });
+    return items.length;
+  }
+
+  @SubscribeMessage('spinWheel')
+  async spinWheel(@CallingUser() user: User, @MessageBody() _data: SpinWheelDto) {
+    const result = await this.avatarService.spinWheel(user.id);
+    if (!result) {
+      await this.clientService.emitErrorData(
+        user,
+        'You cannot spin yet or no items are available.',
+      );
+      return false;
+    }
+
+    await this.clientService.sendProtected('updateSpinResultData', user, result);
+    await this.clientService.sendProtected('updateSpinAvailabilityData', user, {
+      canSpin: false,
+      remainingCooldownSeconds: result.cooldownSeconds,
+    });
+
+    const inv = await this.avatarService.getInventory(user.id);
+    await this.clientService.sendProtected('updateUserInventoryData', user, inv);
     return true;
   }
 

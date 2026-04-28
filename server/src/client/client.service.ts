@@ -26,6 +26,9 @@ import {
   UpdateAchievementDataDto,
 } from '../achievement/achievement.dto';
 import {
+  SpinAvailabilityDto,
+  SpinResultDto,
+  SpinWheelItemsDto,
   UpdateBearItemDataDto,
   UpdateBearItemsDataDto,
   UpdatePurchaseResultDto,
@@ -72,6 +75,9 @@ export type ClientApiDef = {
   updateUserInventoryData: UpdateUserInventoryDataDto;
   updateUserBearLoadoutData: UpdateUserBearLoadoutDataDto;
   updatePurchaseResult: UpdatePurchaseResultDto;
+  updateSpinAvailabilityData: SpinAvailabilityDto;
+  updateSpinWheelItemsData: SpinWheelItemsDto;
+  updateSpinResultData: SpinResultDto;
   timerStarted: TimerStartedDto;
   timerExtended: TimerExtendedDto;
   timerCompleted: TimerCompletedDto;

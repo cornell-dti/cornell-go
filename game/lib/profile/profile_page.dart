@@ -16,6 +16,7 @@ import 'package:game/achievements/achievement_cell.dart';
 import 'package:game/profile/completed_cell.dart';
 import 'package:game/profile/build_a_bear/bear_preview.dart';
 import 'package:game/profile/build_a_bear/build_a_bear_page.dart';
+import 'package:game/profile/spin_the_wheel_page.dart';
 import 'package:game/profile/settings_page.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:intl/intl.dart' hide TextDirection;
@@ -313,6 +314,21 @@ class _ProfilePageState extends State<ProfilePage> {
                                     );
                                   },
                                 ),
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.casino_rounded,
+                                  color: Colors.black,
+                                ),
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          const SpinTheWheelPage(),
+                                    ),
+                                  );
+                                },
+                              ),
                               IconButton(
                                 icon: Icon(Icons.settings,
                                     size: iconSize, color: Colors.black),

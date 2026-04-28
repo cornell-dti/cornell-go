@@ -1,0 +1,8 @@
+-- AlterTable
+ALTER TABLE "User"
+ADD COLUMN "lastSpinAt" TIMESTAMP(3),
+ADD COLUMN "spinJourneyUnlockAt" TIMESTAMP(3);
+-- AlterTable
+ALTER TABLE "User"
+ADD COLUMN IF NOT EXISTS "lastSpinAt" TIMESTAMP(3),
+ADD COLUMN IF NOT EXISTS "spinJourneyUnlockAt" TIMESTAMP(3);
