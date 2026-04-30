@@ -54,6 +54,7 @@ class _EventsDraggableSheetState extends State<EventsDraggableSheet> {
     });
   }
 
+  /// Loads the user's latest location to compute walking time and distance.
   Future<void> _loadUserLocation() async {
     try {
       final location = await GeoPoint.current();
@@ -84,6 +85,7 @@ class _EventsDraggableSheetState extends State<EventsDraggableSheet> {
     }
   }
 
+  /// Keeps the sheet compact after routing starts from an event.
   Future<void> _snapSheetForRouteView() async {
     if (!_sheetController.isAttached) return;
     final current = _sheetController.size;
@@ -103,6 +105,7 @@ class _EventsDraggableSheetState extends State<EventsDraggableSheet> {
     }
   }
 
+  /// Returns the organizer label shown on event cards.
   String _hostLabel(CampusEventDto event) {
     final organizer = event.organizerName?.trim();
     if (organizer != null && organizer.isNotEmpty) {
@@ -111,6 +114,7 @@ class _EventsDraggableSheetState extends State<EventsDraggableSheet> {
     return 'Cornell';
   }
 
+  /// Picks a short highlight line shown at the top of each list card.
   String _perkLine(CampusEventDto event) {
     final d = event.description?.trim();
     if (d != null && d.isNotEmpty) {
@@ -123,6 +127,7 @@ class _EventsDraggableSheetState extends State<EventsDraggableSheet> {
     return event.locationName;
   }
 
+  /// Formats a relative countdown to event end time (e.g. `in 20 min`).
   String _timeLabel(CampusEventDto event) {
     final end = _parseCampusEventTime(event.endTime);
     if (end == null) return '';
@@ -142,6 +147,7 @@ class _EventsDraggableSheetState extends State<EventsDraggableSheet> {
     return '$hour12$minute$ampm';
   }
 
+  /// Formats the start-end time range for the focused event popup.
   String _timeRangeLabel(CampusEventDto event) {
     final start = _parseCampusEventTime(event.startTime);
     final end = _parseCampusEventTime(event.endTime);
@@ -157,6 +163,7 @@ class _EventsDraggableSheetState extends State<EventsDraggableSheet> {
     return '${_formatHourMinute(start)}-${_formatHourMinute(end)}';
   }
 
+  /// Computes straight-line distance from the user to an event in meters.
   double? _distanceMetersToEvent(CampusEventDto event) {
     final userLoc = _currentUserLocation;
     if (userLoc == null) return null;
@@ -169,6 +176,7 @@ class _EventsDraggableSheetState extends State<EventsDraggableSheet> {
     }
   }
 
+  /// Converts event distance into an estimated walking duration label.
   String _walkMinutesLabel(CampusEventDto event) {
     final distanceMeters = _distanceMetersToEvent(event);
     if (distanceMeters == null) return '';
@@ -177,6 +185,7 @@ class _EventsDraggableSheetState extends State<EventsDraggableSheet> {
     return '$min min';
   }
 
+  /// Converts event distance into a one-decimal miles label.
   String _milesLabel(CampusEventDto event) {
     final distanceMeters = _distanceMetersToEvent(event);
     if (distanceMeters == null) return '';
@@ -184,6 +193,7 @@ class _EventsDraggableSheetState extends State<EventsDraggableSheet> {
     return '${miles.toStringAsFixed(1)} mi';
   }
 
+  /// Finds a loaded event by id from the current data set.
   CampusEventDto? _eventById(List<CampusEventDto> events, String? id) {
     if (id == null) return null;
     for (final event in events) {
@@ -192,6 +202,7 @@ class _EventsDraggableSheetState extends State<EventsDraggableSheet> {
     return null;
   }
 
+  /// Shows "Add to GCal" only for events starting at least an hour ahead.
   bool _showAddToGoogleCalendar(CampusEventDto event) {
     final start = _parseCampusEventTime(event.startTime);
     if (start == null) return false;
@@ -206,6 +217,7 @@ class _EventsDraggableSheetState extends State<EventsDraggableSheet> {
     return event.locationName;
   }
 
+  /// Opens Google Calendar prefilled with the focused event details.
   Future<void> _openCampusEventInGoogleCalendar(CampusEventDto event) async {
     final start = _parseCampusEventTime(event.startTime);
     if (start == null) return;
@@ -223,6 +235,7 @@ class _EventsDraggableSheetState extends State<EventsDraggableSheet> {
     );
   }
 
+  /// Parses backend event time values from ISO8601 or HTTP date strings.
   DateTime? _parseCampusEventTime(String? raw) {
     if (raw == null || raw.trim().isEmpty) return null;
     final trimmed = raw.trim();
@@ -235,6 +248,7 @@ class _EventsDraggableSheetState extends State<EventsDraggableSheet> {
     }
   }
 
+  /// Applies location, category, and search filters from the parent page.
   bool _matchesCampusEventFilters(CampusEventDto event) {
     final matchesLocation = widget.locations == null ||
         widget.locations!.isEmpty ||
@@ -254,6 +268,7 @@ class _EventsDraggableSheetState extends State<EventsDraggableSheet> {
     return matchesLocation && matchesCategory && matchesSearch;
   }
 
+  /// Excludes virtual/TBD events and rows without usable coordinates.
   bool _hasPhysicalLocation(CampusEventDto event) {
     final location = event.locationName.trim();
     final hasNamedLocation = location.isNotEmpty &&
@@ -265,6 +280,7 @@ class _EventsDraggableSheetState extends State<EventsDraggableSheet> {
     return hasNamedLocation && hasCoords;
   }
 
+  /// Returns upcoming, map-routable events sorted by start then distance.
   List<CampusEventDto> _filteredEvents(CampusEventModel campusEventModel) {
     final events = campusEventModel.currentList?.events ??
         campusEventModel.allCachedEvents;
@@ -527,6 +543,7 @@ class _EventsDraggableSheetState extends State<EventsDraggableSheet> {
   }
 }
 
+/// Compact event row shown in the default list view.
 class _EventCard extends StatelessWidget {
   final VoidCallback onGo;
   final String eventName;
@@ -673,6 +690,10 @@ class _EventCard extends StatelessWidget {
   }
 }
 
+/// Expanded popup card displayed when an event is focused/selected.
+///
+/// This is the detail popup users see after opening an event from the map/list.
+/// It shows travel/time details, description, and either routing or calendar CTA.
 class _FocusedEventCard extends StatelessWidget {
   final CampusEventDto event;
   final bool isRoutedView;
