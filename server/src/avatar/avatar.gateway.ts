@@ -29,7 +29,7 @@ export class AvatarGateway {
   constructor(
     private clientService: ClientService,
     private avatarService: AvatarService,
-  ) { }
+  ) {}
 
   @SubscribeMessage('requestBearItems')
   async requestBearItems(
@@ -113,7 +113,9 @@ export class AvatarGateway {
     @CallingUser() user: User,
     @MessageBody() _data: RequestSpinAvailabilityDto,
   ) {
-    const availability = await this.avatarService.requestSpinAvailability(user.id);
+    const availability = await this.avatarService.requestSpinAvailability(
+      user.id,
+    );
     await this.clientService.sendProtected(
       'updateSpinAvailabilityData',
       user,
@@ -135,7 +137,10 @@ export class AvatarGateway {
   }
 
   @SubscribeMessage('spinWheel')
-  async spinWheel(@CallingUser() user: User, @MessageBody() _data: SpinWheelDto) {
+  async spinWheel(
+    @CallingUser() user: User,
+    @MessageBody() _data: SpinWheelDto,
+  ) {
     const result = await this.avatarService.spinWheel(user.id);
     if (!result) {
       await this.clientService.emitErrorData(
@@ -145,14 +150,22 @@ export class AvatarGateway {
       return false;
     }
 
-    await this.clientService.sendProtected('updateSpinResultData', user, result);
+    await this.clientService.sendProtected(
+      'updateSpinResultData',
+      user,
+      result,
+    );
     await this.clientService.sendProtected('updateSpinAvailabilityData', user, {
       canSpin: false,
       remainingCooldownSeconds: result.cooldownSeconds,
     });
 
     const inv = await this.avatarService.getInventory(user.id);
-    await this.clientService.sendProtected('updateUserInventoryData', user, inv);
+    await this.clientService.sendProtected(
+      'updateUserInventoryData',
+      user,
+      inv,
+    );
     return true;
   }
 
