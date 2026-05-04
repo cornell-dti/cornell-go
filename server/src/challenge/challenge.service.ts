@@ -38,7 +38,7 @@ export class ChallengeService {
     private clientService: ClientService,
     private abilityFactory: CaslAbilityFactory,
     private userService: UserService,
-  ) {}
+  ) { }
 
   /**
    * Calculate hint-adjusted points using the "Half-after-3" system
