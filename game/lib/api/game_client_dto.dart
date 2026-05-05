@@ -77,6 +77,13 @@ enum CampusEventCheckInMethodDto {
   EITHER,
 }
 
+enum CampusEventApprovalStatusDto {
+  PENDING,
+  APPROVED,
+  REJECTED,
+  ARCHIVED,
+}
+
 enum RequestCampusEventsCategoriesDto {
   SOCIAL,
   CULTURAL,
@@ -111,6 +118,13 @@ enum UpsertCampusEventCheckInMethodDto {
   LOCATION,
   QR_CODE,
   EITHER,
+}
+
+enum UpsertCampusEventApprovalStatusDto {
+  PENDING,
+  APPROVED,
+  REJECTED,
+  ARCHIVED,
 }
 
 enum ChallengeLocationDto {
@@ -1081,6 +1095,7 @@ class CampusEventDto {
     }
     fields['latitude'] = latitude;
     fields['longitude'] = longitude;
+    fields['checkInRadius'] = checkInRadius;
     fields['categories'] =
         categories!.map<String>((dynamic val) => val!.name).toList();
     fields['tags'] = tags;
@@ -1091,12 +1106,19 @@ class CampusEventDto {
     if (organizerName != null) {
       fields['organizerName'] = organizerName;
     }
+    if (organizerEmail != null) {
+      fields['organizerEmail'] = organizerEmail;
+    }
     if (registrationUrl != null) {
       fields['registrationUrl'] = registrationUrl;
     }
     fields['checkInMethod'] = checkInMethod!.name;
     fields['pointsForAttendance'] = pointsForAttendance;
     fields['featured'] = featured;
+    fields['approvalStatus'] = approvalStatus!.name;
+    if (rejectionReason != null) {
+      fields['rejectionReason'] = rejectionReason;
+    }
     fields['attendanceCount'] = attendanceCount;
     fields['rsvpCount'] = rsvpCount;
     return fields;
@@ -1114,6 +1136,7 @@ class CampusEventDto {
     address = fields.containsKey('address') ? (fields["address"]) : null;
     latitude = fields["latitude"];
     longitude = fields["longitude"];
+    checkInRadius = fields["checkInRadius"];
     categories = fields["categories"]
         .map<CampusEventCategoriesDto>(
             (dynamic val) => CampusEventCategoriesDto.values.byName(val))
@@ -1124,6 +1147,9 @@ class CampusEventDto {
         fields.containsKey('externalUrl') ? (fields["externalUrl"]) : null;
     organizerName =
         fields.containsKey('organizerName') ? (fields["organizerName"]) : null;
+    organizerEmail = fields.containsKey('organizerEmail')
+        ? (fields["organizerEmail"])
+        : null;
     registrationUrl = fields.containsKey('registrationUrl')
         ? (fields["registrationUrl"])
         : null;
@@ -1131,6 +1157,11 @@ class CampusEventDto {
         CampusEventCheckInMethodDto.values.byName(fields['checkInMethod']);
     pointsForAttendance = fields["pointsForAttendance"];
     featured = fields["featured"];
+    approvalStatus =
+        CampusEventApprovalStatusDto.values.byName(fields['approvalStatus']);
+    rejectionReason = fields.containsKey('rejectionReason')
+        ? (fields["rejectionReason"])
+        : null;
     attendanceCount = fields["attendanceCount"];
     rsvpCount = fields["rsvpCount"];
   }
@@ -1147,17 +1178,23 @@ class CampusEventDto {
     address = other.address == null ? address : other.address;
     latitude = other.latitude;
     longitude = other.longitude;
+    checkInRadius = other.checkInRadius;
     categories = other.categories;
     tags = other.tags;
     source = other.source;
     externalUrl = other.externalUrl == null ? externalUrl : other.externalUrl;
     organizerName =
         other.organizerName == null ? organizerName : other.organizerName;
+    organizerEmail =
+        other.organizerEmail == null ? organizerEmail : other.organizerEmail;
     registrationUrl =
         other.registrationUrl == null ? registrationUrl : other.registrationUrl;
     checkInMethod = other.checkInMethod;
     pointsForAttendance = other.pointsForAttendance;
     featured = other.featured;
+    approvalStatus = other.approvalStatus;
+    rejectionReason =
+        other.rejectionReason == null ? rejectionReason : other.rejectionReason;
     attendanceCount = other.attendanceCount;
     rsvpCount = other.rsvpCount;
   }
@@ -1174,15 +1211,19 @@ class CampusEventDto {
     this.address,
     required this.latitude,
     required this.longitude,
+    required this.checkInRadius,
     required this.categories,
     required this.tags,
     required this.source,
     this.externalUrl,
     this.organizerName,
+    this.organizerEmail,
     this.registrationUrl,
     required this.checkInMethod,
     required this.pointsForAttendance,
     required this.featured,
+    required this.approvalStatus,
+    this.rejectionReason,
     required this.attendanceCount,
     required this.rsvpCount,
   });
@@ -1198,15 +1239,19 @@ class CampusEventDto {
   late String? address;
   late int latitude;
   late int longitude;
+  late int checkInRadius;
   late List<CampusEventCategoriesDto> categories;
   late List<String> tags;
   late CampusEventSourceDto source;
   late String? externalUrl;
   late String? organizerName;
+  late String? organizerEmail;
   late String? registrationUrl;
   late CampusEventCheckInMethodDto checkInMethod;
   late int pointsForAttendance;
   late bool featured;
+  late CampusEventApprovalStatusDto approvalStatus;
+  late String? rejectionReason;
   late int attendanceCount;
   late int rsvpCount;
 }
@@ -1403,6 +1448,12 @@ class UpsertCampusEventDto {
     if (registrationUrl != null) {
       fields['registrationUrl'] = registrationUrl;
     }
+    if (approvalStatus != null) {
+      fields['approvalStatus'] = approvalStatus!.name;
+    }
+    if (rejectionReason != null) {
+      fields['rejectionReason'] = rejectionReason;
+    }
     return fields;
   }
 
@@ -1448,6 +1499,13 @@ class UpsertCampusEventDto {
     registrationUrl = fields.containsKey('registrationUrl')
         ? (fields["registrationUrl"])
         : null;
+    approvalStatus = fields.containsKey('approvalStatus')
+        ? (UpsertCampusEventApprovalStatusDto.values
+            .byName(fields['approvalStatus']))
+        : null;
+    rejectionReason = fields.containsKey('rejectionReason')
+        ? (fields["rejectionReason"])
+        : null;
   }
 
   void partialUpdate(UpsertCampusEventDto other) {
@@ -1482,6 +1540,10 @@ class UpsertCampusEventDto {
     featured = other.featured == null ? featured : other.featured;
     registrationUrl =
         other.registrationUrl == null ? registrationUrl : other.registrationUrl;
+    approvalStatus =
+        other.approvalStatus == null ? approvalStatus : other.approvalStatus;
+    rejectionReason =
+        other.rejectionReason == null ? rejectionReason : other.rejectionReason;
   }
 
   UpsertCampusEventDto({
@@ -1509,6 +1571,8 @@ class UpsertCampusEventDto {
     this.pointsForAttendance,
     this.featured,
     this.registrationUrl,
+    this.approvalStatus,
+    this.rejectionReason,
   });
 
   late String? id;
@@ -1535,6 +1599,8 @@ class UpsertCampusEventDto {
   late int? pointsForAttendance;
   late bool? featured;
   late String? registrationUrl;
+  late UpsertCampusEventApprovalStatusDto? approvalStatus;
+  late String? rejectionReason;
 }
 
 class DeleteCampusEventDto {

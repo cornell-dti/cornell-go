@@ -1,6 +1,9 @@
 import styled, { css } from 'styled-components';
 
-export const HButton = styled.div<{ float?: 'left' | 'right' }>`
+export const HButton = styled.div<{ // support disabled boolean
+  float?: 'left' | 'right';
+  disabled?: boolean;
+}>`
   display: inline-block;
   height: 30px;
   user-select: none;
@@ -11,6 +14,13 @@ export const HButton = styled.div<{ float?: 'left' | 'right' }>`
   border-radius: 4px;
   font-weight: 500;
   text-align: center;
+
+  ${props =>
+    props.disabled &&
+    css`
+      opacity: 0.45;
+      pointer-events: none;
+    `}
 
   :hover {
     background-color: rgb(245, 245, 255);

@@ -41,15 +41,19 @@ export interface CampusEventDto {
   address?: string;
   latitude: number;
   longitude: number;
+  checkInRadius: number;
   categories: CampusEventCategoryDto[];
   tags: string[];
   source: EventSourceDto;
   externalUrl?: string;
   organizerName?: string;
+  organizerEmail?: string;
   registrationUrl?: string;
   checkInMethod: CheckInMethodDto;
   pointsForAttendance: number;
   featured: boolean;
+  approvalStatus: 'PENDING' | 'APPROVED' | 'REJECTED' | 'ARCHIVED';
+  rejectionReason?: string;
   attendanceCount: number;
   rsvpCount: number;
 }
@@ -105,6 +109,8 @@ export interface UpsertCampusEventDto {
   pointsForAttendance?: number;
   featured?: boolean;
   registrationUrl?: string;
+  approvalStatus?: 'PENDING' | 'APPROVED' | 'REJECTED' | 'ARCHIVED';
+  rejectionReason?: string;
 }
 
 /** Request: delete event */

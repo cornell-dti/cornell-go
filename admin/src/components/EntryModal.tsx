@@ -19,6 +19,8 @@ export type OptionEntryForm = {
   name: string;
   value: number;
   options: string[];
+  hidden?: boolean;
+  onChange?: (value: number) => void;
 };
 
 export type FreeEntryForm = {
@@ -27,6 +29,7 @@ export type FreeEntryForm = {
   characterLimit: number;
   multiline?: boolean;
   helpText?: string;
+  hidden?: boolean;  // for rejection reason of a campus event
 };
 
 export type NumberEntryForm = {
@@ -34,6 +37,8 @@ export type NumberEntryForm = {
   value: number;
   min: number;
   max: number;
+  hidden?: boolean;
+  onChange?: (value: number) => void;
 };
 
 export type MapEntryForm = {
@@ -42,11 +47,13 @@ export type MapEntryForm = {
   longitude: number;
   awardingRadiusF?: number;
   closeRadiusF?: number;
+  hidden?: boolean;
 };
 
 export type DateEntryForm = {
   name: string;
   date: Date;
+  hidden?: boolean;
 };
 
 export type CheckboxNumberEntryForm = {
@@ -56,6 +63,7 @@ export type CheckboxNumberEntryForm = {
   min: number;
   max: number;
   numberLabel: string;
+  hidden?: boolean;
 };
 
 export type AnswersEntryForm = {
@@ -63,12 +71,14 @@ export type AnswersEntryForm = {
   answers: Array<{ text: string; isCorrect: boolean }>;
   minAnswers: number;
   maxAnswers: number;
+  hidden?: boolean;
 };
 
 export type CheckboxDateEntryForm = {
   name: string;
   checked: boolean;
   date: Date;
+  hidden?: boolean;
 };
 
 export type OptionWithCustomEntryForm = {
@@ -77,6 +87,7 @@ export type OptionWithCustomEntryForm = {
   options: string[];
   customValue: string;
   customOptionLabel: string;
+  hidden?: boolean;
 };
 
 export type EntryForm =
@@ -134,11 +145,12 @@ function OptionEntryFormBox(props: { form: OptionEntryForm }) {
       <EntrySelect
         name={props.form.name}
         value={val}
-        onChange={e =>
-          setVal(
-            props.form.options[(props.form.value = e.target.selectedIndex)],
-          )
-        }
+        onChange={e => { // show/hide campus event rejection reason
+          const next = e.target.selectedIndex;
+          props.form.value = next;
+          props.form.onChange?.(next);
+          setVal(props.form.options[next]);
+        }}
       >
         {props.form.options.map(val => (
           <option key={val} onSelect={() => console.log(val)}>
@@ -229,6 +241,7 @@ function NumberEntryFormBox(props: {
           const num = +e.target.value;
           setVal(e.target.value);
           props.form.value = num;
+          props.form.onChange?.(num); // update map circle radius for campus event
           props.onChange?.(num);
         }}
       />
@@ -786,6 +799,7 @@ export function EntryModal(props: {
       }}
     >
       {props.form.map(form => {
+        if ('hidden' in form && form.hidden) return null;
         if ('answers' in form) {
           return <AnswersEntryFormBox form={form} key={form.name} />;
         } else if ('customOptionLabel' in form) {
