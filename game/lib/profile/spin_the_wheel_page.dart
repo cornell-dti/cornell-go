@@ -402,7 +402,8 @@ class _SpinTheWheelPageState extends State<SpinTheWheelPage>
                               ),
                               Positioned(
                                 top: -58,
-                                child: SvgPicture.asset('assets/wheel/Pointer.svg',
+                                child: SvgPicture.asset(
+                                    'assets/wheel/Pointer.svg',
                                     height: 64),
                               ),
                             ],
@@ -488,8 +489,7 @@ class _WheelWidget extends StatelessWidget {
             ),
           ),
           ...List.generate(items.length, (index) {
-            final angle =
-                (-math.pi / 2) + (2 * math.pi * index / items.length);
+            final angle = (-math.pi / 2) + (2 * math.pi * index / items.length);
             final radius = size * 0.31;
             return Transform.translate(
               offset:

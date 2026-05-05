@@ -61,6 +61,7 @@ class BottomNavBar extends StatefulWidget {
 class _BottomNavBarState extends State<BottomNavBar> {
   int _selectedIndex = 0;
   bool _canDailySpinNow = false;
+
   /// While true, keep the middle tab on the wheel even if the server has already
   /// set canSpin to false (so the tab does not switch mid-animation).
   bool _spinTabLockedUntilResult = false;
