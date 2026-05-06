@@ -6,6 +6,7 @@ import { EventService } from '../event/event.service';
 import { ClientService } from '../client/client.service';
 import { AchievementService } from '../achievement/achievement.service';
 import { CaslAbilityFactory } from '../casl/casl-ability.factory';
+import { UserService } from '../user/user.service';
 
 describe('ChallengeService', () => {
   let service: ChallengeService;
@@ -37,6 +38,10 @@ describe('ChallengeService', () => {
         {
           useValue: null,
           provide: CaslAbilityFactory,
+        },
+        {
+          useValue: null,
+          provide: UserService,
         },
       ],
     }).compile();

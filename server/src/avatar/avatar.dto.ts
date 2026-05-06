@@ -97,3 +97,23 @@ export interface UpdateBearItemDataDto {
 }
 
 export interface RequestAllBearItemsDto {}
+
+export interface RequestSpinAvailabilityDto {}
+
+export interface RequestSpinWheelItemsDto {}
+
+export interface SpinWheelDto {}
+
+export interface SpinAvailabilityDto {
+  canSpin: boolean;
+  remainingCooldownSeconds: number;
+}
+
+export interface SpinWheelItemsDto {
+  items: BearItemDto[];
+}
+
+export interface SpinResultDto {
+  wonItem: BearItemDto;
+  cooldownSeconds: number;
+}

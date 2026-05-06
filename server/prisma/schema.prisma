@@ -116,6 +116,7 @@ model User {
   eventAttendances       EventAttendance[]
   eventRSVPs             EventRSVP[]
   feedbacks              Feedback[]
+  lastSpinAt             DateTime?
 }
 
 model Group {

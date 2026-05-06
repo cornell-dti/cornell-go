@@ -1,9 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import {
-  BearSlot as PrismaBearSlot,
-  BearItem,
-  UserBearEquipped,
-} from '@prisma/client';
+import { BearItem } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { ClientService } from '../client/client.service';
 import {
@@ -18,8 +14,13 @@ import {
   UserInventoryDto,
 } from './avatar.dto';
 
+type PrismaBearSlot = BearItem['slot'];
+
 @Injectable()
 export class AvatarService {
+  private static readonly SPIN_COOLDOWN_HOURS = 24;
+  private static readonly WHEEL_ITEM_COUNT = 8;
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly clientService: ClientService,
@@ -50,9 +51,132 @@ export class AvatarService {
   private async getUserBalance(userId: string): Promise<number> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: { coins: true },
     });
     return user?.coins ?? 0;
+  }
+
+  private toSpinAvailabilityDto(
+    canSpin: boolean,
+    remainingCooldownSeconds: number,
+  ): { canSpin: boolean; remainingCooldownSeconds: number } {
+    return {
+      canSpin,
+      remainingCooldownSeconds: Math.max(
+        0,
+        Math.floor(remainingCooldownSeconds),
+      ),
+    };
+  }
+
+  private shuffle<T>(items: T[]): T[] {
+    const cloned = [...items];
+    for (let i = cloned.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [cloned[i], cloned[j]] = [cloned[j], cloned[i]];
+    }
+    return cloned;
+  }
+
+  private getCooldownSeconds(): number {
+    return AvatarService.SPIN_COOLDOWN_HOURS * 60 * 60;
+  }
+
+  async requestSpinAvailability(userId: string): Promise<{
+    canSpin: boolean;
+    remainingCooldownSeconds: number;
+  }> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user?.lastSpinAt) {
+      return this.toSpinAvailabilityDto(true, 0);
+    }
+
+    const nowMs = Date.now();
+    const lastSpinMs = user.lastSpinAt.getTime();
+    const elapsedSeconds = Math.floor((nowMs - lastSpinMs) / 1000);
+    const remainingCooldownSeconds = this.getCooldownSeconds() - elapsedSeconds;
+    if (remainingCooldownSeconds <= 0) {
+      return this.toSpinAvailabilityDto(true, 0);
+    }
+
+    return this.toSpinAvailabilityDto(false, remainingCooldownSeconds);
+  }
+
+  async requestSpinWheelItems(): Promise<BearItemDto[]> {
+    let items = await this.prisma.bearItem.findMany({
+      where: { isDefault: false },
+      orderBy: [{ slot: 'asc' }, { zIndex: 'asc' }, { name: 'asc' }],
+    });
+    // Fallback for environments where only default items are seeded.
+    if (items.length === 0) {
+      items = await this.prisma.bearItem.findMany({
+        orderBy: [{ slot: 'asc' }, { zIndex: 'asc' }, { name: 'asc' }],
+      });
+    }
+    if (items.length === 0) {
+      return [];
+    }
+
+    const shuffled = this.shuffle(items);
+    const selected: BearItem[] = [];
+    for (let i = 0; i < AvatarService.WHEEL_ITEM_COUNT; i++) {
+      selected.push(shuffled[i % shuffled.length]);
+    }
+
+    return selected.map(item => this.toBearItemDto(item));
+  }
+
+  async spinWheel(userId: string): Promise<{
+    wonItem: BearItemDto;
+    cooldownSeconds: number;
+  } | null> {
+    const availability = await this.requestSpinAvailability(userId);
+    if (!availability.canSpin) {
+      return null;
+    }
+
+    const result = await this.prisma.$transaction(async tx => {
+      const availableItems = await tx.bearItem.findMany({
+        where: {
+          isDefault: false,
+          inventories: {
+            none: { userId },
+          },
+        },
+      });
+
+      if (availableItems.length === 0) {
+        return null;
+      }
+
+      const wonItem =
+        availableItems[Math.floor(Math.random() * availableItems.length)];
+
+      await tx.userBearInventory.create({
+        data: {
+          userId,
+          bearItemId: wonItem.id,
+        },
+      });
+
+      await tx.user.update({
+        where: { id: userId },
+        data: { lastSpinAt: new Date() },
+      });
+
+      return wonItem;
+    });
+
+    if (!result) {
+      return null;
+    }
+
+    return {
+      wonItem: this.toBearItemDto(result),
+      cooldownSeconds: this.getCooldownSeconds(),
+    };
   }
 
   async getInventory(userId: string): Promise<UserInventoryDto> {

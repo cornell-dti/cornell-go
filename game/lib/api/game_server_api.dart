@@ -87,6 +87,15 @@ class GameServerApi {
   Future<bool?> equipBearItem(EquipBearItemDto dto) async =>
       await _invokeWithRefresh("equipBearItem", dto.toJson());
 
+  Future<bool?> requestSpinAvailability(RequestSpinAvailabilityDto dto) async =>
+      await _invokeWithRefresh("requestSpinAvailability", dto.toJson());
+
+  Future<int?> requestSpinWheelItems(RequestSpinWheelItemsDto dto) async =>
+      await _invokeWithRefresh("requestSpinWheelItems", dto.toJson());
+
+  Future<bool?> spinWheel(SpinWheelDto dto) async =>
+      await _invokeWithRefresh("spinWheel", dto.toJson());
+
   Future<int?> requestAllBearItems(RequestAllBearItemsDto dto) async =>
       await _invokeWithRefresh("requestAllBearItems", dto.toJson());
 

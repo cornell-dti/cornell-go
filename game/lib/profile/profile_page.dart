@@ -285,7 +285,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                           ),
                         ),
-                        // Clothes hanger and settings icons positioned on the right
+                        // Header action icons on the right
                         Positioned(
                           right: screenWidth * 0.05,
                           top: MediaQuery.of(context)

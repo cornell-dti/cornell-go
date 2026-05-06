@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:game/api/game_api.dart';
+import 'package:game/api/game_client_dto.dart';
 import 'package:game/global_leaderboard/global_leaderboard_widget.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:game/profile/profile_page.dart';
+import 'package:game/profile/spin_the_wheel_page.dart';
 import 'package:game/splash_page/splash_page.dart';
 import 'package:provider/provider.dart';
 import 'package:game/model/onboarding_model.dart';
@@ -13,6 +15,7 @@ import 'package:game/model/challenge_model.dart';
 import 'package:game/widgets/bear_mascot_message.dart';
 import 'package:game/utils/utility_functions.dart';
 import 'package:showcaseview/showcaseview.dart';
+import 'dart:async';
 import 'search_filter_home.dart';
 
 /** 
@@ -57,14 +60,39 @@ class BottomNavBar extends StatefulWidget {
 
 class _BottomNavBarState extends State<BottomNavBar> {
   int _selectedIndex = 0;
+  bool _canDailySpinNow = false;
+
+  /// While true, keep the middle tab on the wheel even if the server has already
+  /// set canSpin to false (so the tab does not switch mid-animation).
+  bool _spinTabLockedUntilResult = false;
   bool _hasTriggeredStep11 = false; // Prevent multiple showcase triggers
   bool _hasTriggeredStep12 = false; // Prevent multiple showcase triggers
   OverlayEntry? _bearOverlayEntry;
+  StreamSubscription<SpinAvailabilityDto>? _spinAvailabilitySub;
   static const TextStyle optionStyle = TextStyle(
     fontSize: 30,
     fontWeight: FontWeight.bold,
   );
-  late final List<Widget> _widgetOptions;
+  List<Widget> _buildWidgetOptions(bool showDailySpinTab) => <Widget>[
+        SearchFilterBar(initialHomeTab: widget.initialHomeTab),
+        showDailySpinTab
+            ? SpinTheWheelPage(
+                onSpinSessionStarted: () {
+                  if (!mounted) return;
+                  setState(() {
+                    _spinTabLockedUntilResult = true;
+                  });
+                },
+                onSpinResultClosed: () {
+                  if (!mounted) return;
+                  setState(() {
+                    _spinTabLockedUntilResult = false;
+                  });
+                },
+              )
+            : GlobalLeaderboardWidget(),
+        ProfilePage(),
+      ];
 
   void _onItemTapped(int index) {
     setState(() {
@@ -75,15 +103,23 @@ class _BottomNavBarState extends State<BottomNavBar> {
   @override
   void initState() {
     super.initState();
-    _widgetOptions = <Widget>[
-      SearchFilterBar(initialHomeTab: widget.initialHomeTab),
-      GlobalLeaderboardWidget(),
-      ProfilePage(),
-    ];
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final client = context.read<ApiClient>();
+      _spinAvailabilitySub ??=
+          client.clientApi.updateSpinAvailabilityDataStream.listen((data) {
+        if (!mounted) return;
+        setState(() {
+          _canDailySpinNow = data.canSpin;
+        });
+      });
+      client.serverApi?.requestSpinAvailability(RequestSpinAvailabilityDto());
+    });
   }
 
   @override
   void dispose() {
+    _spinAvailabilitySub?.cancel();
     _removeBearOverlay();
     super.dispose();
   }
@@ -279,6 +315,8 @@ class _BottomNavBarState extends State<BottomNavBar> {
     final challengeModel = Provider.of<ChallengeModel>(context);
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+    final showDailySpinTab = (_canDailySpinNow || _spinTabLockedUntilResult) &&
+        onboarding.step13FinalComplete;
 
     // Step 11: Auto-select Profile tab and start showcase (trigger once)
     if (onboarding.step10HintButtonComplete &&
@@ -317,6 +355,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
     // Step 12: Auto-select Leaderboard tab and start showcase (trigger once)
     if (onboarding.step11ProfileTabComplete &&
         !onboarding.step12LeaderboardTabComplete &&
+        !showDailySpinTab &&
         !_hasTriggeredStep12) {
       _hasTriggeredStep12 = true; // Prevent re-triggering on rebuild
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -383,7 +422,8 @@ class _BottomNavBarState extends State<BottomNavBar> {
                   });
                 }
                 // Returning the main content page above the navbar [Home, Leaderboard, Profile]
-                return _widgetOptions.elementAt(_selectedIndex);
+                return _buildWidgetOptions(showDailySpinTab)
+                    .elementAt(_selectedIndex);
               },
             ),
           ),
@@ -400,7 +440,21 @@ class _BottomNavBarState extends State<BottomNavBar> {
                 ),
                 label: 'Home',
               ),
-              _buildLeaderboardTab(onboarding, screenWidth, screenHeight),
+              showDailySpinTab
+                  ? BottomNavigationBarItem(
+                      icon: SvgPicture.asset(
+                        "assets/wheel/ferris-wheel.svg",
+                        colorFilter:
+                            ColorFilter.mode(Colors.grey, BlendMode.srcIn),
+                      ),
+                      activeIcon: SvgPicture.asset(
+                        "assets/wheel/ferris-wheel.svg",
+                        colorFilter:
+                            ColorFilter.mode(Colors.black, BlendMode.srcIn),
+                      ),
+                      label: 'Daily Spin',
+                    )
+                  : _buildLeaderboardTab(onboarding, screenWidth, screenHeight),
               _buildProfileTab(onboarding, screenWidth, screenHeight),
             ],
             currentIndex: _selectedIndex,

@@ -1063,6 +1063,125 @@ class RequestAllBearItemsDto {
   RequestAllBearItemsDto();
 }
 
+class RequestSpinAvailabilityDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    return fields;
+  }
+
+  RequestSpinAvailabilityDto.fromJson(Map<String, dynamic> fields) {}
+
+  void partialUpdate(RequestSpinAvailabilityDto other) {}
+
+  RequestSpinAvailabilityDto();
+}
+
+class RequestSpinWheelItemsDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    return fields;
+  }
+
+  RequestSpinWheelItemsDto.fromJson(Map<String, dynamic> fields) {}
+
+  void partialUpdate(RequestSpinWheelItemsDto other) {}
+
+  RequestSpinWheelItemsDto();
+}
+
+class SpinWheelDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    return fields;
+  }
+
+  SpinWheelDto.fromJson(Map<String, dynamic> fields) {}
+
+  void partialUpdate(SpinWheelDto other) {}
+
+  SpinWheelDto();
+}
+
+class SpinAvailabilityDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['canSpin'] = canSpin;
+    fields['remainingCooldownSeconds'] = remainingCooldownSeconds;
+    return fields;
+  }
+
+  SpinAvailabilityDto.fromJson(Map<String, dynamic> fields) {
+    canSpin = fields["canSpin"];
+    remainingCooldownSeconds = fields["remainingCooldownSeconds"];
+  }
+
+  void partialUpdate(SpinAvailabilityDto other) {
+    canSpin = other.canSpin;
+    remainingCooldownSeconds = other.remainingCooldownSeconds;
+  }
+
+  SpinAvailabilityDto({
+    required this.canSpin,
+    required this.remainingCooldownSeconds,
+  });
+
+  late bool canSpin;
+  late int remainingCooldownSeconds;
+}
+
+class SpinWheelItemsDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['items'] = items!
+        .map<Map<String, dynamic>>((dynamic val) => val!.toJson())
+        .toList();
+    return fields;
+  }
+
+  SpinWheelItemsDto.fromJson(Map<String, dynamic> fields) {
+    items = fields["items"]
+        .map<BearItemDto>((dynamic val) => BearItemDto.fromJson(val))
+        .toList();
+  }
+
+  void partialUpdate(SpinWheelItemsDto other) {
+    items = other.items;
+  }
+
+  SpinWheelItemsDto({
+    required this.items,
+  });
+
+  late List<BearItemDto> items;
+}
+
+class SpinResultDto {
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fields = {};
+    fields['wonItem'] = wonItem!.toJson();
+    fields['cooldownSeconds'] = cooldownSeconds;
+    return fields;
+  }
+
+  SpinResultDto.fromJson(Map<String, dynamic> fields) {
+    wonItem = BearItemDto.fromJson(fields['wonItem']);
+    cooldownSeconds = fields["cooldownSeconds"];
+  }
+
+  void partialUpdate(SpinResultDto other) {
+    wonItem = other.wonItem;
+    cooldownSeconds = other.cooldownSeconds;
+  }
+
+  SpinResultDto({
+    required this.wonItem,
+    required this.cooldownSeconds,
+  });
+
+  late BearItemDto wonItem;
+  late int cooldownSeconds;
+}
+
 class CampusEventDto {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> fields = {};
